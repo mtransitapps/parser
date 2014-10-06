@@ -1,0 +1,43 @@
+package org.mtransit.parser.gtfs;
+
+import org.mtransit.parser.gtfs.data.GCalendar;
+import org.mtransit.parser.gtfs.data.GCalendarDate;
+import org.mtransit.parser.gtfs.data.GRoute;
+import org.mtransit.parser.gtfs.data.GStop;
+import org.mtransit.parser.gtfs.data.GStopTime;
+import org.mtransit.parser.gtfs.data.GTrip;
+import org.mtransit.parser.mt.data.MTrip;
+
+public interface GAgencyTools {
+	
+	int getThreadPoolSize();
+
+	// ROUTE
+	int getRouteId(GRoute gRoute);
+	String getRouteShortName(GRoute gRoute);
+	String getRouteLongName(GRoute gRoute);
+	String getRouteColor(GRoute gRoute);
+	String getRouteTextColor(GRoute gRoute);
+	boolean excludeRoute(GRoute gRoute);
+	
+	// TRIP
+	void setTripHeadsign(MTrip mTrip, GTrip gTrip);
+	boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge);
+	boolean excludeTrip(GTrip gTrip);
+
+	// STOP
+	int getStopId(GStop gStop);
+	String cleanStopName(String gStopName);
+	String getStopCode(GStop gStop);
+	boolean excludeStop(GStop gStop);
+	
+	// CALENDAR
+	boolean excludeCalendar(GCalendar gCalendar);
+	
+	// CALENDAR DATE
+	boolean excludeCalendarDate(GCalendarDate gCalendarDates);
+
+	// SCHEDULE
+	int getDepartureTime(GStopTime gStopTime);
+
+}
