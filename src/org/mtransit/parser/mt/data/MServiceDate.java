@@ -12,7 +12,11 @@ public class MServiceDate implements Comparable<MServiceDate> {
 
 	@Override
 	public int compareTo(MServiceDate otherServiceDate) {
-		return calendarDate - otherServiceDate.calendarDate;
+		final int cd = calendarDate - otherServiceDate.calendarDate;
+		if (cd != 0) {
+			return cd;
+		}
+		return serviceId.compareToIgnoreCase(otherServiceDate.serviceId);
 	}
 
 	@Override
