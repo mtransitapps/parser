@@ -176,3 +176,4 @@ public class MSpec {
 		label = Utils.replaceAll(label, SLASH_CHARS, SLASH_SPACE);
 		return cleanLabel(label);
 	}
+}
