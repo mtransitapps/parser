@@ -28,7 +28,6 @@ import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
-
 public class GReader {
 
 	public static final String todayGtfs = new SimpleDateFormat("yyyyMMdd").format(new Date());
@@ -56,22 +55,22 @@ public class GReader {
 					continue;
 				}
 				String filename = entry.getName();
-				if (filename.equals(GCalendarDate.FILENAME)) {
+				if (filename.equals(GCalendarDate.FILENAME)) { // CALENDAR DATES
 					fileLines = readCsv(filename, reader, null, null);
 					calendarDates = processCalendarDates(fileLines, agencyTools);
-				} else if (filename.equals(GCalendar.FILENAME)) {
+				} else if (filename.equals(GCalendar.FILENAME)) { // CALENDAR
 					fileLines = readCsv(filename, reader, null, null);
 					calendars = processCalendar(fileLines, agencyTools);
-				} else if (filename.equals(GRoute.FILENAME)) {
+				} else if (filename.equals(GRoute.FILENAME)) { // ROUTE
 					fileLines = readCsv(filename, reader, null, null);
 					routes = processRoutes(fileLines, agencyTools);
-				} else if (filename.equals(GStop.FILENAME)) {
+				} else if (filename.equals(GStop.FILENAME)) { // STOP
 					fileLines = readCsv(filename, reader, null, null);
 					stops = processStops(fileLines, agencyTools);
-				} else if (filename.equals(GTrip.FILENAME)) {
+				} else if (filename.equals(GTrip.FILENAME)) { // TRIP
 					fileLines = readCsv(filename, reader, null, null);
 					trips = processTrips(fileLines, agencyTools);
-				} else if (filename.equals(GStopTime.FILENAME)) {
+				} else if (filename.equals(GStopTime.FILENAME)) { // STOP TIME
 					fileLines = readCsv(filename, reader, null, null);
 					stopTimes = processStopTimes(fileLines, agencyTools);
 				} else {
@@ -79,7 +78,7 @@ public class GReader {
 				}
 				fileLines = null;
 			}
-			gspec = new GSpec(calendars, calendarDates, stops, routes, trips, stopTimes);
+			gspec = new GSpec(/* agencies, */calendars, calendarDates, stops, routes, trips, stopTimes);
 		} catch (IOException ioe) {
 			System.out.println("I/O Error while reading GTFS file!");
 			ioe.printStackTrace();
@@ -118,7 +117,6 @@ public class GReader {
 			throws IOException {
 		System.out.println("Reading file '" + filename + "'...");
 		ArrayList<HashMap<String, String>> lines = new ArrayList<HashMap<String, String>>();
-
 		String line;
 		String[] lineColumns;
 		line = reader.readLine();
@@ -126,12 +124,10 @@ public class GReader {
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
 		lineColumns = line.split(",");
-
-		String[] columnNames = lineColumns;
+		String[] columnNames = lineColumns;// new String[lineColumns.length];
 		if (columnNames == null || columnNames.length == 0) {
 			return lines;
 		}
-		// read column values
 		while ((line = reader.readLine()) != null) {
 			if (filterStartWith != null && !line.startsWith(filterStartWith)) {
 				continue;
@@ -192,8 +188,11 @@ public class GReader {
 				continue;
 			}
 			String uid = GTripStop.getUID(gTrip.getUID(), gStopTime.stop_id);
-			GTripStop gTripStop = new GTripStop(gTrip.getTripId(), gStopTime.stop_id, gStopTime.stop_sequence);
-			gTripStops.put(uid, gTripStop);
+			if (gTripStops.containsKey(uid)) {
+			} else { // add new one
+				GTripStop gTripStop = new GTripStop(gTrip.getTripId(), gStopTime.stop_id, gStopTime.stop_sequence);
+				gTripStops.put(uid, gTripStop);
+			}
 		}
 		System.out.println("Generating GTFS trip stops... DONE");
 		System.out.printf("- Trip stops: %d\n", gTripStops.size());
@@ -255,7 +254,8 @@ public class GReader {
 				boolean sunday = "1".equals(line.get(GCalendar.SUNDAY));
 				int start_date = Integer.parseInt(line.get(GCalendar.START_DATE));
 				int end_date = Integer.parseInt(line.get(GCalendar.END_DATE));
-				GCalendar gCalendar = new GCalendar(line.get(GCalendar.SERVICE_ID), monday, tuesday, wednesday, thursday, friday, saturday, sunday, start_date, end_date);
+				GCalendar gCalendar = new GCalendar(line.get(GCalendar.SERVICE_ID), monday, tuesday, wednesday, thursday, friday, saturday, sunday, start_date,
+						end_date);
 				if (agencyTools.excludeCalendar(gCalendar)) {
 					continue; // ignore this service
 				}
@@ -383,7 +383,6 @@ public class GReader {
 			}
 			gRouteToSpec.get(routeId).tripStops.put(gTripStop.getKey(), gTripStop.getValue());
 		}
-
 		if (gtfs.calendars != null) {
 			for (GCalendar gCalendar : gtfs.calendars) {
 				if (!gServiceIdToMRouteId.containsKey(gCalendar.service_id)) {
@@ -397,7 +396,6 @@ public class GReader {
 				gRouteToSpec.get(routeId).calendars.add(gCalendar);
 			}
 		}
-
 		if (gtfs.calendarDates != null) {
 			for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
 				if (!gServiceIdToMRouteId.containsKey(gCalendarDate.service_id)) {
@@ -411,7 +409,6 @@ public class GReader {
 				gRouteToSpec.get(routeId).calendarDates.add(gCalendarDate);
 			}
 		}
-
 		for (GStopTime gStopTime : gtfs.stopTimes) {
 			if (!gTripIdToMRouteId.containsKey(gStopTime.trip_id)) {
 				continue; // not processed now (...)
@@ -423,10 +420,5 @@ public class GReader {
 			}
 			gRouteToSpec.get(routeId).stopTimes.add(gStopTime);
 		}
-
 		return gRouteToSpec;
 	}
-
-	private GReader() {
-	}
-}

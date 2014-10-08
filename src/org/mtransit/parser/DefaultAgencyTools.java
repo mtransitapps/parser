@@ -106,6 +106,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return MSpec.cleanLabel(gStopName);
 	}
 
+	public String cleanStopNameFR(String stopName) {
+		return MSpec.cleanLabelFR(stopName);
+	}
+
 	@Override
 	public String getStopCode(GStop gStop) {
 		return gStop.stop_code;

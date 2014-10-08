@@ -1,5 +1,7 @@
 package org.mtransit.parser;
 
+import java.util.regex.Pattern;
+
 public final class Utils {
 
 	private Utils() {
@@ -24,18 +26,42 @@ public final class Utils {
 		boolean printing = false;
 		if (printing || h > 0) {
 			printing = true;
-			sb.append(h).append("h ");
+			if (sb.length() > 0) {
+				sb.append(' ');
+			}
+			sb.append(h).append("h");
 		}
 		if (printing || m > 0) {
 			printing = true;
-			sb.append(m).append("m ");
+			if (sb.length() > 0) {
+				sb.append(' ');
+			}
+			sb.append(m).append("m");
 		}
 		if (printing || s > 0) {
 			printing = true;
-			sb.append(s).append("s ");
+			if (sb.length() > 0) {
+				sb.append(' ');
+			}
+			sb.append(s).append("s");
 		}
-		sb.append(ms).append("ms ");
+		if (sb.length() > 0) {
+			sb.append(' ');
+		}
+		sb.append(ms).append("ms");
 		return sb.toString();
+	}
+
+	public static String replaceAll(String string, Pattern[] patterns, String replacement) {
+		if (string == null || string.length() == 0) {
+			return string;
+		}
+		if (patterns != null) {
+			for (Pattern pattern : patterns) {
+				string = pattern.matcher(string).replaceAll(replacement);
+			}
+		}
+		return string;
 	}
 
 }
