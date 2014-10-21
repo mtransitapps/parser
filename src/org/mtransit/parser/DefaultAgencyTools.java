@@ -12,6 +12,7 @@ import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.MGenerator;
+import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MTrip;
 
@@ -50,6 +51,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
 		return MSpec.cleanLabel(gRoute.route_long_name);
+	}
+
+	@Override
+	public boolean mergeRouteLongName(MRoute mRoute, MRoute mRouteToMerge) {
+		return mRoute.mergeLongName(mRouteToMerge);
 	}
 
 	@Override

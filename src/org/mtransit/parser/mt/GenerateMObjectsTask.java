@@ -56,10 +56,16 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			mRoute.color = agencyTools.getRouteColor(gRoute);
 			mRoute.textColor = agencyTools.getRouteTextColor(gRoute);
 			if (mRoutes.containsKey(mRoute.id) && !mRoute.equals(mRoutes.get(mRoute.id))) {
-				System.out.println(this.routeId + ": Route " + mRoute.id + " already in list!");
-				System.out.println(this.routeId + ": " + mRoute.toString());
-				System.out.println(this.routeId + ": " + mRoutes.get(mRoute.id).toString());
-				System.exit(-1);
+				boolean mergeSuccessful = false;
+				if (mRoute.equalsExceptLongName(mRoutes.get(mRoute.id))) {
+					mergeSuccessful = agencyTools.mergeRouteLongName(mRoute, mRoutes.get(mRoute.id));
+				}
+				if (!mergeSuccessful) {
+					System.out.println(this.routeId + ": Route " + mRoute.id + " already in list!");
+					System.out.println(this.routeId + ": " + mRoute.toString());
+					System.out.println(this.routeId + ": " + mRoutes.get(mRoute.id).toString());
+					System.exit(-1);
+				}
 			}
 			// find route trips
 			Map<Integer, List<MTripStop>> tripIdToMTripStops = new HashMap<Integer, List<MTripStop>>();
@@ -71,13 +77,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				agencyTools.setTripHeadsign(mTrip, gTrip);
 				final int originalTripHeadsignType = mTrip.getHeadsignType();
 				final String originalTripHeadsignValue = mTrip.getHeadsignValue();
-				boolean mergeSuccessful = false;
 				if (mTrips.containsKey(mTrip.getId()) && !mTrips.get(mTrip.getId()).equals(mTrip)) {
+					boolean mergeSuccessful = false;
 					if (mTrip.equalsExceptHeadsignValue(mTrips.get(mTrip.getId()))) {
 						mergeSuccessful = agencyTools.mergeHeadsign(mTrip, mTrips.get(mTrip.getId()));
-						if (!mergeSuccessful) {
-							mergeSuccessful = mTrip.mergeHeadsignValue(mTrips.get(mTrip.getId()));
-						}
 					}
 					if (!mergeSuccessful) {
 						System.out.println(this.routeId + ": Different trip " + mTrip.getId() + " already in list (" + mTrip.toString() + " != "
@@ -129,7 +132,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					if (!equalsMyTripStopLists(mTripStopsList, cTripStopsList)) {
 						tripIdToMTripStops.put(mTripId, mergeMyTripStopLists(mTripStopsList, cTripStopsList));
 					}
-				} else { // just use it
+				} else {
 					tripIdToMTripStops.put(mTripId, mTripStopsList);
 				}
 				mTrips.put(mTrip.getId(), mTrip);

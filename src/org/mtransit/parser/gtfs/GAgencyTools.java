@@ -6,6 +6,7 @@ import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
+import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
 
 public interface GAgencyTools {
@@ -16,6 +17,7 @@ public interface GAgencyTools {
 	int getRouteId(GRoute gRoute);
 	String getRouteShortName(GRoute gRoute);
 	String getRouteLongName(GRoute gRoute);
+	boolean mergeRouteLongName(MRoute mRoute, MRoute mRouteToMerge);
 	String getRouteColor(GRoute gRoute);
 	String getRouteTextColor(GRoute gRoute);
 	boolean excludeRoute(GRoute gRoute);

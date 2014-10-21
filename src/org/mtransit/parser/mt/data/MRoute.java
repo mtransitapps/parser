@@ -44,6 +44,39 @@ public class MRoute implements Comparable<MRoute> {
 		if (!StringUtils.equals(this.longName, o.longName)) {
 			return false;
 		}
+	}
+
+	public boolean equalsExceptLongName(Object obj) {
+		MRoute o = (MRoute) obj;
+		if (this.id != o.id) {
+			return false;
+		}
+		if (!StringUtils.equals(this.shortName, o.shortName)) {
+			return false;
+		}
+		return true;
+	}
+
+	public boolean mergeLongName(MRoute mRouteToMerge) {
+		if (mRouteToMerge == null || mRouteToMerge.longName == null) {
+			return true;
+		}
+		if (this.longName == null) {
+			this.longName = mRouteToMerge.longName;
+			return true;
+		}
+		if (mRouteToMerge.longName.contains(this.longName)) {
+			this.longName = mRouteToMerge.longName;
+			return true;
+		}
+		if (this.longName.contains(mRouteToMerge.longName)) {
+			return true;
+		}
+		if (this.longName.compareTo(mRouteToMerge.longName) > 0) {
+			this.longName = mRouteToMerge.longName + " / " + this.longName;
+		} else {
+			this.longName = this.longName + " / " + mRouteToMerge.longName;
+		}
 		return true;
 	}
 }
