@@ -44,6 +44,7 @@ public class MRoute implements Comparable<MRoute> {
 		if (!StringUtils.equals(this.longName, o.longName)) {
 			return false;
 		}
+		return true;
 	}
 
 	public boolean equalsExceptLongName(Object obj) {
