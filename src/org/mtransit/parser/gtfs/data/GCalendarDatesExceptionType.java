@@ -27,7 +27,7 @@ public enum GCalendarDatesExceptionType {
 		}
 		return parse(Integer.valueOf(id));
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.valueOf(id);

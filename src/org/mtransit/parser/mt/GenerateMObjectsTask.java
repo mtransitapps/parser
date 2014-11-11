@@ -151,7 +151,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			mRoutes.put(mRoute.id, mRoute);
 		}
 		// SERVICE DATES
-		// process calendar date exception 1st
+		// process calendar date exception first
 		Set<String> gCalendarDateServiceRemoved = new HashSet<String>();
 		for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
 			switch (gCalendarDate.exception_type) {
@@ -287,7 +287,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				boolean lastInL1 = isInList(l1StopId, last.getStopId());
 				boolean lastInL2 = isInList(l2StopId, last.getStopId());
 				if (lastInL1 && !lastInL2) {
-					System.out.println(this.routeId + ": Resolved using last " + ts1.getTripId() + "," + ts1.getStopId() + "," + ts2.getStopId() + " (last:" + last.getStopId() + ")");
+					System.out.println(this.routeId + ": Resolved using last " + ts1.getTripId() + "," + ts1.getStopId() + "," + ts2.getStopId() + " (last:"
+							+ last.getStopId() + ")");
 					nl.add(ts1);
 					nlStopId.add(ts1.getStopId());
 					last = ts1;
@@ -295,7 +296,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					continue;
 				}
 				if (!lastInL1 && lastInL2) {
-					System.out.println(this.routeId + ": Resolved using last " + ts1.getTripId() + "," + ts1.getStopId() + "," + ts2.getStopId() + " (last:" + last.getStopId() + ")");
+					System.out.println(this.routeId + ": Resolved using last " + ts1.getTripId() + "," + ts1.getStopId() + "," + ts2.getStopId() + " (last:"
+							+ last.getStopId() + ")");
 					nl.add(ts2);
 					nlStopId.add(ts2.getStopId());
 					last = ts2;
@@ -311,7 +313,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				final double lastGStopLon = Double.parseDouble(lastGStop.stop_lon);
 				double ts1Distance = findDistance(lastGStopLat, lastGStopLon, Double.parseDouble(ts1GStop.stop_lat), Double.parseDouble(ts1GStop.stop_lon));
 				double ts2Distance = findDistance(lastGStopLat, lastGStopLon, Double.parseDouble(ts2GStop.stop_lat), Double.parseDouble(ts2GStop.stop_lon));
-				System.out.println(this.routeId + ": Resolved using last distance " + ts1.getTripId() + "," + ts1.getStopId() + "," + ts2.getStopId() + " (last:" + last.getStopId() + " " + ts1Distance + ", " + ts2Distance + ")");
+				System.out.println(this.routeId + ": Resolved using last distance " + ts1.getTripId() + "," + ts1.getStopId() + "," + ts2.getStopId()
+						+ " (last:" + last.getStopId() + " " + ts1Distance + ", " + ts2Distance + ")");
 				if (ts1Distance < ts2Distance) {
 					nl.add(ts1);
 					nlStopId.add(ts1.getStopId());

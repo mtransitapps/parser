@@ -16,7 +16,8 @@ public class GSpec {
 	public Map<String, GTripStop> tripStops;
 	public Map<String, GService> services;
 
-	public GSpec(List<GCalendar> calendars, List<GCalendarDate> calendarDates, Map<String, GStop> stops, Map<String, GRoute> routes, Map<String, GTrip> trips, List<GStopTime> stopTimes) {
+	public GSpec(List<GCalendar> calendars, List<GCalendarDate> calendarDates, Map<String, GStop> stops, Map<String, GRoute> routes, Map<String, GTrip> trips,
+			List<GStopTime> stopTimes) {
 		this.calendars = calendars;
 		this.calendarDates = calendarDates;
 		this.stops = stops;

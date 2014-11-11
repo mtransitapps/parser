@@ -2,6 +2,7 @@ package org.mtransit.parser.gtfs.data;
 
 // https://developers.google.com/transit/gtfs/reference#trips_fields
 public class GTrip {
+
 	public static final String FILENAME = "trips.txt";
 
 	public static final String ROUTE_ID = "route_id";
@@ -28,7 +29,6 @@ public class GTrip {
 		this.route_id = route_id;
 		this.service_id = service_id;
 		this.trip_id = trip_id;
-
 		this.uid = this.route_id + this.trip_id;
 	}
 
@@ -57,5 +57,4 @@ public class GTrip {
 				.append('\'').append(shape_id).append('\'') //
 				.toString();
 	}
-
 }

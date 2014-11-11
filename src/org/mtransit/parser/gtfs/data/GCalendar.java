@@ -42,7 +42,8 @@ public class GCalendar {
 
 	private ArrayList<GCalendarDate> allDates;
 
-	public GCalendar(String service_id, boolean monday, boolean tuesday, boolean wednesday, boolean thursday, boolean friday, boolean saturday, boolean sunday, int start_date, int end_date) {
+	public GCalendar(String service_id, boolean monday, boolean tuesday, boolean wednesday, boolean thursday, boolean friday, boolean saturday, boolean sunday,
+			int start_date, int end_date) {
 		this.service_id = service_id;
 		this.monday = monday;
 		this.tuesday = tuesday;

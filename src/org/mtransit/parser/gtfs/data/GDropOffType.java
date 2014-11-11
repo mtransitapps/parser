@@ -10,7 +10,7 @@ public enum GDropOffType {
 	GDropOffType(int id) {
 		this.id = id;
 	}
-	
+
 	public static GDropOffType parse(int id) {
 		if (REGULAR.id == id) {
 			return REGULAR;
@@ -26,10 +26,10 @@ public enum GDropOffType {
 		}
 		return REGULAR; // default
 	}
-	
+
 	public static GDropOffType parse(String id) {
 		if (id == null) { // that's OK
-			return REGULAR; //default
+			return REGULAR; // default
 		}
 		return parse(Integer.valueOf(id));
 	}

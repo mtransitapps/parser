@@ -9,7 +9,7 @@ public enum MDropOffType {
 	MDropOffType(int id) {
 		this.id = id;
 	}
-	
+
 	public static MDropOffType parse(int id) {
 		if (REGULAR.id == id) {
 			return REGULAR;
@@ -25,14 +25,14 @@ public enum MDropOffType {
 		}
 		return REGULAR; // default
 	}
-	
+
 	public static MDropOffType parse(String id) {
 		if (id == null) { // that's OK
-			return REGULAR; //default
+			return REGULAR; // default
 		}
 		return parse(Integer.valueOf(id));
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.valueOf(id);

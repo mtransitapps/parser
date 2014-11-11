@@ -2,6 +2,7 @@ package org.mtransit.parser.gtfs.data;
 
 // https://developers.google.com/transit/gtfs/reference#routes_fields
 public class GRoute {
+
 	public static final String FILENAME = "routes.txt";
 
 	public static final String ROUTE_ID = "route_id";

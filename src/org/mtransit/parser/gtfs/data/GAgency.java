@@ -2,6 +2,7 @@ package org.mtransit.parser.gtfs.data;
 
 // https://developers.google.com/transit/gtfs/reference#agency_fields
 public class GAgency {
+
 	public static final String FILENAME = "agency.txt";
 
 	public static final String AGENCY_ID = "agency_id";

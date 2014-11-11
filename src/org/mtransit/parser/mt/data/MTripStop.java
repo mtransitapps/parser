@@ -52,7 +52,7 @@ public class MTripStop implements Comparable<MTripStop> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder() //
-				.append('\'').append(tripId) // TRIP ID
+				.append(tripId) // TRIP ID
 				.append(',') //
 				.append(stopId) // STOP ID
 				.append(',') //

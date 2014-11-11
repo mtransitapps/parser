@@ -10,7 +10,7 @@ import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
 
 public interface GAgencyTools {
-	
+
 	int getThreadPoolSize();
 
 	// ROUTE
@@ -21,7 +21,7 @@ public interface GAgencyTools {
 	String getRouteColor(GRoute gRoute);
 	String getRouteTextColor(GRoute gRoute);
 	boolean excludeRoute(GRoute gRoute);
-	
+
 	// TRIP
 	void setTripHeadsign(MTrip mTrip, GTrip gTrip);
 	boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge);
@@ -32,10 +32,10 @@ public interface GAgencyTools {
 	String cleanStopName(String gStopName);
 	String getStopCode(GStop gStop);
 	boolean excludeStop(GStop gStop);
-	
+
 	// CALENDAR
 	boolean excludeCalendar(GCalendar gCalendar);
-	
+
 	// CALENDAR DATE
 	boolean excludeCalendarDate(GCalendarDate gCalendarDates);
 

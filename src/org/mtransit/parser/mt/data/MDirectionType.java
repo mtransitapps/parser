@@ -3,7 +3,7 @@ package org.mtransit.parser.mt.data;
 public enum MDirectionType {
 
 	NONE(""), EAST("E"), NORTH("N"), SOUTH("S"), WEST("W");
-	
+
 	private static final String WEST_FR = "O";
 
 	public String id;
@@ -27,7 +27,7 @@ public enum MDirectionType {
 		}
 		return NONE; // default
 	}
-	
+
 	@Override
 	public String toString() {
 		return id;
@@ -43,7 +43,7 @@ public enum MDirectionType {
 		} else if (SOUTH.id.equals(this.id)) {
 			return 4;
 		} else {
-			System.out.println("Unknow direction " + this.id);
+			System.out.println("Unknow direction '" + this.id + "'");
 			System.exit(-1);
 			return 0;
 		}
