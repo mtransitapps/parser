@@ -88,8 +88,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public String cleanTripHeasign(String result) {
-		return result;
+	public String cleanTripHeadsign(String tripHeadsign) {
+		return tripHeadsign;
 	}
 
 	@Override
