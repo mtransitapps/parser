@@ -205,7 +205,7 @@ public class GReader {
 		for (HashMap<String, String> line : lines) {
 			try {
 				GStopTime gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.ARRIVAL_TIME), line.get(GStopTime.DEPARTURE_TIME),
-						line.get(GStopTime.STOP_ID), Integer.valueOf(line.get(GStopTime.STOP_SEQUENCE)));
+						line.get(GStopTime.STOP_ID), Integer.valueOf(line.get(GStopTime.STOP_SEQUENCE)), line.get(GStopTime.STOP_HEADSIGN));
 				gStopTime.pickup_type = GPickupType.parse(line.get(GStopTime.PICKUP_TYPE));
 				gStopTime.drop_off_type = GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE));
 				stopTimes.add(gStopTime);

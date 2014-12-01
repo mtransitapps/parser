@@ -25,12 +25,13 @@ public class GStopTime {
 	public static final String SHAPE_DIST_TRAVELED = "shape_dist_traveled";
 	public String shape_dist_traveled;
 
-	public GStopTime(String trip_id, String arrival_time, String departure_time, String stop_id, int stop_sequence) {
+	public GStopTime(String trip_id, String arrival_time, String departure_time, String stop_id, int stop_sequence, String stop_headsign) {
 		this.trip_id = trip_id;
 		this.arrival_time = arrival_time;
 		this.departure_time = departure_time;
 		this.stop_id = stop_id;
 		this.stop_sequence = stop_sequence;
+		this.stop_headsign = stop_headsign;
 	}
 
 	@Override

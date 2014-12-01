@@ -67,6 +67,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					System.exit(-1);
 				}
 			}
+			Map<Integer, String> mTripStopTimesHeadsign = new HashMap<Integer, String>();
 			// find route trips
 			Map<Integer, List<MTripStop>> tripIdToMTripStops = new HashMap<Integer, List<MTripStop>>();
 			for (GTrip gTrip : gtfs.trips.values()) {
@@ -75,8 +76,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 				MTrip mTrip = new MTrip(mRoute.id);
 				agencyTools.setTripHeadsign(mTrip, gTrip);
-				final int originalTripHeadsignType = mTrip.getHeadsignType();
-				final String originalTripHeadsignValue = mTrip.getHeadsignValue();
+				int originalTripHeadsignType = mTrip.getHeadsignType();
+				String originalTripHeadsignValue = mTrip.getHeadsignValue();
 				if (mTrips.containsKey(mTrip.getId()) && !mTrips.get(mTrip.getId()).equals(mTrip)) {
 					boolean mergeSuccessful = false;
 					if (mTrip.equalsExceptHeadsignValue(mTrips.get(mTrip.getId()))) {
@@ -90,6 +91,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 				Integer mTripId = mTrip.getId();
 				// find route trip stops
+				String tripStopTimesHeasign = null;
 				Map<String, MTripStop> mTripStops = new HashMap<String, MTripStop>();
 				for (GTripStop gTripStop : gtfs.tripStops.values()) {
 					if (!gTripStop.trip_id.equals(gTrip.getTripId())) {
@@ -116,11 +118,23 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						}
 						MSchedule mSchedule = new MSchedule(gTrip.service_id, mRoute.id, mTripId, mStopId, agencyTools.getDepartureTime(gStopTime));
 						if (mSchedules.containsKey(mSchedule.getUID()) && !mSchedules.get(mSchedule.getUID()).equals(mSchedule)) {
-							System.out.println(this.routeId + ": Different schedule " + mSchedule.getUID() + " already in list(" + mSchedule.toString()
+							System.out.println(this.routeId + ": Different schedule " + mSchedule.getUID() + " already in list (" + mSchedule.toString()
 									+ " != " + mSchedules.get(mSchedule.getUID()).toString() + ")!");
 							System.exit(-1);
 						}
-						mSchedule.setHeadsign(originalTripHeadsignType, originalTripHeadsignValue); // we can't know if the 1st trip will be merged later or not
+						if (gStopTime.stop_headsign != null && gStopTime.stop_headsign.length() > 0) {
+							String stopHeadsign = agencyTools.cleanTripHeasign(gStopTime.stop_headsign);
+							mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_STRING, stopHeadsign);
+							if (tripStopTimesHeasign == null) {
+								tripStopTimesHeasign = stopHeadsign;
+							} else if (tripStopTimesHeasign == "") { // disabled
+							} else if (!tripStopTimesHeasign.equals(stopHeadsign)) {
+								System.out.println(this.routeId + ": '" + tripStopTimesHeasign + "' != '" + stopHeadsign + "' > not used as trip heasign");
+								tripStopTimesHeasign = ""; // disable
+							}
+						} else {
+							mSchedule.setHeadsign(originalTripHeadsignType, originalTripHeadsignValue);
+						}
 						mSchedules.put(mSchedule.getUID(), mSchedule);
 					}
 					serviceIds.add(gTrip.service_id);
@@ -135,12 +149,53 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				} else {
 					tripIdToMTripStops.put(mTripId, mTripStopsList);
 				}
+				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING && tripStopTimesHeasign != null && tripStopTimesHeasign.length() > 0) {
+					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
+						if (!mTripStopTimesHeadsign.get(mTrip.getId()).equals(tripStopTimesHeasign)) {
+							System.out.println("Trip Stop Times Headsign different for same trip ID ('" + mTripStopTimesHeadsign + "' != '"
+									+ mTripStopTimesHeadsign.get(mTrip.getId()) + "')");
+							System.exit(-1);
+						}
+					} else {
+						System.out.println(this.routeId + ": Saving trip headsign: " + tripStopTimesHeasign + " for trip id " + mTrip.getId());
+						mTripStopTimesHeadsign.put(mTrip.getId(), tripStopTimesHeasign);
+					}
+				}
 				mTrips.put(mTrip.getId(), mTrip);
+			}
+			Set<String> mTripHeasignStrings = new HashSet<String>();
+			boolean headsignTypeString = false;
+			for (MTrip mTrip : mTrips.values()) {
+				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
+					mTripHeasignStrings.add(mTrip.getHeadsignValue());
+					headsignTypeString = true;
+				}
+			}
+			boolean tripKeptNonDescriptiveHeadsing = false; // 1 trip can keep the same non descriptive headsign
+			if (headsignTypeString && mTripHeasignStrings.size() != mTrips.size()) {
+				System.out.println(this.routeId + ": Non descriptive trip headsigns (" + mTripHeasignStrings.size() + " different heasign(s) for "
+						+ mTrips.size() + " trips)");
+				for (MTrip mTrip : mTrips.values()) {
+					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
+						System.out.println(this.routeId + ": Replace trip headsign '" + mTrip.getHeadsignValue() + "' with stop times headsign '"
+								+ mTripStopTimesHeadsign.get(mTrip.getId()) + "' (" + mTrip.toString() + ")");
+						mTrip.setHeadsignString(mTripStopTimesHeadsign.get(mTrip.getId()), mTrip.getHeadsignId());
+					} else {
+						if (tripKeptNonDescriptiveHeadsing) {
+							System.out.println(this.routeId + ": Trip headsign string '" + mTrip.getHeadsignValue() + "' non descriptive! (" + mTrip.toString()
+									+ ")");
+							System.exit(-1);
+						}
+						System.out.println(this.routeId + ": Keeping non-descritive trip headsign '" + mTrip.getHeadsignValue() + "' (" + mTrip.toString()
+								+ ")");
+						tripKeptNonDescriptiveHeadsing = true; // last trip that can keep same headsign
+					}
+				}
 			}
 			for (List<MTripStop> entry : tripIdToMTripStops.values()) {
 				for (MTripStop mTripStop : entry) {
 					if (allMTripStops.containsKey(mTripStop.getUID()) && !allMTripStops.get(mTripStop.getUID()).equals(mTripStop)) {
-						System.out.println(this.routeId + ": Different trip stop " + mTripStop.getUID() + " already in list(" + mTripStop.toString() + " != "
+						System.out.println(this.routeId + ": Different trip stop " + mTripStop.getUID() + " already in list (" + mTripStop.toString() + " != "
 								+ allMTripStops.get(mTripStop.getUID()).toString() + ")!");
 						System.exit(-1);
 					}

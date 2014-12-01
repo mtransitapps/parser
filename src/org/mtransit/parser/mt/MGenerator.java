@@ -250,6 +250,7 @@ public class MGenerator {
 				}
 			}
 		}
+		Double minLat = null, maxLat = null, minLng = null, maxLng = null;
 		file = new File(dumpDirF, fileBase + "gtfs_rts_stops");
 		file.delete(); // delete previous
 		try {
@@ -257,6 +258,20 @@ public class MGenerator {
 			for (MStop mStop : mSpec.stops) {
 				ow.write(mStop.toString());
 				ow.write('\n');
+				double stopLat = Double.parseDouble(mStop.lat);
+				double stopLng = Double.parseDouble(mStop.lng);
+				if (minLat == null || minLat.doubleValue() > stopLat) {
+					minLat = stopLat;
+				}
+				if (maxLat == null || maxLat.doubleValue() < stopLat) {
+					maxLat = stopLat;
+				}
+				if (minLng == null || minLng.doubleValue() > stopLng) {
+					minLng = stopLng;
+				}
+				if (maxLng == null || maxLng.doubleValue() < stopLng) {
+					maxLng = stopLng;
+				}
 			}
 		} catch (IOException ioe) {
 			System.out.println("I/O Error while writing stop file!");
@@ -270,6 +285,7 @@ public class MGenerator {
 				}
 			}
 		}
+		System.out.println("Aera: \n-lat: " + minLat + " - " + maxLat + "\n-lng: " + minLng + " - " + maxLng);
 		System.out.println("Writing files (" + dumpDirF.toURI() + ")... DONE in " + Utils.getPrettyDuration(System.currentTimeMillis() - start) + ".");
 	}
 

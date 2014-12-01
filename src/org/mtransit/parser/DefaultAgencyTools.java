@@ -88,6 +88,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public String cleanTripHeasign(String result) {
+		return result;
+	}
+
+	@Override
 	public boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge) {
 		return mTrip.mergeHeadsignValue(mTripToMerge);
 	}

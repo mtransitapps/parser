@@ -24,6 +24,7 @@ public interface GAgencyTools {
 
 	// TRIP
 	void setTripHeadsign(MTrip mTrip, GTrip gTrip);
+	String cleanTripHeasign(String tripHeadsign);
 	boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge);
 	boolean excludeTrip(GTrip gTrip);
 

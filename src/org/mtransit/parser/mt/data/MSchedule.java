@@ -7,7 +7,7 @@ public class MSchedule implements Comparable<MSchedule> {
 	public int stopId;
 	public int departure;
 
-	private int headsignType = -1; // 0 = String, 1 = direction, 2= inbound, 3=stopId
+	private int headsignType = -1;
 	private String headsignValue = null;
 
 	public MSchedule(String serviceId, int routeId, int tripId, int stopId, int departure) {
