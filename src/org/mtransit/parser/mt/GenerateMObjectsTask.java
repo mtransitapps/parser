@@ -123,7 +123,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 							System.exit(-1);
 						}
 						if (gStopTime.stop_headsign != null && gStopTime.stop_headsign.length() > 0) {
-							String stopHeadsign = agencyTools.cleanTripHeasign(gStopTime.stop_headsign);
+							String stopHeadsign = agencyTools.cleanTripHeadsign(gStopTime.stop_headsign);
 							mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_STRING, stopHeadsign);
 							if (tripStopTimesHeasign == null) {
 								tripStopTimesHeasign = stopHeadsign;
