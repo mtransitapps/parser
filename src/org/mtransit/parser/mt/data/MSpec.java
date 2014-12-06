@@ -158,6 +158,12 @@ public class MSpec {
 	public static final Pattern SAINT = Pattern.compile("(saint)", Pattern.CASE_INSENSITIVE);
 	public static final String SAINT_REPLACEMENT = "St";
 
+	public static final Pattern POINT = Pattern.compile("(point)", Pattern.CASE_INSENSITIVE);
+	public static final String POINT_REPLACEMENT = "Pt";
+
+	public static final Pattern ET = Pattern.compile("( et )", Pattern.CASE_INSENSITIVE);
+	public static final String ET_REPLACEMENT = " & ";
+
 	public static final Pattern CONVERT_ET_TO_SLASHES = Pattern.compile("(\\w)[\\s]+(et)[\\s]+(\\w)", Pattern.UNICODE_CHARACTER_CLASS
 			| Pattern.CASE_INSENSITIVE);
 	public static final String CONVERT_ET_TO_SLASHES_REPLACEMENT = "$1 / $3";

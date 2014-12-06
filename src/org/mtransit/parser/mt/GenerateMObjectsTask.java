@@ -107,7 +107,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					}
 					MTripStop mTripStop = new MTripStop(mTripId, mStopId, gTripStop.stop_sequence);
 					if (mTripStops.containsKey(mTripStop.getUID()) && !mTripStops.get(mTripStop.getUID()).equals(mTripStop)) {
-						System.out.println(this.routeId + ": Different trip stop " + mTripStop.getUID() + " already in list(" + mTripStop.toString() + " != "
+						System.out.println(this.routeId + ": Different trip stop " + mTripStop.getUID() + " already in list (" + mTripStop.toString() + " != "
 								+ mTripStops.get(mTripStop.getUID()).toString() + ")!");
 						System.exit(-1);
 					}
@@ -195,12 +195,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			for (List<MTripStop> entry : tripIdToMTripStops.values()) {
 				for (MTripStop mTripStop : entry) {
 					if (allMTripStops.containsKey(mTripStop.getUID()) && !allMTripStops.get(mTripStop.getUID()).equals(mTripStop)) {
-						System.out.println(this.routeId + ": Different trip stop " + mTripStop.getUID() + " already in list (" + mTripStop.toString() + " != "
-								+ allMTripStops.get(mTripStop.getUID()).toString() + ")!");
-						System.exit(-1);
+						System.out.println(this.routeId + ": Different trip stop " + mTripStop.getUID() + " already in route list (" + mTripStop.toString()
+								+ " != " + allMTripStops.get(mTripStop.getUID()).toString() + ")!");
+					} else {
+						allMTripStops.put(mTripStop.getUID(), mTripStop);
+						tripStopIds.add(mTripStop.getStopId());
 					}
-					allMTripStops.put(mTripStop.getUID(), mTripStop);
-					tripStopIds.add(mTripStop.getStopId());
 				}
 			}
 			mRoutes.put(mRoute.id, mRoute);
