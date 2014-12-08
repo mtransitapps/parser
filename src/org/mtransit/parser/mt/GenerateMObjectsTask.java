@@ -13,12 +13,14 @@ import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
+import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
+import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSchedule;
 import org.mtransit.parser.mt.data.MServiceDate;
@@ -46,6 +48,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		System.out.println(this.routeId + ": processing... ");
 		Set<MServiceDate> mServiceDates = new HashSet<MServiceDate>();
 		HashMap<String, MSchedule> mSchedules = new HashMap<String, MSchedule>();
+		HashMap<String, MFrequency> mFrequencies = new HashMap<String, MFrequency>();
 		Map<Integer, MRoute> mRoutes = new HashMap<Integer, MRoute>();
 		Map<Integer, MTrip> mTrips = new HashMap<Integer, MTrip>();
 		Map<String, MTripStop> allMTripStops = new HashMap<String, MTripStop>();
@@ -90,6 +93,20 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					}
 				}
 				Integer mTripId = mTrip.getId();
+				// find route trip frequencies
+				for (GFrequency gFrequency : gtfs.frequencies) {
+					if (!gFrequency.trip_id.equals(gTrip.getTripId())) {
+						continue;
+					}
+					MFrequency mFrequency = new MFrequency(gTrip.service_id, mRoute.id, mTripId, agencyTools.getStartTime(gFrequency),
+							agencyTools.getEndTime(gFrequency), Integer.parseInt(gFrequency.headway_secs));
+					if (mFrequencies.containsKey(mFrequency.getUID()) && !mFrequencies.get(mFrequency.getUID()).equals(mFrequency)) {
+						System.out.println(this.routeId + ": Different frequency " + mFrequency.getUID() + " already in list (" + mFrequency.toString()
+								+ " != " + mFrequencies.get(mFrequency.getUID()).toString() + ")!");
+						System.exit(-1);
+					}
+					mFrequencies.put(mFrequency.getUID(), mFrequency);
+				}
 				// find route trip stops
 				String tripStopTimesHeasign = null;
 				Map<String, MTripStop> mTripStops = new HashMap<String, MTripStop>();
@@ -97,7 +114,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					if (!gTripStop.trip_id.equals(gTrip.getTripId())) {
 						continue;
 					}
-					final GStop gStop = gstops.get(gTripStop.stop_id.trim());
+					GStop gStop = gstops.get(gTripStop.stop_id.trim());
 					int mStopId = gStop == null ? 0 : agencyTools.getStopId(gStop);
 					this.gStopsCache.put(mStopId, gStop);
 					if (mStopId == 0) {
@@ -240,6 +257,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Collections.sort(mServiceDatesList);
 		List<MSchedule> mSchedulesList = new ArrayList<MSchedule>(mSchedules.values());
 		Collections.sort(mSchedulesList);
+		List<MFrequency> mFrequenciesList = new ArrayList<MFrequency>(mFrequencies.values());
+		Collections.sort(mFrequenciesList);
 		Map<Integer, List<MSchedule>> mStopScheduleMap = new HashMap<Integer, List<MSchedule>>();
 		for (MSchedule schedule : mSchedulesList) {
 			if (!mStopScheduleMap.containsKey(schedule.stopId)) {
@@ -247,7 +266,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			mStopScheduleMap.get(schedule.stopId).add(schedule);
 		}
-		MSpec myrouteSpec = new MSpec(null, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, null, mStopScheduleMap);
+		Map<Integer, List<MFrequency>> mRouteFrequencies = new HashMap<Integer, List<MFrequency>>();
+		mRouteFrequencies.put(this.routeId, mFrequenciesList);
+		MSpec myrouteSpec = new MSpec(null, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, null, mStopScheduleMap, mRouteFrequencies);
 		System.out.println(this.routeId + ": processing... DONE in " + Utils.getPrettyDuration(System.currentTimeMillis() - startAt) + ".");
 		return myrouteSpec;
 	}

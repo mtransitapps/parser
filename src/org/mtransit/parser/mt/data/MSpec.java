@@ -17,15 +17,17 @@ public class MSpec {
 	public List<MTripStop> tripStops;
 	public List<MServiceDate> serviceDates;
 	public Map<Integer, List<MSchedule>> stopSchedules;
+	public Map<Integer, List<MFrequency>> routeFrequencies;
 
 	public MSpec(List<MStop> stops, List<MRoute> routes, List<MTrip> trips, List<MTripStop> tripStops, List<MServiceDate> serviceDates,
-			Map<Integer, List<MSchedule>> routeSchedules, Map<Integer, List<MSchedule>> stopSchedules) {
+			Map<Integer, List<MSchedule>> routeSchedules, Map<Integer, List<MSchedule>> stopSchedules, Map<Integer, List<MFrequency>> routeFrequencies) {
 		this.stops = stops;
 		this.routes = routes;
 		this.trips = trips;
 		this.tripStops = tripStops;
 		this.serviceDates = serviceDates;
 		this.stopSchedules = stopSchedules;
+		this.routeFrequencies = routeFrequencies;
 	}
 
 	public static final Pattern CLEAN_SLASHES = Pattern.compile("(\\w)[\\s]*[/][\\s]*(\\w)");

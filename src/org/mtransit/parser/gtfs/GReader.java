@@ -20,6 +20,7 @@ import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
 import org.mtransit.parser.gtfs.data.GDropOffType;
+import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GService;
@@ -49,6 +50,7 @@ public class GReader {
 			Map<String, GStop> stops = null;
 			Map<String, GTrip> trips = null;
 			List<GStopTime> stopTimes = null;
+			List<GFrequency> frequencies = null;
 			List<HashMap<String, String>> fileLines = null;
 			for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
 				if (entry.isDirectory()) {
@@ -73,12 +75,15 @@ public class GReader {
 				} else if (filename.equals(GStopTime.FILENAME)) { // STOP TIME
 					fileLines = readCsv(filename, reader, null, null);
 					stopTimes = processStopTimes(fileLines, agencyTools);
+				} else if (filename.equals(GFrequency.FILENAME)) { // FREQUENCY
+					fileLines = readCsv(filename, reader, null, null);
+					frequencies = processFrequencies(fileLines, agencyTools);
 				} else {
 					System.out.println("File not used: " + filename);
 				}
 				fileLines = null;
 			}
-			gspec = new GSpec(/* agencies, */calendars, calendarDates, stops, routes, trips, stopTimes);
+			gspec = new GSpec(calendars, calendarDates, stops, routes, trips, stopTimes, frequencies);
 		} catch (IOException ioe) {
 			System.out.println("I/O Error while reading GTFS file!");
 			ioe.printStackTrace();
@@ -110,6 +115,7 @@ public class GReader {
 		System.out.printf("- Trips: %d\n", gspec.trips.size());
 		System.out.printf("- Stops: %d\n", gspec.stops.size());
 		System.out.printf("- StopTimes: %d\n", gspec.stopTimes.size());
+		System.out.printf("- Frequencies: %d\n", gspec.frequencies.size());
 		return gspec;
 	}
 
@@ -216,6 +222,23 @@ public class GReader {
 		}
 		System.out.println("Processing stop times... DONE (" + stopTimes.size() + " extracted)");
 		return stopTimes;
+	}
+
+	private static List<GFrequency> processFrequencies(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
+		System.out.println("Processing frequencies...");
+		List<GFrequency> frequencies = new ArrayList<GFrequency>();
+		for (HashMap<String, String> line : lines) {
+			try {
+				GFrequency gFrequency = new GFrequency(line.get(GFrequency.TRIP_ID), line.get(GFrequency.START_TIME), line.get(GFrequency.END_TIME),
+						line.get(GFrequency.HEADWAY_SECS));
+				frequencies.add(gFrequency);
+			} catch (Exception e) {
+				System.out.println("Error while parsing: " + line);
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Processing frequencies... DONE (" + frequencies.size() + " extracted)");
+		return frequencies;
 	}
 
 	private static List<GCalendarDate> processCalendarDates(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
@@ -342,7 +365,7 @@ public class GReader {
 			gRouteIdToMRouteId.put(gRoute.getValue().route_id, routeId);
 			if (!gRouteToSpec.containsKey(routeId)) {
 				gRouteToSpec.put(routeId, new GSpec(new ArrayList<GCalendar>(), new ArrayList<GCalendarDate>(), new HashMap<String, GStop>(),
-						new HashMap<String, GRoute>(), new HashMap<String, GTrip>(), new ArrayList<GStopTime>()));
+						new HashMap<String, GRoute>(), new HashMap<String, GTrip>(), new ArrayList<GStopTime>(), new ArrayList<GFrequency>()));
 				gRouteToSpec.get(routeId).tripStops = new HashMap<String, GTripStop>();
 			}
 			if (gRouteToSpec.get(routeId).routes.containsKey(gRoute.getKey())) {
@@ -419,6 +442,17 @@ public class GReader {
 				System.exit(-1);
 			}
 			gRouteToSpec.get(routeId).stopTimes.add(gStopTime);
+		}
+		for (GFrequency gFrequency : gtfs.frequencies) {
+			if (!gTripIdToMRouteId.containsKey(gFrequency.trip_id)) {
+				continue; // not processed now (...)
+			}
+			int routeId = gTripIdToMRouteId.get(gFrequency.trip_id);
+			if (!gRouteToSpec.containsKey(routeId)) {
+				System.out.println("Frequency's Route ID " + routeId + " not already present!");
+				System.exit(-1);
+			}
+			gRouteToSpec.get(routeId).frequencies.add(gFrequency);
 		}
 		return gRouteToSpec;
 	}

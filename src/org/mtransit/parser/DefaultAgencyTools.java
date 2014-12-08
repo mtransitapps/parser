@@ -6,6 +6,7 @@ import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
+import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
@@ -146,5 +147,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return Integer.valueOf(gStopTime.departure_time.replaceAll(":", "")); // GTFS standard
 	}
 
+	@Override
+	public int getStartTime(GFrequency gFrequency) {
+		return Integer.valueOf(gFrequency.start_time.replaceAll(":", "")); // GTFS standard
+	}
+
+	@Override
+	public int getEndTime(GFrequency gFrequency) {
+		return Integer.valueOf(gFrequency.end_time.replaceAll(":", "")); // GTFS standard
+	}
 
 }

@@ -2,6 +2,7 @@ package org.mtransit.parser.gtfs;
 
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
+import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
@@ -43,4 +44,7 @@ public interface GAgencyTools {
 	// SCHEDULE
 	int getDepartureTime(GStopTime gStopTime);
 
+	// FREQUENCY
+	int getStartTime(GFrequency gFrequency);
+	int getEndTime(GFrequency gFrequency);
 }

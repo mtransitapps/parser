@@ -12,31 +12,34 @@ public class GSpec {
 	public Map<String, GRoute> routes;
 	public Map<String, GTrip> trips;
 	public List<GStopTime> stopTimes;
+	public List<GFrequency> frequencies;
 
 	public Map<String, GTripStop> tripStops;
 	public Map<String, GService> services;
 
 	public GSpec(List<GCalendar> calendars, List<GCalendarDate> calendarDates, Map<String, GStop> stops, Map<String, GRoute> routes, Map<String, GTrip> trips,
-			List<GStopTime> stopTimes) {
+			List<GStopTime> stopTimes, List<GFrequency> frequencies) {
 		this.calendars = calendars;
 		this.calendarDates = calendarDates;
 		this.stops = stops;
 		this.routes = routes;
 		this.trips = trips;
 		this.stopTimes = stopTimes;
+		this.frequencies = frequencies;
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder() //
-				.append('\'').append(calendars == null ? null : calendars.size()).append('\'').append(',') //
-				.append('\'').append(calendarDates == null ? null : calendarDates.size()).append('\'').append(',') //
-				.append('\'').append(stops == null ? null : stops.size()).append('\'').append(',') //
-				.append('\'').append(routes == null ? null : routes.size()).append('\'').append(',') //
-				.append('\'').append(trips == null ? null : trips.size()).append('\'').append(',') //
-				.append('\'').append(stopTimes == null ? null : stopTimes.size()).append('\'').append(',') //
-				.append('\'').append(tripStops == null ? null : tripStops.size()).append('\'').append(',') //
-				.append('\'').append(services == null ? null : services.size()).append('\'').append(',') //
-				.toString();
+		return new StringBuilder(GSpec.class.getSimpleName()).append('[') //
+				.append("calendars:").append(calendars == null ? null : calendars.size()).append(',') //
+				.append("calendarDates:").append(calendarDates == null ? null : calendarDates.size()).append(',') //
+				.append("routes:").append(routes == null ? null : routes.size()).append(',') //
+				.append("trips:").append(trips == null ? null : trips.size()).append(',') //
+				.append("stops:").append(stops == null ? null : stops.size()).append(',') //
+				.append("stopTimes:").append(stopTimes == null ? null : stopTimes.size()).append(',') //
+				.append("frequencies:").append(frequencies == null ? null : frequencies.size()).append(',') //
+				.append("tripStops:").append(tripStops == null ? null : tripStops.size()).append(',') //
+				.append("services:").append(services == null ? null : services.size()).append(',') //
+				.append(']').toString();
 	}
 }

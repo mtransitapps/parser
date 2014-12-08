@@ -22,6 +22,7 @@ import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
+import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSchedule;
 import org.mtransit.parser.mt.data.MServiceDate;
@@ -38,10 +39,11 @@ public class MGenerator {
 		List<MTrip> mTrips = new ArrayList<MTrip>();
 		List<MTripStop> mTripStops = new ArrayList<MTripStop>();
 		TreeMap<Integer, List<MSchedule>> mStopSchedules = new TreeMap<Integer, List<MSchedule>>();
+		TreeMap<Integer, List<MFrequency>> mRouteFrequencies = new TreeMap<Integer, List<MFrequency>>();
 		List<MServiceDate> mServiceDates = new ArrayList<MServiceDate>();
 		ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(agencyTools.getThreadPoolSize());
 		List<Future<MSpec>> list = new ArrayList<Future<MSpec>>();
-		final List<Integer> routeIds = new ArrayList<Integer>(gtfsByMRouteId.keySet());
+		List<Integer> routeIds = new ArrayList<Integer>(gtfsByMRouteId.keySet());
 		Collections.sort(routeIds);
 		for (Integer routeId : routeIds) {
 			GSpec routeGTFS = gtfsByMRouteId.get(routeId);
@@ -49,7 +51,7 @@ public class MGenerator {
 				System.out.println("Skip route ID " + routeId + " because no route trip.");
 				continue;
 			}
-			final Future<MSpec> submit = threadPoolExecutor.submit(new GenerateMObjectsTask(agencyTools, routeId, routeGTFS, gStops));
+			Future<MSpec> submit = threadPoolExecutor.submit(new GenerateMObjectsTask(agencyTools, routeId, routeGTFS, gStops));
 			list.add(submit);
 		}
 		for (Future<MSpec> future : list) {
@@ -58,13 +60,19 @@ public class MGenerator {
 				mRoutes.addAll(mRouteSpec.routes);
 				mTrips.addAll(mRouteSpec.trips);
 				mTripStops.addAll(mRouteSpec.tripStops);
+				mServiceDates.addAll(mRouteSpec.serviceDates);
 				for (Entry<Integer, List<MSchedule>> stopScheduleEntry : mRouteSpec.stopSchedules.entrySet()) {
 					if (!mStopSchedules.containsKey(stopScheduleEntry.getKey())) {
 						mStopSchedules.put(stopScheduleEntry.getKey(), new ArrayList<MSchedule>());
 					}
 					mStopSchedules.get(stopScheduleEntry.getKey()).addAll(stopScheduleEntry.getValue());
 				}
-				mServiceDates.addAll(mRouteSpec.serviceDates);
+				for (Entry<Integer, List<MFrequency>> routeFrequenciesEntry : mRouteSpec.routeFrequencies.entrySet()) {
+					if (!mRouteFrequencies.containsKey(routeFrequenciesEntry.getKey())) {
+						mRouteFrequencies.put(routeFrequenciesEntry.getKey(), new ArrayList<MFrequency>());
+					}
+					mRouteFrequencies.get(routeFrequenciesEntry.getKey()).addAll(routeFrequenciesEntry.getValue());
+				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -112,7 +120,8 @@ public class MGenerator {
 		System.out.printf("- Stops: %d\n", mStopsList.size());
 		System.out.printf("- Service Dates: %d\n", mServiceDates.size());
 		System.out.printf("- Stop Schedules: %d\n", mStopSchedules.size());
-		return new MSpec(mStopsList, mRoutes, mTrips, mTripStops, mServiceDates, null, mStopSchedules);
+		System.out.printf("- Route Frequencies: %d\n", mRouteFrequencies.size());
+		return new MSpec(mStopsList, mRoutes, mTrips, mTripStops, mServiceDates, null, mStopSchedules, mRouteFrequencies);
 	}
 
 	public static void dumpFiles(MSpec mSpec, String dumpDir, final String fileBase) {
@@ -145,26 +154,22 @@ public class MGenerator {
 			}
 		}
 		// delete all "...schedules_stop_*"
-		final File[] files = dumpDirF.listFiles(new FilenameFilter() {
+		final File[] scheduleStopFiles = dumpDirF.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(final File dir, final String name) {
 				return name.startsWith(fileBase + "gtfs_schedule_stop_");
 			}
 		});
-		for (final File f : files) {
+		for (final File f : scheduleStopFiles) {
 			if (!f.delete()) {
 				System.err.println("Can't remove " + f.getAbsolutePath());
 			}
 		}
-		List<String> allServiceIds = new ArrayList<String>();
-		for (MServiceDate mServiceDate : mSpec.serviceDates) {
-			allServiceIds.add(mServiceDate.serviceId);
-		}
 		for (Integer stopId : mSpec.stopSchedules.keySet()) {
 			try {
-				final List<MSchedule> mStopSchedules = mSpec.stopSchedules.get(stopId);
+				List<MSchedule> mStopSchedules = mSpec.stopSchedules.get(stopId);
 				if (mStopSchedules != null && mStopSchedules.size() > 0) {
-					final String fileName = fileBase + "gtfs_schedule_stop_" + stopId;
+					String fileName = fileBase + "gtfs_schedule_stop_" + stopId;
 					file = new File(dumpDirF, fileName);
 					boolean empty = true;
 					ow = new BufferedWriter(new FileWriter(file));
@@ -179,6 +184,48 @@ public class MGenerator {
 				}
 			} catch (IOException ioe) {
 				System.out.println("I/O Error while writing schedule file!");
+				ioe.printStackTrace();
+				System.exit(-1);
+			} finally {
+				if (ow != null) {
+					try {
+						ow.close();
+					} catch (IOException e) {
+					}
+				}
+			}
+		}
+		// delete all "...frequencies_route_*"
+		File[] frequencyRoutefiles = dumpDirF.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.startsWith(fileBase + "gtfs_frequency_route_");
+			}
+		});
+		for (File f : frequencyRoutefiles) {
+			if (!f.delete()) {
+				System.err.println("Can't remove " + f.getAbsolutePath());
+			}
+		}
+		for (Integer routeId : mSpec.routeFrequencies.keySet()) {
+			try {
+				List<MFrequency> mRouteFrequencies = mSpec.routeFrequencies.get(routeId);
+				if (mRouteFrequencies != null && mRouteFrequencies.size() > 0) {
+					String fileName = fileBase + "gtfs_frequency_route_" + routeId;
+					file = new File(dumpDirF, fileName);
+					boolean empty = true;
+					ow = new BufferedWriter(new FileWriter(file));
+					for (MFrequency mFrequency : mRouteFrequencies) {
+						ow.write(mFrequency.toString());
+						ow.write('\n');
+						empty = false;
+					}
+					if (empty) {
+						file.delete();
+					}
+				}
+			} catch (IOException ioe) {
+				System.out.println("I/O Error while writing frequency file!");
 				ioe.printStackTrace();
 				System.exit(-1);
 			} finally {
