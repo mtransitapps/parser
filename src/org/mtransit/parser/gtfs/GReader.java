@@ -115,7 +115,7 @@ public class GReader {
 		System.out.printf("- Trips: %d\n", gspec.trips.size());
 		System.out.printf("- Stops: %d\n", gspec.stops.size());
 		System.out.printf("- StopTimes: %d\n", gspec.stopTimes.size());
-		System.out.printf("- Frequencies: %d\n", gspec.frequencies.size());
+		System.out.printf("- Frequencies: %d\n", gspec.frequencies == null ? 0 : gspec.frequencies.size());
 		return gspec;
 	}
 
@@ -443,16 +443,19 @@ public class GReader {
 			}
 			gRouteToSpec.get(routeId).stopTimes.add(gStopTime);
 		}
-		for (GFrequency gFrequency : gtfs.frequencies) {
-			if (!gTripIdToMRouteId.containsKey(gFrequency.trip_id)) {
-				continue; // not processed now (...)
+
+		if (gtfs.frequencies != null) {
+			for (GFrequency gFrequency : gtfs.frequencies) {
+				if (!gTripIdToMRouteId.containsKey(gFrequency.trip_id)) {
+					continue; // not processed now (...)
+				}
+				int routeId = gTripIdToMRouteId.get(gFrequency.trip_id);
+				if (!gRouteToSpec.containsKey(routeId)) {
+					System.out.println("Frequency's Route ID " + routeId + " not already present!");
+					System.exit(-1);
+				}
+				gRouteToSpec.get(routeId).frequencies.add(gFrequency);
 			}
-			int routeId = gTripIdToMRouteId.get(gFrequency.trip_id);
-			if (!gRouteToSpec.containsKey(routeId)) {
-				System.out.println("Frequency's Route ID " + routeId + " not already present!");
-				System.exit(-1);
-			}
-			gRouteToSpec.get(routeId).frequencies.add(gFrequency);
 		}
 		return gRouteToSpec;
 	}
