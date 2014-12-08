@@ -142,9 +142,50 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return THREAD_POOL_SIZE;
 	}
 
+	private static final int PRECISON_IN_SECONDS = 10;
+
 	@Override
 	public int getDepartureTime(GStopTime gStopTime) {
-		return Integer.valueOf(gStopTime.departure_time.replaceAll(":", "")); // GTFS standard
+		String departureTimeS = gStopTime.departure_time.replaceAll(":", "");
+		Integer departureTime = Integer.valueOf(departureTimeS);
+		int extraSeconds = departureTime == null ? 0 : departureTime.intValue() % PRECISON_IN_SECONDS;
+		if (extraSeconds > 0) { // IF too precise DO
+			departureTime = cleanDepartureTime(departureTimeS, departureTime.intValue(), extraSeconds);
+		}
+		return departureTime; // GTFS standard
+	}
+
+	private int cleanDepartureTime(String departureTimeS, int departureTime, int extraSeconds) {
+		while (departureTimeS.length() < 6) {
+			departureTimeS = "0" + departureTimeS;
+		}
+		String newHours = departureTimeS.substring(0, 2);
+		String newMinutes = departureTimeS.substring(2, 4);
+		String newSeconds = departureTimeS.substring(4, 6);
+		int seconds = Integer.parseInt(newSeconds);
+		if (extraSeconds < 5) {
+			// remove seconds
+			newSeconds = String.format("%02d", seconds - extraSeconds);
+			return Integer.valueOf(newHours + newMinutes + newSeconds);
+		}
+		// add seconds
+		int secondsToAdd = PRECISON_IN_SECONDS - extraSeconds;
+		if (seconds + secondsToAdd < 60) {
+			newSeconds = String.format("%02d", seconds + secondsToAdd);
+			return Integer.valueOf(newHours + newMinutes + newSeconds);
+		}
+		// add minute
+		newSeconds = "00";
+		int minutes = Integer.parseInt(newMinutes);
+		if (minutes + 1 < 60) {
+			newMinutes = String.format("%02d", minutes + 1);
+			return Integer.valueOf(newHours + newMinutes + newSeconds);
+		}
+		// add hour
+		newMinutes = "00";
+		int hours = Integer.parseInt(newHours);
+		newHours = String.valueOf(hours + 1);
+		return Integer.valueOf(newHours + newMinutes + newSeconds);
 	}
 
 	@Override

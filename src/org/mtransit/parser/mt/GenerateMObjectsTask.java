@@ -267,7 +267,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			mStopScheduleMap.get(schedule.stopId).add(schedule);
 		}
 		Map<Integer, List<MFrequency>> mRouteFrequencies = new HashMap<Integer, List<MFrequency>>();
-		mRouteFrequencies.put(this.routeId, mFrequenciesList);
+		if (mFrequenciesList != null && mFrequenciesList.size() > 0) {
+			mRouteFrequencies.put(this.routeId, mFrequenciesList);
+		}
 		MSpec myrouteSpec = new MSpec(null, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, null, mStopScheduleMap, mRouteFrequencies);
 		System.out.println(this.routeId + ": processing... DONE in " + Utils.getPrettyDuration(System.currentTimeMillis() - startAt) + ".");
 		return myrouteSpec;

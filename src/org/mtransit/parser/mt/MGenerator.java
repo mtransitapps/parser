@@ -68,6 +68,9 @@ public class MGenerator {
 					mStopSchedules.get(stopScheduleEntry.getKey()).addAll(stopScheduleEntry.getValue());
 				}
 				for (Entry<Integer, List<MFrequency>> routeFrequenciesEntry : mRouteSpec.routeFrequencies.entrySet()) {
+					if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().size() == 0) {
+						continue;
+					}
 					if (!mRouteFrequencies.containsKey(routeFrequenciesEntry.getKey())) {
 						mRouteFrequencies.put(routeFrequenciesEntry.getKey(), new ArrayList<MFrequency>());
 					}
@@ -95,7 +98,7 @@ public class MGenerator {
 			MStop mStop = new MStop(agencyTools.getStopId(gStop), agencyTools.getStopCode(gStop), agencyTools.cleanStopName(gStop.stop_name), gStop.stop_lat,
 					gStop.stop_lon);
 			if (mStopIds.contains(mStop.id)) {
-				System.out.println("Stop " + mStop.id + " already in list!");
+				System.out.println("Stop ID" + mStop.id + " already in list! (" + mStop.toString() + ")");
 				continue;
 			}
 			if (!tripStopStopIds.contains(mStop.id)) {
@@ -119,8 +122,8 @@ public class MGenerator {
 		System.out.printf("- Trip stops: %d\n", mTripStops.size());
 		System.out.printf("- Stops: %d\n", mStopsList.size());
 		System.out.printf("- Service Dates: %d\n", mServiceDates.size());
-		System.out.printf("- Stop Schedules: %d\n", mStopSchedules.size());
-		System.out.printf("- Route Frequencies: %d\n", mRouteFrequencies.size());
+		System.out.printf("- Stop with Schedules: %d\n", mStopSchedules.size());
+		System.out.printf("- Route with Frequencies: %d\n", mRouteFrequencies.size());
 		return new MSpec(mStopsList, mRoutes, mTrips, mTripStops, mServiceDates, null, mStopSchedules, mRouteFrequencies);
 	}
 
