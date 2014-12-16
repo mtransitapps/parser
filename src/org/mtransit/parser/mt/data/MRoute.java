@@ -4,14 +4,14 @@ import org.apache.commons.lang3.StringUtils;
 
 public class MRoute implements Comparable<MRoute> {
 
-	public int id;
+	public long id;
 	public String shortName;
 	public String longName;
 
 	public String color;
 	public String textColor;
 
-	public MRoute(int id, String shortName, String longName) {
+	public MRoute(long id, String shortName, String longName) {
 		this.id = id;
 		this.shortName = shortName;
 		this.longName = longName;
@@ -29,7 +29,7 @@ public class MRoute implements Comparable<MRoute> {
 
 	@Override
 	public int compareTo(MRoute otherRoute) {
-		return id - otherRoute.id;
+		return Long.compare(id, otherRoute.id);
 	}
 
 	@Override

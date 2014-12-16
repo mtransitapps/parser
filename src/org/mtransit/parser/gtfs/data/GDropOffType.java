@@ -28,7 +28,7 @@ public enum GDropOffType {
 	}
 
 	public static GDropOffType parse(String id) {
-		if (id == null) { // that's OK
+		if (id == null || id.length() == 0) { // that's OK
 			return REGULAR; // default
 		}
 		return parse(Integer.valueOf(id));

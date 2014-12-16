@@ -4,14 +4,14 @@ import java.util.List;
 
 public class MTripStop implements Comparable<MTripStop> {
 
-	private int tripId;
+	private long tripId;
 	private int stopId;
 	public int stopSequence;
 	private String uid;
 
 	private boolean decentOnly = false;
 
-	public MTripStop(int tripId, int stopId, int stopSequence) {
+	public MTripStop(long tripId, int stopId, int stopSequence) {
 		this.tripId = tripId;
 		this.stopId = stopId;
 		this.stopSequence = stopSequence;
@@ -26,7 +26,7 @@ public class MTripStop implements Comparable<MTripStop> {
 		return this.uid;
 	}
 
-	public int getTripId() {
+	public long getTripId() {
 		return tripId;
 	}
 
@@ -65,7 +65,7 @@ public class MTripStop implements Comparable<MTripStop> {
 	public int compareTo(MTripStop otherTripStop) {
 		// sort by trip_id => stop_sequence
 		if (tripId != otherTripStop.tripId) {
-			return tripId - otherTripStop.tripId;
+			return Long.compare(tripId, otherTripStop.tripId);
 		}
 		return stopSequence - otherTripStop.stopSequence;
 	}

@@ -15,7 +15,7 @@ public interface GAgencyTools {
 	int getThreadPoolSize();
 
 	// ROUTE
-	int getRouteId(GRoute gRoute);
+	long getRouteId(GRoute gRoute);
 	String getRouteShortName(GRoute gRoute);
 	String getRouteLongName(GRoute gRoute);
 	boolean mergeRouteLongName(MRoute mRoute, MRoute mRouteToMerge);
@@ -24,7 +24,7 @@ public interface GAgencyTools {
 	boolean excludeRoute(GRoute gRoute);
 
 	// TRIP
-	void setTripHeadsign(MTrip mTrip, GTrip gTrip);
+	void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip);
 	String cleanTripHeadsign(String tripHeadsign);
 	boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge);
 	boolean excludeTrip(GTrip gTrip);

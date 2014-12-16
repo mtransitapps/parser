@@ -3,12 +3,12 @@ package org.mtransit.parser.mt.data;
 public class MFrequency implements Comparable<MFrequency> {
 
 	public String serviceId;
-	public int tripId;
+	public long tripId;
 	public int startTime;
 	public int endTime;
 	public int headwayInSec;
 
-	public MFrequency(String serviceId, int routeId, int tripId, int startTime, int endTime, int headwayInSec) {
+	public MFrequency(String serviceId, long routeId, long tripId, int startTime, int endTime, int headwayInSec) {
 		this.serviceId = serviceId;
 		this.tripId = tripId;
 		this.startTime = startTime;
@@ -41,7 +41,7 @@ public class MFrequency implements Comparable<MFrequency> {
 			return serviceId.compareTo(otherFrequency.serviceId);
 		}
 		if (tripId != otherFrequency.tripId) {
-			return tripId - otherFrequency.tripId;
+			return Long.compare(tripId, otherFrequency.tripId);
 		}
 		if (startTime != otherFrequency.startTime) {
 			return startTime - otherFrequency.startTime;

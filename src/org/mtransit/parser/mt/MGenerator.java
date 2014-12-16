@@ -33,19 +33,19 @@ import org.mtransit.parser.mt.data.MTripStop;
 
 public class MGenerator {
 
-	public static MSpec generateMSpec(Map<Integer, GSpec> gtfsByMRouteId, Map<String, GStop> gStops, GAgencyTools agencyTools) {
+	public static MSpec generateMSpec(Map<Long, GSpec> gtfsByMRouteId, Map<String, GStop> gStops, GAgencyTools agencyTools) {
 		System.out.println("Generating routes, trips, trip stops & stops objects... ");
 		List<MRoute> mRoutes = new ArrayList<MRoute>();
 		List<MTrip> mTrips = new ArrayList<MTrip>();
 		List<MTripStop> mTripStops = new ArrayList<MTripStop>();
 		TreeMap<Integer, List<MSchedule>> mStopSchedules = new TreeMap<Integer, List<MSchedule>>();
-		TreeMap<Integer, List<MFrequency>> mRouteFrequencies = new TreeMap<Integer, List<MFrequency>>();
+		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<Long, List<MFrequency>>();
 		List<MServiceDate> mServiceDates = new ArrayList<MServiceDate>();
 		ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(agencyTools.getThreadPoolSize());
 		List<Future<MSpec>> list = new ArrayList<Future<MSpec>>();
-		List<Integer> routeIds = new ArrayList<Integer>(gtfsByMRouteId.keySet());
+		List<Long> routeIds = new ArrayList<Long>(gtfsByMRouteId.keySet());
 		Collections.sort(routeIds);
-		for (Integer routeId : routeIds) {
+		for (Long routeId : routeIds) {
 			GSpec routeGTFS = gtfsByMRouteId.get(routeId);
 			if (routeGTFS.trips == null || routeGTFS.trips.size() == 0) {
 				System.out.println("Skip route ID " + routeId + " because no route trip.");
@@ -67,7 +67,7 @@ public class MGenerator {
 					}
 					mStopSchedules.get(stopScheduleEntry.getKey()).addAll(stopScheduleEntry.getValue());
 				}
-				for (Entry<Integer, List<MFrequency>> routeFrequenciesEntry : mRouteSpec.routeFrequencies.entrySet()) {
+				for (Entry<Long, List<MFrequency>> routeFrequenciesEntry : mRouteSpec.routeFrequencies.entrySet()) {
 					if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().size() == 0) {
 						continue;
 					}
@@ -210,7 +210,7 @@ public class MGenerator {
 				System.err.println("Can't remove " + f.getAbsolutePath());
 			}
 		}
-		for (Integer routeId : mSpec.routeFrequencies.keySet()) {
+		for (Long routeId : mSpec.routeFrequencies.keySet()) {
 			try {
 				List<MFrequency> mRouteFrequencies = mSpec.routeFrequencies.get(routeId);
 				if (mRouteFrequencies != null && mRouteFrequencies.size() > 0) {

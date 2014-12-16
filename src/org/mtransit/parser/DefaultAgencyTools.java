@@ -31,7 +31,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		// GTFS parsing
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], this);
 		gtfs.tripStops = GReader.extractTripStops(gtfs);
-		Map<Integer, GSpec> gtfsByMRouteId = GReader.splitByRouteId(gtfs, this);
+		Map<Long, GSpec> gtfsByMRouteId = GReader.splitByRouteId(gtfs, this);
 		// Objects generation
 		MSpec mSpec = MGenerator.generateMSpec(gtfsByMRouteId, gtfs.stops, this);
 		// Dump to files
@@ -40,8 +40,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public int getRouteId(GRoute gRoute) {
-		return Integer.valueOf(gRoute.route_id);
+	public long getRouteId(GRoute gRoute) {
+		return Long.valueOf(gRoute.route_id);
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public void setTripHeadsign(MTrip mTrip, GTrip gTrip) {
+	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip) {
 		if (gTrip.direction_id == null | gTrip.direction_id.length() == 0) {
 			System.out.println("ERROR: default agency implementation required 'direction_id' field in 'trips.txt'!");
 			System.exit(-1);

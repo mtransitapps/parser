@@ -3,14 +3,14 @@ package org.mtransit.parser.mt.data;
 public class MSchedule implements Comparable<MSchedule> {
 
 	public String serviceId;
-	public int tripId;
+	public long tripId;
 	public int stopId;
 	public int departure;
 
 	private int headsignType = -1;
 	private String headsignValue = null;
 
-	public MSchedule(String serviceId, int routeId, int tripId, int stopId, int departure) {
+	public MSchedule(String serviceId, long routeId, long tripId, int stopId, int departure) {
 		this.stopId = stopId;
 		this.tripId = tripId;
 		this.serviceId = serviceId;
@@ -53,7 +53,7 @@ public class MSchedule implements Comparable<MSchedule> {
 		}
 		// no route ID, just for file split
 		if (tripId != otherSchedule.tripId) {
-			return tripId - otherSchedule.tripId;
+			return Long.compare(tripId, otherSchedule.tripId);
 		}
 		if (stopId != otherSchedule.stopId) {
 			return stopId - otherSchedule.stopId;

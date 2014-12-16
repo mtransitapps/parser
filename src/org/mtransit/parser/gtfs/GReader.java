@@ -15,6 +15,9 @@ import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
@@ -129,7 +132,11 @@ public class GReader {
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
-		lineColumns = line.split(",");
+		CSVRecord recordColumns = CSVParser.parse(line, CSVFormat.RFC4180).getRecords().get(0);
+		lineColumns = new String[recordColumns.size()];
+		for (int i = 0; i < recordColumns.size(); i++) {
+			lineColumns[i] = recordColumns.get(i);
+		}
 		String[] columnNames = lineColumns;// new String[lineColumns.length];
 		if (columnNames == null || columnNames.length == 0) {
 			return lines;
@@ -142,7 +149,15 @@ public class GReader {
 				continue;
 			}
 			HashMap<String, String> map = new HashMap<String, String>();
-			lineColumns = line.split(",");
+			recordColumns = CSVParser.parse(line, CSVFormat.RFC4180).getRecords().get(0);
+			lineColumns = new String[recordColumns.size()];
+			for (int i = 0; i < recordColumns.size(); i++) {
+				lineColumns[i] = recordColumns.get(i);
+			}
+			if (columnNames.length != lineColumns.length && columnNames.length != (lineColumns.length + 1)) {
+				System.out.println("File '" + filename + "' line invalid: " + lineColumns.length + " columns instead of " + columnNames.length + ": " + line);
+				continue;
+			}
 			for (int ci = 0; ci < lineColumns.length; ++ci) {
 				map.put(columnNames[ci], lineColumns[ci]);
 			}
@@ -355,13 +370,13 @@ public class GReader {
 		return routes;
 	}
 
-	public static Map<Integer, GSpec> splitByRouteId(GSpec gtfs, GAgencyTools agencyTools) {
-		Map<Integer, GSpec> gRouteToSpec = new HashMap<Integer, GSpec>();
-		Map<String, Integer> gRouteIdToMRouteId = new HashMap<String, Integer>();
-		Map<String, Integer> gTripIdToMRouteId = new HashMap<String, Integer>();
-		Map<String, Integer> gServiceIdToMRouteId = new HashMap<String, Integer>();
+	public static Map<Long, GSpec> splitByRouteId(GSpec gtfs, GAgencyTools agencyTools) {
+		Map<Long, GSpec> gRouteToSpec = new HashMap<Long, GSpec>();
+		Map<String, Long> gRouteIdToMRouteId = new HashMap<String, Long>();
+		Map<String, Long> gTripIdToMRouteId = new HashMap<String, Long>();
+		Map<String, Long> gServiceIdToMRouteId = new HashMap<String, Long>();
 		for (Entry<String, GRoute> gRoute : gtfs.routes.entrySet()) {
-			int routeId = agencyTools.getRouteId(gRoute.getValue());
+			long routeId = agencyTools.getRouteId(gRoute.getValue());
 			gRouteIdToMRouteId.put(gRoute.getValue().route_id, routeId);
 			if (!gRouteToSpec.containsKey(routeId)) {
 				gRouteToSpec.put(routeId, new GSpec(new ArrayList<GCalendar>(), new ArrayList<GCalendarDate>(), new HashMap<String, GStop>(),
@@ -378,7 +393,7 @@ public class GReader {
 			if (!gRouteIdToMRouteId.containsKey(gTrip.getValue().getRouteId())) {
 				continue; // not processed now (route not processed because filter or other type of route)
 			}
-			int routeId = gRouteIdToMRouteId.get(gTrip.getValue().getRouteId());
+			long routeId = gRouteIdToMRouteId.get(gTrip.getValue().getRouteId());
 			gTripIdToMRouteId.put(gTrip.getValue().getTripId(), routeId);
 			if (!gRouteToSpec.containsKey(routeId)) {
 				System.out.println("Trip's Route ID " + routeId + " not already present!");
@@ -395,7 +410,7 @@ public class GReader {
 			if (!gTripIdToMRouteId.containsKey(gTripStop.getValue().trip_id)) {
 				continue; // not processed now (subway line...)
 			}
-			int routeId = gTripIdToMRouteId.get(gTripStop.getValue().trip_id);
+			long routeId = gTripIdToMRouteId.get(gTripStop.getValue().trip_id);
 			if (!gRouteToSpec.containsKey(routeId)) {
 				System.out.println("Trip Stop's Route ID " + routeId + " not already present!");
 				System.exit(-1);
@@ -411,7 +426,7 @@ public class GReader {
 				if (!gServiceIdToMRouteId.containsKey(gCalendar.service_id)) {
 					continue; // not processed now (...)
 				}
-				int routeId = gServiceIdToMRouteId.get(gCalendar.service_id);
+				long routeId = gServiceIdToMRouteId.get(gCalendar.service_id);
 				if (!gRouteToSpec.containsKey(routeId)) {
 					System.out.println("Calendar's Route ID " + routeId + " not already present!");
 					System.exit(-1);
@@ -424,7 +439,7 @@ public class GReader {
 				if (!gServiceIdToMRouteId.containsKey(gCalendarDate.service_id)) {
 					continue; // not processed now (...)
 				}
-				int routeId = gServiceIdToMRouteId.get(gCalendarDate.service_id);
+				long routeId = gServiceIdToMRouteId.get(gCalendarDate.service_id);
 				if (!gRouteToSpec.containsKey(routeId)) {
 					System.out.println("Calendar Date's Route ID " + routeId + " not already present!");
 					System.exit(-1);
@@ -436,7 +451,7 @@ public class GReader {
 			if (!gTripIdToMRouteId.containsKey(gStopTime.trip_id)) {
 				continue; // not processed now (...)
 			}
-			int routeId = gTripIdToMRouteId.get(gStopTime.trip_id);
+			long routeId = gTripIdToMRouteId.get(gStopTime.trip_id);
 			if (!gRouteToSpec.containsKey(routeId)) {
 				System.out.println("Stop Time's Route ID " + routeId + " not already present!");
 				System.exit(-1);
@@ -449,7 +464,7 @@ public class GReader {
 				if (!gTripIdToMRouteId.containsKey(gFrequency.trip_id)) {
 					continue; // not processed now (...)
 				}
-				int routeId = gTripIdToMRouteId.get(gFrequency.trip_id);
+				long routeId = gTripIdToMRouteId.get(gFrequency.trip_id);
 				if (!gRouteToSpec.containsKey(routeId)) {
 					System.out.println("Frequency's Route ID " + routeId + " not already present!");
 					System.exit(-1);

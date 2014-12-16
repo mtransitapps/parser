@@ -10,18 +10,18 @@ public class MTrip implements Comparable<MTrip> {
 	private int headsignType = HEADSIGN_TYPE_STRING; // 0 = String, 1 = direction, 2= inbound, 3=stopId
 	private String headsignValue = "";
 	private int headsignId = 0;
-	private int routeId;
+	private long routeId;
 
-	private int id = -1;
+	private long id = -1;
 	private String idString = null;
 
-	public MTrip(int routeId) {
+	public MTrip(long routeId) {
 		this.routeId = routeId;
 	}
 
-	public int getId() {
+	public long getId() {
 		if (this.id < 0) {
-			this.id = Integer.valueOf(this.routeId + "0" + this.headsignId);
+			this.id = Long.valueOf(this.routeId + "0" + this.headsignId);
 		}
 		return this.id;
 	}
@@ -153,7 +153,7 @@ public class MTrip implements Comparable<MTrip> {
 	public int compareTo(MTrip otherTrip) {
 		// sort by trip route id => trip id
 		if (routeId != otherTrip.routeId) {
-			return routeId - otherTrip.routeId;
+			return Long.compare(routeId, otherTrip.routeId);
 		}
 		return this.getIdString().compareTo(otherTrip.getIdString());
 	}
