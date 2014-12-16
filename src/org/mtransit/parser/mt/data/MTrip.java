@@ -81,6 +81,10 @@ public class MTrip implements Comparable<MTrip> {
 		return headsignId;
 	}
 
+	public long getRouteId() {
+		return routeId;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) {
