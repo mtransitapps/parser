@@ -149,7 +149,11 @@ public class GReader {
 				continue;
 			}
 			HashMap<String, String> map = new HashMap<String, String>();
-			recordColumns = CSVParser.parse(line, CSVFormat.RFC4180).getRecords().get(0);
+			List<CSVRecord> records = CSVParser.parse(line, CSVFormat.RFC4180).getRecords();
+			if (records == null || records.size() == 0) {
+				continue; // empty line
+			}
+			recordColumns = records.get(0);
 			lineColumns = new String[recordColumns.size()];
 			for (int i = 0; i < recordColumns.size(); i++) {
 				lineColumns[i] = recordColumns.get(i);
