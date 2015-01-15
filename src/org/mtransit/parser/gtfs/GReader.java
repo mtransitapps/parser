@@ -113,7 +113,7 @@ public class GReader {
 		}
 		System.out.printf("Reading GTFS file '%1$s'... DONE in %2$s.\n", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
 		System.out.printf("- Calendars: %d\n", gspec.calendars == null ? 0 : gspec.calendars.size());
-		System.out.printf("- CalendarDates: %d\n", gspec.calendarDates.size());
+		System.out.printf("- CalendarDates: %d\n", gspec.calendarDates == null ? 0 : gspec.calendarDates.size());
 		System.out.printf("- Routes: %d\n", gspec.routes.size());
 		System.out.printf("- Trips: %d\n", gspec.trips.size());
 		System.out.printf("- Stops: %d\n", gspec.stops.size());
