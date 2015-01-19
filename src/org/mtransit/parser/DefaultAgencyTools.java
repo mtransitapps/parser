@@ -225,9 +225,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 				serviceIds.add(gCalendar.service_id);
 			}
 		}
-		for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
-			if (gCalendarDate.date >= startDate && gCalendarDate.date <= endDate) {
-				serviceIds.add(gCalendarDate.service_id);
+		if (gtfs.calendarDates != null) {
+			for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+				if (gCalendarDate.date >= startDate && gCalendarDate.date <= endDate) {
+					serviceIds.add(gCalendarDate.service_id);
+				}
 			}
 		}
 		System.out.println("Service IDs: " + serviceIds);
