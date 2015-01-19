@@ -98,7 +98,7 @@ public class MGenerator {
 			MStop mStop = new MStop(agencyTools.getStopId(gStop), agencyTools.getStopCode(gStop), agencyTools.cleanStopName(gStop.stop_name), gStop.stop_lat,
 					gStop.stop_lon);
 			if (mStopIds.contains(mStop.id)) {
-				System.out.println("Stop ID" + mStop.id + " already in list! (" + mStop.toString() + ")");
+				System.out.println("Stop ID '" + mStop.id + "' already in list! (" + mStop.toString() + ")");
 				continue;
 			}
 			if (!tripStopStopIds.contains(mStop.id)) {

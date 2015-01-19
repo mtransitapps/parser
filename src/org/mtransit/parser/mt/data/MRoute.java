@@ -20,7 +20,7 @@ public class MRoute implements Comparable<MRoute> {
 	@Override
 	public String toString() {
 		return new StringBuilder().append(id).append(',') // ID
-				.append('\'').append(shortName == null ? "" : shortName).append('\'').append(',') // short name
+				.append('\'').append(shortName == null ? "" : MSpec.escape(shortName)).append('\'').append(',') // short name
 				.append('\'').append(longName == null ? "" : MSpec.escape(longName)).append('\'').append(',') // long name
 				.append('\'').append(color == null ? "" : color).append('\'').append(',') // color
 				.append('\'').append(textColor == null ? "" : textColor).append('\'') // text color
