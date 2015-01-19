@@ -1,5 +1,8 @@
 package org.mtransit.parser;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.mtransit.parser.gtfs.GAgencyTools;
@@ -196,6 +199,62 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public int getEndTime(GFrequency gFrequency) {
 		return Integer.valueOf(gFrequency.end_time.replaceAll(":", "")); // GTFS standard
+	}
+
+	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
+		System.out.printf("Extracting useful service IDs...\n");
+		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools);
+		Integer startDate = null;
+		Integer endDate = null;
+		Integer todayStringInt = Integer.valueOf(new SimpleDateFormat("yyyyMMdd").format(new Date()));
+		for (GCalendar gCalendar : gtfs.calendars) {
+			if (gCalendar.start_date <= todayStringInt && gCalendar.end_date >= todayStringInt) {
+				if (startDate == null || gCalendar.start_date < startDate) {
+					startDate = gCalendar.start_date;
+				}
+				if (endDate == null || gCalendar.end_date > endDate) {
+					endDate = gCalendar.end_date;
+				}
+			}
+		}
+		System.out.println("Generated on " + todayStringInt + " | Schedules from " + startDate + " to " + endDate);
+		HashSet<String> serviceIds = new HashSet<String>();
+		for (GCalendar gCalendar : gtfs.calendars) {
+			if ((gCalendar.start_date >= startDate && gCalendar.start_date <= endDate) //
+					|| (gCalendar.end_date >= startDate && gCalendar.end_date <= endDate)) {
+				serviceIds.add(gCalendar.service_id);
+			}
+		}
+		for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+			if (gCalendarDate.date >= startDate && gCalendarDate.date <= endDate) {
+				serviceIds.add(gCalendarDate.service_id);
+			}
+		}
+		System.out.println("Service IDs: " + serviceIds);
+		gtfs = null;
+		System.out.printf("Extracting useful service IDs... DONE\n");
+		return serviceIds;
+	}
+
+	public static boolean excludeUselessCalendar(GCalendar gCalendar, HashSet<String> serviceIds) {
+		if (serviceIds == null) {
+			return false; // keep
+		}
+		return !serviceIds.contains(gCalendar.service_id);
+	}
+
+	public static boolean excludeUselessCalendarDate(GCalendarDate gCalendarDate, HashSet<String> serviceIds) {
+		if (serviceIds == null) {
+			return false; // keep
+		}
+		return !serviceIds.contains(gCalendarDate.service_id);
+	}
+
+	public static boolean excludeUselessTrip(GTrip gTrip, HashSet<String> serviceIds) {
+		if (serviceIds == null) {
+			return false; // keep
+		}
+		return !serviceIds.contains(gTrip.service_id);
 	}
 
 }
