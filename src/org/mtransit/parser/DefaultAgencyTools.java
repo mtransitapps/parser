@@ -207,22 +207,54 @@ public class DefaultAgencyTools implements GAgencyTools {
 		Integer startDate = null;
 		Integer endDate = null;
 		Integer todayStringInt = Integer.valueOf(new SimpleDateFormat("yyyyMMdd").format(new Date()));
-		for (GCalendar gCalendar : gtfs.calendars) {
-			if (gCalendar.start_date <= todayStringInt && gCalendar.end_date >= todayStringInt) {
-				if (startDate == null || gCalendar.start_date < startDate) {
-					startDate = gCalendar.start_date;
-				}
-				if (endDate == null || gCalendar.end_date > endDate) {
-					endDate = gCalendar.end_date;
+		if (gtfs.calendars != null) {
+			for (GCalendar gCalendar : gtfs.calendars) {
+				if (gCalendar.start_date <= todayStringInt && gCalendar.end_date >= todayStringInt) {
+					if (startDate == null || gCalendar.start_date < startDate) {
+						startDate = gCalendar.start_date;
+					}
+					if (endDate == null || gCalendar.end_date > endDate) {
+						endDate = gCalendar.end_date;
+					}
 				}
 			}
+		} else if (gtfs.calendarDates != null) {
+			String todayServiceId = null;
+			for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+				if (gCalendarDate.date == todayStringInt) {
+					todayServiceId = gCalendarDate.service_id;
+					break;
+				}
+			}
+			if (todayServiceId != null) {
+				for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+					if (gCalendarDate.service_id.equals(todayServiceId)) {
+						if (startDate == null || gCalendarDate.date < startDate) {
+							startDate = gCalendarDate.date;
+						}
+						if (endDate == null || gCalendarDate.date > endDate) {
+							endDate = gCalendarDate.date;
+						}
+					}
+				}
+			} else {
+				System.out.println("NO schedule available for " + todayStringInt + "!");
+				System.exit(-1);
+				return null;
+			}
+		} else {
+			System.out.println("NO schedule available for " + todayStringInt + "!");
+			System.exit(-1);
+			return null;
 		}
 		System.out.println("Generated on " + todayStringInt + " | Schedules from " + startDate + " to " + endDate);
 		HashSet<String> serviceIds = new HashSet<String>();
-		for (GCalendar gCalendar : gtfs.calendars) {
-			if ((gCalendar.start_date >= startDate && gCalendar.start_date <= endDate) //
-					|| (gCalendar.end_date >= startDate && gCalendar.end_date <= endDate)) {
-				serviceIds.add(gCalendar.service_id);
+		if (gtfs.calendars != null) {
+			for (GCalendar gCalendar : gtfs.calendars) {
+				if ((gCalendar.start_date >= startDate && gCalendar.start_date <= endDate) //
+						|| (gCalendar.end_date >= startDate && gCalendar.end_date <= endDate)) {
+					serviceIds.add(gCalendar.service_id);
+				}
 			}
 		}
 		if (gtfs.calendarDates != null) {
