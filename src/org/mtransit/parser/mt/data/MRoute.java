@@ -9,7 +9,6 @@ public class MRoute implements Comparable<MRoute> {
 	public String longName;
 
 	public String color;
-	public String textColor;
 
 	public MRoute(long id, String shortName, String longName) {
 		this.id = id;
@@ -23,7 +22,6 @@ public class MRoute implements Comparable<MRoute> {
 				.append('\'').append(shortName == null ? "" : MSpec.escape(shortName)).append('\'').append(',') // short name
 				.append('\'').append(longName == null ? "" : MSpec.escape(longName)).append('\'').append(',') // long name
 				.append('\'').append(color == null ? "" : color).append('\'').append(',') // color
-				.append('\'').append(textColor == null ? "" : textColor).append('\'') // text color
 				.toString();
 	}
 

@@ -67,10 +67,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return gRoute.route_color;
 	}
 
-	@Override
-	public String getRouteTextColor(GRoute gRoute) {
-		return gRoute.route_text_color;
-	}
 
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {

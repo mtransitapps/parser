@@ -57,7 +57,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		for (GRoute gRoute : gtfs.routes.values()) {
 			MRoute mRoute = new MRoute(agencyTools.getRouteId(gRoute), agencyTools.getRouteShortName(gRoute), agencyTools.getRouteLongName(gRoute));
 			mRoute.color = agencyTools.getRouteColor(gRoute);
-			mRoute.textColor = agencyTools.getRouteTextColor(gRoute);
 			if (mRoutes.containsKey(mRoute.id) && !mRoute.equals(mRoutes.get(mRoute.id))) {
 				boolean mergeSuccessful = false;
 				if (mRoute.equalsExceptLongName(mRoutes.get(mRoute.id))) {

@@ -20,7 +20,6 @@ public interface GAgencyTools {
 	String getRouteLongName(GRoute gRoute);
 	boolean mergeRouteLongName(MRoute mRoute, MRoute mRouteToMerge);
 	String getRouteColor(GRoute gRoute);
-	String getRouteTextColor(GRoute gRoute);
 	boolean excludeRoute(GRoute gRoute);
 
 	// TRIP
