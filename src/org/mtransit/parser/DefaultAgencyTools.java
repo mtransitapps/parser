@@ -43,6 +43,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public String getAgencyColor() {
+		return null;
+	}
+
+	@Override
 	public long getRouteId(GRoute gRoute) {
 		return Long.valueOf(gRoute.route_id);
 	}
@@ -64,9 +69,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public String getRouteColor(GRoute gRoute) {
+		if (getAgencyColor() != null && getAgencyColor().equals(gRoute.route_color)) {
+			return null;
+		}
 		return gRoute.route_color;
 	}
-
 
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {

@@ -14,6 +14,8 @@ public interface GAgencyTools {
 
 	int getThreadPoolSize();
 
+	String getAgencyColor();
+
 	// ROUTE
 	long getRouteId(GRoute gRoute);
 	String getRouteShortName(GRoute gRoute);
