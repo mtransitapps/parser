@@ -2,10 +2,10 @@ package org.mtransit.parser.mt.data;
 
 public class MSchedule implements Comparable<MSchedule> {
 
-	public String serviceId;
-	public long tripId;
-	public int stopId;
-	public int departure;
+	private String serviceId;
+	private long tripId;
+	private int stopId;
+	private int departure;
 
 	private int headsignType = -1;
 	private String headsignValue = null;
@@ -22,6 +22,27 @@ public class MSchedule implements Comparable<MSchedule> {
 		this.headsignValue = headsignValue;
 	}
 
+	public void clearHeadsign() {
+		this.headsignType = -1;
+		this.headsignValue = null;
+	}
+
+	public int getHeadsignType() {
+		return this.headsignType;
+	}
+
+	public String getHeadsignValue() {
+		return this.headsignValue;
+	}
+
+	public long getTripId() {
+		return this.tripId;
+	}
+
+	public int getStopId() {
+		return this.stopId;
+	}
+
 	public String getUID() {
 		// identifies a stop + trip + service (date) => departure
 		return this.serviceId + "-" + this.tripId + "-" + this.stopId + "-" + this.departure;
@@ -30,51 +51,51 @@ public class MSchedule implements Comparable<MSchedule> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(); //
-		sb.append('\'').append(MSpec.escape(serviceId)).append('\''); // service ID
+		sb.append('\'').append(MSpec.escape(this.serviceId)).append('\''); // service ID
 		sb.append(','); //
 		// no route ID, just for file split
-		sb.append(tripId); // trip ID
+		sb.append(this.tripId); // trip ID
 		sb.append(','); //
-		sb.append(stopId); // stop ID
+		sb.append(this.stopId); // stop ID
 		sb.append(','); //
-		sb.append(departure); // departure
+		sb.append(this.departure); // departure
 		sb.append(','); //
-		sb.append(headsignType < 0 ? "" : headsignType); // HEADSIGN TYPE
+		sb.append(this.headsignType < 0 ? "" : this.headsignType); // HEADSIGN TYPE
 		sb.append(','); //
-		sb.append('\'').append(headsignValue == null ? "" : headsignValue).append('\''); // HEADSIGN STRING
+		sb.append('\'').append(this.headsignValue == null ? "" : this.headsignValue).append('\''); // HEADSIGN STRING
 		return sb.toString();
 	}
 
 	@Override
 	public int compareTo(MSchedule otherSchedule) {
 		// sort by service_id => trip_id => stop_id => departure
-		if (!serviceId.equals(otherSchedule.serviceId)) {
-			return serviceId.compareTo(otherSchedule.serviceId);
+		if (!this.serviceId.equals(otherSchedule.serviceId)) {
+			return this.serviceId.compareTo(otherSchedule.serviceId);
 		}
 		// no route ID, just for file split
-		if (tripId != otherSchedule.tripId) {
-			return Long.compare(tripId, otherSchedule.tripId);
+		if (this.tripId != otherSchedule.tripId) {
+			return Long.compare(this.tripId, otherSchedule.tripId);
 		}
-		if (stopId != otherSchedule.stopId) {
-			return stopId - otherSchedule.stopId;
+		if (this.stopId != otherSchedule.stopId) {
+			return this.stopId - otherSchedule.stopId;
 		}
-		return departure - otherSchedule.departure;
+		return this.departure - otherSchedule.departure;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		MSchedule ts = (MSchedule) obj;
-		if (ts.serviceId != null && !ts.serviceId.equals(serviceId)) {
+		if (ts.serviceId != null && !ts.serviceId.equals(this.serviceId)) {
 			return false;
 		}
 		// no route ID, just for file split
-		if (ts.tripId != 0 && ts.tripId != tripId) {
+		if (ts.tripId != 0 && ts.tripId != this.tripId) {
 			return false;
 		}
-		if (ts.stopId != 0 && ts.stopId != stopId) {
+		if (ts.stopId != 0 && ts.stopId != this.stopId) {
 			return false;
 		}
-		if (ts.departure != 0 && ts.departure != departure) {
+		if (ts.departure != 0 && ts.departure != this.departure) {
 			return false;
 		}
 		return true;

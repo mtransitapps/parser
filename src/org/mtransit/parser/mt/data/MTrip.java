@@ -70,19 +70,19 @@ public class MTrip implements Comparable<MTrip> {
 	}
 
 	public int getHeadsignType() {
-		return headsignType;
+		return this.headsignType;
 	}
 
 	public String getHeadsignValue() {
-		return headsignValue;
+		return this.headsignValue;
 	}
 
 	public int getHeadsignId() {
-		return headsignId;
+		return this.headsignId;
 	}
 
 	public long getRouteId() {
-		return routeId;
+		return this.routeId;
 	}
 
 	@Override
@@ -91,13 +91,13 @@ public class MTrip implements Comparable<MTrip> {
 			return false;
 		}
 		MTrip t = (MTrip) obj;
-		if (t.headsignType != headsignType) {
+		if (t.headsignType != this.headsignType) {
 			return false;
 		}
-		if (t.headsignValue != null && !t.headsignValue.equals(headsignValue)) {
+		if (t.headsignValue != null && !t.headsignValue.equals(this.headsignValue)) {
 			return false;
 		}
-		if (t.routeId != 0 && t.routeId != routeId) {
+		if (t.routeId != 0 && t.routeId != this.routeId) {
 			return false;
 		}
 		return true;
@@ -108,10 +108,10 @@ public class MTrip implements Comparable<MTrip> {
 			return false;
 		}
 		MTrip t = (MTrip) obj;
-		if (t.headsignType != headsignType) {
+		if (t.headsignType != this.headsignType) {
 			return false;
 		}
-		if (t.routeId != 0 && t.routeId != routeId) {
+		if (t.routeId != 0 && t.routeId != this.routeId) {
 			return false;
 		}
 		return true;
@@ -147,17 +147,17 @@ public class MTrip implements Comparable<MTrip> {
 	public String toString() {
 		return new StringBuilder() //
 				.append(getId()).append(',') // ID
-				.append(headsignType).append(',') // HEADSIGN TYPE
-				.append('\'').append(MSpec.escape(headsignValue)).append('\'').append(',') // HEADSIGN STRING
-				.append(routeId) // ROUTE ID
+				.append(this.headsignType).append(',') // HEADSIGN TYPE
+				.append('\'').append(MSpec.escape(this.headsignValue)).append('\'').append(',') // HEADSIGN STRING
+				.append(this.routeId) // ROUTE ID
 				.toString();
 	}
 
 	@Override
 	public int compareTo(MTrip otherTrip) {
 		// sort by trip route id => trip id
-		if (routeId != otherTrip.routeId) {
-			return Long.compare(routeId, otherTrip.routeId);
+		if (this.routeId != otherTrip.routeId) {
+			return Long.compare(this.routeId, otherTrip.routeId);
 		}
 		return this.getIdString().compareTo(otherTrip.getIdString());
 	}

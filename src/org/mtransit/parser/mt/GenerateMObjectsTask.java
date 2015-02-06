@@ -248,6 +248,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mServiceDates.add(new MServiceDate(gCalendarDate.service_id, gCalendarDate.date));
 			}
 		}
+		// remove useless head-signs from schedules
+		for (MSchedule mSchedule : mSchedules.values()) {
+			MTrip mTrip = mTrips.get(mSchedule.getTripId());
+			if (mTrip.getHeadsignType() == mSchedule.getHeadsignType() && mTrip.getHeadsignValue().equals(mSchedule.getHeadsignValue())) {
+				mSchedule.clearHeadsign();
+			}
+		}
 		List<MRoute> mRoutesList = new ArrayList<MRoute>(mRoutes.values());
 		Collections.sort(mRoutesList);
 		List<MTrip> mTripsList = new ArrayList<MTrip>(mTrips.values());
@@ -263,10 +270,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Collections.sort(mFrequenciesList);
 		Map<Integer, List<MSchedule>> mStopScheduleMap = new HashMap<Integer, List<MSchedule>>();
 		for (MSchedule schedule : mSchedulesList) {
-			if (!mStopScheduleMap.containsKey(schedule.stopId)) {
-				mStopScheduleMap.put(schedule.stopId, new ArrayList<MSchedule>());
+			if (!mStopScheduleMap.containsKey(schedule.getStopId())) {
+				mStopScheduleMap.put(schedule.getStopId(), new ArrayList<MSchedule>());
 			}
-			mStopScheduleMap.get(schedule.stopId).add(schedule);
+			mStopScheduleMap.get(schedule.getStopId()).add(schedule);
 		}
 		Map<Long, List<MFrequency>> mRouteFrequencies = new HashMap<Long, List<MFrequency>>();
 		if (mFrequenciesList != null && mFrequenciesList.size() > 0) {
@@ -278,6 +285,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	}
 
 	private void setTripStopDecentOnly(List<MTripStop> mTripStopsList) {
+		if (mTripStopsList == null || mTripStopsList.size() == 0) {
+			return;
+		}
 		int i = mTripStopsList.size() - 1; // starting with last
 		MTripStop currentTripStop;
 		long currentTripId = -1;
