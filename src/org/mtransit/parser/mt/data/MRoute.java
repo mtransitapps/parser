@@ -18,16 +18,20 @@ public class MRoute implements Comparable<MRoute> {
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(id).append(',') // ID
-				.append('\'').append(shortName == null ? "" : MSpec.escape(shortName)).append('\'').append(',') // short name
-				.append('\'').append(longName == null ? "" : MSpec.escape(longName)).append('\'').append(',') // long name
-				.append('\'').append(color == null ? "" : color).append('\'').append(',') // color
+		return new StringBuilder() //
+				.append(this.id) // ID
+				.append(',') //
+				.append('\'').append(this.shortName == null ? "" : MSpec.escape(this.shortName)).append('\'') // short name
+				.append(',') //
+				.append('\'').append(this.longName == null ? "" : MSpec.escape(this.longName)).append('\'') // long name
+				.append(',') //
+				.append('\'').append(this.color == null ? "" : this.color).append('\'') // color
 				.toString();
 	}
 
 	@Override
 	public int compareTo(MRoute otherRoute) {
-		return Long.compare(id, otherRoute.id);
+		return Long.compare(this.id, otherRoute.id);
 	}
 
 	@Override
