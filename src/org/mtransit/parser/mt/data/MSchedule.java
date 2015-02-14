@@ -56,8 +56,6 @@ public class MSchedule implements Comparable<MSchedule> {
 		// no route ID, just for file split
 		sb.append(this.tripId); // trip ID
 		sb.append(','); //
-		sb.append(this.stopId); // stop ID
-		sb.append(','); //
 		sb.append(this.departure); // departure
 		sb.append(','); //
 		sb.append(this.headsignType < 0 ? "" : this.headsignType); // HEADSIGN TYPE
