@@ -149,10 +149,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	private static final int PRECISON_IN_SECONDS = 10;
+	private static final String TIME_SEPARATOR = ":";
 
 	@Override
 	public int getDepartureTime(GStopTime gStopTime) {
-		String departureTimeS = gStopTime.departure_time.replaceAll(":", "");
+		String departureTimeS = gStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY);
 		Integer departureTime = Integer.valueOf(departureTimeS);
 		int extraSeconds = departureTime == null ? 0 : departureTime.intValue() % PRECISON_IN_SECONDS;
 		if (extraSeconds > 0) { // IF too precise DO
@@ -161,9 +162,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return departureTime; // GTFS standard
 	}
 
+	private static final String CLEAN_DEPARTURE_TIME_FORMAT = "%02d";
+	private static final String CLEAN_DEPARTURE_TIME_LEADING_ZERO = "0";
+	private static final String CLEAN_DEPARTURE_TIME_DEFAULT_MINUTES = "00";
+	private static final String CLEAN_DEPARTURE_TIME_DEFAULT_SECONDS = "00";
+
 	private int cleanDepartureTime(String departureTimeS, int departureTime, int extraSeconds) {
 		while (departureTimeS.length() < 6) {
-			departureTimeS = "0" + departureTimeS;
+			departureTimeS = CLEAN_DEPARTURE_TIME_LEADING_ZERO + departureTimeS;
 		}
 		String newHours = departureTimeS.substring(0, 2);
 		String newMinutes = departureTimeS.substring(2, 4);
@@ -171,24 +177,24 @@ public class DefaultAgencyTools implements GAgencyTools {
 		int seconds = Integer.parseInt(newSeconds);
 		if (extraSeconds < 5) {
 			// remove seconds
-			newSeconds = String.format("%02d", seconds - extraSeconds);
+			newSeconds = String.format(CLEAN_DEPARTURE_TIME_FORMAT, seconds - extraSeconds);
 			return Integer.valueOf(newHours + newMinutes + newSeconds);
 		}
 		// add seconds
 		int secondsToAdd = PRECISON_IN_SECONDS - extraSeconds;
 		if (seconds + secondsToAdd < 60) {
-			newSeconds = String.format("%02d", seconds + secondsToAdd);
+			newSeconds = String.format(CLEAN_DEPARTURE_TIME_FORMAT, seconds + secondsToAdd);
 			return Integer.valueOf(newHours + newMinutes + newSeconds);
 		}
 		// add minute
-		newSeconds = "00";
+		newSeconds = CLEAN_DEPARTURE_TIME_DEFAULT_SECONDS;
 		int minutes = Integer.parseInt(newMinutes);
 		if (minutes + 1 < 60) {
-			newMinutes = String.format("%02d", minutes + 1);
+			newMinutes = String.format(CLEAN_DEPARTURE_TIME_FORMAT, minutes + 1);
 			return Integer.valueOf(newHours + newMinutes + newSeconds);
 		}
 		// add hour
-		newMinutes = "00";
+		newMinutes = CLEAN_DEPARTURE_TIME_DEFAULT_MINUTES;
 		int hours = Integer.parseInt(newHours);
 		newHours = String.valueOf(hours + 1);
 		return Integer.valueOf(newHours + newMinutes + newSeconds);
@@ -196,12 +202,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public int getStartTime(GFrequency gFrequency) {
-		return Integer.valueOf(gFrequency.start_time.replaceAll(":", "")); // GTFS standard
+		return Integer.valueOf(gFrequency.start_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY)); // GTFS standard
 	}
 
 	@Override
 	public int getEndTime(GFrequency gFrequency) {
-		return Integer.valueOf(gFrequency.end_time.replaceAll(":", "")); // GTFS standard
+		return Integer.valueOf(gFrequency.end_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY)); // GTFS standard
 	}
 
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {

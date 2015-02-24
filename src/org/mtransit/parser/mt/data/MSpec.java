@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.commons.lang3.text.translate.CharSequenceTranslator;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
+import org.mtransit.parser.Constants;
 import org.mtransit.parser.Utils;
 
 public class MSpec {
@@ -41,7 +42,7 @@ public class MSpec {
 	private static final Pattern CLEAN_PARENTHESE2 = Pattern.compile("(\\w)[\\s]*[" + PARENTHESE2 + "]");
 	private static final String CLEAN_PARENTHESE2_REPLACEMENT = "$1" + PARENTHESE2;
 
-	private static final CharSequenceTranslator ESCAPE = new LookupTranslator(new String[][] { { "\'", "\'\'" }, { "_", "" } });
+	private static final CharSequenceTranslator ESCAPE = new LookupTranslator(new String[][] { { "\'", "\'\'" }, { "_", Constants.EMPTY } });
 
 	public static String escape(String string) {
 		return ESCAPE.translate(string);
@@ -49,7 +50,7 @@ public class MSpec {
 
 	public static String cleanLabel(String label) {
 		label = label.replaceAll("\\s+", " ");
-		label = WordUtils.capitalize(label, ' ', '-', '–', '/', '\'', '(', '.');
+		label = WordUtils.capitalize(label, Constants.SPACE, '-', '–', '/', Constants.STRING_DELIMITER, '(', '.');
 		return label.trim();
 	}
 

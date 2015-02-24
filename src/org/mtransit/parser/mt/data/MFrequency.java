@@ -1,5 +1,7 @@
 package org.mtransit.parser.mt.data;
 
+import org.mtransit.parser.Constants;
+
 public class MFrequency implements Comparable<MFrequency> {
 
 	public String serviceId;
@@ -19,20 +21,20 @@ public class MFrequency implements Comparable<MFrequency> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(); //
-		sb.append('\'').append(MSpec.escape(serviceId)).append('\''); // service ID
-		sb.append(','); //
+		sb.append(Constants.STRING_DELIMITER).append(MSpec.escape(serviceId)).append(Constants.STRING_DELIMITER); // service ID
+		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(tripId); // trip ID
-		sb.append(','); //
+		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(startTime); // start time
-		sb.append(','); //
+		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(endTime); // end time
-		sb.append(','); //
+		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(headwayInSec); // headway in seconds
 		return sb.toString();
 	}
 
 	public String getUID() {
-		return this.serviceId + "-" + this.tripId + "-" + this.startTime + "-" + this.endTime;
+		return this.serviceId + Constants.UUID_SEPARATOR + this.tripId + Constants.UUID_SEPARATOR + this.startTime + Constants.UUID_SEPARATOR + this.endTime;
 	}
 
 	@Override

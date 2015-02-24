@@ -3,6 +3,8 @@ package org.mtransit.parser.gtfs.data;
 import java.util.List;
 import java.util.Map;
 
+import org.mtransit.parser.Constants;
+
 // https://developers.google.com/transit/gtfs/reference#FeedFiles
 public class GSpec {
 
@@ -31,15 +33,15 @@ public class GSpec {
 	@Override
 	public String toString() {
 		return new StringBuilder(GSpec.class.getSimpleName()).append('[') //
-				.append("calendars:").append(calendars == null ? null : calendars.size()).append(',') //
-				.append("calendarDates:").append(calendarDates == null ? null : calendarDates.size()).append(',') //
-				.append("routes:").append(routes == null ? null : routes.size()).append(',') //
-				.append("trips:").append(trips == null ? null : trips.size()).append(',') //
-				.append("stops:").append(stops == null ? null : stops.size()).append(',') //
-				.append("stopTimes:").append(stopTimes == null ? null : stopTimes.size()).append(',') //
-				.append("frequencies:").append(frequencies == null ? null : frequencies.size()).append(',') //
-				.append("tripStops:").append(tripStops == null ? null : tripStops.size()).append(',') //
-				.append("services:").append(services == null ? null : services.size()).append(',') //
+				.append("calendars:").append(calendars == null ? null : calendars.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append("calendarDates:").append(calendarDates == null ? null : calendarDates.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append("routes:").append(routes == null ? null : routes.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append("trips:").append(trips == null ? null : trips.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append("stops:").append(stops == null ? null : stops.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append("stopTimes:").append(stopTimes == null ? null : stopTimes.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append("frequencies:").append(frequencies == null ? null : frequencies.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append("tripStops:").append(tripStops == null ? null : tripStops.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append("services:").append(services == null ? null : services.size()).append(Constants.COLUMN_SEPARATOR) //
 				.append(']').toString();
 	}
 }

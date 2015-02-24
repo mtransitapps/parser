@@ -2,6 +2,8 @@ package org.mtransit.parser.mt.data;
 
 import java.util.List;
 
+import org.mtransit.parser.Constants;
+
 public class MTripStop implements Comparable<MTripStop> {
 
 	private long tripId;
@@ -15,7 +17,7 @@ public class MTripStop implements Comparable<MTripStop> {
 		this.tripId = tripId;
 		this.stopId = stopId;
 		this.stopSequence = stopSequence;
-		this.uid = this.tripId + "" + this.stopId;
+		this.uid = this.tripId + Constants.EMPTY + this.stopId;
 	}
 
 	public void setDecentOnly(boolean decentOnly) {
@@ -53,11 +55,11 @@ public class MTripStop implements Comparable<MTripStop> {
 	public String toString() {
 		StringBuilder sb = new StringBuilder() //
 				.append(tripId) // TRIP ID
-				.append(',') //
+				.append(Constants.COLUMN_SEPARATOR) //
 				.append(stopId) // STOP ID
-				.append(',') //
+				.append(Constants.COLUMN_SEPARATOR) //
 				.append(stopSequence); // STOP SEQUENCE
-		sb.append(',').append(decentOnly ? 1 : 0); // DECENT ONLY
+		sb.append(Constants.COLUMN_SEPARATOR).append(decentOnly ? 1 : 0); // DECENT ONLY
 		return sb.toString();
 	}
 
@@ -74,7 +76,7 @@ public class MTripStop implements Comparable<MTripStop> {
 		StringBuilder sb = new StringBuilder();
 		for (MTripStop mTripStop : l) {
 			if (sb.length() > 0) {
-				sb.append(',');
+				sb.append(Constants.COLUMN_SEPARATOR);
 			}
 			sb.append(mTripStop.stopId);
 		}

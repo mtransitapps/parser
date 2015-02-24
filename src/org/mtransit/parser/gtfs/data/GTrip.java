@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs.data;
 
+import org.mtransit.parser.Constants;
+
 // https://developers.google.com/transit/gtfs/reference#trips_fields
 public class GTrip {
 
@@ -47,14 +49,14 @@ public class GTrip {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append('\'').append(route_id).append('\'').append(',') //
-				.append('\'').append(service_id).append('\'').append(',') //
-				.append('\'').append(trip_id).append('\'').append(',') //
-				.append('\'').append(trip_headsign).append('\'').append(',') //
-				.append('\'').append(trip_short_name).append('\'').append(',') //
-				.append('\'').append(direction_id).append('\'').append(',') //
-				.append('\'').append(block_id).append('\'').append(',') //
-				.append('\'').append(shape_id).append('\'') //
+				.append(Constants.STRING_DELIMITER).append(route_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(trip_headsign).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(trip_short_name).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(direction_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(block_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(shape_id).append(Constants.STRING_DELIMITER) //
 				.toString();
 	}
 }

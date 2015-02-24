@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import org.mtransit.parser.Constants;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GCalendar;
@@ -146,10 +147,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 							mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_STRING, stopHeadsign);
 							if (tripStopTimesHeasign == null) {
 								tripStopTimesHeasign = stopHeadsign;
-							} else if (tripStopTimesHeasign == "") { // disabled
+							} else if (Constants.EMPTY.equals(tripStopTimesHeasign)) { // disabled
 							} else if (!tripStopTimesHeasign.equals(stopHeadsign)) {
 								System.out.println(this.routeId + ": '" + tripStopTimesHeasign + "' != '" + stopHeadsign + "' > not used as trip heasign");
-								tripStopTimesHeasign = ""; // disable
+								tripStopTimesHeasign = Constants.EMPTY; // disable
 							}
 						} else {
 							mSchedule.setHeadsign(originalTripHeadsignType, originalTripHeadsignValue);

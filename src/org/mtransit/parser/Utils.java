@@ -13,6 +13,10 @@ public final class Utils {
 	private static final long MINUTES_PER_HOUR = 60;
 	private static final long MILLIS_PER_MINUTE = SECONDS_PER_MINUTE * MILLIS_PER_SECOND;
 	private static final long MILLIS_PER_HOUR = MINUTES_PER_HOUR * MILLIS_PER_MINUTE;
+	private static final String H = "h";
+	private static final String M = "m";
+	private static final String S = "s";
+	private static final String MS = "ms";
 
 	public static String getPrettyDuration(long durationInMs) {
 		StringBuilder sb = new StringBuilder();
@@ -27,28 +31,28 @@ public final class Utils {
 		if (printing || h > 0) {
 			printing = true;
 			if (sb.length() > 0) {
-				sb.append(' ');
+				sb.append(Constants.SPACE);
 			}
-			sb.append(h).append("h");
+			sb.append(h).append(H);
 		}
 		if (printing || m > 0) {
 			printing = true;
 			if (sb.length() > 0) {
-				sb.append(' ');
+				sb.append(Constants.SPACE);
 			}
-			sb.append(m).append("m");
+			sb.append(m).append(M);
 		}
 		if (printing || s > 0) {
 			printing = true;
 			if (sb.length() > 0) {
-				sb.append(' ');
+				sb.append(Constants.SPACE);
 			}
-			sb.append(s).append("s");
+			sb.append(s).append(S);
 		}
 		if (sb.length() > 0) {
-			sb.append(' ');
+			sb.append(Constants.SPACE);
 		}
-		sb.append(ms).append("ms");
+		sb.append(ms).append(MS);
 		return sb.toString();
 	}
 

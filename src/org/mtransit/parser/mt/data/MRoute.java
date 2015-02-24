@@ -1,6 +1,7 @@
 package org.mtransit.parser.mt.data;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mtransit.parser.Constants;
 
 public class MRoute implements Comparable<MRoute> {
 
@@ -20,12 +21,16 @@ public class MRoute implements Comparable<MRoute> {
 	public String toString() {
 		return new StringBuilder() //
 				.append(this.id) // ID
-				.append(',') //
-				.append('\'').append(this.shortName == null ? "" : MSpec.escape(this.shortName)).append('\'') // short name
-				.append(',') //
-				.append('\'').append(this.longName == null ? "" : MSpec.escape(this.longName)).append('\'') // long name
-				.append(',') //
-				.append('\'').append(this.color == null ? "" : this.color).append('\'') // color
+				.append(Constants.COLUMN_SEPARATOR)
+				.append(Constants.STRING_DELIMITER) //
+				.append(this.shortName == null ? Constants.EMPTY : MSpec.escape(this.shortName)) // short name
+				.append(Constants.STRING_DELIMITER)
+				.append(Constants.COLUMN_SEPARATOR)
+				.append(Constants.STRING_DELIMITER) //
+				.append(this.longName == null ? Constants.EMPTY : MSpec.escape(this.longName)) // long name
+				.append(Constants.STRING_DELIMITER) //
+				.append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.color == null ? Constants.EMPTY : this.color).append(Constants.STRING_DELIMITER) // color
 				.toString();
 	}
 

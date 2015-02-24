@@ -1,5 +1,7 @@
 package org.mtransit.parser.mt.data;
 
+import org.mtransit.parser.Constants;
+
 public class MSchedule implements Comparable<MSchedule> {
 
 	private String serviceId;
@@ -45,23 +47,48 @@ public class MSchedule implements Comparable<MSchedule> {
 
 	public String getUID() {
 		// identifies a stop + trip + service (date) => departure
-		return this.serviceId + "-" + this.tripId + "-" + this.stopId + "-" + this.departure;
+		return this.serviceId + Constants.UUID_SEPARATOR + this.tripId + Constants.UUID_SEPARATOR + this.stopId + Constants.UUID_SEPARATOR + this.departure;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(); //
-		sb.append('\'').append(MSpec.escape(this.serviceId)).append('\''); // service ID
-		sb.append(','); //
+		sb.append(Constants.STRING_DELIMITER).append(MSpec.escape(this.serviceId)).append(Constants.STRING_DELIMITER); // service ID
+		sb.append(Constants.COLUMN_SEPARATOR); //
 		// no route ID, just for file split
 		sb.append(this.tripId); // trip ID
-		sb.append(','); //
+		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(this.departure); // departure
-		sb.append(','); //
-		sb.append(this.headsignType < 0 ? "" : this.headsignType); // HEADSIGN TYPE
-		sb.append(','); //
-		sb.append('\'').append(this.headsignValue == null ? "" : this.headsignValue).append('\''); // HEADSIGN STRING
+		sb.append(Constants.COLUMN_SEPARATOR); //
+		sb.append(this.headsignType < 0 ? Constants.EMPTY : this.headsignType); // HEADSIGN TYPE
+		sb.append(Constants.COLUMN_SEPARATOR); //
+		sb.append(Constants.STRING_DELIMITER)//
+				.append(this.headsignValue == null ? Constants.EMPTY : this.headsignValue) //
+				.append(Constants.STRING_DELIMITER); // HEADSIGN STRING
 		return sb.toString();
+	}
+
+	public String toStringSameServiceIdAndTripId(MSchedule lastSchedule) {
+		StringBuilder sb = new StringBuilder(); //
+		if (lastSchedule == null) {
+			sb.append(this.departure); // departure
+		} else {
+			sb.append(this.departure - lastSchedule.departure); // departure
+		}
+		sb.append(Constants.COLUMN_SEPARATOR); //
+		sb.append(this.headsignType < 0 ? Constants.EMPTY : this.headsignType); // HEADSIGN TYPE
+		sb.append(Constants.COLUMN_SEPARATOR); //
+		sb.append(Constants.STRING_DELIMITER) //
+				.append(this.headsignValue == null ? Constants.EMPTY : this.headsignValue) //
+				.append(Constants.STRING_DELIMITER); // HEADSIGN STRING
+		return sb.toString();
+	}
+
+	public boolean sameServiceIdAndTripId(MSchedule lastSchedule) {
+		if (lastSchedule == null) {
+			return false;
+		}
+		return lastSchedule.serviceId.equals(this.serviceId) && lastSchedule.tripId == this.tripId;
 	}
 
 	@Override

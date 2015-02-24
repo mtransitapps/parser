@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs.data;
 
+import org.mtransit.parser.Constants;
+
 // https://developers.google.com/transit/gtfs/reference#calendar_dates_fields
 public class GCalendarDate {
 
@@ -23,9 +25,9 @@ public class GCalendarDate {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append('\'').append(service_id).append('\'').append(',') //
-				.append('\'').append(date).append('\'').append(',') //
-				.append('\'').append(exception_type).append('\'').append(',') //
+				.append(Constants.STRING_DELIMITER).append(service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(exception_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.toString();
 	}
 

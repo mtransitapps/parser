@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs.data;
 
+import org.mtransit.parser.Constants;
+
 // https://developers.google.com/transit/gtfs/reference#stop_times_trip_id_field
 // https://developers.google.com/transit/gtfs/reference#stop_times_stop_id_field
 public class GTripStop {
@@ -20,9 +22,9 @@ public class GTripStop {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append('\'').append(trip_id).append('\'').append(',') //
-				.append('\'').append(stop_id).append('\'').append(',') //
-				.append('\'').append(stop_sequence).append('\'').append(',') //
+				.append(Constants.STRING_DELIMITER).append(trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_sequence).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.toString();
 	}
 

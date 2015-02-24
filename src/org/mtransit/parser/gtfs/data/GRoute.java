@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs.data;
 
+import org.mtransit.parser.Constants;
+
 // https://developers.google.com/transit/gtfs/reference#routes_fields
 public class GRoute {
 
@@ -35,15 +37,15 @@ public class GRoute {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append('\'').append(route_id).append('\'').append(',') //
-				.append('\'').append(route_short_name).append('\'').append(',') //
-				.append('\'').append(route_long_name).append('\'').append(',') //
-				.append('\'').append(route_type).append('\'').append(',') //
-				.append('\'').append(agency_id).append('\'').append(',') //
-				.append('\'').append(route_desc).append('\'').append(',') //
-				.append('\'').append(route_url).append('\'').append(',') //
-				.append('\'').append(route_color).append('\'').append(',') //
-				.append('\'').append(route_text_color).append('\'') //
+				.append(Constants.STRING_DELIMITER).append(route_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(route_short_name).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(route_long_name).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(route_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(agency_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(route_desc).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(route_url).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(route_color).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(route_text_color).append(Constants.STRING_DELIMITER) //
 				.toString();
 	}
 

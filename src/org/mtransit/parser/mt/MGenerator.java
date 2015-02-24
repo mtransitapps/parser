@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.mtransit.parser.Constants;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GSpec;
@@ -45,18 +46,19 @@ public class MGenerator {
 		List<Future<MSpec>> list = new ArrayList<Future<MSpec>>();
 		List<Long> routeIds = new ArrayList<Long>(gtfsByMRouteId.keySet());
 		Collections.sort(routeIds);
+		GSpec routeGTFS;
 		for (Long routeId : routeIds) {
-			GSpec routeGTFS = gtfsByMRouteId.get(routeId);
+			routeGTFS = gtfsByMRouteId.get(routeId);
 			if (routeGTFS.trips == null || routeGTFS.trips.size() == 0) {
 				System.out.println("Skip route ID " + routeId + " because no route trip.");
 				continue;
 			}
-			Future<MSpec> submit = threadPoolExecutor.submit(new GenerateMObjectsTask(agencyTools, routeId, routeGTFS, gStops));
-			list.add(submit);
+			list.add(threadPoolExecutor.submit(new GenerateMObjectsTask(agencyTools, routeId, routeGTFS, gStops)));
 		}
+		MSpec mRouteSpec;
 		for (Future<MSpec> future : list) {
 			try {
-				MSpec mRouteSpec = future.get();
+				mRouteSpec = future.get();
 				mRoutes.addAll(mRouteSpec.routes);
 				mTrips.addAll(mRouteSpec.trips);
 				mTripStops.addAll(mRouteSpec.tripStops);
@@ -94,8 +96,9 @@ public class MGenerator {
 		List<MStop> mStopsList = new ArrayList<MStop>();
 		Set<Integer> mStopIds = new HashSet<Integer>();
 		int skippedStopsCount = 0;
+		MStop mStop;
 		for (GStop gStop : gStops.values()) {
-			MStop mStop = new MStop(agencyTools.getStopId(gStop), agencyTools.getStopCode(gStop), agencyTools.cleanStopName(gStop.stop_name), gStop.stop_lat,
+			mStop = new MStop(agencyTools.getStopId(gStop), agencyTools.getStopCode(gStop), agencyTools.cleanStopName(gStop.stop_name), gStop.stop_lat,
 					gStop.stop_lon);
 			if (mStopIds.contains(mStop.id)) {
 				System.out.println("Stop ID '" + mStop.id + "' already in list! (" + mStop.toString() + ")");
@@ -142,7 +145,7 @@ public class MGenerator {
 			ow = new BufferedWriter(new FileWriter(file));
 			for (MServiceDate mServiceDate : mSpec.serviceDates) {
 				ow.write(mServiceDate.toString());
-				ow.write('\n');
+				ow.write(Constants.NEW_LINE);
 			}
 		} catch (IOException ioe) {
 			System.out.println("I/O Error while writing service dates file!");
@@ -157,10 +160,11 @@ public class MGenerator {
 			}
 		}
 		// delete all "...schedules_stop_*"
+		final String fileBaseScheduleStop = fileBase + "gtfs_schedule_stop_";
 		final File[] scheduleStopFiles = dumpDirF.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(final File dir, final String name) {
-				return name.startsWith(fileBase + "gtfs_schedule_stop_");
+				return name.startsWith(fileBaseScheduleStop);
 			}
 		});
 		for (final File f : scheduleStopFiles) {
@@ -168,18 +172,30 @@ public class MGenerator {
 				System.err.println("Can't remove " + f.getAbsolutePath());
 			}
 		}
+		String fileName;
+		boolean empty;
+		List<MSchedule> mStopSchedules;
 		for (Integer stopId : mSpec.stopSchedules.keySet()) {
 			try {
-				List<MSchedule> mStopSchedules = mSpec.stopSchedules.get(stopId);
+				mStopSchedules = mSpec.stopSchedules.get(stopId);
 				if (mStopSchedules != null && mStopSchedules.size() > 0) {
-					String fileName = fileBase + "gtfs_schedule_stop_" + stopId;
+					fileName = fileBaseScheduleStop + stopId;
 					file = new File(dumpDirF, fileName);
-					boolean empty = true;
+					empty = true;
 					ow = new BufferedWriter(new FileWriter(file));
+					MSchedule lastSchedule = null;
 					for (MSchedule mSchedule : mStopSchedules) {
-						ow.write(mSchedule.toString());
-						ow.write('\n');
+						if (mSchedule.sameServiceIdAndTripId(lastSchedule)) {
+							ow.write(Constants.COLUMN_SEPARATOR);
+							ow.write(mSchedule.toStringSameServiceIdAndTripId(lastSchedule));
+						} else {
+							if (!empty) {
+								ow.write(Constants.NEW_LINE);
+							}
+							ow.write(mSchedule.toString());
+						}
 						empty = false;
+						lastSchedule = mSchedule;
 					}
 					if (empty) {
 						file.delete();
@@ -199,10 +215,11 @@ public class MGenerator {
 			}
 		}
 		// delete all "...frequencies_route_*"
+		final String fileBaseRouteFrequency = fileBase + "gtfs_frequency_route_";
 		File[] frequencyRoutefiles = dumpDirF.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
-				return name.startsWith(fileBase + "gtfs_frequency_route_");
+				return name.startsWith(fileBaseRouteFrequency);
 			}
 		});
 		for (File f : frequencyRoutefiles) {
@@ -210,17 +227,18 @@ public class MGenerator {
 				System.err.println("Can't remove " + f.getAbsolutePath());
 			}
 		}
+		List<MFrequency> mRouteFrequencies;
 		for (Long routeId : mSpec.routeFrequencies.keySet()) {
 			try {
-				List<MFrequency> mRouteFrequencies = mSpec.routeFrequencies.get(routeId);
+				mRouteFrequencies = mSpec.routeFrequencies.get(routeId);
 				if (mRouteFrequencies != null && mRouteFrequencies.size() > 0) {
-					String fileName = fileBase + "gtfs_frequency_route_" + routeId;
+					fileName = fileBaseRouteFrequency + routeId;
 					file = new File(dumpDirF, fileName);
-					boolean empty = true;
+					empty = true;
 					ow = new BufferedWriter(new FileWriter(file));
 					for (MFrequency mFrequency : mRouteFrequencies) {
 						ow.write(mFrequency.toString());
-						ow.write('\n');
+						ow.write(Constants.NEW_LINE);
 						empty = false;
 					}
 					if (empty) {
@@ -246,7 +264,7 @@ public class MGenerator {
 			ow = new BufferedWriter(new FileWriter(file));
 			for (MRoute mRoute : mSpec.routes) {
 				ow.write(mRoute.toString());
-				ow.write('\n');
+				ow.write(Constants.NEW_LINE);
 			}
 		} catch (IOException ioe) {
 			System.out.println("I/O Error while writing route file!");
@@ -266,7 +284,7 @@ public class MGenerator {
 			ow = new BufferedWriter(new FileWriter(file));
 			for (MTrip mTrip : mSpec.trips) {
 				ow.write(mTrip.toString());
-				ow.write('\n');
+				ow.write(Constants.NEW_LINE);
 			}
 		} catch (IOException ioe) {
 			System.out.println("I/O Error while writing trip file!");
@@ -286,7 +304,7 @@ public class MGenerator {
 			ow = new BufferedWriter(new FileWriter(file));
 			for (MTripStop mTripStop : mSpec.tripStops) {
 				ow.write(mTripStop.toString());
-				ow.write('\n');
+				ow.write(Constants.NEW_LINE);
 			}
 		} catch (IOException ioe) {
 			System.out.println("I/O Error while writing trip stops file!");
@@ -303,13 +321,15 @@ public class MGenerator {
 		Double minLat = null, maxLat = null, minLng = null, maxLng = null;
 		file = new File(dumpDirF, fileBase + "gtfs_rts_stops");
 		file.delete(); // delete previous
+		double stopLat;
+		double stopLng;
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
 			for (MStop mStop : mSpec.stops) {
 				ow.write(mStop.toString());
-				ow.write('\n');
-				double stopLat = Double.parseDouble(mStop.lat);
-				double stopLng = Double.parseDouble(mStop.lng);
+				ow.write(Constants.NEW_LINE);
+				stopLat = Double.parseDouble(mStop.lat);
+				stopLng = Double.parseDouble(mStop.lng);
 				if (minLat == null || minLat.doubleValue() > stopLat) {
 					minLat = stopLat;
 				}

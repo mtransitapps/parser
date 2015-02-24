@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.mtransit.parser.Constants;
+
 // https://developers.google.com/transit/gtfs/reference#calendar_fields
 public class GCalendar {
 
@@ -60,16 +62,16 @@ public class GCalendar {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append('\'').append(service_id).append('\'').append(',') //
-				.append('\'').append(monday).append('\'').append(',') //
-				.append('\'').append(tuesday).append('\'').append(',') //
-				.append('\'').append(wednesday).append('\'').append(',') //
-				.append('\'').append(thursday).append('\'').append(',') //
-				.append('\'').append(friday).append('\'').append(',') //
-				.append('\'').append(saturday).append('\'').append(',') //
-				.append('\'').append(sunday).append('\'').append(',') //
-				.append('\'').append(start_date).append('\'').append(',') //
-				.append('\'').append(end_date).append('\'').append(',') //
+				.append(Constants.STRING_DELIMITER).append(service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(monday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(tuesday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(wednesday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(thursday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(friday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(saturday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(sunday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(start_date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(end_date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.toString();
 	}
 
@@ -93,10 +95,11 @@ public class GCalendar {
 			endDate.setTime(DATE_FORMAT.parse(String.valueOf(this.end_date)));
 			Calendar c = startDate; // no need to clone because not re-using startDate later
 			c.add(Calendar.DAY_OF_MONTH, -1); // starting yesterday because increment done at the beginning of the loop
+			int date;
 			while (c.before(endDate)) {
 				c.add(Calendar.DAY_OF_MONTH, +1);
 				try {
-					int date = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
+					date = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
 					switch (c.get(Calendar.DAY_OF_WEEK)) {
 					case Calendar.MONDAY:
 						if (this.monday) {

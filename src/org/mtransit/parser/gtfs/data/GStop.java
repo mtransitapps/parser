@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs.data;
 
+import org.mtransit.parser.Constants;
+
 // https://developers.google.com/transit/gtfs/reference#stops_fields
 public class GStop {
 
@@ -39,17 +41,17 @@ public class GStop {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append('\'').append(stop_id).append('\'').append(',') //
-				.append('\'').append(stop_name).append('\'').append(',') //
-				.append('\'').append(stop_lat).append('\'').append(',') //
-				.append('\'').append(stop_lon).append('\'').append(',') //
-				.append('\'').append(stop_code).append('\'').append(',') //
-				.append('\'').append(stop_desc).append('\'').append(',') //
-				.append('\'').append(zone_id).append('\'').append(',') //
-				.append('\'').append(stop_url).append('\'').append(',') //
-				.append('\'').append(location_type).append('\'').append(',') //
-				.append('\'').append(parent_station).append('\'').append(',') //
-				.append('\'').append(stop_timezone).append('\'') //
+				.append(Constants.STRING_DELIMITER).append(stop_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_name).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_lat).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_lon).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_code).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_desc).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(zone_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_url).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(location_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(parent_station).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_timezone).append(Constants.STRING_DELIMITER) //
 				.toString();
 	}
 }

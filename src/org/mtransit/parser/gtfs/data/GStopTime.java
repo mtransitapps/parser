@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs.data;
 
+import org.mtransit.parser.Constants;
+
 // https://developers.google.com/transit/gtfs/reference#stop_times_fields
 public class GStopTime {
 
@@ -37,15 +39,15 @@ public class GStopTime {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append('\'').append(trip_id).append('\'').append(',') //
-				.append('\'').append(stop_id).append('\'').append(',') //
-				.append('\'').append(stop_sequence).append('\'').append(',') //
-				.append('\'').append(arrival_time).append('\'').append(',') //
-				.append('\'').append(departure_time).append('\'').append(',') //
-				.append('\'').append(stop_headsign).append('\'').append(',') //
-				.append('\'').append(pickup_type).append('\'').append(',') //
-				.append('\'').append(drop_off_type).append('\'').append(',') //
-				.append('\'').append(shape_dist_traveled).append('\'') //
+				.append(Constants.STRING_DELIMITER).append(trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_sequence).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(arrival_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(departure_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(stop_headsign).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(pickup_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(drop_off_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(shape_dist_traveled).append(Constants.STRING_DELIMITER) //
 				.toString();
 	}
 }

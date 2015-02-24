@@ -1,5 +1,7 @@
 package org.mtransit.parser.mt.data;
 
+import org.mtransit.parser.Constants;
+
 public class MStop implements Comparable<MStop> {
 
 	public int id;
@@ -22,13 +24,13 @@ public class MStop implements Comparable<MStop> {
 	public String toString() {
 		StringBuilder sb = new StringBuilder(); //
 		sb.append(id); // ID
-		sb.append(','); //
-		sb.append('\'').append(code == null ? "" : code).append('\'');// code
-		sb.append(','); //
-		sb.append('\'').append(MSpec.escape(name)).append('\''); // name
-		sb.append(','); //
+		sb.append(Constants.COLUMN_SEPARATOR); //
+		sb.append(Constants.STRING_DELIMITER).append(code == null ? Constants.EMPTY : code).append(Constants.STRING_DELIMITER);// code
+		sb.append(Constants.COLUMN_SEPARATOR); //
+		sb.append(Constants.STRING_DELIMITER).append(MSpec.escape(name)).append(Constants.STRING_DELIMITER); // name
+		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(lat); // lat
-		sb.append(','); //
+		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(lng); // lng
 		return sb.toString();
 	}

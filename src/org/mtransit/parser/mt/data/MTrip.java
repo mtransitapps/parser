@@ -1,5 +1,7 @@
 package org.mtransit.parser.mt.data;
 
+import org.mtransit.parser.Constants;
+
 public class MTrip implements Comparable<MTrip> {
 
 	public static final int HEADSIGN_TYPE_STRING = 0;
@@ -8,7 +10,7 @@ public class MTrip implements Comparable<MTrip> {
 	public static final int HEADSIGN_TYPE_STOP_ID = 3;
 
 	private int headsignType = HEADSIGN_TYPE_STRING; // 0 = String, 1 = direction, 2= inbound, 3=stopId
-	private String headsignValue = "";
+	private String headsignValue = Constants.EMPTY;
 	private int headsignId = 0;
 	private long routeId;
 
@@ -28,7 +30,7 @@ public class MTrip implements Comparable<MTrip> {
 
 	public String getIdString() {
 		if (this.idString == null) {
-			this.idString = this.routeId + "-" + this.headsignValue;
+			this.idString = this.routeId + Constants.UUID_SEPARATOR + this.headsignValue;
 		}
 		return this.idString;
 	}
@@ -117,6 +119,8 @@ public class MTrip implements Comparable<MTrip> {
 		return true;
 	}
 
+	private static final String SLASH = " / ";
+
 	public boolean mergeHeadsignValue(MTrip mTripToMerge) {
 		if (mTripToMerge == null || mTripToMerge.headsignValue == null) {
 			System.out.println("mergeHeadsignValue() > no trip heading value to merge > " + this.headsignValue);
@@ -135,9 +139,9 @@ public class MTrip implements Comparable<MTrip> {
 			return true;
 		}
 		if (this.headsignValue.compareTo(mTripToMerge.headsignValue) > 0) {
-			this.headsignValue = mTripToMerge.headsignValue + " / " + this.headsignValue;
+			this.headsignValue = mTripToMerge.headsignValue + SLASH + this.headsignValue;
 		} else {
-			this.headsignValue = this.headsignValue + " / " + mTripToMerge.headsignValue;
+			this.headsignValue = this.headsignValue + SLASH + mTripToMerge.headsignValue;
 		}
 		System.out.println("mergeHeadsignValue() > merge 2 headsign value > " + this.headsignValue);
 		return true;
@@ -146,9 +150,12 @@ public class MTrip implements Comparable<MTrip> {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append(getId()).append(',') // ID
-				.append(this.headsignType).append(',') // HEADSIGN TYPE
-				.append('\'').append(MSpec.escape(this.headsignValue)).append('\'').append(',') // HEADSIGN STRING
+				.append(getId()) // ID
+				.append(Constants.COLUMN_SEPARATOR) //
+				.append(this.headsignType) // HEADSIGN TYPE
+				.append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(MSpec.escape(this.headsignValue)).append(Constants.STRING_DELIMITER) // HEADSIGN STRING
+				.append(Constants.COLUMN_SEPARATOR) //
 				.append(this.routeId) // ROUTE ID
 				.toString();
 	}
