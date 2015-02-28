@@ -87,7 +87,6 @@ public class GCalendar {
 
 	private void initAllDates() {
 		this.allDates = new ArrayList<GCalendarDate>();
-		System.out.println("Generating dates... ");
 		try {
 			Calendar startDate = Calendar.getInstance();
 			startDate.setTime(DATE_FORMAT.parse(String.valueOf(this.start_date)));
@@ -155,8 +154,6 @@ public class GCalendar {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		System.out.println("Generating dates... DONE");
-		System.out.println("- all service dates: " + (this.allDates == null ? null : this.allDates.size()));
 	}
 
 }

@@ -37,10 +37,10 @@ public class MSpec {
 	public static final String CLEAN_EN_DASHES_REPLACEMENT = "$1–$2";
 	private static final String PARENTHESE1 = "\\(";
 	private static final String PARENTHESE2 = "\\)";
-	private static final Pattern CLEAN_PARENTHESE1 = Pattern.compile("[" + PARENTHESE1 + "][\\s]*(\\w)");
-	private static final String CLEAN_PARENTHESE1_REPLACEMENT = PARENTHESE1 + "$1";
-	private static final Pattern CLEAN_PARENTHESE2 = Pattern.compile("(\\w)[\\s]*[" + PARENTHESE2 + "]");
-	private static final String CLEAN_PARENTHESE2_REPLACEMENT = "$1" + PARENTHESE2;
+	public static final Pattern CLEAN_PARENTHESE1 = Pattern.compile("[" + PARENTHESE1 + "][\\s]*(\\w)");
+	public static final String CLEAN_PARENTHESE1_REPLACEMENT = PARENTHESE1 + "$1";
+	public static final Pattern CLEAN_PARENTHESE2 = Pattern.compile("(\\w)[\\s]*[" + PARENTHESE2 + "]");
+	public static final String CLEAN_PARENTHESE2_REPLACEMENT = "$1" + PARENTHESE2;
 
 	private static final CharSequenceTranslator ESCAPE = new LookupTranslator(new String[][] { { "\'", "\'\'" }, { "_", Constants.EMPTY } });
 

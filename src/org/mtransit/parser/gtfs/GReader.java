@@ -389,7 +389,7 @@ public class GReader {
 		for (HashMap<String, String> line : lines) {
 			routeId = line.get(GRoute.ROUTE_ID);
 			routeType = line.get(GRoute.ROUTE_TYPE);
-			gRoute = new GRoute(routeId, line.get(GRoute.ROUTE_SHORT_NAME), line.get(GRoute.ROUTE_LONG_NAME), routeType);
+			gRoute = new GRoute(routeId, line.get(GRoute.ROUTE_SHORT_NAME), line.get(GRoute.ROUTE_LONG_NAME), line.get(GRoute.ROUTE_DESC), routeType);
 			gRoute.route_color = line.get(GRoute.ROUTE_COLOR);
 			gRoute.route_text_color = line.get(GRoute.ROUTE_TEXT_COLOR);
 			if (agencyTools.excludeRoute(gRoute)) {

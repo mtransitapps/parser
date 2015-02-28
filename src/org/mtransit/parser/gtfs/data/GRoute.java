@@ -27,10 +27,11 @@ public class GRoute {
 	public static final String ROUTE_TEXT_COLOR = "route_text_color";
 	public String route_text_color;
 
-	public GRoute(String route_id, String route_short_name, String route_long_name, String route_type) {
+	public GRoute(String route_id, String route_short_name, String route_long_name, String route_desc, String route_type) {
 		this.route_id = route_id;
 		this.route_short_name = route_short_name;
 		this.route_long_name = route_long_name;
+		this.route_desc = route_desc;
 		this.route_type = route_type;
 	}
 
