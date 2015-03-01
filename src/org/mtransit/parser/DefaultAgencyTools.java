@@ -216,7 +216,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		Integer startDate = null;
 		Integer endDate = null;
 		Integer todayStringInt = Integer.valueOf(new SimpleDateFormat("yyyyMMdd").format(new Date()));
-		if (gtfs.calendars != null) {
+		if (gtfs.calendars != null && gtfs.calendars.size() > 0) {
 			for (GCalendar gCalendar : gtfs.calendars) {
 				if (gCalendar.start_date <= todayStringInt && gCalendar.end_date >= todayStringInt) {
 					if (startDate == null || gCalendar.start_date < startDate) {
@@ -227,7 +227,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 					}
 				}
 			}
-		} else if (gtfs.calendarDates != null) {
+		} else if (gtfs.calendarDates != null && gtfs.calendarDates.size() > 0) {
 			String todayServiceId = null;
 			for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
 				if (gCalendarDate.date == todayStringInt) {
