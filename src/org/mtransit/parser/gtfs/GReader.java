@@ -48,6 +48,7 @@ public class GReader {
 			zip = new ZipInputStream(new FileInputStream(gtfsFile));
 			isr = new InputStreamReader(zip, Charset.forName("UTF-8"));
 			reader = new BufferedReader(isr);
+			List<GAgency> agencies = null;
 			List<GCalendar> calendars = null;
 			List<GCalendarDate> calendarDates = null;
 			Map<String, GRoute> routes = null;
