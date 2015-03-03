@@ -48,6 +48,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public Integer getAgencyRouteType() {
+		return null;
+	}
+
+	@Override
+	public String cleanServiceId(String serviceId) {
+		return serviceId;
+	}
+
+	@Override
 	public long getRouteId(GRoute gRoute) {
 		return Long.valueOf(gRoute.route_id);
 	}
@@ -77,6 +87,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
+		if (getAgencyRouteType() == null) {
+			System.out.println("ERROR: unspecified agency route type '" + getAgencyRouteType() + "'!");
+			System.exit(-1);
+		}
+		if (!gRoute.route_type.equals(String.valueOf(getAgencyRouteType()))) {
+			return true;
+		}
 		return false;
 	}
 

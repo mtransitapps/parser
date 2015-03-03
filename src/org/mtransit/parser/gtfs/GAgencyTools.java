@@ -16,6 +16,10 @@ public interface GAgencyTools {
 
 	String getAgencyColor();
 
+	Integer getAgencyRouteType();
+
+	String cleanServiceId(String serviceId);
+
 	// ROUTE
 	long getRouteId(GRoute gRoute);
 	String getRouteShortName(GRoute gRoute);

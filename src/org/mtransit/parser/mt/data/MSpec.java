@@ -12,6 +12,7 @@ import org.mtransit.parser.Utils;
 
 public class MSpec {
 
+	public List<MAgency> agencies;
 	public List<MStop> stops;
 	public List<MRoute> routes;
 	public List<MTrip> trips;
@@ -20,7 +21,7 @@ public class MSpec {
 	public Map<Integer, List<MSchedule>> stopSchedules;
 	public Map<Long, List<MFrequency>> routeFrequencies;
 
-	public MSpec(List<MStop> stops, List<MRoute> routes, List<MTrip> trips, List<MTripStop> tripStops, List<MServiceDate> serviceDates,
+	public MSpec(List<MAgency> agencies, List<MStop> stops, List<MRoute> routes, List<MTrip> trips, List<MTripStop> tripStops, List<MServiceDate> serviceDates,
 			Map<Integer, List<MSchedule>> routeSchedules, Map<Integer, List<MSchedule>> stopSchedules, Map<Long, List<MFrequency>> routeFrequencies) {
 		this.stops = stops;
 		this.routes = routes;

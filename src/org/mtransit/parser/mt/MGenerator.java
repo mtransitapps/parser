@@ -23,6 +23,7 @@ import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
+import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSchedule;
@@ -36,6 +37,7 @@ public class MGenerator {
 
 	public static MSpec generateMSpec(Map<Long, GSpec> gtfsByMRouteId, Map<String, GStop> gStops, GAgencyTools agencyTools) {
 		System.out.println("Generating routes, trips, trip stops & stops objects... ");
+		List<MAgency> mAgencies = new ArrayList<MAgency>();
 		List<MRoute> mRoutes = new ArrayList<MRoute>();
 		List<MTrip> mTrips = new ArrayList<MTrip>();
 		List<MTripStop> mTripStops = new ArrayList<MTripStop>();
@@ -59,6 +61,7 @@ public class MGenerator {
 		for (Future<MSpec> future : list) {
 			try {
 				mRouteSpec = future.get();
+				mAgencies.addAll(mRouteSpec.agencies);
 				mRoutes.addAll(mRouteSpec.routes);
 				mTrips.addAll(mRouteSpec.trips);
 				mTripStops.addAll(mRouteSpec.tripStops);
@@ -114,12 +117,14 @@ public class MGenerator {
 		System.out.println("Skipped " + skippedStopsCount + " useless stops.");
 		System.out.println("Generating stops objects... DONE");
 
+		Collections.sort(mAgencies);
 		Collections.sort(mStopsList);
 		Collections.sort(mRoutes);
 		Collections.sort(mTrips);
 		Collections.sort(mTripStops);
 		Collections.sort(mServiceDates);
 		System.out.println("Generating routes, trips, trip stops & stops objects... DONE");
+		System.out.printf("- mAgencies: %d\n", mAgencies.size());
 		System.out.printf("- Routes: %d\n", mRoutes.size());
 		System.out.printf("- Trips: %d\n", mTrips.size());
 		System.out.printf("- Trip stops: %d\n", mTripStops.size());
@@ -127,7 +132,7 @@ public class MGenerator {
 		System.out.printf("- Service Dates: %d\n", mServiceDates.size());
 		System.out.printf("- Stop with Schedules: %d\n", mStopSchedules.size());
 		System.out.printf("- Route with Frequencies: %d\n", mRouteFrequencies.size());
-		return new MSpec(mStopsList, mRoutes, mTrips, mTripStops, mServiceDates, null, mStopSchedules, mRouteFrequencies);
+		return new MSpec(mAgencies, mStopsList, mRoutes, mTrips, mTripStops, mServiceDates, null, mStopSchedules, mRouteFrequencies);
 	}
 
 	public static void dumpFiles(MSpec mSpec, String dumpDir, final String fileBase) {
@@ -355,8 +360,69 @@ public class MGenerator {
 				}
 			}
 		}
-		System.out.println("Aera: \n-lat: " + minLat + " - " + maxLat + "\n-lng: " + minLng + " - " + maxLng);
+		final File dumpDirResF = dumpDirF.getParentFile();
+		final File valuesDirF = new File(dumpDirResF, "values");
+		file = new File(valuesDirF, "gtfs_rts_values_gen.xml");
+		file.delete(); // delete previous
+		System.out.println("Generated values file: " + file);
+		try {
+			ow = new BufferedWriter(new FileWriter(file));
+			ow.write(XML_HEADER);
+			ow.write(Constants.NEW_LINE);
+			ow.write(RESOURCES_START);
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_INTEGER("gtfs_rts_agency_type", mSpec.agencies.get(0).getType()));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_BOOL("gtfs_rts_schedule_available", mSpec.stopSchedules.size() > 0));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_BOOL("gtfs_rts_frequency_available", mSpec.routeFrequencies.size() > 0));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_STRING("gtfs_rts_timezone", mSpec.agencies.get(0).getTimezone()));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_STRING("gtfs_rts_area_min_lat", minLat));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_STRING("gtfs_rts_area_max_lat", maxLat));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_STRING("gtfs_rts_area_min_lng", minLng));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_STRING("gtfs_rts_area_max_lng", maxLng));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_STRING("gtfs_rts_color", mSpec.agencies.get(0).getColor()));
+			ow.write(Constants.NEW_LINE);
+			ow.write(RESOURCES_END);
+			ow.write(Constants.NEW_LINE);
+		} catch (IOException ioe) {
+			System.out.println("I/O Error while writing trip stops file!");
+			ioe.printStackTrace();
+			System.exit(-1);
+		} finally {
+			if (ow != null) {
+				try {
+					ow.close();
+				} catch (IOException e) {
+				}
+			}
+		}
 		System.out.println("Writing files (" + dumpDirF.toURI() + ")... DONE in " + Utils.getPrettyDuration(System.currentTimeMillis() - start) + ".");
 	}
 
+	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+	private static final String RESOURCES_START = "<resources xmlns:tools=\"http://schemas.android.com/tools\" tools:ignore=\"MissingTranslation\">";
+	private static final String RESOURCE_TAB = "    ";
+	private static final String RESOURCE_INTEGER_AND_NAME_VALUE = RESOURCE_TAB + "<integer name=\"%s\">%s</integer>";
+	private static final String RESOURCE_BOOL_AND_NAME_VALUE = RESOURCE_TAB + "<bool name=\"%s\">%s</bool>";
+	private static final String RESOURCE_STRING_AND_NAME_VALUE = RESOURCE_TAB + "<string name=\"%s\">%s</string>";
+	private static final String RESOURCES_END = "</resources>";
+
+	private static String getRESOURCES_INTEGER(String resName, Integer resValue) {
+		return String.format(RESOURCE_INTEGER_AND_NAME_VALUE, resName, resValue);
+	}
+
+	private static String getRESOURCES_BOOL(String resName, boolean resValue) {
+		return String.format(RESOURCE_BOOL_AND_NAME_VALUE, resName, resValue);
+	}
+
+	private static String getRESOURCES_STRING(String resName, Object resValue) {
+		return String.format(RESOURCE_STRING_AND_NAME_VALUE, resName, resValue);
+	}
 }

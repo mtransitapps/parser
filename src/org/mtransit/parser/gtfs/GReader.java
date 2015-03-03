@@ -19,6 +19,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.mtransit.parser.Utils;
+import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
@@ -60,7 +61,10 @@ public class GReader {
 					continue;
 				}
 				String filename = entry.getName();
-				if (filename.equals(GCalendarDate.FILENAME)) { // CALENDAR DATES
+				if (filename.equals(GAgency.FILENAME)) { // AGENCY
+					fileLines = readCsv(filename, reader, null, null);
+					agencies = processAgencies(fileLines, agencyTools);
+				} else if (filename.equals(GCalendarDate.FILENAME)) { // CALENDAR DATES
 					fileLines = readCsv(filename, reader, null, null);
 					calendarDates = processCalendarDates(fileLines, agencyTools);
 				} else if (filename.equals(GCalendar.FILENAME)) { // CALENDAR
@@ -86,7 +90,7 @@ public class GReader {
 				}
 				fileLines = null;
 			}
-			gspec = new GSpec(calendars, calendarDates, stops, routes, trips, stopTimes, frequencies);
+			gspec = new GSpec(agencies, calendars, calendarDates, stops, routes, trips, stopTimes, frequencies);
 		} catch (IOException ioe) {
 			System.out.println("I/O Error while reading GTFS file!");
 			ioe.printStackTrace();
@@ -112,6 +116,7 @@ public class GReader {
 			}
 		}
 		System.out.printf("Reading GTFS file '%1$s'... DONE in %2$s.\n", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		System.out.printf("- Agencies: %d\n", gspec.agencies.size());
 		System.out.printf("- Calendars: %d\n", gspec.calendars == null ? 0 : gspec.calendars.size());
 		System.out.printf("- CalendarDates: %d\n", gspec.calendarDates == null ? 0 : gspec.calendarDates.size());
 		System.out.printf("- Routes: %d\n", gspec.routes.size());
@@ -265,6 +270,23 @@ public class GReader {
 		return frequencies;
 	}
 
+	private static List<GAgency> processAgencies(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
+		System.out.println("Processing agency...");
+		List<GAgency> agencies = new ArrayList<GAgency>();
+		for (HashMap<String, String> line : lines) {
+			try {
+				agencies.add(new GAgency(line.get(GAgency.AGENCY_ID), line.get(GAgency.AGENCY_NAME), line.get(GAgency.AGENCY_URL), line
+						.get(GAgency.AGENCY_TIMEZONE)));
+			} catch (Exception e) {
+				System.out.println("Error while processing: " + line);
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		}
+		System.out.println("Processing agency... DONE (" + agencies.size() + " extracted)");
+		return agencies;
+	}
+
 	private static List<GCalendarDate> processCalendarDates(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
 		System.out.println("Processing calendar dates...");
 		List<GCalendarDate> calendarDates = new ArrayList<GCalendarDate>();
@@ -411,8 +433,10 @@ public class GReader {
 			routeId = agencyTools.getRouteId(gRoute.getValue());
 			gRouteIdToMRouteId.put(gRoute.getValue().route_id, routeId);
 			if (!gRouteToSpec.containsKey(routeId)) {
-				gRouteToSpec.put(routeId, new GSpec(new ArrayList<GCalendar>(), new ArrayList<GCalendarDate>(), new HashMap<String, GStop>(),
-						new HashMap<String, GRoute>(), new HashMap<String, GTrip>(), new ArrayList<GStopTime>(), new ArrayList<GFrequency>()));
+				gRouteToSpec.put(routeId, new GSpec(new ArrayList<GAgency>(), new ArrayList<GCalendar>(), new ArrayList<GCalendarDate>(),
+						new HashMap<String, GStop>(), new HashMap<String, GRoute>(), new HashMap<String, GTrip>(), new ArrayList<GStopTime>(),
+						new ArrayList<GFrequency>()));
+				gRouteToSpec.get(routeId).agencies = gtfs.agencies;
 				gRouteToSpec.get(routeId).tripStops = new HashMap<String, GTripStop>();
 			}
 			if (gRouteToSpec.get(routeId).routes.containsKey(gRoute.getKey())) {

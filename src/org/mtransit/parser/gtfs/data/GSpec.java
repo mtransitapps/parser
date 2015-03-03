@@ -8,6 +8,7 @@ import org.mtransit.parser.Constants;
 // https://developers.google.com/transit/gtfs/reference#FeedFiles
 public class GSpec {
 
+	public List<GAgency> agencies;
 	public List<GCalendar> calendars;
 	public List<GCalendarDate> calendarDates;
 	public Map<String, GStop> stops;
@@ -19,8 +20,9 @@ public class GSpec {
 	public Map<String, GTripStop> tripStops;
 	public Map<String, GService> services;
 
-	public GSpec(List<GCalendar> calendars, List<GCalendarDate> calendarDates, Map<String, GStop> stops, Map<String, GRoute> routes, Map<String, GTrip> trips,
-			List<GStopTime> stopTimes, List<GFrequency> frequencies) {
+	public GSpec(List<GAgency> agencies, List<GCalendar> calendars, List<GCalendarDate> calendarDates, Map<String, GStop> stops, Map<String, GRoute> routes,
+			Map<String, GTrip> trips, List<GStopTime> stopTimes, List<GFrequency> frequencies) {
+		this.agencies = agencies;
 		this.calendars = calendars;
 		this.calendarDates = calendarDates;
 		this.stops = stops;
@@ -33,6 +35,7 @@ public class GSpec {
 	@Override
 	public String toString() {
 		return new StringBuilder(GSpec.class.getSimpleName()).append('[') //
+				.append("agencies:").append(agencies == null ? null : agencies.size()).append(Constants.COLUMN_SEPARATOR) //
 				.append("calendars:").append(calendars == null ? null : calendars.size()).append(Constants.COLUMN_SEPARATOR) //
 				.append("calendarDates:").append(calendarDates == null ? null : calendarDates.size()).append(Constants.COLUMN_SEPARATOR) //
 				.append("routes:").append(routes == null ? null : routes.size()).append(Constants.COLUMN_SEPARATOR) //

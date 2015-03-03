@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.GAgencyTools;
+import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GFrequency;
@@ -21,6 +22,7 @@ import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
+import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSchedule;
@@ -47,6 +49,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	public MSpec call() {
 		final long startAt = System.currentTimeMillis();
 		System.out.println(this.routeId + ": processing... ");
+		HashMap<String, MAgency> mAgencies = new HashMap<String, MAgency>();// new ArrayList<MAgency>();
 		Set<MServiceDate> mServiceDates = new HashSet<MServiceDate>();
 		HashMap<String, MSchedule> mSchedules = new HashMap<String, MSchedule>();
 		HashMap<String, MFrequency> mFrequencies = new HashMap<String, MFrequency>();
@@ -55,6 +58,16 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Map<String, MTripStop> allMTripStops = new HashMap<String, MTripStop>();
 		Set<Integer> tripStopIds = new HashSet<Integer>(); // the list of stop IDs used by trips
 		Set<String> serviceIds = new HashSet<String>();
+		for (GAgency gAgency : gtfs.agencies) {
+			MAgency mAgency = new MAgency(gAgency.agency_id, gAgency.agency_timezone, agencyTools.getAgencyColor(), agencyTools.getAgencyRouteType());
+			if (mAgencies.containsKey(mAgency.getId()) && !mAgencies.get(mAgency.getId()).equals(mAgency)) {
+				System.out.println(this.routeId + ": Agency " + mAgency.getId() + " already in list!");
+				System.out.println(this.routeId + ": " + mAgency.toString());
+				System.out.println(this.routeId + ": " + mAgencies.get(mAgency.getId()).toString());
+				System.exit(-1);
+			}
+			mAgencies.put(mAgency.getId(), mAgency);
+		}
 		for (GRoute gRoute : gtfs.routes.values()) {
 			MRoute mRoute = new MRoute(agencyTools.getRouteId(gRoute), agencyTools.getRouteShortName(gRoute), agencyTools.getRouteLongName(gRoute));
 			mRoute.color = agencyTools.getRouteColor(gRoute);
@@ -94,11 +107,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 				Long mTripId = mTrip.getId();
 				// find route trip frequencies
+				String tripServiceId = agencyTools.cleanServiceId(gTrip.service_id);
 				for (GFrequency gFrequency : gtfs.frequencies) {
 					if (!gFrequency.trip_id.equals(gTrip.getTripId())) {
 						continue;
 					}
-					MFrequency mFrequency = new MFrequency(gTrip.service_id, mRoute.id, mTripId, agencyTools.getStartTime(gFrequency),
+					MFrequency mFrequency = new MFrequency(tripServiceId, mRoute.id, mTripId, agencyTools.getStartTime(gFrequency),
 							agencyTools.getEndTime(gFrequency), Integer.parseInt(gFrequency.headway_secs));
 					if (mFrequencies.containsKey(mFrequency.getUID()) && !mFrequencies.get(mFrequency.getUID()).equals(mFrequency)) {
 						System.out.println(this.routeId + ": Different frequency " + mFrequency.getUID() + " already in list (" + mFrequency.toString()
@@ -136,7 +150,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						if (!gStopTime.trip_id.equals(gTripStop.trip_id) || !gStopTime.stop_id.equals(gTripStop.stop_id)) {
 							continue;
 						}
-						MSchedule mSchedule = new MSchedule(gTrip.service_id, mRoute.id, mTripId, mStopId, agencyTools.getDepartureTime(gStopTime));
+						MSchedule mSchedule = new MSchedule(tripServiceId, mRoute.id, mTripId, mStopId, agencyTools.getDepartureTime(gStopTime));
 						if (mSchedules.containsKey(mSchedule.getUID()) && !mSchedules.get(mSchedule.getUID()).equals(mSchedule)) {
 							System.out.println(this.routeId + ": Different schedule " + mSchedule.getUID() + " already in list (" + mSchedule.toString()
 									+ " != " + mSchedules.get(mSchedule.getUID()).toString() + ")!");
@@ -157,7 +171,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						}
 						mSchedules.put(mSchedule.getUID(), mSchedule);
 					}
-					serviceIds.add(gTrip.service_id);
+					serviceIds.add(tripServiceId);
 				}
 				List<MTripStop> mTripStopsList = new ArrayList<MTripStop>(mTripStops.values());
 				Collections.sort(mTripStopsList);
@@ -234,7 +248,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				gCalendarDateServiceRemoved.add(gCalendarDate.getUID());
 				break;
 			case SERVICE_ADDED:
-				mServiceDates.add(new MServiceDate(gCalendarDate.service_id, gCalendarDate.date));
+				mServiceDates.add(new MServiceDate(agencyTools.cleanServiceId(gCalendarDate.service_id), gCalendarDate.date));
 				break;
 			default:
 				System.out.println(this.routeId + ": Unexecpted calendar date exeception type '" + gCalendarDate.exception_type + "'!");
@@ -246,7 +260,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (gCalendarDateServiceRemoved.contains(gCalendarDate.getUID())) {
 					continue; // service REMOVED at this date
 				}
-				mServiceDates.add(new MServiceDate(gCalendarDate.service_id, gCalendarDate.date));
+				mServiceDates.add(new MServiceDate(agencyTools.cleanServiceId(gCalendarDate.service_id), gCalendarDate.date));
 			}
 		}
 		// remove useless head-signs from schedules
@@ -256,6 +270,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mSchedule.clearHeadsign();
 			}
 		}
+		List<MAgency> mAgenciesList = new ArrayList<MAgency>(mAgencies.values());
+		Collections.sort(mAgenciesList);
 		List<MRoute> mRoutesList = new ArrayList<MRoute>(mRoutes.values());
 		Collections.sort(mRoutesList);
 		List<MTrip> mTripsList = new ArrayList<MTrip>(mTrips.values());
@@ -280,7 +296,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		if (mFrequenciesList != null && mFrequenciesList.size() > 0) {
 			mRouteFrequencies.put(this.routeId, mFrequenciesList);
 		}
-		MSpec myrouteSpec = new MSpec(null, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, null, mStopScheduleMap, mRouteFrequencies);
+		MSpec myrouteSpec = new MSpec(mAgenciesList, null, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, null, mStopScheduleMap,
+				mRouteFrequencies);
 		System.out.println(this.routeId + ": processing... DONE in " + Utils.getPrettyDuration(System.currentTimeMillis() - startAt) + ".");
 		return myrouteSpec;
 	}
