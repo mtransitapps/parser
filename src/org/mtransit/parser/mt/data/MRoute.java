@@ -21,16 +21,18 @@ public class MRoute implements Comparable<MRoute> {
 	public String toString() {
 		return new StringBuilder() //
 				.append(this.id) // ID
-				.append(Constants.COLUMN_SEPARATOR)
+				.append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER) //
 				.append(this.shortName == null ? Constants.EMPTY : MSpec.escape(this.shortName)) // short name
-				.append(Constants.STRING_DELIMITER)
-				.append(Constants.COLUMN_SEPARATOR)
+				.append(Constants.STRING_DELIMITER) //
+				.append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER) //
 				.append(this.longName == null ? Constants.EMPTY : MSpec.escape(this.longName)) // long name
 				.append(Constants.STRING_DELIMITER) //
 				.append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.color == null ? Constants.EMPTY : this.color).append(Constants.STRING_DELIMITER) // color
+				.append(Constants.STRING_DELIMITER) //
+				.append(this.color == null ? Constants.EMPTY : this.color) // color
+				.append(Constants.STRING_DELIMITER) // color
 				.toString();
 	}
 
@@ -65,6 +67,8 @@ public class MRoute implements Comparable<MRoute> {
 		return true;
 	}
 
+	private static final String SLASH = " / ";
+
 	public boolean mergeLongName(MRoute mRouteToMerge) {
 		if (mRouteToMerge == null || mRouteToMerge.longName == null) {
 			return true;
@@ -81,9 +85,9 @@ public class MRoute implements Comparable<MRoute> {
 			return true;
 		}
 		if (this.longName.compareTo(mRouteToMerge.longName) > 0) {
-			this.longName = mRouteToMerge.longName + " / " + this.longName;
+			this.longName = mRouteToMerge.longName + SLASH + this.longName;
 		} else {
-			this.longName = this.longName + " / " + mRouteToMerge.longName;
+			this.longName = this.longName + SLASH + mRouteToMerge.longName;
 		}
 		return true;
 	}

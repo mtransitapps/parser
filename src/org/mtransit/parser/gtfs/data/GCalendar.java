@@ -56,7 +56,7 @@ public class GCalendar {
 		this.sunday = sunday;
 		this.start_date = start_date;
 		this.end_date = end_date;
-		this.allDates = null;
+		initAllDates();
 	}
 
 	@Override

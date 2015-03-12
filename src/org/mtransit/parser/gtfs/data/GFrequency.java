@@ -16,9 +16,6 @@ public class GFrequency {
 	public static final String HEADWAY_SECS = "headway_secs";
 	public String headway_secs;
 
-	public static final String EXACT_TIMES = "exact_times";
-	public String exact_times;
-
 	public GFrequency(String trip_id, String start_time, String end_time, String headway_secs) {
 		this.trip_id = trip_id;
 		this.start_time = start_time;

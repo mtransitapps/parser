@@ -14,25 +14,22 @@ public class GRoute {
 	public static final String ROUTE_LONG_NAME = "route_long_name";
 	public String route_long_name;
 	public static final String ROUTE_TYPE = "route_type";
-	public String route_type;
+	public int route_type;
 
 	public static final String AGENCY_ID = "agency_id";
 	public String agency_id;
 	public static final String ROUTE_DESC = "route_desc";
 	public String route_desc;
-	public static final String ROUTE_URL = "route_url";
-	public String route_url;
 	public static final String ROUTE_COLOR = "route_color";
 	public String route_color;
-	public static final String ROUTE_TEXT_COLOR = "route_text_color";
-	public String route_text_color;
 
-	public GRoute(String route_id, String route_short_name, String route_long_name, String route_desc, String route_type) {
+	public GRoute(String route_id, String route_short_name, String route_long_name, String route_desc, int route_type, String route_color) {
 		this.route_id = route_id;
 		this.route_short_name = route_short_name;
 		this.route_long_name = route_long_name;
 		this.route_desc = route_desc;
 		this.route_type = route_type;
+		this.route_color = route_color;
 	}
 
 	@Override
@@ -44,10 +41,7 @@ public class GRoute {
 				.append(Constants.STRING_DELIMITER).append(route_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(agency_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(route_desc).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(route_url).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(route_color).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(route_text_color).append(Constants.STRING_DELIMITER) //
 				.toString();
 	}
-
 }

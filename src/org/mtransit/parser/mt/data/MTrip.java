@@ -21,9 +21,11 @@ public class MTrip implements Comparable<MTrip> {
 		this.routeId = routeId;
 	}
 
+	private static final String ZERO = "0";
+
 	public long getId() {
 		if (this.id < 0) {
-			this.id = Long.valueOf(this.routeId + "0" + this.headsignId);
+			this.id = Long.valueOf(this.routeId + ZERO + this.headsignId);
 		}
 		return this.id;
 	}

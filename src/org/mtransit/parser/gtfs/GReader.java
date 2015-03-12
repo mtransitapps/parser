@@ -23,9 +23,7 @@ import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
-import org.mtransit.parser.gtfs.data.GDropOffType;
 import org.mtransit.parser.gtfs.data.GFrequency;
-import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GService;
 import org.mtransit.parser.gtfs.data.GSpec;
@@ -239,10 +237,8 @@ public class GReader {
 		GStopTime gStopTime;
 		for (HashMap<String, String> line : lines) {
 			try {
-				gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.ARRIVAL_TIME), line.get(GStopTime.DEPARTURE_TIME),
-						line.get(GStopTime.STOP_ID), Integer.valueOf(line.get(GStopTime.STOP_SEQUENCE)), line.get(GStopTime.STOP_HEADSIGN));
-				gStopTime.pickup_type = GPickupType.parse(line.get(GStopTime.PICKUP_TYPE));
-				gStopTime.drop_off_type = GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE));
+				gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.DEPARTURE_TIME), line.get(GStopTime.STOP_ID), Integer.valueOf(line
+						.get(GStopTime.STOP_SEQUENCE)), line.get(GStopTime.STOP_HEADSIGN));
 				stopTimes.add(gStopTime);
 			} catch (Exception e) {
 				System.out.println("Error while parsing: " + line);
@@ -291,14 +287,11 @@ public class GReader {
 	private static List<GCalendarDate> processCalendarDates(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
 		System.out.println("Processing calendar dates...");
 		List<GCalendarDate> calendarDates = new ArrayList<GCalendarDate>();
-		GCalendarDatesExceptionType exceptionType;
-		int date;
 		GCalendarDate gCalendarDates;
 		for (HashMap<String, String> line : lines) {
 			try {
-				exceptionType = GCalendarDatesExceptionType.parse(line.get(GCalendarDate.EXCEPTION_DATE));
-				date = Integer.parseInt(line.get(GCalendarDate.DATE));
-				gCalendarDates = new GCalendarDate(line.get(GCalendarDate.SERVICE_ID), date, exceptionType);
+				gCalendarDates = new GCalendarDate(line.get(GCalendarDate.SERVICE_ID), Integer.parseInt(line.get(GCalendarDate.DATE)),
+						GCalendarDatesExceptionType.parse(line.get(GCalendarDate.EXCEPTION_DATE)));
 				if (agencyTools.excludeCalendarDate(gCalendarDates)) {
 					continue; // ignore this service
 				}
@@ -318,28 +311,15 @@ public class GReader {
 	private static List<GCalendar> processCalendar(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
 		System.out.println("Processing calendar...");
 		List<GCalendar> calendars = new ArrayList<GCalendar>();
-		boolean monday;
-		boolean tuesday;
-		boolean wednesday;
-		boolean thursday;
-		boolean friday;
-		boolean saturday;
-		boolean sunday;
-		int start_date;
-		int end_date;
 		GCalendar gCalendar;
 		for (HashMap<String, String> line : lines) {
 			try {
-				monday = DAY_TRUE.equals(line.get(GCalendar.MONDAY));
-				tuesday = DAY_TRUE.equals(line.get(GCalendar.TUESDAY));
-				wednesday = DAY_TRUE.equals(line.get(GCalendar.WEDNESDAY));
-				thursday = DAY_TRUE.equals(line.get(GCalendar.THURSDAY));
-				friday = DAY_TRUE.equals(line.get(GCalendar.FRIDAY));
-				saturday = DAY_TRUE.equals(line.get(GCalendar.SATURDAY));
-				sunday = DAY_TRUE.equals(line.get(GCalendar.SUNDAY));
-				start_date = Integer.parseInt(line.get(GCalendar.START_DATE));
-				end_date = Integer.parseInt(line.get(GCalendar.END_DATE));
-				gCalendar = new GCalendar(line.get(GCalendar.SERVICE_ID), monday, tuesday, wednesday, thursday, friday, saturday, sunday, start_date, end_date);
+				gCalendar = new GCalendar(line.get(GCalendar.SERVICE_ID), //
+						DAY_TRUE.equals(line.get(GCalendar.MONDAY)), DAY_TRUE.equals(line.get(GCalendar.TUESDAY)), //
+						DAY_TRUE.equals(line.get(GCalendar.WEDNESDAY)), DAY_TRUE.equals(line.get(GCalendar.THURSDAY)), //
+						DAY_TRUE.equals(line.get(GCalendar.FRIDAY)), DAY_TRUE.equals(line.get(GCalendar.SATURDAY)), //
+						DAY_TRUE.equals(line.get(GCalendar.SUNDAY)), //
+						Integer.parseInt(line.get(GCalendar.START_DATE)), Integer.parseInt(line.get(GCalendar.END_DATE)));
 				if (agencyTools.excludeCalendar(gCalendar)) {
 					continue; // ignore this service
 				}
@@ -357,23 +337,15 @@ public class GReader {
 	private static Map<String, GTrip> processTrips(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
 		System.out.println("Processing trips...");
 		Map<String, GTrip> trips = new HashMap<String, GTrip>();
-		String routeId;
-		String tripId;
-		String serviceId;
 		GTrip gTrip;
 		for (HashMap<String, String> line : lines) {
 			try {
-				routeId = line.get(GTrip.ROUTE_ID);
-				tripId = line.get(GTrip.TRIP_ID);
-				serviceId = line.get(GTrip.SERVICE_ID);
-				gTrip = new GTrip(routeId, serviceId, tripId);
-				gTrip.trip_headsign = line.get(GTrip.TRIP_HEADSIGN);
-				gTrip.direction_id = line.get(GTrip.DIRECTION_ID);
-				gTrip.shape_id = line.get(GTrip.SHAPE_ID);
+				gTrip = new GTrip(line.get(GTrip.ROUTE_ID), line.get(GTrip.SERVICE_ID), line.get(GTrip.TRIP_ID),
+						Integer.parseInt(line.get(GTrip.DIRECTION_ID)), line.get(GTrip.TRIP_HEADSIGN));
 				if (agencyTools.excludeTrip(gTrip)) {
 					continue; // ignore this service
 				}
-				trips.put(tripId, gTrip);
+				trips.put(gTrip.getTripId(), gTrip);
 			} catch (Exception e) {
 				System.out.println("Error while processing: " + line);
 				e.printStackTrace();
@@ -389,11 +361,7 @@ public class GReader {
 		HashMap<String, GStop> stops = new HashMap<String, GStop>();
 		GStop gStop;
 		for (Map<String, String> line : lines) {
-			gStop = new GStop(line.get(GStop.STOP_ID), line.get(GStop.STOP_NAME), line.get(GStop.STOP_LAT), line.get(GStop.STOP_LON));
-			gStop.stop_code = line.get(GStop.STOP_CODE);
-			gStop.stop_desc = line.get(GStop.STOP_DESC);
-			gStop.zone_id = line.get(GStop.ZONE_ID);
-			gStop.location_type = line.get(GStop.LOCATION_TYPE);
+			gStop = new GStop(line.get(GStop.STOP_ID), line.get(GStop.STOP_NAME), line.get(GStop.STOP_LAT), line.get(GStop.STOP_LON), line.get(GStop.STOP_CODE));
 			if (agencyTools.excludeStop(gStop)) {
 				continue;
 			}
@@ -406,19 +374,14 @@ public class GReader {
 	private static Map<String, GRoute> processRoutes(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
 		System.out.println("Processing routes...");
 		Map<String, GRoute> routes = new HashMap<String, GRoute>();
-		String routeId;
-		String routeType;
 		GRoute gRoute;
 		for (HashMap<String, String> line : lines) {
-			routeId = line.get(GRoute.ROUTE_ID);
-			routeType = line.get(GRoute.ROUTE_TYPE);
-			gRoute = new GRoute(routeId, line.get(GRoute.ROUTE_SHORT_NAME), line.get(GRoute.ROUTE_LONG_NAME), line.get(GRoute.ROUTE_DESC), routeType);
-			gRoute.route_color = line.get(GRoute.ROUTE_COLOR);
-			gRoute.route_text_color = line.get(GRoute.ROUTE_TEXT_COLOR);
+			gRoute = new GRoute(line.get(GRoute.ROUTE_ID), line.get(GRoute.ROUTE_SHORT_NAME), line.get(GRoute.ROUTE_LONG_NAME), line.get(GRoute.ROUTE_DESC),
+					Integer.parseInt(line.get(GRoute.ROUTE_TYPE)), line.get(GRoute.ROUTE_COLOR));
 			if (agencyTools.excludeRoute(gRoute)) {
 				continue;
 			}
-			routes.put(routeId, gRoute);
+			routes.put(gRoute.route_id, gRoute);
 		}
 		System.out.println("Processing routes... DONE (" + routes.size() + " extracted)");
 		return routes;

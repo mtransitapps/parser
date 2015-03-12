@@ -16,21 +16,17 @@ public class GTrip {
 
 	public static final String TRIP_HEADSIGN = "trip_headsign";
 	public String trip_headsign;
-	public static final String TRIP_SHORT_NAME = "trip_short_name";
-	public String trip_short_name;
 	public static final String DIRECTION_ID = "direction_id";
-	public String direction_id;
-	public static final String BLOCK_ID = "block_id";
-	public String block_id;
-	public static final String SHAPE_ID = "shape_id";
-	public String shape_id;
+	public int direction_id;
 
 	private String uid;
 
-	public GTrip(String route_id, String service_id, String trip_id) {
+	public GTrip(String route_id, String service_id, String trip_id, int direction_id, String trip_headsign) {
 		this.route_id = route_id;
 		this.service_id = service_id;
 		this.trip_id = trip_id;
+		this.direction_id = direction_id;
+		this.trip_headsign = trip_headsign;
 		this.uid = this.route_id + this.trip_id;
 	}
 
@@ -53,10 +49,7 @@ public class GTrip {
 				.append(Constants.STRING_DELIMITER).append(service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(trip_headsign).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(trip_short_name).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(direction_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(block_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(shape_id).append(Constants.STRING_DELIMITER) //
 				.toString();
 	}
 }

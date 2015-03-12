@@ -13,23 +13,13 @@ public class GStopTime {
 	public String stop_id;
 	public static final String STOP_SEQUENCE = "stop_sequence";
 	public int stop_sequence;
-	public static final String ARRIVAL_TIME = "arrival_time";
-	public String arrival_time;
 	public static final String DEPARTURE_TIME = "departure_time";
 	public String departure_time;
 
 	public static final String STOP_HEADSIGN = "stop_headsign";
 	public String stop_headsign;
-	public static final String PICKUP_TYPE = "pickup_type";
-	public GPickupType pickup_type;
-	public static final String DROP_OFF_TYPE = "drop_off_type";
-	public GDropOffType drop_off_type;
-	public static final String SHAPE_DIST_TRAVELED = "shape_dist_traveled";
-	public String shape_dist_traveled;
-
-	public GStopTime(String trip_id, String arrival_time, String departure_time, String stop_id, int stop_sequence, String stop_headsign) {
+	public GStopTime(String trip_id, String departure_time, String stop_id, int stop_sequence, String stop_headsign) {
 		this.trip_id = trip_id;
-		this.arrival_time = arrival_time;
 		this.departure_time = departure_time;
 		this.stop_id = stop_id;
 		this.stop_sequence = stop_sequence;
@@ -42,12 +32,8 @@ public class GStopTime {
 				.append(Constants.STRING_DELIMITER).append(trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(stop_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(stop_sequence).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(arrival_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(departure_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(stop_headsign).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(pickup_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(drop_off_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(shape_dist_traveled).append(Constants.STRING_DELIMITER) //
 				.toString();
 	}
 }

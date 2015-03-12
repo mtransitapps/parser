@@ -91,7 +91,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			System.out.println("ERROR: unspecified agency route type '" + getAgencyRouteType() + "'!");
 			System.exit(-1);
 		}
-		if (!gRoute.route_type.equals(String.valueOf(getAgencyRouteType()))) {
+		if (getAgencyRouteType() != gRoute.route_type) {
 			return true;
 		}
 		return false;
@@ -99,12 +99,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip) {
-		if (gTrip.direction_id == null | gTrip.direction_id.length() == 0) {
+		if (gTrip.direction_id < 0 || gTrip.direction_id > 1) {
 			System.out.println("ERROR: default agency implementation required 'direction_id' field in 'trips.txt'!");
 			System.exit(-1);
 		}
 		try {
-			mTrip.setHeadsignString(gTrip.trip_headsign, Integer.valueOf(gTrip.direction_id));
+			mTrip.setHeadsignString(gTrip.trip_headsign, gTrip.direction_id);
 		} catch (NumberFormatException nfe) {
 			System.out.println("ERROR: default agency implementation required integer 'direction_id' field in 'trips.txt'!");
 			System.exit(-1);

@@ -124,7 +124,7 @@ public class MGenerator {
 		Collections.sort(mTripStops);
 		Collections.sort(mServiceDates);
 		System.out.println("Generating routes, trips, trip stops & stops objects... DONE");
-		System.out.printf("- mAgencies: %d\n", mAgencies.size());
+		System.out.printf("- Agencies: %d\n", mAgencies.size());
 		System.out.printf("- Routes: %d\n", mRoutes.size());
 		System.out.printf("- Trips: %d\n", mTrips.size());
 		System.out.printf("- Trip stops: %d\n", mTripStops.size());
