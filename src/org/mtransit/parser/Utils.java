@@ -68,4 +68,14 @@ public final class Utils {
 		return string;
 	}
 
+	// from the Android Open Source Project by Google
+	public static boolean isDigitsOnly(CharSequence str) {
+		final int len = str.length();
+		for (int i = 0; i < len; i++) {
+			if (!Character.isDigit(str.charAt(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
