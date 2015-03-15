@@ -17,11 +17,11 @@ public class GTrip {
 	public static final String TRIP_HEADSIGN = "trip_headsign";
 	public String trip_headsign;
 	public static final String DIRECTION_ID = "direction_id";
-	public int direction_id;
+	public Integer direction_id;
 
 	private String uid;
 
-	public GTrip(String route_id, String service_id, String trip_id, int direction_id, String trip_headsign) {
+	public GTrip(String route_id, String service_id, String trip_id, Integer direction_id, String trip_headsign) {
 		this.route_id = route_id;
 		this.service_id = service_id;
 		this.trip_id = trip_id;

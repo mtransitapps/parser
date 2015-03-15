@@ -18,6 +18,7 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
@@ -337,11 +338,13 @@ public class GReader {
 	private static Map<String, GTrip> processTrips(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
 		System.out.println("Processing trips...");
 		Map<String, GTrip> trips = new HashMap<String, GTrip>();
+		String directionId;
 		GTrip gTrip;
 		for (HashMap<String, String> line : lines) {
 			try {
-				gTrip = new GTrip(line.get(GTrip.ROUTE_ID), line.get(GTrip.SERVICE_ID), line.get(GTrip.TRIP_ID),
-						Integer.parseInt(line.get(GTrip.DIRECTION_ID)), line.get(GTrip.TRIP_HEADSIGN));
+				directionId = line.get(GTrip.DIRECTION_ID);
+				gTrip = new GTrip(line.get(GTrip.ROUTE_ID), line.get(GTrip.SERVICE_ID), line.get(GTrip.TRIP_ID), StringUtils.isEmpty(directionId) ? null
+						: Integer.valueOf(directionId), line.get(GTrip.TRIP_HEADSIGN));
 				if (agencyTools.excludeTrip(gTrip)) {
 					continue; // ignore this service
 				}
