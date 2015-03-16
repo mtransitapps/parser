@@ -334,7 +334,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return true;
 	}
 
-	public List<MTripStop> mergeMyTripStopLists(List<MTripStop> l1, List<MTripStop> l2) {
+	private List<MTripStop> mergeMyTripStopLists(List<MTripStop> l1, List<MTripStop> l2) {
 		List<MTripStop> nl = new ArrayList<MTripStop>();
 		Set<Integer> nlStopId = new HashSet<Integer>();
 
@@ -498,7 +498,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 		// set stop sequence
 		for (int i = 0; i < nl.size(); i++) {
-			nl.get(i).stopSequence = i + 1;
+			nl.get(i).setStopSequence(i + 1);
 		}
 		return nl;
 	}

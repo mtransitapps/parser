@@ -8,7 +8,7 @@ public class MTripStop implements Comparable<MTripStop> {
 
 	private long tripId;
 	private int stopId;
-	public int stopSequence;
+	private int stopSequence;
 	private String uid;
 
 	private boolean decentOnly = false;
@@ -36,6 +36,10 @@ public class MTripStop implements Comparable<MTripStop> {
 		return stopId;
 	}
 
+	public void setStopSequence(int stopSequence) {
+		this.stopSequence = stopSequence;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		MTripStop ts = (MTripStop) obj;
@@ -53,21 +57,22 @@ public class MTripStop implements Comparable<MTripStop> {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder() //
-				.append(tripId) // TRIP ID
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(stopId) // STOP ID
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(stopSequence); // STOP SEQUENCE
-		sb.append(Constants.COLUMN_SEPARATOR).append(decentOnly ? 1 : 0); // DECENT ONLY
+		StringBuilder sb = new StringBuilder(); //
+		sb.append(tripId); // TRIP ID
+		sb.append(Constants.COLUMN_SEPARATOR); //
+		sb.append(stopId); // STOP ID
+		sb.append(Constants.COLUMN_SEPARATOR);
+		sb.append(stopSequence); // STOP SEQUENCE
+		sb.append(Constants.COLUMN_SEPARATOR);
+		sb.append(decentOnly ? 1 : 0); // DECENT ONLY
 		return sb.toString();
 	}
 
 	@Override
 	public int compareTo(MTripStop otherTripStop) {
 		// sort by trip_id => stop_sequence
-		if (tripId != otherTripStop.tripId) {
-			return Long.compare(tripId, otherTripStop.tripId);
+		if (this.tripId != otherTripStop.tripId) {
+			return Long.compare(this.tripId, otherTripStop.tripId);
 		}
 		return stopSequence - otherTripStop.stopSequence;
 	}
