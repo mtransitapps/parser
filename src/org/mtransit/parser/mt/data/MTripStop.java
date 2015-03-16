@@ -55,6 +55,17 @@ public class MTripStop implements Comparable<MTripStop> {
 		return true;
 	}
 
+	public boolean equalsExceptStopSequence(Object obj) {
+		MTripStop ts = (MTripStop) obj;
+		if (ts.tripId != 0 && ts.tripId != tripId) {
+			return false;
+		}
+		if (ts.stopId != 0 && ts.stopId != stopId) {
+			return false;
+		}
+		return true;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(); //

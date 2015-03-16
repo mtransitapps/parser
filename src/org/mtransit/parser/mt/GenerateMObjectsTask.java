@@ -140,7 +140,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						System.exit(-1);
 					}
 					MTripStop mTripStop = new MTripStop(mTripId, mStopId, gTripStop.stop_sequence);
-					if (mTripStops.containsKey(mTripStop.getUID()) && !mTripStops.get(mTripStop.getUID()).equals(mTripStop)) {
+					if (mTripStops.containsKey(mTripStop.getUID()) && !mTripStops.get(mTripStop.getUID()).equalsExceptStopSequence(mTripStop)) {
 						System.out.println(this.routeId + ": Different trip stop " + mTripStop.getUID() + " already in list (" + mTripStop.toString() + " != "
 								+ mTripStops.get(mTripStop.getUID()).toString() + ")!");
 						System.exit(-1);
