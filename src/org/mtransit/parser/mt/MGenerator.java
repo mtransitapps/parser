@@ -101,8 +101,8 @@ public class MGenerator {
 		int skippedStopsCount = 0;
 		MStop mStop;
 		for (GStop gStop : gStops.values()) {
-			mStop = new MStop(agencyTools.getStopId(gStop), agencyTools.getStopCode(gStop), agencyTools.cleanStopName(gStop.stop_name), gStop.stop_lat,
-					gStop.stop_lon);
+			mStop = new MStop(agencyTools.getStopId(gStop), agencyTools.getStopCode(gStop), agencyTools.cleanStopName(gStop.stop_name),
+					Double.parseDouble(gStop.stop_lat), Double.parseDouble(gStop.stop_lon));
 			if (mStopIds.contains(mStop.id)) {
 				System.out.println("Stop ID '" + mStop.id + "' already in list! (" + mStop.toString() + ")");
 				continue;
@@ -326,26 +326,22 @@ public class MGenerator {
 		Double minLat = null, maxLat = null, minLng = null, maxLng = null;
 		file = new File(dumpDirF, fileBase + "gtfs_rts_stops");
 		file.delete(); // delete previous
-		double stopLat;
-		double stopLng;
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
 			for (MStop mStop : mSpec.stops) {
 				ow.write(mStop.toString());
 				ow.write(Constants.NEW_LINE);
-				stopLat = Double.parseDouble(mStop.lat);
-				stopLng = Double.parseDouble(mStop.lng);
-				if (minLat == null || minLat.doubleValue() > stopLat) {
-					minLat = stopLat;
+				if (minLat == null || minLat.doubleValue() > mStop.lat) {
+					minLat = mStop.lat;
 				}
-				if (maxLat == null || maxLat.doubleValue() < stopLat) {
-					maxLat = stopLat;
+				if (maxLat == null || maxLat.doubleValue() < mStop.lat) {
+					maxLat = mStop.lat;
 				}
-				if (minLng == null || minLng.doubleValue() > stopLng) {
-					minLng = stopLng;
+				if (minLng == null || minLng.doubleValue() > mStop.lng) {
+					minLng = mStop.lng;
 				}
-				if (maxLng == null || maxLng.doubleValue() < stopLng) {
-					maxLng = stopLng;
+				if (maxLng == null || maxLng.doubleValue() < mStop.lng) {
+					maxLng = mStop.lng;
 				}
 			}
 		} catch (IOException ioe) {

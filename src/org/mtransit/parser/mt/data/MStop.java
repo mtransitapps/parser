@@ -9,10 +9,10 @@ public class MStop implements Comparable<MStop> {
 	public String code;
 	public String name;
 
-	public String lat;
-	public String lng;
+	public double lat;
+	public double lng;
 
-	public MStop(int id, String code, String name, String lat, String lng) {
+	public MStop(int id, String code, String name, double lat, double lng) {
 		this.id = id;
 		this.code = code;
 		this.name = name;
@@ -52,10 +52,10 @@ public class MStop implements Comparable<MStop> {
 		if (!this.name.equals(o.name)) {
 			return false;
 		}
-		if (!this.lat.equals(o.lat)) {
+		if (this.lat != o.lat) {
 			return false;
 		}
-		if (!this.lng.equals(o.lng)) {
+		if (this.lng != o.lng) {
 			return false;
 		}
 		return true;

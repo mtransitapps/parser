@@ -1,10 +1,13 @@
 package org.mtransit.parser;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GCalendar;
@@ -167,10 +170,62 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final int PRECISON_IN_SECONDS = 10;
 	private static final String TIME_SEPARATOR = ":";
+	private static final SimpleDateFormat HHMMSS = new SimpleDateFormat("HHmmss");
 
 	@Override
-	public int getDepartureTime(GStopTime gStopTime) {
-		String departureTimeS = gStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY);
+	public int getDepartureTime(GStopTime gStopTime, List<GStopTime> gStopTimes) {
+		String departureTimeS;
+		if (StringUtils.isEmpty(gStopTime.departure_time)) {
+			try {
+				Integer newDepartureTime = null;
+				Integer previousDepartureTime = null;
+				Integer previousDepartureTimeStopSequence = null;
+				Integer nextDepartureTime = null;
+				Integer nextDepartureTimeStopSequence = null;
+				for (GStopTime aStopTime : gStopTimes) {
+					if (!gStopTime.trip_id.equals(aStopTime.trip_id)) {
+						continue;
+					}
+					if (aStopTime.stop_sequence < gStopTime.stop_sequence) {
+						if (!StringUtils.isEmpty(aStopTime.departure_time)) {
+							newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
+							if (previousDepartureTime == null || previousDepartureTimeStopSequence == null
+									|| previousDepartureTimeStopSequence < aStopTime.stop_sequence) {
+								previousDepartureTime = newDepartureTime;
+								previousDepartureTimeStopSequence = aStopTime.stop_sequence;
+							}
+						}
+					} else if (aStopTime.stop_sequence > gStopTime.stop_sequence) {
+						if (!StringUtils.isEmpty(aStopTime.departure_time)) {
+							newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
+							if (nextDepartureTime == null || nextDepartureTimeStopSequence == null || nextDepartureTimeStopSequence > aStopTime.stop_sequence) {
+								nextDepartureTime = newDepartureTime;
+								nextDepartureTimeStopSequence = aStopTime.stop_sequence;
+							}
+						}
+					}
+				}
+				long previousDepartureTimeInMs = HHMMSS.parse(String.valueOf(previousDepartureTime)).getTime();
+				long nextDepartureTimeInMs = HHMMSS.parse(String.valueOf(nextDepartureTime)).getTime();
+				long timeDiffInMs = nextDepartureTimeInMs - previousDepartureTimeInMs;
+				int nbStop = nextDepartureTimeStopSequence - previousDepartureTimeStopSequence;
+				long timeBetweenStopInMs = timeDiffInMs / nbStop;
+				long departureTimeInMs = previousDepartureTimeInMs + (timeBetweenStopInMs * (gStopTime.stop_sequence - previousDepartureTimeStopSequence));
+				Calendar c = Calendar.getInstance();
+				c.setTimeInMillis(departureTimeInMs);
+				departureTimeS = HHMMSS.format(c.getTime());
+				if (c.get(Calendar.DAY_OF_YEAR) > 1) {
+					departureTimeS = String.valueOf(240000 + Integer.valueOf(departureTimeS));
+				}
+			} catch (Exception e) {
+				System.out.println("Error while interpolating departure time for " + gStopTime + "!");
+				e.printStackTrace();
+				System.exit(-1);
+				departureTimeS = null;
+			}
+		} else {
+			departureTimeS = gStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY);
+		}
 		Integer departureTime = Integer.valueOf(departureTimeS);
 		int extraSeconds = departureTime == null ? 0 : departureTime.intValue() % PRECISON_IN_SECONDS;
 		if (extraSeconds > 0) { // IF too precise DO

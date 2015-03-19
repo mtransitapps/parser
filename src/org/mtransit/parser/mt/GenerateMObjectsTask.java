@@ -150,7 +150,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						if (!gStopTime.trip_id.equals(gTripStop.trip_id) || !gStopTime.stop_id.equals(gTripStop.stop_id)) {
 							continue;
 						}
-						MSchedule mSchedule = new MSchedule(tripServiceId, mRoute.id, mTripId, mStopId, agencyTools.getDepartureTime(gStopTime));
+						MSchedule mSchedule = new MSchedule(tripServiceId, mRoute.id, mTripId, mStopId, agencyTools.getDepartureTime(gStopTime, gtfs.stopTimes));
 						if (mSchedules.containsKey(mSchedule.getUID()) && !mSchedules.get(mSchedule.getUID()).equals(mSchedule)) {
 							System.out.println(this.routeId + ": Different schedule " + mSchedule.getUID() + " already in list (" + mSchedule.toString()
 									+ " != " + mSchedules.get(mSchedule.getUID()).toString() + ")!");
@@ -163,7 +163,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								tripStopTimesHeasign = stopHeadsign;
 							} else if (Constants.EMPTY.equals(tripStopTimesHeasign)) { // disabled
 							} else if (!tripStopTimesHeasign.equals(stopHeadsign)) {
-								System.out.println(this.routeId + ": '" + tripStopTimesHeasign + "' != '" + stopHeadsign + "' > not used as trip heasign");
 								tripStopTimesHeasign = Constants.EMPTY; // disable
 							}
 						} else {
