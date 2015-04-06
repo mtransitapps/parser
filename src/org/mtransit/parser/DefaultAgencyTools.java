@@ -282,12 +282,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return Integer.valueOf(gFrequency.end_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY)); // GTFS standard
 	}
 
+	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 1;
+
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
 		System.out.printf("Extracting useful service IDs...\n");
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools);
 		Integer startDate = null;
 		Integer endDate = null;
 		Integer todayStringInt = Integer.valueOf(new SimpleDateFormat("yyyyMMdd").format(new Date()));
+		todayStringInt++; // TOMORROW (too late to publish today's schedule)
 		if (gtfs.calendars != null && gtfs.calendars.size() > 0) {
 			for (GCalendar gCalendar : gtfs.calendars) {
 				if (gCalendar.start_date <= todayStringInt && gCalendar.end_date >= todayStringInt) {
@@ -317,6 +320,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 							endDate = gCalendarDate.date;
 						}
 					}
+				}
+				if (endDate - startDate < MIN_COVERAGE_AFTER_TODAY_IN_DAYS) {
+					endDate = startDate += MIN_COVERAGE_AFTER_TODAY_IN_DAYS;
 				}
 			} else {
 				System.out.println("NO schedule available for " + todayStringInt + "!");
