@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.GAgencyTools;
@@ -265,7 +266,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		// remove useless head-signs from schedules
 		for (MSchedule mSchedule : mSchedules.values()) {
 			MTrip mTrip = mTrips.get(mSchedule.getTripId());
-			if (mTrip.getHeadsignType() == mSchedule.getHeadsignType() && mTrip.getHeadsignValue().equals(mSchedule.getHeadsignValue())) {
+			if (mTrip.getHeadsignType() == mSchedule.getHeadsignType() && StringUtils.equals(mTrip.getHeadsignValue(), mSchedule.getHeadsignValue())) {
 				mSchedule.clearHeadsign();
 			}
 		}
