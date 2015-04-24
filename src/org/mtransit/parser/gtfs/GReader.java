@@ -238,8 +238,8 @@ public class GReader {
 		GStopTime gStopTime;
 		for (HashMap<String, String> line : lines) {
 			try {
-				gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.DEPARTURE_TIME), line.get(GStopTime.STOP_ID), Integer.valueOf(line
-						.get(GStopTime.STOP_SEQUENCE)), line.get(GStopTime.STOP_HEADSIGN));
+				gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.DEPARTURE_TIME), line.get(GStopTime.STOP_ID), Integer.parseInt(line
+						.get(GStopTime.STOP_SEQUENCE).trim()), line.get(GStopTime.STOP_HEADSIGN));
 				stopTimes.add(gStopTime);
 			} catch (Exception e) {
 				System.out.println("Error while parsing: " + line);
@@ -344,7 +344,7 @@ public class GReader {
 			try {
 				directionId = line.get(GTrip.DIRECTION_ID);
 				gTrip = new GTrip(line.get(GTrip.ROUTE_ID), line.get(GTrip.SERVICE_ID), line.get(GTrip.TRIP_ID), StringUtils.isEmpty(directionId) ? null
-						: Integer.valueOf(directionId), line.get(GTrip.TRIP_HEADSIGN));
+						: Integer.valueOf(directionId), line.get(GTrip.TRIP_HEADSIGN), line.get(GTrip.SHAPE_ID));
 				if (agencyTools.excludeTrip(gTrip)) {
 					continue; // ignore this service
 				}
@@ -359,11 +359,16 @@ public class GReader {
 		return trips;
 	}
 
+	private static final String PARENT_STATION_TYPE = "1";
+
 	private static HashMap<String, GStop> processStops(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
 		System.out.println("Processing stops...");
 		HashMap<String, GStop> stops = new HashMap<String, GStop>();
 		GStop gStop;
 		for (Map<String, String> line : lines) {
+			if (PARENT_STATION_TYPE.equals(line.get(GStop.LOCATION_TYPE))) {
+				continue; // skip parent stations
+			}
 			gStop = new GStop(line.get(GStop.STOP_ID), line.get(GStop.STOP_NAME), line.get(GStop.STOP_LAT), line.get(GStop.STOP_LON), line.get(GStop.STOP_CODE));
 			if (agencyTools.excludeStop(gStop)) {
 				continue;

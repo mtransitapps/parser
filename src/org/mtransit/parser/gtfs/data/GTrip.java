@@ -18,15 +18,18 @@ public class GTrip {
 	public String trip_headsign;
 	public static final String DIRECTION_ID = "direction_id";
 	public Integer direction_id;
+	public static final String SHAPE_ID = "shape_id";
+	public String shape_id;
 
 	private String uid;
 
-	public GTrip(String route_id, String service_id, String trip_id, Integer direction_id, String trip_headsign) {
+	public GTrip(String route_id, String service_id, String trip_id, Integer direction_id, String trip_headsign, String shape_id) {
 		this.route_id = route_id;
 		this.service_id = service_id;
 		this.trip_id = trip_id;
 		this.direction_id = direction_id;
 		this.trip_headsign = trip_headsign;
+		this.shape_id = shape_id;
 		this.uid = this.route_id + this.trip_id;
 	}
 
@@ -50,6 +53,7 @@ public class GTrip {
 				.append(Constants.STRING_DELIMITER).append(trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(trip_headsign).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(direction_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(shape_id).append(Constants.STRING_DELIMITER) //
 				.toString();
 	}
 }

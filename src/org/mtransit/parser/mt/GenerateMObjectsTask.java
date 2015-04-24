@@ -135,8 +135,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					}
 					int mStopId = agencyTools.getStopId(gStop);
 					this.gStopsCache.put(mStopId, gStop);
-					if (mStopId == 0) {
-						System.out.println(this.routeId + ": Can't found gtfs stop ID (" + mStopId + ") '" + gTripStop.stop_id + "' from trip ID '"
+					if (mStopId < 0) {
+						System.out.println(this.routeId + ": Can't find gtfs stop ID (" + mStopId + ") '" + gTripStop.stop_id + "' from trip ID '"
 								+ gTripStop.trip_id + "' (" + gTrip.getTripId() + ")");
 						System.exit(-1);
 					}
