@@ -190,4 +190,36 @@ public class MSpec {
 		label = Utils.replaceAll(label, SLASH_CHARS, SLASH_SPACE);
 		return cleanLabel(label);
 	}
+
+	private static final Pattern FIRST = Pattern.compile("(^|\\s){1}(first)($|\\s){1}", Pattern.CASE_INSENSITIVE);
+	private static final String FIRST_REPLACEMENT = "$11st$3";
+	private static final Pattern SECOND = Pattern.compile("(^|\\s){1}(second)($|\\s){1}", Pattern.CASE_INSENSITIVE);
+	private static final String SECOND_REPLACEMENT = "$12nd$3";
+	private static final Pattern THIRD = Pattern.compile("(^|\\s){1}(third)($|\\s){1}", Pattern.CASE_INSENSITIVE);
+	private static final String THIRD_REPLACEMENT = "$13rd$3";
+	private static final Pattern FOURTH = Pattern.compile("(^|\\s){1}(fourth)($|\\s){1}", Pattern.CASE_INSENSITIVE);
+	private static final String FOURTH_REPLACEMENT = "$14th$3";
+	private static final Pattern FIFTH = Pattern.compile("(^|\\s){1}(fifth)($|\\s){1}", Pattern.CASE_INSENSITIVE);
+	private static final String FIFTH_REPLACEMENT = "$15th$3";
+	private static final Pattern SIXTH = Pattern.compile("(^|\\s){1}(sixth)($|\\s){1}", Pattern.CASE_INSENSITIVE);
+	private static final String SIXTH_REPLACEMENT = "$16th$3";
+	private static final Pattern SEVENTH = Pattern.compile("(^|\\s){1}(seventh)($|\\s){1}", Pattern.CASE_INSENSITIVE);
+	private static final String SEVENTH_REPLACEMENT = "$17th$3";
+	private static final Pattern EIGHTH = Pattern.compile("(^|\\s){1}(eighth)($|\\s){1}", Pattern.CASE_INSENSITIVE);
+	private static final String EIGHTH_REPLACEMENT = "$18th$3";
+	private static final Pattern NINTH = Pattern.compile("(^|\\s){1}(ninth)($|\\s){1}", Pattern.CASE_INSENSITIVE);
+	private static final String NINTH_REPLACEMENT = "$19th$3";
+
+	public static String cleanNumbers(String string) {
+		string = FIRST.matcher(string).replaceAll(FIRST_REPLACEMENT);
+		string = SECOND.matcher(string).replaceAll(SECOND_REPLACEMENT);
+		string = THIRD.matcher(string).replaceAll(THIRD_REPLACEMENT);
+		string = FOURTH.matcher(string).replaceAll(FOURTH_REPLACEMENT);
+		string = FIFTH.matcher(string).replaceAll(FIFTH_REPLACEMENT);
+		string = SIXTH.matcher(string).replaceAll(SIXTH_REPLACEMENT);
+		string = SEVENTH.matcher(string).replaceAll(SEVENTH_REPLACEMENT);
+		string = EIGHTH.matcher(string).replaceAll(EIGHTH_REPLACEMENT);
+		string = NINTH.matcher(string).replaceAll(NINTH_REPLACEMENT);
+		return string;
+	}
 }
