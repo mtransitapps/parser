@@ -360,6 +360,7 @@ public class GReader {
 	}
 
 	private static final String PARENT_STATION_TYPE = "1";
+	private static final String ENTRANCE_TYPE = "2";
 
 	private static HashMap<String, GStop> processStops(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
 		System.out.println("Processing stops...");
@@ -367,6 +368,9 @@ public class GReader {
 		GStop gStop;
 		for (Map<String, String> line : lines) {
 			if (PARENT_STATION_TYPE.equals(line.get(GStop.LOCATION_TYPE))) {
+				continue; // skip parent stations
+			}
+			if (ENTRANCE_TYPE.equals(line.get(GStop.LOCATION_TYPE))) {
 				continue; // skip parent stations
 			}
 			gStop = new GStop(line.get(GStop.STOP_ID), line.get(GStop.STOP_NAME), line.get(GStop.STOP_LAT), line.get(GStop.STOP_LON), line.get(GStop.STOP_CODE));
