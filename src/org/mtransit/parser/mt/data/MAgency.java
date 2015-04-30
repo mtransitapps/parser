@@ -5,6 +5,7 @@ import org.mtransit.parser.Constants;
 
 public class MAgency implements Comparable<MAgency> {
 
+	public static final int ROUTE_TYPE_LIGHT_RAIL = 0;
 	public static final int ROUTE_TYPE_SUBWAY = 1;
 	public static final int ROUTE_TYPE_TRAIN = 2;
 	public static final int ROUTE_TYPE_BUS = 3;
