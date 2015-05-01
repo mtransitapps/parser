@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -289,7 +290,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools);
 		Integer startDate = null;
 		Integer endDate = null;
-		Integer todayStringInt = Integer.valueOf(new SimpleDateFormat("yyyyMMdd").format(new Date()));
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
+		Integer todayStringInt = Integer.valueOf(simpleDateFormat.format(new Date()));
 		todayStringInt++; // TOMORROW (too late to publish today's schedule)
 		if (gtfs.calendars != null && gtfs.calendars.size() > 0) {
 			for (GCalendar gCalendar : gtfs.calendars) {
@@ -303,26 +305,27 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 			}
 		} else if (gtfs.calendarDates != null && gtfs.calendarDates.size() > 0) {
-			String todayServiceId = null;
+			HashSet<String> todayServiceIds = new HashSet<String>();
 			for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
 				if (gCalendarDate.date == todayStringInt) {
-					todayServiceId = gCalendarDate.service_id;
-					break;
+					todayServiceIds.add(gCalendarDate.service_id);
 				}
 			}
-			if (todayServiceId != null) {
+			if (todayServiceIds != null && todayServiceIds.size() > 0) {
 				for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
-					if (gCalendarDate.service_id.equals(todayServiceId)) {
-						if (startDate == null || gCalendarDate.date < startDate) {
-							startDate = gCalendarDate.date;
-						}
-						if (endDate == null || gCalendarDate.date > endDate) {
-							endDate = gCalendarDate.date;
+					for (String todayServiceId : todayServiceIds) {
+						if (gCalendarDate.service_id.equals(todayServiceId)) {
+							if (startDate == null || gCalendarDate.date < startDate) {
+								startDate = gCalendarDate.date;
+							}
+							if (endDate == null || gCalendarDate.date > endDate) {
+								endDate = gCalendarDate.date;
+							}
 						}
 					}
 				}
 				if (endDate - startDate < MIN_COVERAGE_AFTER_TODAY_IN_DAYS) {
-					endDate = startDate += MIN_COVERAGE_AFTER_TODAY_IN_DAYS;
+					endDate = startDate + MIN_COVERAGE_AFTER_TODAY_IN_DAYS;
 				}
 			} else {
 				System.out.println("NO schedule available for " + todayStringInt + "!");
