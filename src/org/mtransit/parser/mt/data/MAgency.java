@@ -9,6 +9,7 @@ public class MAgency implements Comparable<MAgency> {
 	public static final int ROUTE_TYPE_SUBWAY = 1;
 	public static final int ROUTE_TYPE_TRAIN = 2;
 	public static final int ROUTE_TYPE_BUS = 3;
+	public static final int ROUTE_TYPE_FERRY = 4;
 
 	private String id;
 	private String timezone;
