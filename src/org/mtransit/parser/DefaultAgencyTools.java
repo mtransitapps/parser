@@ -173,64 +173,83 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final String TIME_SEPARATOR = ":";
 	private static final SimpleDateFormat HHMMSS = new SimpleDateFormat("HHmmss");
 
+	private String departureTimeS = null;
+	private Integer newDepartureTime = null;
+	private Integer previousDepartureTime = null;
+	private Integer previousDepartureTimeStopSequence = null;
+	private Integer nextDepartureTime = null;
+	private Integer nextDepartureTimeStopSequence = null;
+
+	private Integer departureTime = null;
+
+	private Calendar calendar = Calendar.getInstance();
+
+	private int extraSeconds;
+	private int nbStop;
+	private long previousDepartureTimeInMs;
+	private long nextDepartureTimeInMs;
+	private long timeDiffInMs;
+	private long timeBetweenStopInMs;
+	private long departureTimeInMs;
+
 	@Override
 	public int getDepartureTime(GStopTime gStopTime, List<GStopTime> gStopTimes) {
-		String departureTimeS;
 		if (StringUtils.isEmpty(gStopTime.departure_time)) {
 			try {
-				Integer newDepartureTime = null;
-				Integer previousDepartureTime = null;
-				Integer previousDepartureTimeStopSequence = null;
-				Integer nextDepartureTime = null;
-				Integer nextDepartureTimeStopSequence = null;
+				this.newDepartureTime = null;
+				this.previousDepartureTime = null;
+				this.previousDepartureTimeStopSequence = null;
+				this.nextDepartureTime = null;
+				this.nextDepartureTimeStopSequence = null;
 				for (GStopTime aStopTime : gStopTimes) {
 					if (!gStopTime.trip_id.equals(aStopTime.trip_id)) {
 						continue;
 					}
 					if (aStopTime.stop_sequence < gStopTime.stop_sequence) {
 						if (!StringUtils.isEmpty(aStopTime.departure_time)) {
-							newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
-							if (previousDepartureTime == null || previousDepartureTimeStopSequence == null
-									|| previousDepartureTimeStopSequence < aStopTime.stop_sequence) {
-								previousDepartureTime = newDepartureTime;
-								previousDepartureTimeStopSequence = aStopTime.stop_sequence;
+							this.newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
+							if (this.previousDepartureTime == null || this.previousDepartureTimeStopSequence == null
+									|| this.previousDepartureTimeStopSequence < aStopTime.stop_sequence) {
+								this.previousDepartureTime = this.newDepartureTime;
+								this.previousDepartureTimeStopSequence = aStopTime.stop_sequence;
 							}
 						}
 					} else if (aStopTime.stop_sequence > gStopTime.stop_sequence) {
 						if (!StringUtils.isEmpty(aStopTime.departure_time)) {
-							newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
-							if (nextDepartureTime == null || nextDepartureTimeStopSequence == null || nextDepartureTimeStopSequence > aStopTime.stop_sequence) {
-								nextDepartureTime = newDepartureTime;
-								nextDepartureTimeStopSequence = aStopTime.stop_sequence;
+							this.newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
+							if (this.nextDepartureTime == null || this.nextDepartureTimeStopSequence == null
+									|| this.nextDepartureTimeStopSequence > aStopTime.stop_sequence) {
+								this.nextDepartureTime = this.newDepartureTime;
+								this.nextDepartureTimeStopSequence = aStopTime.stop_sequence;
 							}
 						}
 					}
 				}
-				long previousDepartureTimeInMs = HHMMSS.parse(String.valueOf(previousDepartureTime)).getTime();
-				long nextDepartureTimeInMs = HHMMSS.parse(String.valueOf(nextDepartureTime)).getTime();
-				long timeDiffInMs = nextDepartureTimeInMs - previousDepartureTimeInMs;
-				int nbStop = nextDepartureTimeStopSequence - previousDepartureTimeStopSequence;
-				long timeBetweenStopInMs = timeDiffInMs / nbStop;
-				long departureTimeInMs = previousDepartureTimeInMs + (timeBetweenStopInMs * (gStopTime.stop_sequence - previousDepartureTimeStopSequence));
-				Calendar c = Calendar.getInstance();
-				c.setTimeInMillis(departureTimeInMs);
-				departureTimeS = HHMMSS.format(c.getTime());
-				if (c.get(Calendar.DAY_OF_YEAR) > 1) {
-					departureTimeS = String.valueOf(240000 + Integer.valueOf(departureTimeS));
+				this.previousDepartureTimeInMs = HHMMSS.parse(String.valueOf(this.previousDepartureTime)).getTime();
+				this.nextDepartureTimeInMs = HHMMSS.parse(String.valueOf(this.nextDepartureTime)).getTime();
+				this.timeDiffInMs = this.nextDepartureTimeInMs - this.previousDepartureTimeInMs;
+				this.nbStop = this.nextDepartureTimeStopSequence - this.previousDepartureTimeStopSequence;
+				this.timeBetweenStopInMs = this.timeDiffInMs / this.nbStop;
+				this.departureTimeInMs = this.previousDepartureTimeInMs
+						+ (this.timeBetweenStopInMs * (gStopTime.stop_sequence - this.previousDepartureTimeStopSequence));
+				this.calendar.setTimeInMillis(this.departureTimeInMs);
+				this.departureTimeS = HHMMSS.format(this.calendar.getTime());
+				if (this.calendar.get(Calendar.DAY_OF_YEAR) > 1) {
+					this.departureTimeS = String.valueOf(240000 + Integer.valueOf(this.departureTimeS));
 				}
 			} catch (Exception e) {
 				System.out.println("Error while interpolating departure time for " + gStopTime + "!");
 				e.printStackTrace();
 				System.exit(-1);
-				departureTimeS = null;
+				this.departureTimeS = null;
 			}
 		} else {
-			departureTimeS = gStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY);
+			this.departureTimeS = gStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY);
 		}
-		Integer departureTime = Integer.valueOf(departureTimeS);
-		int extraSeconds = departureTime == null ? 0 : departureTime.intValue() % PRECISON_IN_SECONDS;
+		this.departureTime = Integer.valueOf(this.departureTimeS);
+		this.extraSeconds = this.departureTime == null ? 0 : this.departureTime.intValue() % PRECISON_IN_SECONDS;
 		if (extraSeconds > 0) { // IF too precise DO
-			departureTime = cleanDepartureTime(departureTimeS, departureTime.intValue(), extraSeconds);
+			departureTime = cleanDepartureTime(this.departureTimeS, this.departureTime.intValue(), extraSeconds);
 		}
 		return departureTime; // GTFS standard
 	}
