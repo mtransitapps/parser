@@ -51,7 +51,7 @@ public class MSpec {
 
 	public static String cleanLabel(String label) {
 		label = label.replaceAll("\\s+", " ");
-		label = WordUtils.capitalize(label, Constants.SPACE, '-', '–', '/', Constants.STRING_DELIMITER, '(', '.');
+		label = WordUtils.capitalize(label, Constants.SPACE, '-', '–', '/', '(', '.');
 		return label.trim();
 	}
 
@@ -220,6 +220,38 @@ public class MSpec {
 		string = SEVENTH.matcher(string).replaceAll(SEVENTH_REPLACEMENT);
 		string = EIGHTH.matcher(string).replaceAll(EIGHTH_REPLACEMENT);
 		string = NINTH.matcher(string).replaceAll(NINTH_REPLACEMENT);
+		return string;
+	}
+
+	private static final Pattern STREET = Pattern.compile("( street)", Pattern.CASE_INSENSITIVE);
+	private static final String STREET_REPLACEMENT = " St";
+	private static final Pattern AVENUE = Pattern.compile("( avenue)", Pattern.CASE_INSENSITIVE);
+	private static final String AVENUE_REPLACEMENT = " Ave";
+	private static final Pattern ROAD = Pattern.compile("( road)", Pattern.CASE_INSENSITIVE);
+	private static final String ROAD_REPLACEMENT = " Rd";
+	private static final Pattern HIGHWAY = Pattern.compile("(highway)", Pattern.CASE_INSENSITIVE);
+	private static final String HIGHWAY_REPLACEMENT = "Hwy";
+	private static final Pattern BOULEVARD = Pattern.compile("( boulevard)", Pattern.CASE_INSENSITIVE);
+	private static final String BOULEVARD_REPLACEMENT = " Blvd";
+	private static final Pattern DRIVE = Pattern.compile("( drive)", Pattern.CASE_INSENSITIVE);
+	private static final String DRIVE_REPLACEMENT = " Dr";
+	private static final Pattern PLACE = Pattern.compile("( place)", Pattern.CASE_INSENSITIVE);
+	private static final String PLACE_REPLACEMENT = " Pl";
+	private static final Pattern LANE = Pattern.compile("( lane)", Pattern.CASE_INSENSITIVE);
+	private static final String LANE_REPLACEMENT = " Ln";
+	private static final Pattern CRESCENT = Pattern.compile("( crescent)", Pattern.CASE_INSENSITIVE);
+	private static final String CRESCENT_REPLACEMENT = " Cr";
+
+	public static String cleanStreetTypes(String string) {
+		string = LANE.matcher(string).replaceAll(LANE_REPLACEMENT);
+		string = PLACE.matcher(string).replaceAll(PLACE_REPLACEMENT);
+		string = DRIVE.matcher(string).replaceAll(DRIVE_REPLACEMENT);
+		string = BOULEVARD.matcher(string).replaceAll(BOULEVARD_REPLACEMENT);
+		string = HIGHWAY.matcher(string).replaceAll(HIGHWAY_REPLACEMENT);
+		string = STREET.matcher(string).replaceAll(STREET_REPLACEMENT);
+		string = AVENUE.matcher(string).replaceAll(AVENUE_REPLACEMENT);
+		string = ROAD.matcher(string).replaceAll(ROAD_REPLACEMENT);
+		string = CRESCENT.matcher(string).replaceAll(CRESCENT_REPLACEMENT);
 		return string;
 	}
 }

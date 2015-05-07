@@ -238,8 +238,8 @@ public class GReader {
 		GStopTime gStopTime;
 		for (HashMap<String, String> line : lines) {
 			try {
-				gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.DEPARTURE_TIME), line.get(GStopTime.STOP_ID), Integer.parseInt(line
-						.get(GStopTime.STOP_SEQUENCE).trim()), line.get(GStopTime.STOP_HEADSIGN));
+				gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.DEPARTURE_TIME).trim(), line.get(GStopTime.STOP_ID),
+						Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()), line.get(GStopTime.STOP_HEADSIGN));
 				stopTimes.add(gStopTime);
 			} catch (Exception e) {
 				System.out.println("Error while parsing: " + line);

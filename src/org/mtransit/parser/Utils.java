@@ -78,4 +78,16 @@ public final class Utils {
 		}
 		return true;
 	}
+
+	public static boolean isUppercaseOnly(CharSequence str, boolean allowWhitespace) {
+		final int len = str.length();
+		for (int i = 0; i < len; i++) {
+			if (!Character.isUpperCase(str.charAt(i))) {
+				if (!allowWhitespace || !Character.isWhitespace(str.charAt(i))) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }
