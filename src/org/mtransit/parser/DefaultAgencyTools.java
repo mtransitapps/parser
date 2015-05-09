@@ -173,83 +173,64 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final String TIME_SEPARATOR = ":";
 	private static final SimpleDateFormat HHMMSS = new SimpleDateFormat("HHmmss");
 
-	private String departureTimeS = null;
-	private Integer newDepartureTime = null;
-	private Integer previousDepartureTime = null;
-	private Integer previousDepartureTimeStopSequence = null;
-	private Integer nextDepartureTime = null;
-	private Integer nextDepartureTimeStopSequence = null;
-
-	private Integer departureTime = null;
-
-	private Calendar calendar = Calendar.getInstance();
-
-	private int extraSeconds;
-	private int nbStop;
-	private long previousDepartureTimeInMs;
-	private long nextDepartureTimeInMs;
-	private long timeDiffInMs;
-	private long timeBetweenStopInMs;
-	private long departureTimeInMs;
 
 	@Override
 	public int getDepartureTime(GStopTime gStopTime, List<GStopTime> gStopTimes) {
 		if (StringUtils.isEmpty(gStopTime.departure_time)) {
 			try {
-				this.newDepartureTime = null;
-				this.previousDepartureTime = null;
-				this.previousDepartureTimeStopSequence = null;
-				this.nextDepartureTime = null;
-				this.nextDepartureTimeStopSequence = null;
+				Integer newDepartureTime = null;
+				Integer previousDepartureTime = null;
+				Integer previousDepartureTimeStopSequence = null;
+				Integer nextDepartureTime = null;
+				Integer nextDepartureTimeStopSequence = null;
 				for (GStopTime aStopTime : gStopTimes) {
 					if (!gStopTime.trip_id.equals(aStopTime.trip_id)) {
 						continue;
 					}
 					if (aStopTime.stop_sequence < gStopTime.stop_sequence) {
 						if (!StringUtils.isEmpty(aStopTime.departure_time)) {
-							this.newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
-							if (this.previousDepartureTime == null || this.previousDepartureTimeStopSequence == null
-									|| this.previousDepartureTimeStopSequence < aStopTime.stop_sequence) {
-								this.previousDepartureTime = this.newDepartureTime;
-								this.previousDepartureTimeStopSequence = aStopTime.stop_sequence;
+							newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
+							if (previousDepartureTime == null || previousDepartureTimeStopSequence == null
+									|| previousDepartureTimeStopSequence < aStopTime.stop_sequence) {
+								previousDepartureTime = newDepartureTime;
+								previousDepartureTimeStopSequence = aStopTime.stop_sequence;
 							}
 						}
 					} else if (aStopTime.stop_sequence > gStopTime.stop_sequence) {
 						if (!StringUtils.isEmpty(aStopTime.departure_time)) {
-							this.newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
-							if (this.nextDepartureTime == null || this.nextDepartureTimeStopSequence == null
-									|| this.nextDepartureTimeStopSequence > aStopTime.stop_sequence) {
-								this.nextDepartureTime = this.newDepartureTime;
-								this.nextDepartureTimeStopSequence = aStopTime.stop_sequence;
+							newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
+							if (nextDepartureTime == null || nextDepartureTimeStopSequence == null || nextDepartureTimeStopSequence > aStopTime.stop_sequence) {
+								nextDepartureTime = newDepartureTime;
+								nextDepartureTimeStopSequence = aStopTime.stop_sequence;
 							}
 						}
 					}
 				}
-				this.previousDepartureTimeInMs = HHMMSS.parse(String.valueOf(this.previousDepartureTime)).getTime();
-				this.nextDepartureTimeInMs = HHMMSS.parse(String.valueOf(this.nextDepartureTime)).getTime();
-				this.timeDiffInMs = this.nextDepartureTimeInMs - this.previousDepartureTimeInMs;
-				this.nbStop = this.nextDepartureTimeStopSequence - this.previousDepartureTimeStopSequence;
-				this.timeBetweenStopInMs = this.timeDiffInMs / this.nbStop;
-				this.departureTimeInMs = this.previousDepartureTimeInMs
-						+ (this.timeBetweenStopInMs * (gStopTime.stop_sequence - this.previousDepartureTimeStopSequence));
-				this.calendar.setTimeInMillis(this.departureTimeInMs);
-				this.departureTimeS = HHMMSS.format(this.calendar.getTime());
-				if (this.calendar.get(Calendar.DAY_OF_YEAR) > 1) {
-					this.departureTimeS = String.valueOf(240000 + Integer.valueOf(this.departureTimeS));
+				long previousDepartureTimeInMs = HHMMSS.parse(String.valueOf(previousDepartureTime)).getTime();
+				long nextDepartureTimeInMs = HHMMSS.parse(String.valueOf(nextDepartureTime)).getTime();
+				long timeDiffInMs = nextDepartureTimeInMs - previousDepartureTimeInMs;
+				int nbStop = nextDepartureTimeStopSequence - previousDepartureTimeStopSequence;
+				long timeBetweenStopInMs = timeDiffInMs / nbStop;
+				long departureTimeInMs = previousDepartureTimeInMs + (timeBetweenStopInMs * (gStopTime.stop_sequence - previousDepartureTimeStopSequence));
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTimeInMillis(departureTimeInMs);
+				departureTimeS = HHMMSS.format(calendar.getTime());
+				if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
+					departureTimeS = String.valueOf(240000 + Integer.valueOf(departureTimeS));
 				}
 			} catch (Exception e) {
 				System.out.println("Error while interpolating departure time for " + gStopTime + "!");
 				e.printStackTrace();
 				System.exit(-1);
-				this.departureTimeS = null;
+				departureTimeS = null;
 			}
 		} else {
-			this.departureTimeS = gStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY);
+			departureTimeS = gStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY);
 		}
-		this.departureTime = Integer.valueOf(this.departureTimeS);
-		this.extraSeconds = this.departureTime == null ? 0 : this.departureTime.intValue() % PRECISON_IN_SECONDS;
+		Integer departureTime = Integer.valueOf(departureTimeS);
+		int extraSeconds = departureTime == null ? 0 : departureTime.intValue() % PRECISON_IN_SECONDS;
 		if (extraSeconds > 0) { // IF too precise DO
-			departureTime = cleanDepartureTime(this.departureTimeS, this.departureTime.intValue(), extraSeconds);
+			return cleanDepartureTime(departureTimeS, extraSeconds);
 		}
 		return departureTime; // GTFS standard
 	}
@@ -259,37 +240,44 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final String CLEAN_DEPARTURE_TIME_DEFAULT_MINUTES = "00";
 	private static final String CLEAN_DEPARTURE_TIME_DEFAULT_SECONDS = "00";
 
-	private int cleanDepartureTime(String departureTimeS, int departureTime, int extraSeconds) {
-		while (departureTimeS.length() < 6) {
-			departureTimeS = CLEAN_DEPARTURE_TIME_LEADING_ZERO + departureTimeS;
-		}
-		String newHours = departureTimeS.substring(0, 2);
-		String newMinutes = departureTimeS.substring(2, 4);
-		String newSeconds = departureTimeS.substring(4, 6);
-		int seconds = Integer.parseInt(newSeconds);
-		if (extraSeconds < 5) {
-			// remove seconds
-			newSeconds = String.format(CLEAN_DEPARTURE_TIME_FORMAT, seconds - extraSeconds);
+	private int cleanDepartureTime(String departureTimeS, int extraSeconds) {
+		try {
+			while (departureTimeS.length() < 6) {
+				departureTimeS = CLEAN_DEPARTURE_TIME_LEADING_ZERO + departureTimeS;
+			}
+			String newHours = departureTimeS.substring(0, 2);
+			String newMinutes = departureTimeS.substring(2, 4);
+			String newSeconds = departureTimeS.substring(4, 6);
+			int seconds = Integer.parseInt(newSeconds);
+			if (extraSeconds < 5) {
+				if (extraSeconds > seconds) {
+					newSeconds = CLEAN_DEPARTURE_TIME_DEFAULT_SECONDS;
+				} else {
+					newSeconds = String.format(CLEAN_DEPARTURE_TIME_FORMAT, seconds - extraSeconds);
+				}
+				return Integer.valueOf(newHours + newMinutes + newSeconds);
+			}
+			int secondsToAdd = PRECISON_IN_SECONDS - extraSeconds;
+			if (seconds + secondsToAdd < 60) {
+				newSeconds = String.format(CLEAN_DEPARTURE_TIME_FORMAT, seconds + secondsToAdd);
+				return Integer.valueOf(newHours + newMinutes + newSeconds);
+			}
+			newSeconds = CLEAN_DEPARTURE_TIME_DEFAULT_SECONDS;
+			int minutes = Integer.parseInt(newMinutes);
+			if (minutes + 1 < 60) {
+				newMinutes = String.format(CLEAN_DEPARTURE_TIME_FORMAT, minutes + 1);
+				return Integer.valueOf(newHours + newMinutes + newSeconds);
+			}
+			newMinutes = CLEAN_DEPARTURE_TIME_DEFAULT_MINUTES;
+			int hours = Integer.parseInt(newHours);
+			newHours = String.valueOf(hours + 1);
 			return Integer.valueOf(newHours + newMinutes + newSeconds);
+		} catch (Exception e) {
+			System.out.println("Error while cleaning departure time '" + departureTimeS + "' '" + extraSeconds + "' !");
+			e.printStackTrace();
+			System.exit(-1);
+			return -1;
 		}
-		// add seconds
-		int secondsToAdd = PRECISON_IN_SECONDS - extraSeconds;
-		if (seconds + secondsToAdd < 60) {
-			newSeconds = String.format(CLEAN_DEPARTURE_TIME_FORMAT, seconds + secondsToAdd);
-			return Integer.valueOf(newHours + newMinutes + newSeconds);
-		}
-		// add minute
-		newSeconds = CLEAN_DEPARTURE_TIME_DEFAULT_SECONDS;
-		int minutes = Integer.parseInt(newMinutes);
-		if (minutes + 1 < 60) {
-			newMinutes = String.format(CLEAN_DEPARTURE_TIME_FORMAT, minutes + 1);
-			return Integer.valueOf(newHours + newMinutes + newSeconds);
-		}
-		// add hour
-		newMinutes = CLEAN_DEPARTURE_TIME_DEFAULT_MINUTES;
-		int hours = Integer.parseInt(newHours);
-		newHours = String.valueOf(hours + 1);
-		return Integer.valueOf(newHours + newMinutes + newSeconds);
 	}
 
 	@Override
