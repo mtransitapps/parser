@@ -63,7 +63,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public long getRouteId(GRoute gRoute) {
-		return Long.valueOf(gRoute.route_id);
+		try {
+			return Long.valueOf(gRoute.route_id);
+		} catch (Exception e) {
+			System.out.println("Error while extracting route ID from " + gRoute);
+			e.printStackTrace();
+			System.exit(-1);
+			return -1;
+		}
 	}
 
 	@Override
@@ -156,7 +163,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public int getStopId(GStop gStop) {
-		return Integer.parseInt(gStop.stop_id);
+		try {
+			return Integer.parseInt(gStop.stop_id);
+		} catch (Exception e) {
+			System.out.println("Error while extracting stop ID from " + gStop);
+			e.printStackTrace();
+			System.exit(-1);
+			return -1;
+		}
 	}
 
 	@Override
@@ -176,6 +190,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public int getDepartureTime(GStopTime gStopTime, List<GStopTime> gStopTimes) {
+		String departureTimeS = null;
 		if (StringUtils.isEmpty(gStopTime.departure_time)) {
 			try {
 				Integer newDepartureTime = null;
