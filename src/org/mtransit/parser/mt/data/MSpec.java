@@ -23,6 +23,7 @@ public class MSpec {
 
 	public MSpec(List<MAgency> agencies, List<MStop> stops, List<MRoute> routes, List<MTrip> trips, List<MTripStop> tripStops, List<MServiceDate> serviceDates,
 			Map<Integer, List<MSchedule>> routeSchedules, Map<Integer, List<MSchedule>> stopSchedules, Map<Long, List<MFrequency>> routeFrequencies) {
+		this.agencies = agencies;
 		this.stops = stops;
 		this.routes = routes;
 		this.trips = trips;

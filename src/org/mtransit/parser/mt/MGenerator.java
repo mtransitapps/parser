@@ -101,8 +101,8 @@ public class MGenerator {
 		int skippedStopsCount = 0;
 		MStop mStop;
 		for (GStop gStop : gStops.values()) {
-			mStop = new MStop(agencyTools.getStopId(gStop), agencyTools.getStopCode(gStop), agencyTools.cleanStopName(gStop.stop_name),
-					Double.parseDouble(gStop.stop_lat), Double.parseDouble(gStop.stop_lon));
+			mStop = new MStop(agencyTools.getStopId(gStop), agencyTools.getStopCode(gStop), agencyTools.cleanStopName(gStop.stop_name), gStop.getLatD(),
+					gStop.getLongD());
 			if (mStopIds.contains(mStop.id)) {
 				System.out.println("Stop ID '" + mStop.id + "' already in list! (" + mStop.toString() + ")");
 				continue;

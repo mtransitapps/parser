@@ -373,7 +373,8 @@ public class GReader {
 			if (ENTRANCE_TYPE.equals(line.get(GStop.LOCATION_TYPE))) {
 				continue; // skip parent stations
 			}
-			gStop = new GStop(line.get(GStop.STOP_ID), line.get(GStop.STOP_NAME), line.get(GStop.STOP_LAT), line.get(GStop.STOP_LON), line.get(GStop.STOP_CODE));
+			gStop = new GStop(line.get(GStop.STOP_ID), line.get(GStop.STOP_NAME), Double.parseDouble(line.get(GStop.STOP_LAT)), Double.parseDouble(line
+					.get(GStop.STOP_LON)), line.get(GStop.STOP_CODE));
 			if (agencyTools.excludeStop(gStop)) {
 				continue;
 			}

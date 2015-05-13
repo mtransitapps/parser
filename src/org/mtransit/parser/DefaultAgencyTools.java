@@ -23,6 +23,7 @@ import org.mtransit.parser.mt.MGenerator;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MTrip;
+import org.mtransit.parser.mt.data.MTripStop;
 
 public class DefaultAgencyTools implements GAgencyTools {
 
@@ -171,6 +172,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 			System.exit(-1);
 			return -1;
 		}
+	}
+
+	@Override
+	public int compare(MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
+		return 0; // nothing
 	}
 
 	@Override

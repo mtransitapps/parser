@@ -11,10 +11,11 @@ public class MRoute implements Comparable<MRoute> {
 
 	public String color;
 
-	public MRoute(long id, String shortName, String longName) {
+	public MRoute(long id, String shortName, String longName, String color) {
 		this.id = id;
 		this.shortName = shortName;
 		this.longName = longName;
+		this.color = color;
 	}
 
 	@Override

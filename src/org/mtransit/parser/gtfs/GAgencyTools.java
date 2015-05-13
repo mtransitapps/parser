@@ -11,6 +11,7 @@ import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
+import org.mtransit.parser.mt.data.MTripStop;
 
 public interface GAgencyTools {
 
@@ -54,4 +55,6 @@ public interface GAgencyTools {
 	// FREQUENCY
 	int getStartTime(GFrequency gFrequency);
 	int getEndTime(GFrequency gFrequency);
+
+	int compare(MTripStop ts1, MTripStop ts2, GStop ts1gStop, GStop ts2GStop);
 }
