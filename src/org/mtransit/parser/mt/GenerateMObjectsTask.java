@@ -11,7 +11,6 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.Constants;
-import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
@@ -48,7 +47,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 
 	@Override
 	public MSpec call() {
-		final long startAt = System.currentTimeMillis();
 		System.out.println(this.routeId + ": processing... ");
 		HashMap<String, MAgency> mAgencies = new HashMap<String, MAgency>();// new ArrayList<MAgency>();
 		Set<MServiceDate> mServiceDates = new HashSet<MServiceDate>();
