@@ -244,6 +244,7 @@ public class GReader {
 			} catch (Exception e) {
 				System.out.println("Error while parsing: " + line);
 				e.printStackTrace();
+				System.exit(-1);
 			}
 		}
 		System.out.println("Processing stop times... DONE (" + stopTimes.size() + " extracted)");
@@ -289,10 +290,17 @@ public class GReader {
 		System.out.println("Processing calendar dates...");
 		List<GCalendarDate> calendarDates = new ArrayList<GCalendarDate>();
 		GCalendarDate gCalendarDates;
+		String serviceId, date, exceptionDate;
 		for (HashMap<String, String> line : lines) {
 			try {
-				gCalendarDates = new GCalendarDate(line.get(GCalendarDate.SERVICE_ID), Integer.parseInt(line.get(GCalendarDate.DATE)),
-						GCalendarDatesExceptionType.parse(line.get(GCalendarDate.EXCEPTION_DATE)));
+				serviceId = line.get(GCalendarDate.SERVICE_ID);
+				date = line.get(GCalendarDate.DATE);
+				exceptionDate = line.get(GCalendarDate.EXCEPTION_DATE);
+				if (StringUtils.isEmpty(serviceId) && StringUtils.isEmpty(date) && StringUtils.isEmpty(exceptionDate)) {
+					System.out.println("Empty calendar dates ignored (" + line + ").");
+					continue; // ignore empty calendar dates
+				}
+				gCalendarDates = new GCalendarDate(serviceId, Integer.parseInt(date), GCalendarDatesExceptionType.parse(exceptionDate));
 				if (agencyTools.excludeCalendarDate(gCalendarDates)) {
 					continue; // ignore this service
 				}

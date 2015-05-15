@@ -329,6 +329,10 @@ public class MSpec {
 	private static final String SHORE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Shr");
 	private static final Pattern SHORES = Pattern.compile(String.format(REGEX_START_END, "shores"), Pattern.CASE_INSENSITIVE);
 	private static final String SHORES_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Shrs");
+	private static final Pattern MOUNT = Pattern.compile(String.format(REGEX_START_END, "mount"), Pattern.CASE_INSENSITIVE);
+	private static final String MOUNT_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mt");
+	private static final Pattern MOUNTAIN = Pattern.compile(String.format(REGEX_START_END, "mountain"), Pattern.CASE_INSENSITIVE);
+	private static final String MOUNTAIN_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mtn");
 	private static final Pattern PARK = Pattern.compile(String.format(REGEX_START_END, "park"), Pattern.CASE_INSENSITIVE);
 	private static final String PARK_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pk"); // not official
 	private static final Pattern GATE = Pattern.compile(String.format(REGEX_START_END, "gate"), Pattern.CASE_INSENSITIVE);
@@ -386,6 +390,8 @@ public class MSpec {
 		string = SHORE.matcher(string).replaceAll(SHORE_REPLACEMENT);
 		string = SHORES.matcher(string).replaceAll(SHORES_REPLACEMENT);
 		string = PARKING.matcher(string).replaceAll(PARKING_REPLACEMENT);
+		string = MOUNT.matcher(string).replaceAll(MOUNT_REPLACEMENT);
+		string = MOUNTAIN.matcher(string).replaceAll(MOUNTAIN_REPLACEMENT);
 		string = PARK.matcher(string).replaceAll(PARK_REPLACEMENT);
 		string = GATE.matcher(string).replaceAll(GATE_REPLACEMENT);
 		return string;
