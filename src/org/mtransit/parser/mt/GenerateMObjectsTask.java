@@ -573,7 +573,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			for (MTripStop tts2 : l2) {
 				if (tts1.getStopId() == tts2.getStopId()) {
 					if (previousTs1 == null || previousTs2 == null) {
-						System.out.println(this.routeId + ": findFirstCommonStop() > Common stop found '" + tts1.getStopId() + "' but no previous stop! Looking for next common stop...");
+						System.out.println(this.routeId + ": findFirstCommonStop() > Common stop found '" + tts1.getStopId()
+								+ "' but no previous stop! Looking for next common stop...");
 					} else {
 						commonStopAndPrevious = new MTripStop[3];
 						commonStopAndPrevious[0] = tts1;
