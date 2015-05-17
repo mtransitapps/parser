@@ -19,6 +19,7 @@ public class GStop {
 	public String stop_code;
 
 	public static final String LOCATION_TYPE = "location_type";
+
 	public GStop(String stop_id, String stop_name, double stop_lat, double stop_lon, String stop_code) {
 		this.stop_id = stop_id;
 		this.stop_name = stop_name;

@@ -6,6 +6,7 @@ import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GRoute;
+import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
@@ -25,22 +26,36 @@ public interface GAgencyTools {
 
 	// ROUTE
 	long getRouteId(GRoute gRoute);
+
 	String getRouteShortName(GRoute gRoute);
+
 	String getRouteLongName(GRoute gRoute);
+
 	boolean mergeRouteLongName(MRoute mRoute, MRoute mRouteToMerge);
+
 	String getRouteColor(GRoute gRoute);
+
 	boolean excludeRoute(GRoute gRoute);
 
 	// TRIP
+	@Deprecated
 	void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip);
+
+	boolean setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs);
+
 	String cleanTripHeadsign(String tripHeadsign);
+
 	boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge);
+
 	boolean excludeTrip(GTrip gTrip);
 
 	// STOP
 	int getStopId(GStop gStop);
+
 	String cleanStopName(String gStopName);
+
 	String getStopCode(GStop gStop);
+
 	boolean excludeStop(GStop gStop);
 
 	// CALENDAR
@@ -54,7 +69,9 @@ public interface GAgencyTools {
 
 	// FREQUENCY
 	int getStartTime(GFrequency gFrequency);
+
 	int getEndTime(GFrequency gFrequency);
 
+	// DEPARTURE TIME
 	int compare(MTripStop ts1, MTripStop ts2, GStop ts1gStop, GStop ts2GStop);
 }

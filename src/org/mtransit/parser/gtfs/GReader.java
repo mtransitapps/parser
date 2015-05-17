@@ -32,6 +32,7 @@ import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
+
 public class GReader {
 
 	public static final String todayGtfs = new SimpleDateFormat("yyyyMMdd").format(new Date());
@@ -135,6 +136,7 @@ public class GReader {
 		String[] lineColumns;
 		line = reader.readLine();
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
+			System.out.println("Remove 1st empty car");
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
 		CSVRecord recordColumns = CSVParser.parse(line, CSVFormat.RFC4180).getRecords().get(0);
@@ -142,7 +144,7 @@ public class GReader {
 		for (int i = 0; i < recordColumns.size(); i++) {
 			lineColumns[i] = recordColumns.get(i);
 		}
-		String[] columnNames = lineColumns;// new String[lineColumns.length];
+		String[] columnNames = lineColumns;
 		if (columnNames == null || columnNames.length == 0) {
 			return lines;
 		}

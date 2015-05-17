@@ -21,15 +21,15 @@ public class MFrequency implements Comparable<MFrequency> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(); //
-		sb.append(Constants.STRING_DELIMITER).append(MSpec.escape(serviceId)).append(Constants.STRING_DELIMITER); // service ID
+		sb.append(Constants.STRING_DELIMITER).append(MSpec.escape(this.serviceId)).append(Constants.STRING_DELIMITER); // service ID
 		sb.append(Constants.COLUMN_SEPARATOR); //
-		sb.append(tripId); // trip ID
+		sb.append(this.tripId); // trip ID
 		sb.append(Constants.COLUMN_SEPARATOR); //
-		sb.append(startTime); // start time
+		sb.append(this.startTime); // start time
 		sb.append(Constants.COLUMN_SEPARATOR); //
-		sb.append(endTime); // end time
+		sb.append(this.endTime); // end time
 		sb.append(Constants.COLUMN_SEPARATOR); //
-		sb.append(headwayInSec); // headway in seconds
+		sb.append(this.headwayInSec); // headway in seconds
 		return sb.toString();
 	}
 
@@ -39,19 +39,19 @@ public class MFrequency implements Comparable<MFrequency> {
 
 	@Override
 	public int compareTo(MFrequency otherFrequency) {
-		if (!serviceId.equals(otherFrequency.serviceId)) {
-			return serviceId.compareTo(otherFrequency.serviceId);
+		if (!this.serviceId.equals(otherFrequency.serviceId)) {
+			return this.serviceId.compareTo(otherFrequency.serviceId);
 		}
-		if (tripId != otherFrequency.tripId) {
-			return Long.compare(tripId, otherFrequency.tripId);
+		if (this.tripId != otherFrequency.tripId) {
+			return Long.compare(this.tripId, otherFrequency.tripId);
 		}
-		if (startTime != otherFrequency.startTime) {
-			return startTime - otherFrequency.startTime;
+		if (this.startTime != otherFrequency.startTime) {
+			return this.startTime - otherFrequency.startTime;
 		}
-		if (endTime != otherFrequency.endTime) {
-			return endTime - otherFrequency.endTime;
+		if (this.endTime != otherFrequency.endTime) {
+			return this.endTime - otherFrequency.endTime;
 		}
-		return headwayInSec - otherFrequency.headwayInSec;
+		return this.headwayInSec - otherFrequency.headwayInSec;
 	}
 
 	@Override
@@ -60,6 +60,7 @@ public class MFrequency implements Comparable<MFrequency> {
 		if (ts.serviceId != null && !ts.serviceId.equals(serviceId)) {
 			return false;
 		}
+		// no route ID, just for file split
 		if (ts.tripId != 0 && ts.tripId != tripId) {
 			return false;
 		}

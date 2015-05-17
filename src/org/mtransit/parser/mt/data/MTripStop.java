@@ -69,13 +69,13 @@ public class MTripStop implements Comparable<MTripStop> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(); //
-		sb.append(tripId); // TRIP ID
+		sb.append(this.tripId); // TRIP ID
 		sb.append(Constants.COLUMN_SEPARATOR); //
-		sb.append(stopId); // STOP ID
+		sb.append(this.stopId); // STOP ID
 		sb.append(Constants.COLUMN_SEPARATOR);
-		sb.append(stopSequence); // STOP SEQUENCE
+		sb.append(this.stopSequence); // STOP SEQUENCE
 		sb.append(Constants.COLUMN_SEPARATOR);
-		sb.append(decentOnly ? 1 : 0); // DECENT ONLY
+		sb.append(this.decentOnly ? 1 : 0); // DECENT ONLY
 		return sb.toString();
 	}
 
@@ -98,5 +98,4 @@ public class MTripStop implements Comparable<MTripStop> {
 		}
 		return sb.toString();
 	}
-
 }

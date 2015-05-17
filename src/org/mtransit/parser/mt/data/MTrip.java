@@ -170,5 +170,4 @@ public class MTrip implements Comparable<MTrip> {
 		}
 		return this.getIdString().compareTo(otherTrip.getIdString());
 	}
-
 }

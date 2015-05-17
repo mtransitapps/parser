@@ -116,11 +116,17 @@ public class DefaultAgencyTools implements GAgencyTools {
 			System.exit(-1);
 		}
 		try {
-			mTrip.setHeadsignString(gTrip.trip_headsign, gTrip.direction_id);
+			mTrip.setHeadsignString(cleanTripHeadsign(gTrip.trip_headsign), gTrip.direction_id);
 		} catch (NumberFormatException nfe) {
-			System.out.println("ERROR: default agency implementation required integer 'direction_id' field in 'trips.txt'!");
+			System.out.println("ERROR: default agency implementation not possible!");
+			nfe.printStackTrace();
 			System.exit(-1);
 		}
+	}
+
+	@Override
+	public boolean setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
+		return false; // not processed
 	}
 
 	@Override
@@ -354,6 +360,23 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 				if (endDate - startDate < MIN_COVERAGE_AFTER_TODAY_IN_DAYS) {
 					endDate = startDate + MIN_COVERAGE_AFTER_TODAY_IN_DAYS;
+				}
+				for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+					if (gCalendarDate.date >= startDate && gCalendarDate.date <= endDate) {
+						todayServiceIds.add(gCalendarDate.service_id);
+					}
+				}
+				for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+					for (String todayServiceId : todayServiceIds) {
+						if (gCalendarDate.service_id.equals(todayServiceId)) {
+							if (startDate == null || gCalendarDate.date < startDate) {
+								startDate = gCalendarDate.date;
+							}
+							if (endDate == null || gCalendarDate.date > endDate) {
+								endDate = gCalendarDate.date;
+							}
+						}
+					}
 				}
 			} else {
 				System.out.println("NO schedule available for " + todayStringInt + "!");

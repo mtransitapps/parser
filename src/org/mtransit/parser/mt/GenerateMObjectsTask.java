@@ -217,21 +217,23 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				continue;
 			}
 			mTrip = new MTrip(mRoute.id);
-			this.agencyTools.setTripHeadsign(mRoute, mTrip, gTrip);
+			if (!this.agencyTools.setTripHeadsign(mRoute, mTrip, gTrip, this.gtfs)) {
+				this.agencyTools.setTripHeadsign(mRoute, mTrip, gTrip);
+			}
 			originalTripHeadsignType = mTrip.getHeadsignType();
 			originalTripHeadsignValue = mTrip.getHeadsignValue();
-			if (mTrips.containsKey(mTrip.getId()) && !mTrips.get(mTrip.getId()).equals(mTrip)) {
+			mTripId = mTrip.getId();
+			if (mTrips.containsKey(mTripId) && !mTrips.get(mTripId).equals(mTrip)) {
 				mergeSuccessful = false;
-				if (mTrip.equalsExceptHeadsignValue(mTrips.get(mTrip.getId()))) {
-					mergeSuccessful = this.agencyTools.mergeHeadsign(mTrip, mTrips.get(mTrip.getId()));
+				if (mTrip.equalsExceptHeadsignValue(mTrips.get(mTripId))) {
+					mergeSuccessful = this.agencyTools.mergeHeadsign(mTrip, mTrips.get(mTripId));
 				}
 				if (!mergeSuccessful) {
-					System.out.println(this.routeId + ": Different trip " + mTrip.getId() + " already in list (" + mTrip.toString() + " != "
-							+ mTrips.get(mTrip.getId()).toString() + ")");
+					System.out.println(this.routeId + ": Different trip " + mTripId + " already in list (" + mTrip.toString() + " != "
+							+ mTrips.get(mTripId).toString() + ")");
 					System.exit(-1);
 				}
 			}
-			mTripId = mTrip.getId();
 			tripServiceId = this.agencyTools.cleanServiceId(gTrip.service_id);
 			parseFrequencies(mFrequencies, mRoute, gTrip, mTripId, tripServiceId);
 			mTripStops = new HashMap<String, MTripStop>();
@@ -244,21 +246,21 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (!equalsMyTripStopLists(mTripStopsList, cTripStopsList)) {
 					tripIdToMTripStops.put(mTripId, mergeMyTripStopLists(mTripStopsList, cTripStopsList));
 				}
-			} else {
+			} else { // just use it
 				tripIdToMTripStops.put(mTripId, mTripStopsList);
 			}
 			if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING && tripStopTimesHeadsign != null && tripStopTimesHeadsign.length() > 0) {
-				if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
-					if (!mTripStopTimesHeadsign.get(mTrip.getId()).equals(tripStopTimesHeadsign)) {
+				if (mTripStopTimesHeadsign.containsKey(mTripId)) {
+					if (!mTripStopTimesHeadsign.get(mTripId).equals(tripStopTimesHeadsign)) {
 						System.out.println("Trip Stop Times Headsign different for same trip ID ('" + mTripStopTimesHeadsign + "' != '"
-								+ mTripStopTimesHeadsign.get(mTrip.getId()) + "')");
+								+ mTripStopTimesHeadsign.get(mTripId) + "')");
 						System.exit(-1);
 					}
 				} else {
-					mTripStopTimesHeadsign.put(mTrip.getId(), tripStopTimesHeadsign);
+					mTripStopTimesHeadsign.put(mTripId, tripStopTimesHeadsign);
 				}
 			}
-			mTrips.put(mTrip.getId(), mTrip);
+			mTrips.put(mTripId, mTrip);
 		}
 	}
 
@@ -386,7 +388,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	private List<MTripStop> mergeMyTripStopLists(List<MTripStop> list1, List<MTripStop> list2) {
 		List<MTripStop> newList = new ArrayList<MTripStop>();
 		Set<Integer> newListStopIds = new HashSet<Integer>();
-
 		Set<Integer> list1StopIds = new HashSet<Integer>();
 		for (MTripStop ts1 : list1) {
 			list1StopIds.add(ts1.getStopId());
@@ -395,7 +396,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		for (MTripStop ts2 : list2) {
 			list2StopIds.add(ts2.getStopId());
 		}
-
 		MTripStop ts1, ts2;
 		boolean inL1, inL2;
 		boolean lastInL1, lastInL2;
@@ -404,7 +404,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		double ts1Distance, ts2Distance;
 		double previousTs1Distance, previousTs2Distance;
 		MTripStop[] commonStopAndPrevious;
-
 		int i1 = 0, i2 = 0;
 		MTripStop last = null;
 		for (; i1 < list1.size() && i2 < list2.size();) {
@@ -448,7 +447,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				continue;
 			}
 			// MANUAL MERGE
-			// Can't randomly choose one of them because stops might be in different order than real life,
 			if (last != null) {
 				lastInL1 = list1StopIds.contains(last.getStopId());
 				lastInL2 = list2StopIds.contains(last.getStopId());
@@ -600,7 +598,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	Map<Integer, GStop> gStopsCache = new HashMap<Integer, GStop>();
 
 	public GStop getGStop(MTripStop ts) {
-		return gStopsCache.get(ts.getStopId());
+		return this.gStopsCache.get(ts.getStopId());
 	}
 
 	// https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/location/java/android/location/Location.java

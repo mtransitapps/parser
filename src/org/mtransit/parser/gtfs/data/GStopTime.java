@@ -18,6 +18,7 @@ public class GStopTime {
 
 	public static final String STOP_HEADSIGN = "stop_headsign";
 	public String stop_headsign;
+
 	public GStopTime(String trip_id, String departure_time, String stop_id, int stop_sequence, String stop_headsign) {
 		this.trip_id = trip_id;
 		this.departure_time = departure_time;
