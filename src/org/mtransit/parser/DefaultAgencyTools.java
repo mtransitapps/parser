@@ -19,6 +19,7 @@ import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
+import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.MGenerator;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSpec;
@@ -37,7 +38,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		System.out.printf("Generating agency data...\n");
 		long start = System.currentTimeMillis();
 		// GTFS parsing
-		GSpec gtfs = GReader.readGtfsZipFile(args[0], this);
+		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false);
 		gtfs.tripStops = GReader.extractTripStops(gtfs);
 		Map<Long, GSpec> gtfsByMRouteId = GReader.splitByRouteId(gtfs, this);
 		// Objects generation
@@ -110,7 +111,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip) {
+	public HashSet<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs) {
+		HashSet<MTrip> mTrips = new HashSet<MTrip>();
+		mTrips.add(new MTrip(mRoute.id));
+		return mTrips;
+	}
+
+	@Override
+	public Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, HashSet<MTrip> splitTrips, GSpec gtfs) {
+		return new Pair<Long[], Integer[]>(new Long[] { splitTrips.iterator().next().getId() }, new Integer[] { gTripStop.stop_sequence });
+	}
+
+	@Override
+	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
 		if (gTrip.direction_id < 0 || gTrip.direction_id > 1) {
 			System.out.println("ERROR: default agency implementation required 'direction_id' field in 'trips.txt'!");
 			System.exit(-1);
@@ -122,11 +135,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 			nfe.printStackTrace();
 			System.exit(-1);
 		}
-	}
-
-	@Override
-	public boolean setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
-		return false; // not processed
 	}
 
 	@Override
@@ -321,7 +329,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
 		System.out.printf("Extracting useful service IDs...\n");
-		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools);
+		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, true);
 		Integer startDate = null;
 		Integer endDate = null;
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);

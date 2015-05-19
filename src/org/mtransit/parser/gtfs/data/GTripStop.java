@@ -22,14 +22,13 @@ public class GTripStop {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(stop_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(stop_sequence).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.stop_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.stop_sequence).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.toString();
 	}
 
-	public static String getUID(String trip_uid, String stop_id) {
-		return trip_uid + stop_id;
+	public static String getUID(String trip_uid, String stop_id, int stop_sequence) {
+		return stop_id + Constants.UUID_SEPARATOR + stop_sequence + Constants.UUID_SEPARATOR + trip_uid;
 	}
-
 }

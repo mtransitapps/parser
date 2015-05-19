@@ -25,9 +25,9 @@ public class GCalendarDate {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(exception_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.exception_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.toString();
 	}
 

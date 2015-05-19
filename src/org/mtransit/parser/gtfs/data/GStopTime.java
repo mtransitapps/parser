@@ -30,11 +30,15 @@ public class GStopTime {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(stop_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(stop_sequence).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(departure_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(stop_headsign).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.toString();
+				.append(Constants.STRING_DELIMITER).append(this.trip_id).append(Constants.STRING_DELIMITER) //
+				.append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.stop_id).append(Constants.STRING_DELIMITER) //
+				.append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.stop_sequence).append(Constants.STRING_DELIMITER) //
+				.append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.departure_time).append(Constants.STRING_DELIMITER) //
+				.append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.stop_headsign == null ? Constants.EMPTY : this.stop_headsign).append(Constants.STRING_DELIMITER) //
+				.append(Constants.COLUMN_SEPARATOR).toString();
 	}
 }

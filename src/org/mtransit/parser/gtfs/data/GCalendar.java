@@ -62,16 +62,16 @@ public class GCalendar {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(monday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(tuesday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(wednesday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(thursday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(friday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(saturday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(sunday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(start_date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(end_date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.monday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.tuesday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.wednesday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.thursday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.friday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.saturday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.sunday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.start_date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.end_date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.toString();
 	}
 

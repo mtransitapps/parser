@@ -4,10 +4,10 @@ import org.mtransit.parser.Constants;
 
 public class MFrequency implements Comparable<MFrequency> {
 
-	public String serviceId;
-	public long tripId;
-	public int startTime;
-	public int endTime;
+	private String serviceId;
+	private long tripId;
+	private int startTime;
+	private int endTime;
 	public int headwayInSec;
 
 	public MFrequency(String serviceId, long routeId, long tripId, int startTime, int endTime, int headwayInSec) {
@@ -16,6 +16,7 @@ public class MFrequency implements Comparable<MFrequency> {
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.headwayInSec = headwayInSec;
+		this.uuid = null;
 	}
 
 	@Override
@@ -33,8 +34,14 @@ public class MFrequency implements Comparable<MFrequency> {
 		return sb.toString();
 	}
 
+	private String uuid = null;
+
 	public String getUID() {
-		return this.serviceId + Constants.UUID_SEPARATOR + this.tripId + Constants.UUID_SEPARATOR + this.startTime + Constants.UUID_SEPARATOR + this.endTime;
+		if (this.uuid == null) {
+			this.uuid = this.serviceId + Constants.UUID_SEPARATOR + this.tripId + Constants.UUID_SEPARATOR + this.startTime + Constants.UUID_SEPARATOR
+					+ this.endTime;
+		}
+		return this.uuid;
 	}
 
 	@Override

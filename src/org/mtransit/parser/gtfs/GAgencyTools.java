@@ -1,7 +1,9 @@
 package org.mtransit.parser.gtfs;
 
+import java.util.HashSet;
 import java.util.List;
 
+import org.mtransit.parser.Pair;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GFrequency;
@@ -10,6 +12,7 @@ import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
+import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
@@ -38,16 +41,17 @@ public interface GAgencyTools {
 	boolean excludeRoute(GRoute gRoute);
 
 	// TRIP
-	@Deprecated
-	void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip);
-
-	boolean setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs);
+	void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs);
 
 	String cleanTripHeadsign(String tripHeadsign);
 
 	boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge);
 
 	boolean excludeTrip(GTrip gTrip);
+
+	HashSet<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs);
+
+	Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, HashSet<MTrip> splitTrips, GSpec gtfs);
 
 	// STOP
 	int getStopId(GStop gStop);

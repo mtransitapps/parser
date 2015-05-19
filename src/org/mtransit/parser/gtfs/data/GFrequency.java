@@ -14,9 +14,9 @@ public class GFrequency {
 	public static final String END_TIME = "end_time";
 	public String end_time;
 	public static final String HEADWAY_SECS = "headway_secs";
-	public String headway_secs;
+	public int headway_secs;
 
-	public GFrequency(String trip_id, String start_time, String end_time, String headway_secs) {
+	public GFrequency(String trip_id, String start_time, String end_time, int headway_secs) {
 		this.trip_id = trip_id;
 		this.start_time = start_time;
 		this.end_time = end_time;
@@ -26,10 +26,10 @@ public class GFrequency {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(start_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(end_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(headway_secs).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.start_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.end_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.headway_secs).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.toString();
 	}
 }

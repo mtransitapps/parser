@@ -37,7 +37,7 @@ public class GReader {
 
 	public static final String todayGtfs = new SimpleDateFormat("yyyyMMdd").format(new Date());
 
-	public static GSpec readGtfsZipFile(String gtfsFile, GAgencyTools agencyTools) {
+	public static GSpec readGtfsZipFile(String gtfsFile, GAgencyTools agencyTools, boolean calendarsOnly) {
 		System.out.printf("Reading GTFS file '%s'...\n", gtfsFile);
 		long start = System.currentTimeMillis();
 		GSpec gspec = null;
@@ -63,6 +63,9 @@ public class GReader {
 				}
 				String filename = entry.getName();
 				if (filename.equals(GAgency.FILENAME)) { // AGENCY
+					if (calendarsOnly) {
+						continue;
+					}
 					fileLines = readCsv(filename, reader, null, null);
 					agencies = processAgencies(fileLines, agencyTools);
 				} else if (filename.equals(GCalendarDate.FILENAME)) { // CALENDAR DATES
@@ -72,18 +75,33 @@ public class GReader {
 					fileLines = readCsv(filename, reader, null, null);
 					calendars = processCalendar(fileLines, agencyTools);
 				} else if (filename.equals(GRoute.FILENAME)) { // ROUTE
+					if (calendarsOnly) {
+						continue;
+					}
 					fileLines = readCsv(filename, reader, null, null);
 					routes = processRoutes(fileLines, agencyTools);
 				} else if (filename.equals(GStop.FILENAME)) { // STOP
+					if (calendarsOnly) {
+						continue;
+					}
 					fileLines = readCsv(filename, reader, null, null);
 					stops = processStops(fileLines, agencyTools);
 				} else if (filename.equals(GTrip.FILENAME)) { // TRIP
+					if (calendarsOnly) {
+						continue;
+					}
 					fileLines = readCsv(filename, reader, null, null);
 					trips = processTrips(fileLines, agencyTools);
 				} else if (filename.equals(GStopTime.FILENAME)) { // STOP TIME
+					if (calendarsOnly) {
+						continue;
+					}
 					fileLines = readCsv(filename, reader, null, null);
 					stopTimes = processStopTimes(fileLines, agencyTools);
 				} else if (filename.equals(GFrequency.FILENAME)) { // FREQUENCY
+					if (calendarsOnly) {
+						continue;
+					}
 					fileLines = readCsv(filename, reader, null, null);
 					frequencies = processFrequencies(fileLines, agencyTools);
 				} else {
@@ -117,13 +135,13 @@ public class GReader {
 			}
 		}
 		System.out.printf("Reading GTFS file '%1$s'... DONE in %2$s.\n", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
-		System.out.printf("- Agencies: %d\n", gspec.agencies.size());
+		System.out.printf("- Agencies: %d\n", gspec.agencies == null ? 0 : gspec.agencies.size());
 		System.out.printf("- Calendars: %d\n", gspec.calendars == null ? 0 : gspec.calendars.size());
 		System.out.printf("- CalendarDates: %d\n", gspec.calendarDates == null ? 0 : gspec.calendarDates.size());
-		System.out.printf("- Routes: %d\n", gspec.routes.size());
-		System.out.printf("- Trips: %d\n", gspec.trips.size());
-		System.out.printf("- Stops: %d\n", gspec.stops.size());
-		System.out.printf("- StopTimes: %d\n", gspec.stopTimes.size());
+		System.out.printf("- Routes: %d\n", gspec.routes == null ? 0 : gspec.routes.size());
+		System.out.printf("- Trips: %d\n", gspec.trips == null ? 0 : gspec.trips.size());
+		System.out.printf("- Stops: %d\n", gspec.stops == null ? 0 : gspec.stops.size());
+		System.out.printf("- StopTimes: %d\n", gspec.stopTimes == null ? 0 : gspec.stopTimes.size());
 		System.out.printf("- Frequencies: %d\n", gspec.frequencies == null ? 0 : gspec.frequencies.size());
 		return gspec;
 	}
@@ -223,7 +241,7 @@ public class GReader {
 			if (gTrip == null) {
 				continue;
 			}
-			uid = GTripStop.getUID(gTrip.getUID(), gStopTime.stop_id);
+			uid = GTripStop.getUID(gTrip.getUID(), gStopTime.stop_id, gStopTime.stop_sequence);
 			if (gTripStops.containsKey(uid)) {
 			} else { // add new one
 				gTripStops.put(uid, new GTripStop(gTrip.getTripId(), gStopTime.stop_id, gStopTime.stop_sequence));
@@ -240,7 +258,7 @@ public class GReader {
 		GStopTime gStopTime;
 		for (HashMap<String, String> line : lines) {
 			try {
-				gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.DEPARTURE_TIME).trim(), line.get(GStopTime.STOP_ID),
+				gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.DEPARTURE_TIME).trim(), line.get(GStopTime.STOP_ID).trim(),
 						Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()), line.get(GStopTime.STOP_HEADSIGN));
 				stopTimes.add(gStopTime);
 			} catch (Exception e) {
@@ -259,12 +277,13 @@ public class GReader {
 		GFrequency gFrequency;
 		for (HashMap<String, String> line : lines) {
 			try {
-				gFrequency = new GFrequency(line.get(GFrequency.TRIP_ID), line.get(GFrequency.START_TIME), line.get(GFrequency.END_TIME),
-						line.get(GFrequency.HEADWAY_SECS));
+				gFrequency = new GFrequency(line.get(GFrequency.TRIP_ID), line.get(GFrequency.START_TIME), line.get(GFrequency.END_TIME), Integer.parseInt(line
+						.get(GFrequency.HEADWAY_SECS)));
 				frequencies.add(gFrequency);
 			} catch (Exception e) {
 				System.out.println("Error while parsing: " + line);
 				e.printStackTrace();
+				System.exit(-1);
 			}
 		}
 		System.out.println("Processing frequencies... DONE (" + frequencies.size() + " extracted)");

@@ -14,20 +14,20 @@ public class MServiceDate implements Comparable<MServiceDate> {
 
 	@Override
 	public int compareTo(MServiceDate otherServiceDate) {
-		final int cd = calendarDate - otherServiceDate.calendarDate;
+		final int cd = this.calendarDate - otherServiceDate.calendarDate;
 		if (cd != 0) {
 			return cd;
 		}
-		return serviceId.compareToIgnoreCase(otherServiceDate.serviceId);
+		return this.serviceId.compareToIgnoreCase(otherServiceDate.serviceId);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		MServiceDate ts = (MServiceDate) obj;
-		if (ts.serviceId != null && !ts.serviceId.equals(serviceId)) {
+		if (ts.serviceId != null && !ts.serviceId.equals(this.serviceId)) {
 			return false;
 		}
-		if (ts.calendarDate != 0 && ts.calendarDate != calendarDate) {
+		if (ts.calendarDate != 0 && ts.calendarDate != this.calendarDate) {
 			return false;
 		}
 		return true;
@@ -36,9 +36,9 @@ public class MServiceDate implements Comparable<MServiceDate> {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(MSpec.escape(serviceId)).append(Constants.STRING_DELIMITER) // service ID
+				.append(Constants.STRING_DELIMITER).append(MSpec.escape(this.serviceId)).append(Constants.STRING_DELIMITER) // service ID
 				.append(Constants.COLUMN_SEPARATOR) //
-				.append(calendarDate) // calendar date
+				.append(this.calendarDate) // calendar date
 				.toString();
 	}
 
