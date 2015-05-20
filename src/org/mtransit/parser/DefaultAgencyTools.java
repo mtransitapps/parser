@@ -2,7 +2,6 @@ package org.mtransit.parser;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -326,6 +325,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 1;
+	private static final int MIN_COVERAGE_AFTER_TOTAL_IN_DAYS = 30;
 
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
 		System.out.printf("Extracting useful service IDs...\n");
@@ -333,8 +333,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		Integer startDate = null;
 		Integer endDate = null;
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
-		Integer todayStringInt = Integer.valueOf(simpleDateFormat.format(new Date()));
-		todayStringInt++; // TOMORROW (too late to publish today's schedule)
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.DAY_OF_MONTH, 1); // TOMORROW (too late to publish today's schedule)
+		Integer todayStringInt = Integer.valueOf(simpleDateFormat.format(c.getTime()));
 		if (gtfs.calendars != null && gtfs.calendars.size() > 0) {
 			for (GCalendar gCalendar : gtfs.calendars) {
 				if (gCalendar.start_date <= todayStringInt && gCalendar.end_date >= todayStringInt) {
@@ -369,21 +370,36 @@ public class DefaultAgencyTools implements GAgencyTools {
 				if (endDate - startDate < MIN_COVERAGE_AFTER_TODAY_IN_DAYS) {
 					endDate = startDate + MIN_COVERAGE_AFTER_TODAY_IN_DAYS;
 				}
-				for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
-					if (gCalendarDate.date >= startDate && gCalendarDate.date <= endDate) {
-						todayServiceIds.add(gCalendarDate.service_id);
+				while (true) {
+					for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+						if (gCalendarDate.date >= startDate && gCalendarDate.date <= endDate) {
+							todayServiceIds.add(gCalendarDate.service_id);
+						}
 					}
-				}
-				for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
-					for (String todayServiceId : todayServiceIds) {
-						if (gCalendarDate.service_id.equals(todayServiceId)) {
-							if (startDate == null || gCalendarDate.date < startDate) {
-								startDate = gCalendarDate.date;
-							}
-							if (endDate == null || gCalendarDate.date > endDate) {
-								endDate = gCalendarDate.date;
+					for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+						for (String todayServiceId : todayServiceIds) {
+							if (gCalendarDate.service_id.equals(todayServiceId)) {
+								if (startDate == null || gCalendarDate.date < startDate) {
+									startDate = gCalendarDate.date;
+								}
+								if (endDate == null || gCalendarDate.date > endDate) {
+									endDate = gCalendarDate.date;
+								}
 							}
 						}
+					}
+					if (endDate - startDate < MIN_COVERAGE_AFTER_TOTAL_IN_DAYS) {
+						try {
+							c.setTime(simpleDateFormat.parse(String.valueOf(endDate)));
+							c.add(Calendar.DAY_OF_MONTH, 1);
+							endDate = Integer.valueOf(simpleDateFormat.format(c.getTime()));
+						} catch (Exception e) {
+							System.out.println("Error while increasing end date!");
+							e.printStackTrace();
+							System.exit(-1);
+						}
+					} else {
+						break;
 					}
 				}
 			} else {
