@@ -197,8 +197,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					}
 				}
 			}
-			for (List<MTripStop> entry : tripIdToMTripStops.values()) {
-				for (MTripStop mTripStop : entry) {
+			for (List<MTripStop> mTripStops : tripIdToMTripStops.values()) {
+				setMTripStopSequence(mTripStops);
+				for (MTripStop mTripStop : mTripStops) {
 					if (allMTripStops.containsKey(mTripStop.getUID()) && !allMTripStops.get(mTripStop.getUID()).equals(mTripStop)) {
 						System.out.println(this.routeId + ": Different trip stop " + mTripStop.getUID() + " already in route list (" + mTripStop.toString()
 								+ " != " + allMTripStops.get(mTripStop.getUID()).toString() + ")!");
@@ -591,11 +592,16 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		for (; i2 < list2.size();) {
 			newList.add(list2.get(i2++));
 		}
-		// set stop sequence
-		for (int i = 0; i < newList.size(); i++) {
-			newList.get(i).setStopSequence(i + 1);
-		}
+		setMTripStopSequence(newList);
 		return newList;
+	}
+
+	private void setMTripStopSequence(List<MTripStop> mTripStops) {
+		if (mTripStops != null) {
+			for (int i = 0; i < mTripStops.size(); i++) {
+				mTripStops.get(i).setStopSequence(i + 1);
+			}
+		}
 	}
 
 	private MTripStop[] findFirstCommonStop(List<MTripStop> l1, List<MTripStop> l2) {

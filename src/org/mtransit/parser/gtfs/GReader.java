@@ -520,7 +520,6 @@ public class GReader {
 			}
 			gRouteToSpec.get(routeId).stopTimes.add(gStopTime);
 		}
-
 		if (gtfs.frequencies != null) {
 			for (GFrequency gFrequency : gtfs.frequencies) {
 				routeId = gTripIdToMRouteId.get(gFrequency.trip_id);
