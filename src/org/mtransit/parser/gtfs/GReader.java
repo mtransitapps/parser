@@ -418,8 +418,8 @@ public class GReader {
 		Map<String, GRoute> routes = new HashMap<String, GRoute>();
 		GRoute gRoute;
 		for (HashMap<String, String> line : lines) {
-			gRoute = new GRoute(line.get(GRoute.ROUTE_ID), line.get(GRoute.ROUTE_SHORT_NAME), line.get(GRoute.ROUTE_LONG_NAME), line.get(GRoute.ROUTE_DESC),
-					Integer.parseInt(line.get(GRoute.ROUTE_TYPE)), line.get(GRoute.ROUTE_COLOR));
+			gRoute = new GRoute(line.get(GRoute.AGENCY_ID), line.get(GRoute.ROUTE_ID), line.get(GRoute.ROUTE_SHORT_NAME), line.get(GRoute.ROUTE_LONG_NAME),
+					line.get(GRoute.ROUTE_DESC), Integer.parseInt(line.get(GRoute.ROUTE_TYPE)), line.get(GRoute.ROUTE_COLOR));
 			if (agencyTools.excludeRoute(gRoute)) {
 				continue;
 			}

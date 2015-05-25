@@ -76,11 +76,21 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public String getRouteShortName(GRoute gRoute) {
+		if (StringUtils.isEmpty(gRoute.route_short_name)) {
+			System.out.println("No default route short name for " + gRoute);
+			System.exit(-1);
+			return null;
+		}
 		return gRoute.route_short_name;
 	}
 
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
+		if (StringUtils.isEmpty(gRoute.route_long_name)) {
+			System.out.println("No default route long name for " + gRoute);
+			System.exit(-1);
+			return null;
+		}
 		return MSpec.cleanLabel(gRoute.route_long_name);
 	}
 

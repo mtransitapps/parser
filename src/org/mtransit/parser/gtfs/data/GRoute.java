@@ -23,7 +23,8 @@ public class GRoute {
 	public static final String ROUTE_COLOR = "route_color";
 	public String route_color;
 
-	public GRoute(String route_id, String route_short_name, String route_long_name, String route_desc, int route_type, String route_color) {
+	public GRoute(String agency_id, String route_id, String route_short_name, String route_long_name, String route_desc, int route_type, String route_color) {
+		this.agency_id = agency_id;
 		this.route_id = route_id;
 		this.route_short_name = route_short_name;
 		this.route_long_name = route_long_name;

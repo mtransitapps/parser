@@ -333,12 +333,16 @@ public class MSpec {
 	private static final String MOUNT_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mt");
 	private static final Pattern MOUNTAIN = Pattern.compile(String.format(REGEX_START_END, "mountain"), Pattern.CASE_INSENSITIVE);
 	private static final String MOUNTAIN_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mtn");
+	private static final Pattern MARKET = Pattern.compile(String.format(REGEX_START_END, "market"), Pattern.CASE_INSENSITIVE);
+	private static final String MARKET_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mkt");
 	private static final Pattern PARK = Pattern.compile(String.format(REGEX_START_END, "park"), Pattern.CASE_INSENSITIVE);
 	private static final String PARK_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pk"); // not official
 	private static final Pattern GATE = Pattern.compile(String.format(REGEX_START_END, "gate"), Pattern.CASE_INSENSITIVE);
 	private static final String GATE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Gt"); // not official
 	private static final Pattern PARKING = Pattern.compile(String.format(REGEX_START_END, "parking"), Pattern.CASE_INSENSITIVE);
 	private static final String PARKING_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pkng"); // not official
+	private static final Pattern HOSPITAL = Pattern.compile(String.format(REGEX_START_END, "hospital"), Pattern.CASE_INSENSITIVE);
+	private static final String HOSPITAL_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Hosp"); // not official
 
 	public static String cleanStreetTypes(String string) {
 		string = LANE.matcher(string).replaceAll(LANE_REPLACEMENT);
@@ -394,6 +398,8 @@ public class MSpec {
 		string = MOUNTAIN.matcher(string).replaceAll(MOUNTAIN_REPLACEMENT);
 		string = PARK.matcher(string).replaceAll(PARK_REPLACEMENT);
 		string = GATE.matcher(string).replaceAll(GATE_REPLACEMENT);
+		string = HOSPITAL.matcher(string).replaceAll(HOSPITAL_REPLACEMENT);
+		string = MARKET.matcher(string).replaceAll(MARKET_REPLACEMENT);
 		return string;
 	}
 }
