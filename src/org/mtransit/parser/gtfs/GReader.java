@@ -37,6 +37,8 @@ public class GReader {
 
 	public static final String todayGtfs = new SimpleDateFormat("yyyyMMdd").format(new Date());
 
+	private static final Charset UTF8 = Charset.forName("UTF-8");
+
 	public static GSpec readGtfsZipFile(String gtfsFile, GAgencyTools agencyTools, boolean calendarsOnly) {
 		System.out.printf("Reading GTFS file '%s'...\n", gtfsFile);
 		long start = System.currentTimeMillis();
@@ -46,7 +48,7 @@ public class GReader {
 		BufferedReader reader = null;
 		try {
 			zip = new ZipInputStream(new FileInputStream(gtfsFile));
-			isr = new InputStreamReader(zip, Charset.forName("UTF-8"));
+			isr = new InputStreamReader(zip, UTF8);
 			reader = new BufferedReader(isr);
 			List<GAgency> agencies = null;
 			List<GCalendar> calendars = null;
@@ -419,7 +421,7 @@ public class GReader {
 		GRoute gRoute;
 		for (HashMap<String, String> line : lines) {
 			gRoute = new GRoute(line.get(GRoute.AGENCY_ID), line.get(GRoute.ROUTE_ID), line.get(GRoute.ROUTE_SHORT_NAME), line.get(GRoute.ROUTE_LONG_NAME),
-					line.get(GRoute.ROUTE_DESC), Integer.parseInt(line.get(GRoute.ROUTE_TYPE)), line.get(GRoute.ROUTE_COLOR));
+					line.get(GRoute.ROUTE_DESC), Integer.parseInt(line.get(GRoute.ROUTE_TYPE)), line.get(GRoute.ROUTE_COLOR).trim());
 			if (agencyTools.excludeRoute(gRoute)) {
 				continue;
 			}
