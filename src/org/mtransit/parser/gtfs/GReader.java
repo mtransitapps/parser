@@ -402,10 +402,10 @@ public class GReader {
 				continue; // skip parent stations
 			}
 			if (ENTRANCE_TYPE.equals(line.get(GStop.LOCATION_TYPE))) {
-				continue; // skip parent stations
+				continue; // skip entrance stations
 			}
 			gStop = new GStop(line.get(GStop.STOP_ID), line.get(GStop.STOP_NAME), Double.parseDouble(line.get(GStop.STOP_LAT)), Double.parseDouble(line
-					.get(GStop.STOP_LON)), line.get(GStop.STOP_CODE));
+					.get(GStop.STOP_LON)), line.get(GStop.STOP_CODE).trim());
 			if (agencyTools.excludeStop(gStop)) {
 				continue;
 			}
