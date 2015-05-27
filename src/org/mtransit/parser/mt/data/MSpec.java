@@ -335,6 +335,8 @@ public class MSpec {
 	private static final String MOUNTAIN_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mtn");
 	private static final Pattern MARKET = Pattern.compile(String.format(REGEX_START_END, "market"), Pattern.CASE_INSENSITIVE);
 	private static final String MARKET_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mkt");
+	private static final Pattern BUILDING = Pattern.compile(String.format(REGEX_START_END, "building"), Pattern.CASE_INSENSITIVE);
+	private static final String BUILDING_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Bldg");
 	private static final Pattern PARK = Pattern.compile(String.format(REGEX_START_END, "park"), Pattern.CASE_INSENSITIVE);
 	private static final String PARK_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pk"); // not official
 	private static final Pattern GATE = Pattern.compile(String.format(REGEX_START_END, "gate"), Pattern.CASE_INSENSITIVE);
@@ -400,6 +402,7 @@ public class MSpec {
 		string = GATE.matcher(string).replaceAll(GATE_REPLACEMENT);
 		string = HOSPITAL.matcher(string).replaceAll(HOSPITAL_REPLACEMENT);
 		string = MARKET.matcher(string).replaceAll(MARKET_REPLACEMENT);
+		string = BUILDING.matcher(string).replaceAll(BUILDING_REPLACEMENT);
 		return string;
 	}
 }

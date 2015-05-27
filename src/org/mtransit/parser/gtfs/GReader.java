@@ -419,13 +419,21 @@ public class GReader {
 		System.out.println("Processing routes...");
 		Map<String, GRoute> routes = new HashMap<String, GRoute>();
 		GRoute gRoute;
+		String routeColor;
 		for (HashMap<String, String> line : lines) {
-			gRoute = new GRoute(line.get(GRoute.AGENCY_ID), line.get(GRoute.ROUTE_ID), line.get(GRoute.ROUTE_SHORT_NAME), line.get(GRoute.ROUTE_LONG_NAME),
-					line.get(GRoute.ROUTE_DESC), Integer.parseInt(line.get(GRoute.ROUTE_TYPE)), line.get(GRoute.ROUTE_COLOR).trim());
-			if (agencyTools.excludeRoute(gRoute)) {
-				continue;
+			try {
+				routeColor = line.get(GRoute.ROUTE_COLOR);
+				gRoute = new GRoute(line.get(GRoute.AGENCY_ID), line.get(GRoute.ROUTE_ID), line.get(GRoute.ROUTE_SHORT_NAME), line.get(GRoute.ROUTE_LONG_NAME),
+						line.get(GRoute.ROUTE_DESC), Integer.parseInt(line.get(GRoute.ROUTE_TYPE)), routeColor == null ? null : routeColor.trim());
+				if (agencyTools.excludeRoute(gRoute)) {
+					continue;
+				}
+				routes.put(gRoute.route_id, gRoute);
+			} catch (Exception e) {
+				System.out.println("Error while parsing route line " + line);
+				e.printStackTrace();
+				System.exit(-1);
 			}
-			routes.put(gRoute.route_id, gRoute);
 		}
 		System.out.println("Processing routes... DONE (" + routes.size() + " extracted)");
 		return routes;
