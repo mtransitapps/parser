@@ -397,6 +397,7 @@ public class GReader {
 		System.out.println("Processing stops...");
 		HashMap<String, GStop> stops = new HashMap<String, GStop>();
 		GStop gStop;
+		String code;
 		for (Map<String, String> line : lines) {
 			if (PARENT_STATION_TYPE.equals(line.get(GStop.LOCATION_TYPE))) {
 				continue; // skip parent stations
@@ -404,8 +405,9 @@ public class GReader {
 			if (ENTRANCE_TYPE.equals(line.get(GStop.LOCATION_TYPE))) {
 				continue; // skip entrance stations
 			}
+			code = line.get(GStop.STOP_CODE);
 			gStop = new GStop(line.get(GStop.STOP_ID), line.get(GStop.STOP_NAME), Double.parseDouble(line.get(GStop.STOP_LAT)), Double.parseDouble(line
-					.get(GStop.STOP_LON)), line.get(GStop.STOP_CODE).trim());
+					.get(GStop.STOP_LON)), code == null ? null : code.trim());
 			if (agencyTools.excludeStop(gStop)) {
 				continue;
 			}

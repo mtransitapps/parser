@@ -148,7 +148,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		HashMap<Long, List<MTripStop>> tripIdToMTripStops;
 		Set<String> mTripHeasignStrings;
 		boolean headsignTypeString;
-		boolean tripKeptNonDescriptiveHeadsing;
+		boolean tripKeptNonDescriptiveHeadsign;
 		for (GRoute gRoute : this.gtfs.routes.values()) {
 			mRoute = new MRoute(this.agencyTools.getRouteId(gRoute), this.agencyTools.getRouteShortName(gRoute), this.agencyTools.getRouteLongName(gRoute),
 					this.agencyTools.getRouteColor(gRoute));
@@ -176,7 +176,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					headsignTypeString = true;
 				}
 			}
-			tripKeptNonDescriptiveHeadsing = false; // 1 trip can keep the same non descriptive head sign
+			tripKeptNonDescriptiveHeadsign = false; // 1 trip can keep the same non descriptive head sign
 			if (headsignTypeString && mTripHeasignStrings.size() != mTrips.size()) {
 				System.out.println(this.routeId + ": Non descriptive trip headsigns (" + mTripHeasignStrings.size() + " different heasign(s) for "
 						+ mTrips.size() + " trips)");
@@ -186,14 +186,14 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								+ mTripStopTimesHeadsign.get(mTrip.getId()) + "' (" + mTrip.toString() + ")");
 						mTrip.setHeadsignString(mTripStopTimesHeadsign.get(mTrip.getId()), mTrip.getHeadsignId());
 					} else {
-						if (tripKeptNonDescriptiveHeadsing) {
+						if (tripKeptNonDescriptiveHeadsign) {
 							System.out.println(this.routeId + ": Trip headsign string '" + mTrip.getHeadsignValue() + "' non descriptive! (" + mTrip.toString()
 									+ ")");
 							System.exit(-1);
 						}
 						System.out.println(this.routeId + ": Keeping non-descritive trip headsign '" + mTrip.getHeadsignValue() + "' (" + mTrip.toString()
 								+ ")");
-						tripKeptNonDescriptiveHeadsing = true; // last trip that can keep same head sign
+						tripKeptNonDescriptiveHeadsign = true; // last trip that can keep same head sign
 					}
 				}
 			}
@@ -488,8 +488,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				lastInL1 = list1StopIds.contains(last.getStopId());
 				lastInL2 = list2StopIds.contains(last.getStopId());
 				if (lastInL1 && !lastInL2) {
-					System.out.println(this.routeId + ": Resolved using last " + ts1.getTripId() + "," + ts1.getStopId() + "," + ts2.getStopId() + " (last:"
-							+ last.getStopId() + ")");
+					System.out.println(this.routeId + ": Resolved using last [tripID:" + ts1.getTripId() + "|ts1.stopID:" + ts1.getStopId() + "|ts2.stopID:"
+							+ ts2.getStopId() + "] (last.stopID:" + last.getStopId() + ") > insert: " + ts1 + " instead of " + ts2);
 					newList.add(ts1);
 					newListStopIds.add(ts1.getStopId());
 					last = ts1;
@@ -497,8 +497,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					continue;
 				}
 				if (!lastInL1 && lastInL2) {
-					System.out.println(this.routeId + ": Resolved using last " + ts1.getTripId() + "," + ts1.getStopId() + "," + ts2.getStopId() + " (last:"
-							+ last.getStopId() + ")");
+					System.out.println(this.routeId + ": Resolved using last [tripID:" + ts1.getTripId() + "|ts1.stopID:" + ts1.getStopId() + "|ts2.stopID:"
+							+ ts2.getStopId() + "] (last.stopID:" + last.getStopId() + ") > insert: " + ts2 + " instead of " + ts1);
 					// System.out.println(this.routeId + ": Inserted " + ts2 + ".");
 					newList.add(ts2);
 					newListStopIds.add(ts2.getStopId());
@@ -513,15 +513,19 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				ts2GStop = this.gStopsCache.get(ts2.getStopId());
 				ts1Distance = findDistance(lastGStop.getLatD(), lastGStop.getLongD(), ts1GStop.getLatD(), ts1GStop.getLongD());
 				ts2Distance = findDistance(lastGStop.getLatD(), lastGStop.getLongD(), ts2GStop.getLatD(), ts2GStop.getLongD());
-				System.out.println(this.routeId + ": Resolved using last distance " + ts1.getTripId() + "," + ts1.getStopId() + "," + ts2.getStopId()
-						+ " (last:" + last.getStopId() + " " + ts1Distance + ", " + ts2Distance + ")");
 				if (ts1Distance < ts2Distance) {
+					System.out.println(this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
+							+ "|stopID2:" + ts2.getStopId() + "] (lastStopID:" + last.getStopId() + "|distance1:" + ts1Distance + "|distance2:" + ts2Distance
+							+ ") > insert: " + ts1 + " instead of " + ts2);
 					newList.add(ts1);
 					newListStopIds.add(ts1.getStopId());
 					last = ts1;
 					i1++;
 					continue;
 				} else {
+					System.out.println(this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
+							+ "|stopID2:" + ts2.getStopId() + "] (lastStopID:" + last.getStopId() + "|distance1:" + ts1Distance + "|distance2:" + ts2Distance
+							+ ") > insert: " + ts2 + " instead of " + ts1);
 					newList.add(ts2);
 					newListStopIds.add(ts2.getStopId());
 					last = ts2;
