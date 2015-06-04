@@ -53,6 +53,8 @@ public interface GAgencyTools {
 
 	Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, HashSet<MTrip> splitTrips, GSpec gtfs);
 
+	boolean excludeStopTime(GStopTime gStopTime);
+
 	// STOP
 	int getStopId(GStop gStop);
 
@@ -77,5 +79,7 @@ public interface GAgencyTools {
 	int getEndTime(GFrequency gFrequency);
 
 	// DEPARTURE TIME
-	int compare(MTripStop ts1, MTripStop ts2, GStop ts1gStop, GStop ts2GStop);
+	int compareEarly(MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop);
+
+	int compare(MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop);
 }

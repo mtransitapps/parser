@@ -263,6 +263,9 @@ public class GReader {
 				gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.DEPARTURE_TIME).trim(), line.get(GStopTime.STOP_ID).trim(),
 						Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()), line.get(GStopTime.STOP_HEADSIGN));
 				stopTimes.add(gStopTime);
+				if (agencyTools.excludeStopTime(gStopTime)) {
+					continue; // ignore this service
+				}
 			} catch (Exception e) {
 				System.out.println("Error while parsing: " + line);
 				e.printStackTrace();

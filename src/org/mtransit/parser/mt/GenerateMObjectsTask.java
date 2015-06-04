@@ -507,6 +507,22 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					continue;
 				}
 			}
+			ts1GStop = this.gStopsCache.get(ts1.getStopId());
+			ts2GStop = this.gStopsCache.get(ts2.getStopId());
+			int compareEarly = this.agencyTools.compareEarly(ts1, ts2, ts1GStop, ts2GStop);
+			if (compareEarly > 0) {
+				newList.add(ts1);
+				newListStopIds.add(ts1.getStopId());
+				last = ts1;
+				i1++;
+				continue;
+			} else if (compareEarly < 0) {
+				newList.add(ts2);
+				newListStopIds.add(ts2.getStopId());
+				last = ts2;
+				i2++;
+				continue;
+			}
 			if (last != null) {
 				lastGStop = this.gStopsCache.get(last.getStopId());
 				ts1GStop = this.gStopsCache.get(ts1.getStopId());
@@ -559,8 +575,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 			}
 
-			ts1GStop = this.gStopsCache.get(ts1.getStopId());
-			ts2GStop = this.gStopsCache.get(ts2.getStopId());
 			int compare = this.agencyTools.compare(ts1, ts2, ts1GStop, ts2GStop);
 			if (compare > 0) {
 				newList.add(ts1);

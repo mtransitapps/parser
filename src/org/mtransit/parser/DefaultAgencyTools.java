@@ -157,6 +157,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public boolean excludeStopTime(GStopTime gStopTime) {
+		return false;
+	}
+
+	@Override
 	public boolean excludeTrip(GTrip gTrip) {
 		return false;
 	}
@@ -195,6 +200,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 			System.exit(-1);
 			return -1;
 		}
+	}
+
+	@Override
+	public int compareEarly(MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
+		return 0; // nothing
 	}
 
 	@Override
