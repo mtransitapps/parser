@@ -509,7 +509,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			ts1GStop = this.gStopsCache.get(ts1.getStopId());
 			ts2GStop = this.gStopsCache.get(ts2.getStopId());
-			int compareEarly = this.agencyTools.compareEarly(ts1, ts2, ts1GStop, ts2GStop);
+			int compareEarly = this.agencyTools.compareEarly(this.routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
 			if (compareEarly > 0) {
 				newList.add(ts1);
 				newListStopIds.add(ts1.getStopId());
@@ -575,7 +575,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 			}
 
-			int compare = this.agencyTools.compare(ts1, ts2, ts1GStop, ts2GStop);
+			int compare = this.agencyTools.compare(this.routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
 			if (compare > 0) {
 				newList.add(ts1);
 				newListStopIds.add(ts1.getStopId());

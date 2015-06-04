@@ -203,12 +203,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public int compareEarly(MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
+	public int compareEarly(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
 		return 0; // nothing
 	}
 
 	@Override
-	public int compare(MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
+	public int compare(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
 		return 0; // nothing
 	}
 
