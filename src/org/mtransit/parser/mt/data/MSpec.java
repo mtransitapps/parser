@@ -233,6 +233,7 @@ public class MSpec {
 	private static final String REGEX_START_END = "((^|\\W){1}(%s)(\\W|$){1})";
 	private static final String REGEX_START_END_REPLACEMENT = "$2%s$4";
 
+	// http://www.semaphorecorp.com/cgi/abbrev.html
 	private static final Pattern STREET = Pattern.compile(String.format(REGEX_START_END, "street"), Pattern.CASE_INSENSITIVE);
 	private static final String STREET_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "St");
 	private static final Pattern AVENUE = Pattern.compile(String.format(REGEX_START_END, "avenue"), Pattern.CASE_INSENSITIVE);
@@ -337,6 +338,8 @@ public class MSpec {
 	private static final String MARKET_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mkt");
 	private static final Pattern BUILDING = Pattern.compile(String.format(REGEX_START_END, "building"), Pattern.CASE_INSENSITIVE);
 	private static final String BUILDING_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Bldg");
+	private static final Pattern GREENS = Pattern.compile(String.format(REGEX_START_END, "Greens"), Pattern.CASE_INSENSITIVE);
+	private static final String GREENS_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Grns");
 	private static final Pattern PARK = Pattern.compile(String.format(REGEX_START_END, "park"), Pattern.CASE_INSENSITIVE);
 	private static final String PARK_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pk"); // not official
 	private static final Pattern GATE = Pattern.compile(String.format(REGEX_START_END, "gate"), Pattern.CASE_INSENSITIVE);
@@ -403,6 +406,31 @@ public class MSpec {
 		string = HOSPITAL.matcher(string).replaceAll(HOSPITAL_REPLACEMENT);
 		string = MARKET.matcher(string).replaceAll(MARKET_REPLACEMENT);
 		string = BUILDING.matcher(string).replaceAll(BUILDING_REPLACEMENT);
+		string = GREENS.matcher(string).replaceAll(GREENS_REPLACEMENT);
+		return string;
+	}
+
+	// FR-CA : http://www.toponymie.gouv.qc.ca/ct/normes-procedures/terminologie-geographique/liste-termes-geographiques.html
+	private static final Pattern FR_CA_AVENUE = Pattern.compile(String.format(REGEX_START_END, "avenue"), Pattern.CASE_INSENSITIVE);
+	private static final String FR_CA_AVENUE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Av.");
+	private static final Pattern FR_CA_CARREFOUR = Pattern.compile(String.format(REGEX_START_END, "carrefour"), Pattern.CASE_INSENSITIVE);
+	private static final String FR_CA_CARREFOUR_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Carref.");
+	private static final Pattern FR_CA_PARC_INDUSTRIEL = Pattern.compile(String.format(REGEX_START_END, "parc industriel"), Pattern.CASE_INSENSITIVE);
+	private static final String FR_CA_PARC_INDUSTRIEL_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Parc Ind.");
+	private static final Pattern FR_CA_PLATEAU = Pattern.compile(String.format(REGEX_START_END, "plateau"), Pattern.CASE_INSENSITIVE);
+	private static final String FR_CA_PLATEAU_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pl.");
+	private static final Pattern FR_CA_TERRASSE = Pattern.compile(String.format(REGEX_START_END, "terrasse"), Pattern.CASE_INSENSITIVE);
+	private static final String FR_CA_TERRASSE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Tsse");
+	private static final Pattern FR_CA_TERRASSES = Pattern.compile(String.format(REGEX_START_END, "terrasses"), Pattern.CASE_INSENSITIVE);
+	private static final String FR_CA_TERRASSES_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Tsses");
+
+	public static String cleanStreetTypesFRCA(String string) {
+		string = FR_CA_AVENUE.matcher(string).replaceAll(FR_CA_AVENUE_REPLACEMENT);
+		string = FR_CA_CARREFOUR.matcher(string).replaceAll(FR_CA_CARREFOUR_REPLACEMENT);
+		string = FR_CA_PARC_INDUSTRIEL.matcher(string).replaceAll(FR_CA_PARC_INDUSTRIEL_REPLACEMENT);
+		string = FR_CA_PLATEAU.matcher(string).replaceAll(FR_CA_PLATEAU_REPLACEMENT);
+		string = FR_CA_TERRASSE.matcher(string).replaceAll(FR_CA_TERRASSE_REPLACEMENT);
+		string = FR_CA_TERRASSES.matcher(string).replaceAll(FR_CA_TERRASSES_REPLACEMENT);
 		return string;
 	}
 }
