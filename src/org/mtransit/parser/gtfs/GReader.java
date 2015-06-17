@@ -5,9 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +33,7 @@ import org.mtransit.parser.gtfs.data.GTripStop;
 
 public class GReader {
 
-	public static final String todayGtfs = new SimpleDateFormat("yyyyMMdd").format(new Date());
-
-	private static final Charset UTF8 = Charset.forName("UTF-8");
+	public static final Charset UTF8 = Charset.forName("UTF-8");
 
 	public static GSpec readGtfsZipFile(String gtfsFile, GAgencyTools agencyTools, boolean calendarsOnly) {
 		System.out.printf("Reading GTFS file '%s'...\n", gtfsFile);
