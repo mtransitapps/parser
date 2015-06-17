@@ -7,11 +7,9 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -41,6 +39,7 @@ public class MGenerator {
 		List<MRoute> mRoutes = new ArrayList<MRoute>();
 		List<MTrip> mTrips = new ArrayList<MTrip>();
 		List<MTripStop> mTripStops = new ArrayList<MTripStop>();
+		List<MStop> mStopsList = new ArrayList<MStop>();
 		TreeMap<Integer, List<MSchedule>> mStopSchedules = new TreeMap<Integer, List<MSchedule>>();
 		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<Long, List<MFrequency>>();
 		List<MServiceDate> mServiceDates = new ArrayList<MServiceDate>();
@@ -65,6 +64,11 @@ public class MGenerator {
 				mRoutes.addAll(mRouteSpec.routes);
 				mTrips.addAll(mRouteSpec.trips);
 				mTripStops.addAll(mRouteSpec.tripStops);
+				for (MStop mStop : mRouteSpec.stops) {
+					if (!mStopsList.contains(mStop)) {
+						mStopsList.add(mStop);
+					}
+				}
 				mServiceDates.addAll(mRouteSpec.serviceDates);
 				for (Entry<Integer, List<MSchedule>> stopScheduleEntry : mRouteSpec.stopSchedules.entrySet()) {
 					if (!mStopSchedules.containsKey(stopScheduleEntry.getKey())) {
@@ -88,34 +92,6 @@ public class MGenerator {
 			}
 		}
 		threadPoolExecutor.shutdown();
-		System.out.println("Generating stops objects... ");
-		// generate trip stops stops IDs to check stop usefulness
-		Set<Integer> tripStopStopIds = new HashSet<Integer>();
-		for (MTripStop mTripStop : mTripStops) {
-			tripStopStopIds.add(mTripStop.getStopId());
-		}
-
-		// generate stops
-		List<MStop> mStopsList = new ArrayList<MStop>();
-		Set<Integer> mStopIds = new HashSet<Integer>();
-		int skippedStopsCount = 0;
-		MStop mStop;
-		for (GStop gStop : gStops.values()) {
-			mStop = new MStop(agencyTools.getStopId(gStop), agencyTools.getStopCode(gStop), agencyTools.cleanStopName(gStop.stop_name), gStop.getLatD(),
-					gStop.getLongD());
-			if (mStopIds.contains(mStop.id)) {
-				System.out.println("Stop ID '" + mStop.id + "' already in list! (" + mStop.toString() + ")");
-				continue;
-			}
-			if (!tripStopStopIds.contains(mStop.id)) {
-				skippedStopsCount++;
-				continue;
-			}
-			mStopsList.add(mStop);
-			mStopIds.add(mStop.id);
-		}
-		System.out.println("Skipped " + skippedStopsCount + " useless stops.");
-		System.out.println("Generating stops objects... DONE");
 
 		Collections.sort(mAgencies);
 		Collections.sort(mStopsList);
