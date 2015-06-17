@@ -7,6 +7,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,7 +40,7 @@ public class MGenerator {
 		List<MRoute> mRoutes = new ArrayList<MRoute>();
 		List<MTrip> mTrips = new ArrayList<MTrip>();
 		List<MTripStop> mTripStops = new ArrayList<MTripStop>();
-		List<MStop> mStopsList = new ArrayList<MStop>();
+		HashMap<Integer, MStop> mStops = new HashMap<Integer, MStop>();
 		TreeMap<Integer, List<MSchedule>> mStopSchedules = new TreeMap<Integer, List<MSchedule>>();
 		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<Long, List<MFrequency>>();
 		List<MServiceDate> mServiceDates = new ArrayList<MServiceDate>();
@@ -65,9 +66,14 @@ public class MGenerator {
 				mTrips.addAll(mRouteSpec.trips);
 				mTripStops.addAll(mRouteSpec.tripStops);
 				for (MStop mStop : mRouteSpec.stops) {
-					if (!mStopsList.contains(mStop)) {
-						mStopsList.add(mStop);
+					if (mStops.containsKey(mStop.id)) {
+						if (!mStops.get(mStop.id).equals(mStop)) {
+							System.out.println("Stop ID '" + mStop.id + "' already in list! " //
+									+ "(" + mStops.get(mStop.id) + " instead of " + mStop.toString() + ")");
+						}
+						continue;
 					}
+					mStops.put(mStop.id, mStop);
 				}
 				mServiceDates.addAll(mRouteSpec.serviceDates);
 				for (Entry<Integer, List<MSchedule>> stopScheduleEntry : mRouteSpec.stopSchedules.entrySet()) {
@@ -92,7 +98,7 @@ public class MGenerator {
 			}
 		}
 		threadPoolExecutor.shutdown();
-
+		List<MStop> mStopsList = new ArrayList<MStop>(mStops.values());
 		Collections.sort(mAgencies);
 		Collections.sort(mStopsList);
 		Collections.sort(mRoutes);
