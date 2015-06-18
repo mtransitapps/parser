@@ -452,11 +452,13 @@ public class MGenerator {
 
 	private static final SimpleDateFormat CALENDAR_DATE = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
 
-	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from[^\\.]*.)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from [A-Za-z]+ [0-9]{1,2}\\, [0-9]{4} to [A-Za-z]+ [0-9]{1,2}\\, [0-9]{4}\\.)",
+			Pattern.CASE_INSENSITIVE);
 	private static final SimpleDateFormat SCHEDULE_DATE = new SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH);
 	private static final String SCHEDULE_FROM_TO = "Schedule from %s to %s.";
 
-	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du[^\\.]*.)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du [0-9]{1,2} [A-Za-z]+ [0-9]{4} au [0-9]{1,2} [A-Za-z]+ [0-9]{4}\\.)",
+			Pattern.CASE_INSENSITIVE);
 	private static final SimpleDateFormat SCHEDULE_DATE_FR = new SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH);
 	private static final String SCHEDULE_FROM_TO_FR = "Horaires du %s au %s.";
 
