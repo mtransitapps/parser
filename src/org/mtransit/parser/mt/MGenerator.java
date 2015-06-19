@@ -457,8 +457,8 @@ public class MGenerator {
 	private static final SimpleDateFormat SCHEDULE_DATE = new SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH);
 	private static final String SCHEDULE_FROM_TO = "Schedule from %s to %s.";
 
-	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du [0-9]{1,2} [A-Za-z]+ [0-9]{4} au [0-9]{1,2} [A-Za-z]+ [0-9]{4}\\.)",
-			Pattern.CASE_INSENSITIVE);
+	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du [0-9]{1,2} [\\w]+ [0-9]{4} au [0-9]{1,2} [\\w]+ [0-9]{4}\\.)",
+			Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
 	private static final SimpleDateFormat SCHEDULE_DATE_FR = new SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH);
 	private static final String SCHEDULE_FROM_TO_FR = "Horaires du %s au %s.";
 
