@@ -399,16 +399,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 						}
 					}
 					for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
-						for (String todayServiceId : todayServiceIds) {
-							if (gCalendarDate.service_id.equals(todayServiceId)) {
-								if (startDate == null || gCalendarDate.date < startDate) {
-									startDate = gCalendarDate.date;
-									newDates = true;
-								}
-								if (endDate == null || gCalendarDate.date > endDate) {
-									endDate = gCalendarDate.date;
-									newDates = true;
-								}
+						if (todayServiceIds.contains(gCalendarDate.service_id)) {
+							if (startDate == null || gCalendarDate.date < startDate) {
+								startDate = gCalendarDate.date;
+								newDates = true;
+							}
+							if (endDate == null || gCalendarDate.date > endDate) {
+								endDate = gCalendarDate.date;
+								newDates = true;
 							}
 						}
 					}
