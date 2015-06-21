@@ -433,6 +433,8 @@ public class MSpec {
 	private static final String FR_CA_STATION_DE_METRO_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Ston mét.");
 	private static final Pattern FR_CA_STATION = Pattern.compile(String.format(REGEX_START_END, "station"), Pattern.CASE_INSENSITIVE);
 	private static final String FR_CA_STATION_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Ston");
+	private static final Pattern FR_CA_STATIONNEMENT = Pattern.compile(String.format(REGEX_START_END, "stationnement"), Pattern.CASE_INSENSITIVE);
+	private static final String FR_CA_STATIONNEMENT_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Stat");
 	private static final Pattern FR_CA_TERRASSE = Pattern.compile(String.format(REGEX_START_END, "terrasse"), Pattern.CASE_INSENSITIVE);
 	private static final String FR_CA_TERRASSE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Tsse");
 	private static final Pattern FR_CA_TERRASSES = Pattern.compile(String.format(REGEX_START_END, "terrasses"), Pattern.CASE_INSENSITIVE);
@@ -450,6 +452,7 @@ public class MSpec {
 		string = FR_CA_SECTEUR.matcher(string).replaceAll(FR_CA_SECTEUR_REPLACEMENT);
 		string = FR_CA_STATION_DE_METRO.matcher(string).replaceAll(FR_CA_STATION_DE_METRO_REPLACEMENT);
 		string = FR_CA_STATION.matcher(string).replaceAll(FR_CA_STATION_REPLACEMENT);
+		string = FR_CA_STATIONNEMENT.matcher(string).replaceAll(FR_CA_STATIONNEMENT_REPLACEMENT);
 		string = FR_CA_TERRASSE.matcher(string).replaceAll(FR_CA_TERRASSE_REPLACEMENT);
 		string = FR_CA_TERRASSES.matcher(string).replaceAll(FR_CA_TERRASSES_REPLACEMENT);
 		return string;
