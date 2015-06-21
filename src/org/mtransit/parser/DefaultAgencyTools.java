@@ -390,7 +390,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 				if (endDate - startDate < MIN_COVERAGE_AFTER_TODAY_IN_DAYS) {
 					endDate = startDate + MIN_COVERAGE_AFTER_TODAY_IN_DAYS;
 				}
+				boolean newDates;
 				while (true) {
+					newDates = false;
 					for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
 						if (gCalendarDate.date >= startDate && gCalendarDate.date <= endDate) {
 							todayServiceIds.add(gCalendarDate.service_id);
@@ -401,12 +403,17 @@ public class DefaultAgencyTools implements GAgencyTools {
 							if (gCalendarDate.service_id.equals(todayServiceId)) {
 								if (startDate == null || gCalendarDate.date < startDate) {
 									startDate = gCalendarDate.date;
+									newDates = true;
 								}
 								if (endDate == null || gCalendarDate.date > endDate) {
 									endDate = gCalendarDate.date;
+									newDates = true;
 								}
 							}
 						}
+					}
+					if (newDates) {
+						continue;
 					}
 					if (endDate - startDate < MIN_COVERAGE_AFTER_TOTAL_IN_DAYS) {
 						try {
