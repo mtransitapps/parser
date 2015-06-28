@@ -129,12 +129,12 @@ public class MTrip implements Comparable<MTrip> {
 
 	public boolean mergeHeadsignValue(MTrip mTripToMerge) {
 		if (mTripToMerge == null || mTripToMerge.headsignValue == null) {
-			System.out.println("mergeHeadsignValue() > no trip heading value to merge > " + this.headsignValue);
+			System.out.printf("\n%s: mergeHeadsignValue() > no trip heading value to merge > %s.", this.routeId, this.headsignValue);
 			return true;
 		}
 		if (this.headsignValue == null) {
 			this.headsignValue = mTripToMerge.headsignValue;
-			System.out.println("mergeHeadsignValue() > no current headsign value > " + this.headsignValue);
+			System.out.printf("\n%s: mergeHeadsignValue() > no current headsign value > %s.", this.routeId, this.headsignValue);
 			return true;
 		}
 		if (mTripToMerge.headsignValue.contains(this.headsignValue)) {
@@ -149,7 +149,7 @@ public class MTrip implements Comparable<MTrip> {
 		} else {
 			this.headsignValue = this.headsignValue + SLASH + mTripToMerge.headsignValue;
 		}
-		System.out.println("mergeHeadsignValue() > merge 2 headsign value > " + this.headsignValue);
+		System.out.printf("\n%s: mergeHeadsignValue() > merge 2 headsign value > %s.", this.routeId, this.headsignValue);
 		return true;
 	}
 

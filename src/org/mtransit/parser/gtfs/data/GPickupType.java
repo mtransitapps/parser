@@ -34,7 +34,8 @@ public enum GPickupType {
 		try {
 			return parse(Integer.valueOf(id));
 		} catch (NumberFormatException nfe) {
-			System.out.println("Error while parsing " + id + " as pickup tipe");
+			System.out.printf("\nError while parsing '%s' as pickup tipe!\n", id);
+			nfe.printStackTrace();
 			throw nfe;
 		}
 	}

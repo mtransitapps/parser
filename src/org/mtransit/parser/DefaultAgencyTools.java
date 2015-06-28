@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
@@ -34,7 +35,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	public void start(String[] args) {
-		System.out.printf("Generating agency data...\n");
+		System.out.printf("\nGenerating agency data...");
 		long start = System.currentTimeMillis();
 		// GTFS parsing
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false);
@@ -44,7 +45,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		MSpec mSpec = MGenerator.generateMSpec(gtfsByMRouteId, gtfs.stops, this);
 		// Dump to files
 		MGenerator.dumpFiles(mSpec, args[1], args[2]);
-		System.out.printf("Generating agency data... DONE in %s.\n", Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		System.out.printf("\nGenerating agency data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
 	@Override
@@ -67,7 +68,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		try {
 			return Long.valueOf(gRoute.route_id);
 		} catch (Exception e) {
-			System.out.println("Error while extracting route ID from " + gRoute);
+			System.out.printf("\nError while extracting route ID from %s!\n", gRoute);
 			e.printStackTrace();
 			System.exit(-1);
 			return -1;
@@ -77,7 +78,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String getRouteShortName(GRoute gRoute) {
 		if (StringUtils.isEmpty(gRoute.route_short_name)) {
-			System.out.println("No default route short name for " + gRoute);
+			System.out.printf("\nNo default route short name for %s!\n", gRoute);
 			System.exit(-1);
 			return null;
 		}
@@ -87,7 +88,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
 		if (StringUtils.isEmpty(gRoute.route_long_name)) {
-			System.out.println("No default route long name for " + gRoute);
+			System.out.printf("\nNo default route long name for %s!\n", gRoute);
 			System.exit(-1);
 			return null;
 		}
@@ -110,7 +111,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
 		if (getAgencyRouteType() == null) {
-			System.out.println("ERROR: unspecified agency route type '" + getAgencyRouteType() + "'!");
+			System.out.printf("\nERROR: unspecified agency route type '%s'!\n", getAgencyRouteType());
 			System.exit(-1);
 		}
 		if (getAgencyRouteType() != gRoute.route_type) {
@@ -133,14 +134,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
-		if (gTrip.direction_id < 0 || gTrip.direction_id > 1) {
-			System.out.println("ERROR: default agency implementation required 'direction_id' field in 'trips.txt'!");
+		if (gTrip.direction_id == null || gTrip.direction_id < 0 || gTrip.direction_id > 1) {
+			System.out.printf("\nERROR: default agency implementation required 'direction_id' field in 'trips.txt'!\n");
 			System.exit(-1);
 		}
 		try {
 			mTrip.setHeadsignString(cleanTripHeadsign(gTrip.trip_headsign), gTrip.direction_id);
 		} catch (NumberFormatException nfe) {
-			System.out.println("ERROR: default agency implementation not possible!");
+			System.out.printf("\nERROR: default agency implementation not possible!\n");
 			nfe.printStackTrace();
 			System.exit(-1);
 		}
@@ -195,7 +196,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		try {
 			return Integer.parseInt(gStop.stop_id);
 		} catch (Exception e) {
-			System.out.println("Error while extracting stop ID from " + gStop);
+			System.out.printf("\nError while extracting stop ID from %s!\n", gStop);
 			e.printStackTrace();
 			System.exit(-1);
 			return -1;
@@ -223,70 +224,74 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	private static final int PRECISON_IN_SECONDS = 10;
-	private static final String TIME_SEPARATOR = ":";
+	private static final Pattern TIME_SEPARATOR_REGEX = Pattern.compile(":");
 	private static final SimpleDateFormat HHMMSS = new SimpleDateFormat("HHmmss");
 
+	private static int parseTimeString(String timeS) {
+		return Integer.parseInt(TIME_SEPARATOR_REGEX.matcher(timeS).replaceAll(Constants.EMPTY));
+	}
 
 	@Override
 	public int getDepartureTime(GStopTime gStopTime, List<GStopTime> gStopTimes) {
-		String departureTimeS = null;
+		Integer departureTime = null;
 		if (StringUtils.isEmpty(gStopTime.departure_time)) {
-			try {
-				Integer newDepartureTime = null;
-				Integer previousDepartureTime = null;
-				Integer previousDepartureTimeStopSequence = null;
-				Integer nextDepartureTime = null;
-				Integer nextDepartureTimeStopSequence = null;
-				for (GStopTime aStopTime : gStopTimes) {
-					if (!gStopTime.trip_id.equals(aStopTime.trip_id)) {
-						continue;
-					}
-					if (aStopTime.stop_sequence < gStopTime.stop_sequence) {
-						if (!StringUtils.isEmpty(aStopTime.departure_time)) {
-							newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
-							if (previousDepartureTime == null || previousDepartureTimeStopSequence == null
-									|| previousDepartureTimeStopSequence < aStopTime.stop_sequence) {
-								previousDepartureTime = newDepartureTime;
-								previousDepartureTimeStopSequence = aStopTime.stop_sequence;
-							}
-						}
-					} else if (aStopTime.stop_sequence > gStopTime.stop_sequence) {
-						if (!StringUtils.isEmpty(aStopTime.departure_time)) {
-							newDepartureTime = Integer.valueOf(aStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY));
-							if (nextDepartureTime == null || nextDepartureTimeStopSequence == null || nextDepartureTimeStopSequence > aStopTime.stop_sequence) {
-								nextDepartureTime = newDepartureTime;
-								nextDepartureTimeStopSequence = aStopTime.stop_sequence;
-							}
-						}
-					}
-				}
-				long previousDepartureTimeInMs = HHMMSS.parse(String.valueOf(previousDepartureTime)).getTime();
-				long nextDepartureTimeInMs = HHMMSS.parse(String.valueOf(nextDepartureTime)).getTime();
-				long timeDiffInMs = nextDepartureTimeInMs - previousDepartureTimeInMs;
-				int nbStop = nextDepartureTimeStopSequence - previousDepartureTimeStopSequence;
-				long timeBetweenStopInMs = timeDiffInMs / nbStop;
-				long departureTimeInMs = previousDepartureTimeInMs + (timeBetweenStopInMs * (gStopTime.stop_sequence - previousDepartureTimeStopSequence));
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTimeInMillis(departureTimeInMs);
-				departureTimeS = HHMMSS.format(calendar.getTime());
-				if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
-					departureTimeS = String.valueOf(240000 + Integer.valueOf(departureTimeS));
-				}
-			} catch (Exception e) {
-				System.out.println("Error while interpolating departure time for " + gStopTime + "!");
-				e.printStackTrace();
-				System.exit(-1);
-				departureTimeS = null;
-			}
+			departureTime = extractDepartureTime(gStopTime, gStopTimes);
 		} else {
-			departureTimeS = gStopTime.departure_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY);
+			departureTime = parseTimeString(gStopTime.departure_time);
 		}
-		Integer departureTime = Integer.valueOf(departureTimeS);
 		int extraSeconds = departureTime == null ? 0 : departureTime.intValue() % PRECISON_IN_SECONDS;
 		if (extraSeconds > 0) { // IF too precise DO
-			return cleanDepartureTime(departureTimeS, extraSeconds);
+			return cleanDepartureTime(departureTime, extraSeconds);
 		}
 		return departureTime; // GTFS standard
+	}
+
+	private Integer extractDepartureTime(GStopTime gStopTime, List<GStopTime> gStopTimes) {
+		Integer departureTime;
+		try {
+			Integer previousDepartureTime = null;
+			Integer previousDepartureTimeStopSequence = null;
+			Integer nextDepartureTime = null;
+			Integer nextDepartureTimeStopSequence = null;
+			for (GStopTime aStopTime : gStopTimes) {
+				if (!gStopTime.trip_id.equals(aStopTime.trip_id)) {
+					continue;
+				}
+				if (aStopTime.stop_sequence < gStopTime.stop_sequence) {
+						if (previousDepartureTime == null || previousDepartureTimeStopSequence == null
+								|| previousDepartureTimeStopSequence < aStopTime.stop_sequence) {
+							previousDepartureTime = parseTimeString(aStopTime.departure_time);
+							previousDepartureTimeStopSequence = aStopTime.stop_sequence;
+						}
+					}
+				} else if (aStopTime.stop_sequence > gStopTime.stop_sequence) {
+					if (!StringUtils.isEmpty(aStopTime.departure_time)) {
+						if (nextDepartureTime == null || nextDepartureTimeStopSequence == null || nextDepartureTimeStopSequence > aStopTime.stop_sequence) {
+							nextDepartureTime = parseTimeString(aStopTime.departure_time);
+							nextDepartureTimeStopSequence = aStopTime.stop_sequence;
+						}
+					}
+				}
+			}
+			long previousDepartureTimeInMs = HHMMSS.parse(String.valueOf(previousDepartureTime)).getTime();
+			long nextDepartureTimeInMs = HHMMSS.parse(String.valueOf(nextDepartureTime)).getTime();
+			long timeDiffInMs = nextDepartureTimeInMs - previousDepartureTimeInMs;
+			int nbStop = nextDepartureTimeStopSequence - previousDepartureTimeStopSequence;
+			long timeBetweenStopInMs = timeDiffInMs / nbStop;
+			long departureTimeInMs = previousDepartureTimeInMs + (timeBetweenStopInMs * (gStopTime.stop_sequence - previousDepartureTimeStopSequence));
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTimeInMillis(departureTimeInMs);
+			departureTime = Integer.parseInt(HHMMSS.format(calendar.getTime()));
+			if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
+				departureTime += 240000;
+			}
+			return departureTime;
+		} catch (Exception e) {
+			System.out.printf("\nError while interpolating departure time for %s!\n", gStopTime);
+			e.printStackTrace();
+			System.exit(-1);
+			return null;
+		}
 	}
 
 	private static final String CLEAN_DEPARTURE_TIME_FORMAT = "%02d";
@@ -294,8 +299,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final String CLEAN_DEPARTURE_TIME_DEFAULT_MINUTES = "00";
 	private static final String CLEAN_DEPARTURE_TIME_DEFAULT_SECONDS = "00";
 
-	private int cleanDepartureTime(String departureTimeS, int extraSeconds) {
+	private int cleanDepartureTime(Integer departureTime, int extraSeconds) {
 		try {
+			String departureTimeS = String.valueOf(departureTime);
 			while (departureTimeS.length() < 6) {
 				departureTimeS = CLEAN_DEPARTURE_TIME_LEADING_ZERO + departureTimeS;
 			}
@@ -309,25 +315,24 @@ public class DefaultAgencyTools implements GAgencyTools {
 				} else {
 					newSeconds = String.format(CLEAN_DEPARTURE_TIME_FORMAT, seconds - extraSeconds);
 				}
-				return Integer.valueOf(newHours + newMinutes + newSeconds);
+				return Integer.parseInt(newHours + newMinutes + newSeconds);
 			}
 			int secondsToAdd = PRECISON_IN_SECONDS - extraSeconds;
 			if (seconds + secondsToAdd < 60) {
 				newSeconds = String.format(CLEAN_DEPARTURE_TIME_FORMAT, seconds + secondsToAdd);
-				return Integer.valueOf(newHours + newMinutes + newSeconds);
+				return Integer.parseInt(newHours + newMinutes + newSeconds);
 			}
 			newSeconds = CLEAN_DEPARTURE_TIME_DEFAULT_SECONDS;
 			int minutes = Integer.parseInt(newMinutes);
 			if (minutes + 1 < 60) {
 				newMinutes = String.format(CLEAN_DEPARTURE_TIME_FORMAT, minutes + 1);
-				return Integer.valueOf(newHours + newMinutes + newSeconds);
+				return Integer.parseInt(newHours + newMinutes + newSeconds);
 			}
 			newMinutes = CLEAN_DEPARTURE_TIME_DEFAULT_MINUTES;
-			int hours = Integer.parseInt(newHours);
-			newHours = String.valueOf(hours + 1);
-			return Integer.valueOf(newHours + newMinutes + newSeconds);
+			newHours = String.valueOf(Integer.parseInt(newHours) + 1);
+			return Integer.parseInt(newHours + newMinutes + newSeconds);
 		} catch (Exception e) {
-			System.out.println("Error while cleaning departure time '" + departureTimeS + "' '" + extraSeconds + "' !");
+			System.out.printf("\nError while cleaning departure time '%s' '%s' !\n", departureTime, extraSeconds);
 			e.printStackTrace();
 			System.exit(-1);
 			return -1;
@@ -336,19 +341,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public int getStartTime(GFrequency gFrequency) {
-		return Integer.valueOf(gFrequency.start_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY)); // GTFS standard
+		return parseTimeString(gFrequency.start_time); // GTFS standard
 	}
 
 	@Override
 	public int getEndTime(GFrequency gFrequency) {
-		return Integer.valueOf(gFrequency.end_time.replaceAll(TIME_SEPARATOR, Constants.EMPTY)); // GTFS standard
+		return parseTimeString(gFrequency.end_time); // GTFS standard
 	}
 
 	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 1;
 	private static final int MIN_COVERAGE_AFTER_TOTAL_IN_DAYS = 30;
 
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
-		System.out.printf("Extracting useful service IDs...\n");
+		System.out.printf("\nExtracting useful service IDs...");
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, true);
 		Integer startDate = null;
 		Integer endDate = null;
@@ -419,7 +424,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 							c.add(Calendar.DAY_OF_MONTH, 1);
 							endDate = Integer.valueOf(simpleDateFormat.format(c.getTime()));
 						} catch (Exception e) {
-							System.out.println("Error while increasing end date!");
+							System.out.printf("\nError while increasing end date!\n");
 							e.printStackTrace();
 							System.exit(-1);
 						}
@@ -428,16 +433,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 					}
 				}
 			} else {
-				System.out.println("NO schedule available for " + todayStringInt + "!");
+				System.out.printf("\nNO schedule available for %s!\n", todayStringInt);
 				System.exit(-1);
 				return null;
 			}
 		} else {
-			System.out.println("NO schedule available for " + todayStringInt + "!");
+			System.out.printf("\nNO schedule available for %s!\n", todayStringInt);
 			System.exit(-1);
 			return null;
 		}
-		System.out.println("Generated on " + todayStringInt + " | Schedules from " + startDate + " to " + endDate);
+		System.out.printf("\nGenerated on %s | Schedules from %s to %s.", todayStringInt, startDate, endDate);
 		HashSet<String> serviceIds = new HashSet<String>();
 		if (gtfs.calendars != null) {
 			for (GCalendar gCalendar : gtfs.calendars) {
@@ -454,9 +459,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 			}
 		}
-		System.out.println("Service IDs: " + serviceIds);
+		System.out.printf("\nService IDs: %s", serviceIds);
 		gtfs = null;
-		System.out.printf("Extracting useful service IDs... DONE\n");
+		System.out.printf("\nExtracting useful service IDs... DONE");
 		return serviceIds;
 	}
 

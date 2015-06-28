@@ -42,7 +42,7 @@ import org.mtransit.parser.mt.data.MTripStop;
 public class MGenerator {
 
 	public static MSpec generateMSpec(Map<Long, GSpec> gtfsByMRouteId, Map<String, GStop> gStops, GAgencyTools agencyTools) {
-		System.out.println("Generating routes, trips, trip stops & stops objects... ");
+		System.out.printf("\nGenerating routes, trips, trip stops & stops objects... ");
 		List<MAgency> mAgencies = new ArrayList<MAgency>();
 		List<MRoute> mRoutes = new ArrayList<MRoute>();
 		List<MTrip> mTrips = new ArrayList<MTrip>();
@@ -59,7 +59,7 @@ public class MGenerator {
 		for (Long routeId : routeIds) {
 			routeGTFS = gtfsByMRouteId.get(routeId);
 			if (routeGTFS.trips == null || routeGTFS.trips.size() == 0) {
-				System.out.println("Skip route ID " + routeId + " because no route trip.");
+				System.out.printf("\nSkip route ID %s because no route trip: %s.", routeId, gtfsByMRouteId.get(routeId).routes);
 				continue;
 			}
 			list.add(threadPoolExecutor.submit(new GenerateMObjectsTask(agencyTools, routeId, routeGTFS, gStops)));
@@ -75,8 +75,7 @@ public class MGenerator {
 				for (MStop mStop : mRouteSpec.stops) {
 					if (mStops.containsKey(mStop.id)) {
 						if (!mStops.get(mStop.id).equals(mStop)) {
-							System.out.println("Stop ID '" + mStop.id + "' already in list! " //
-									+ "(" + mStops.get(mStop.id) + " instead of " + mStop.toString() + ")");
+							System.out.printf("\nStop ID '%s' already in list! (%s instead of %s)", mStop.id, mStops.get(mStop.id), mStop.toString());
 						}
 						continue;
 					}
@@ -112,15 +111,15 @@ public class MGenerator {
 		Collections.sort(mTrips);
 		Collections.sort(mTripStops);
 		Collections.sort(mServiceDates);
-		System.out.println("Generating routes, trips, trip stops & stops objects... DONE");
-		System.out.printf("- Agencies: %d\n", mAgencies.size());
-		System.out.printf("- Routes: %d\n", mRoutes.size());
-		System.out.printf("- Trips: %d\n", mTrips.size());
-		System.out.printf("- Trip stops: %d\n", mTripStops.size());
-		System.out.printf("- Stops: %d\n", mStopsList.size());
-		System.out.printf("- Service Dates: %d\n", mServiceDates.size());
-		System.out.printf("- Stop with Schedules: %d\n", mStopSchedules.size());
-		System.out.printf("- Route with Frequencies: %d\n", mRouteFrequencies.size());
+		System.out.printf("\nGenerating routes, trips, trip stops & stops objects... DONE");
+		System.out.printf("\n- Agencies: %d", mAgencies.size());
+		System.out.printf("\n- Routes: %d", mRoutes.size());
+		System.out.printf("\n- Trips: %d", mTrips.size());
+		System.out.printf("\n- Trip stops: %d", mTripStops.size());
+		System.out.printf("\n- Stops: %d", mStopsList.size());
+		System.out.printf("\n- Service Dates: %d", mServiceDates.size());
+		System.out.printf("\n- Stop with Schedules: %d", mStopSchedules.size());
+		System.out.printf("\n- Route with Frequencies: %d", mRouteFrequencies.size());
 		return new MSpec(mAgencies, mStopsList, mRoutes, mTrips, mTripStops, mServiceDates, null, mStopSchedules, mRouteFrequencies);
 	}
 
@@ -138,7 +137,7 @@ public class MGenerator {
 		if (!dumpDirF.exists()) {
 			dumpDirF.mkdir();
 		}
-		System.out.println("Writing " + "MT" + " files (" + dumpDirF.toURI() + ")...");
+		System.out.printf("\nWriting MT files (%s)...", dumpDirF.toURI());
 		File file = null;
 		BufferedWriter ow = null;
 		Integer minDate = null, maxDate = null;
@@ -157,7 +156,7 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			System.out.println("I/O Error while writing service dates file!");
+			System.out.printf("\nI/O Error while writing service dates file!\n");
 			ioe.printStackTrace();
 			System.exit(-1);
 		} finally {
@@ -178,7 +177,7 @@ public class MGenerator {
 		});
 		for (final File f : scheduleStopFiles) {
 			if (!f.delete()) {
-				System.err.println("Can't remove " + f.getAbsolutePath());
+				System.err.printf("\nCan't remove %s!", f.getAbsolutePath());
 			}
 		}
 		String fileName;
@@ -211,7 +210,7 @@ public class MGenerator {
 					}
 				}
 			} catch (IOException ioe) {
-				System.out.println("I/O Error while writing schedule file!");
+				System.out.printf("\nI/O Error while writing schedule file!\n");
 				ioe.printStackTrace();
 				System.exit(-1);
 			} finally {
@@ -233,7 +232,7 @@ public class MGenerator {
 		});
 		for (File f : frequencyRoutefiles) {
 			if (!f.delete()) {
-				System.err.println("Can't remove " + f.getAbsolutePath());
+				System.err.printf("\nCan't remove %s!\n", f.getAbsolutePath());
 			}
 		}
 		List<MFrequency> mRouteFrequencies;
@@ -255,7 +254,7 @@ public class MGenerator {
 					}
 				}
 			} catch (IOException ioe) {
-				System.out.println("I/O Error while writing frequency file!");
+				System.out.printf("\nI/O Error while writing frequency file!\n");
 				ioe.printStackTrace();
 				System.exit(-1);
 			} finally {
@@ -276,7 +275,7 @@ public class MGenerator {
 				ow.write(Constants.NEW_LINE);
 			}
 		} catch (IOException ioe) {
-			System.out.println("I/O Error while writing route file!");
+			System.out.printf("\nI/O Error while writing route file!\n");
 			ioe.printStackTrace();
 			System.exit(-1);
 		} finally {
@@ -296,7 +295,7 @@ public class MGenerator {
 				ow.write(Constants.NEW_LINE);
 			}
 		} catch (IOException ioe) {
-			System.out.println("I/O Error while writing trip file!");
+			System.out.printf("\nI/O Error while writing trip file!\n");
 			ioe.printStackTrace();
 			System.exit(-1);
 		} finally {
@@ -316,7 +315,7 @@ public class MGenerator {
 				ow.write(Constants.NEW_LINE);
 			}
 		} catch (IOException ioe) {
-			System.out.println("I/O Error while writing trip stops file!");
+			System.out.printf("\nI/O Error while writing trip stops file!\n");
 			ioe.printStackTrace();
 			System.exit(-1);
 		} finally {
@@ -349,7 +348,7 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			System.out.println("I/O Error while writing stop file!");
+			System.out.printf("\nI/O Error while writing stop file!\n");
 			ioe.printStackTrace();
 			System.exit(-1);
 		} finally {
@@ -362,7 +361,7 @@ public class MGenerator {
 		}
 		dumpValues(dumpDirF, mSpec, minLat, maxLat, minLng, maxLng);
 		dumpStoreListing(dumpDirF, minDate, maxDate);
-		System.out.println("Writing files (" + dumpDirF.toURI() + ")... DONE in " + Utils.getPrettyDuration(System.currentTimeMillis() - start) + ".");
+		System.out.printf("\nWriting files (%s)... DONE in %s.", dumpDirF.toURI(), Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
 	private static final String VALUES = "values";
@@ -385,7 +384,7 @@ public class MGenerator {
 		File valuesDirF = new File(dumpDirResF, VALUES);
 		file = new File(valuesDirF, GTFS_RTS_VALUES_GEN_XML);
 		file.delete(); // delete previous
-		System.out.println("Generated values file: " + file);
+		System.out.printf("\nGenerated values file: '%s'.", file);
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
 			ow.write(XML_HEADER);
@@ -413,7 +412,7 @@ public class MGenerator {
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);
 		} catch (IOException ioe) {
-			System.out.println("I/O Error while writing values file!");
+			System.out.printf("\nI/O Error while writing values file!\n");
 			ioe.printStackTrace();
 			System.exit(-1);
 		} finally {
@@ -469,7 +468,7 @@ public class MGenerator {
 		File valuesDirF = new File(dumpDirRootF, PUB);
 		file = new File(valuesDirF, STORE_LISTING_TXT);
 		if (file.exists()) {
-			System.out.println("Generated store listing file: " + file);
+			System.out.printf("\nGenerated store listing file: '%s'.", file);
 			try {
 				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF8);
 				content = SCHEDULE.matcher(content)
@@ -480,7 +479,7 @@ public class MGenerator {
 										SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
 			} catch (Exception e) {
-				System.out.println("Error while writing store listing files!");
+				System.out.printf("\nError while writing store listing files!\n");
 				e.printStackTrace();
 				System.exit(-1);
 			} finally {
@@ -492,11 +491,11 @@ public class MGenerator {
 				}
 			}
 		} else {
-			System.out.println("Do not generate store listing file: " + file);
+			System.out.printf("\nDo not generate store listing file: %s.", file);
 		}
 		file = new File(valuesDirF, STORE_LISTING_FR_TXT);
 		if (file.exists()) {
-			System.out.println("Generated store listing file: " + file);
+			System.out.printf("\nGenerated store listing file: %s.", file);
 			try {
 				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF8);
 				content = SCHEDULE_FR.matcher(content).replaceAll(
@@ -506,7 +505,7 @@ public class MGenerator {
 								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
 			} catch (Exception e) {
-				System.out.println("Error while writing store listing files!");
+				System.out.printf("\nError while writing store listing files!\n");
 				e.printStackTrace();
 				System.exit(-1);
 			} finally {
@@ -518,7 +517,7 @@ public class MGenerator {
 				}
 			}
 		} else {
-			System.out.println("Do not generate store listing file: " + file);
+			System.out.printf("\nDo not generate store listing file: %s.", file);
 		}
 	}
 }

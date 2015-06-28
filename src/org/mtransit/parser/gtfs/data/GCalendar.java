@@ -144,13 +144,13 @@ public class GCalendar {
 						break;
 					}
 				} catch (Exception e) {
-					System.out.println("Error while parsing date '" + c + "'!");
+					System.out.printf("\nError while parsing date '%s'!\n", c);
 					e.printStackTrace();
 					System.exit(-1);
 				}
 			}
 		} catch (Exception e) {
-			System.out.println("Error while parsing dates between '" + this.start_date + "' and '" + this.end_date + "'!");
+			System.out.printf("\nError while parsing dates between '%s' and '%s'!\n", this.start_date, this.end_date);
 			e.printStackTrace();
 			System.exit(-1);
 		}

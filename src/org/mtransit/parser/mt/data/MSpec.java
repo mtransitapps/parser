@@ -340,6 +340,8 @@ public class MSpec {
 	private static final String BUILDING_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Bldg");
 	private static final Pattern GREENS = Pattern.compile(String.format(REGEX_START_END, "Greens"), Pattern.CASE_INSENSITIVE);
 	private static final String GREENS_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Grns");
+	private static final Pattern PARKWAY = Pattern.compile(String.format(REGEX_START_END, "parkway"), Pattern.CASE_INSENSITIVE);
+	private static final String PARKWAY_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pkwy");
 	private static final Pattern PARK = Pattern.compile(String.format(REGEX_START_END, "park"), Pattern.CASE_INSENSITIVE);
 	private static final String PARK_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pk"); // not official
 	private static final Pattern GATE = Pattern.compile(String.format(REGEX_START_END, "gate"), Pattern.CASE_INSENSITIVE);
@@ -407,6 +409,7 @@ public class MSpec {
 		string = MARKET.matcher(string).replaceAll(MARKET_REPLACEMENT);
 		string = BUILDING.matcher(string).replaceAll(BUILDING_REPLACEMENT);
 		string = GREENS.matcher(string).replaceAll(GREENS_REPLACEMENT);
+		string = PARKWAY.matcher(string).replaceAll(PARKWAY_REPLACEMENT);
 		return string;
 	}
 

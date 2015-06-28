@@ -33,10 +33,12 @@ import org.mtransit.parser.gtfs.data.GTripStop;
 
 public class GReader {
 
+	private static final String POINT = ".";
+
 	public static final Charset UTF8 = Charset.forName("UTF-8");
 
 	public static GSpec readGtfsZipFile(String gtfsFile, GAgencyTools agencyTools, boolean calendarsOnly) {
-		System.out.printf("Reading GTFS file '%s'...\n", gtfsFile);
+		System.out.printf("\nReading GTFS file '%s'...", gtfsFile);
 		long start = System.currentTimeMillis();
 		GSpec gspec = null;
 		ZipInputStream zip = null;
@@ -103,13 +105,13 @@ public class GReader {
 					fileLines = readCsv(filename, reader, null, null);
 					frequencies = processFrequencies(fileLines, agencyTools);
 				} else {
-					System.out.println("File not used: " + filename);
+					System.out.printf("\nFile not used: %s", filename);
 				}
 				fileLines = null;
 			}
 			gspec = new GSpec(agencies, calendars, calendarDates, stops, routes, trips, stopTimes, frequencies);
 		} catch (IOException ioe) {
-			System.out.println("I/O Error while reading GTFS file!");
+			System.out.printf("\nI/O Error while reading GTFS file!\n");
 			ioe.printStackTrace();
 			System.exit(-1);
 		} finally {
@@ -132,27 +134,27 @@ public class GReader {
 				}
 			}
 		}
-		System.out.printf("Reading GTFS file '%1$s'... DONE in %2$s.\n", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
-		System.out.printf("- Agencies: %d\n", gspec.agencies == null ? 0 : gspec.agencies.size());
-		System.out.printf("- Calendars: %d\n", gspec.calendars == null ? 0 : gspec.calendars.size());
-		System.out.printf("- CalendarDates: %d\n", gspec.calendarDates == null ? 0 : gspec.calendarDates.size());
-		System.out.printf("- Routes: %d\n", gspec.routes == null ? 0 : gspec.routes.size());
-		System.out.printf("- Trips: %d\n", gspec.trips == null ? 0 : gspec.trips.size());
-		System.out.printf("- Stops: %d\n", gspec.stops == null ? 0 : gspec.stops.size());
-		System.out.printf("- StopTimes: %d\n", gspec.stopTimes == null ? 0 : gspec.stopTimes.size());
-		System.out.printf("- Frequencies: %d\n", gspec.frequencies == null ? 0 : gspec.frequencies.size());
+		System.out.printf("\nReading GTFS file '%1$s'... DONE in %2$s.", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		System.out.printf("\n- Agencies: %d", gspec.agencies == null ? 0 : gspec.agencies.size());
+		System.out.printf("\n- Calendars: %d", gspec.calendars == null ? 0 : gspec.calendars.size());
+		System.out.printf("\n- CalendarDates: %d", gspec.calendarDates == null ? 0 : gspec.calendarDates.size());
+		System.out.printf("\n- Routes: %d", gspec.routes == null ? 0 : gspec.routes.size());
+		System.out.printf("\n- Trips: %d", gspec.trips == null ? 0 : gspec.trips.size());
+		System.out.printf("\n- Stops: %d", gspec.stops == null ? 0 : gspec.stops.size());
+		System.out.printf("\n- StopTimes: %d", gspec.stopTimes == null ? 0 : gspec.stopTimes.size());
+		System.out.printf("\n- Frequencies: %d", gspec.frequencies == null ? 0 : gspec.frequencies.size());
 		return gspec;
 	}
 
 	private static List<HashMap<String, String>> readCsv(String filename, BufferedReader reader, String filterStartWith, String filterContains)
 			throws IOException {
-		System.out.println("Reading file '" + filename + "'...");
+		System.out.printf("\nReading file '%s'...", filename);
 		ArrayList<HashMap<String, String>> lines = new ArrayList<HashMap<String, String>>();
 		String line;
 		String[] lineColumns;
 		line = reader.readLine();
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
-			System.out.println("Remove 1st empty car");
+			System.out.printf("\nRemove 1st empty car");
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
 		CSVRecord recordColumns = CSVParser.parse(line, CSVFormat.RFC4180).getRecords().get(0);
@@ -166,6 +168,7 @@ public class GReader {
 		}
 		List<CSVRecord> records;
 		HashMap<String, String> map;
+		int l = 0; // LOG
 		while ((line = reader.readLine()) != null) {
 			if (filterStartWith != null && !line.startsWith(filterStartWith)) {
 				continue;
@@ -183,7 +186,7 @@ public class GReader {
 				lineColumns[i] = recordColumns.get(i);
 			}
 			if (columnNames.length != lineColumns.length && columnNames.length != (lineColumns.length + 1)) {
-				System.out.println("File '" + filename + "' line invalid: " + lineColumns.length + " columns instead of " + columnNames.length + ": " + line);
+				System.out.printf("\nFile '%s' line invalid: %s columns instead of %s: %s", filename, lineColumns.length, columnNames.length, line);
 				continue;
 			}
 			map = new HashMap<String, String>();
@@ -191,13 +194,16 @@ public class GReader {
 				map.put(columnNames[ci], lineColumns[ci]);
 			}
 			lines.add(map);
+			if (l++ % 10000 == 0) { // LOG
+				System.out.print(POINT); // LOG
+			} // LOG
 		}
-		System.out.println("File '" + filename + "' read (lines: " + lines.size() + ").");
+		System.out.printf("\nFile '%s' read (lines: %s).", filename, lines.size());
 		return lines;
 	}
 
 	public static Map<String, GService> extractServices(GSpec gtfs) {
-		System.out.println("Generating GTFS services...");
+		System.out.printf("\nGenerating GTFS services...");
 		HashMap<String, GService> gServices = new HashMap<String, GService>();
 		if (gtfs.calendars != null) {
 			for (GCalendar gCalendar : gtfs.calendars) {
@@ -221,13 +227,13 @@ public class GReader {
 				gServices.put(gCalendarDate.service_id, new GService(gCalendarDate.service_id));
 			}
 		}
-		System.out.println("Generating GTFS services... DONE");
-		System.out.printf("- Services: %d\n", gServices.size());
+		System.out.printf("\nGenerating GTFS services... DONE");
+		System.out.printf("\n- Services: %d", gServices.size());
 		return gServices;
 	}
 
 	public static Map<String, GTripStop> extractTripStops(GSpec gtfs) {
-		System.out.println("Generating GTFS trip stops...");
+		System.out.print("\nGenerating GTFS trip stops...");
 		HashMap<String, GTripStop> gTripStops = new HashMap<String, GTripStop>();
 		GTrip gTrip;
 		String uid;
@@ -245,13 +251,13 @@ public class GReader {
 				gTripStops.put(uid, new GTripStop(gTrip.getTripId(), gStopTime.stop_id, gStopTime.stop_sequence));
 			}
 		}
-		System.out.println("Generating GTFS trip stops... DONE");
-		System.out.printf("- Trip stops: %d\n", gTripStops.size());
+		System.out.printf("\nGenerating GTFS trip stops... DONE");
+		System.out.printf("\n- Trip stops: %d", gTripStops.size());
 		return gTripStops;
 	}
 
 	private static List<GStopTime> processStopTimes(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
-		System.out.println("Processing stop times...");
+		System.out.printf("\nProcessing stop times...");
 		List<GStopTime> stopTimes = new ArrayList<GStopTime>();
 		GStopTime gStopTime;
 		for (HashMap<String, String> line : lines) {
@@ -263,17 +269,17 @@ public class GReader {
 					continue; // ignore this service
 				}
 			} catch (Exception e) {
-				System.out.println("Error while parsing: " + line);
+				System.out.printf("\nError while parsing: '%s'!\n", line);
 				e.printStackTrace();
 				System.exit(-1);
 			}
 		}
-		System.out.println("Processing stop times... DONE (" + stopTimes.size() + " extracted)");
+		System.out.printf("\nProcessing stop times... DONE (%s extracted)", stopTimes.size());
 		return stopTimes;
 	}
 
 	private static List<GFrequency> processFrequencies(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
-		System.out.println("Processing frequencies...");
+		System.out.printf("\nProcessing frequencies...");
 		List<GFrequency> frequencies = new ArrayList<GFrequency>();
 		GFrequency gFrequency;
 		for (HashMap<String, String> line : lines) {
@@ -282,34 +288,34 @@ public class GReader {
 						.get(GFrequency.HEADWAY_SECS)));
 				frequencies.add(gFrequency);
 			} catch (Exception e) {
-				System.out.println("Error while parsing: " + line);
+				System.out.printf("\nError while parsing: '%s'!\n", line);
 				e.printStackTrace();
 				System.exit(-1);
 			}
 		}
-		System.out.println("Processing frequencies... DONE (" + frequencies.size() + " extracted)");
+		System.out.printf("\nProcessing frequencies... DONE (%s extracted)", frequencies.size());
 		return frequencies;
 	}
 
 	private static List<GAgency> processAgencies(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
-		System.out.println("Processing agency...");
+		System.out.printf("\nProcessing agency...");
 		List<GAgency> agencies = new ArrayList<GAgency>();
 		for (HashMap<String, String> line : lines) {
 			try {
 				agencies.add(new GAgency(line.get(GAgency.AGENCY_ID), line.get(GAgency.AGENCY_NAME), line.get(GAgency.AGENCY_URL), line
 						.get(GAgency.AGENCY_TIMEZONE)));
 			} catch (Exception e) {
-				System.out.println("Error while processing: " + line);
+				System.out.printf("\nError while processing: '%s'!\n", line);
 				e.printStackTrace();
 				System.exit(-1);
 			}
 		}
-		System.out.println("Processing agency... DONE (" + agencies.size() + " extracted)");
+		System.out.printf("\nProcessing agency... DONE (%s extracted)", agencies.size());
 		return agencies;
 	}
 
 	private static List<GCalendarDate> processCalendarDates(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
-		System.out.println("Processing calendar dates...");
+		System.out.printf("\nProcessing calendar dates...");
 		List<GCalendarDate> calendarDates = new ArrayList<GCalendarDate>();
 		GCalendarDate gCalendarDates;
 		String serviceId, date, exceptionDate;
@@ -319,7 +325,7 @@ public class GReader {
 				date = line.get(GCalendarDate.DATE);
 				exceptionDate = line.get(GCalendarDate.EXCEPTION_DATE);
 				if (StringUtils.isEmpty(serviceId) && StringUtils.isEmpty(date) && StringUtils.isEmpty(exceptionDate)) {
-					System.out.println("Empty calendar dates ignored (" + line + ").");
+					System.out.printf("\nEmpty calendar dates ignored (%s).", line);
 					continue; // ignore empty calendar dates
 				}
 				gCalendarDates = new GCalendarDate(serviceId, Integer.parseInt(date), GCalendarDatesExceptionType.parse(exceptionDate));
@@ -328,19 +334,19 @@ public class GReader {
 				}
 				calendarDates.add(gCalendarDates);
 			} catch (Exception e) {
-				System.out.println("Error while processing: " + line);
+				System.out.printf("\nError while processing: '%s'!\n", line);
 				e.printStackTrace();
 				System.exit(-1);
 			}
 		}
-		System.out.println("Processing calendar dates... DONE (" + calendarDates.size() + " extracted)");
+		System.out.printf("\nProcessing calendar dates... DONE (%s extracted)", calendarDates.size());
 		return calendarDates;
 	}
 
 	private static final String DAY_TRUE = "1";
 
 	private static List<GCalendar> processCalendar(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
-		System.out.println("Processing calendar...");
+		System.out.printf("\nProcessing calendar...");
 		List<GCalendar> calendars = new ArrayList<GCalendar>();
 		GCalendar gCalendar;
 		for (HashMap<String, String> line : lines) {
@@ -356,17 +362,17 @@ public class GReader {
 				}
 				calendars.add(gCalendar);
 			} catch (Exception e) {
-				System.out.println("Error while processing: " + line);
+				System.out.printf("\nError while processing: %s!\n", line);
 				e.printStackTrace();
 				System.exit(-1);
 			}
 		}
-		System.out.println("Processing calendar... DONE (" + calendars.size() + " extracted)");
+		System.out.printf("\nProcessing calendar... DONE (%s extracted)", calendars.size());
 		return calendars;
 	}
 
 	private static Map<String, GTrip> processTrips(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
-		System.out.println("Processing trips...");
+		System.out.printf("\nProcessing trips...");
 		Map<String, GTrip> trips = new HashMap<String, GTrip>();
 		String directionId;
 		GTrip gTrip;
@@ -380,12 +386,12 @@ public class GReader {
 				}
 				trips.put(gTrip.getTripId(), gTrip);
 			} catch (Exception e) {
-				System.out.println("Error while processing: " + line);
+				System.out.printf("\nError while processing: " + line);
 				e.printStackTrace();
 				System.exit(-1);
 			}
 		}
-		System.out.println("Processing trips... DONE (" + trips.size() + " extracted)");
+		System.out.printf("\nProcessing trips... DONE (" + trips.size() + " extracted)");
 		return trips;
 	}
 
@@ -393,7 +399,7 @@ public class GReader {
 	private static final String ENTRANCE_TYPE = "2";
 
 	private static HashMap<String, GStop> processStops(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
-		System.out.println("Processing stops...");
+		System.out.printf("\nProcessing stops...");
 		HashMap<String, GStop> stops = new HashMap<String, GStop>();
 		GStop gStop;
 		String code;
@@ -412,12 +418,12 @@ public class GReader {
 			}
 			stops.put(gStop.stop_id, gStop);
 		}
-		System.out.println("Processing stops... DONE (" + stops.size() + " extracted)");
+		System.out.printf("\nProcessing stops... DONE (%s extracted)", stops.size());
 		return stops;
 	}
 
 	private static Map<String, GRoute> processRoutes(List<HashMap<String, String>> lines, GAgencyTools agencyTools) throws IOException {
-		System.out.println("Processing routes...");
+		System.out.printf("\nProcessing routes...");
 		Map<String, GRoute> routes = new HashMap<String, GRoute>();
 		GRoute gRoute;
 		String routeColor;
@@ -431,12 +437,12 @@ public class GReader {
 				}
 				routes.put(gRoute.route_id, gRoute);
 			} catch (Exception e) {
-				System.out.println("Error while parsing route line " + line);
+				System.out.printf("\nError while parsing route line %s!\n", line);
 				e.printStackTrace();
 				System.exit(-1);
 			}
 		}
-		System.out.println("Processing routes... DONE (" + routes.size() + " extracted)");
+		System.out.printf("\nProcessing routes... DONE (%s extracted)", routes.size());
 		return routes;
 	}
 
@@ -457,7 +463,7 @@ public class GReader {
 				gRouteToSpec.get(routeId).tripStops = new HashMap<String, GTripStop>();
 			}
 			if (gRouteToSpec.get(routeId).routes.containsKey(gRoute.getKey())) {
-				System.out.println("Route ID " + gRoute.getValue().route_id + " already present!");
+				System.out.printf("\nRoute ID %s already present!\n", gRoute.getValue().route_id);
 				System.exit(-1);
 			}
 			gRouteToSpec.get(routeId).routes.put(gRoute.getKey(), gRoute.getValue());
@@ -469,11 +475,11 @@ public class GReader {
 			}
 			gTripIdToMRouteId.put(gTrip.getValue().getTripId(), routeId);
 			if (!gRouteToSpec.containsKey(routeId)) {
-				System.out.println("Trip's Route ID " + routeId + " not already present!");
+				System.out.printf("\nTrip's Route ID %s not already present!\n", routeId);
 				System.exit(-1);
 			}
 			if (gRouteToSpec.get(routeId).trips.containsKey(gTrip.getKey())) {
-				System.out.println("Trip ID " + gTrip.getValue().getTripId() + " already present!");
+				System.out.printf("\nTrip ID %s already present!\n", gTrip.getValue().getTripId());
 				System.exit(-1);
 			}
 			gServiceIdToMRouteId.put(gTrip.getValue().service_id, routeId);
@@ -485,11 +491,11 @@ public class GReader {
 				continue; // not processed now (subway line...)
 			}
 			if (!gRouteToSpec.containsKey(routeId)) {
-				System.out.println("Trip Stop's Route ID " + routeId + " not already present!");
+				System.out.printf("\nTrip Stop's Route ID  not already present!\n", routeId);
 				System.exit(-1);
 			}
 			if (gRouteToSpec.get(routeId).tripStops.containsKey(gTripStop.getKey())) {
-				System.out.println("Trip stop ID " + gTripStop.getValue().trip_id + " already present!");
+				System.out.printf("\nTrip stop ID %s already present!\n", gTripStop.getValue().trip_id);
 				System.exit(-1);
 			}
 			gRouteToSpec.get(routeId).tripStops.put(gTripStop.getKey(), gTripStop.getValue());
@@ -501,7 +507,7 @@ public class GReader {
 					continue;
 				}
 				if (!gRouteToSpec.containsKey(routeId)) {
-					System.out.println("Calendar's Route ID " + routeId + " not already present!");
+					System.out.printf("\nCalendar's Route ID %s not already present!\n", routeId);
 					System.exit(-1);
 				}
 				gRouteToSpec.get(routeId).calendars.add(gCalendar);
@@ -514,7 +520,7 @@ public class GReader {
 					continue; // not processed now (...)
 				}
 				if (!gRouteToSpec.containsKey(routeId)) {
-					System.out.println("Calendar Date's Route ID " + routeId + " not already present!");
+					System.out.printf("\nCalendar Date's Route ID %s not already present!", routeId);
 					System.exit(-1);
 				}
 				gRouteToSpec.get(routeId).calendarDates.add(gCalendarDate);
@@ -526,7 +532,7 @@ public class GReader {
 				continue;
 			}
 			if (!gRouteToSpec.containsKey(routeId)) {
-				System.out.println("Stop Time's Route ID " + routeId + " not already present!");
+				System.out.printf("\nStop Time's Route ID %s not already present!\n", routeId);
 				System.exit(-1);
 			}
 			gRouteToSpec.get(routeId).stopTimes.add(gStopTime);
@@ -538,7 +544,7 @@ public class GReader {
 					continue; // not processed now (...)
 				}
 				if (!gRouteToSpec.containsKey(routeId)) {
-					System.out.println("Frequency's Route ID " + routeId + " not already present!");
+					System.out.printf("\nFrequency's Route ID %s not already present!\n", routeId);
 					System.exit(-1);
 				}
 				gRouteToSpec.get(routeId).frequencies.add(gFrequency);
