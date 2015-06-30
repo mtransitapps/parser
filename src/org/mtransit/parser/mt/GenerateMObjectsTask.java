@@ -142,7 +142,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 		MSpec myrouteSpec = new MSpec(mAgenciesList, mStopsList, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, null, mStopScheduleMap,
 				mRouteFrequencies);
-		System.out.printf("\n%s: processing... DONE in %s." + this.routeId, org.mtransit.parser.Utils.getPrettyDuration(System.currentTimeMillis() - startAt));
+		System.out.printf("\n%s: processing... DONE in %s.", this.routeId, org.mtransit.parser.Utils.getPrettyDuration(System.currentTimeMillis() - startAt));
 		return myrouteSpec;
 	}
 
@@ -164,9 +164,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					mergeSuccessful = this.agencyTools.mergeRouteLongName(mRoute, mRoutes.get(mRoute.id));
 				}
 				if (!mergeSuccessful) {
-					System.out.println(this.routeId + ": Route " + mRoute.id + " already in list!");
-					System.out.println(this.routeId + ": " + mRoute.toString());
-					System.out.println(this.routeId + ": " + mRoutes.get(mRoute.id).toString());
+					System.out.printf("\n%s: Route %s already in list!", this.routeId, mRoute.id);
+					System.out.printf("\n%s: %s", this.routeId, mRoute.toString());
+					System.out.printf("\n%s: %s.\n", this.routeId, mRoutes.get(mRoute.id).toString());
 					System.exit(-1);
 				}
 			}
