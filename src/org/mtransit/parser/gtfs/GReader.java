@@ -425,6 +425,7 @@ public class GReader {
 			if (!gRouteToSpec.containsKey(routeId)) {
 				gRouteToSpec.put(routeId, new GSpec());
 				gRouteToSpec.get(routeId).addAllAgencies(gtfs.getAllAgencies());
+			}
 			if (gRouteToSpec.get(routeId).containsRoute(gRoute)) {
 				System.out.printf("\nRoute ID %s already present!", gRoute.route_id);
 				System.out.printf("\nNew route: %s", gRoute);
