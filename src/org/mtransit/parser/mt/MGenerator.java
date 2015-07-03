@@ -28,7 +28,6 @@ import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GSpec;
-import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
@@ -41,7 +40,7 @@ import org.mtransit.parser.mt.data.MTripStop;
 
 public class MGenerator {
 
-	public static MSpec generateMSpec(Map<Long, GSpec> gtfsByMRouteId, Map<String, GStop> gStops, GAgencyTools agencyTools) {
+	public static MSpec generateMSpec(Map<Long, GSpec> gtfsByMRouteId, GSpec gtfs, GAgencyTools agencyTools) {
 		System.out.printf("\nGenerating routes, trips, trip stops & stops objects... ");
 		List<MAgency> mAgencies = new ArrayList<MAgency>();
 		List<MRoute> mRoutes = new ArrayList<MRoute>();
@@ -58,11 +57,10 @@ public class MGenerator {
 		GSpec routeGTFS;
 		for (Long routeId : routeIds) {
 			routeGTFS = gtfsByMRouteId.get(routeId);
-			if (routeGTFS.trips == null || routeGTFS.trips.size() == 0) {
-				System.out.printf("\nSkip route ID %s because no route trip: %s.", routeId, gtfsByMRouteId.get(routeId).routes);
+			if (!routeGTFS.hasTrips()) {
 				continue;
 			}
-			list.add(threadPoolExecutor.submit(new GenerateMObjectsTask(agencyTools, routeId, routeGTFS, gStops)));
+			list.add(threadPoolExecutor.submit(new GenerateMObjectsTask(agencyTools, routeId, routeGTFS, gtfs)));
 		}
 		MSpec mRouteSpec;
 		for (Future<MSpec> future : list) {
@@ -120,7 +118,7 @@ public class MGenerator {
 		System.out.printf("\n- Service Dates: %d", mServiceDates.size());
 		System.out.printf("\n- Stop with Schedules: %d", mStopSchedules.size());
 		System.out.printf("\n- Route with Frequencies: %d", mRouteFrequencies.size());
-		return new MSpec(mAgencies, mStopsList, mRoutes, mTrips, mTripStops, mServiceDates, null, mStopSchedules, mRouteFrequencies);
+		return new MSpec(mAgencies, mStopsList, mRoutes, mTrips, mTripStops, mServiceDates, mStopSchedules, mRouteFrequencies);
 	}
 
 	private static final String GTFS_SCHEDULE_SERVICE_DATES = "gtfs_schedule_service_dates";

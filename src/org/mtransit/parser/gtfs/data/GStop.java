@@ -28,6 +28,10 @@ public class GStop {
 		this.stop_code = stop_code;
 	}
 
+	public String getStopId() {
+		return stop_id;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //

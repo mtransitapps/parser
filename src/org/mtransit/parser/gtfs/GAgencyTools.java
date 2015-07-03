@@ -68,10 +68,10 @@ public interface GAgencyTools {
 	boolean excludeCalendar(GCalendar gCalendar);
 
 	// CALENDAR DATE
-	boolean excludeCalendarDate(GCalendarDate gCalendarDates);
+	boolean excludeCalendarDate(GCalendarDate gCalendarDate);
 
 	// SCHEDULE
-	int getDepartureTime(GStopTime gStopTime, List<GStopTime> gStopTimes);
+	int getDepartureTime(GStopTime gStopTime, GSpec gSpec);
 
 	// FREQUENCY
 	int getStartTime(GFrequency gFrequency);

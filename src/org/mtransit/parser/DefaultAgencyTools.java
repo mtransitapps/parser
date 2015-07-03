@@ -39,10 +39,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 		long start = System.currentTimeMillis();
 		// GTFS parsing
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false);
-		gtfs.tripStops = GReader.extractTripStops(gtfs);
+		GReader.generateTripStops(gtfs);
 		Map<Long, GSpec> gtfsByMRouteId = GReader.splitByRouteId(gtfs, this);
 		// Objects generation
-		MSpec mSpec = MGenerator.generateMSpec(gtfsByMRouteId, gtfs.stops, this);
+		MSpec mSpec = MGenerator.generateMSpec(gtfsByMRouteId, gtfs, this);
 		// Dump to files
 		MGenerator.dumpFiles(mSpec, args[1], args[2]);
 		System.out.printf("\nGenerating agency data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
@@ -129,7 +129,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, HashSet<MTrip> splitTrips, GSpec gtfs) {
-		return new Pair<Long[], Integer[]>(new Long[] { splitTrips.iterator().next().getId() }, new Integer[] { gTripStop.stop_sequence });
+		return new Pair<Long[], Integer[]>(new Long[] { splitTrips.iterator().next().getId() }, new Integer[] { gTripStop.getStopSequence() });
 	}
 
 	@Override
@@ -168,7 +168,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public boolean excludeCalendarDate(GCalendarDate gCalendarDates) {
+	public boolean excludeCalendarDate(GCalendarDate gCalendarDate) {
 		return false;
 	}
 
@@ -232,10 +232,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public int getDepartureTime(GStopTime gStopTime, List<GStopTime> gStopTimes) {
+	public int getDepartureTime(GStopTime gStopTime, GSpec gSpec) {
 		Integer departureTime = null;
 		if (StringUtils.isEmpty(gStopTime.departure_time)) {
-			departureTime = extractDepartureTime(gStopTime, gStopTimes);
+			departureTime = extractDepartureTime(gStopTime, gSpec);
 		} else {
 			departureTime = parseTimeString(gStopTime.departure_time);
 		}
@@ -246,18 +246,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return departureTime; // GTFS standard
 	}
 
-	private Integer extractDepartureTime(GStopTime gStopTime, List<GStopTime> gStopTimes) {
+	private Integer extractDepartureTime(GStopTime gStopTime, GSpec gSpec) {
 		Integer departureTime;
 		try {
 			Integer previousDepartureTime = null;
 			Integer previousDepartureTimeStopSequence = null;
 			Integer nextDepartureTime = null;
 			Integer nextDepartureTimeStopSequence = null;
-			for (GStopTime aStopTime : gStopTimes) {
+			for (GStopTime aStopTime : gSpec.getStopTimes(gStopTime.trip_id, null, null)) {
 				if (!gStopTime.trip_id.equals(aStopTime.trip_id)) {
 					continue;
 				}
 				if (aStopTime.stop_sequence < gStopTime.stop_sequence) {
+					if (!StringUtils.isEmpty(aStopTime.departure_time)) {
 						if (previousDepartureTime == null || previousDepartureTimeStopSequence == null
 								|| previousDepartureTimeStopSequence < aStopTime.stop_sequence) {
 							previousDepartureTime = parseTimeString(aStopTime.departure_time);
@@ -361,8 +362,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.DAY_OF_MONTH, 1); // TOMORROW (too late to publish today's schedule)
 		Integer todayStringInt = Integer.valueOf(simpleDateFormat.format(c.getTime()));
-		if (gtfs.calendars != null && gtfs.calendars.size() > 0) {
-			for (GCalendar gCalendar : gtfs.calendars) {
+		List<GCalendar> calendars = gtfs.getAllCalendars();
+		List<GCalendarDate> calendarDates = gtfs.getAllCalendarDates();
+		if (calendars != null && calendars.size() > 0) {
+			for (GCalendar gCalendar : calendars) {
 				if (gCalendar.start_date <= todayStringInt && gCalendar.end_date >= todayStringInt) {
 					if (startDate == null || gCalendar.start_date < startDate) {
 						startDate = gCalendar.start_date;
@@ -372,15 +375,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 					}
 				}
 			}
-		} else if (gtfs.calendarDates != null && gtfs.calendarDates.size() > 0) {
+		} else if (calendarDates != null && calendarDates.size() > 0) {
 			HashSet<String> todayServiceIds = new HashSet<String>();
-			for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+			for (GCalendarDate gCalendarDate : calendarDates) {
 				if (gCalendarDate.date == todayStringInt) {
 					todayServiceIds.add(gCalendarDate.service_id);
 				}
 			}
 			if (todayServiceIds != null && todayServiceIds.size() > 0) {
-				for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+				for (GCalendarDate gCalendarDate : calendarDates) {
 					for (String todayServiceId : todayServiceIds) {
 						if (gCalendarDate.service_id.equals(todayServiceId)) {
 							if (startDate == null || gCalendarDate.date < startDate) {
@@ -398,27 +401,30 @@ public class DefaultAgencyTools implements GAgencyTools {
 				boolean newDates;
 				while (true) {
 					newDates = false;
-					for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+					for (GCalendarDate gCalendarDate : calendarDates) {
 						if (gCalendarDate.date >= startDate && gCalendarDate.date <= endDate) {
 							todayServiceIds.add(gCalendarDate.service_id);
 						}
 					}
-					for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+					for (GCalendarDate gCalendarDate : calendarDates) {
 						if (todayServiceIds.contains(gCalendarDate.service_id)) {
 							if (startDate == null || gCalendarDate.date < startDate) {
 								startDate = gCalendarDate.date;
 								newDates = true;
 							}
 							if (endDate == null || gCalendarDate.date > endDate) {
+								System.out.printf("\nnew service ID %s end date:  %s (replace %s)", gCalendarDate.service_id, gCalendarDate.date, endDate);
 								endDate = gCalendarDate.date;
 								newDates = true;
 							}
 						}
 					}
 					if (newDates) {
+						System.out.printf("\nNew schedules from %s to %s... ", startDate, endDate);
 						continue;
 					}
 					if (endDate - startDate < MIN_COVERAGE_AFTER_TOTAL_IN_DAYS) {
+						System.out.printf("\nNo enough days (%s), 1 more day in the future...", (endDate - startDate));
 						try {
 							c.setTime(simpleDateFormat.parse(String.valueOf(endDate)));
 							c.add(Calendar.DAY_OF_MONTH, 1);
@@ -444,16 +450,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		System.out.printf("\nGenerated on %s | Schedules from %s to %s.", todayStringInt, startDate, endDate);
 		HashSet<String> serviceIds = new HashSet<String>();
-		if (gtfs.calendars != null) {
-			for (GCalendar gCalendar : gtfs.calendars) {
+		if (calendars != null) {
+			for (GCalendar gCalendar : calendars) {
 				if ((gCalendar.start_date >= startDate && gCalendar.start_date <= endDate) //
 						|| (gCalendar.end_date >= startDate && gCalendar.end_date <= endDate)) {
 					serviceIds.add(gCalendar.service_id);
 				}
 			}
 		}
-		if (gtfs.calendarDates != null) {
-			for (GCalendarDate gCalendarDate : gtfs.calendarDates) {
+		if (calendarDates != null) {
+			for (GCalendarDate gCalendarDate : calendarDates) {
 				if (gCalendarDate.date >= startDate && gCalendarDate.date <= endDate) {
 					serviceIds.add(gCalendarDate.service_id);
 				}

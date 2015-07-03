@@ -27,6 +27,18 @@ public class GStopTime {
 		this.stop_headsign = stop_headsign;
 	}
 
+	public int getStopSequence() {
+		return stop_sequence;
+	}
+
+	public String getStopId() {
+		return stop_id;
+	}
+
+	public String getTripId() {
+		return trip_id;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //
@@ -38,7 +50,8 @@ public class GStopTime {
 				.append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.departure_time).append(Constants.STRING_DELIMITER) //
 				.append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.stop_headsign == null ? Constants.EMPTY : this.stop_headsign).append(Constants.STRING_DELIMITER) //
-				.append(Constants.COLUMN_SEPARATOR).toString();
+				.append(Constants.STRING_DELIMITER).append(this.stop_headsign).append(Constants.STRING_DELIMITER) //
+				.append(Constants.COLUMN_SEPARATOR) //
+				.toString();
 	}
 }
