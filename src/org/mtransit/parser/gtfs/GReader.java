@@ -22,12 +22,10 @@ import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
 import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GRoute;
-import org.mtransit.parser.gtfs.data.GService;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
-import org.mtransit.parser.gtfs.data.GTripStop;
 
 public class GReader {
 
@@ -158,14 +156,19 @@ public class GReader {
 			}
 		}
 		System.out.printf("\nReading GTFS file '%1$s'... DONE in %2$s.", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
-		System.out.printf("\n- Agencies: %d", gSpec.getAgenciesCount());
-		System.out.printf("\n- Calendars: %d", gSpec.getCalendarsCount());
-		System.out.printf("\n- CalendarDates: %d", gSpec.getCalendarDatesCount());
-		System.out.printf("\n- Routes: %d", gSpec.getRoutesCount());
-		System.out.printf("\n- Trips: %d", gSpec.getTripsCount());
-		System.out.printf("\n- Stops: %d", gSpec.getStopsCount());
-		System.out.printf("\n- StopTimes: %d", gSpec.getStopTimesCount());
-		System.out.printf("\n- Frequencies: %d", gSpec.getFrequenciesCount());
+		if (calendarsOnly) {
+			System.out.printf("\n- Calendars: %d", gSpec.getCalendarsCount());
+			System.out.printf("\n- CalendarDates: %d", gSpec.getCalendarDatesCount());
+		} else {
+			System.out.printf("\n- Agencies: %d", gSpec.getAgenciesCount());
+			System.out.printf("\n- Calendars: %d", gSpec.getCalendarsCount());
+			System.out.printf("\n- CalendarDates: %d", gSpec.getCalendarDatesCount());
+			System.out.printf("\n- Routes: %d", gSpec.getRoutesCount());
+			System.out.printf("\n- Trips: %d", gSpec.getTripsCount());
+			System.out.printf("\n- Stops: %d", gSpec.getStopsCount());
+			System.out.printf("\n- StopTimes: %d", gSpec.getStopTimesCount());
+			System.out.printf("\n- Frequencies: %d", gSpec.getFrequenciesCount());
+		}
 		return gSpec;
 	}
 
@@ -223,56 +226,6 @@ public class GReader {
 			} // LOG
 		}
 		System.out.printf("\nFile '%s' read (lines: %s).", filename, l);
-	}
-
-	public static Map<String, GService> extractServices(GSpec gtfs) {
-		System.out.printf("\nGenerating GTFS services...");
-		HashMap<String, GService> gServices = new HashMap<String, GService>();
-		if (gtfs.getAllCalendars() != null) {
-			for (GCalendar gCalendar : gtfs.getAllCalendars()) {
-				if (gCalendar.service_id == null) {
-					continue;
-				}
-				if (gServices.containsKey(gCalendar.service_id)) {
-					continue;
-				}
-				gServices.put(gCalendar.service_id, new GService(gCalendar.service_id));
-			}
-		}
-		if (gtfs.getAllCalendarDates() != null) {
-			for (GCalendarDate gCalendarDate : gtfs.getAllCalendarDates()) {
-				if (gCalendarDate.service_id == null) {
-					continue;
-				}
-				if (gServices.containsKey(gCalendarDate.service_id)) {
-					continue;
-				}
-				gServices.put(gCalendarDate.service_id, new GService(gCalendarDate.service_id));
-			}
-		}
-		System.out.printf("\nGenerating GTFS services... DONE");
-		System.out.printf("\n- Services: %d", gServices.size());
-		return gServices;
-	}
-
-	public static void generateTripStops(GSpec gtfs) {
-		System.out.print("\nGenerating GTFS trip stops...");
-		GTrip gTrip;
-		String uid;
-		for (GStopTime gStopTime : gtfs.getAllStopTimes()) {
-			gTrip = gtfs.getTrip(gStopTime.getTripId());
-			if (gTrip == null) {
-				continue;
-			}
-			uid = GTripStop.getUID(gTrip.getUID(), gStopTime.stop_id, gStopTime.stop_sequence);
-			if (gtfs.containsTripStop(uid)) {
-				System.out.printf("\nGenerating GTFS trip stops... > (uid: %s)  skip %s | keep: %s", uid, gStopTime, gtfs.getTripStop(uid));
-				continue;
-			}
-			gtfs.addTripStops(new GTripStop(uid, gTrip.getTripId(), gStopTime.stop_id, gStopTime.stop_sequence));
-		}
-		System.out.printf("\nGenerating GTFS trip stops... DONE");
-		System.out.printf("\n- Trip stops: %d", gtfs.getTripStopsCount());
 	}
 
 	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
@@ -411,107 +364,6 @@ public class GReader {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-	}
-
-	public static Map<Long, GSpec> splitByRouteId(GSpec gtfs, GAgencyTools agencyTools) {
-		Map<Long, GSpec> gRouteToSpec = new HashMap<Long, GSpec>();
-		Map<String, Long> gRouteIdToMRouteId = new HashMap<String, Long>();
-		Map<String, Long> gTripIdToMRouteId = new HashMap<String, Long>();
-		Map<String, Long> gServiceIdToMRouteId = new HashMap<String, Long>();
-		Long routeId;
-		for (GRoute gRoute : gtfs.getAllRoutes()) {
-			routeId = agencyTools.getRouteId(gRoute);
-			gRouteIdToMRouteId.put(gRoute.route_id, routeId);
-			if (!gRouteToSpec.containsKey(routeId)) {
-				gRouteToSpec.put(routeId, new GSpec());
-				gRouteToSpec.get(routeId).addAllAgencies(gtfs.getAllAgencies());
-			}
-			if (gRouteToSpec.get(routeId).containsRoute(gRoute)) {
-				System.out.printf("\nRoute ID %s already present!", gRoute.route_id);
-				System.out.printf("\nNew route: %s", gRoute);
-				System.out.printf("\nExisting route: %s", gRouteToSpec.get(routeId).getRoute(gRoute.route_id));
-				System.out.printf("\n");
-				System.exit(-1);
-			}
-			gRouteToSpec.get(routeId).addRoute(gRoute);
-		}
-		for (GTrip gTrip : gtfs.getAllTrips()) {
-			routeId = gRouteIdToMRouteId.get(gTrip.getRouteId());
-			if (routeId == null) {
-				continue; // not processed now (route not processed because filter or other type of route)
-			}
-			gTripIdToMRouteId.put(gTrip.getTripId(), routeId);
-			if (!gRouteToSpec.containsKey(routeId)) {
-				System.out.printf("\nTrip's Route ID %s not already present!\n", routeId);
-				System.exit(-1);
-			}
-			if (gRouteToSpec.get(routeId).containsTrip(gTrip)) {
-				System.out.printf("\nTrip ID %s already present!\n", gTrip.getTripId());
-				System.exit(-1);
-			}
-			gServiceIdToMRouteId.put(gTrip.service_id, routeId);
-			gRouteToSpec.get(routeId).addTrip(gTrip);
-		}
-		for (GTripStop gTripStop : gtfs.getAllTripStops()) {
-			routeId = gTripIdToMRouteId.get(gTripStop.getTripId());
-			if (routeId == null) {
-				continue; // not processed now (subway line...)
-			}
-			if (!gRouteToSpec.containsKey(routeId)) {
-				System.out.printf("\nTrip Stop's Route ID  not already present!\n", routeId);
-				System.exit(-1);
-			}
-			if (gRouteToSpec.get(routeId).containsTripStop(gTripStop)) {
-				System.out.printf("\nTrip stop ID %s already present!\n", gTripStop.getTripId());
-				System.exit(-1);
-			}
-			gRouteToSpec.get(routeId).addTripStops(gTripStop);
-		}
-		for (GCalendar gCalendar : gtfs.getAllCalendars()) {
-			routeId = gServiceIdToMRouteId.get(gCalendar.service_id);
-			if (routeId == null) {
-				continue;
-			}
-			if (!gRouteToSpec.containsKey(routeId)) {
-				System.out.printf("\nCalendar's Route ID %s not already present!\n", routeId);
-				System.exit(-1);
-			}
-			gRouteToSpec.get(routeId).addCalendar(gCalendar);
-		}
-		for (GCalendarDate gCalendarDate : gtfs.getAllCalendarDates()) {
-			routeId = gServiceIdToMRouteId.get(gCalendarDate.service_id);
-			if (routeId == null) {
-				continue; // not processed now (...)
-			}
-			if (!gRouteToSpec.containsKey(routeId)) {
-				System.out.printf("\nCalendar Date's Route ID %s not already present!", routeId);
-				System.exit(-1);
-			}
-			gRouteToSpec.get(routeId).addCalendarDate(gCalendarDate);
-		}
-		for (GStopTime gStopTime : gtfs.getAllStopTimes()) {
-			routeId = gTripIdToMRouteId.get(gStopTime.trip_id);
-			if (routeId == null) {
-				continue;
-			}
-			if (!gRouteToSpec.containsKey(routeId)) {
-				System.out.printf("\nStop Time's Route ID %s not already present!\n", routeId);
-				System.exit(-1);
-			}
-			gRouteToSpec.get(routeId).addStopTime(gStopTime);
-		}
-		for (GFrequency gFrequency : gtfs.getAllfrequencies()) {
-			routeId = gTripIdToMRouteId.get(gFrequency.trip_id);
-			if (routeId == null) {
-				continue; // not processed now (...)
-			}
-			if (!gRouteToSpec.containsKey(routeId)) {
-				System.out.printf("\nFrequency's Route ID %s not already present!\n", routeId);
-				System.exit(-1);
-			}
-			gRouteToSpec.get(routeId).addFrequency(gFrequency);
-		}
-		return gRouteToSpec;
 	}
 
 	private GReader() {

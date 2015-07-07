@@ -33,6 +33,10 @@ public class GRoute {
 		this.route_color = route_color;
 	}
 
+	public String getRouteId() {
+		return route_id;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //

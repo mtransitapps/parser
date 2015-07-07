@@ -45,6 +45,10 @@ public class GTrip {
 		return this.trip_id;
 	}
 
+	public String getServiceId() {
+		return service_id;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //

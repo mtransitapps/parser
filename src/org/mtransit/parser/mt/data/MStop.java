@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data;
 
+import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
 
 public class MStop implements Comparable<MStop> {
@@ -27,7 +28,7 @@ public class MStop implements Comparable<MStop> {
 		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(Constants.STRING_DELIMITER).append(this.code == null ? Constants.EMPTY : this.code).append(Constants.STRING_DELIMITER);// code
 		sb.append(Constants.COLUMN_SEPARATOR); //
-		sb.append(Constants.STRING_DELIMITER).append(MSpec.escape(this.name)).append(Constants.STRING_DELIMITER); // name
+		sb.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.name)).append(Constants.STRING_DELIMITER); // name
 		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(this.lat); // latitude
 		sb.append(Constants.COLUMN_SEPARATOR); //

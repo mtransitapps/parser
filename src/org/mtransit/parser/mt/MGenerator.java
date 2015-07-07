@@ -7,13 +7,10 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
@@ -24,6 +21,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.mtransit.parser.Constants;
+import org.mtransit.parser.ThreadSafeDateFormatter;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
@@ -40,27 +38,26 @@ import org.mtransit.parser.mt.data.MTripStop;
 
 public class MGenerator {
 
-	public static MSpec generateMSpec(Map<Long, GSpec> gtfsByMRouteId, GSpec gtfs, GAgencyTools agencyTools) {
+	public static MSpec generateMSpec(GSpec gtfs, GAgencyTools agencyTools) {
 		System.out.printf("\nGenerating routes, trips, trip stops & stops objects... ");
-		List<MAgency> mAgencies = new ArrayList<MAgency>();
-		List<MRoute> mRoutes = new ArrayList<MRoute>();
-		List<MTrip> mTrips = new ArrayList<MTrip>();
-		List<MTripStop> mTripStops = new ArrayList<MTripStop>();
+		ArrayList<MAgency> mAgencies = new ArrayList<MAgency>();
+		ArrayList<MRoute> mRoutes = new ArrayList<MRoute>();
+		ArrayList<MTrip> mTrips = new ArrayList<MTrip>();
+		ArrayList<MTripStop> mTripStops = new ArrayList<MTripStop>();
 		HashMap<Integer, MStop> mStops = new HashMap<Integer, MStop>();
-		TreeMap<Integer, List<MSchedule>> mStopSchedules = new TreeMap<Integer, List<MSchedule>>();
-		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<Long, List<MFrequency>>();
-		List<MServiceDate> mServiceDates = new ArrayList<MServiceDate>();
+		TreeMap<Integer, ArrayList<MSchedule>> mStopSchedules = new TreeMap<Integer, ArrayList<MSchedule>>();
+		TreeMap<Long, ArrayList<MFrequency>> mRouteFrequencies = new TreeMap<Long, ArrayList<MFrequency>>();
+		ArrayList<MServiceDate> mServiceDates = new ArrayList<MServiceDate>();
 		ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(agencyTools.getThreadPoolSize());
-		List<Future<MSpec>> list = new ArrayList<Future<MSpec>>();
-		List<Long> routeIds = new ArrayList<Long>(gtfsByMRouteId.keySet());
+		ArrayList<Future<MSpec>> list = new ArrayList<Future<MSpec>>();
+		ArrayList<Long> routeIds = new ArrayList<Long>(gtfs.getRouteIds());
 		Collections.sort(routeIds);
-		GSpec routeGTFS;
 		for (Long routeId : routeIds) {
-			routeGTFS = gtfsByMRouteId.get(routeId);
-			if (!routeGTFS.hasTrips()) {
+			if (!gtfs.hasRouteTrips(routeId)) {
+				System.out.printf("\n%s: Skip route because no route trips", routeId);
 				continue;
 			}
-			list.add(threadPoolExecutor.submit(new GenerateMObjectsTask(agencyTools, routeId, routeGTFS, gtfs)));
+			list.add(threadPoolExecutor.submit(new GenerateMObjectsTask(routeId, agencyTools, gtfs)));
 		}
 		MSpec mRouteSpec;
 		for (Future<MSpec> future : list) {
@@ -79,14 +76,19 @@ public class MGenerator {
 					}
 					mStops.put(mStop.id, mStop);
 				}
-				mServiceDates.addAll(mRouteSpec.serviceDates);
-				for (Entry<Integer, List<MSchedule>> stopScheduleEntry : mRouteSpec.stopSchedules.entrySet()) {
+				for (MServiceDate mServiceDate : mRouteSpec.serviceDates) {
+					if (mServiceDates.contains(mServiceDate)) {
+						continue;
+					}
+					mServiceDates.add(mServiceDate);
+				}
+				for (Entry<Integer, ArrayList<MSchedule>> stopScheduleEntry : mRouteSpec.stopSchedules.entrySet()) {
 					if (!mStopSchedules.containsKey(stopScheduleEntry.getKey())) {
 						mStopSchedules.put(stopScheduleEntry.getKey(), new ArrayList<MSchedule>());
 					}
 					mStopSchedules.get(stopScheduleEntry.getKey()).addAll(stopScheduleEntry.getValue());
 				}
-				for (Entry<Long, List<MFrequency>> routeFrequenciesEntry : mRouteSpec.routeFrequencies.entrySet()) {
+				for (Entry<Long, ArrayList<MFrequency>> routeFrequenciesEntry : mRouteSpec.routeFrequencies.entrySet()) {
 					if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().size() == 0) {
 						continue;
 					}
@@ -102,7 +104,7 @@ public class MGenerator {
 			}
 		}
 		threadPoolExecutor.shutdown();
-		List<MStop> mStopsList = new ArrayList<MStop>(mStops.values());
+		ArrayList<MStop> mStopsList = new ArrayList<MStop>(mStops.values());
 		Collections.sort(mAgencies);
 		Collections.sort(mStopsList);
 		Collections.sort(mRoutes);
@@ -180,7 +182,7 @@ public class MGenerator {
 		}
 		String fileName;
 		boolean empty;
-		List<MSchedule> mStopSchedules;
+		ArrayList<MSchedule> mStopSchedules;
 		for (Integer stopId : mSpec.stopSchedules.keySet()) {
 			try {
 				mStopSchedules = mSpec.stopSchedules.get(stopId);
@@ -233,7 +235,7 @@ public class MGenerator {
 				System.err.printf("\nCan't remove %s!\n", f.getAbsolutePath());
 			}
 		}
-		List<MFrequency> mRouteFrequencies;
+		ArrayList<MFrequency> mRouteFrequencies;
 		for (Long routeId : mSpec.routeFrequencies.keySet()) {
 			try {
 				mRouteFrequencies = mSpec.routeFrequencies.get(routeId);
@@ -447,16 +449,16 @@ public class MGenerator {
 	private static final String STORE_LISTING_TXT = "store-listing.txt";
 	private static final String STORE_LISTING_FR_TXT = "store-listing_fr.txt";
 
-	private static final SimpleDateFormat CALENDAR_DATE = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
+	private static final ThreadSafeDateFormatter CALENDAR_DATE = new ThreadSafeDateFormatter("yyyyMMdd", Locale.ENGLISH);
 
 	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from [A-Za-z]+ [0-9]{1,2}\\, [0-9]{4} to [A-Za-z]+ [0-9]{1,2}\\, [0-9]{4}\\.)",
 			Pattern.CASE_INSENSITIVE);
-	private static final SimpleDateFormat SCHEDULE_DATE = new SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH);
+	private static final ThreadSafeDateFormatter SCHEDULE_DATE = new ThreadSafeDateFormatter("MMMMM d, yyyy", Locale.ENGLISH);
 	private static final String SCHEDULE_FROM_TO = "Schedule from %s to %s.";
 
 	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du [0-9]{1,2} [\\w]+ [0-9]{4} au [0-9]{1,2} [\\w]+ [0-9]{4}\\.)",
 			Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
-	private static final SimpleDateFormat SCHEDULE_DATE_FR = new SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH);
+	private static final ThreadSafeDateFormatter SCHEDULE_DATE_FR = new ThreadSafeDateFormatter("d MMMMM yyyy", Locale.FRENCH);
 	private static final String SCHEDULE_FROM_TO_FR = "Horaires du %s au %s.";
 
 	private static void dumpStoreListing(File dumpDirF, Integer minDate, Integer maxDate) {
@@ -469,12 +471,11 @@ public class MGenerator {
 			System.out.printf("\nGenerated store listing file: '%s'.", file);
 			try {
 				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF8);
-				content = SCHEDULE.matcher(content)
-						.replaceAll(
-								String.format(
-										SCHEDULE_FROM_TO, //
-										SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(minDate))),
-										SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
+				content = SCHEDULE.matcher(content).replaceAll(
+						String.format(
+								SCHEDULE_FROM_TO, //
+								SCHEDULE_DATE.formatThreadSafe(CALENDAR_DATE.parseThreadSafe(String.valueOf(minDate))),
+								SCHEDULE_DATE.formatThreadSafe(CALENDAR_DATE.parseThreadSafe(String.valueOf(maxDate)))));
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
 			} catch (Exception e) {
 				System.out.printf("\nError while writing store listing files!\n");
@@ -499,8 +500,8 @@ public class MGenerator {
 				content = SCHEDULE_FR.matcher(content).replaceAll(
 						String.format(
 								SCHEDULE_FROM_TO_FR, //
-								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(minDate))),
-								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
+								SCHEDULE_DATE_FR.formatThreadSafe(CALENDAR_DATE.parseThreadSafe(String.valueOf(minDate))),
+								SCHEDULE_DATE_FR.formatThreadSafe(CALENDAR_DATE.parseThreadSafe(String.valueOf(maxDate)))));
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
 			} catch (Exception e) {
 				System.out.printf("\nError while writing store listing files!\n");

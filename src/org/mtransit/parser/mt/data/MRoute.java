@@ -1,6 +1,7 @@
 package org.mtransit.parser.mt.data;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
 
 public class MRoute implements Comparable<MRoute> {
@@ -24,11 +25,11 @@ public class MRoute implements Comparable<MRoute> {
 				.append(this.id) // ID
 				.append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER) //
-				.append(this.shortName == null ? Constants.EMPTY : MSpec.escape(this.shortName)) // short name
+				.append(this.shortName == null ? Constants.EMPTY : CleanUtils.escape(this.shortName)) // short name
 				.append(Constants.STRING_DELIMITER) //
 				.append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER) //
-				.append(this.longName == null ? Constants.EMPTY : MSpec.escape(this.longName)) // long name
+				.append(this.longName == null ? Constants.EMPTY : CleanUtils.escape(this.longName)) // long name
 				.append(Constants.STRING_DELIMITER) //
 				.append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER) //

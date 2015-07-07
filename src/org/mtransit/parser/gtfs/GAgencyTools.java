@@ -51,7 +51,7 @@ public interface GAgencyTools {
 
 	HashSet<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs);
 
-	Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, HashSet<MTrip> splitTrips, GSpec gtfs);
+	Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, HashSet<MTrip> splitTrips, GSpec routeGTFS);
 
 	boolean excludeStopTime(GStopTime gStopTime);
 
@@ -71,7 +71,7 @@ public interface GAgencyTools {
 	boolean excludeCalendarDate(GCalendarDate gCalendarDate);
 
 	// SCHEDULE
-	int getDepartureTime(GStopTime gStopTime, GSpec gSpec);
+	int getDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS);
 
 	// FREQUENCY
 	int getStartTime(GFrequency gFrequency);

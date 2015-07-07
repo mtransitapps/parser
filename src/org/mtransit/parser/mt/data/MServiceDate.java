@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data;
 
+import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
 
 public class MServiceDate implements Comparable<MServiceDate> {
@@ -14,7 +15,7 @@ public class MServiceDate implements Comparable<MServiceDate> {
 
 	@Override
 	public int compareTo(MServiceDate otherServiceDate) {
-		final int cd = this.calendarDate - otherServiceDate.calendarDate;
+		int cd = this.calendarDate - otherServiceDate.calendarDate;
 		if (cd != 0) {
 			return cd;
 		}
@@ -36,10 +37,9 @@ public class MServiceDate implements Comparable<MServiceDate> {
 	@Override
 	public String toString() {
 		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(MSpec.escape(this.serviceId)).append(Constants.STRING_DELIMITER) // service ID
+				.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.serviceId)).append(Constants.STRING_DELIMITER) // service ID
 				.append(Constants.COLUMN_SEPARATOR) //
 				.append(this.calendarDate) // calendar date
 				.toString();
 	}
-
 }

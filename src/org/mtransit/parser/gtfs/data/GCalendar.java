@@ -1,11 +1,11 @@
 package org.mtransit.parser.gtfs.data;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import org.mtransit.parser.Constants;
+import org.mtransit.parser.ThreadSafeDateFormatter;
 
 // https://developers.google.com/transit/gtfs/reference#calendar_fields
 public class GCalendar {
@@ -59,6 +59,10 @@ public class GCalendar {
 		initAllDates();
 	}
 
+	public String getServiceId() {
+		return service_id;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //
@@ -75,8 +79,7 @@ public class GCalendar {
 				.toString();
 	}
 
-	// NOT THREAD SAFE
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+	private static final ThreadSafeDateFormatter DATE_FORMAT = new ThreadSafeDateFormatter("yyyyMMdd");
 
 	public List<GCalendarDate> getDates() {
 		if (this.allDates == null) {
@@ -89,16 +92,16 @@ public class GCalendar {
 		this.allDates = new ArrayList<GCalendarDate>();
 		try {
 			Calendar startDate = Calendar.getInstance();
-			startDate.setTime(DATE_FORMAT.parse(String.valueOf(this.start_date)));
+			startDate.setTime(DATE_FORMAT.parseThreadSafe(String.valueOf(this.start_date)));
 			Calendar endDate = Calendar.getInstance();
-			endDate.setTime(DATE_FORMAT.parse(String.valueOf(this.end_date)));
+			endDate.setTime(DATE_FORMAT.parseThreadSafe(String.valueOf(this.end_date)));
 			Calendar c = startDate; // no need to clone because not re-using startDate later
 			c.add(Calendar.DAY_OF_MONTH, -1); // starting yesterday because increment done at the beginning of the loop
 			int date;
 			while (c.before(endDate)) {
 				c.add(Calendar.DAY_OF_MONTH, +1);
 				try {
-					date = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
+					date = Integer.valueOf(DATE_FORMAT.formatThreadSafe(c.getTime()));
 					switch (c.get(Calendar.DAY_OF_WEEK)) {
 					case Calendar.MONDAY:
 						if (this.monday) {

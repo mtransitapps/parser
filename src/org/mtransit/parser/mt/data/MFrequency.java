@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data;
 
+import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
 
 public class MFrequency implements Comparable<MFrequency> {
@@ -22,7 +23,7 @@ public class MFrequency implements Comparable<MFrequency> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(); //
-		sb.append(Constants.STRING_DELIMITER).append(MSpec.escape(this.serviceId)).append(Constants.STRING_DELIMITER); // service ID
+		sb.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.serviceId)).append(Constants.STRING_DELIMITER); // service ID
 		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(this.tripId); // trip ID
 		sb.append(Constants.COLUMN_SEPARATOR); //

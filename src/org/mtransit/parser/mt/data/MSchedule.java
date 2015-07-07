@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data;
 
+import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
 
 public class MSchedule implements Comparable<MSchedule> {
@@ -53,7 +54,7 @@ public class MSchedule implements Comparable<MSchedule> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(); //
-		sb.append(Constants.STRING_DELIMITER).append(MSpec.escape(this.serviceId)).append(Constants.STRING_DELIMITER); // service ID
+		sb.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.serviceId)).append(Constants.STRING_DELIMITER); // service ID
 		sb.append(Constants.COLUMN_SEPARATOR); //
 		// no route ID, just for file split
 		sb.append(this.tripId); // trip ID

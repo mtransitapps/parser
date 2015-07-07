@@ -22,6 +22,10 @@ public class GCalendarDate {
 		this.exception_type = exception_type;
 	}
 
+	public String getServiceId() {
+		return service_id;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //

@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data;
 
+import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
 
 public class MTrip implements Comparable<MTrip> {
@@ -160,7 +161,7 @@ public class MTrip implements Comparable<MTrip> {
 				.append(Constants.COLUMN_SEPARATOR) //
 				.append(this.headsignType) // HEADSIGN TYPE
 				.append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(MSpec.escape(this.headsignValue)).append(Constants.STRING_DELIMITER) // HEADSIGN STRING
+				.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.headsignValue)).append(Constants.STRING_DELIMITER) // HEADSIGN STRING
 				.append(Constants.COLUMN_SEPARATOR) //
 				.append(this.routeId) // ROUTE ID
 				.toString();
