@@ -43,9 +43,9 @@ public enum MDirectionType {
 		} else if (SOUTH.id.equals(this.id)) {
 			return 4;
 		} else {
-			System.out.println("Unknow direction '" + this.id + "'");
+			System.out.printf("\nUnknow direction type '%s'!\n", this.id);
 			System.exit(-1);
-			return 0;
+			return -1;
 		}
 	}
 }

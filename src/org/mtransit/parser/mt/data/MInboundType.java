@@ -3,7 +3,7 @@ package org.mtransit.parser.mt.data;
 public enum MInboundType {
 
 	NONE(""), INBOUND("0"), OUTBOUND("1");
-	
+
 	public String id;
 
 	MInboundType(String id) {
@@ -19,9 +19,21 @@ public enum MInboundType {
 		}
 		return NONE; // default
 	}
-	
+
 	@Override
 	public String toString() {
 		return id;
+	}
+
+	public int intValue() {
+		if (INBOUND.id.equals(this.id)) {
+			return 0;
+		} else if (OUTBOUND.id.equals(this.id)) {
+			return 1;
+		} else {
+			System.out.printf("\nUnknow inbound type '%s'!\n", this.id);
+			System.exit(-1);
+			return -1;
+		}
 	}
 }

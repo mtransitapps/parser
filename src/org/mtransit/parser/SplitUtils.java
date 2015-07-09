@@ -12,6 +12,7 @@ import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MDirectionType;
+import org.mtransit.parser.mt.data.MInboundType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
@@ -35,7 +36,7 @@ public class SplitUtils {
 		} else if (stopIdsTowardsBoth12.contains(beforeAfter)) {
 			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop1, tidTowardsStop2 }, new Integer[] { 1, gTripStop.getStopSequence() });
 		}
-		System.out.printf("\n%s: Unexptected trip stop to split %s.\n", gTrip.getRouteId(), gTripStop);
+		System.out.printf("\n%s: Unexptected trip stop to split %s.\n", mRoute.id, gTripStop);
 		System.exit(-1);
 		return null;
 	}
@@ -80,7 +81,7 @@ public class SplitUtils {
 		if (beforeAfterStopIdCandidate != null) {
 			return beforeAfterStopIdCandidate;
 		}
-		System.out.printf("\n%s: Unexpected trip (befores:%s|afters:%s) %s.\n", gTrip.getRouteId(), beforeStopIds, afterStopIds, gTrip);
+		System.out.printf("\n%s: Unexpected trip (befores:%s|afters:%s) %s.\n", mRoute.id, beforeStopIds, afterStopIds, gTrip);
 		System.exit(-1);
 		return null;
 	}
@@ -180,7 +181,7 @@ public class SplitUtils {
 			gStopId = gStopTime.getStopId();
 		}
 		if (StringUtils.isEmpty(gStopId)) {
-			System.out.printf("\n%s: Unexpected trip (no 1st stop) %s.\n", gTrip.getRouteId(), gTrip);
+			System.out.printf("\n%s: Unexpected trip (no 1st stop) %s.\n", mRoute.id, gTrip);
 			System.exit(-1);
 		}
 		return gStopId;
@@ -200,7 +201,7 @@ public class SplitUtils {
 			gStopId = gStopTime.getStopId();
 		}
 		if (StringUtils.isEmpty(gStopId)) {
-			System.out.printf("\n%s: Unexpected trip (no last stop) %s.\n", gTrip.getRouteId(), gTrip);
+			System.out.printf("\n%s: Unexpected trip (no last stop) %s.\n", mRoute.id, gTrip);
 			System.exit(-1);
 		}
 		return gStopId;
@@ -315,6 +316,8 @@ public class SplitUtils {
 				this.allTrips.add(new MTrip(this.routeId).setHeadsignString(this.headsignString0, this.directionId0));
 			} else if (this.headsignType0 == MTrip.HEADSIGN_TYPE_DIRECTION) {
 				this.allTrips.add(new MTrip(this.routeId).setHeadsignDirection(MDirectionType.parse(this.headsignString0)));
+			} else if (this.headsignType0 == MTrip.HEADSIGN_TYPE_INBOUND) {
+				this.allTrips.add(new MTrip(this.routeId).setHeadsignInbound(MInboundType.parse(this.headsignString0)));
 			} else {
 				System.out.printf("\n%s: Unexpected trip type %s for %s.\n", this.routeId, this.headsignType0, this.routeId);
 				System.exit(-1);
@@ -323,6 +326,8 @@ public class SplitUtils {
 				this.allTrips.add(new MTrip(this.routeId).setHeadsignString(this.headsignString1, this.directionId1));
 			} else if (this.headsignType1 == MTrip.HEADSIGN_TYPE_DIRECTION) {
 				this.allTrips.add(new MTrip(this.routeId).setHeadsignDirection(MDirectionType.parse(this.headsignString1)));
+			} else if (this.headsignType1 == MTrip.HEADSIGN_TYPE_INBOUND) {
+				this.allTrips.add(new MTrip(this.routeId).setHeadsignInbound(MInboundType.parse(this.headsignString1)));
 			} else {
 				System.out.printf("\n%s: Unexpected trip type %s for %s\n.", this.routeId, this.headsignType1, this.routeId);
 				System.exit(-1);
@@ -377,16 +382,16 @@ public class SplitUtils {
 				return 0;
 			}
 			List<String> sortedStopIds = this.allSortedStopIds.get(directionId);
-			if (!sortedStopIds.contains(ts1GStop.stop_code) || !sortedStopIds.contains(ts2GStop.stop_code)) {
-				System.out.printf("\n%s: Unexpected stop IDs %s AND/OR %s", routeId, ts1GStop.stop_code, ts2GStop.stop_code);
+			int ts1StopIndex = sortedStopIds.indexOf(ts1GStop.stop_id);
+			int ts2StopIndex = sortedStopIds.indexOf(ts2GStop.stop_id);
+			if (ts1StopIndex < 0 || ts2StopIndex < 0) {
+				System.out.printf("\n%s: Unexpected stop IDs %s AND/OR %s", routeId, ts1GStop.stop_id, ts2GStop.stop_id);
 				System.out.printf("\n%s: Not in sorted list: %s", routeId, sortedStopIds);
 				System.out.printf("\n%s: 1: %s", routeId, list1);
 				System.out.printf("\n%s: 2: %s", routeId, list2);
 				System.exit(-1);
 				return 0;
 			}
-			int ts1StopIndex = sortedStopIds.indexOf(ts1GStop.stop_code);
-			int ts2StopIndex = sortedStopIds.indexOf(ts2GStop.stop_code);
 			return ts2StopIndex - ts1StopIndex;
 		}
 

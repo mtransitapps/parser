@@ -32,6 +32,22 @@ public class GStop {
 		return stop_id;
 	}
 
+	public String getStopName() {
+		return stop_name;
+	}
+
+	public double getStopLat() {
+		return this.stop_lat;
+	}
+
+	public double getStopLong() {
+		return this.stop_lon;
+	}
+
+	public String getStopCode() {
+		return stop_code;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //
@@ -41,13 +57,5 @@ public class GStop {
 				.append(Constants.STRING_DELIMITER).append(this.stop_lon).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.stop_code).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.toString();
-	}
-
-	public double getLatD() {
-		return this.stop_lat;
-	}
-
-	public double getLongD() {
-		return this.stop_lon;
 	}
 }

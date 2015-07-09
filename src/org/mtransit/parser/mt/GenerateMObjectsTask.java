@@ -356,8 +356,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				serviceIds.add(tripServiceId);
 			}
 			if (!mStops.containsKey(mStopId)) {
-				mStops.put(mStopId, new MStop(mStopId, this.agencyTools.getStopCode(gStop), this.agencyTools.cleanStopName(gStop.stop_name), gStop.getLatD(),
-						gStop.getLongD()));
+				mStops.put(mStopId, new MStop(mStopId, this.agencyTools.getStopCode(gStop), this.agencyTools.cleanStopName(gStop.stop_name),
+						gStop.getStopLat(), gStop.getStopLong()));
 			}
 		}
 		return splitTripStopTimesHeadsign;
@@ -558,8 +558,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				lastGStop = this.gStopsCache.get(last.getStopId());
 				ts1GStop = this.gStopsCache.get(ts1.getStopId());
 				ts2GStop = this.gStopsCache.get(ts2.getStopId());
-				ts1Distance = findDistance(lastGStop.getLatD(), lastGStop.getLongD(), ts1GStop.getLatD(), ts1GStop.getLongD());
-				ts2Distance = findDistance(lastGStop.getLatD(), lastGStop.getLongD(), ts2GStop.getLatD(), ts2GStop.getLongD());
+				ts1Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts1GStop.getStopLat(), ts1GStop.getStopLong());
+				ts2Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts2GStop.getStopLat(), ts2GStop.getStopLong());
 				if (ts1Distance < ts2Distance) {
 					System.out.printf("\n" + this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
 							+ "|stopID2:" + ts2.getStopId() + "] (lastStopID:" + last.getStopId() + "|distance1:" + ts1Distance + "|distance2:" + ts2Distance
@@ -586,8 +586,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				commonGStop = this.gStopsCache.get(commonStopAndPrevious[0].getStopId());
 				previousTs1GStop = this.gStopsCache.get(ts1.getStopId());
 				previousTs2GStop = this.gStopsCache.get(ts2.getStopId());
-				previousTs1Distance = findDistance(commonGStop.getLatD(), commonGStop.getLongD(), previousTs1GStop.getLatD(), previousTs1GStop.getLongD());
-				previousTs2Distance = findDistance(commonGStop.getLatD(), commonGStop.getLongD(), previousTs2GStop.getLatD(), previousTs2GStop.getLongD());
+				previousTs1Distance = findDistance(commonGStop.getStopLat(), commonGStop.getStopLong(), previousTs1GStop.getStopLat(),
+						previousTs1GStop.getStopLong());
+				previousTs2Distance = findDistance(commonGStop.getStopLat(), commonGStop.getStopLong(), previousTs2GStop.getStopLat(),
+						previousTs2GStop.getStopLong());
 				System.out.printf("\n" + this.routeId + ": Resolved using 1st common stop trip ID:" + ts1.getTripId() + ", stop IDs:" + ts1.getStopId() + ","
 						+ ts2.getStopId() + " (" + commonStopAndPrevious[1].getStopId() + " " + previousTs1Distance + ", "
 						+ commonStopAndPrevious[2].getStopId() + " " + previousTs2Distance + ")");
@@ -620,7 +622,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				i2++;
 				continue;
 			}
-			if (ts1GStop.getLatD() < ts2GStop.getLatD() || ts1GStop.getLongD() < ts2GStop.getLongD()) {
+			if (ts1GStop.getStopLat() < ts2GStop.getStopLat() || ts1GStop.getStopLong() < ts2GStop.getStopLong()) {
 				newList.add(ts1);
 				newListStopIds.add(ts1.getStopId());
 				last = ts1;
