@@ -23,6 +23,10 @@ public class GFrequency {
 		this.headway_secs = headway_secs;
 	}
 
+	public String getTripId() {
+		return trip_id;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //

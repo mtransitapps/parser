@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs;
 
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.List;
 
@@ -71,7 +72,7 @@ public interface GAgencyTools {
 	boolean excludeCalendarDate(GCalendarDate gCalendarDate);
 
 	// SCHEDULE
-	int getDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS);
+	int getDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat dateFormatterInstance);
 
 	// FREQUENCY
 	int getStartTime(GFrequency gFrequency);

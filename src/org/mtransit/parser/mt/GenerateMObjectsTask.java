@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.Constants;
+import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -83,23 +85,29 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		parseRTS(mSchedules, mFrequencies, mRoutes, mTrips, mStops, allMTripStops, tripStopIds, serviceIds, routeGTFS);
 		HashSet<String> gCalendarDateServiceRemoved = new HashSet<String>();
 		for (GCalendarDate gCalendarDate : routeGTFS.getAllCalendarDates()) {
+			if (!serviceIds.contains(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()))) {
+				continue;
+			}
 			switch (gCalendarDate.exception_type) {
 			case SERVICE_REMOVED: // keep list of removed service for calendars processing
 				gCalendarDateServiceRemoved.add(gCalendarDate.getUID());
 				break;
 			case SERVICE_ADDED:
-				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.service_id), gCalendarDate.date));
+				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()), gCalendarDate.date));
 				break;
 			default:
 				System.out.printf("\n%s: Unexpected calendar date exeception type '%s'!", this.routeId, gCalendarDate.exception_type);
 			}
 		}
 		for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
+			if (!serviceIds.contains(this.agencyTools.cleanServiceId(gCalendar.getServiceId()))) {
+				continue;
+			}
 			for (GCalendarDate gCalendarDate : gCalendar.getDates()) {
 				if (gCalendarDateServiceRemoved.contains(gCalendarDate.getUID())) {
 					continue; // service REMOVED at this date
 				}
-				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.service_id), gCalendarDate.date));
+				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()), gCalendarDate.date));
 			}
 		}
 		MTrip mTrip;
@@ -155,8 +163,11 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		HashSet<String> mTripHeasignStrings;
 		boolean headsignTypeString;
 		boolean tripKeptNonDescriptiveHeadsign;
-		for (GRoute gRoute : routeGTFS.getAllRoutes()) {
-			mRoute = new MRoute(this.agencyTools.getRouteId(gRoute), this.agencyTools.getRouteShortName(gRoute), this.agencyTools.getRouteLongName(gRoute),
+		for (GRoute gRoute : routeGTFS.getRoutes(this.routeId)) {
+			if (this.agencyTools.getRouteId(gRoute) != this.routeId) {
+				continue;
+			}
+			mRoute = new MRoute(this.routeId, this.agencyTools.getRouteShortName(gRoute), this.agencyTools.getRouteLongName(gRoute),
 					this.agencyTools.getRouteColor(gRoute));
 			if (mRoutes.containsKey(mRoute.id) && !mRoute.equals(mRoutes.get(mRoute.id))) {
 				mergeSuccessful = false;
@@ -363,6 +374,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return splitTripStopTimesHeadsign;
 	}
 
+	private SimpleDateFormat DEPARTURE_TIME_FORMAT = DefaultAgencyTools.getNewDepartureTimeFormatInstance(); // not static - not sharable between threads!
+
 	private String parseStopTimes(HashMap<String, MSchedule> mSchedules, MRoute mRoute, int originalTripHeadsignType, String originalTripHeadsignValue,
 			long mTripId, String tripServiceId, String tripStopTimesHeadsign, GTripStop gTripStop, int mStopId, GSpec routeGTFS) {
 		MSchedule mSchedule;
@@ -372,7 +385,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					|| gStopTime.stop_sequence != gTripStop.getStopSequence()) {
 				continue;
 			}
-			mSchedule = new MSchedule(tripServiceId, mRoute.id, mTripId, mStopId, this.agencyTools.getDepartureTime(this.routeId, gStopTime, routeGTFS));
+			mSchedule = new MSchedule(tripServiceId, mRoute.id, mTripId, mStopId, this.agencyTools.getDepartureTime(this.routeId, gStopTime, routeGTFS,
+					DEPARTURE_TIME_FORMAT));
 			if (mSchedules.containsKey(mSchedule.getUID()) && !mSchedules.get(mSchedule.getUID()).equals(mSchedule)) {
 				System.out.printf("\n%s: Different schedule %s already in list (%s != %s)!\n", this.routeId, mSchedule.getUID(), mSchedule.toString(),
 						mSchedules.get(mSchedule.getUID()).toString());

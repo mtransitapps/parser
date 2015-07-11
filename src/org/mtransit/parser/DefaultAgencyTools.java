@@ -1,5 +1,6 @@
 package org.mtransit.parser;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +28,8 @@ import org.mtransit.parser.mt.data.MTripStop;
 public class DefaultAgencyTools implements GAgencyTools {
 
 	public static final int THREAD_POOL_SIZE = 1;
+	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 1;
+	private static final int MIN_COVERAGE_AFTER_TOTAL_IN_DAYS = 30;
 
 	public static void main(String[] args) {
 		new DefaultAgencyTools().start(args);
@@ -223,17 +226,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final int PRECISON_IN_SECONDS = 10;
 	private static final Pattern TIME_SEPARATOR_REGEX = Pattern.compile(":");
-	private static final ThreadSafeDateFormatter HHMMSS = new ThreadSafeDateFormatter("HHmmss");
 
+	public static final SimpleDateFormat getNewDepartureTimeFormatInstance() {
+		return new SimpleDateFormat("HHmmss");
+	}
 	private static int parseTimeString(String timeS) {
 		return Integer.parseInt(TIME_SEPARATOR_REGEX.matcher(timeS).replaceAll(Constants.EMPTY));
 	}
 
 	@Override
-	public int getDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS) {
+	public int getDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat dateFormatterInstance) {
 		Integer departureTime = null;
 		if (StringUtils.isEmpty(gStopTime.departure_time)) {
-			departureTime = extractDepartureTime(mRouteId, gStopTime, routeGTFS);
+			departureTime = extractDepartureTime(mRouteId, gStopTime, routeGTFS, dateFormatterInstance);
 		} else {
 			departureTime = parseTimeString(gStopTime.departure_time);
 		}
@@ -244,7 +249,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return departureTime; // GTFS standard
 	}
 
-	private Integer extractDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS) {
+	private Integer extractDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat dateFormatterInstance) {
 		Integer departureTime;
 		try {
 			Integer previousDepartureTime = null;
@@ -272,15 +277,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 					}
 				}
 			}
-			long previousDepartureTimeInMs = HHMMSS.parseThreadSafe(String.valueOf(previousDepartureTime)).getTime();
-			long nextDepartureTimeInMs = HHMMSS.parseThreadSafe(String.valueOf(nextDepartureTime)).getTime();
+			long previousDepartureTimeInMs = dateFormatterInstance.parse(String.valueOf(previousDepartureTime)).getTime();
+			long nextDepartureTimeInMs = dateFormatterInstance.parse(String.valueOf(nextDepartureTime)).getTime();
 			long timeDiffInMs = nextDepartureTimeInMs - previousDepartureTimeInMs;
 			int nbStop = nextDepartureTimeStopSequence - previousDepartureTimeStopSequence;
 			long timeBetweenStopInMs = timeDiffInMs / nbStop;
 			long departureTimeInMs = previousDepartureTimeInMs + (timeBetweenStopInMs * (gStopTime.stop_sequence - previousDepartureTimeStopSequence));
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTimeInMillis(departureTimeInMs);
-			departureTime = Integer.parseInt(HHMMSS.formatThreadSafe(calendar.getTime()));
+			departureTime = Integer.parseInt(dateFormatterInstance.format(calendar.getTime()));
 			if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
 				departureTime += 240000;
 			}
@@ -348,19 +353,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return parseTimeString(gFrequency.end_time); // GTFS standard
 	}
 
-	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 1;
-	private static final int MIN_COVERAGE_AFTER_TOTAL_IN_DAYS = 30;
-
-	private static final ThreadSafeDateFormatter DATE_FORMAT = new ThreadSafeDateFormatter("yyyyMMdd", Locale.ENGLISH);
-
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
 		System.out.printf("\nExtracting useful service IDs...");
+		SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, true);
 		Integer startDate = null;
 		Integer endDate = null;
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.DAY_OF_MONTH, 1); // TOMORROW (too late to publish today's schedule)
-		Integer todayStringInt = Integer.valueOf(DATE_FORMAT.formatThreadSafe(c.getTime()));
+		Integer todayStringInt = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
 		List<GCalendar> calendars = gtfs.getAllCalendars();
 		List<GCalendarDate> calendarDates = gtfs.getAllCalendarDates();
 		if (calendars != null && calendars.size() > 0) {
@@ -425,9 +426,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 					if (endDate - startDate < MIN_COVERAGE_AFTER_TOTAL_IN_DAYS) {
 						System.out.printf("\nNo enough days (%s), 1 more day in the future...", (endDate - startDate));
 						try {
-							c.setTime(DATE_FORMAT.parseThreadSafe(String.valueOf(endDate)));
+							c.setTime(DATE_FORMAT.parse(String.valueOf(endDate)));
 							c.add(Calendar.DAY_OF_MONTH, 1);
-							endDate = Integer.valueOf(DATE_FORMAT.formatThreadSafe(c.getTime()));
+							endDate = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
 						} catch (Exception e) {
 							System.out.printf("\nError while increasing end date!\n");
 							e.printStackTrace();
