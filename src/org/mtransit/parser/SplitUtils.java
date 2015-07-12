@@ -2,7 +2,6 @@ package org.mtransit.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -301,9 +300,9 @@ public class SplitUtils {
 			}
 		}
 
-		private HashSet<MTrip> allTrips = null;
+		private ArrayList<MTrip> allTrips = null;
 
-		public HashSet<MTrip> getAllTrips() {
+		public ArrayList<MTrip> getAllTrips() {
 			if (this.allTrips == null) {
 				initAllTrips();
 			}
@@ -311,7 +310,7 @@ public class SplitUtils {
 		}
 
 		private void initAllTrips() {
-			this.allTrips = new HashSet<MTrip>();
+			this.allTrips = new ArrayList<MTrip>();
 			if (this.headsignType0 == MTrip.HEADSIGN_TYPE_STRING) {
 				this.allTrips.add(new MTrip(this.routeId).setHeadsignString(this.headsignString0, this.directionId0));
 			} else if (this.headsignType0 == MTrip.HEADSIGN_TYPE_DIRECTION) {

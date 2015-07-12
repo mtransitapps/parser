@@ -1,6 +1,7 @@
 package org.mtransit.parser;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -122,15 +123,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public HashSet<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs) {
-		HashSet<MTrip> mTrips = new HashSet<MTrip>();
+	public ArrayList<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs) {
+		ArrayList<MTrip> mTrips = new ArrayList<MTrip>();
 		mTrips.add(new MTrip(mRoute.id));
 		return mTrips;
 	}
 
 	@Override
-	public Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, HashSet<MTrip> splitTrips, GSpec routeGTFS) {
-		return new Pair<Long[], Integer[]>(new Long[] { splitTrips.iterator().next().getId() }, new Integer[] { gTripStop.getStopSequence() });
+	public Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, ArrayList<MTrip> splitTrips, GSpec routeGTFS) {
+		return new Pair<Long[], Integer[]>(new Long[] { splitTrips.get(0).getId() }, new Integer[] { gTripStop.getStopSequence() });
 	}
 
 	@Override

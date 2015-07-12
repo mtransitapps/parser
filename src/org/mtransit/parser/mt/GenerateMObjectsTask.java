@@ -238,7 +238,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		boolean mergeSuccessful;
 		HashMap<Long, HashSet<String>> mergedTripIdToMTripStops = new HashMap<Long, HashSet<String>>();
 		HashMap<Long, Pair<Integer, String>> originalTripHeadsign;
-		HashSet<MTrip> splitTrips;
+		ArrayList<MTrip> splitTrips;
 		HashMap<Long, HashMap<String, MTripStop>> splitTripStops;
 		ArrayList<MTripStop> cTripStopsList;
 		ArrayList<MTripStop> mTripStopsList;
@@ -321,7 +321,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	}
 
 	private HashMap<Long, String> parseTripStops(HashMap<String, MSchedule> mSchedules, HashSet<String> serviceIds, MRoute mRoute,
-			HashMap<Integer, MStop> mStops, GTrip gTrip, HashMap<Long, Pair<Integer, String>> originalTripHeadsign, HashSet<MTrip> splitTrips,
+			HashMap<Integer, MStop> mStops, GTrip gTrip, HashMap<Long, Pair<Integer, String>> originalTripHeadsign, ArrayList<MTrip> splitTrips,
 			String tripServiceId, HashMap<Long, HashMap<String, MTripStop>> splitTripStops, GSpec routeGTFS) {
 		HashMap<Long, String> splitTripStopTimesHeadsign = new HashMap<Long, String>();
 		int mStopId;
@@ -352,13 +352,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (!splitTripStops.containsKey(mTripId)) {
 					splitTripStops.put(mTripId, new HashMap<String, MTripStop>());
 				}
-				if (splitTripStops.get(mTripId).containsKey(mTripStop.getUID())
-						&& !splitTripStops.get(mTripId).get(mTripStop.getUID()).equalsExceptStopSequence(mTripStop)) {
-					System.out.printf("\n%s: Different trip stop %s already in list (%s != %s)!\n", this.routeId, mTripStop.getUID(), mTripStop.toString(),
-							splitTripStops.get(mTripId).get(mTripStop.getUID()).toString());
-					System.exit(-1);
+				if (splitTripStops.get(mTripId).containsKey(mTripStop.getUID())) {
+					if (!splitTripStops.get(mTripId).get(mTripStop.getUID()).equalsExceptStopSequence(mTripStop)) {
+						System.out.printf("\n%s: Different trip stop %s already in list (%s != %s)!\n", this.routeId, mTripStop.getUID(), mTripStop.toString(),
+								splitTripStops.get(mTripId).get(mTripStop.getUID()).toString());
+						System.exit(-1);
+					}
+				} else {
+					splitTripStops.get(mTripId).put(mTripStop.getUID(), mTripStop);
 				}
-				splitTripStops.get(mTripId).put(mTripStop.getUID(), mTripStop);
 				tripStopTimesHeadsign = splitTripStopTimesHeadsign.get(mTripId);
 				tripStopTimesHeadsign = parseStopTimes(mSchedules, mRoute, //
 						originalTripHeadsign.get(mTripId).first, originalTripHeadsign.get(mTripId).second, //
@@ -415,7 +417,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return tripStopTimesHeadsign;
 	}
 
-	private void parseFrequencies(HashMap<String, MFrequency> mFrequencies, MRoute mRoute, GTrip gTrip, HashSet<MTrip> splitTrips, String tripServiceId,
+	private void parseFrequencies(HashMap<String, MFrequency> mFrequencies, MRoute mRoute, GTrip gTrip, ArrayList<MTrip> splitTrips, String tripServiceId,
 			GSpec routeGTFS) {
 		MFrequency mFrequency;
 		for (GFrequency gFrequency : routeGTFS.getFrequencies(gTrip.getTripId())) {

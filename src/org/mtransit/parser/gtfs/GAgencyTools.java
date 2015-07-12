@@ -1,7 +1,7 @@
 package org.mtransit.parser.gtfs;
 
 import java.text.SimpleDateFormat;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.mtransit.parser.Pair;
@@ -50,9 +50,9 @@ public interface GAgencyTools {
 
 	boolean excludeTrip(GTrip gTrip);
 
-	HashSet<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs);
+	ArrayList<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs);
 
-	Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, HashSet<MTrip> splitTrips, GSpec routeGTFS);
+	Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, ArrayList<MTrip> splitTrips, GSpec routeGTFS);
 
 	boolean excludeStopTime(GStopTime gStopTime);
 
