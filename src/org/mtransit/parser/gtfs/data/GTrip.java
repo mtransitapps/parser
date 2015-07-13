@@ -19,7 +19,7 @@ public class GTrip {
 	public static final String DIRECTION_ID = "direction_id";
 	public Integer direction_id;
 	public static final String SHAPE_ID = "shape_id";
-	public String shape_id;
+	private String shape_id;
 
 	private String uid;
 
@@ -30,7 +30,15 @@ public class GTrip {
 		this.direction_id = direction_id;
 		this.trip_headsign = trip_headsign;
 		this.shape_id = shape_id;
-		this.uid = this.route_id + this.trip_id;
+		this.uid = getUID(this.route_id, this.trip_id);
+	}
+
+	public String getShapeId() {
+		return shape_id;
+	}
+
+	private static String getUID(String routeId, String tripId) {
+		return routeId + tripId;
 	}
 
 	public String getUID() {

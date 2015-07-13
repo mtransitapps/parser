@@ -156,19 +156,7 @@ public class GReader {
 			}
 		}
 		System.out.printf("\nReading GTFS file '%1$s'... DONE in %2$s.", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
-		if (calendarsOnly) {
-			System.out.printf("\n- Calendars: %d", gSpec.getCalendarsCount());
-			System.out.printf("\n- CalendarDates: %d", gSpec.getCalendarDatesCount());
-		} else {
-			System.out.printf("\n- Agencies: %d", gSpec.getAgenciesCount());
-			System.out.printf("\n- Calendars: %d", gSpec.getCalendarsCount());
-			System.out.printf("\n- CalendarDates: %d", gSpec.getCalendarDatesCount());
-			System.out.printf("\n- Routes: %d", gSpec.getRoutesCount());
-			System.out.printf("\n- Trips: %d", gSpec.getTripsCount());
-			System.out.printf("\n- Stops: %d", gSpec.getStopsCount());
-			System.out.printf("\n- StopTimes: %d", gSpec.getStopTimesCount());
-			System.out.printf("\n- Frequencies: %d", gSpec.getFrequenciesCount());
-		}
+		gSpec.print(calendarsOnly);
 		return gSpec;
 	}
 

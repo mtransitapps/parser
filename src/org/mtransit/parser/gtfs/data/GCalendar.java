@@ -37,10 +37,10 @@ public class GCalendar {
 	public boolean sunday;
 
 	public static final String START_DATE = "start_date";
-	public int start_date; // YYYYMMDD
+	private int start_date; // YYYYMMDD
 
 	public static final String END_DATE = "end_date";
-	public int end_date; // YYYYMMDD
+	private int end_date; // YYYYMMDD
 
 	private ArrayList<GCalendarDate> allDates;
 
@@ -61,6 +61,14 @@ public class GCalendar {
 
 	public String getServiceId() {
 		return service_id;
+	}
+
+	public int getStartDate() {
+		return start_date;
+	}
+
+	public int getEndDate() {
+		return end_date;
 	}
 
 	@Override
@@ -89,6 +97,7 @@ public class GCalendar {
 	private void initAllDates() {
 		this.allDates = new ArrayList<GCalendarDate>();
 		try {
+			SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 			Calendar startDate = Calendar.getInstance();
 			startDate.setTime(DATE_FORMAT.parse(String.valueOf(this.start_date)));
 			Calendar endDate = Calendar.getInstance();

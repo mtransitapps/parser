@@ -43,6 +43,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false);
 		gtfs.generateTripStops();
 		gtfs.splitByRouteId(this);
+		gtfs.clearRawData();
 		// Objects generation
 		MSpec mSpec = MGenerator.generateMSpec(gtfs, this);
 		// Dump to files
@@ -367,20 +368,20 @@ public class DefaultAgencyTools implements GAgencyTools {
 		List<GCalendarDate> calendarDates = gtfs.getAllCalendarDates();
 		if (calendars != null && calendars.size() > 0) {
 			for (GCalendar gCalendar : calendars) {
-				if (gCalendar.start_date <= todayStringInt && gCalendar.end_date >= todayStringInt) {
-					if (startDate == null || gCalendar.start_date < startDate) {
-						startDate = gCalendar.start_date;
+				if (gCalendar.getStartDate() <= todayStringInt && gCalendar.getEndDate() >= todayStringInt) {
+					if (startDate == null || gCalendar.getStartDate() < startDate) {
+						startDate = gCalendar.getStartDate();
 					}
-					if (endDate == null || gCalendar.end_date > endDate) {
-						endDate = gCalendar.end_date;
+					if (endDate == null || gCalendar.getEndDate() > endDate) {
+						endDate = gCalendar.getEndDate();
 					}
 				}
 			}
 		} else if (calendarDates != null && calendarDates.size() > 0) {
 			HashSet<String> todayServiceIds = new HashSet<String>();
 			for (GCalendarDate gCalendarDate : calendarDates) {
-				if (gCalendarDate.date == todayStringInt) {
-					todayServiceIds.add(gCalendarDate.service_id);
+				if (gCalendarDate.getDate() == todayStringInt) {
+					todayServiceIds.add(gCalendarDate.getServiceId());
 				}
 			}
 			if (todayServiceIds != null && todayServiceIds.size() > 0) {
@@ -453,16 +454,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 		HashSet<String> serviceIds = new HashSet<String>();
 		if (calendars != null) {
 			for (GCalendar gCalendar : calendars) {
-				if ((gCalendar.start_date >= startDate && gCalendar.start_date <= endDate) //
-						|| (gCalendar.end_date >= startDate && gCalendar.end_date <= endDate)) {
-					serviceIds.add(gCalendar.service_id);
+				if ((gCalendar.getStartDate() >= startDate && gCalendar.getStartDate() <= endDate) //
+						|| (gCalendar.getEndDate() >= startDate && gCalendar.getEndDate() <= endDate)) {
+					serviceIds.add(gCalendar.getServiceId());
 				}
 			}
 		}
 		if (calendarDates != null) {
 			for (GCalendarDate gCalendarDate : calendarDates) {
-				if (gCalendarDate.date >= startDate && gCalendarDate.date <= endDate) {
-					serviceIds.add(gCalendarDate.service_id);
+				if (gCalendarDate.getDate() >= startDate && gCalendarDate.getDate() <= endDate) {
+					serviceIds.add(gCalendarDate.getServiceId());
 				}
 			}
 		}
@@ -476,21 +477,20 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (serviceIds == null) {
 			return false; // keep
 		}
-		return !serviceIds.contains(gCalendar.service_id);
+		return !serviceIds.contains(gCalendar.getServiceId());
 	}
 
 	public static boolean excludeUselessCalendarDate(GCalendarDate gCalendarDate, HashSet<String> serviceIds) {
 		if (serviceIds == null) {
 			return false; // keep
 		}
-		return !serviceIds.contains(gCalendarDate.service_id);
+		return !serviceIds.contains(gCalendarDate.getServiceId());
 	}
 
 	public static boolean excludeUselessTrip(GTrip gTrip, HashSet<String> serviceIds) {
 		if (serviceIds == null) {
 			return false; // keep
 		}
-		return !serviceIds.contains(gTrip.service_id);
+		return !serviceIds.contains(gTrip.getServiceId());
 	}
-
 }

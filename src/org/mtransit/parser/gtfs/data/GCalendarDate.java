@@ -26,6 +26,10 @@ public class GCalendarDate {
 		return service_id;
 	}
 
+	public int getDate() {
+		return date;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //

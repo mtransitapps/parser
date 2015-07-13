@@ -2,8 +2,10 @@ package org.mtransit.parser.gtfs.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.mtransit.parser.Constants;
@@ -15,17 +17,24 @@ public class GSpec {
 	private ArrayList<GAgency> agencies = new ArrayList<GAgency>();
 	private ArrayList<GCalendar> calendars = new ArrayList<GCalendar>();
 	private ArrayList<GCalendarDate> calendarDates = new ArrayList<GCalendarDate>();
-	private HashMap<String, GStop> stops = new HashMap<String, GStop>();
-	private HashMap<String, GRoute> routes = new HashMap<String, GRoute>();
-	private HashMap<String, GTrip> trips = new HashMap<String, GTrip>();
+
+	private HashMap<String, GStop> stopIdStops = new HashMap<String, GStop>();
+	private int routesCount = 0;
+	private HashMap<String, GRoute> routeIdRoutes = new HashMap<String, GRoute>();
+	private int tripsCount = 0;
+	private HashMap<String, String> tripIdsUIDs = new HashMap<String, String>();
+	private int stopTimesCount = 0;
 	private ArrayList<GStopTime> stopTimes = new ArrayList<GStopTime>();
-	private ArrayList<GFrequency> frequencies = new ArrayList<GFrequency>();
-	private HashMap<String, GTripStop> tripStops = new HashMap<String, GTripStop>();
+	private int frequenciesCount = 0;
+	private int tripStopsCount = 0;
+	private HashSet<String> tripStopsUIDs = new HashSet<String>();
 
 	private HashMap<String, ArrayList<GStopTime>> tripIdStopTimes = new HashMap<String, ArrayList<GStopTime>>();
 	private HashMap<String, ArrayList<GTrip>> routeIdTrips = new HashMap<String, ArrayList<GTrip>>();
 	private HashMap<String, ArrayList<GTripStop>> tripIdTripStops = new HashMap<String, ArrayList<GTripStop>>();
 	private HashMap<String, ArrayList<GFrequency>> tripIdFrequencies = new HashMap<String, ArrayList<GFrequency>>();
+
+	private HashMap<Long, ArrayList<GRoute>> mRouteIdRoutes = new HashMap<Long, ArrayList<GRoute>>();
 
 	public GSpec() {
 	}
@@ -36,10 +45,6 @@ public class GSpec {
 
 	public void addAllAgencies(ArrayList<GAgency> agencies) {
 		this.agencies.addAll(agencies);
-	}
-
-	public int getAgenciesCount() {
-		return this.agencies == null ? 0 : this.agencies.size();
 	}
 
 	public ArrayList<GAgency> getAllAgencies() {
@@ -54,10 +59,6 @@ public class GSpec {
 		return this.calendars;
 	}
 
-	public int getCalendarsCount() {
-		return this.calendars == null ? 0 : this.calendars.size();
-	}
-
 	public void addCalendarDate(GCalendarDate gCalendarDate) {
 		this.calendarDates.add(gCalendarDate);
 	}
@@ -66,103 +67,57 @@ public class GSpec {
 		return this.calendarDates;
 	}
 
-	public int getCalendarDatesCount() {
-		return this.calendarDates == null ? 0 : this.calendarDates.size();
-	}
-
 	public void addRoute(GRoute gRoute) {
-		this.routes.put(gRoute.route_id, gRoute);
+		this.routeIdRoutes.put(gRoute.route_id, gRoute);
+		this.routesCount++;
 	}
 
-	public int getRoutesCount() {
-		return this.routes == null ? 0 : this.routes.size();
-	}
-
-	private Collection<GRoute> getAllRoutes() {
-		return this.routes.values();
-	}
-
-	public Collection<GRoute> getRoutes(Long optMRouteId) {
+	public ArrayList<GRoute> getRoutes(Long optMRouteId) {
 		if (optMRouteId != null) {
-			return this.gRouteToSpec.get(optMRouteId).getAllRoutes();
+			return this.mRouteIdRoutes.get(optMRouteId);
 		}
-		return getAllRoutes();
+		System.out.printf("\ngetRoutes() > trying to use ALL routes!");
+		System.exit(-1);
+		return null;
 	}
 
 	public GRoute getRoute(String gRouteId) {
-		return this.routes.get(gRouteId);
-	}
-
-	public boolean containsRoute(GRoute gRoute) {
-		return this.routes.containsKey(gRoute.route_id);
+		return this.routeIdRoutes.get(gRouteId);
 	}
 
 	public void addStop(GStop gStop) {
-		this.stops.put(gStop.stop_id, gStop);
+		this.stopIdStops.put(gStop.stop_id, gStop);
 	}
 
 	public GStop getStop(String gStopId) {
-		return this.stops.get(gStopId);
-	}
-
-	public int getStopsCount() {
-		return this.stops == null ? 0 : this.stops.size();
+		return this.stopIdStops.get(gStopId);
 	}
 
 	public void addTrip(GTrip gTrip) {
-		this.trips.put(gTrip.getTripId(), gTrip);
 		if (!this.routeIdTrips.containsKey(gTrip.getRouteId())) {
 			this.routeIdTrips.put(gTrip.getRouteId(), new ArrayList<GTrip>());
 		}
 		this.routeIdTrips.get(gTrip.getRouteId()).add(gTrip);
+		this.tripIdsUIDs.put(gTrip.getTripId(), gTrip.getUID());
+		this.tripsCount++;
 	}
 
-	public int getTripsCount() {
-		return this.trips == null ? 0 : this.trips.size();
-	}
-
-	public GTrip getTrip(String tripId) {
-		if (tripId == null) {
-			return null;
-		}
-		return this.trips.get(tripId);
-	}
-
-	private Collection<GTrip> getAllTrips() {
-		return this.trips.values();
-	}
-
-	public Collection<GTrip> getTrips(String optRouteId) {
+	public ArrayList<GTrip> getTrips(String optRouteId) {
 		if (optRouteId != null) {
-			this.routeIdTrips.get(optRouteId);
+			return this.routeIdTrips.get(optRouteId);
 		}
-		return getAllTrips();
-	}
-
-	public boolean hasTrips() {
-		return this.trips.size() > 0;
-	}
-
-	public boolean containsTrip(GTrip gTrip) {
-		return this.trips.containsKey(gTrip.getTripId());
-	}
-
-	private ArrayList<GStopTime> getAllStopTimes() {
-		return this.stopTimes;
+		System.out.printf("\ngetTrips() > trying to use ALL trips!");
+		System.exit(-1);
+		return null;
 	}
 
 	public ArrayList<GStopTime> getStopTimes(Long optMRouteId, String optGTripId, String optGStopId, Integer optGStopSequence) {
 		if (optGTripId != null) {
 			return this.tripIdStopTimes.get(optGTripId);
 		}
-		if (optMRouteId != null) {
-			return getRouteGTFS(optMRouteId).getAllStopTimes();
-		}
-		return getAllStopTimes();
-	}
-
-	public int getStopTimesCount() {
-		return this.stopTimes == null ? 0 : this.stopTimes.size();
+		System.out.printf("\ngetStopTimes() > trying to use ALL stop times!");
+		System.exit(-1);
+		return null;
 	}
 
 	public void addStopTime(GStopTime gStopTime) {
@@ -171,66 +126,51 @@ public class GSpec {
 			this.tripIdStopTimes.put(gStopTime.getTripId(), new ArrayList<GStopTime>());
 		}
 		this.tripIdStopTimes.get(gStopTime.getTripId()).add(gStopTime);
+		this.stopTimesCount++;
 	}
 
 	public void addFrequency(GFrequency gFrequency) {
-		this.frequencies.add(gFrequency);
 		if (!this.tripIdFrequencies.containsKey(gFrequency.getTripId())) {
 			this.tripIdFrequencies.put(gFrequency.getTripId(), new ArrayList<GFrequency>());
 		}
 		this.tripIdFrequencies.get(gFrequency.getTripId()).add(gFrequency);
+		this.frequenciesCount++;
 	}
 
-	private ArrayList<GFrequency> getAllFrequencies() {
-		return this.frequencies;
-	}
-
-	public int getFrequenciesCount() {
-		return this.frequencies == null ? 0 : this.frequencies.size();
-	}
-
-	public ArrayList<GFrequency> getFrequencies(String optTripId) {
-		if (optTripId != null && this.tripIdFrequencies.containsKey(optTripId)) {
-			return this.tripIdFrequencies.get(optTripId);
-		}
-		return getAllFrequencies();
-	}
-
-	private Collection<GTripStop> getAllTripStops() {
-		return this.tripStops.values();
-	}
-
-	public int getTripStopsCount() {
-		return this.tripStops == null ? 0 : this.tripStops.size();
-	}
-
-	public Collection<GTripStop> getTripStops(String optTripId) {
+	public List<GFrequency> getFrequencies(String optTripId) {
 		if (optTripId != null) {
-			return this.tripIdTripStops.get(optTripId);
+			if (this.tripIdFrequencies.containsKey(optTripId)) {
+				return this.tripIdFrequencies.get(optTripId);
+			} else {
+				return Collections.<GFrequency> emptyList();
+			}
 		}
-		return getAllTripStops();
+		System.out.printf("\ngetFrequencies() > trying to use ALL frequencies!");
+		System.exit(-1);
+		return null;
 	}
 
-	public boolean containsTripStop(GTripStop gTripStop) {
-		return containsTripStop(gTripStop.getUID());
-	}
-
-	public boolean containsTripStop(String uid) {
-		return this.tripStops.containsKey(uid);
-	}
-
-	public GTripStop getTripStop(String uid) {
-		return this.tripStops.get(uid);
+	public List<GTripStop> getTripStops(String optTripId) {
+		if (optTripId != null) {
+			if (this.tripIdTripStops.containsKey(optTripId)) {
+				return this.tripIdTripStops.get(optTripId);
+			} else {
+				return Collections.<GTripStop> emptyList();
+			}
+		}
+		System.out.printf("\ngetTripStops() > trying to use ALL trip stops!");
+		System.exit(-1);
+		return null;
 	}
 
 	public void addTripStops(GTripStop gTripStop) {
-		this.tripStops.put(gTripStop.getUID(), gTripStop);
+		this.tripStopsUIDs.add(gTripStop.getUID());
 		if (!this.tripIdTripStops.containsKey(gTripStop.getTripId())) {
 			this.tripIdTripStops.put(gTripStop.getTripId(), new ArrayList<GTripStop>());
 		}
 		this.tripIdTripStops.get(gTripStop.getTripId()).add(gTripStop);
+		this.tripStopsCount++;
 	}
-
 
 	private static final String AGENCIES = "agencies:";
 	private static final String CALENDARS = "calendars:";
@@ -245,99 +185,92 @@ public class GSpec {
 	@Override
 	public String toString() {
 		return new StringBuilder(GSpec.class.getSimpleName()).append('[') //
-				.append(AGENCIES).append(getAgenciesCount()).append(Constants.COLUMN_SEPARATOR) //
-				.append(CALENDARS).append(getCalendarsCount()).append(Constants.COLUMN_SEPARATOR) //
-				.append(CALENDAR_DATES).append(getCalendarDatesCount()).append(Constants.COLUMN_SEPARATOR) //
-				.append(ROUTES).append(getRoutesCount()).append(Constants.COLUMN_SEPARATOR) //
-				.append(TRIPS).append(getTripsCount()).append(Constants.COLUMN_SEPARATOR) //
-				.append(STOPS).append(getStopsCount()).append(Constants.COLUMN_SEPARATOR) //
-				.append(STOP_TIMES).append(getStopTimesCount()).append(Constants.COLUMN_SEPARATOR) //
-				.append(FREQUENCIES).append(getFrequenciesCount()).append(Constants.COLUMN_SEPARATOR) //
-				.append(TRIP_STOPS).append(getTripStopsCount()).append(Constants.COLUMN_SEPARATOR) //
+				.append(AGENCIES).append(this.agencies.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append(CALENDARS).append(this.calendars.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append(CALENDAR_DATES).append(this.calendarDates.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append(ROUTES).append(this.routesCount).append(Constants.COLUMN_SEPARATOR) //
+				.append(TRIPS).append(this.tripsCount).append(Constants.COLUMN_SEPARATOR) //
+				.append(STOPS).append(this.stopIdStops.size()).append(Constants.COLUMN_SEPARATOR) //
+				.append(STOP_TIMES).append(this.stopTimesCount).append(Constants.COLUMN_SEPARATOR) //
+				.append(FREQUENCIES).append(this.frequenciesCount).append(Constants.COLUMN_SEPARATOR) //
+				.append(TRIP_STOPS).append(this.tripStopsCount).append(Constants.COLUMN_SEPARATOR) //
 				.append(']').toString();
 	}
-	public void generateTripStops() {
-		System.out.print("\nGenerating GTFS trip stops...");
-		GTrip gTrip;
-		String uid;
-		for (GStopTime gStopTime : getAllStopTimes()) {
-			gTrip = getTrip(gStopTime.getTripId());
-			if (gTrip == null) {
-				continue;
-			}
-			uid = GTripStop.getUID(gTrip.getUID(), gStopTime.stop_id, gStopTime.stop_sequence);
-			if (containsTripStop(uid)) {
-				System.out.printf("\nGenerating GTFS trip stops... > (uid: %s)  skip %s | keep: %s", uid, gStopTime, getTripStop(uid));
-				continue;
-			}
-			addTripStops(new GTripStop(uid, gTrip.getTripId(), gStopTime.stop_id, gStopTime.stop_sequence));
+
+	public void print(boolean calendarsOnly) {
+		if (calendarsOnly) {
+			System.out.printf("\n- Calendars: %d", this.calendars.size());
+			System.out.printf("\n- CalendarDates: %d", this.calendarDates.size());
+		} else {
+			System.out.printf("\n- Agencies: %d", this.agencies.size());
+			System.out.printf("\n- Calendars: %d", this.calendars.size());
+			System.out.printf("\n- CalendarDates: %d", this.calendarDates.size());
+			System.out.printf("\n- Routes: %d", this.routesCount);
+			System.out.printf("\n- Trips: %d", this.tripsCount);
+			System.out.printf("\n- Stops: %d", this.stopIdStops.size());
+			System.out.printf("\n- StopTimes: %d", this.stopTimesCount);
+			System.out.printf("\n- Frequencies: %d", this.frequenciesCount);
 		}
-		System.out.printf("\nGenerating GTFS trip stops... DONE");
-		System.out.printf("\n- Trip stops: %d", getTripStopsCount());
 	}
 
-	private HashMap<Long, GSpec> gRouteToSpec = new HashMap<Long, GSpec>();
+	public void generateTripStops() {
+		System.out.print("\nGenerating GTFS trip stops...");
+		String uid;
+		String tripUID;
+		for (GStopTime gStopTime : this.stopTimes) {
+			tripUID = this.tripIdsUIDs.get(gStopTime.getTripId());
+			if (tripUID == null) {
+				continue;
+			}
+			uid = GTripStop.getUID(tripUID, gStopTime.getStopId(), gStopTime.getStopSequence());
+			if (this.tripStopsUIDs.contains(uid)) {
+				System.out.printf("\nGenerating GTFS trip stops... > (uid: %s) SKIP %s", uid, gStopTime);
+				continue;
+			}
+			addTripStops(new GTripStop(uid, gStopTime.getTripId(), gStopTime.getStopId(), gStopTime.getStopSequence()));
+		}
+		System.out.printf("\nGenerating GTFS trip stops... DONE");
+		System.out.printf("\n- Trip stops: %d", this.tripStopsCount);
+	}
+
+	private HashSet<Long> mRouteWithTripIds = new HashSet<Long>();
 
 	public Set<Long> getRouteIds() {
-		return this.gRouteToSpec.keySet();
+		return this.mRouteWithTripIds;
 	}
 
 	public GSpec getRouteGTFS(Long mRouteId) {
 		return this;
 	}
 
+	public void clearRawData() {
+		this.stopTimes.clear();
+	}
+
 	public void clearRouteGTFS(Long mRouteId) {
-		System.out.printf("\n%s: route GTFS split removed", mRouteId);
-		this.gRouteToSpec.remove(mRouteId);
 	}
 
 	public boolean hasRouteTrips(Long mRouteId) {
-		return this.gRouteToSpec.get(mRouteId).hasTrips();
+		return this.mRouteWithTripIds.contains(mRouteId);
 	}
 
 	public void splitByRouteId(GAgencyTools agencyTools) {
 		System.out.printf("\nSplitting GTFS by route ID...");
-		this.gRouteToSpec.clear();
-		HashMap<String, Long> gRouteIdToMRouteId = new HashMap<String, Long>();
-		HashMap<String, Long> gTripIdToMRouteId = new HashMap<String, Long>();
-		HashMap<String, HashSet<Long>> gServiceIdToMRouteIds = new HashMap<String, HashSet<Long>>();
+		this.mRouteWithTripIds.clear();
 		Long mRouteId;
-		for (GRoute gRoute : getAllRoutes()) {
+		Collection<GTrip> routeTrips;
+		for (GRoute gRoute : this.routeIdRoutes.values()) {
 			mRouteId = agencyTools.getRouteId(gRoute);
-			gRouteIdToMRouteId.put(gRoute.getRouteId(), mRouteId);
-			if (!this.gRouteToSpec.containsKey(mRouteId)) {
-				System.out.printf("\n%s: route GTFS split added", mRouteId);
-				this.gRouteToSpec.put(mRouteId, new GSpec());
-				this.gRouteToSpec.get(mRouteId).addAllAgencies(getAllAgencies());
+			routeTrips = this.routeIdTrips.get(gRoute.getRouteId());
+			if (routeTrips == null || routeTrips.size() == 0) {
+				System.out.printf("\n%s: Skip GTFS route '%s' because no trips", mRouteId, gRoute);
+				continue;
 			}
-			if (this.gRouteToSpec.get(mRouteId).containsRoute(gRoute)) {
-				System.out.printf("\nRoute ID %s already present!", gRoute.getRouteId());
-				System.out.printf("\nNew route: %s", gRoute);
-				System.out.printf("\nExisting route: %s", this.gRouteToSpec.get(mRouteId).getRoute(gRoute.getRouteId()));
-				System.out.printf("\n");
-				System.exit(-1);
+			if (!this.mRouteIdRoutes.containsKey(mRouteId)) {
+				this.mRouteIdRoutes.put(mRouteId, new ArrayList<GRoute>());
 			}
-			this.gRouteToSpec.get(mRouteId).addRoute(gRoute);
-		}
-		for (GTrip gTrip : getAllTrips()) {
-			mRouteId = gRouteIdToMRouteId.get(gTrip.getRouteId());
-			if (mRouteId == null) {
-				continue; // not processed now (route not processed because filter or other type of route)
-			}
-			gTripIdToMRouteId.put(gTrip.getTripId(), mRouteId);
-			if (!this.gRouteToSpec.containsKey(mRouteId)) {
-				System.out.printf("\nTrip's Route ID %s not already present!\n", mRouteId);
-				System.exit(-1);
-			}
-			if (this.gRouteToSpec.get(mRouteId).containsTrip(gTrip)) {
-				System.out.printf("\nTrip ID %s already present!\n", gTrip.getTripId());
-				System.exit(-1);
-			}
-			if (!gServiceIdToMRouteIds.containsKey(gTrip.getServiceId())) {
-				gServiceIdToMRouteIds.put(gTrip.getServiceId(), new HashSet<Long>());
-			}
-			gServiceIdToMRouteIds.get(gTrip.getServiceId()).add(mRouteId);
-			this.gRouteToSpec.get(mRouteId).addTrip(gTrip);
+			this.mRouteIdRoutes.get(mRouteId).add(gRoute);
+			this.mRouteWithTripIds.add(mRouteId);
 		}
 		System.out.printf("\nSplitting GTFS by route ID... DONE");
 	}

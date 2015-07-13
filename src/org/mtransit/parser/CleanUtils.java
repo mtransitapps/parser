@@ -175,6 +175,18 @@ public final class CleanUtils {
 		return cleanLabel(label);
 	}
 
+	private static final Pattern POINT1 = Pattern.compile("((^|\\W){1}([\\w]{1})\\.(\\W|$){1})", Pattern.CASE_INSENSITIVE);
+	private static final String POINT1_REPLACEMENT = "$2$3$4";
+
+	private static final Pattern POINTS = Pattern.compile("((^|\\W){1}([\\w]+)\\.(\\W|$){1})", Pattern.CASE_INSENSITIVE);
+	private static final String POINTS_REPLACEMENT = "$2$3$4";
+
+	public static String removePoints(String string) {
+		string = POINT1.matcher(string).replaceAll(POINT1_REPLACEMENT);
+		string = POINTS.matcher(string).replaceAll(POINTS_REPLACEMENT);
+		return string;
+	}
+
 	private static final Pattern FIRST = Pattern.compile("(^|\\s){1}(first)($|\\s){1}", Pattern.CASE_INSENSITIVE);
 	private static final String FIRST_REPLACEMENT = "$11st$3";
 	private static final Pattern SECOND = Pattern.compile("(^|\\s){1}(second)($|\\s){1}", Pattern.CASE_INSENSITIVE);
