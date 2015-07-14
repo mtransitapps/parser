@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -23,5 +24,9 @@ public class MSpec {
 		this.serviceDates = serviceDates;
 		this.stopSchedules = stopSchedules;
 		this.routeFrequencies = routeFrequencies;
+	}
+
+	public static final SimpleDateFormat getNewTimeFormatInstance() {
+		return new SimpleDateFormat("HHmmss");
 	}
 }

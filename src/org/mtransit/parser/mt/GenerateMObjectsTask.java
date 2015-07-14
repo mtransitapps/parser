@@ -10,7 +10,6 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.Constants;
-import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -302,9 +301,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING && tripStopTimesHeadsign != null && tripStopTimesHeadsign.length() > 0) {
 					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
 						if (!mTripStopTimesHeadsign.get(mTrip.getId()).equals(tripStopTimesHeadsign)) {
-							System.out.printf("\n%s: Trip Stop Times Headsign different for same trip ID ('%s' != ''%s')\n", this.routeId,
-									mTripStopTimesHeadsign, mTripStopTimesHeadsign.get(mTrip.getId()));
-							System.exit(-1);
+							System.out.printf("\n%s: Trip stop times headsign different for same trip ID ('%s'!='%s')", this.routeId, tripStopTimesHeadsign,
+									mTripStopTimesHeadsign.get(mTrip.getId()));
+							mTripStopTimesHeadsign.put(mTrip.getId(),
+									MTrip.mergeHeadsignValue(mTripStopTimesHeadsign.get(mTrip.getId()), tripStopTimesHeadsign));
 						}
 					} else {
 						mTripStopTimesHeadsign.put(mTrip.getId(), tripStopTimesHeadsign);
@@ -376,7 +376,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return splitTripStopTimesHeadsign;
 	}
 
-	private SimpleDateFormat DEPARTURE_TIME_FORMAT = DefaultAgencyTools.getNewDepartureTimeFormatInstance(); // not static - not sharable between threads!
+	private SimpleDateFormat G_TIME_FORMAT = GSpec.getNewTimeFormatInstance(); // not static - not sharable between threads!
+
+	private SimpleDateFormat M_TIME_FORMAT = MSpec.getNewTimeFormatInstance(); // not static - not sharable between threads!
 
 	private String parseStopTimes(HashMap<String, MSchedule> mSchedules, MRoute mRoute, int originalTripHeadsignType, String originalTripHeadsignValue,
 			long mTripId, String tripServiceId, String tripStopTimesHeadsign, GTripStop gTripStop, int mStopId, GSpec routeGTFS) {
@@ -388,7 +390,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				continue;
 			}
 			mSchedule = new MSchedule(tripServiceId, mRoute.id, mTripId, mStopId, this.agencyTools.getDepartureTime(this.routeId, gStopTime, routeGTFS,
-					DEPARTURE_TIME_FORMAT));
+					G_TIME_FORMAT, M_TIME_FORMAT));
 			if (mSchedules.containsKey(mSchedule.getUID()) && !mSchedules.get(mSchedule.getUID()).equals(mSchedule)) {
 				System.out.printf("\n%s: Different schedule %s already in list (%s != %s)!\n", this.routeId, mSchedule.getUID(), mSchedule.toString(),
 						mSchedules.get(mSchedule.getUID()).toString());

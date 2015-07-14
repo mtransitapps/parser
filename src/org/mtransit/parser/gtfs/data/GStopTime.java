@@ -39,6 +39,14 @@ public class GStopTime {
 		return trip_id;
 	}
 
+	public String getDepartureTime() {
+		return departure_time;
+	}
+
+	public String getStopHeadsign() {
+		return stop_headsign;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //

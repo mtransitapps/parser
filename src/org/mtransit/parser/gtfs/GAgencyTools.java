@@ -72,7 +72,7 @@ public interface GAgencyTools {
 	boolean excludeCalendarDate(GCalendarDate gCalendarDate);
 
 	// SCHEDULE
-	int getDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat dateFormatterInstance);
+	int getDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat, SimpleDateFormat mDateFormat);
 
 	// FREQUENCY
 	int getStartTime(GFrequency gFrequency);

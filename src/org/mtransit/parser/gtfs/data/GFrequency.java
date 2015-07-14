@@ -27,13 +27,21 @@ public class GFrequency {
 		return trip_id;
 	}
 
+	public String getStartTime() {
+		return start_time;
+	}
+
+	public String getEndTime() {
+		return end_time;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //
 				.append(Constants.STRING_DELIMITER).append(this.trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.start_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.end_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.headway_secs).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(this.headway_secs).append(Constants.COLUMN_SEPARATOR) //
 				.toString();
 	}
 }

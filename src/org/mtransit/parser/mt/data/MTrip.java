@@ -154,6 +154,26 @@ public class MTrip implements Comparable<MTrip> {
 		return true;
 	}
 
+	public static String mergeHeadsignValue(String mTripHeadsign, String mTripHeadsignToMerge) {
+		if (mTripHeadsignToMerge == null || mTripHeadsignToMerge.length() == 0) {
+			return mTripHeadsign;
+		}
+		if (mTripHeadsign == null || mTripHeadsign.length() == 0) {
+			return mTripHeadsignToMerge;
+		}
+		if (mTripHeadsignToMerge.contains(mTripHeadsign)) {
+			return mTripHeadsignToMerge;
+		}
+		if (mTripHeadsign.contains(mTripHeadsignToMerge)) {
+			return mTripHeadsign;
+		}
+		if (mTripHeadsign.compareTo(mTripHeadsignToMerge) > 0) {
+			return mTripHeadsignToMerge + SLASH + mTripHeadsign;
+		} else {
+			return mTripHeadsign + SLASH + mTripHeadsignToMerge;
+		}
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //

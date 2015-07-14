@@ -1,12 +1,17 @@
 package org.mtransit.parser.gtfs.data;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.gtfs.GAgencyTools;
@@ -233,6 +238,62 @@ public class GSpec {
 		System.out.printf("\n- Trip stops: %d", this.tripStopsCount);
 	}
 
+	private static final Pattern TIME_SEPARATOR_REGEX = Pattern.compile(":");
+
+	public static int parseTimeString(String timeS) {
+		return Integer.parseInt(TIME_SEPARATOR_REGEX.matcher(timeS).replaceAll(Constants.EMPTY));
+	}
+
+	public static final SimpleDateFormat getNewTimeFormatInstance() {
+		return new SimpleDateFormat("HH:mm:ss");
+	}
+
+	public void generateStopTimesFromFrequencies() {
+		System.out.print("\nGenerating GTFS stop times from frequencies...");
+		System.out.printf("\n- Stop times: %d (before)", this.stopTimesCount);
+		SimpleDateFormat gDateFormat = getNewTimeFormatInstance();
+		int st = 0;
+		for (String tripId : this.tripIdFrequencies.keySet()) {
+			ArrayList<GFrequency> tripFrequencies = this.tripIdFrequencies.get(tripId);
+			ArrayList<GStopTime> tripStopTimes = this.tripIdStopTimes.get(tripId);
+			ArrayList<GStopTime> newGStopTimes = new ArrayList<GStopTime>();
+			Calendar stopTimeCal = Calendar.getInstance();
+			long frequencyStartInMs = -1l;
+			long frequencyEndInMs = -1l;
+			for (GStopTime gStopTime : tripStopTimes) {
+				try {
+					stopTimeCal.setTime(gDateFormat.parse(gStopTime.getDepartureTime()));
+					for (GFrequency gFrequency : tripFrequencies) {
+						frequencyStartInMs = gDateFormat.parse(gFrequency.getStartTime()).getTime();
+						frequencyEndInMs = gDateFormat.parse(gFrequency.getEndTime()).getTime();
+						while (stopTimeCal.getTimeInMillis() >= frequencyStartInMs && stopTimeCal.getTimeInMillis() < frequencyEndInMs) {
+							stopTimeCal.add(Calendar.SECOND, gFrequency.headway_secs);
+							String newDepartureTimeS = gDateFormat.format(stopTimeCal.getTime());
+							if (stopTimeCal.get(Calendar.DAY_OF_YEAR) > 1) {
+								int indexOf = newDepartureTimeS.indexOf(":");
+								int hour = Integer.parseInt(newDepartureTimeS.substring(0, indexOf)) + 24;
+								newDepartureTimeS = hour + newDepartureTimeS.substring(indexOf);
+							}
+							GStopTime newGStopTime = new GStopTime(tripId, newDepartureTimeS, gStopTime.getStopId(), gStopTime.getStopSequence(),
+									gStopTime.getStopHeadsign());
+							newGStopTimes.add(newGStopTime);
+						}
+					}
+				} catch (Exception e) {
+					System.out.printf("\nError while generating stop times for '%s'!\n", gStopTime);
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}
+			for (GStopTime newGStopTime : newGStopTimes) {
+				addStopTime(newGStopTime);
+				st++;
+			}
+		}
+		System.out.printf("\nGenerating GTFS stop times from frequencies... DONE");
+		System.out.printf("\n- Stop times: %d (after) (new: %d)", this.stopTimesCount, st);
+	}
+
 	private HashSet<Long> mRouteWithTripIds = new HashSet<Long>();
 
 	public Set<Long> getRouteIds() {
@@ -241,6 +302,40 @@ public class GSpec {
 
 	public GSpec getRouteGTFS(Long mRouteId) {
 		return this;
+	}
+
+	private static final String POINT = ".";
+
+	public void cleanupExcludedData() {
+		System.out.printf("\nRemoving more excluded data...");
+		int r = 0;
+		try {
+			Iterator<Entry<String, ArrayList<GTrip>>> it = this.routeIdTrips.entrySet().iterator();
+			while (it.hasNext()) {
+				Entry<String, ArrayList<GTrip>> routeAndTrip = it.next();
+				if (!this.routeIdRoutes.containsKey(routeAndTrip.getKey())) {
+					for (GTrip gTrip : routeAndTrip.getValue()) {
+						if (this.tripIdsUIDs.remove(gTrip.getTripId()) != null) {
+							r++;
+						}
+						if (this.tripIdStopTimes.remove(gTrip.getTripId()) != null) {
+							r++;
+						}
+						if (this.tripIdFrequencies.remove(gTrip.getTripId()) != null) {
+							r++;
+						}
+					}
+					it.remove();
+					r++;
+					System.out.print(POINT);
+				}
+			}
+		} catch (Exception e) {
+			System.out.printf("\nError while removing more excluded data!\n");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		System.out.printf("\nRemoving more excluded data... DONE (%d removed objects)", r);
 	}
 
 	public void clearRawData() {
