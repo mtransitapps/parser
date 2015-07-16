@@ -29,6 +29,8 @@ import org.mtransit.parser.gtfs.data.GTrip;
 
 public class GReader {
 
+	private static final String SLASH = "/";
+
 	private static final String POINT = ".";
 
 	public static final Charset UTF8 = Charset.forName("UTF-8");
@@ -53,6 +55,9 @@ public class GReader {
 					continue;
 				}
 				String filename = entry.getName();
+				while (filename.contains(SLASH)) { // remove directory from file name
+					filename = filename.substring(filename.indexOf(SLASH) + 1);
+				}
 				if (filename.equals(GAgency.FILENAME)) { // AGENCY
 					if (calendarsOnly) {
 						continue;
