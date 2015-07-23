@@ -72,7 +72,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		GSpec routeGTFS = this.globalGTFS.getRouteGTFS(this.routeId);
 		MAgency mAgency;
 		for (GAgency gAgency : routeGTFS.getAllAgencies()) {
-			mAgency = new MAgency(gAgency.agency_id, gAgency.agency_timezone, this.agencyTools.getAgencyColor(), this.agencyTools.getAgencyRouteType());
+			mAgency = new MAgency(gAgency.getAgencyId(), gAgency.getAgencyTimezone(), this.agencyTools.getAgencyColor(), this.agencyTools.getAgencyRouteType());
 			if (mAgencies.containsKey(mAgency.getId()) && !mAgencies.get(mAgency.getId()).equals(mAgency)) {
 				System.out.printf("\n%s: Agency %s already in list!", this.routeId, mAgency.getId());
 				System.out.printf("\n%s: %s", this.routeId, mAgency.toString());
@@ -87,15 +87,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			if (!serviceIds.contains(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()))) {
 				continue;
 			}
-			switch (gCalendarDate.exception_type) {
+			switch (gCalendarDate.getExceptionType()) {
 			case SERVICE_REMOVED: // keep list of removed service for calendars processing
 				gCalendarDateServiceRemoved.add(gCalendarDate.getUID());
 				break;
 			case SERVICE_ADDED:
-				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()), gCalendarDate.date));
+				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()), gCalendarDate.getDate()));
 				break;
 			default:
-				System.out.printf("\n%s: Unexpected calendar date exeception type '%s'!", this.routeId, gCalendarDate.exception_type);
+				System.out.printf("\n%s: Unexpected calendar date exeception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
 			}
 		}
 		for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
@@ -106,7 +106,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (gCalendarDateServiceRemoved.contains(gCalendarDate.getUID())) {
 					continue; // service REMOVED at this date
 				}
-				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()), gCalendarDate.date));
+				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()), gCalendarDate.getDate()));
 			}
 		}
 		MTrip mTrip;
@@ -244,8 +244,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		String tripServiceId;
 		HashMap<Long, String> splitTripStopTimesHeadsign;
 		int g = 0;
-		for (GTrip gTrip : routeGTFS.getTrips(gRoute.route_id)) {
-			if (!gTrip.getRouteId().equals(gRoute.route_id)) {
+		for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteId())) {
+			if (!gTrip.getRouteId().equals(gRoute.getRouteId())) {
 				continue;
 			}
 			splitTrips = this.agencyTools.splitTrip(mRoute, gTrip, routeGTFS);
@@ -267,7 +267,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					}
 				}
 			}
-			tripServiceId = this.agencyTools.cleanServiceId(gTrip.service_id);
+			tripServiceId = this.agencyTools.cleanServiceId(gTrip.getServiceId());
 			parseFrequencies(mFrequencies, mRoute, gTrip, splitTrips, tripServiceId, routeGTFS);
 			splitTripStops = new HashMap<Long, HashMap<String, MTripStop>>();
 			splitTripStopTimesHeadsign = parseTripStops(mSchedules, serviceIds, mRoute, mStops, gTrip, originalTripHeadsign, splitTrips, tripServiceId,
@@ -369,8 +369,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				serviceIds.add(tripServiceId);
 			}
 			if (!mStops.containsKey(mStopId)) {
-				mStops.put(mStopId, new MStop(mStopId, this.agencyTools.getStopCode(gStop), this.agencyTools.cleanStopName(gStop.stop_name),
-						gStop.getStopLat(), gStop.getStopLong()));
+				mStops.put(
+						mStopId,
+						new MStop(mStopId, this.agencyTools.getStopCode(gStop), this.agencyTools.cleanStopName(gStop.getStopName()), gStop.getStopLat(), gStop
+								.getStopLong()));
 			}
 		}
 		return splitTripStopTimesHeadsign;
@@ -385,19 +387,19 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		MSchedule mSchedule;
 		String stopHeadsign;
 		for (GStopTime gStopTime : routeGTFS.getStopTimes(null, gTripStop.getTripId(), gTripStop.getStopId(), gTripStop.getStopSequence())) {
-			if (!gStopTime.trip_id.equals(gTripStop.getTripId()) || !gStopTime.stop_id.equals(gTripStop.getStopId())
-					|| gStopTime.stop_sequence != gTripStop.getStopSequence()) {
+			if (!gStopTime.getTripId().equals(gTripStop.getTripId()) || !gStopTime.getStopId().equals(gTripStop.getStopId())
+					|| gStopTime.getStopSequence() != gTripStop.getStopSequence()) {
 				continue;
 			}
-			mSchedule = new MSchedule(tripServiceId, mRoute.id, mTripId, mStopId, this.agencyTools.getDepartureTime(this.routeId, gStopTime, routeGTFS,
+			mSchedule = new MSchedule(tripServiceId, mRoute.getId(), mTripId, mStopId, this.agencyTools.getDepartureTime(this.routeId, gStopTime, routeGTFS,
 					G_TIME_FORMAT, M_TIME_FORMAT));
 			if (mSchedules.containsKey(mSchedule.getUID()) && !mSchedules.get(mSchedule.getUID()).equals(mSchedule)) {
 				System.out.printf("\n%s: Different schedule %s already in list (%s != %s)!\n", this.routeId, mSchedule.getUID(), mSchedule.toString(),
 						mSchedules.get(mSchedule.getUID()).toString());
 				System.exit(-1);
 			}
-			if (gStopTime.stop_headsign != null && gStopTime.stop_headsign.length() > 0) {
-				stopHeadsign = this.agencyTools.cleanTripHeadsign(gStopTime.stop_headsign);
+			if (gStopTime.hasStopHeadsign()) {
+				stopHeadsign = this.agencyTools.cleanTripHeadsign(gStopTime.getStopHeadsign());
 				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_STRING, stopHeadsign);
 				tripStopTimesHeadsign = setTripStopTimesHeadsign(tripStopTimesHeadsign, stopHeadsign);
 			} else {
@@ -423,12 +425,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			GSpec routeGTFS) {
 		MFrequency mFrequency;
 		for (GFrequency gFrequency : routeGTFS.getFrequencies(gTrip.getTripId())) {
-			if (!gFrequency.trip_id.equals(gTrip.getTripId())) {
+			if (!gFrequency.getTripId().equals(gTrip.getTripId())) {
 				continue;
 			}
 			for (MTrip mTrip : splitTrips) {
-				mFrequency = new MFrequency(tripServiceId, mRoute.id, mTrip.getId(), this.agencyTools.getStartTime(gFrequency),
-						this.agencyTools.getEndTime(gFrequency), gFrequency.headway_secs);
+				mFrequency = new MFrequency(tripServiceId, mRoute.getId(), mTrip.getId(), this.agencyTools.getStartTime(gFrequency),
+						this.agencyTools.getEndTime(gFrequency), gFrequency.getHeadwaySecs());
 				if (mFrequencies.containsKey(mFrequency.getUID()) && !mFrequencies.get(mFrequency.getUID()).equals(mFrequency)) {
 					System.out.printf("\n%s%s: Different frequency %s already in list (%s != %s)\n!", this.routeId, mFrequency.getUID(), mFrequency.toString(),
 							mFrequencies.get(mFrequency.getUID()).toString());

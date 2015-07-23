@@ -19,6 +19,22 @@ public class MRoute implements Comparable<MRoute> {
 		this.color = color;
 	}
 
+	public long getId() {
+		return id;
+	}
+
+	public String getShortName() {
+		return shortName;
+	}
+
+	public String getLongName() {
+		return longName;
+	}
+
+	public String getColor() {
+		return color;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //

@@ -11,8 +11,6 @@ public final class CleanUtils {
 	private CleanUtils() {
 	}
 
-	public static final Pattern CLEAN_SLASHES = Pattern.compile("(\\w)[\\s]*[/][\\s]*(\\w)");
-	public static final String CLEAN_SLASHES_REPLACEMENT = "$1 / $2";
 	public static final Pattern CLEAN_EN_DASHES = Pattern.compile("(\\w)[\\s]*[–][\\s]*(\\w)");
 	public static final String CLEAN_EN_DASHES_REPLACEMENT = "$1–$2";
 	private static final String PARENTHESE1 = "\\(";
@@ -164,7 +162,7 @@ public final class CleanUtils {
 	public static final String SLASH_SPACE = "/ ";
 
 	public static String cleanLabelFR(String label) {
-		label = CLEAN_SLASHES.matcher(label).replaceAll(CLEAN_SLASHES_REPLACEMENT);
+		label = cleanSlashes(label);
 		label = CLEAN_PARENTHESE1.matcher(label).replaceAll(CLEAN_PARENTHESE1_REPLACEMENT);
 		label = CLEAN_PARENTHESE2.matcher(label).replaceAll(CLEAN_PARENTHESE2_REPLACEMENT);
 		label = SAINT.matcher(label).replaceAll(SAINT_REPLACEMENT);
@@ -173,6 +171,13 @@ public final class CleanUtils {
 		label = Utils.replaceAll(label.trim(), START_WITH_CHARS, SPACE); // , StringUtils.EMPTY); //
 		label = Utils.replaceAll(label, SLASH_CHARS, SLASH_SPACE);
 		return cleanLabel(label);
+	}
+
+	private static final Pattern CLEAN_SLASH = Pattern.compile("(\\S)[\\s]*[/][\\s]*(\\S)");
+	private static final String CLEAN_SLASH_REPLACEMENT = "$1 / $2";
+
+	public static final String cleanSlashes(String string) {
+		return CLEAN_SLASH.matcher(string).replaceAll(CLEAN_SLASH_REPLACEMENT);
 	}
 
 	private static final Pattern POINT1 = Pattern.compile("((^|\\W){1}([\\w]{1})\\.(\\W|$){1})", Pattern.CASE_INSENSITIVE);

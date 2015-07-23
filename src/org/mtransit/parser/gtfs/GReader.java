@@ -250,8 +250,7 @@ public class GReader {
 
 	private static void processAgency(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			gSpec.addAgency(new GAgency(line.get(GAgency.AGENCY_ID), line.get(GAgency.AGENCY_NAME), line.get(GAgency.AGENCY_URL), line
-					.get(GAgency.AGENCY_TIMEZONE)));
+			gSpec.addAgency(new GAgency(line.get(GAgency.AGENCY_ID), line.get(GAgency.AGENCY_TIMEZONE)));
 		} catch (Exception e) {
 			System.out.printf("\nError while processing: '%s'!\n", line);
 			e.printStackTrace();

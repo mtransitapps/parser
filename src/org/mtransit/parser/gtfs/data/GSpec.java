@@ -73,7 +73,7 @@ public class GSpec {
 	}
 
 	public void addRoute(GRoute gRoute) {
-		this.routeIdRoutes.put(gRoute.route_id, gRoute);
+		this.routeIdRoutes.put(gRoute.getRouteId(), gRoute);
 		this.routesCount++;
 	}
 
@@ -91,7 +91,7 @@ public class GSpec {
 	}
 
 	public void addStop(GStop gStop) {
-		this.stopIdStops.put(gStop.stop_id, gStop);
+		this.stopIdStops.put(gStop.getStopId(), gStop);
 	}
 
 	public GStop getStop(String gStopId) {
@@ -267,7 +267,7 @@ public class GSpec {
 						frequencyStartInMs = gDateFormat.parse(gFrequency.getStartTime()).getTime();
 						frequencyEndInMs = gDateFormat.parse(gFrequency.getEndTime()).getTime();
 						while (stopTimeCal.getTimeInMillis() >= frequencyStartInMs && stopTimeCal.getTimeInMillis() < frequencyEndInMs) {
-							stopTimeCal.add(Calendar.SECOND, gFrequency.headway_secs);
+							stopTimeCal.add(Calendar.SECOND, gFrequency.getHeadwaySecs());
 							String newDepartureTimeS = gDateFormat.format(stopTimeCal.getTime());
 							if (stopTimeCal.get(Calendar.DAY_OF_YEAR) > 1) {
 								int indexOf = newDepartureTimeS.indexOf(":");

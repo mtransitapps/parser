@@ -8,16 +8,16 @@ public class GStopTime {
 	public static final String FILENAME = "stop_times.txt";
 
 	public static final String TRIP_ID = "trip_id";
-	public String trip_id;
+	private String trip_id;
 	public static final String STOP_ID = "stop_id";
-	public String stop_id;
+	private String stop_id;
 	public static final String STOP_SEQUENCE = "stop_sequence";
-	public int stop_sequence;
+	private int stop_sequence;
 	public static final String DEPARTURE_TIME = "departure_time";
-	public String departure_time;
+	private String departure_time;
 
 	public static final String STOP_HEADSIGN = "stop_headsign";
-	public String stop_headsign;
+	private String stop_headsign;
 
 	public GStopTime(String trip_id, String departure_time, String stop_id, int stop_sequence, String stop_headsign) {
 		this.trip_id = trip_id;
@@ -45,6 +45,10 @@ public class GStopTime {
 
 	public String getStopHeadsign() {
 		return stop_headsign;
+	}
+
+	public boolean hasStopHeadsign() {
+		return this.stop_headsign != null && this.stop_headsign.length() > 0;
 	}
 
 	@Override

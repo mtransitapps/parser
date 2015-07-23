@@ -8,13 +8,13 @@ public class GCalendarDate {
 	public static final String FILENAME = "calendar_dates.txt";
 
 	public static final String SERVICE_ID = "service_id";
-	public String service_id;
+	private String service_id;
 
 	public static final String DATE = "date";
-	public int date; // YYYYMMDD
+	private int date; // YYYYMMDD
 
 	public static final String EXCEPTION_DATE = "exception_type";
-	public GCalendarDatesExceptionType exception_type;
+	private GCalendarDatesExceptionType exception_type;
 
 	public GCalendarDate(String service_id, int date, GCalendarDatesExceptionType exception_type) {
 		this.service_id = service_id;
@@ -30,6 +30,10 @@ public class GCalendarDate {
 		return date;
 	}
 
+	public GCalendarDatesExceptionType getExceptionType() {
+		return exception_type;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //
@@ -42,5 +46,4 @@ public class GCalendarDate {
 	public String getUID() {
 		return this.date + this.service_id;
 	}
-
 }

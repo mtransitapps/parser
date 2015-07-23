@@ -10,14 +10,14 @@ public class GTrip {
 	public static final String ROUTE_ID = "route_id";
 	private String route_id;
 	public static final String SERVICE_ID = "service_id";
-	public String service_id;
+	private String service_id;
 	public static final String TRIP_ID = "trip_id";
 	private String trip_id;
 
 	public static final String TRIP_HEADSIGN = "trip_headsign";
-	public String trip_headsign;
+	private String trip_headsign;
 	public static final String DIRECTION_ID = "direction_id";
-	public Integer direction_id;
+	private Integer direction_id;
 	public static final String SHAPE_ID = "shape_id";
 	private String shape_id;
 
@@ -30,7 +30,7 @@ public class GTrip {
 		this.direction_id = direction_id;
 		this.trip_headsign = trip_headsign;
 		this.shape_id = shape_id;
-		this.uid = getUID(this.route_id, this.trip_id);
+		this.uid = getUID(this.getRouteId(), this.trip_id);
 	}
 
 	public String getShapeId() {
@@ -42,19 +42,27 @@ public class GTrip {
 	}
 
 	public String getUID() {
-		return this.uid;
+		return uid;
 	}
 
 	public String getRouteId() {
-		return this.route_id;
+		return route_id;
 	}
 
 	public String getTripId() {
-		return this.trip_id;
+		return trip_id;
 	}
 
 	public String getServiceId() {
 		return service_id;
+	}
+
+	public Integer getDirectionId() {
+		return direction_id;
+	}
+
+	public String getTripHeadsign() {
+		return trip_headsign;
 	}
 
 	@Override

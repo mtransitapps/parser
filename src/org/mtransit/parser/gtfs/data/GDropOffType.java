@@ -5,7 +5,7 @@ public enum GDropOffType {
 
 	REGULAR(0), NO_DROP_OFF(1), MUST_PHONE_AGENCY(2), MUST_COORDINATE_WITH_DRIVER(3);
 
-	public int id;
+	private int id;
 
 	GDropOffType(int id) {
 		this.id = id;

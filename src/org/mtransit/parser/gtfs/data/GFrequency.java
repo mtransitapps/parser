@@ -8,13 +8,13 @@ public class GFrequency {
 	public static final String FILENAME = "frequencies.txt";
 
 	public static final String TRIP_ID = "trip_id";
-	public String trip_id;
+	private String trip_id;
 	public static final String START_TIME = "start_time";
-	public String start_time;
+	private String start_time;
 	public static final String END_TIME = "end_time";
-	public String end_time;
+	private String end_time;
 	public static final String HEADWAY_SECS = "headway_secs";
-	public int headway_secs;
+	private int headway_secs;
 
 	public GFrequency(String trip_id, String start_time, String end_time, int headway_secs) {
 		this.trip_id = trip_id;
@@ -33,6 +33,10 @@ public class GFrequency {
 
 	public String getEndTime() {
 		return end_time;
+	}
+
+	public int getHeadwaySecs() {
+		return headway_secs;
 	}
 
 	@Override

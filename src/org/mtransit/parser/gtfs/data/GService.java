@@ -6,7 +6,7 @@ import org.mtransit.parser.Constants;
 public class GService {
 
 	public static final String SERVICE_ID = "service_id";
-	public String service_id;
+	private String service_id;
 
 	public GService(String service_id) {
 		this.service_id = service_id;

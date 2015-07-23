@@ -69,7 +69,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public long getRouteId(GRoute gRoute) {
 		try {
-			return Long.valueOf(gRoute.route_id);
+			return Long.valueOf(gRoute.getRouteId());
 		} catch (Exception e) {
 			System.out.printf("\nError while extracting route ID from %s!\n", gRoute);
 			e.printStackTrace();
@@ -80,22 +80,22 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public String getRouteShortName(GRoute gRoute) {
-		if (StringUtils.isEmpty(gRoute.route_short_name)) {
+		if (StringUtils.isEmpty(gRoute.getRouteShortName())) {
 			System.out.printf("\nNo default route short name for %s!\n", gRoute);
 			System.exit(-1);
 			return null;
 		}
-		return gRoute.route_short_name;
+		return gRoute.getRouteShortName();
 	}
 
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
-		if (StringUtils.isEmpty(gRoute.route_long_name)) {
+		if (StringUtils.isEmpty(gRoute.getRouteLongName())) {
 			System.out.printf("\nNo default route long name for %s!\n", gRoute);
 			System.exit(-1);
 			return null;
 		}
-		return CleanUtils.cleanLabel(gRoute.route_long_name);
+		return CleanUtils.cleanLabel(gRoute.getRouteLongName());
 	}
 
 	@Override
@@ -105,10 +105,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public String getRouteColor(GRoute gRoute) {
-		if (getAgencyColor() != null && getAgencyColor().equals(gRoute.route_color)) {
+		if (getAgencyColor() != null && getAgencyColor().equals(gRoute.getRouteColor())) {
 			return null;
 		}
-		return gRoute.route_color;
+		return gRoute.getRouteColor();
 	}
 
 	@Override
@@ -117,7 +117,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			System.out.printf("\nERROR: unspecified agency route type '%s'!\n", getAgencyRouteType());
 			System.exit(-1);
 		}
-		if (getAgencyRouteType() != gRoute.route_type) {
+		if (getAgencyRouteType() != gRoute.getRouteType()) {
 			return true;
 		}
 		return false;
@@ -137,12 +137,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
-		if (gTrip.direction_id == null || gTrip.direction_id < 0 || gTrip.direction_id > 1) {
+		if (gTrip.getDirectionId() == null || gTrip.getDirectionId() < 0 || gTrip.getDirectionId() > 1) {
 			System.out.printf("\nERROR: default agency implementation required 'direction_id' field in 'trips.txt'!\n");
 			System.exit(-1);
 		}
 		try {
-			mTrip.setHeadsignString(cleanTripHeadsign(gTrip.trip_headsign), gTrip.direction_id);
+			mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId());
 		} catch (NumberFormatException nfe) {
 			System.out.printf("\nERROR: default agency implementation not possible!\n");
 			nfe.printStackTrace();
@@ -191,13 +191,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public String getStopCode(GStop gStop) {
-		return gStop.stop_code;
+		return gStop.getStopCode();
 	}
 
 	@Override
 	public int getStopId(GStop gStop) {
 		try {
-			return Integer.parseInt(gStop.stop_id);
+			return Integer.parseInt(gStop.getStopId());
 		} catch (Exception e) {
 			System.out.printf("\nError while extracting stop ID from %s!\n", gStop);
 			e.printStackTrace();
@@ -231,10 +231,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public int getDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat, SimpleDateFormat mDateFormat) {
 		Integer departureTime = null;
-		if (StringUtils.isEmpty(gStopTime.departure_time)) {
+		if (StringUtils.isEmpty(gStopTime.getDepartureTime())) {
 			departureTime = extractDepartureTime(mRouteId, gStopTime, routeGTFS, gDateFormat, mDateFormat);
 		} else {
-			departureTime = GSpec.parseTimeString(gStopTime.departure_time);
+			departureTime = GSpec.parseTimeString(gStopTime.getDepartureTime());
 		}
 		int extraSeconds = departureTime == null ? 0 : departureTime.intValue() % PRECISON_IN_SECONDS;
 		if (extraSeconds > 0) { // IF too precise DO
@@ -250,23 +250,23 @@ public class DefaultAgencyTools implements GAgencyTools {
 			Integer previousDepartureTimeStopSequence = null;
 			String nextDepartureTime = null;
 			Integer nextDepartureTimeStopSequence = null;
-			for (GStopTime aStopTime : routeGTFS.getStopTimes(null, gStopTime.trip_id, null, null)) {
-				if (!gStopTime.trip_id.equals(aStopTime.trip_id)) {
+			for (GStopTime aStopTime : routeGTFS.getStopTimes(null, gStopTime.getTripId(), null, null)) {
+				if (!gStopTime.getTripId().equals(aStopTime.getTripId())) {
 					continue;
 				}
-				if (aStopTime.stop_sequence < gStopTime.stop_sequence) {
-					if (!StringUtils.isEmpty(aStopTime.departure_time)) {
+				if (aStopTime.getStopSequence() < gStopTime.getStopSequence()) {
+					if (!StringUtils.isEmpty(aStopTime.getDepartureTime())) {
 						if (previousDepartureTime == null || previousDepartureTimeStopSequence == null
-								|| previousDepartureTimeStopSequence < aStopTime.stop_sequence) {
-							previousDepartureTime = aStopTime.departure_time;
-							previousDepartureTimeStopSequence = aStopTime.stop_sequence;
+								|| previousDepartureTimeStopSequence < aStopTime.getStopSequence()) {
+							previousDepartureTime = aStopTime.getDepartureTime();
+							previousDepartureTimeStopSequence = aStopTime.getStopSequence();
 						}
 					}
-				} else if (aStopTime.stop_sequence > gStopTime.stop_sequence) {
-					if (!StringUtils.isEmpty(aStopTime.departure_time)) {
-						if (nextDepartureTime == null || nextDepartureTimeStopSequence == null || nextDepartureTimeStopSequence > aStopTime.stop_sequence) {
-							nextDepartureTime = aStopTime.departure_time;
-							nextDepartureTimeStopSequence = aStopTime.stop_sequence;
+				} else if (aStopTime.getStopSequence() > gStopTime.getStopSequence()) {
+					if (!StringUtils.isEmpty(aStopTime.getDepartureTime())) {
+						if (nextDepartureTime == null || nextDepartureTimeStopSequence == null || nextDepartureTimeStopSequence > aStopTime.getStopSequence()) {
+							nextDepartureTime = aStopTime.getDepartureTime();
+							nextDepartureTimeStopSequence = aStopTime.getStopSequence();
 						}
 					}
 				}
@@ -276,7 +276,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			long timeDiffInMs = nextDepartureTimeInMs - previousDepartureTimeInMs;
 			int nbStop = nextDepartureTimeStopSequence - previousDepartureTimeStopSequence;
 			long timeBetweenStopInMs = timeDiffInMs / nbStop;
-			long departureTimeInMs = previousDepartureTimeInMs + (timeBetweenStopInMs * (gStopTime.stop_sequence - previousDepartureTimeStopSequence));
+			long departureTimeInMs = previousDepartureTimeInMs + (timeBetweenStopInMs * (gStopTime.getStopSequence() - previousDepartureTimeStopSequence));
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTimeInMillis(departureTimeInMs);
 			departureTime = Integer.parseInt(mDateFormat.format(calendar.getTime()));
@@ -339,12 +339,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public int getStartTime(GFrequency gFrequency) {
-		return GSpec.parseTimeString(gFrequency.start_time); // GTFS standard
+		return GSpec.parseTimeString(gFrequency.getStartTime()); // GTFS standard
 	}
 
 	@Override
 	public int getEndTime(GFrequency gFrequency) {
-		return GSpec.parseTimeString(gFrequency.end_time); // GTFS standard
+		return GSpec.parseTimeString(gFrequency.getEndTime()); // GTFS standard
 	}
 
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
@@ -379,12 +379,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (todayServiceIds != null && todayServiceIds.size() > 0) {
 				for (GCalendarDate gCalendarDate : calendarDates) {
 					for (String todayServiceId : todayServiceIds) {
-						if (gCalendarDate.service_id.equals(todayServiceId)) {
-							if (startDate == null || gCalendarDate.date < startDate) {
-								startDate = gCalendarDate.date;
+						if (gCalendarDate.getServiceId().equals(todayServiceId)) {
+							if (startDate == null || gCalendarDate.getDate() < startDate) {
+								startDate = gCalendarDate.getDate();
 							}
-							if (endDate == null || gCalendarDate.date > endDate) {
-								endDate = gCalendarDate.date;
+							if (endDate == null || gCalendarDate.getDate() > endDate) {
+								endDate = gCalendarDate.getDate();
 							}
 						}
 					}
@@ -396,19 +396,20 @@ public class DefaultAgencyTools implements GAgencyTools {
 				while (true) {
 					newDates = false;
 					for (GCalendarDate gCalendarDate : calendarDates) {
-						if (gCalendarDate.date >= startDate && gCalendarDate.date <= endDate) {
-							todayServiceIds.add(gCalendarDate.service_id);
+						if (gCalendarDate.getDate() >= startDate && gCalendarDate.getDate() <= endDate) {
+							todayServiceIds.add(gCalendarDate.getServiceId());
 						}
 					}
 					for (GCalendarDate gCalendarDate : calendarDates) {
-						if (todayServiceIds.contains(gCalendarDate.service_id)) {
-							if (startDate == null || gCalendarDate.date < startDate) {
-								startDate = gCalendarDate.date;
+						if (todayServiceIds.contains(gCalendarDate.getServiceId())) {
+							if (startDate == null || gCalendarDate.getDate() < startDate) {
+								startDate = gCalendarDate.getDate();
 								newDates = true;
 							}
-							if (endDate == null || gCalendarDate.date > endDate) {
-								System.out.printf("\nnew service ID %s end date: %s (replace %s)", gCalendarDate.service_id, gCalendarDate.date, endDate);
-								endDate = gCalendarDate.date;
+							if (endDate == null || gCalendarDate.getDate() > endDate) {
+								System.out.printf("\nnew service ID %s end date: %s (replace %s)", gCalendarDate.getServiceId(), gCalendarDate.getDate(),
+										endDate);
+								endDate = gCalendarDate.getDate();
 								newDates = true;
 							}
 						}

@@ -8,15 +8,15 @@ public class GStop {
 	public static final String FILENAME = "stops.txt";
 
 	public static final String STOP_ID = "stop_id";
-	public String stop_id;
+	private String stop_id;
 	public static final String STOP_NAME = "stop_name";
-	public String stop_name;
+	private String stop_name;
 	public static final String STOP_LAT = "stop_lat";
 	private double stop_lat;
 	public static final String STOP_LON = "stop_lon";
 	private double stop_lon;
 	public static final String STOP_CODE = "stop_code";
-	public String stop_code;
+	private String stop_code;
 
 	public static final String LOCATION_TYPE = "location_type";
 

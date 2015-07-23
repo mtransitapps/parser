@@ -5,7 +5,7 @@ public enum GPickupType {
 
 	REGULAR(0), NO_PICKUP(1), MUST_PHONE_AGENCY(2), MUST_COORDINATE_WITH_DRIVER(3);
 
-	public int id;
+	private int id;
 
 	GPickupType(int id) {
 		this.id = id;

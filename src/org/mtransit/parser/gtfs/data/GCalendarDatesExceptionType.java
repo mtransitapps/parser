@@ -5,7 +5,7 @@ public enum GCalendarDatesExceptionType {
 
 	SERVICE_ADDED(1), SERVICE_REMOVED(2);
 
-	public int id;
+	private int id;
 
 	GCalendarDatesExceptionType(int id) {
 		this.id = id;

@@ -2,9 +2,11 @@ package org.mtransit.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
@@ -21,42 +23,48 @@ public class SplitUtils {
 	public static final String DASH = "-";
 	public static final String ALL = "*";
 
-	public static Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, GSpec routeGTFS, List<String> stopIdsTowards1,
-			List<String> stopIdsTowards2, List<String> stopIdsTowardsBoth21, List<String> stopIdsTowardsBoth12, long tidTowardsStop1, long tidTowardsStop2,
-			List<String> allBeforeAfterStopIds) {
-		String beforeAfter = getBeforeAfterStopId(routeGTFS, mRoute, gTrip, gTripStop, stopIdsTowards1, stopIdsTowards2, stopIdsTowardsBoth21,
-				stopIdsTowardsBoth12, allBeforeAfterStopIds);
-		if (stopIdsTowards1.contains(beforeAfter)) {
+	public static Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, GSpec routeGTFS, RouteTripSpec rts) {
+		List<String> stopIdsTowards0 = rts.getBeforeAfterStopIds(0);
+		List<String> stopIdsTowards1 = rts.getBeforeAfterStopIds(1);
+		List<String> stopIdsTowardsBoth10 = rts.getBeforeAfterBothStopIds(0);
+		List<String> stopIdsTowardsBoth01 = rts.getBeforeAfterBothStopIds(1);
+		long tidTowardsStop0 = rts.getTripId(0);
+		long tidTowardsStop1 = rts.getTripId(1);
+		List<String> allBeforeAfterStopIds = rts.getAllBeforeAfterStopIds();
+		String beforeAfter = getBeforeAfterStopId(routeGTFS, mRoute, gTrip, gTripStop, stopIdsTowards0, stopIdsTowards1, stopIdsTowardsBoth10,
+				stopIdsTowardsBoth01, allBeforeAfterStopIds);
+		if (stopIdsTowards0.contains(beforeAfter)) {
+			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop0 }, new Integer[] { gTripStop.getStopSequence() });
+		} else if (stopIdsTowards1.contains(beforeAfter)) {
 			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop1 }, new Integer[] { gTripStop.getStopSequence() });
-		} else if (stopIdsTowards2.contains(beforeAfter)) {
-			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop2 }, new Integer[] { gTripStop.getStopSequence() });
-		} else if (stopIdsTowardsBoth21.contains(beforeAfter)) {
-			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop2, tidTowardsStop1 }, new Integer[] { 1, gTripStop.getStopSequence() });
-		} else if (stopIdsTowardsBoth12.contains(beforeAfter)) {
-			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop1, tidTowardsStop2 }, new Integer[] { 1, gTripStop.getStopSequence() });
+		} else if (stopIdsTowardsBoth10.contains(beforeAfter)) {
+			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop1, tidTowardsStop0 }, new Integer[] { 1, gTripStop.getStopSequence() });
+		} else if (stopIdsTowardsBoth01.contains(beforeAfter)) {
+			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop0, tidTowardsStop1 }, new Integer[] { 1, gTripStop.getStopSequence() });
 		}
 		System.out.printf("\n%s: Unexptected trip stop to split %s.\n", mRoute.id, gTripStop);
 		System.exit(-1);
 		return null;
 	}
 
-	private static String getBeforeAfterStopId(GSpec routeGTFS, MRoute mRoute, GTrip gTrip, GTripStop gTripStop, List<String> stopIdsTowards1,
-			List<String> stopIdsTowards2, List<String> stopIdsTowardsBoth21, List<String> stopIdsTowardsBoth12, List<String> allBeforeAfterStopIds) {
+	private static String getBeforeAfterStopId(GSpec routeGTFS, MRoute mRoute, GTrip gTrip, GTripStop gTripStop, List<String> stopIdsTowards0,
+			List<String> stopIdsTowards1, List<String> stopIdsTowardsBoth10, List<String> stopIdsTowardsBoth01, List<String> allBeforeAfterStopIds) {
 		int gStopMaxSequence = -1;
 		ArrayList<String> afterStopIds = new ArrayList<String>();
 		ArrayList<Integer> afterStopSequence = new ArrayList<Integer>();
 		ArrayList<String> beforeStopIds = new ArrayList<String>();
 		ArrayList<Integer> beforeStopSequence = new ArrayList<Integer>();
+		int tripStopSequence = gTripStop.getStopSequence();
 		for (GStopTime gStopTime : routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null)) {
-			if (!gStopTime.trip_id.equals(gTrip.getTripId())) {
+			if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
 				continue;
 			}
 			if (allBeforeAfterStopIds.contains(gStopTime.getStopId())) {
-				if (gStopTime.getStopSequence() < gTripStop.getStopSequence()) {
+				if (gStopTime.getStopSequence() < tripStopSequence) {
 					beforeStopIds.add(gStopTime.getStopId());
 					beforeStopSequence.add(gStopTime.getStopSequence());
 				}
-				if (gStopTime.getStopSequence() > gTripStop.getStopSequence()) {
+				if (gStopTime.getStopSequence() > tripStopSequence) {
 					afterStopIds.add(gStopTime.getStopId());
 					afterStopSequence.add(gStopTime.getStopSequence());
 				}
@@ -66,17 +74,17 @@ public class SplitUtils {
 			}
 		}
 		if (allBeforeAfterStopIds.contains(gTripStop.getStopId())) {
-			if (gTripStop.getStopSequence() == 1) {
+			if (tripStopSequence == 1) {
 				beforeStopIds.add(gTripStop.getStopId());
-				beforeStopSequence.add(gTripStop.getStopSequence());
+				beforeStopSequence.add(tripStopSequence);
 			}
-			if (gTripStop.getStopSequence() == gStopMaxSequence) {
+			if (tripStopSequence == gStopMaxSequence) {
 				afterStopIds.add(gTripStop.getStopId());
-				afterStopSequence.add(gTripStop.getStopSequence());
+				afterStopSequence.add(tripStopSequence);
 			}
 		}
-		String beforeAfterStopIdCandidate = findBeforeAfterStopIdCandidate(gTripStop, stopIdsTowards1, stopIdsTowards2, stopIdsTowardsBoth21,
-				stopIdsTowardsBoth12, afterStopIds, afterStopSequence, beforeStopIds, beforeStopSequence);
+		String beforeAfterStopIdCandidate = findBeforeAfterStopIdCandidate(mRoute, gTripStop, stopIdsTowards0, stopIdsTowards1, stopIdsTowardsBoth10,
+				stopIdsTowardsBoth01, afterStopIds, afterStopSequence, beforeStopIds, beforeStopSequence);
 		if (beforeAfterStopIdCandidate != null) {
 			return beforeAfterStopIdCandidate;
 		}
@@ -85,20 +93,41 @@ public class SplitUtils {
 		return null;
 	}
 
-	private static String findBeforeAfterStopIdCandidate(GTripStop gTripStop, List<String> stopIdsTowards1, List<String> stopIdsTowards2,
-			List<String> stopIdsTowardsBoth21, List<String> stopIdsTowardsBoth12, ArrayList<String> afterStopIds, ArrayList<Integer> afterStopSequence,
+	public static void listRouteTripStops(long mRouteId, GSpec routeGTFS) {
+		HashSet<String> gTripStopsS = new HashSet<String>();
+		for (GRoute gRoute : routeGTFS.getRoutes(mRouteId)) {
+			for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteId())) {
+				ArrayList<Pair<String, Integer>> gTripStops = new ArrayList<Pair<String, Integer>>();
+				for (GStopTime gStopTime : routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null)) {
+					if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
+						continue;
+					}
+					gTripStops.add(new Pair<String, Integer>(gStopTime.getStopId(), gStopTime.getStopSequence()));
+				}
+				gTripStopsS.add(gTripStops.toString());
+			}
+		}
+		System.out.printf("\n%s: all %s gTripStop(s):", mRouteId, gTripStopsS.size());
+		for (String gTripStopS : gTripStopsS) {
+			System.out.printf("\n%s: - %s", mRouteId, gTripStopS);
+		}
+	}
+
+	private static String findBeforeAfterStopIdCandidate(MRoute mRoute, GTripStop gTripStop, List<String> stopIdsTowards0, List<String> stopIdsTowards1,
+			List<String> stopIdsTowardsBoth10, List<String> stopIdsTowardsBoth01, ArrayList<String> afterStopIds, ArrayList<Integer> afterStopSequence,
 			ArrayList<String> beforeStopIds, ArrayList<Integer> beforeStopSequence) {
 		String beforeAfterStopIdCurrent;
 		Pair<Integer, String> beforeAfterStopIdCandidate = null;
 		String beforeStopId, afterStopId;
 		int size;
+		int tripStopSequence = gTripStop.getStopSequence();
 		for (int b = 0; b < beforeStopIds.size(); b++) {
 			beforeStopId = beforeStopIds.get(b);
 			for (int a = 0; a < afterStopIds.size(); a++) {
 				afterStopId = afterStopIds.get(a);
 				beforeAfterStopIdCurrent = beforeStopId + DASH + afterStopId;
-				if (stopIdsTowards1.contains(beforeAfterStopIdCurrent) || stopIdsTowards2.contains(beforeAfterStopIdCurrent)) {
-					size = Math.max(afterStopSequence.get(a) - gTripStop.getStopSequence(), gTripStop.getStopSequence() - beforeStopSequence.get(b));
+				if (stopIdsTowards0.contains(beforeAfterStopIdCurrent) || stopIdsTowards1.contains(beforeAfterStopIdCurrent)) {
+					size = Math.max(afterStopSequence.get(a) - tripStopSequence, tripStopSequence - beforeStopSequence.get(b));
 					if (beforeAfterStopIdCandidate == null || size < beforeAfterStopIdCandidate.first) {
 						beforeAfterStopIdCandidate = new Pair<Integer, String>(size, beforeAfterStopIdCurrent);
 					}
@@ -108,8 +137,8 @@ public class SplitUtils {
 		for (int b = 0; b < beforeStopIds.size(); b++) {
 			beforeStopId = beforeStopIds.get(b);
 			beforeAfterStopIdCurrent = beforeStopId + DASH + ALL;
-			if (stopIdsTowards1.contains(beforeAfterStopIdCurrent) || stopIdsTowards2.contains(beforeAfterStopIdCurrent)) {
-				size = gTripStop.getStopSequence() - beforeStopSequence.get(b);
+			if (stopIdsTowards0.contains(beforeAfterStopIdCurrent) || stopIdsTowards1.contains(beforeAfterStopIdCurrent)) {
+				size = tripStopSequence - beforeStopSequence.get(b);
 				if (beforeAfterStopIdCandidate == null || size < beforeAfterStopIdCandidate.first) {
 					beforeAfterStopIdCandidate = new Pair<Integer, String>(size, beforeAfterStopIdCurrent);
 				}
@@ -118,8 +147,8 @@ public class SplitUtils {
 		for (int a = 0; a < afterStopIds.size(); a++) {
 			afterStopId = afterStopIds.get(a);
 			beforeAfterStopIdCurrent = ALL + DASH + afterStopId;
-			if (stopIdsTowards1.contains(beforeAfterStopIdCurrent) || stopIdsTowards2.contains(beforeAfterStopIdCurrent)) {
-				size = afterStopSequence.get(a) - gTripStop.getStopSequence();
+			if (stopIdsTowards0.contains(beforeAfterStopIdCurrent) || stopIdsTowards1.contains(beforeAfterStopIdCurrent)) {
+				size = afterStopSequence.get(a) - tripStopSequence;
 				if (beforeAfterStopIdCandidate == null || size < beforeAfterStopIdCandidate.first) {
 					beforeAfterStopIdCandidate = new Pair<Integer, String>(size, beforeAfterStopIdCurrent);
 				}
@@ -133,8 +162,8 @@ public class SplitUtils {
 					continue;
 				}
 				beforeAfterStopIdCurrent = beforeStopId + DASH + afterStopId;
-				if (stopIdsTowardsBoth21.contains(beforeAfterStopIdCurrent) || stopIdsTowardsBoth12.contains(beforeAfterStopIdCurrent)) {
-					size = Math.max(afterStopSequence.get(a) - gTripStop.getStopSequence(), gTripStop.getStopSequence() - beforeStopSequence.get(b));
+				if (stopIdsTowardsBoth10.contains(beforeAfterStopIdCurrent) || stopIdsTowardsBoth01.contains(beforeAfterStopIdCurrent)) {
+					size = Math.max(afterStopSequence.get(a) - tripStopSequence, tripStopSequence - beforeStopSequence.get(b));
 					if (beforeAfterStopIdCandidate == null || size < beforeAfterStopIdCandidate.first) {
 						beforeAfterStopIdCandidate = new Pair<Integer, String>(size, beforeAfterStopIdCurrent);
 					}
@@ -144,8 +173,8 @@ public class SplitUtils {
 		for (int b = 0; b < beforeStopIds.size(); b++) {
 			beforeStopId = beforeStopIds.get(b);
 			beforeAfterStopIdCurrent = beforeStopId + DASH + ALL;
-			if (stopIdsTowardsBoth21.contains(beforeAfterStopIdCurrent) || stopIdsTowardsBoth12.contains(beforeAfterStopIdCurrent)) {
-				size = gTripStop.getStopSequence() - beforeStopSequence.get(b);
+			if (stopIdsTowardsBoth10.contains(beforeAfterStopIdCurrent) || stopIdsTowardsBoth01.contains(beforeAfterStopIdCurrent)) {
+				size = tripStopSequence - beforeStopSequence.get(b);
 				if (beforeAfterStopIdCandidate == null || size < beforeAfterStopIdCandidate.first) {
 					beforeAfterStopIdCandidate = new Pair<Integer, String>(size, beforeAfterStopIdCurrent);
 				}
@@ -154,8 +183,8 @@ public class SplitUtils {
 		for (int a = 0; a < afterStopIds.size(); a++) {
 			afterStopId = afterStopIds.get(a);
 			beforeAfterStopIdCurrent = ALL + DASH + afterStopId;
-			if (stopIdsTowardsBoth21.contains(beforeAfterStopIdCurrent) || stopIdsTowardsBoth12.contains(beforeAfterStopIdCurrent)) {
-				size = afterStopSequence.get(a) - gTripStop.getStopSequence();
+			if (stopIdsTowardsBoth10.contains(beforeAfterStopIdCurrent) || stopIdsTowardsBoth01.contains(beforeAfterStopIdCurrent)) {
+				size = afterStopSequence.get(a) - tripStopSequence;
 				if (beforeAfterStopIdCandidate == null || size < beforeAfterStopIdCandidate.first) {
 					beforeAfterStopIdCandidate = new Pair<Integer, String>(size, beforeAfterStopIdCurrent);
 				}
@@ -168,7 +197,7 @@ public class SplitUtils {
 		int gStopMaxSequence = -1;
 		String gStopId = null;
 		for (GStopTime gStopTime : gtfs.getStopTimes(mRoute.id, gTrip.getTripId(), null, null)) {
-			if (!gStopTime.trip_id.equals(gTrip.getTripId())) {
+			if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
 				continue;
 			}
 			if (gStopTime.getStopSequence() > gStopMaxSequence) {
@@ -190,7 +219,7 @@ public class SplitUtils {
 		int gStopMaxSequence = -1;
 		String gStopId = null;
 		for (GStopTime gStopTime : gtfs.getStopTimes(mRoute.id, gTrip.getTripId(), null, null)) {
-			if (!gStopTime.trip_id.equals(gTrip.getTripId())) {
+			if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
 				continue;
 			}
 			if (gStopTime.getStopSequence() < gStopMaxSequence) {
@@ -243,6 +272,10 @@ public class SplitUtils {
 
 		public ArrayList<String> getAllBeforeAfterStopIds() {
 			return this.allBeforeAfterStopIds;
+		}
+
+		public boolean hasBeforeAfterStopIds() {
+			return this.allBeforeAfterStopIds != null && this.allBeforeAfterStopIds.size() > 0;
 		}
 
 		public long getTripId(int directionIndex) {
@@ -381,13 +414,14 @@ public class SplitUtils {
 				return 0;
 			}
 			List<String> sortedStopIds = this.allSortedStopIds.get(directionId);
-			int ts1StopIndex = sortedStopIds.indexOf(ts1GStop.stop_id);
-			int ts2StopIndex = sortedStopIds.indexOf(ts2GStop.stop_id);
+			int ts1StopIndex = sortedStopIds.indexOf(ts1GStop.getStopId());
+			int ts2StopIndex = sortedStopIds.indexOf(ts2GStop.getStopId());
 			if (ts1StopIndex < 0 || ts2StopIndex < 0) {
-				System.out.printf("\n%s: Unexpected stop IDs %s AND/OR %s", routeId, ts1GStop.stop_id, ts2GStop.stop_id);
+				System.out.printf("\n%s: Unexpected stop IDs %s AND/OR %s", routeId, ts1GStop.getStopId(), ts2GStop.getStopId());
 				System.out.printf("\n%s: Not in sorted list: %s", routeId, sortedStopIds);
 				System.out.printf("\n%s: 1: %s", routeId, list1);
 				System.out.printf("\n%s: 2: %s", routeId, list2);
+				System.out.printf("\n");
 				System.exit(-1);
 				return 0;
 			}

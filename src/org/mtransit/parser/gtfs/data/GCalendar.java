@@ -13,28 +13,28 @@ public class GCalendar {
 	public static final String FILENAME = "calendar.txt";
 
 	public static final String SERVICE_ID = "service_id";
-	public String service_id;
+	private String service_id;
 
 	public static final String MONDAY = "monday";
-	public boolean monday;
+	private boolean monday;
 
 	public static final String TUESDAY = "tuesday";
-	public boolean tuesday;
+	private boolean tuesday;
 
 	public static final String WEDNESDAY = "wednesday";
-	public boolean wednesday;
+	private boolean wednesday;
 
 	public static final String THURSDAY = "thursday";
-	public boolean thursday;
+	private boolean thursday;
 
 	public static final String FRIDAY = "friday";
-	public boolean friday;
+	private boolean friday;
 
 	public static final String SATURDAY = "saturday";
-	public boolean saturday;
+	private boolean saturday;
 
 	public static final String SUNDAY = "sunday";
-	public boolean sunday;
+	private boolean sunday;
 
 	public static final String START_DATE = "start_date";
 	private int start_date; // YYYYMMDD
