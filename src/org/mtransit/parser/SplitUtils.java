@@ -55,6 +55,7 @@ public class SplitUtils {
 		ArrayList<String> beforeStopIds = new ArrayList<String>();
 		ArrayList<Integer> beforeStopSequence = new ArrayList<Integer>();
 		int tripStopSequence = gTripStop.getStopSequence();
+		int minStopSequence = Integer.MAX_VALUE; // can be 1... or 0 or anything according to official documentation
 		for (GStopTime gStopTime : routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null)) {
 			if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
 				continue;
@@ -72,9 +73,12 @@ public class SplitUtils {
 			if (gStopTime.getStopSequence() > gStopMaxSequence) {
 				gStopMaxSequence = gStopTime.getStopSequence();
 			}
+			if (gStopTime.getStopSequence() < minStopSequence) {
+				minStopSequence = gStopTime.getStopSequence();
+			}
 		}
 		if (allBeforeAfterStopIds.contains(gTripStop.getStopId())) {
-			if (tripStopSequence == 1) {
+			if (tripStopSequence == minStopSequence) {
 				beforeStopIds.add(gTripStop.getStopId());
 				beforeStopSequence.add(tripStopSequence);
 			}
