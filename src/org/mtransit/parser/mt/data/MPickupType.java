@@ -9,7 +9,7 @@ public enum MPickupType {
 	MPickupType(int id) {
 		this.id = id;
 	}
-	
+
 	public static MPickupType parse(int id) {
 		if (REGULAR.id == id) {
 			return REGULAR;
@@ -25,7 +25,7 @@ public enum MPickupType {
 		}
 		return REGULAR; // default
 	}
-	
+
 	public static MPickupType parse(String id) {
 		if (id == null) {// no pickup info, that's OK
 			return REGULAR; // default
@@ -33,11 +33,11 @@ public enum MPickupType {
 		try {
 			return parse(Integer.valueOf(id));
 		} catch (NumberFormatException nfe) {
-			System.out.println("Error while parsing " +id+ " as pickup tipe");
+			System.out.printf("\nError while parsing %s as pickup tipe!\n", id);
 			throw nfe;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.valueOf(id);

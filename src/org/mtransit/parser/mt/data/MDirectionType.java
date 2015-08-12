@@ -2,7 +2,7 @@ package org.mtransit.parser.mt.data;
 
 public enum MDirectionType {
 
-	NONE(""), EAST("E"), NORTH("N"), SOUTH("S"), WEST("W");
+	NONE(""), EAST("E"), WEST("W"), NORTH("N"), SOUTH("S");
 
 	private static final String WEST_FR = "O";
 
@@ -16,14 +16,14 @@ public enum MDirectionType {
 		if (EAST.id.equals(id)) {
 			return EAST;
 		}
+		if (WEST.id.equals(id) || WEST_FR.equals(id)) {
+			return WEST;
+		}
 		if (NORTH.id.equals(id)) {
 			return NORTH;
 		}
 		if (SOUTH.id.equals(id)) {
 			return SOUTH;
-		}
-		if (WEST.id.equals(id) || WEST_FR.equals(id)) {
-			return WEST;
 		}
 		return NONE; // default
 	}

@@ -1,6 +1,8 @@
 package org.mtransit.parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -92,9 +94,20 @@ public class SplitUtils {
 		if (beforeAfterStopIdCandidate != null) {
 			return beforeAfterStopIdCandidate;
 		}
+		sortGTripStopsBySequence(gTripStops);
+		listRouteTripStops(mRoute.id, routeGTFS);
 		System.out.printf("\n%s: Unexpected trip (befores:%s|afters:%s) %s.\n", mRoute.id, beforeStopIds, afterStopIds, gTrip);
 		System.exit(-1);
 		return null;
+	}
+
+	public static void sortGTripStopsBySequence(ArrayList<Pair<String, Integer>> gTripStops) {
+		Collections.sort(gTripStops, new Comparator<Pair<String, Integer>>() {
+			@Override
+			public int compare(Pair<String, Integer> o1, Pair<String, Integer> o2) {
+				return o1.second - o2.second;
+			}
+		});
 	}
 
 	public static void listRouteTripStops(long mRouteId, GSpec routeGTFS) {
@@ -108,6 +121,7 @@ public class SplitUtils {
 					}
 					gTripStops.add(new Pair<String, Integer>(gStopTime.getStopId(), gStopTime.getStopSequence()));
 				}
+				sortGTripStopsBySequence(gTripStops);
 				gTripStopsS.add(gTripStops.toString());
 			}
 		}

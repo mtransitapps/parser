@@ -13,7 +13,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.Constants;
+import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.gtfs.GAgencyTools;
 
 // https://developers.google.com/transit/gtfs/reference#FeedFiles
@@ -40,6 +42,7 @@ public class GSpec {
 	private HashMap<String, ArrayList<GFrequency>> tripIdFrequencies = new HashMap<String, ArrayList<GFrequency>>();
 
 	private HashMap<Long, ArrayList<GRoute>> mRouteIdRoutes = new HashMap<Long, ArrayList<GRoute>>();
+	private HashMap<String, String> tripIdRouteId = new HashMap<String, String>();
 
 	public GSpec() {
 	}
@@ -103,6 +106,7 @@ public class GSpec {
 			this.routeIdTrips.put(gTrip.getRouteId(), new ArrayList<GTrip>());
 		}
 		this.routeIdTrips.get(gTrip.getRouteId()).add(gTrip);
+		this.tripIdRouteId.put(gTrip.getTripId(), gTrip.getRouteId());
 		this.tripIdsUIDs.put(gTrip.getTripId(), gTrip.getUID());
 		this.tripsCount++;
 	}
@@ -248,21 +252,36 @@ public class GSpec {
 		return new SimpleDateFormat("HH:mm:ss");
 	}
 
-	public void generateStopTimesFromFrequencies() {
+	public void generateStopTimesFromFrequencies(GAgencyTools agencyTools) {
 		System.out.print("\nGenerating GTFS stop times from frequencies...");
 		System.out.printf("\n- Stop times: %d (before)", this.stopTimesCount);
 		SimpleDateFormat gDateFormat = getNewTimeFormatInstance();
 		int st = 0;
 		for (String tripId : this.tripIdFrequencies.keySet()) {
+			if (!this.tripIdsUIDs.containsKey(tripId)) {
+				continue; // excluded service ID
+			}
 			ArrayList<GFrequency> tripFrequencies = this.tripIdFrequencies.get(tripId);
 			ArrayList<GStopTime> tripStopTimes = this.tripIdStopTimes.get(tripId);
+			long mRouteId = agencyTools.getRouteId(this.routeIdRoutes.get(this.tripIdRouteId.get(tripId)));
 			ArrayList<GStopTime> newGStopTimes = new ArrayList<GStopTime>();
 			Calendar stopTimeCal = Calendar.getInstance();
 			long frequencyStartInMs = -1l;
 			long frequencyEndInMs = -1l;
 			for (GStopTime gStopTime : tripStopTimes) {
 				try {
-					stopTimeCal.setTime(gDateFormat.parse(gStopTime.getDepartureTime()));
+					String departureTime = gStopTime.getDepartureTime();
+					if (StringUtils.isEmpty(departureTime)) {
+						long departureTimeInMs = DefaultAgencyTools.extractDepartureTimeInMs(gStopTime, getRouteGTFS(mRouteId), gDateFormat);
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTimeInMillis(departureTimeInMs);
+						departureTime = gDateFormat.format(calendar.getTime());
+						if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
+							departureTime = (Integer.valueOf(departureTime.substring(0, departureTime.length() - 6)) + 24)
+									+ departureTime.substring(departureTime.length() - 6);
+						}
+					}
+					stopTimeCal.setTime(gDateFormat.parse(departureTime));
 					for (GFrequency gFrequency : tripFrequencies) {
 						frequencyStartInMs = gDateFormat.parse(gFrequency.getStartTime()).getTime();
 						frequencyEndInMs = gDateFormat.parse(gFrequency.getEndTime()).getTime();
