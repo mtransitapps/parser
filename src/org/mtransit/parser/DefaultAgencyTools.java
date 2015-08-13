@@ -370,6 +370,28 @@ public class DefaultAgencyTools implements GAgencyTools {
 					}
 				}
 			}
+			boolean newDates;
+			while (true) {
+				newDates = false;
+				for (GCalendar gCalendar : calendars) {
+					if ((gCalendar.getStartDate() >= startDate && gCalendar.getStartDate() <= endDate)
+							|| (gCalendar.getEndDate() >= startDate && gCalendar.getEndDate() <= endDate)) {
+						if (startDate == null || gCalendar.getStartDate() < startDate) {
+							startDate = gCalendar.getStartDate();
+							newDates = true;
+						}
+						if (endDate == null || gCalendar.getEndDate() > endDate) {
+							endDate = gCalendar.getEndDate();
+							newDates = true;
+						}
+					}
+				}
+				if (newDates) {
+					System.out.printf("\nNew schedules from %s to %s... ", startDate, endDate);
+					continue;
+				}
+				break;
+			}
 		} else if (calendarDates != null && calendarDates.size() > 0) {
 			HashSet<String> todayServiceIds = new HashSet<String>();
 			for (GCalendarDate gCalendarDate : calendarDates) {
