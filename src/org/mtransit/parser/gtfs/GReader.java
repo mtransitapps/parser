@@ -178,7 +178,7 @@ public class GReader {
 		CSVRecord recordColumns = CSVParser.parse(line, CSVFormat.RFC4180).getRecords().get(0);
 		lineColumns = new String[recordColumns.size()];
 		for (int i = 0; i < recordColumns.size(); i++) {
-			lineColumns[i] = recordColumns.get(i);
+			lineColumns[i] = recordColumns.get(i).trim();
 		}
 		String[] columnNames = lineColumns;
 		if (columnNames == null || columnNames.length == 0) {
