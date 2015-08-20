@@ -201,7 +201,7 @@ public class GReader {
 			recordColumns = records.get(0);
 			lineColumns = new String[recordColumns.size()];
 			for (int i = 0; i < recordColumns.size(); i++) {
-				lineColumns[i] = recordColumns.get(i);
+				lineColumns[i] = recordColumns.get(i).trim();
 			}
 			if (columnNames.length != lineColumns.length && columnNames.length != (lineColumns.length + 1)) {
 				System.out.printf("\nFile '%s' line invalid: %s columns instead of %s: %s", filename, lineColumns.length, columnNames.length, line);
