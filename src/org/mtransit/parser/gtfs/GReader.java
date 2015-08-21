@@ -165,6 +165,10 @@ public class GReader {
 		return gSpec;
 	}
 
+	private static final CSVFormat CSV_FORMAT = CSVFormat.RFC4180.withIgnoreSurroundingSpaces();
+
+	private static final CSVFormat CSV_FORMAT_NO_QUOTE = CSV_FORMAT.withQuote(null);
+
 	private static void readCsv(String filename, BufferedReader reader, String filterStartWith, String filterContains, LineProcessor lineProcessor)
 			throws IOException {
 		System.out.printf("\nReading file '%s'...", filename);
@@ -175,10 +179,10 @@ public class GReader {
 			System.out.printf("\nRemove 1st empty car");
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
-		CSVRecord recordColumns = CSVParser.parse(line, CSVFormat.RFC4180).getRecords().get(0);
+		CSVRecord recordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
 		lineColumns = new String[recordColumns.size()];
 		for (int i = 0; i < recordColumns.size(); i++) {
-			lineColumns[i] = recordColumns.get(i).trim();
+			lineColumns[i] = recordColumns.get(i);
 		}
 		String[] columnNames = lineColumns;
 		if (columnNames == null || columnNames.length == 0) {
@@ -187,36 +191,46 @@ public class GReader {
 		List<CSVRecord> records;
 		HashMap<String, String> map;
 		int l = 0; // LOG
+		boolean noQuote;
 		while ((line = reader.readLine()) != null) {
-			if (filterStartWith != null && !line.startsWith(filterStartWith)) {
-				continue;
+			try {
+				if (filterStartWith != null && !line.startsWith(filterStartWith)) {
+					continue;
+				}
+				if (filterContains != null && !line.contains(filterContains)) {
+					continue;
+				}
+				try {
+					records = CSVParser.parse(line, CSV_FORMAT).getRecords();
+					noQuote = false;
+				} catch (Exception e) {
+					records = CSVParser.parse(line, CSV_FORMAT_NO_QUOTE).getRecords();
+					noQuote = true;
+				}
+				if (records == null || records.size() == 0) {
+					continue; // empty line
+				}
+				recordColumns = records.get(0);
+				lineColumns = new String[recordColumns.size()];
+				for (int i = 0; i < recordColumns.size(); i++) {
+					lineColumns[i] = noQuote ? recordColumns.get(i).replaceAll("\"", "") : recordColumns.get(i);
+				}
+				if (columnNames.length != lineColumns.length && columnNames.length != (lineColumns.length + 1)) {
+					System.out.printf("\nFile '%s' line invalid: %s columns instead of %s: %s", filename, lineColumns.length, columnNames.length, line);
+					continue;
+				}
+				map = new HashMap<String, String>();
+				for (int ci = 0; ci < lineColumns.length; ++ci) {
+					map.put(columnNames[ci], lineColumns[ci]);
+				}
+				if (lineProcessor != null) {
+					lineProcessor.processLine(map);
+				}
+			} catch (Exception e) {
+				System.out.printf("\nError while processing line: %s\n", line);
+				e.printStackTrace();
+				System.exit(-1);
 			}
-			if (filterContains != null && !line.contains(filterContains)) {
-				continue;
-			}
-			records = CSVParser.parse(line, CSVFormat.RFC4180).getRecords();
-			if (records == null || records.size() == 0) {
-				continue; // empty line
-			}
-			recordColumns = records.get(0);
-			lineColumns = new String[recordColumns.size()];
-			for (int i = 0; i < recordColumns.size(); i++) {
-				lineColumns[i] = recordColumns.get(i).trim();
-			}
-			if (columnNames.length != lineColumns.length && columnNames.length != (lineColumns.length + 1)) {
-				System.out.printf("\nFile '%s' line invalid: %s columns instead of %s: %s", filename, lineColumns.length, columnNames.length, line);
-				continue;
-			}
-			map = new HashMap<String, String>();
-			for (int ci = 0; ci < lineColumns.length; ++ci) {
-				map.put(columnNames[ci], lineColumns[ci]);
-			}
-			if (lineProcessor != null) {
-				lineProcessor.processLine(map);
-			}
-			if (l++ % 10000 == 0) { // LOG
-				System.out.print(POINT); // LOG
-			} // LOG
 		}
 		System.out.printf("\nFile '%s' read (lines: %s).", filename, l);
 	}
