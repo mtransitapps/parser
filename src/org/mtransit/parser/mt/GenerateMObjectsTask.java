@@ -273,30 +273,34 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			splitTripStopTimesHeadsign = parseTripStops(mSchedules, serviceIds, mRoute, mStops, gTrip, originalTripHeadsign, splitTrips, tripServiceId,
 					splitTripStops, routeGTFS);
 			for (MTrip mTrip : splitTrips) {
-				if (splitTripStops.containsKey(mTrip.getId())) {
-					mTripStopsList = new ArrayList<MTripStop>(splitTripStops.get(mTrip.getId()).values());
-					Collections.sort(mTripStopsList);
-					setMTripStopSequence(mTripStopsList);
-					String mTripStopListString = mTripStopsList.toString();
-					if (mergedTripIdToMTripStops.containsKey(mTrip.getId()) && mergedTripIdToMTripStops.get(mTrip.getId()).contains(mTripStopListString)) {
-						continue;
-					}
-					if (tripIdToMTripStops.containsKey(mTrip.getId())) {
-						cTripStopsList = tripIdToMTripStops.get(mTrip.getId());
-						if (!equalsMyTripStopLists(mTripStopsList, cTripStopsList)) {
-							System.out.printf("\n%s: Need to merge trip ID '%s'.", this.routeId, mTrip.getId());
-							tripIdToMTripStops.put(mTrip.getId(), setMTripStopSequence(mergeMyTripStopLists(mTripStopsList, cTripStopsList)));
-						}
-					} else { // just use it
-						tripIdToMTripStops.put(mTrip.getId(), mTripStopsList);
-					}
-					if (!mergedTripIdToMTripStops.containsKey(mTrip.getId())) {
-						mergedTripIdToMTripStops.put(mTrip.getId(), new HashSet<String>());
-					}
-					mergedTripIdToMTripStops.get(mTrip.getId()).add(mTripStopListString);
+				if (!splitTripStops.containsKey(mTrip.getId())) {
+					continue;
 				}
+				mTripStopsList = new ArrayList<MTripStop>(splitTripStops.get(mTrip.getId()).values());
+				Collections.sort(mTripStopsList);
+				setMTripStopSequence(mTripStopsList);
+				String mTripStopListString = mTripStopsList.toString();
+				if (mergedTripIdToMTripStops.containsKey(mTrip.getId()) && mergedTripIdToMTripStops.get(mTrip.getId()).contains(mTripStopListString)) {
+					continue;
+				}
+				if (tripIdToMTripStops.containsKey(mTrip.getId())) {
+					cTripStopsList = tripIdToMTripStops.get(mTrip.getId());
+					if (!equalsMyTripStopLists(mTripStopsList, cTripStopsList)) {
+						System.out.printf("\n%s: Need to merge trip ID '%s'.", this.routeId, mTrip.getId());
+						tripIdToMTripStops.put(mTrip.getId(), setMTripStopSequence(mergeMyTripStopLists(mTripStopsList, cTripStopsList)));
+					}
+				} else { // just use it
+					tripIdToMTripStops.put(mTrip.getId(), mTripStopsList);
+				}
+				if (!mergedTripIdToMTripStops.containsKey(mTrip.getId())) {
+					mergedTripIdToMTripStops.put(mTrip.getId(), new HashSet<String>());
+				}
+				mergedTripIdToMTripStops.get(mTrip.getId()).add(mTripStopListString);
 			}
 			for (MTrip mTrip : splitTrips) {
+				if (!splitTripStops.containsKey(mTrip.getId())) {
+					continue;
+				}
 				String tripStopTimesHeadsign = splitTripStopTimesHeadsign.get(mTrip.getId());
 				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING && tripStopTimesHeadsign != null && tripStopTimesHeadsign.length() > 0) {
 					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
@@ -312,6 +316,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 			}
 			for (MTrip mTrip : splitTrips) {
+				if (!splitTripStops.containsKey(mTrip.getId())) {
+					continue;
+				}
 				mTrips.put(mTrip.getId(), mTrip);
 			}
 			if (g++ % 10 == 0) { // LOG
