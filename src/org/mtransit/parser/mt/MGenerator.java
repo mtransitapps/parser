@@ -338,17 +338,21 @@ public class MGenerator {
 			for (MStop mStop : mSpec.stops) {
 				ow.write(mStop.toString());
 				ow.write(Constants.NEW_LINE);
-				if (minLat == null || minLat.doubleValue() > mStop.lat) {
-					minLat = mStop.lat;
+				if (mStop.lat != 0.0d) {
+					if (minLat == null || minLat.doubleValue() > mStop.lat) {
+						minLat = mStop.lat;
+					}
+					if (maxLat == null || maxLat.doubleValue() < mStop.lat) {
+						maxLat = mStop.lat;
+					}
 				}
-				if (maxLat == null || maxLat.doubleValue() < mStop.lat) {
-					maxLat = mStop.lat;
-				}
-				if (minLng == null || minLng.doubleValue() > mStop.lng) {
-					minLng = mStop.lng;
-				}
-				if (maxLng == null || maxLng.doubleValue() < mStop.lng) {
-					maxLng = mStop.lng;
+				if (mStop.lng != 0.0d) {
+					if (minLng == null || minLng.doubleValue() > mStop.lng) {
+						minLng = mStop.lng;
+					}
+					if (maxLng == null || maxLng.doubleValue() < mStop.lng) {
+						maxLng = mStop.lng;
+					}
 				}
 			}
 		} catch (IOException ioe) {
