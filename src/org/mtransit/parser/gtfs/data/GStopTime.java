@@ -25,6 +25,7 @@ public class GStopTime {
 		this.stop_id = stop_id;
 		this.stop_sequence = stop_sequence;
 		this.stop_headsign = stop_headsign;
+		this.uid = null;
 	}
 
 	public int getStopSequence() {
@@ -49,6 +50,19 @@ public class GStopTime {
 
 	public boolean hasStopHeadsign() {
 		return this.stop_headsign != null && this.stop_headsign.length() > 0;
+	}
+
+	private String uid = null;
+
+	public String getUID() {
+		if (this.uid == null) {
+			this.uid = getUID(this.trip_id, this.stop_id, this.stop_sequence);
+		}
+		return this.uid;
+	}
+
+	public static String getUID(String trip_uid, String stop_id, int stop_sequence) {
+		return stop_id + Constants.UUID_SEPARATOR + stop_sequence + Constants.UUID_SEPARATOR + trip_uid;
 	}
 
 	@Override

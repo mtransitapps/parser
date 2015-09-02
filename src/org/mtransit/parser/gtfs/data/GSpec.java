@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -136,6 +138,16 @@ public class GSpec {
 		}
 		this.tripIdStopTimes.get(gStopTime.getTripId()).add(gStopTime);
 		this.stopTimesCount++;
+	}
+
+	public void removeTripStopTimes(String gTripId) {
+		if (this.tripIdStopTimes.containsKey(gTripId)) {
+			ArrayList<GStopTime> tripStopTimes = this.tripIdStopTimes.get(gTripId);
+			for (GStopTime tripStopTime : tripStopTimes) {
+				this.stopTimes.remove(tripStopTime);
+			}
+			this.tripIdStopTimes.remove(gTripId);
+		}
 	}
 
 	public void addFrequency(GFrequency gFrequency) {
@@ -268,38 +280,44 @@ public class GSpec {
 			Calendar stopTimeCal = Calendar.getInstance();
 			long frequencyStartInMs = -1l;
 			long frequencyEndInMs = -1l;
+			HashMap<String, Integer> gStopTimeIncInSec = new HashMap<String, Integer>();
+			Integer previousStopTimeInSec = null;
 			for (GStopTime gStopTime : tripStopTimes) {
 				try {
-					String departureTime = gStopTime.getDepartureTime();
-					if (StringUtils.isEmpty(departureTime)) {
-						long departureTimeInMs = DefaultAgencyTools.extractDepartureTimeInMs(gStopTime, getRouteGTFS(mRouteId), gDateFormat);
-						Calendar calendar = Calendar.getInstance();
-						calendar.setTimeInMillis(departureTimeInMs);
-						departureTime = gDateFormat.format(calendar.getTime());
-						if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
-							departureTime = (Integer.valueOf(departureTime.substring(0, departureTime.length() - 6)) + 24)
-									+ departureTime.substring(departureTime.length() - 6);
-						}
+					if (gStopTimeIncInSec.containsKey(gStopTime.getUID())) {
+						System.out.printf("\nstop time UID '%s' already in list with value '%s'!\n", gStopTime.getUID(),
+								gStopTimeIncInSec.get(gStopTime.getUID()));
+						System.exit(-1);
 					}
+					String departureTime = getDepartureTime(gDateFormat, mRouteId, gStopTime);
 					stopTimeCal.setTime(gDateFormat.parse(departureTime));
-					for (GFrequency gFrequency : tripFrequencies) {
-						frequencyStartInMs = gDateFormat.parse(gFrequency.getStartTime()).getTime();
-						frequencyEndInMs = gDateFormat.parse(gFrequency.getEndTime()).getTime();
-						while (stopTimeCal.getTimeInMillis() >= frequencyStartInMs && stopTimeCal.getTimeInMillis() < frequencyEndInMs) {
-							stopTimeCal.add(Calendar.SECOND, gFrequency.getHeadwaySecs());
-							String newDepartureTimeS = gDateFormat.format(stopTimeCal.getTime());
-							if (stopTimeCal.get(Calendar.DAY_OF_YEAR) > 1) {
-								int indexOf = newDepartureTimeS.indexOf(":");
-								int hour = Integer.parseInt(newDepartureTimeS.substring(0, indexOf)) + 24;
-								newDepartureTimeS = hour + newDepartureTimeS.substring(indexOf);
-							}
+					int stopTimeInSec = (int) TimeUnit.MILLISECONDS.toSeconds(stopTimeCal.getTimeInMillis());
+					gStopTimeIncInSec.put(gStopTime.getUID(), previousStopTimeInSec == null ? 0 : stopTimeInSec - previousStopTimeInSec);
+					previousStopTimeInSec = stopTimeInSec;
+				} catch (Exception e) {
+					System.out.printf("\nError while generating stop increments for '%s'!\n", gStopTime);
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}
+			for (GFrequency gFrequency : tripFrequencies) {
+				try {
+					frequencyStartInMs = gDateFormat.parse(gFrequency.getStartTime()).getTime();
+					frequencyEndInMs = gDateFormat.parse(gFrequency.getEndTime()).getTime();
+					long firstStopTimeInMs = frequencyStartInMs;
+					while (firstStopTimeInMs >= frequencyStartInMs && firstStopTimeInMs <= frequencyEndInMs) {
+						stopTimeCal.setTimeInMillis(firstStopTimeInMs);
+						for (GStopTime gStopTime : tripStopTimes) {
+							stopTimeCal.add(Calendar.SECOND, gStopTimeIncInSec.get(gStopTime.getUID()));
+							String newDepartureTimeS = getNewDepartureTime(gDateFormat, stopTimeCal);
 							GStopTime newGStopTime = new GStopTime(tripId, newDepartureTimeS, gStopTime.getStopId(), gStopTime.getStopSequence(),
 									gStopTime.getStopHeadsign());
 							newGStopTimes.add(newGStopTime);
 						}
+						firstStopTimeInMs += TimeUnit.SECONDS.toMillis(gFrequency.getHeadwaySecs());
 					}
 				} catch (Exception e) {
-					System.out.printf("\nError while generating stop times for '%s'!\n", gStopTime);
+					System.out.printf("\nError while generating stop times for frequency '%s'!\n", gFrequency);
 					e.printStackTrace();
 					System.exit(-1);
 				}
@@ -311,6 +329,32 @@ public class GSpec {
 		}
 		System.out.printf("\nGenerating GTFS stop times from frequencies... DONE");
 		System.out.printf("\n- Stop times: %d (after) (new: %d)", this.stopTimesCount, st);
+	}
+
+	private String getDepartureTime(SimpleDateFormat gDateFormat, long mRouteId, GStopTime gStopTime) throws ParseException {
+		String departureTime = gStopTime.getDepartureTime();
+		if (StringUtils.isEmpty(departureTime)) {
+			long departureTimeInMs = DefaultAgencyTools.extractDepartureTimeInMs(gStopTime, getRouteGTFS(mRouteId), gDateFormat);
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTimeInMillis(departureTimeInMs);
+			departureTime = gDateFormat.format(calendar.getTime());
+			if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
+				departureTime = (Integer.valueOf(departureTime.substring(0, departureTime.length() - 6)) + 24)
+						+ departureTime.substring(departureTime.length() - 6);
+			}
+		}
+		return departureTime;
+	}
+
+	private String getNewDepartureTime(SimpleDateFormat gDateFormat, Calendar stopTimeCal) {
+		String newDepartureTimeS = gDateFormat.format(stopTimeCal.getTime());
+		if (stopTimeCal.get(Calendar.DAY_OF_YEAR) > 1) {
+			int indexOf = newDepartureTimeS.indexOf(":");
+			int hour = Integer.parseInt(newDepartureTimeS.substring(0, indexOf));
+			hour += 24;
+			newDepartureTimeS = hour + newDepartureTimeS.substring(indexOf);
+		}
+		return newDepartureTimeS;
 	}
 
 	private HashSet<Long> mRouteWithTripIds = new HashSet<Long>();
