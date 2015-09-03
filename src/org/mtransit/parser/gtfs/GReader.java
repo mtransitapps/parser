@@ -31,8 +31,6 @@ public class GReader {
 
 	private static final String SLASH = "/";
 
-	private static final String POINT = ".";
-
 	public static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private interface LineProcessor {
