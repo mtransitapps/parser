@@ -94,7 +94,6 @@ public class SplitUtils {
 		if (beforeAfterStopIdCandidate != null) {
 			return beforeAfterStopIdCandidate;
 		}
-		sortGTripStopsBySequence(gTripStops);
 		listRouteTripStops(mRoute.id, routeGTFS);
 		System.out.printf("\n%s: Unexpected trip (befores:%s|afters:%s) %s.\n", mRoute.id, beforeStopIds, afterStopIds, gTrip);
 		System.exit(-1);
