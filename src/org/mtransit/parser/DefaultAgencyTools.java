@@ -29,7 +29,7 @@ import org.mtransit.parser.mt.data.MTripStop;
 public class DefaultAgencyTools implements GAgencyTools {
 
 	public static final int THREAD_POOL_SIZE = 1;
-	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 1;
+	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 2;
 	private static final int MIN_COVERAGE_AFTER_TOTAL_IN_DAYS = 30;
 
 	public static void main(String[] args) {
@@ -370,6 +370,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 					}
 				}
 			}
+			if (endDate - startDate < MIN_COVERAGE_AFTER_TODAY_IN_DAYS) {
+				endDate = incDateOneDay(DATE_FORMAT, c, startDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS);
+			}
 			boolean newDates;
 			while (true) {
 				newDates = false;
@@ -413,7 +416,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 					}
 				}
 				if (endDate - startDate < MIN_COVERAGE_AFTER_TODAY_IN_DAYS) {
-					endDate = startDate + MIN_COVERAGE_AFTER_TODAY_IN_DAYS;
+					endDate = incDateOneDay(DATE_FORMAT, c, startDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS);
 				}
 				boolean newDates;
 				while (true) {
@@ -443,15 +446,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 					}
 					if (endDate - startDate < MIN_COVERAGE_AFTER_TOTAL_IN_DAYS) {
 						System.out.printf("\nNo enough days (%s), 1 more day in the future...", (endDate - startDate));
-						try {
-							c.setTime(DATE_FORMAT.parse(String.valueOf(endDate)));
-							c.add(Calendar.DAY_OF_MONTH, 1);
-							endDate = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
-						} catch (Exception e) {
-							System.out.printf("\nError while increasing end date!\n");
-							e.printStackTrace();
-							System.exit(-1);
-						}
+						endDate = incDateOneDay(DATE_FORMAT, c, endDate, 1);
 					} else {
 						break;
 					}
@@ -487,6 +482,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 		gtfs = null;
 		System.out.printf("\nExtracting useful service IDs... DONE");
 		return serviceIds;
+	}
+
+	private static int incDateOneDay(SimpleDateFormat dateFormat, Calendar calendar, int dateInt, int amount) {
+		try {
+			calendar.setTime(dateFormat.parse(String.valueOf(dateInt)));
+			calendar.add(Calendar.DAY_OF_MONTH, amount);
+			return Integer.parseInt(dateFormat.format(calendar.getTime()));
+		} catch (Exception e) {
+			System.out.printf("\nError while increasing end date!\n");
+			e.printStackTrace();
+			System.exit(-1);
+			return -1;
+		}
 	}
 
 	public static boolean excludeUselessCalendar(GCalendar gCalendar, HashSet<String> serviceIds) {
