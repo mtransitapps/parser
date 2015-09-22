@@ -351,12 +351,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
 		System.out.printf("\nExtracting useful service IDs...");
 		SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
-		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, true);
-		Integer startDate = null;
-		Integer endDate = null;
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.DAY_OF_MONTH, 1); // TOMORROW (too late to publish today's schedule)
 		Integer todayStringInt = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
+		Integer startDate = null;
+		Integer endDate = null;
+		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, true);
 		List<GCalendar> calendars = gtfs.getAllCalendars();
 		List<GCalendarDate> calendarDates = gtfs.getAllCalendarDates();
 		if (calendars != null && calendars.size() > 0) {

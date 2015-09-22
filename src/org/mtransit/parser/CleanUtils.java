@@ -13,6 +13,8 @@ public final class CleanUtils {
 
 	public static final Pattern CLEAN_EN_DASHES = Pattern.compile("(\\w)[\\s]*[–][\\s]*(\\w)");
 	public static final String CLEAN_EN_DASHES_REPLACEMENT = "$1–$2";
+	public static final Pattern CLEAN_DASHES = Pattern.compile("(\\w)[\\s]*[\\-][\\s]*(\\w)");
+	public static final String CLEAN_DASHES_REPLACEMENT = "$1-$2";
 	private static final String PARENTHESE1 = "\\(";
 	private static final String PARENTHESE2 = "\\)";
 	public static final Pattern CLEAN_PARENTHESE1 = Pattern.compile("[" + PARENTHESE1 + "][\\s]*(\\w)");
@@ -36,7 +38,7 @@ public final class CleanUtils {
 		label = CLEAN_SPACES.matcher(label).replaceAll(SPACE);
 		label = CLEAN_P1.matcher(label).replaceAll(CLEAN_P1_REPLACEMENT);
 		label = CLEAN_P2.matcher(label).replaceAll(CLEAN_P2_REPLACEMENT);
-		label = WordUtils.capitalize(label, Constants.SPACE, '-', '–', '/', '(', '.');
+		label = WordUtils.capitalize(label, SPACE_CHAR, '-', '–', '/', '(', '.');
 		return label.trim();
 	}
 
@@ -343,6 +345,8 @@ public final class CleanUtils {
 	//
 	private static final Pattern PARK = Pattern.compile(String.format(REGEX_START_END, "park"), Pattern.CASE_INSENSITIVE);
 	private static final String PARK_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pk"); // not official
+	private static final Pattern GATES = Pattern.compile(String.format(REGEX_START_END, "gates"), Pattern.CASE_INSENSITIVE);
+	private static final String GATES_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Gts"); // not official
 	private static final Pattern GATE = Pattern.compile(String.format(REGEX_START_END, "gate"), Pattern.CASE_INSENSITIVE);
 	private static final String GATE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Gt"); // not official
 	private static final Pattern PARKING = Pattern.compile(String.format(REGEX_START_END, "parking"), Pattern.CASE_INSENSITIVE);
@@ -403,6 +407,7 @@ public final class CleanUtils {
 		string = MOUNT.matcher(string).replaceAll(MOUNT_REPLACEMENT);
 		string = MOUNTAIN.matcher(string).replaceAll(MOUNTAIN_REPLACEMENT);
 		string = PARK.matcher(string).replaceAll(PARK_REPLACEMENT);
+		string = GATES.matcher(string).replaceAll(GATES_REPLACEMENT);
 		string = GATE.matcher(string).replaceAll(GATE_REPLACEMENT);
 		string = HOSPITAL.matcher(string).replaceAll(HOSPITAL_REPLACEMENT);
 		string = MARKET.matcher(string).replaceAll(MARKET_REPLACEMENT);

@@ -188,7 +188,6 @@ public class GReader {
 		}
 		List<CSVRecord> records;
 		HashMap<String, String> map;
-		int l = 0; // LOG
 		boolean noQuote;
 		while ((line = reader.readLine()) != null) {
 			try {

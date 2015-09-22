@@ -109,6 +109,15 @@ public class SplitUtils {
 		});
 	}
 
+	public static ArrayList<Pair<String, Integer>> setGTripStopSequence(ArrayList<Pair<String, Integer>> gTripStops) {
+		if (gTripStops != null) {
+			for (int i = 0; i < gTripStops.size(); i++) {
+				gTripStops.set(i, new Pair<String, Integer>(gTripStops.get(i).first, i + 1));
+			}
+		}
+		return gTripStops;
+	}
+
 	public static void listRouteTripStops(long mRouteId, GSpec routeGTFS) {
 		HashSet<String> gTripStopsS = new HashSet<String>();
 		for (GRoute gRoute : routeGTFS.getRoutes(mRouteId)) {
@@ -121,6 +130,7 @@ public class SplitUtils {
 					gTripStops.add(new Pair<String, Integer>(gStopTime.getStopId(), gStopTime.getStopSequence()));
 				}
 				sortGTripStopsBySequence(gTripStops);
+				setGTripStopSequence(gTripStops);
 				gTripStopsS.add(gTripStops.toString());
 			}
 		}
