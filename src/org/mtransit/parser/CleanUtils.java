@@ -161,6 +161,8 @@ public final class CleanUtils {
 	public static final String CONVERT_ET_TO_SLASHES_REPLACEMENT = "$1 / $3";
 
 	public static final String SPACE = " ";
+	public static final char SPACE_CHAR = ' ';
+
 	public static final String SLASH_SPACE = "/ ";
 
 	public static String cleanLabelFR(String label) {
