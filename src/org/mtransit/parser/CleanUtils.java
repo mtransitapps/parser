@@ -153,12 +153,14 @@ public final class CleanUtils {
 	public static final Pattern SAINT = Pattern.compile("(saint)", Pattern.CASE_INSENSITIVE);
 	public static final String SAINT_REPLACEMENT = "St";
 
-	public static final Pattern ET = Pattern.compile("( et )", Pattern.CASE_INSENSITIVE);
-	public static final String ET_REPLACEMENT = " & ";
+	public static final Pattern CLEAN_AT = Pattern.compile("(\\S)[\\s]+(at)[\\s]+(\\S)", Pattern.UNICODE_CHARACTER_CLASS | Pattern.CASE_INSENSITIVE);
+	public static final String CLEAN_AT_REPLACEMENT = "$1 @ $3";
 
-	public static final Pattern CONVERT_ET_TO_SLASHES = Pattern.compile("(\\w)[\\s]+(et)[\\s]+(\\w)", Pattern.UNICODE_CHARACTER_CLASS
-			| Pattern.CASE_INSENSITIVE);
-	public static final String CONVERT_ET_TO_SLASHES_REPLACEMENT = "$1 / $3";
+	public static final Pattern CLEAN_AND = Pattern.compile("(\\S)[\\s]+(and)[\\s]+(\\S)", Pattern.UNICODE_CHARACTER_CLASS | Pattern.CASE_INSENSITIVE);
+	public static final String CLEAN_AND_REPLACEMENT = "$1 & $3";
+
+	public static final Pattern CLEAN_ET = Pattern.compile("(\\S)[\\s]+(et)[\\s]+(\\S)", Pattern.UNICODE_CHARACTER_CLASS | Pattern.CASE_INSENSITIVE);
+	public static final String CLEAN_ET_REPLACEMENT = "$1 & $3";
 
 	public static final String SPACE = " ";
 	public static final char SPACE_CHAR = ' ';
