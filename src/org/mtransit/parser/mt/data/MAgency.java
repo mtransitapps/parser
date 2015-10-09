@@ -24,6 +24,12 @@ public class MAgency implements Comparable<MAgency> {
 	}
 
 	@Override
+	public int hashCode() {
+		return (this.id == null ? 0 : this.id.hashCode()) + (this.timezone == null ? 0 : this.timezone.hashCode())
+				+ (this.color == null ? 0 : this.color.hashCode()) + (this.type == null ? 0 : this.type.hashCode());
+	}
+
+	@Override
 	public String toString() {
 		return new StringBuilder() //
 				.append(this.id) //

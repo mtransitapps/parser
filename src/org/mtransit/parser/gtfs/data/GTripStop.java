@@ -22,6 +22,12 @@ public class GTripStop {
 		this.stop_sequence = stop_sequence;
 	}
 
+	@Override
+	public int hashCode() {
+		return (this.uid == null ? 0 : this.uid.hashCode()) + (this.trip_id == null ? 0 : this.trip_id.hashCode())
+				+ (this.stop_id == null ? 0 : this.stop_id.hashCode()) + this.stop_sequence;
+	}
+
 	public String getUID() {
 		return this.uid;
 	}

@@ -359,6 +359,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, true);
 		List<GCalendar> calendars = gtfs.getAllCalendars();
 		List<GCalendarDate> calendarDates = gtfs.getAllCalendarDates();
+		printMinMaxDate(calendars, calendarDates);
 		if (calendars != null && calendars.size() > 0) {
 			for (GCalendar gCalendar : calendars) {
 				if (gCalendar.getStartDate() <= todayStringInt && gCalendar.getEndDate() >= todayStringInt) {
@@ -369,6 +370,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 						endDate = gCalendar.getEndDate();
 					}
 				}
+			}
+			if (startDate == null || endDate == null) {
+				System.out.printf("\nNO schedule available for %s! (start:%s|end:%s)\n", todayStringInt, startDate, endDate);
+				System.exit(-1);
+				return null;
 			}
 			if (endDate - startDate < MIN_COVERAGE_AFTER_TODAY_IN_DAYS) {
 				endDate = incDateOneDay(DATE_FORMAT, c, startDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS);
@@ -482,6 +488,31 @@ public class DefaultAgencyTools implements GAgencyTools {
 		gtfs = null;
 		System.out.printf("\nExtracting useful service IDs... DONE");
 		return serviceIds;
+	}
+
+	private static void printMinMaxDate(List<GCalendar> calendars, List<GCalendarDate> calendarDates) {
+		Integer minDate = null, maxDate = null;
+		if (calendars != null && calendars.size() > 0) {
+			for (GCalendar gCalendar : calendars) {
+				if (minDate == null || gCalendar.getStartDate() < minDate) {
+					minDate = gCalendar.getStartDate();
+				}
+				if (maxDate == null || gCalendar.getEndDate() > maxDate) {
+					maxDate = gCalendar.getEndDate();
+				}
+			}
+		}
+		if (calendarDates != null && calendarDates.size() > 0) {
+			for (GCalendarDate gCalendarDate : calendarDates) {
+				if (minDate == null || gCalendarDate.getDate() < minDate) {
+					minDate = gCalendarDate.getDate();
+				}
+				if (maxDate == null || gCalendarDate.getDate() > maxDate) {
+					maxDate = gCalendarDate.getDate();
+				}
+			}
+		}
+		System.out.printf("\nSchedule available from %s to %s.", minDate, maxDate);
 	}
 
 	private static int incDateOneDay(SimpleDateFormat dateFormat, Calendar calendar, int dateInt, int amount) {

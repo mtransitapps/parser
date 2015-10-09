@@ -62,44 +62,47 @@ public class MGenerator {
 		for (Future<MSpec> future : list) {
 			try {
 				MSpec mRouteSpec = future.get();
-				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (adding route...)", mRouteSpec.routes.get(0).id);
+				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging...)", mRouteSpec.routes.get(0).id);
 				mAgencies.addAll(mRouteSpec.agencies);
 				mRoutes.addAll(mRouteSpec.routes);
 				mTrips.addAll(mRouteSpec.trips);
 				mTripStops.addAll(mRouteSpec.tripStops);
-				for (MStop mStop : mRouteSpec.stops) {
-					if (mStops.containsKey(mStop.id)) {
-						if (!mStops.get(mStop.id).equals(mStop)) {
-							System.out.printf("\nStop ID '%s' already in list! (%s instead of %s)", mStop.id, mStops.get(mStop.id), mStop.toString());
-						}
-						continue;
-					}
-					mStops.put(mStop.id, mStop);
-				}
-				if (mRouteSpec.serviceDates != null) {
-					for (MServiceDate mServiceDate : mRouteSpec.serviceDates) {
-						if (mServiceDates.contains(mServiceDate)) {
+				if (mRouteSpec.stops != null && mRouteSpec.stops.size() > 0) {
+					for (MStop mStop : mRouteSpec.stops) {
+						if (mStops.containsKey(mStop.id)) {
+							if (!mStops.get(mStop.id).equals(mStop)) {
+								System.out.printf("\nStop ID '%s' already in list! (%s instead of %s)", mStop.id, mStops.get(mStop.id), mStop.toString());
+							}
 							continue;
 						}
+						mStops.put(mStop.id, mStop);
+					}
+				}
+				if (mRouteSpec.serviceDates != null && mRouteSpec.serviceDates.size() > 0) {
+					for (MServiceDate mServiceDate : mRouteSpec.serviceDates) {
 						mServiceDates.add(mServiceDate);
 					}
 				}
-				for (Entry<Integer, ArrayList<MSchedule>> stopScheduleEntry : mRouteSpec.stopSchedules.entrySet()) {
-					if (!mStopSchedules.containsKey(stopScheduleEntry.getKey())) {
-						mStopSchedules.put(stopScheduleEntry.getKey(), new ArrayList<MSchedule>());
+				if (mRouteSpec.stopSchedules != null && mRouteSpec.stopSchedules.size() > 0) {
+					for (Entry<Integer, ArrayList<MSchedule>> stopScheduleEntry : mRouteSpec.stopSchedules.entrySet()) {
+						if (!mStopSchedules.containsKey(stopScheduleEntry.getKey())) {
+							mStopSchedules.put(stopScheduleEntry.getKey(), new ArrayList<MSchedule>());
+						}
+						mStopSchedules.get(stopScheduleEntry.getKey()).addAll(stopScheduleEntry.getValue());
 					}
-					mStopSchedules.get(stopScheduleEntry.getKey()).addAll(stopScheduleEntry.getValue());
 				}
-				for (Entry<Long, ArrayList<MFrequency>> routeFrequenciesEntry : mRouteSpec.routeFrequencies.entrySet()) {
-					if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().size() == 0) {
-						continue;
+				if (mRouteSpec.routeFrequencies != null && mRouteSpec.routeFrequencies.size() > 0) {
+					for (Entry<Long, ArrayList<MFrequency>> routeFrequenciesEntry : mRouteSpec.routeFrequencies.entrySet()) {
+						if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().size() == 0) {
+							continue;
+						}
+						if (!mRouteFrequencies.containsKey(routeFrequenciesEntry.getKey())) {
+							mRouteFrequencies.put(routeFrequenciesEntry.getKey(), new ArrayList<MFrequency>());
+						}
+						mRouteFrequencies.get(routeFrequenciesEntry.getKey()).addAll(routeFrequenciesEntry.getValue());
 					}
-					if (!mRouteFrequencies.containsKey(routeFrequenciesEntry.getKey())) {
-						mRouteFrequencies.put(routeFrequenciesEntry.getKey(), new ArrayList<MFrequency>());
-					}
-					mRouteFrequencies.get(routeFrequenciesEntry.getKey()).addAll(routeFrequenciesEntry.getValue());
 				}
-				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (adding route... DONE)", mRouteSpec.routes.get(0).id);
+				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.routes.get(0).id);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -456,7 +459,6 @@ public class MGenerator {
 	private static final String PUB = "pub";
 	private static final String STORE_LISTING_TXT = "store-listing.txt";
 	private static final String STORE_LISTING_FR_TXT = "store-listing_fr.txt";
-
 
 	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from [A-Za-z]+ [0-9]{1,2}\\, [0-9]{4} to [A-Za-z]+ [0-9]{1,2}\\, [0-9]{4}\\.)",
 			Pattern.CASE_INSENSITIVE);

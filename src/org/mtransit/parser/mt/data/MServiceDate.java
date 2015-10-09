@@ -35,6 +35,11 @@ public class MServiceDate implements Comparable<MServiceDate> {
 	}
 
 	@Override
+	public int hashCode() {
+		return (this.serviceId == null ? 0 : this.serviceId.hashCode()) + this.calendarDate;
+	}
+
+	@Override
 	public String toString() {
 		return new StringBuilder() //
 				.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.serviceId)).append(Constants.STRING_DELIMITER) // service ID

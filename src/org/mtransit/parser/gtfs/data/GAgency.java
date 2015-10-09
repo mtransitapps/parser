@@ -15,6 +15,11 @@ public class GAgency {
 		this.agency_timezone = agency_timezone;
 	}
 
+	@Override
+	public int hashCode() {
+		return (this.agency_id == null ? 0 : this.agency_id.hashCode()) + (this.agency_timezone == null ? 0 : this.agency_timezone.hashCode());
+	}
+
 	public String getAgencyId() {
 		return agency_id;
 	}

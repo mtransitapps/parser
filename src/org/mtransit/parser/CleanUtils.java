@@ -153,14 +153,14 @@ public final class CleanUtils {
 	public static final Pattern SAINT = Pattern.compile("(saint)", Pattern.CASE_INSENSITIVE);
 	public static final String SAINT_REPLACEMENT = "St";
 
-	public static final Pattern CLEAN_AT = Pattern.compile("(\\S)[\\s]+(at)[\\s]+(\\S)", Pattern.UNICODE_CHARACTER_CLASS | Pattern.CASE_INSENSITIVE);
-	public static final String CLEAN_AT_REPLACEMENT = "$1 @ $3";
+	public static final Pattern CLEAN_AT = Pattern.compile("((^|\\W){1}(at)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
+	public static final String CLEAN_AT_REPLACEMENT = "$2@$4";
 
-	public static final Pattern CLEAN_AND = Pattern.compile("(\\S)[\\s]+(and)[\\s]+(\\S)", Pattern.UNICODE_CHARACTER_CLASS | Pattern.CASE_INSENSITIVE);
-	public static final String CLEAN_AND_REPLACEMENT = "$1 & $3";
+	public static final Pattern CLEAN_AND = Pattern.compile("((^|\\W){1}(and)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
+	public static final String CLEAN_AND_REPLACEMENT = "$2&$4";
 
-	public static final Pattern CLEAN_ET = Pattern.compile("(\\S)[\\s]+(et)[\\s]+(\\S)", Pattern.UNICODE_CHARACTER_CLASS | Pattern.CASE_INSENSITIVE);
-	public static final String CLEAN_ET_REPLACEMENT = "$1 & $3";
+	public static final Pattern CLEAN_ET = Pattern.compile("((^|\\W){1}(et)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
+	public static final String CLEAN_ET_REPLACEMENT = "$2&$4";
 
 	public static final String SPACE = " ";
 	public static final char SPACE_CHAR = ' ';

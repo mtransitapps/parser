@@ -18,6 +18,7 @@ public class MSchedule implements Comparable<MSchedule> {
 		this.tripId = tripId;
 		this.serviceId = serviceId;
 		this.departure = departure;
+		resetUID();
 	}
 
 	public void setHeadsign(int headsignType, String headsignValue) {
@@ -30,25 +31,23 @@ public class MSchedule implements Comparable<MSchedule> {
 		this.headsignValue = null;
 	}
 
-	public int getHeadsignType() {
-		return this.headsignType;
-	}
-
-	public String getHeadsignValue() {
-		return this.headsignValue;
-	}
-
-	public long getTripId() {
-		return this.tripId;
-	}
-
-	public int getStopId() {
-		return this.stopId;
-	}
+	private String uid = null;
 
 	public String getUID() {
-		// identifies a stop + trip + service (date) => departure
-		return this.serviceId + Constants.UUID_SEPARATOR + this.tripId + Constants.UUID_SEPARATOR + this.stopId + Constants.UUID_SEPARATOR + this.departure;
+		if (this.uid == null) {
+			this.uid = this.serviceId + Constants.UUID_SEPARATOR + this.tripId + Constants.UUID_SEPARATOR + this.stopId + Constants.UUID_SEPARATOR
+					+ this.departure;
+		}
+		return this.uid;
+	}
+
+	private void resetUID() {
+		this.uid = null;
+	}
+
+	@Override
+	public int hashCode() {
+		return getUID().hashCode() + (this.headsignValue == null ? 0 : this.headsignValue.hashCode());
 	}
 
 	@Override
@@ -125,5 +124,21 @@ public class MSchedule implements Comparable<MSchedule> {
 			return false;
 		}
 		return true;
+	}
+
+	public int getHeadsignType() {
+		return this.headsignType;
+	}
+
+	public String getHeadsignValue() {
+		return this.headsignValue;
+	}
+
+	public long getTripId() {
+		return this.tripId;
+	}
+
+	public int getStopId() {
+		return this.stopId;
 	}
 }
