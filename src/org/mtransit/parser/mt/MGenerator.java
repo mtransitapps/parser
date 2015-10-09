@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -40,14 +41,14 @@ public class MGenerator {
 
 	public static MSpec generateMSpec(GSpec gtfs, GAgencyTools agencyTools) {
 		System.out.printf("\nGenerating routes, trips, trip stops & stops objects... ");
-		ArrayList<MAgency> mAgencies = new ArrayList<MAgency>();
-		ArrayList<MRoute> mRoutes = new ArrayList<MRoute>();
-		ArrayList<MTrip> mTrips = new ArrayList<MTrip>();
-		ArrayList<MTripStop> mTripStops = new ArrayList<MTripStop>();
+		HashSet<MAgency> mAgencies = new HashSet<MAgency>(); // use set to avoid duplicates
+		HashSet<MRoute> mRoutes = new HashSet<MRoute>(); // use set to avoid duplicates
+		HashSet<MTrip> mTrips = new HashSet<MTrip>(); // use set to avoid duplicates
+		HashSet<MTripStop> mTripStops = new HashSet<MTripStop>(); // use set to avoid duplicates
 		HashMap<Integer, MStop> mStops = new HashMap<Integer, MStop>();
 		TreeMap<Integer, ArrayList<MSchedule>> mStopSchedules = new TreeMap<Integer, ArrayList<MSchedule>>();
 		TreeMap<Long, ArrayList<MFrequency>> mRouteFrequencies = new TreeMap<Long, ArrayList<MFrequency>>();
-		ArrayList<MServiceDate> mServiceDates = new ArrayList<MServiceDate>();
+		HashSet<MServiceDate> mServiceDates = new HashSet<MServiceDate>(); // use set to avoid duplicates
 		ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(agencyTools.getThreadPoolSize());
 		ArrayList<Future<MSpec>> list = new ArrayList<Future<MSpec>>();
 		ArrayList<Long> routeIds = new ArrayList<Long>(gtfs.getRouteIds());
@@ -110,23 +111,28 @@ public class MGenerator {
 		}
 		System.out.printf("\nGenerating routes, trips, trip stops & stops objects... (all routes completed)");
 		threadPoolExecutor.shutdown();
+		ArrayList<MAgency> mAgenciesList = new ArrayList<MAgency>(mAgencies);
+		Collections.sort(mAgenciesList);
 		ArrayList<MStop> mStopsList = new ArrayList<MStop>(mStops.values());
-		Collections.sort(mAgencies);
 		Collections.sort(mStopsList);
-		Collections.sort(mRoutes);
-		Collections.sort(mTrips);
-		Collections.sort(mTripStops);
-		Collections.sort(mServiceDates);
+		ArrayList<MRoute> mRoutesList = new ArrayList<MRoute>(mRoutes);
+		Collections.sort(mRoutesList);
+		ArrayList<MTrip> mTripsList = new ArrayList<MTrip>(mTrips);
+		Collections.sort(mTripsList);
+		ArrayList<MTripStop> mTripStopsList = new ArrayList<MTripStop>(mTripStops);
+		Collections.sort(mTripStopsList);
+		ArrayList<MServiceDate> mServiceDatesList = new ArrayList<MServiceDate>(mServiceDates);
+		Collections.sort(mServiceDatesList);
 		System.out.printf("\nGenerating routes, trips, trip stops & stops objects... DONE");
-		System.out.printf("\n- Agencies: %d", mAgencies.size());
-		System.out.printf("\n- Routes: %d", mRoutes.size());
-		System.out.printf("\n- Trips: %d", mTrips.size());
-		System.out.printf("\n- Trip stops: %d", mTripStops.size());
+		System.out.printf("\n- Agencies: %d", mAgenciesList.size());
+		System.out.printf("\n- Routes: %d", mRoutesList.size());
+		System.out.printf("\n- Trips: %d", mTripsList.size());
+		System.out.printf("\n- Trip stops: %d", mTripStopsList.size());
 		System.out.printf("\n- Stops: %d", mStopsList.size());
-		System.out.printf("\n- Service Dates: %d", mServiceDates.size());
+		System.out.printf("\n- Service Dates: %d", mServiceDatesList.size());
 		System.out.printf("\n- Stop with Schedules: %d", mStopSchedules.size());
 		System.out.printf("\n- Route with Frequencies: %d", mRouteFrequencies.size());
-		return new MSpec(mAgencies, mStopsList, mRoutes, mTrips, mTripStops, mServiceDates, mStopSchedules, mRouteFrequencies);
+		return new MSpec(mAgenciesList, mStopsList, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, mStopSchedules, mRouteFrequencies);
 	}
 
 	private static final String GTFS_SCHEDULE_SERVICE_DATES = "gtfs_schedule_service_dates";
