@@ -44,7 +44,7 @@ public class SplitUtils {
 		} else if (stopIdsTowardsBoth01.contains(beforeAfter)) {
 			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop0, tidTowardsStop1 }, new Integer[] { 1, gTripStop.getStopSequence() });
 		}
-		System.out.printf("\n%s: Unexptected trip stop to split %s.\n", mRoute.id, gTripStop);
+		System.out.printf("\n%s: Unexptected trip stop to split %s.\n", mRoute.getId(), gTripStop);
 		System.exit(-1);
 		return null;
 	}
@@ -94,8 +94,8 @@ public class SplitUtils {
 		if (beforeAfterStopIdCandidate != null) {
 			return beforeAfterStopIdCandidate;
 		}
-		listRouteTripStops(mRoute.id, routeGTFS);
-		System.out.printf("\n%s: Unexpected trip (befores:%s|afters:%s) %s.\n", mRoute.id, beforeStopIds, afterStopIds, gTrip);
+		listRouteTripStops(mRoute.getId(), routeGTFS);
+		System.out.printf("\n%s: Unexpected trip (befores:%s|afters:%s) %s.\n", mRoute.getId(), beforeStopIds, afterStopIds, gTrip);
 		System.exit(-1);
 		return null;
 	}
@@ -223,7 +223,7 @@ public class SplitUtils {
 	public static String getFirstStopId(MRoute mRoute, GSpec gtfs, GTrip gTrip) {
 		int gStopMaxSequence = -1;
 		String gStopId = null;
-		for (GStopTime gStopTime : gtfs.getStopTimes(mRoute.id, gTrip.getTripId(), null, null)) {
+		for (GStopTime gStopTime : gtfs.getStopTimes(mRoute.getId(), gTrip.getTripId(), null, null)) {
 			if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
 				continue;
 			}
@@ -236,7 +236,7 @@ public class SplitUtils {
 			gStopId = gStopTime.getStopId();
 		}
 		if (StringUtils.isEmpty(gStopId)) {
-			System.out.printf("\n%s: Unexpected trip (no 1st stop) %s.\n", mRoute.id, gTrip);
+			System.out.printf("\n%s: Unexpected trip (no 1st stop) %s.\n", mRoute.getId(), gTrip);
 			System.exit(-1);
 		}
 		return gStopId;
@@ -245,7 +245,7 @@ public class SplitUtils {
 	public static String getLastStopId(MRoute mRoute, GSpec gtfs, GTrip gTrip) {
 		int gStopMaxSequence = -1;
 		String gStopId = null;
-		for (GStopTime gStopTime : gtfs.getStopTimes(mRoute.id, gTrip.getTripId(), null, null)) {
+		for (GStopTime gStopTime : gtfs.getStopTimes(mRoute.getId(), gTrip.getTripId(), null, null)) {
 			if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
 				continue;
 			}
@@ -256,7 +256,7 @@ public class SplitUtils {
 			gStopId = gStopTime.getStopId();
 		}
 		if (StringUtils.isEmpty(gStopId)) {
-			System.out.printf("\n%s: Unexpected trip (no last stop) %s.\n", mRoute.id, gTrip);
+			System.out.printf("\n%s: Unexpected trip (no last stop) %s.\n", mRoute.getId(), gTrip);
 			System.exit(-1);
 		}
 		return gStopId;

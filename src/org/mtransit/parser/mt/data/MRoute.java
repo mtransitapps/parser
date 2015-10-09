@@ -6,11 +6,11 @@ import org.mtransit.parser.Constants;
 
 public class MRoute implements Comparable<MRoute> {
 
-	public long id;
-	public String shortName;
-	public String longName;
+	private long id;
+	private String shortName;
+	private String longName;
 
-	public String color;
+	private String color;
 
 	public MRoute(long id, String shortName, String longName, String color) {
 		this.id = id;

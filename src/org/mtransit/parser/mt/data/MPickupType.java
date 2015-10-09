@@ -4,7 +4,7 @@ public enum MPickupType {
 
 	REGULAR(0), NO_PICKUP(1), MUST_PHONE_AGENCY(2), MUST_COORDINATE_WITH_DRIVER(3);
 
-	public int id;
+	private int id;
 
 	MPickupType(int id) {
 		this.id = id;
@@ -36,6 +36,10 @@ public enum MPickupType {
 			System.out.printf("\nError while parsing %s as pickup tipe!\n", id);
 			throw nfe;
 		}
+	}
+
+	public int getId() {
+		return id;
 	}
 
 	@Override

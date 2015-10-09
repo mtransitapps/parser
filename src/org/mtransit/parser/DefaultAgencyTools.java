@@ -127,7 +127,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public ArrayList<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs) {
 		ArrayList<MTrip> mTrips = new ArrayList<MTrip>();
-		mTrips.add(new MTrip(mRoute.id));
+		mTrips.add(new MTrip(mRoute.getId()));
 		return mTrips;
 	}
 

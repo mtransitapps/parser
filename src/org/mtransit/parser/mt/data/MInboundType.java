@@ -4,7 +4,7 @@ public enum MInboundType {
 
 	NONE(""), INBOUND("1"), OUTBOUND("0");
 
-	public String id;
+	private String id;
 
 	MInboundType(String id) {
 		this.id = id;
@@ -18,6 +18,10 @@ public enum MInboundType {
 			return OUTBOUND;
 		}
 		return NONE; // default
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	@Override

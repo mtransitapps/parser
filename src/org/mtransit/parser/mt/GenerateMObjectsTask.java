@@ -168,15 +168,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			mRoute = new MRoute(this.routeId, this.agencyTools.getRouteShortName(gRoute), this.agencyTools.getRouteLongName(gRoute),
 					this.agencyTools.getRouteColor(gRoute));
-			if (mRoutes.containsKey(mRoute.id) && !mRoute.equals(mRoutes.get(mRoute.id))) {
+			if (mRoutes.containsKey(mRoute.getId()) && !mRoute.equals(mRoutes.get(mRoute.getId()))) {
 				mergeSuccessful = false;
-				if (mRoute.equalsExceptLongName(mRoutes.get(mRoute.id))) {
-					mergeSuccessful = this.agencyTools.mergeRouteLongName(mRoute, mRoutes.get(mRoute.id));
+				if (mRoute.equalsExceptLongName(mRoutes.get(mRoute.getId()))) {
+					mergeSuccessful = this.agencyTools.mergeRouteLongName(mRoute, mRoutes.get(mRoute.getId()));
 				}
 				if (!mergeSuccessful) {
-					System.out.printf("\n%s: Route %s already in list!", this.routeId, mRoute.id);
+					System.out.printf("\n%s: Route %s already in list!", this.routeId, mRoute.getId());
 					System.out.printf("\n%s: %s", this.routeId, mRoute.toString());
-					System.out.printf("\n%s: %s.\n", this.routeId, mRoutes.get(mRoute.id).toString());
+					System.out.printf("\n%s: %s.\n", this.routeId, mRoutes.get(mRoute.getId()).toString());
 					System.exit(-1);
 				}
 			}
@@ -225,7 +225,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					tripStopIds.add(mTripStop.getStopId());
 				}
 			}
-			mRoutes.put(mRoute.id, mRoute);
+			mRoutes.put(mRoute.getId(), mRoute);
 		}
 	}
 

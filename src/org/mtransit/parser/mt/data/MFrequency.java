@@ -9,7 +9,7 @@ public class MFrequency implements Comparable<MFrequency> {
 	private long tripId;
 	private int startTime;
 	private int endTime;
-	public int headwayInSec;
+	private int headwayInSec;
 
 	public MFrequency(String serviceId, long routeId, long tripId, int startTime, int endTime, int headwayInSec) {
 		this.serviceId = serviceId;

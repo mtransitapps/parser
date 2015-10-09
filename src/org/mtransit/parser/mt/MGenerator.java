@@ -62,37 +62,36 @@ public class MGenerator {
 		for (Future<MSpec> future : list) {
 			try {
 				MSpec mRouteSpec = future.get();
-				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging...)", mRouteSpec.routes.get(0).id);
-				mAgencies.addAll(mRouteSpec.agencies);
-				mRoutes.addAll(mRouteSpec.routes);
-				mTrips.addAll(mRouteSpec.trips);
-				mTripStops.addAll(mRouteSpec.tripStops);
-				if (mRouteSpec.stops != null && mRouteSpec.stops.size() > 0) {
-					for (MStop mStop : mRouteSpec.stops) {
-						if (mStops.containsKey(mStop.id)) {
-							if (!mStops.get(mStop.id).equals(mStop)) {
-								System.out.printf("\nStop ID '%s' already in list! (%s instead of %s)", mStop.id, mStops.get(mStop.id), mStop.toString());
+				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging...)", mRouteSpec.getFirstRoute().getId());
+				mAgencies.addAll(mRouteSpec.getAgencies());
+				mRoutes.addAll(mRouteSpec.getRoutes());
+				mTrips.addAll(mRouteSpec.getTrips());
+				mTripStops.addAll(mRouteSpec.getTripStops());
+				if (mRouteSpec.hasStops()) {
+					for (MStop mStop : mRouteSpec.getStops()) {
+						if (mStops.containsKey(mStop.getId())) {
+							if (!mStops.get(mStop.getId()).equals(mStop)) {
+								System.out.printf("\nStop ID '%s' already in list! (%s instead of %s)", mStop.getId(), mStops.get(mStop.getId()),
+										mStop.toString());
 							}
 							continue;
 						}
-						mStops.put(mStop.id, mStop);
+						mStops.put(mStop.getId(), mStop);
 					}
 				}
-				if (mRouteSpec.serviceDates != null && mRouteSpec.serviceDates.size() > 0) {
-					for (MServiceDate mServiceDate : mRouteSpec.serviceDates) {
-						mServiceDates.add(mServiceDate);
-					}
+				if (mRouteSpec.hasServiceDates()) {
+					mServiceDates.addAll(mRouteSpec.getServiceDates());
 				}
-				if (mRouteSpec.stopSchedules != null && mRouteSpec.stopSchedules.size() > 0) {
-					for (Entry<Integer, ArrayList<MSchedule>> stopScheduleEntry : mRouteSpec.stopSchedules.entrySet()) {
+				if (mRouteSpec.hasStopSchedules()) {
+					for (Entry<Integer, ArrayList<MSchedule>> stopScheduleEntry : mRouteSpec.getStopSchedules().entrySet()) {
 						if (!mStopSchedules.containsKey(stopScheduleEntry.getKey())) {
 							mStopSchedules.put(stopScheduleEntry.getKey(), new ArrayList<MSchedule>());
 						}
 						mStopSchedules.get(stopScheduleEntry.getKey()).addAll(stopScheduleEntry.getValue());
 					}
 				}
-				if (mRouteSpec.routeFrequencies != null && mRouteSpec.routeFrequencies.size() > 0) {
-					for (Entry<Long, ArrayList<MFrequency>> routeFrequenciesEntry : mRouteSpec.routeFrequencies.entrySet()) {
+				if (mRouteSpec.hasRouteFrequencies()) {
+					for (Entry<Long, ArrayList<MFrequency>> routeFrequenciesEntry : mRouteSpec.getRouteFrequencies().entrySet()) {
 						if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().size() == 0) {
 							continue;
 						}
@@ -102,7 +101,7 @@ public class MGenerator {
 						mRouteFrequencies.get(routeFrequenciesEntry.getKey()).addAll(routeFrequenciesEntry.getValue());
 					}
 				}
-				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.routes.get(0).id);
+				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -152,14 +151,14 @@ public class MGenerator {
 		file.delete(); // delete previous
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
-			for (MServiceDate mServiceDate : mSpec.serviceDates) {
+			for (MServiceDate mServiceDate : mSpec.getServiceDates()) {
 				ow.write(mServiceDate.toString());
 				ow.write(Constants.NEW_LINE);
-				if (minDate == null || minDate.intValue() > mServiceDate.calendarDate) {
-					minDate = mServiceDate.calendarDate;
+				if (minDate == null || minDate.intValue() > mServiceDate.getCalendarDate()) {
+					minDate = mServiceDate.getCalendarDate();
 				}
-				if (maxDate == null || maxDate.doubleValue() < mServiceDate.calendarDate) {
-					maxDate = mServiceDate.calendarDate;
+				if (maxDate == null || maxDate.doubleValue() < mServiceDate.getCalendarDate()) {
+					maxDate = mServiceDate.getCalendarDate();
 				}
 			}
 		} catch (IOException ioe) {
@@ -190,9 +189,9 @@ public class MGenerator {
 		String fileName;
 		boolean empty;
 		ArrayList<MSchedule> mStopSchedules;
-		for (Integer stopId : mSpec.stopSchedules.keySet()) {
+		for (Integer stopId : mSpec.getStopSchedules().keySet()) {
 			try {
-				mStopSchedules = mSpec.stopSchedules.get(stopId);
+				mStopSchedules = mSpec.getStopSchedules().get(stopId);
 				if (mStopSchedules != null && mStopSchedules.size() > 0) {
 					fileName = fileBaseScheduleStop + stopId;
 					file = new File(dumpDirF, fileName);
@@ -217,7 +216,7 @@ public class MGenerator {
 					}
 				}
 			} catch (IOException ioe) {
-				System.out.printf("\nI/O Error while writing schedule file!\n");
+				System.out.printf("\nI/O Error while writing schedule file for stop '%s'!\n", stopId);
 				ioe.printStackTrace();
 				System.exit(-1);
 			} finally {
@@ -243,9 +242,9 @@ public class MGenerator {
 			}
 		}
 		ArrayList<MFrequency> mRouteFrequencies;
-		for (Long routeId : mSpec.routeFrequencies.keySet()) {
+		for (Long routeId : mSpec.getRouteFrequencies().keySet()) {
 			try {
-				mRouteFrequencies = mSpec.routeFrequencies.get(routeId);
+				mRouteFrequencies = mSpec.getRouteFrequencies().get(routeId);
 				if (mRouteFrequencies != null && mRouteFrequencies.size() > 0) {
 					fileName = fileBaseRouteFrequency + routeId;
 					file = new File(dumpDirF, fileName);
@@ -277,7 +276,7 @@ public class MGenerator {
 		file.delete(); // delete previous
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
-			for (MRoute mRoute : mSpec.routes) {
+			for (MRoute mRoute : mSpec.getRoutes()) {
 				ow.write(mRoute.toString());
 				ow.write(Constants.NEW_LINE);
 			}
@@ -297,7 +296,7 @@ public class MGenerator {
 		file.delete(); // delete previous
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
-			for (MTrip mTrip : mSpec.trips) {
+			for (MTrip mTrip : mSpec.getTrips()) {
 				ow.write(mTrip.toString());
 				ow.write(Constants.NEW_LINE);
 			}
@@ -317,7 +316,7 @@ public class MGenerator {
 		file.delete(); // delete previous
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
-			for (MTripStop mTripStop : mSpec.tripStops) {
+			for (MTripStop mTripStop : mSpec.getTripStops()) {
 				ow.write(mTripStop.toString());
 				ow.write(Constants.NEW_LINE);
 			}
@@ -338,23 +337,23 @@ public class MGenerator {
 		file.delete(); // delete previous
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
-			for (MStop mStop : mSpec.stops) {
+			for (MStop mStop : mSpec.getStops()) {
 				ow.write(mStop.toString());
 				ow.write(Constants.NEW_LINE);
-				if (mStop.lat != 0.0d) {
-					if (minLat == null || minLat.doubleValue() > mStop.lat) {
-						minLat = mStop.lat;
+				if (mStop.hasLat()) {
+					if (minLat == null || minLat.doubleValue() > mStop.getLat()) {
+						minLat = mStop.getLat();
 					}
-					if (maxLat == null || maxLat.doubleValue() < mStop.lat) {
-						maxLat = mStop.lat;
+					if (maxLat == null || maxLat.doubleValue() < mStop.getLat()) {
+						maxLat = mStop.getLat();
 					}
 				}
-				if (mStop.lng != 0.0d) {
-					if (minLng == null || minLng.doubleValue() > mStop.lng) {
-						minLng = mStop.lng;
+				if (mStop.hasLng()) {
+					if (minLng == null || minLng.doubleValue() > mStop.getLng()) {
+						minLng = mStop.getLng();
 					}
-					if (maxLng == null || maxLng.doubleValue() < mStop.lng) {
-						maxLng = mStop.lng;
+					if (maxLng == null || maxLng.doubleValue() < mStop.getLng()) {
+						maxLng = mStop.getLng();
 					}
 				}
 			}
@@ -402,13 +401,13 @@ public class MGenerator {
 			ow.write(Constants.NEW_LINE);
 			ow.write(RESOURCES_START);
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_INTEGER(GTFS_RTS_AGENCY_TYPE, mSpec.agencies.get(0).getType()));
+			ow.write(getRESOURCES_INTEGER(GTFS_RTS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_BOOL(GTFS_RTS_SCHEDULE_AVAILABLE, mSpec.stopSchedules.size() > 0));
+			ow.write(getRESOURCES_BOOL(GTFS_RTS_SCHEDULE_AVAILABLE, mSpec.getStopSchedules().size() > 0));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_BOOL(GTFS_RTS_FREQUENCY_AVAILABLE, mSpec.routeFrequencies.size() > 0));
+			ow.write(getRESOURCES_BOOL(GTFS_RTS_FREQUENCY_AVAILABLE, mSpec.getRouteFrequencies().size() > 0));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_STRING(GTFS_RTS_TIMEZONE, mSpec.agencies.get(0).getTimezone()));
+			ow.write(getRESOURCES_STRING(GTFS_RTS_TIMEZONE, mSpec.getFirstAgency().getTimezone()));
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_STRING(GTFS_RTS_AREA_MIN_LAT, minLat));
 			ow.write(Constants.NEW_LINE);
@@ -418,7 +417,7 @@ public class MGenerator {
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_STRING(GTFS_RTS_AREA_MAX_LNG, maxLng));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_STRING(GTFS_RTS_COLOR, mSpec.agencies.get(0).getColor()));
+			ow.write(getRESOURCES_STRING(GTFS_RTS_COLOR, mSpec.getFirstAgency().getColor()));
 			ow.write(Constants.NEW_LINE);
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);

@@ -5,13 +5,13 @@ import org.mtransit.parser.Constants;
 
 public class MStop implements Comparable<MStop> {
 
-	public int id;
+	private int id;
 
-	public String code;
-	public String name;
+	private String code;
+	private String name;
 
-	public double lat;
-	public double lng;
+	private double lat;
+	private double lng;
 
 	public MStop(int id, String code, String name, double lat, double lng) {
 		this.id = id;
@@ -19,6 +19,34 @@ public class MStop implements Comparable<MStop> {
 		this.name = name;
 		this.lat = lat;
 		this.lng = lng;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public double getLat() {
+		return lat;
+	}
+
+	public boolean hasLat() {
+		return lat != 0.0d;
+	}
+
+	public double getLng() {
+		return lng;
+	}
+
+	public boolean hasLng() {
+		return lng != 0.0d;
 	}
 
 	@Override

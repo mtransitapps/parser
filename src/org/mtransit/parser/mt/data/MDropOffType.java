@@ -4,7 +4,7 @@ public enum MDropOffType {
 
 	REGULAR(0), NO_DROP_OFF(1), MUST_PHONE_AGENCY(2), MUST_COORDINATE_WITH_DRIVER(3);
 
-	public int id;
+	private int id;
 
 	MDropOffType(int id) {
 		this.id = id;
@@ -31,6 +31,10 @@ public enum MDropOffType {
 			return REGULAR; // default
 		}
 		return parse(Integer.valueOf(id));
+	}
+
+	public int getId() {
+		return id;
 	}
 
 	@Override

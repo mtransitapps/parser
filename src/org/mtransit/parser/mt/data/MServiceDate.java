@@ -5,12 +5,20 @@ import org.mtransit.parser.Constants;
 
 public class MServiceDate implements Comparable<MServiceDate> {
 
-	public String serviceId;
-	public int calendarDate;
+	private String serviceId;
+	private int calendarDate;
 
 	public MServiceDate(String serviceId, int calendarDate) {
 		this.serviceId = serviceId;
 		this.calendarDate = calendarDate;
+	}
+
+	public int getCalendarDate() {
+		return calendarDate;
+	}
+
+	public String getServiceId() {
+		return serviceId;
 	}
 
 	@Override

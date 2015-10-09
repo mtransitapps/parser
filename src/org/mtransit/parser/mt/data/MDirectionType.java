@@ -6,7 +6,7 @@ public enum MDirectionType {
 
 	private static final String WEST_FR = "O";
 
-	public String id;
+	private String id;
 
 	MDirectionType(String id) {
 		this.id = id;
@@ -26,6 +26,10 @@ public enum MDirectionType {
 			return SOUTH;
 		}
 		return NONE; // default
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	@Override
