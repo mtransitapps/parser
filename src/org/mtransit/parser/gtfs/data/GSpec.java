@@ -26,6 +26,7 @@ public class GSpec {
 	private ArrayList<GAgency> agencies = new ArrayList<GAgency>();
 	private ArrayList<GCalendar> calendars = new ArrayList<GCalendar>();
 	private ArrayList<GCalendarDate> calendarDates = new ArrayList<GCalendarDate>();
+	private HashSet<String> allServiceIds = new HashSet<String>();
 
 	private HashMap<String, GStop> stopIdStops = new HashMap<String, GStop>();
 	private int routesCount = 0;
@@ -63,6 +64,7 @@ public class GSpec {
 
 	public void addCalendar(GCalendar gCalendar) {
 		this.calendars.add(gCalendar);
+		this.allServiceIds.add(gCalendar.getServiceId());
 	}
 
 	public ArrayList<GCalendar> getAllCalendars() {
@@ -71,6 +73,7 @@ public class GSpec {
 
 	public void addCalendarDate(GCalendarDate gCalendarDate) {
 		this.calendarDates.add(gCalendarDate);
+		this.allServiceIds.add(gCalendarDate.getServiceId());
 	}
 
 	public ArrayList<GCalendarDate> getAllCalendarDates() {
@@ -423,6 +426,18 @@ public class GSpec {
 			if (routeTrips == null || routeTrips.size() == 0) {
 				System.out.printf("\n%s: Skip GTFS route '%s' because no trips", mRouteId, gRoute);
 				continue;
+			} else {
+				boolean tripServed = false;
+				for (GTrip routeTrip : routeTrips) {
+					if (this.allServiceIds.contains(routeTrip.getServiceId())) {
+						tripServed = true;
+						break;
+					}
+				}
+				if (!tripServed) {
+					System.out.printf("\n%s: Skip GTFS route '%s' because no usefull trips.", mRouteId, gRoute);
+					continue;
+				}
 			}
 			if (!this.mRouteIdRoutes.containsKey(mRouteId)) {
 				this.mRouteIdRoutes.put(mRouteId, new ArrayList<GRoute>());

@@ -158,7 +158,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		MRoute mRoute;
 		boolean mergeSuccessful;
 		HashMap<Long, String> mTripStopTimesHeadsign;
-		HashMap<Long, ArrayList<MTripStop>> tripIdToMTripStops;
+		HashMap<Long, ArrayList<MTripStop>> tripIdToMTripStops = new HashMap<Long, ArrayList<MTripStop>>();
 		HashSet<String> mTripHeasignStrings;
 		boolean headsignTypeString;
 		boolean tripKeptNonDescriptiveHeadsign;
@@ -180,9 +180,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					System.exit(-1);
 				}
 			}
+			mRoutes.put(mRoute.getId(), mRoute);
 			mTripStopTimesHeadsign = new HashMap<Long, String>();
-			// find route trips
-			tripIdToMTripStops = new HashMap<Long, ArrayList<MTripStop>>();
 			parseTrips(mSchedules, mFrequencies, mTrips, mStops, serviceIds, mRoute, mTripStopTimesHeadsign, tripIdToMTripStops, gRoute, routeGTFS);
 			mTripHeasignStrings = new HashSet<String>();
 			headsignTypeString = false;
@@ -213,19 +212,18 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					}
 				}
 			}
-			for (ArrayList<MTripStop> mTripStops : tripIdToMTripStops.values()) {
-				setMTripStopSequence(mTripStops); // TODO necessary?
-				for (MTripStop mTripStop : mTripStops) {
-					if (allMTripStops.containsKey(mTripStop.getUID()) && !allMTripStops.get(mTripStop.getUID()).equals(mTripStop)) {
-						System.out.printf("\n%s: Different trip stop %s already in route list (%s != %s)!", this.routeId, mTripStop.getUID(),
-								mTripStop.toString(), allMTripStops.get(mTripStop.getUID()).toString());
-						continue;
-					}
-					allMTripStops.put(mTripStop.getUID(), mTripStop);
-					tripStopIds.add(mTripStop.getStopId());
+		}
+		for (ArrayList<MTripStop> mTripStops : tripIdToMTripStops.values()) {
+			setMTripStopSequence(mTripStops);
+			for (MTripStop mTripStop : mTripStops) {
+				if (allMTripStops.containsKey(mTripStop.getUID()) && !allMTripStops.get(mTripStop.getUID()).equals(mTripStop)) {
+					System.out.printf("\n%s: Different trip stop %s already in route list (%s != %s)!", this.routeId, mTripStop.getUID(), mTripStop.toString(),
+							allMTripStops.get(mTripStop.getUID()).toString());
+					continue;
 				}
+				allMTripStops.put(mTripStop.getUID(), mTripStop);
+				tripStopIds.add(mTripStop.getStopId());
 			}
-			mRoutes.put(mRoute.getId(), mRoute);
 		}
 	}
 
