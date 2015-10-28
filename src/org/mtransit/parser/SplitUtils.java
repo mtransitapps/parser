@@ -32,7 +32,7 @@ public class SplitUtils {
 		List<String> stopIdsTowardsBoth01 = rts.getBeforeAfterBothStopIds(1);
 		long tidTowardsStop0 = rts.getTripId(0);
 		long tidTowardsStop1 = rts.getTripId(1);
-		List<String> allBeforeAfterStopIds = rts.getAllBeforeAfterStopIds();
+		HashSet<String> allBeforeAfterStopIds = rts.getAllBeforeAfterStopIds();
 		String beforeAfter = getBeforeAfterStopId(routeGTFS, mRoute, gTrip, gTripStop, stopIdsTowards0, stopIdsTowards1, stopIdsTowardsBoth10,
 				stopIdsTowardsBoth01, allBeforeAfterStopIds);
 		if (stopIdsTowards0.contains(beforeAfter)) {
@@ -50,7 +50,7 @@ public class SplitUtils {
 	}
 
 	private static String getBeforeAfterStopId(GSpec routeGTFS, MRoute mRoute, GTrip gTrip, GTripStop gTripStop, List<String> stopIdsTowards0,
-			List<String> stopIdsTowards1, List<String> stopIdsTowardsBoth10, List<String> stopIdsTowardsBoth01, List<String> allBeforeAfterStopIds) {
+			List<String> stopIdsTowards1, List<String> stopIdsTowardsBoth10, List<String> stopIdsTowardsBoth01, HashSet<String> allBeforeAfterStopIds) {
 		int gStopMaxSequence = -1;
 		ArrayList<String> afterStopIds = new ArrayList<String>();
 		ArrayList<Integer> afterStopSequence = new ArrayList<Integer>();
@@ -295,9 +295,9 @@ public class SplitUtils {
 			this.headsignString1 = headsignString1;
 		}
 
-		private ArrayList<String> allBeforeAfterStopIds = new ArrayList<String>();
+		private HashSet<String> allBeforeAfterStopIds = new HashSet<String>();
 
-		public ArrayList<String> getAllBeforeAfterStopIds() {
+		public HashSet<String> getAllBeforeAfterStopIds() {
 			return this.allBeforeAfterStopIds;
 		}
 
