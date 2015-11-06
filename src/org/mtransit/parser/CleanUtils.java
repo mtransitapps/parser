@@ -286,6 +286,8 @@ public final class CleanUtils {
 	private static final String GLEN_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Gln");
 	private static final Pattern RIDGE = Pattern.compile(String.format(REGEX_START_END, "ridge"), Pattern.CASE_INSENSITIVE);
 	private static final String RIDGE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Rdg");
+	private static final Pattern RIDGES = Pattern.compile(String.format(REGEX_START_END, "ridges"), Pattern.CASE_INSENSITIVE);
+	private static final String RIDGES_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Rdgs");
 	private static final Pattern GARDEN = Pattern.compile(String.format(REGEX_START_END, "garden"), Pattern.CASE_INSENSITIVE);
 	private static final String GARDEN_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Gdn");
 	private static final Pattern GARDENS = Pattern.compile(String.format(REGEX_START_END, "gardens"), Pattern.CASE_INSENSITIVE);
@@ -384,6 +386,7 @@ public final class CleanUtils {
 		string = CIRCLE.matcher(string).replaceAll(CIRCLE_REPLACEMENT);
 		string = GLEN.matcher(string).replaceAll(GLEN_REPLACEMENT);
 		string = RIDGE.matcher(string).replaceAll(RIDGE_REPLACEMENT);
+		string = RIDGES.matcher(string).replaceAll(RIDGES_REPLACEMENT);
 		string = GARDEN.matcher(string).replaceAll(GARDEN_REPLACEMENT);
 		string = GARDENS.matcher(string).replaceAll(GARDENS_REPLACEMENT);
 		string = CENTER.matcher(string).replaceAll(CENTER_REPLACEMENT);
