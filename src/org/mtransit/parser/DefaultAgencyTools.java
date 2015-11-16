@@ -39,7 +39,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public void start(String[] args) {
 		System.out.printf("\nGenerating agency data...");
 		long start = System.currentTimeMillis();
-		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false);
+		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false, false);
 		gtfs.cleanupExcludedData();
 		gtfs.generateTripStops();
 		if (args.length >= 4 && Boolean.parseBoolean(args[3])) {
@@ -349,6 +349,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
+		return extractUsefulServiceIds(args, agencyTools, false);
+	}
+
+	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools, boolean agencyFilter) {
 		System.out.printf("\nExtracting useful service IDs...");
 		SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
 		Calendar c = Calendar.getInstance();
@@ -356,7 +360,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 		Integer todayStringInt = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
 		Integer startDate = null;
 		Integer endDate = null;
-		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, true);
+		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, !agencyFilter, agencyFilter);
+		if (agencyFilter) {
+			gtfs.cleanupExcludedServiceIds();
+		}
 		List<GCalendar> calendars = gtfs.getAllCalendars();
 		List<GCalendarDate> calendarDates = gtfs.getAllCalendarDates();
 		printMinMaxDate(calendars, calendarDates);

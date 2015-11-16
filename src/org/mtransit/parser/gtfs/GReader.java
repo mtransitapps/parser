@@ -37,7 +37,7 @@ public class GReader {
 		void processLine(HashMap<String, String> line);
 	}
 
-	public static GSpec readGtfsZipFile(String gtfsFile, final GAgencyTools agencyTools, boolean calendarsOnly) {
+	public static GSpec readGtfsZipFile(String gtfsFile, final GAgencyTools agencyTools, boolean calendarsOnly, boolean routeTripCalendarsOnly) {
 		System.out.printf("\nReading GTFS file '%s'...", gtfsFile);
 		long start = System.currentTimeMillis();
 		final GSpec gSpec = new GSpec();
@@ -57,7 +57,7 @@ public class GReader {
 					filename = filename.substring(filename.indexOf(SLASH) + 1);
 				}
 				if (filename.equals(GAgency.FILENAME)) { // AGENCY
-					if (calendarsOnly) {
+					if (calendarsOnly || routeTripCalendarsOnly) {
 						continue;
 					}
 					readCsv(filename, reader, null, null, new LineProcessor() {
@@ -91,7 +91,7 @@ public class GReader {
 						}
 					});
 				} else if (filename.equals(GStop.FILENAME)) { // STOP
-					if (calendarsOnly) {
+					if (calendarsOnly || routeTripCalendarsOnly) {
 						continue;
 					}
 					readCsv(filename, reader, null, null, new LineProcessor() {
@@ -111,7 +111,7 @@ public class GReader {
 						}
 					});
 				} else if (filename.equals(GStopTime.FILENAME)) { // STOP TIME
-					if (calendarsOnly) {
+					if (calendarsOnly || routeTripCalendarsOnly) {
 						continue;
 					}
 					readCsv(filename, reader, null, null, new LineProcessor() {
@@ -121,7 +121,7 @@ public class GReader {
 						}
 					});
 				} else if (filename.equals(GFrequency.FILENAME)) { // FREQUENCY
-					if (calendarsOnly) {
+					if (calendarsOnly || routeTripCalendarsOnly) {
 						continue;
 					}
 					readCsv(filename, reader, null, null, new LineProcessor() {

@@ -404,6 +404,42 @@ public class GSpec {
 		System.out.printf("\nRemoving more excluded data... DONE (%d removed objects)", r);
 	}
 
+	public void cleanupExcludedServiceIds() {
+		System.out.printf("\nRemoving more excluded service IDs...");
+		int r = 0;
+		try {
+			HashSet<String> routeTripServiceIds = new HashSet<String>();
+			for (String gRouteId : this.routeIdRoutes.keySet()) {
+				for (GTrip gTrip : this.routeIdTrips.get(gRouteId)) {
+					routeTripServiceIds.add(gTrip.getServiceId());
+				}
+			}
+			Iterator<GCalendar> itGCalendar = this.calendars.iterator();
+			while (itGCalendar.hasNext()) {
+				GCalendar gCalendar = itGCalendar.next();
+				if (!routeTripServiceIds.contains(gCalendar.getServiceId())) {
+					itGCalendar.remove();
+					r++;
+					System.out.print(POINT);
+				}
+			}
+			Iterator<GCalendarDate> itGCalendarDate = this.calendarDates.iterator();
+			while (itGCalendarDate.hasNext()) {
+				GCalendarDate gCalendarDate = itGCalendarDate.next();
+				if (!routeTripServiceIds.contains(gCalendarDate.getServiceId())) {
+					itGCalendarDate.remove();
+					r++;
+					System.out.print(POINT);
+				}
+			}
+		} catch (Exception e) {
+			System.out.printf("\nError while rmoving more excluded service IDs!\n");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		System.out.printf("\nRemoving more excluded service IDs... DONE (%d removed objects)", r);
+	}
+
 	public void clearRawData() {
 		this.stopTimes.clear();
 	}
