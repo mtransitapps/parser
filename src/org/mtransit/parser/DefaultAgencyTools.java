@@ -70,7 +70,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public long getRouteId(GRoute gRoute) {
 		try {
-			return Long.valueOf(gRoute.getRouteId());
+			return Long.parseLong(gRoute.getRouteId());
 		} catch (Exception e) {
 			System.out.printf("\nError while extracting route ID from %s!\n", gRoute);
 			e.printStackTrace();
@@ -104,9 +104,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return mRoute.mergeLongName(mRouteToMerge);
 	}
 
+	public static final String WHITE = "FFFFFF";
+
 	@Override
 	public String getRouteColor(GRoute gRoute) {
 		if (getAgencyColor() != null && getAgencyColor().equals(gRoute.getRouteColor())) {
+			return null;
+		}
+		if (WHITE.equalsIgnoreCase(gRoute.getRouteColor())) {
+			System.out.printf("\nERROR: invalid route color '%s'!\n", getAgencyRouteType());
+			System.exit(-1);
 			return null;
 		}
 		return gRoute.getRouteColor();

@@ -275,8 +275,8 @@ public final class CleanUtils {
 	private static final String VALLEY_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Vly");
 	private static final Pattern HILL = Pattern.compile(String.format(REGEX_START_END_S, "hill|h ill"), Pattern.CASE_INSENSITIVE);
 	private static final String HILL_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Hl");
-	private static final Pattern LAKE = Pattern.compile(String.format(REGEX_START_END, "lake"), Pattern.CASE_INSENSITIVE);
-	private static final String LAKE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Lk");
+	private static final Pattern LAKE = Pattern.compile(String.format(REGEX_START_END_S, "lake"), Pattern.CASE_INSENSITIVE);
+	private static final String LAKE_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Lk");
 	private static final Pattern MEADOW = Pattern.compile(String.format(REGEX_START_END_S, "meadow"), Pattern.CASE_INSENSITIVE);
 	private static final String MEADOW_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Mdw");
 	private static final Pattern CIRCLE = Pattern.compile(String.format(REGEX_START_END, "circle"), Pattern.CASE_INSENSITIVE);
