@@ -69,6 +69,7 @@ public class MGenerator {
 				mTrips.addAll(mRouteSpec.getTrips());
 				mTripStops.addAll(mRouteSpec.getTripStops());
 				if (mRouteSpec.hasStops()) {
+					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stops...)", mRouteSpec.getFirstRoute().getId());
 					for (MStop mStop : mRouteSpec.getStops()) {
 						if (mStops.containsKey(mStop.getId())) {
 							if (!mStops.get(mStop.getId()).equals(mStop)) {
@@ -79,19 +80,31 @@ public class MGenerator {
 						}
 						mStops.put(mStop.getId(), mStop);
 					}
+					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stops... DONE)", mRouteSpec.getFirstRoute()
+							.getId());
 				}
 				if (mRouteSpec.hasServiceDates()) {
+					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging service dates...)", mRouteSpec.getFirstRoute()
+							.getId());
 					mServiceDates.addAll(mRouteSpec.getServiceDates());
+					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging service dates... DONE)", mRouteSpec
+							.getFirstRoute().getId());
 				}
 				if (mRouteSpec.hasStopSchedules()) {
+					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules...)", mRouteSpec.getFirstRoute()
+							.getId());
 					for (Entry<Integer, ArrayList<MSchedule>> stopScheduleEntry : mRouteSpec.getStopSchedules().entrySet()) {
 						if (!mStopSchedules.containsKey(stopScheduleEntry.getKey())) {
 							mStopSchedules.put(stopScheduleEntry.getKey(), new ArrayList<MSchedule>());
 						}
 						mStopSchedules.get(stopScheduleEntry.getKey()).addAll(stopScheduleEntry.getValue());
 					}
+					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules... DONE)", mRouteSpec
+							.getFirstRoute().getId());
 				}
 				if (mRouteSpec.hasRouteFrequencies()) {
+					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies...)", mRouteSpec
+							.getFirstRoute().getId());
 					for (Entry<Long, ArrayList<MFrequency>> routeFrequenciesEntry : mRouteSpec.getRouteFrequencies().entrySet()) {
 						if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().size() == 0) {
 							continue;
@@ -101,6 +114,8 @@ public class MGenerator {
 						}
 						mRouteFrequencies.get(routeFrequenciesEntry.getKey()).addAll(routeFrequenciesEntry.getValue());
 					}
+					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies... DONE)", mRouteSpec
+							.getFirstRoute().getId());
 				}
 				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
 			} catch (InterruptedException e) {

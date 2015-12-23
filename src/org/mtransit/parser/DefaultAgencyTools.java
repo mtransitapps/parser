@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
@@ -28,9 +29,12 @@ import org.mtransit.parser.mt.data.MTripStop;
 
 public class DefaultAgencyTools implements GAgencyTools {
 
-	public static final int THREAD_POOL_SIZE = 1;
-	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 2;
+	public static final int THREAD_POOL_SIZE = 2;
+
+	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 3;
 	private static final int MIN_COVERAGE_AFTER_TOTAL_IN_DAYS = 30;
+
+	private static final Integer OVERRIDE_DATE = null;
 
 	public static void main(String[] args) {
 		new DefaultAgencyTools().start(args);
@@ -365,6 +369,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.DAY_OF_MONTH, 1); // TOMORROW (too late to publish today's schedule)
 		Integer todayStringInt = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
+		if (OVERRIDE_DATE != null) {
+			todayStringInt = OVERRIDE_DATE;
+		}
 		Integer startDate = null;
 		Integer endDate = null;
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, !agencyFilter, agencyFilter);
@@ -376,11 +383,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 		printMinMaxDate(calendars, calendarDates);
 		if (calendars != null && calendars.size() > 0) {
 			for (GCalendar gCalendar : calendars) {
-				if (gCalendar.getStartDate() <= todayStringInt && gCalendar.getEndDate() >= todayStringInt) {
+				if (gCalendar.getStartDate() <= todayStringInt && todayStringInt <= gCalendar.getEndDate()) {
 					if (startDate == null || gCalendar.getStartDate() < startDate) {
+						System.out.printf("\nnew start date from calendar active on %s: %s (was: %s)", todayStringInt, gCalendar.getStartDate(), startDate);
 						startDate = gCalendar.getStartDate();
 					}
 					if (endDate == null || gCalendar.getEndDate() > endDate) {
+						System.out.printf("\nnew end date from calendar active on %s: %s (was: %s)", todayStringInt, gCalendar.getEndDate(), endDate);
 						endDate = gCalendar.getEndDate();
 					}
 				}
@@ -390,27 +399,32 @@ public class DefaultAgencyTools implements GAgencyTools {
 				System.exit(-1);
 				return null;
 			}
-			if (endDate - startDate < MIN_COVERAGE_AFTER_TODAY_IN_DAYS) {
-				endDate = incDateOneDay(DATE_FORMAT, c, startDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS);
+			if (diffLowerThan(DATE_FORMAT, c, startDate, endDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS)) {
+				endDate = incDateDays(DATE_FORMAT, c, startDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS);
+				System.out.printf("\nnew end date because coverage lower than %s days: %s", MIN_COVERAGE_AFTER_TODAY_IN_DAYS, endDate);
 			}
 			boolean newDates;
 			while (true) {
+				System.out.printf("\nSchedules from %s to %s... ", startDate, endDate);
 				newDates = false;
 				for (GCalendar gCalendar : calendars) {
-					if ((gCalendar.getStartDate() >= startDate && gCalendar.getStartDate() <= endDate)
-							|| (gCalendar.getEndDate() >= startDate && gCalendar.getEndDate() <= endDate)) {
+					if ((startDate <= gCalendar.getStartDate() && gCalendar.getStartDate() <= endDate)
+							|| (startDate <= gCalendar.getEndDate() && gCalendar.getEndDate() <= endDate)) {
 						if (startDate == null || gCalendar.getStartDate() < startDate) {
+							System.out.printf("\nnew start date from calendar active between %s and %s: %s (was: %s)", startDate, endDate,
+									gCalendar.getStartDate(), startDate);
 							startDate = gCalendar.getStartDate();
 							newDates = true;
 						}
 						if (endDate == null || gCalendar.getEndDate() > endDate) {
+							System.out.printf("\nnew end date from calendar active between %s and %s: %s (was: %s)", startDate, endDate,
+									gCalendar.getEndDate(), endDate);
 							endDate = gCalendar.getEndDate();
 							newDates = true;
 						}
 					}
 				}
 				if (newDates) {
-					System.out.printf("\nNew schedules from %s to %s... ", startDate, endDate);
 					continue;
 				}
 				break;
@@ -419,7 +433,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 			HashSet<String> todayServiceIds = new HashSet<String>();
 			for (GCalendarDate gCalendarDate : calendarDates) {
 				if (gCalendarDate.getDate() == todayStringInt) {
-					todayServiceIds.add(gCalendarDate.getServiceId());
+					if (!todayServiceIds.contains(gCalendarDate.getServiceId())) {
+						todayServiceIds.add(gCalendarDate.getServiceId());
+						System.out.printf("\nnew service ID from calendar date active on %s: %s ", todayStringInt, gCalendarDate.getServiceId());
+					}
 				}
 			}
 			if (todayServiceIds != null && todayServiceIds.size() > 0) {
@@ -427,46 +444,58 @@ public class DefaultAgencyTools implements GAgencyTools {
 					for (String todayServiceId : todayServiceIds) {
 						if (gCalendarDate.getServiceId().equals(todayServiceId)) {
 							if (startDate == null || gCalendarDate.getDate() < startDate) {
+								System.out.printf("\nnew start date from calendar date active during service ID %s: %s (was: %s)",
+										gCalendarDate.getServiceId(), gCalendarDate.getDate(), startDate);
 								startDate = gCalendarDate.getDate();
 							}
 							if (endDate == null || gCalendarDate.getDate() > endDate) {
+								System.out.printf("\nnew end date from calendar date active during service ID %s: %s (was: %s)", gCalendarDate.getServiceId(),
+										gCalendarDate.getDate(), endDate);
 								endDate = gCalendarDate.getDate();
 							}
 						}
 					}
 				}
-				if (endDate - startDate < MIN_COVERAGE_AFTER_TODAY_IN_DAYS) {
-					endDate = incDateOneDay(DATE_FORMAT, c, startDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS);
+				if (diffLowerThan(DATE_FORMAT, c, startDate, endDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS)) {
+					endDate = incDateDays(DATE_FORMAT, c, startDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS);
+					System.out.printf("\nnew end date because coverage lower than %s days: %s", MIN_COVERAGE_AFTER_TODAY_IN_DAYS, endDate);
 				}
 				boolean newDates;
 				while (true) {
+					System.out.printf("\nSchedules from %s to %s... ", startDate, endDate);
 					newDates = false;
 					for (GCalendarDate gCalendarDate : calendarDates) {
-						if (gCalendarDate.getDate() >= startDate && gCalendarDate.getDate() <= endDate) {
-							todayServiceIds.add(gCalendarDate.getServiceId());
+						if (startDate <= gCalendarDate.getDate() && gCalendarDate.getDate() <= endDate) {
+							if (!todayServiceIds.contains(gCalendarDate.getServiceId())) {
+								System.out.printf("\nnew service ID from calendar date active during %s between %s and %s: %s", gCalendarDate.getDate(),
+										startDate, endDate, gCalendarDate.getServiceId());
+								todayServiceIds.add(gCalendarDate.getServiceId());
+							}
 						}
 					}
 					for (GCalendarDate gCalendarDate : calendarDates) {
 						if (todayServiceIds.contains(gCalendarDate.getServiceId())) {
 							if (startDate == null || gCalendarDate.getDate() < startDate) {
+								System.out.printf("\nnew start date from calendar date active during service ID %s: %s (was: %s)",
+										gCalendarDate.getServiceId(), gCalendarDate.getDate(), startDate);
 								startDate = gCalendarDate.getDate();
 								newDates = true;
 							}
 							if (endDate == null || gCalendarDate.getDate() > endDate) {
-								System.out.printf("\nnew service ID %s end date: %s (replace %s)", gCalendarDate.getServiceId(), gCalendarDate.getDate(),
-										endDate);
+								System.out.printf("\nnew end date from calendar date active during service ID %s: %s (was: %s)", gCalendarDate.getServiceId(),
+										gCalendarDate.getDate(), endDate);
 								endDate = gCalendarDate.getDate();
 								newDates = true;
 							}
 						}
 					}
 					if (newDates) {
-						System.out.printf("\nNew schedules from %s to %s... ", startDate, endDate);
 						continue;
 					}
-					if (endDate - startDate < MIN_COVERAGE_AFTER_TOTAL_IN_DAYS) {
-						System.out.printf("\nNo enough days (%s), 1 more day in the future...", (endDate - startDate));
-						endDate = incDateOneDay(DATE_FORMAT, c, endDate, 1);
+					if (diffLowerThan(DATE_FORMAT, c, startDate, endDate, MIN_COVERAGE_AFTER_TOTAL_IN_DAYS)) {
+						endDate = incDateDays(DATE_FORMAT, c, endDate, 1);
+						System.out.printf("\nnew end date because coverage lower than %s days: %s", MIN_COVERAGE_AFTER_TOTAL_IN_DAYS, endDate);
+						continue;
 					} else {
 						break;
 					}
@@ -485,16 +514,22 @@ public class DefaultAgencyTools implements GAgencyTools {
 		HashSet<String> serviceIds = new HashSet<String>();
 		if (calendars != null) {
 			for (GCalendar gCalendar : calendars) {
-				if ((gCalendar.getStartDate() >= startDate && gCalendar.getStartDate() <= endDate) //
-						|| (gCalendar.getEndDate() >= startDate && gCalendar.getEndDate() <= endDate)) {
-					serviceIds.add(gCalendar.getServiceId());
+				if ((startDate <= gCalendar.getStartDate() && gCalendar.getStartDate() <= endDate) //
+						|| (startDate <= gCalendar.getEndDate() && gCalendar.getEndDate() <= endDate)) {
+					if (!serviceIds.contains(gCalendar.getServiceId())) {
+						System.out.printf("\nnew service ID from calendar active between %s and %s: %s", startDate, endDate, gCalendar.getServiceId());
+						serviceIds.add(gCalendar.getServiceId());
+					}
 				}
 			}
 		}
 		if (calendarDates != null) {
 			for (GCalendarDate gCalendarDate : calendarDates) {
-				if (gCalendarDate.getDate() >= startDate && gCalendarDate.getDate() <= endDate) {
-					serviceIds.add(gCalendarDate.getServiceId());
+				if (startDate <= gCalendarDate.getDate() && gCalendarDate.getDate() <= endDate) {
+					if (!serviceIds.contains(gCalendarDate.getServiceId())) {
+						System.out.printf("\nnew service ID from calendar date active between %s and %s: %s", startDate, endDate, gCalendarDate.getServiceId());
+						serviceIds.add(gCalendarDate.getServiceId());
+					}
 				}
 			}
 		}
@@ -529,16 +564,31 @@ public class DefaultAgencyTools implements GAgencyTools {
 		System.out.printf("\nSchedule available from %s to %s.", minDate, maxDate);
 	}
 
-	private static int incDateOneDay(SimpleDateFormat dateFormat, Calendar calendar, int dateInt, int amount) {
+	private static int incDateDays(SimpleDateFormat dateFormat, Calendar calendar, int dateInt, int numberOfDays) {
 		try {
 			calendar.setTime(dateFormat.parse(String.valueOf(dateInt)));
-			calendar.add(Calendar.DAY_OF_MONTH, amount);
+			calendar.add(Calendar.DAY_OF_MONTH, numberOfDays);
 			return Integer.parseInt(dateFormat.format(calendar.getTime()));
 		} catch (Exception e) {
 			System.out.printf("\nError while increasing end date!\n");
 			e.printStackTrace();
 			System.exit(-1);
 			return -1;
+		}
+	}
+
+	private static boolean diffLowerThan(SimpleDateFormat dateFormat, Calendar calendar, int startDateInt, int enDateInt, int diffInDays) {
+		try {
+			calendar.setTime(dateFormat.parse(String.valueOf(startDateInt)));
+			long startDateInMs = calendar.getTimeInMillis();
+			calendar.setTime(dateFormat.parse(String.valueOf(enDateInt)));
+			long endDateInMs = calendar.getTimeInMillis();
+			return endDateInMs - startDateInMs < TimeUnit.DAYS.toMillis(diffInDays);
+		} catch (Exception e) {
+			System.out.printf("\nError while checking date difference!\n");
+			e.printStackTrace();
+			System.exit(-1);
+			return false;
 		}
 	}
 

@@ -196,6 +196,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				System.out.printf("\n%s: Non descriptive trip headsigns (%s different heasign(s) for %s trips)", this.routeId, mTripHeasignStrings.size(),
 						mTrips.size());
 				for (MTrip mTrip : mTrips.values()) {
+					System.out.printf("\n%s: mTrip: %s", this.routeId, mTrip.toString());
 					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
 						System.out.printf("\n%s: Replace trip headsign '%s' with stop times headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(),
 								mTripStopTimesHeadsign.get(mTrip.getId()), mTrip.toString());
@@ -232,6 +233,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	private void parseTrips(HashMap<String, MSchedule> mSchedules, HashMap<String, MFrequency> mFrequencies, HashMap<Long, MTrip> mTrips,
 			HashMap<Integer, MStop> mStops, HashSet<String> serviceIds, MRoute mRoute, HashMap<Long, String> mTripStopTimesHeadsign,
 			HashMap<Long, ArrayList<MTripStop>> tripIdToMTripStops, GRoute gRoute, GSpec routeGTFS) {
+		System.out.printf("\n%s: parsing trips...", this.routeId);
 		boolean mergeSuccessful;
 		HashMap<Long, HashSet<String>> mergedTripIdToMTripStops = new HashMap<Long, HashSet<String>>();
 		HashMap<Long, Pair<Integer, String>> originalTripHeadsign;
@@ -323,6 +325,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				System.out.print(POINT); // LOG
 			} // LOG
 		}
+		System.out.printf("\n%s: parsing trips... DONE", this.routeId);
 	}
 
 	private HashMap<Long, String> parseTripStops(HashMap<String, MSchedule> mSchedules, HashSet<String> serviceIds, MRoute mRoute,
@@ -346,8 +349,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			mStopId = this.agencyTools.getStopId(gStop);
 			this.gStopsCache.put(mStopId, gStop);
 			if (mStopId < 0) {
-				System.out.printf("%s: Can't find gtfs stop ID (%s) '%s' from trip ID '%s' (%s)\n", this.routeId, mStopId, gTripStop.getStopId(),
-						gTripStop.getTripId());
+				System.out.printf("\n%s: Can't find gtfs stop ID (%s) '%s' from trip ID '%s' (%s)\n", this.routeId, mStopId, gTripStop.getStopId(),
+						gTripStop.getTripId(), gStop);
 				System.exit(-1);
 			}
 			mTripsAndStopSequences = this.agencyTools.splitTripStop(mRoute, gTrip, gTripStop, splitTrips, routeGTFS);
