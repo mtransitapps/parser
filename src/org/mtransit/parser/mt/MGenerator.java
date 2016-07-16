@@ -64,17 +64,16 @@ public class MGenerator {
 			try {
 				MSpec mRouteSpec = future.get();
 				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging...)", mRouteSpec.getFirstRoute().getId());
-				mAgencies.addAll(mRouteSpec.getAgencies());
-				mRoutes.addAll(mRouteSpec.getRoutes());
-				mTrips.addAll(mRouteSpec.getTrips());
-				mTripStops.addAll(mRouteSpec.getTripStops());
-				if (mRouteSpec.hasStops()) {
+				if (mRouteSpec.hasStops() && mRouteSpec.hasServiceDates()) {
+					mAgencies.addAll(mRouteSpec.getAgencies());
+					mRoutes.addAll(mRouteSpec.getRoutes());
+					mTrips.addAll(mRouteSpec.getTrips());
+					mTripStops.addAll(mRouteSpec.getTripStops());
 					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stops...)", mRouteSpec.getFirstRoute().getId());
 					for (MStop mStop : mRouteSpec.getStops()) {
 						if (mStops.containsKey(mStop.getId())) {
 							if (!mStops.get(mStop.getId()).equals(mStop)) {
-								System.out.printf("\nStop ID '%s' already in list! (%s instead of %s)", mStop.getId(), mStops.get(mStop.getId()),
-										mStop.toString());
+								System.out.printf("\nStop ID '%s' already in list! (%s instead of %s)", mStop.getId(), mStops.get(mStop.getId()), mStop);
 							}
 							continue;
 						}
@@ -82,40 +81,40 @@ public class MGenerator {
 					}
 					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stops... DONE)", mRouteSpec.getFirstRoute()
 							.getId());
-				}
-				if (mRouteSpec.hasServiceDates()) {
 					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging service dates...)", mRouteSpec.getFirstRoute()
 							.getId());
 					mServiceDates.addAll(mRouteSpec.getServiceDates());
 					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging service dates... DONE)", mRouteSpec
 							.getFirstRoute().getId());
-				}
-				if (mRouteSpec.hasStopSchedules()) {
-					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules...)", mRouteSpec.getFirstRoute()
-							.getId());
-					for (Entry<Integer, ArrayList<MSchedule>> stopScheduleEntry : mRouteSpec.getStopSchedules().entrySet()) {
-						if (!mStopSchedules.containsKey(stopScheduleEntry.getKey())) {
-							mStopSchedules.put(stopScheduleEntry.getKey(), new ArrayList<MSchedule>());
+					if (mRouteSpec.hasStopSchedules()) {
+						System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules...)", mRouteSpec
+								.getFirstRoute().getId());
+						for (Entry<Integer, ArrayList<MSchedule>> stopScheduleEntry : mRouteSpec.getStopSchedules().entrySet()) {
+							if (!mStopSchedules.containsKey(stopScheduleEntry.getKey())) {
+								mStopSchedules.put(stopScheduleEntry.getKey(), new ArrayList<MSchedule>());
+							}
+							mStopSchedules.get(stopScheduleEntry.getKey()).addAll(stopScheduleEntry.getValue());
 						}
-						mStopSchedules.get(stopScheduleEntry.getKey()).addAll(stopScheduleEntry.getValue());
+						System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules... DONE)", mRouteSpec
+								.getFirstRoute().getId());
 					}
-					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules... DONE)", mRouteSpec
-							.getFirstRoute().getId());
-				}
-				if (mRouteSpec.hasRouteFrequencies()) {
-					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies...)", mRouteSpec
-							.getFirstRoute().getId());
-					for (Entry<Long, ArrayList<MFrequency>> routeFrequenciesEntry : mRouteSpec.getRouteFrequencies().entrySet()) {
-						if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().size() == 0) {
-							continue;
+					if (mRouteSpec.hasRouteFrequencies()) {
+						System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies...)", mRouteSpec
+								.getFirstRoute().getId());
+						for (Entry<Long, ArrayList<MFrequency>> routeFrequenciesEntry : mRouteSpec.getRouteFrequencies().entrySet()) {
+							if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().size() == 0) {
+								continue;
+							}
+							if (!mRouteFrequencies.containsKey(routeFrequenciesEntry.getKey())) {
+								mRouteFrequencies.put(routeFrequenciesEntry.getKey(), new ArrayList<MFrequency>());
+							}
+							mRouteFrequencies.get(routeFrequenciesEntry.getKey()).addAll(routeFrequenciesEntry.getValue());
 						}
-						if (!mRouteFrequencies.containsKey(routeFrequenciesEntry.getKey())) {
-							mRouteFrequencies.put(routeFrequenciesEntry.getKey(), new ArrayList<MFrequency>());
-						}
-						mRouteFrequencies.get(routeFrequenciesEntry.getKey()).addAll(routeFrequenciesEntry.getValue());
+						System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies... DONE)", mRouteSpec
+								.getFirstRoute().getId());
 					}
-					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies... DONE)", mRouteSpec
-							.getFirstRoute().getId());
+				} else {
+					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (EMPTY)", mRouteSpec.getFirstRoute().getId());
 				}
 				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
 			} catch (InterruptedException e) {
@@ -227,7 +226,7 @@ public class MGenerator {
 							if (!empty) {
 								ow.write(Constants.NEW_LINE);
 							}
-							ow.write(mSchedule.toString());
+							ow.write(mSchedule.toStringNewServiceIdAndTripId());
 						}
 						empty = false;
 						lastSchedule = mSchedule;
@@ -318,7 +317,7 @@ public class MGenerator {
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
 			for (MTrip mTrip : mSpec.getTrips()) {
-				ow.write(mTrip.toString());
+				ow.write(mTrip.printString());
 				ow.write(Constants.NEW_LINE);
 			}
 		} catch (IOException ioe) {
@@ -359,7 +358,7 @@ public class MGenerator {
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
 			for (MStop mStop : mSpec.getStops()) {
-				ow.write(mStop.toString());
+				ow.write(mStop.printString());
 				ow.write(Constants.NEW_LINE);
 				if (mStop.hasLat()) {
 					if (minLat == null || minLat.doubleValue() > mStop.getLat()) {

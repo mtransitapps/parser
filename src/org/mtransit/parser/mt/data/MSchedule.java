@@ -2,22 +2,35 @@ package org.mtransit.parser.mt.data;
 
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
+import org.mtransit.parser.DefaultAgencyTools;
+import org.mtransit.parser.Pair;
 
 public class MSchedule implements Comparable<MSchedule> {
 
 	private String serviceId;
-	private long tripId;
+	private long tripId; // direction ID
 	private int stopId;
 	private int departure;
 
 	private int headsignType = -1;
 	private String headsignValue = null;
 
-	public MSchedule(String serviceId, long routeId, long tripId, int stopId, int departure) {
+	private String pathId; // trip ID
+	private int arrivalBeforeDeparture;
+
+	private boolean descentOnly = false;
+
+	public MSchedule(String serviceId, long routeId, long tripId, int stopId, Pair<Integer, Integer> times, String pathId) {
+		this(serviceId, routeId, tripId, stopId, times == null ? 0 : times.first, times == null ? 0 : times.second, pathId);
+	}
+
+	private MSchedule(String serviceId, long routeId, long tripId, int stopId, int arrival, int departure, String pathId) {
 		this.stopId = stopId;
 		this.tripId = tripId;
 		this.serviceId = serviceId;
 		this.departure = departure;
+		this.arrivalBeforeDeparture = departure - arrival;
+		this.pathId = pathId;
 		resetUID();
 	}
 
@@ -45,6 +58,9 @@ public class MSchedule implements Comparable<MSchedule> {
 		this.uid = null;
 	}
 
+	public String getServiceId() {
+		return serviceId;
+	}
 	@Override
 	public int hashCode() {
 		return getUID().hashCode() + (this.headsignValue == null ? 0 : this.headsignValue.hashCode());
@@ -52,6 +68,10 @@ public class MSchedule implements Comparable<MSchedule> {
 
 	@Override
 	public String toString() {
+		return toStringNewServiceIdAndTripId();
+	}
+
+	public String toStringNewServiceIdAndTripId() {
 		StringBuilder sb = new StringBuilder(); //
 		sb.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.serviceId)).append(Constants.STRING_DELIMITER); // service ID
 		sb.append(Constants.COLUMN_SEPARATOR); //
@@ -60,9 +80,19 @@ public class MSchedule implements Comparable<MSchedule> {
 		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(this.departure); // departure
 		sb.append(Constants.COLUMN_SEPARATOR); //
+		if (DefaultAgencyTools.EXPORT_PATH_ID) {
+			if (this.arrivalBeforeDeparture > 0) {
+			}
+			sb.append(this.arrivalBeforeDeparture <= 0 ? Constants.EMPTY : this.arrivalBeforeDeparture); // arrival before departure
+			sb.append(Constants.COLUMN_SEPARATOR); //
+		}
+		if (DefaultAgencyTools.EXPORT_PATH_ID) {
+			sb.append(Constants.STRING_DELIMITER).append(this.pathId).append(Constants.STRING_DELIMITER); // original trip ID
+			sb.append(Constants.COLUMN_SEPARATOR); //
+		}
 		sb.append(this.headsignType < 0 ? Constants.EMPTY : this.headsignType); // HEADSIGN TYPE
 		sb.append(Constants.COLUMN_SEPARATOR); //
-		sb.append(Constants.STRING_DELIMITER)//
+		sb.append(Constants.STRING_DELIMITER) //
 				.append(this.headsignValue == null ? Constants.EMPTY : this.headsignValue) //
 				.append(Constants.STRING_DELIMITER); // HEADSIGN STRING
 		return sb.toString();
@@ -76,12 +106,54 @@ public class MSchedule implements Comparable<MSchedule> {
 			sb.append(this.departure - lastSchedule.departure); // departure
 		}
 		sb.append(Constants.COLUMN_SEPARATOR); //
-		sb.append(this.headsignType < 0 ? Constants.EMPTY : this.headsignType); // HEADSIGN TYPE
-		sb.append(Constants.COLUMN_SEPARATOR); //
-		sb.append(Constants.STRING_DELIMITER) //
-				.append(this.headsignValue == null ? Constants.EMPTY : this.headsignValue) //
-				.append(Constants.STRING_DELIMITER); // HEADSIGN STRING
+		if (DefaultAgencyTools.EXPORT_PATH_ID) {
+			if (this.arrivalBeforeDeparture > 0) {
+			}
+			sb.append(this.arrivalBeforeDeparture <= 0 ? Constants.EMPTY : this.arrivalBeforeDeparture); // arrival before departure
+			sb.append(Constants.COLUMN_SEPARATOR); //
+		}
+		if (DefaultAgencyTools.EXPORT_PATH_ID) {
+			sb.append(this.pathId); // original trip ID
+			sb.append(Constants.COLUMN_SEPARATOR); //
+		}
+		if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+			if (this.descentOnly) {
+				sb.append(MTrip.HEADSIGN_TYPE_DESCENT_ONLY); // HEADSIGN TYPE
+				sb.append(Constants.COLUMN_SEPARATOR); //
+				sb.append(Constants.STRING_DELIMITER) //
+						.append(Constants.EMPTY) //
+						.append(Constants.STRING_DELIMITER); // HEADSIGN STRING
+			} else {
+				sb.append(this.headsignType < 0 ? Constants.EMPTY : this.headsignType); // HEADSIGN TYPE
+				sb.append(Constants.COLUMN_SEPARATOR); //
+				sb.append(Constants.STRING_DELIMITER) //
+						.append(this.headsignValue == null ? Constants.EMPTY : this.headsignValue) //
+						.append(Constants.STRING_DELIMITER); // HEADSIGN STRING
+			}
+		} else {
+			if (this.headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
+				sb.append(MTrip.HEADSIGN_TYPE_STRING); // HEADSIGN TYPE
+				sb.append(Constants.COLUMN_SEPARATOR); //
+				sb.append(Constants.STRING_DELIMITER) //
+						.append("Descent Only") //
+						.append(Constants.STRING_DELIMITER); // HEADSIGN STRING
+			} else {
+				sb.append(this.headsignType < 0 ? Constants.EMPTY : this.headsignType); // HEADSIGN TYPE
+				sb.append(Constants.COLUMN_SEPARATOR); //
+				sb.append(Constants.STRING_DELIMITER) //
+						.append(this.headsignValue == null ? Constants.EMPTY : this.headsignValue) //
+						.append(Constants.STRING_DELIMITER); // HEADSIGN STRING
+			}
+		}
 		return sb.toString();
+	}
+
+	public boolean isDescentOnly() {
+		return this.descentOnly;
+	}
+
+	public void setDescentOnly(boolean descentOnly) {
+		this.descentOnly = descentOnly;
 	}
 
 	public boolean sameServiceIdAndTripId(MSchedule lastSchedule) {

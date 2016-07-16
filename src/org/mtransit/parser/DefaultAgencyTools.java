@@ -34,7 +34,20 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 3;
 	private static final int MIN_COVERAGE_TOTAL_IN_DAYS = 30;
 
-	private static final Integer OVERRIDE_DATE = null;
+	public static final boolean EXPORT_PATH_ID;
+	public static final boolean EXPORT_ORIGINAL_ID;
+	public static final boolean EXPORT_DESCENT_ONLY;
+	static {
+		EXPORT_PATH_ID = false;
+		EXPORT_ORIGINAL_ID = false;
+		EXPORT_DESCENT_ONLY = false;
+	}
+
+	private static final Integer OVERRIDE_DATE;
+	static {
+		OVERRIDE_DATE = null;
+	}
+
 
 	public static void main(String[] args) {
 		new DefaultAgencyTools().start(args);
@@ -116,7 +129,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return null;
 		}
 		if (WHITE.equalsIgnoreCase(gRoute.getRouteColor())) {
-			System.out.printf("\nERROR: invalid route color '%s'!\n", getAgencyRouteType());
+			System.out.printf("\nERROR: invalid route color for '%s'!\n", gRoute);
 			System.exit(-1);
 			return null;
 		}
@@ -203,6 +216,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public String getStopOriginalId(GStop gStop) {
+		return null; // only if not stop code or stop ID
+	}
+
+	@Override
 	public int getStopId(GStop gStop) {
 		try {
 			return Integer.parseInt(gStop.getStopId());
@@ -237,42 +255,48 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final int PRECISON_IN_SECONDS = 10;
 
 	@Override
-	public int getDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat, SimpleDateFormat mDateFormat) {
-		Integer departureTime = null;
-		if (StringUtils.isEmpty(gStopTime.getDepartureTime())) {
-			departureTime = extractDepartureTime(mRouteId, gStopTime, routeGTFS, gDateFormat, mDateFormat);
+	public Pair<Integer, Integer> getTimes(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat, SimpleDateFormat mDateFormat) {
+		if (StringUtils.isEmpty(gStopTime.getArrivalTime()) || StringUtils.isEmpty(gStopTime.getDepartureTime())) {
+			return extractTimes(mRouteId, gStopTime, routeGTFS, gDateFormat, mDateFormat);
 		} else {
-			departureTime = GSpec.parseTimeString(gStopTime.getDepartureTime());
+			return new Pair<Integer, Integer>(cleanExtraSeconds(GSpec.parseTimeString(gStopTime.getArrivalTime())),
+					cleanExtraSeconds(GSpec.parseTimeString(gStopTime.getDepartureTime())));
 		}
-		int extraSeconds = departureTime == null ? 0 : departureTime.intValue() % PRECISON_IN_SECONDS;
-		if (extraSeconds > 0) { // IF too precise DO
-			return cleanDepartureTime(departureTime, extraSeconds);
-		}
-		return departureTime; // GTFS standard
 	}
 
-	public static Integer extractDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat, SimpleDateFormat mDateFormat) {
-		Integer departureTime;
+	public static Pair<Integer, Integer> extractTimes(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat,
+			SimpleDateFormat mDateFormat) {
 		try {
-			long departureTimeInMs = extractDepartureTimeInMs(gStopTime, routeGTFS, gDateFormat);
+			Pair<Long, Long> timesInMs = extractTimeInMs(gStopTime, routeGTFS, gDateFormat);
+			long arrivalTimeInMs = timesInMs.first;
 			Calendar calendar = Calendar.getInstance();
+			calendar.setTimeInMillis(arrivalTimeInMs);
+			Integer arrivalTime = Integer.parseInt(mDateFormat.format(calendar.getTime()));
+			if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
+				arrivalTime += 240000;
+			}
+			long departureTimeInMs = timesInMs.second;
 			calendar.setTimeInMillis(departureTimeInMs);
-			departureTime = Integer.parseInt(mDateFormat.format(calendar.getTime()));
+			Integer departureTime = Integer.parseInt(mDateFormat.format(calendar.getTime()));
 			if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
 				departureTime += 240000;
 			}
-			return departureTime;
+			return new Pair<Integer, Integer>(cleanExtraSeconds(arrivalTime), cleanExtraSeconds(departureTime));
 		} catch (Exception e) {
-			System.out.printf("\nError while interpolating departure time for %s!\n", gStopTime);
+			System.out.printf("\nError while interpolating times for %s!\n", gStopTime);
 			e.printStackTrace();
 			System.exit(-1);
 			return null;
 		}
 	}
 
-	public static long extractDepartureTimeInMs(GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat) throws ParseException {
+	public static Pair<Long, Long> extractTimeInMs(GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat) throws ParseException {
+		String previousArrivalTime = null;
+		Integer previousArrivalTimeStopSequence = null;
 		String previousDepartureTime = null;
 		Integer previousDepartureTimeStopSequence = null;
+		String nextArrivalTime = null;
+		Integer nextArrivalTimeStopSequence = null;
 		String nextDepartureTime = null;
 		Integer nextDepartureTimeStopSequence = null;
 		for (GStopTime aStopTime : routeGTFS.getStopTimes(null, gStopTime.getTripId(), null, null)) {
@@ -287,6 +311,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 						previousDepartureTimeStopSequence = aStopTime.getStopSequence();
 					}
 				}
+				if (!StringUtils.isEmpty(aStopTime.getArrivalTime())) {
+					if (previousArrivalTime == null || previousArrivalTimeStopSequence == null || previousArrivalTimeStopSequence < aStopTime.getStopSequence()) {
+						previousArrivalTime = aStopTime.getArrivalTime();
+						previousArrivalTimeStopSequence = aStopTime.getStopSequence();
+					}
+				}
 			} else if (aStopTime.getStopSequence() > gStopTime.getStopSequence()) {
 				if (!StringUtils.isEmpty(aStopTime.getDepartureTime())) {
 					if (nextDepartureTime == null || nextDepartureTimeStopSequence == null || nextDepartureTimeStopSequence > aStopTime.getStopSequence()) {
@@ -294,55 +324,76 @@ public class DefaultAgencyTools implements GAgencyTools {
 						nextDepartureTimeStopSequence = aStopTime.getStopSequence();
 					}
 				}
+				if (!StringUtils.isEmpty(aStopTime.getArrivalTime())) {
+					if (nextArrivalTime == null || nextArrivalTimeStopSequence == null || nextArrivalTimeStopSequence > aStopTime.getStopSequence()) {
+						nextArrivalTime = aStopTime.getArrivalTime();
+						nextArrivalTimeStopSequence = aStopTime.getStopSequence();
+					}
+				}
 			}
 		}
+		long previousArrivalTimeInMs = gDateFormat.parse(previousArrivalTime).getTime();
 		long previousDepartureTimeInMs = gDateFormat.parse(previousDepartureTime).getTime();
+		long nextArrivalTimeInMs = gDateFormat.parse(nextArrivalTime).getTime();
 		long nextDepartureTimeInMs = gDateFormat.parse(nextDepartureTime).getTime();
-		long timeDiffInMs = nextDepartureTimeInMs - previousDepartureTimeInMs;
-		int nbStop = nextDepartureTimeStopSequence - previousDepartureTimeStopSequence;
-		long timeBetweenStopInMs = timeDiffInMs / nbStop;
-		return previousDepartureTimeInMs + (timeBetweenStopInMs * (gStopTime.getStopSequence() - previousDepartureTimeStopSequence));
+		long arrivalTimeDiffInMs = nextArrivalTimeInMs - previousArrivalTimeInMs;
+		long departureTimeDiffInMs = nextDepartureTimeInMs - previousDepartureTimeInMs;
+		int arrivalNbStop = nextArrivalTimeStopSequence - previousArrivalTimeStopSequence;
+		int departureNbStop = nextDepartureTimeStopSequence - previousDepartureTimeStopSequence;
+		long arrivalTimeBetweenStopInMs = arrivalTimeDiffInMs / arrivalNbStop;
+		long departureTimeBetweenStopInMs = departureTimeDiffInMs / departureNbStop;
+		long arrivalTime = previousArrivalTimeInMs + (arrivalTimeBetweenStopInMs * (gStopTime.getStopSequence() - previousArrivalTimeStopSequence));
+		long departureTime = previousDepartureTimeInMs + (departureTimeBetweenStopInMs * (gStopTime.getStopSequence() - previousDepartureTimeStopSequence));
+		return new Pair<Long, Long>(arrivalTime, departureTime);
 	}
 
-	private static final String CLEAN_DEPARTURE_TIME_FORMAT = "%02d";
-	private static final String CLEAN_DEPARTURE_TIME_LEADING_ZERO = "0";
-	private static final String CLEAN_DEPARTURE_TIME_DEFAULT_MINUTES = "00";
-	private static final String CLEAN_DEPARTURE_TIME_DEFAULT_SECONDS = "00";
+	private static int cleanExtraSeconds(Integer time) {
+		int extraSeconds = time == null ? 0 : time.intValue() % PRECISON_IN_SECONDS;
+		if (extraSeconds > 0) { // IF too precise DO
+			return cleanTime(time, extraSeconds);
+		}
+		return time; // GTFS standard
+	}
 
-	private int cleanDepartureTime(Integer departureTime, int extraSeconds) {
+	private static final String CLEAN_TIME_FORMAT = "%02d";
+	private static final String CLEAN_TIME_LEADING_ZERO = "0";
+	private static final String CLEAN_TIME_DEFAULT_MINUTES = "00";
+	private static final String CLEAN_TIME_DEFAULT_SECONDS = "00";
+
+	private static int cleanTime(Integer time, int extraSeconds) {
 		try {
-			String departureTimeS = String.valueOf(departureTime);
-			while (departureTimeS.length() < 6) {
-				departureTimeS = CLEAN_DEPARTURE_TIME_LEADING_ZERO + departureTimeS;
+			String timeS = String.valueOf(time);
+			while (timeS.length() < 6) {
+				timeS = CLEAN_TIME_LEADING_ZERO + timeS;
 			}
-			String newHours = departureTimeS.substring(0, 2);
-			String newMinutes = departureTimeS.substring(2, 4);
-			String newSeconds = departureTimeS.substring(4, 6);
+			String newHours = timeS.substring(0, 2);
+			String newMinutes = timeS.substring(2, 4);
+			String newSeconds = timeS.substring(4, 6);
 			int seconds = Integer.parseInt(newSeconds);
 			if (extraSeconds < 5) {
 				if (extraSeconds > seconds) {
-					newSeconds = CLEAN_DEPARTURE_TIME_DEFAULT_SECONDS;
+					newSeconds = CLEAN_TIME_DEFAULT_SECONDS;
 				} else {
-					newSeconds = String.format(CLEAN_DEPARTURE_TIME_FORMAT, seconds - extraSeconds);
+					newSeconds = String.format(CLEAN_TIME_FORMAT, seconds - extraSeconds);
 				}
 				return Integer.parseInt(newHours + newMinutes + newSeconds);
 			}
 			int secondsToAdd = PRECISON_IN_SECONDS - extraSeconds;
 			if (seconds + secondsToAdd < 60) {
-				newSeconds = String.format(CLEAN_DEPARTURE_TIME_FORMAT, seconds + secondsToAdd);
+				newSeconds = String.format(CLEAN_TIME_FORMAT, seconds + secondsToAdd);
 				return Integer.parseInt(newHours + newMinutes + newSeconds);
 			}
-			newSeconds = CLEAN_DEPARTURE_TIME_DEFAULT_SECONDS;
+			newSeconds = CLEAN_TIME_DEFAULT_SECONDS;
 			int minutes = Integer.parseInt(newMinutes);
 			if (minutes + 1 < 60) {
-				newMinutes = String.format(CLEAN_DEPARTURE_TIME_FORMAT, minutes + 1);
+				newMinutes = String.format(CLEAN_TIME_FORMAT, minutes + 1);
 				return Integer.parseInt(newHours + newMinutes + newSeconds);
 			}
-			newMinutes = CLEAN_DEPARTURE_TIME_DEFAULT_MINUTES;
+			newMinutes = CLEAN_TIME_DEFAULT_MINUTES;
 			newHours = String.valueOf(Integer.parseInt(newHours) + 1);
 			return Integer.parseInt(newHours + newMinutes + newSeconds);
 		} catch (Exception e) {
-			System.out.printf("\nError while cleaning departure time '%s' '%s' !\n", departureTime, extraSeconds);
+			System.out.printf("\nError while cleaning time '%s' '%s' !\n", time, extraSeconds);
 			e.printStackTrace();
 			System.exit(-1);
 			return -1;

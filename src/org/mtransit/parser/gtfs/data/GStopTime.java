@@ -13,18 +13,25 @@ public class GStopTime {
 	private String stop_id;
 	public static final String STOP_SEQUENCE = "stop_sequence";
 	private int stop_sequence;
+	public static final String ARRIVAL_TIME = "arrival_time";
+	private String arrival_time;
 	public static final String DEPARTURE_TIME = "departure_time";
 	private String departure_time;
 
 	public static final String STOP_HEADSIGN = "stop_headsign";
 	private String stop_headsign;
 
-	public GStopTime(String trip_id, String departure_time, String stop_id, int stop_sequence, String stop_headsign) {
+	public static final String PICKUP_TYPE = "pickup_type";
+	private int pickup_type;
+
+	public GStopTime(String trip_id, String arrival_time, String departure_time, String stop_id, int stop_sequence, String stop_headsign, int pickup_type) {
 		this.trip_id = trip_id;
+		this.arrival_time = arrival_time;
 		this.departure_time = departure_time;
 		this.stop_id = stop_id;
 		this.stop_sequence = stop_sequence;
 		this.stop_headsign = stop_headsign;
+		this.pickup_type = pickup_type;
 		this.uid = null;
 	}
 
@@ -40,12 +47,20 @@ public class GStopTime {
 		return trip_id;
 	}
 
+	public String getArrivalTime() {
+		return arrival_time;
+	}
+
 	public String getDepartureTime() {
 		return departure_time;
 	}
 
 	public String getStopHeadsign() {
 		return stop_headsign;
+	}
+
+	public int getPickupType() {
+		return pickup_type;
 	}
 
 	public boolean hasStopHeadsign() {
@@ -74,10 +89,13 @@ public class GStopTime {
 				.append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.stop_sequence).append(Constants.STRING_DELIMITER) //
 				.append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.arrival_time).append(Constants.STRING_DELIMITER) //
+				.append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.departure_time).append(Constants.STRING_DELIMITER) //
 				.append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.stop_headsign).append(Constants.STRING_DELIMITER) //
 				.append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.pickup_type).append(Constants.STRING_DELIMITER) //
 				.toString();
 	}
 }

@@ -2,6 +2,7 @@ package org.mtransit.parser.mt.data;
 
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
+import org.mtransit.parser.DefaultAgencyTools;
 
 public class MStop implements Comparable<MStop> {
 
@@ -13,9 +14,12 @@ public class MStop implements Comparable<MStop> {
 	private double lat;
 	private double lng;
 
-	public MStop(int id, String code, String name, double lat, double lng) {
+	private String originalId;
+
+	public MStop(int id, String code, String originalId, String name, double lat, double lng) {
 		this.id = id;
 		this.code = code;
+		this.originalId = originalId;
 		this.name = name;
 		this.lat = lat;
 		this.lng = lng;
@@ -51,10 +55,17 @@ public class MStop implements Comparable<MStop> {
 
 	@Override
 	public String toString() {
+		return printString();
+	}
+	public String printString() {
 		StringBuilder sb = new StringBuilder(); //
 		sb.append(this.id); // ID
 		sb.append(Constants.COLUMN_SEPARATOR); //
-		sb.append(Constants.STRING_DELIMITER).append(this.code == null ? Constants.EMPTY : this.code).append(Constants.STRING_DELIMITER);// code
+		sb.append(Constants.STRING_DELIMITER).append(this.code == null ? Constants.EMPTY : this.code).append(Constants.STRING_DELIMITER); // code
+		if (DefaultAgencyTools.EXPORT_ORIGINAL_ID) {
+			sb.append(Constants.COLUMN_SEPARATOR); //
+			sb.append(Constants.STRING_DELIMITER).append(this.originalId == null ? Constants.EMPTY : this.originalId).append(Constants.STRING_DELIMITER); //
+		}
 		sb.append(Constants.COLUMN_SEPARATOR); //
 		sb.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.name)).append(Constants.STRING_DELIMITER); // name
 		sb.append(Constants.COLUMN_SEPARATOR); //
@@ -85,6 +96,9 @@ public class MStop implements Comparable<MStop> {
 			return false;
 		}
 		if (this.lng != o.lng) {
+			return false;
+		}
+		if (this.originalId != o.originalId) {
 			return false;
 		}
 		return true;

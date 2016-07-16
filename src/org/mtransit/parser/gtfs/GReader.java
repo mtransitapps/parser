@@ -21,6 +21,7 @@ import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
 import org.mtransit.parser.gtfs.data.GFrequency;
+import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
@@ -235,8 +236,10 @@ public class GReader {
 
 	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			GStopTime gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.DEPARTURE_TIME).trim(), line.get(GStopTime.STOP_ID).trim(),
-					Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()), line.get(GStopTime.STOP_HEADSIGN));
+			String pickupTypeS = line.get(GStopTime.PICKUP_TYPE);
+			GStopTime gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.ARRIVAL_TIME).trim(),
+					line.get(GStopTime.DEPARTURE_TIME).trim(), line.get(GStopTime.STOP_ID).trim(), Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()),
+					line.get(GStopTime.STOP_HEADSIGN), StringUtils.isEmpty(pickupTypeS) ? GPickupType.REGULAR.intValue() : Integer.parseInt(pickupTypeS.trim()));
 			if (agencyTools.excludeStopTime(gStopTime)) {
 				return;
 			}

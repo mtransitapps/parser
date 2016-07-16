@@ -11,6 +11,10 @@ public enum GPickupType {
 		this.id = id;
 	}
 
+	public int intValue() {
+		return this.id;
+	}
+
 	public static GPickupType parse(int id) {
 		if (REGULAR.id == id) {
 			return REGULAR;

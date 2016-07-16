@@ -46,12 +46,12 @@ public class GTripStop {
 
 	@Override
 	public String toString() {
-		return new StringBuilder() //
+		return new StringBuilder(GTripStop.class.getSimpleName()).append('{') //
 				.append(Constants.STRING_DELIMITER).append(this.uid).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.stop_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.stop_sequence).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.toString();
+				.append('}').toString();
 	}
 
 	public static String getUID(String trip_uid, String stop_id, int stop_sequence) {

@@ -278,7 +278,8 @@ public class GSpec {
 			}
 			ArrayList<GFrequency> tripFrequencies = this.tripIdFrequencies.get(tripId);
 			ArrayList<GStopTime> tripStopTimes = this.tripIdStopTimes.get(tripId);
-			long mRouteId = agencyTools.getRouteId(this.routeIdRoutes.get(this.tripIdRouteId.get(tripId)));
+			String routeId = this.tripIdRouteId.get(tripId);
+			long mRouteId = agencyTools.getRouteId(this.routeIdRoutes.get(routeId));
 			ArrayList<GStopTime> newGStopTimes = new ArrayList<GStopTime>();
 			Calendar stopTimeCal = Calendar.getInstance();
 			long frequencyStartInMs = -1l;
@@ -292,8 +293,7 @@ public class GSpec {
 								gStopTimeIncInSec.get(gStopTime.getUID()));
 						System.exit(-1);
 					}
-					String departureTime = getDepartureTime(gDateFormat, mRouteId, gStopTime);
-					stopTimeCal.setTime(gDateFormat.parse(departureTime));
+					getDepartureTimeCal(stopTimeCal, gDateFormat, mRouteId, gStopTime);
 					int stopTimeInSec = (int) TimeUnit.MILLISECONDS.toSeconds(stopTimeCal.getTimeInMillis());
 					gStopTimeIncInSec.put(gStopTime.getUID(), previousStopTimeInSec == null ? 0 : stopTimeInSec - previousStopTimeInSec);
 					previousStopTimeInSec = stopTimeInSec;
@@ -313,8 +313,8 @@ public class GSpec {
 						for (GStopTime gStopTime : tripStopTimes) {
 							stopTimeCal.add(Calendar.SECOND, gStopTimeIncInSec.get(gStopTime.getUID()));
 							String newDepartureTimeS = getNewDepartureTime(gDateFormat, stopTimeCal);
-							GStopTime newGStopTime = new GStopTime(tripId, newDepartureTimeS, gStopTime.getStopId(), gStopTime.getStopSequence(),
-									gStopTime.getStopHeadsign());
+							GStopTime newGStopTime = new GStopTime(tripId, newDepartureTimeS, newDepartureTimeS, gStopTime.getStopId(),
+									gStopTime.getStopSequence(), gStopTime.getStopHeadsign(), GFrequency.DEFAULT_PICKUP_TYPE);
 							newGStopTimes.add(newGStopTime);
 						}
 						firstStopTimeInMs += TimeUnit.SECONDS.toMillis(gFrequency.getHeadwaySecs());
@@ -334,19 +334,14 @@ public class GSpec {
 		System.out.printf("\n- Stop times: %d (after) (new: %d)", this.stopTimesCount, st);
 	}
 
-	private String getDepartureTime(SimpleDateFormat gDateFormat, long mRouteId, GStopTime gStopTime) throws ParseException {
-		String departureTime = gStopTime.getDepartureTime();
-		if (StringUtils.isEmpty(departureTime)) {
-			long departureTimeInMs = DefaultAgencyTools.extractDepartureTimeInMs(gStopTime, getRouteGTFS(mRouteId), gDateFormat);
-			Calendar calendar = Calendar.getInstance();
+	private Calendar getDepartureTimeCal(Calendar calendar, SimpleDateFormat gDateFormat, long mRouteId, GStopTime gStopTime) throws ParseException {
+		if (StringUtils.isEmpty(gStopTime.getDepartureTime())) {
+			long departureTimeInMs = DefaultAgencyTools.extractTimeInMs(gStopTime, getRouteGTFS(mRouteId), gDateFormat).second;
 			calendar.setTimeInMillis(departureTimeInMs);
-			departureTime = gDateFormat.format(calendar.getTime());
-			if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
-				departureTime = (Integer.valueOf(departureTime.substring(0, departureTime.length() - 6)) + 24)
-						+ departureTime.substring(departureTime.length() - 6);
-			}
+		} else {
+			calendar.setTime(gDateFormat.parse(gStopTime.getDepartureTime()));
 		}
-		return departureTime;
+		return calendar;
 	}
 
 	private String getNewDepartureTime(SimpleDateFormat gDateFormat, Calendar stopTimeCal) {
@@ -410,8 +405,10 @@ public class GSpec {
 		try {
 			HashSet<String> routeTripServiceIds = new HashSet<String>();
 			for (String gRouteId : this.routeIdRoutes.keySet()) {
-				for (GTrip gTrip : this.routeIdTrips.get(gRouteId)) {
-					routeTripServiceIds.add(gTrip.getServiceId());
+				if (this.routeIdTrips.containsKey(gRouteId)) {
+					for (GTrip gTrip : this.routeIdTrips.get(gRouteId)) {
+						routeTripServiceIds.add(gTrip.getServiceId());
+					}
 				}
 			}
 			Iterator<GCalendar> itGCalendar = this.calendars.iterator();
@@ -433,7 +430,7 @@ public class GSpec {
 				}
 			}
 		} catch (Exception e) {
-			System.out.printf("\nError while rmoving more excluded service IDs!\n");
+			System.out.printf("\nError while removing more excluded service IDs!\n");
 			e.printStackTrace();
 			System.exit(-1);
 		}
@@ -471,7 +468,7 @@ public class GSpec {
 					}
 				}
 				if (!tripServed) {
-					System.out.printf("\n%s: Skip GTFS route '%s' because no usefull trips.", mRouteId, gRoute);
+					System.out.printf("\n%s: Skip GTFS route '%s' because no useful trips.", mRouteId, gRoute);
 					continue;
 				}
 			}

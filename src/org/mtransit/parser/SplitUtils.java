@@ -33,15 +33,15 @@ public class SplitUtils {
 		long tidTowardsStop0 = rts.getTripId(0);
 		long tidTowardsStop1 = rts.getTripId(1);
 		HashSet<String> allBeforeAfterStopIds = rts.getAllBeforeAfterStopIds();
-		String beforeAfter = getBeforeAfterStopId(routeGTFS, mRoute, gTrip, gTripStop, stopIdsTowards0, stopIdsTowards1, stopIdsTowardsBoth10,
+		String beforeAfterStopIds = getBeforeAfterStopId(routeGTFS, mRoute, gTrip, gTripStop, stopIdsTowards0, stopIdsTowards1, stopIdsTowardsBoth10,
 				stopIdsTowardsBoth01, allBeforeAfterStopIds);
-		if (stopIdsTowards0.contains(beforeAfter)) {
+		if (stopIdsTowards0.contains(beforeAfterStopIds)) {
 			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop0 }, new Integer[] { gTripStop.getStopSequence() });
-		} else if (stopIdsTowards1.contains(beforeAfter)) {
+		} else if (stopIdsTowards1.contains(beforeAfterStopIds)) {
 			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop1 }, new Integer[] { gTripStop.getStopSequence() });
-		} else if (stopIdsTowardsBoth10.contains(beforeAfter)) {
+		} else if (stopIdsTowardsBoth10.contains(beforeAfterStopIds)) {
 			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop1, tidTowardsStop0 }, new Integer[] { 1, gTripStop.getStopSequence() });
-		} else if (stopIdsTowardsBoth01.contains(beforeAfter)) {
+		} else if (stopIdsTowardsBoth01.contains(beforeAfterStopIds)) {
 			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop0, tidTowardsStop1 }, new Integer[] { 1, gTripStop.getStopSequence() });
 		}
 		System.out.printf("\n%s: Unexptected trip stop to split %s.\n", mRoute.getId(), gTripStop);
@@ -123,11 +123,15 @@ public class SplitUtils {
 		for (GRoute gRoute : routeGTFS.getRoutes(mRouteId)) {
 			for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteId())) {
 				ArrayList<Pair<String, Integer>> gTripStops = new ArrayList<Pair<String, Integer>>();
-				for (GStopTime gStopTime : routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null)) {
-					if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
-						continue;
+				try {
+					for (GStopTime gStopTime : routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null)) {
+						if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
+							continue;
+						}
+						gTripStops.add(new Pair<String, Integer>(gStopTime.getStopId(), gStopTime.getStopSequence()));
 					}
-					gTripStops.add(new Pair<String, Integer>(gStopTime.getStopId(), gStopTime.getStopSequence()));
+				} catch (Exception e) {
+					System.out.printf("\nError while listing stop times for trip ID '%s'!", gTrip.getTripId());
 				}
 				sortGTripStopsBySequence(gTripStops);
 				setGTripStopSequence(gTripStops);
@@ -445,7 +449,7 @@ public class SplitUtils {
 			int ts2StopIndex = sortedStopIds.indexOf(ts2GStop.getStopId());
 			if (ts1StopIndex < 0 || ts2StopIndex < 0) {
 				System.out.printf("\n%s: Unexpected stop IDs %s AND/OR %s", routeId, ts1GStop.getStopId(), ts2GStop.getStopId());
-				System.out.printf("\n%s: Not in sorted list: %s", routeId, sortedStopIds);
+				System.out.printf("\n%s: Not in sorted ID list: %s", routeId, sortedStopIds);
 				System.out.printf("\n%s: 1: %s", routeId, list1);
 				System.out.printf("\n%s: 2: %s", routeId, list2);
 				System.out.printf("\n");

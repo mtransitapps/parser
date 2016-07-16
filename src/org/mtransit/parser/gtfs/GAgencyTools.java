@@ -63,6 +63,8 @@ public interface GAgencyTools {
 
 	String getStopCode(GStop gStop);
 
+	String getStopOriginalId(GStop gStop);
+
 	boolean excludeStop(GStop gStop);
 
 	// CALENDAR
@@ -72,7 +74,7 @@ public interface GAgencyTools {
 	boolean excludeCalendarDate(GCalendarDate gCalendarDate);
 
 	// SCHEDULE
-	int getDepartureTime(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat, SimpleDateFormat mDateFormat);
+	Pair<Integer, Integer> getTimes(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat, SimpleDateFormat mDateFormat);
 
 	// FREQUENCY
 	int getStartTime(GFrequency gFrequency);

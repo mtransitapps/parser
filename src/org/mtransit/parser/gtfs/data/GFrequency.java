@@ -7,6 +7,8 @@ public class GFrequency {
 
 	public static final String FILENAME = "frequencies.txt";
 
+	public static final int DEFAULT_PICKUP_TYPE = 0; // Regularly scheduled pickup
+
 	public static final String TRIP_ID = "trip_id";
 	private String trip_id;
 	public static final String START_TIME = "start_time";

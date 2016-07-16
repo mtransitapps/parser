@@ -2,6 +2,7 @@ package org.mtransit.parser.mt.data;
 
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
+import org.mtransit.parser.DefaultAgencyTools;
 
 public class MTrip implements Comparable<MTrip> {
 
@@ -9,8 +10,9 @@ public class MTrip implements Comparable<MTrip> {
 	public static final int HEADSIGN_TYPE_DIRECTION = 1;
 	public static final int HEADSIGN_TYPE_INBOUND = 2;
 	public static final int HEADSIGN_TYPE_STOP_ID = 3;
+	public static final int HEADSIGN_TYPE_DESCENT_ONLY = 4;
 
-	private int headsignType = HEADSIGN_TYPE_STRING; // 0 = String, 1 = direction, 2= inbound, 3=stopId
+	private int headsignType = HEADSIGN_TYPE_STRING; // 0=string, 1=direction, 2=inbound, 3=stopId, 4=descent-only
 	private String headsignValue = Constants.EMPTY;
 	private int headsignId = 0;
 	private long routeId;
@@ -74,6 +76,15 @@ public class MTrip implements Comparable<MTrip> {
 		this.headsignValue = String.valueOf(stop.getId());
 		this.idString = null; // reset
 		this.headsignId = stop.getId();
+		this.id = -1; // reset
+		return this;
+	}
+
+	public MTrip setHeadsignDescentOnly() {
+		this.headsignType = HEADSIGN_TYPE_DESCENT_ONLY;
+		this.headsignValue = null;
+		this.idString = null; // reset
+		this.headsignId = 0;
 		this.id = -1; // reset
 		return this;
 	}
@@ -176,15 +187,34 @@ public class MTrip implements Comparable<MTrip> {
 
 	@Override
 	public String toString() {
-		return new StringBuilder() //
-				.append(getId()) // ID
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(this.headsignType) // HEADSIGN TYPE
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.headsignValue)).append(Constants.STRING_DELIMITER) // HEADSIGN STRING
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(this.routeId) // ROUTE ID
-				.toString();
+		return printString();
+	}
+
+	public String printString() {
+		StringBuilder sb = new StringBuilder(); //
+		sb.append(getId()); // ID
+		sb.append(Constants.COLUMN_SEPARATOR); //
+		if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+			sb.append(this.headsignType); // HEADSIGN TYPE
+			sb.append(Constants.COLUMN_SEPARATOR); //
+			sb.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.headsignValue)).append(Constants.STRING_DELIMITER); // HEADSIGN STRING
+			sb.append(Constants.COLUMN_SEPARATOR); //
+		} else {
+			if (this.headsignType == HEADSIGN_TYPE_DESCENT_ONLY) {
+				sb.append(HEADSIGN_TYPE_STRING); // HEADSIGN TYPE
+				sb.append(Constants.COLUMN_SEPARATOR); //
+				sb.append(Constants.STRING_DELIMITER).append(CleanUtils.escape("Descent Only")).append(Constants.STRING_DELIMITER); // HEADSIGN STRING
+				sb.append(Constants.COLUMN_SEPARATOR); //
+			} else {
+				sb.append(this.headsignType); // HEADSIGN TYPE
+				sb.append(Constants.COLUMN_SEPARATOR); //
+				sb.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.headsignValue)).append(Constants.STRING_DELIMITER); // HEADSIGN STRING
+				sb.append(Constants.COLUMN_SEPARATOR); //
+			}
+
+		}
+		sb.append(this.routeId); // ROUTE ID
+		return sb.toString();
 	}
 
 	@Override
