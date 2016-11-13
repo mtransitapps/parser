@@ -89,6 +89,18 @@ public final class Utils {
 		return true;
 	}
 
+	public static boolean isLettersOnly(CharSequence str, boolean allowWhitespace) {
+		final int len = str.length();
+		for (int i = 0; i < len; i++) {
+			if (!Character.isLetter(str.charAt(i))) {
+				if (!allowWhitespace || !Character.isWhitespace(str.charAt(i))) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	public static boolean isUppercaseOnly(CharSequence str, boolean allowWhitespace, boolean checkAZonly) {
 		final int len = str.length();
 		for (int i = 0; i < len; i++) {

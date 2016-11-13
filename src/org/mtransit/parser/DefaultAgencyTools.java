@@ -65,7 +65,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		gtfs.splitByRouteId(this);
 		gtfs.clearRawData();
 		MSpec mSpec = MGenerator.generateMSpec(gtfs, this);
-		MGenerator.dumpFiles(mSpec, args[1], args[2]);
+		MGenerator.dumpFiles(mSpec, args[0], args[1], args[2]);
 		System.out.printf("\nGenerating agency data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
@@ -558,6 +558,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 						}
 					}
 					if (newDates) {
+						continue;
 					}
 					if (diffLowerThan(DATE_FORMAT, c, startDate, endDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS)) {
 						endDate = incDateDays(DATE_FORMAT, c, endDate, 1); // end++

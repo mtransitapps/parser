@@ -7,8 +7,14 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,9 +25,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.GAgencyTools;
@@ -157,7 +165,7 @@ public class MGenerator {
 	private static final String GTFS_RTS_TRIP_STOPS = "gtfs_rts_trip_stops";
 	private static final String GTFS_RTS_STOPS = "gtfs_rts_stops";
 
-	public static void dumpFiles(MSpec mSpec, String dumpDir, final String fileBase) {
+	public static void dumpFiles(MSpec mSpec, String gtfsFile, String dumpDir, final String fileBase) {
 		long start = System.currentTimeMillis();
 		final File dumpDirF = new File(dumpDir);
 		if (!dumpDirF.exists()) {
@@ -189,7 +197,9 @@ public class MGenerator {
 			if (ow != null) {
 				try {
 					ow.close();
-				} catch (IOException e) {
+				} catch (IOException ioe) {
+					System.out.printf("\nI/O Error while closing service dates file!\n");
+					ioe.printStackTrace();
 				}
 			}
 		}
@@ -243,7 +253,9 @@ public class MGenerator {
 				if (ow != null) {
 					try {
 						ow.close();
-					} catch (IOException e) {
+					} catch (IOException ioe) {
+						System.out.printf("\nI/O Error while closing file for stop '%s'!\n", stopId);
+						ioe.printStackTrace();
 					}
 				}
 			}
@@ -287,7 +299,9 @@ public class MGenerator {
 				if (ow != null) {
 					try {
 						ow.close();
-					} catch (IOException e) {
+					} catch (IOException ioe) {
+						System.out.printf("\nI/O Error while closing frequency file!\n");
+						ioe.printStackTrace();
 					}
 				}
 			}
@@ -308,7 +322,9 @@ public class MGenerator {
 			if (ow != null) {
 				try {
 					ow.close();
-				} catch (IOException e) {
+				} catch (IOException ioe) {
+					System.out.printf("\nI/O Error while closing route file!\n");
+					ioe.printStackTrace();
 				}
 			}
 		}
@@ -328,7 +344,9 @@ public class MGenerator {
 			if (ow != null) {
 				try {
 					ow.close();
-				} catch (IOException e) {
+				} catch (IOException ioe) {
+					System.out.printf("\nI/O Error while closing trip file!\n");
+					ioe.printStackTrace();
 				}
 			}
 		}
@@ -348,7 +366,9 @@ public class MGenerator {
 			if (ow != null) {
 				try {
 					ow.close();
-				} catch (IOException e) {
+				} catch (IOException ioe) {
+					System.out.printf("\nI/O Error while closing trip stops file!\n");
+					ioe.printStackTrace();
 				}
 			}
 		}
@@ -385,13 +405,90 @@ public class MGenerator {
 			if (ow != null) {
 				try {
 					ow.close();
-				} catch (IOException e) {
+				} catch (IOException ioe) {
+					System.out.printf("\nI/O Error while closing stop file!\n");
+					ioe.printStackTrace();
 				}
 			}
 		}
 		dumpValues(dumpDirF, mSpec, minLat, maxLat, minLng, maxLng);
 		dumpStoreListing(dumpDirF, minDate, maxDate);
+		bumpDBVersion(dumpDirF, gtfsFile);
 		System.out.printf("\nWriting files (%s)... DONE in %s.", dumpDirF.toURI(), Utils.getPrettyDuration(System.currentTimeMillis() - start));
+	}
+
+	private static final String GTFS_RTS_VALUES_XML = "gtfs_rts_values.xml";
+
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+
+	private static final Pattern RTS_DB_VERSION_REGEX = Pattern.compile("((<integer name=\"gtfs_rts_db_version\">)([\\d]+)(</integer>))",
+			Pattern.CASE_INSENSITIVE);
+	private static final String RTS_DB_VERSION_REPLACEMENT = "$2%s$4";
+
+	private static void bumpDBVersion(File dumpDirF, String gtfsFile) {
+		System.out.printf("\nBumping DB version...");
+		BufferedWriter ow = null;
+		String lastModifiedTimeDateS = getLastModified(gtfsFile);
+		if (StringUtils.isEmpty(lastModifiedTimeDateS)) {
+			System.out.printf("\nBumping DB version... SKIP (error while reading last modified time)");
+			return;
+		}
+		int lastModifiedTimeDateI = Integer.parseInt(lastModifiedTimeDateS);
+		try {
+			File dumpDirResF = dumpDirF.getParentFile();
+			File valuesDirF = new File(dumpDirResF, VALUES);
+			File gtfsRtsValuesXmlF = new File(valuesDirF, GTFS_RTS_VALUES_XML);
+			String content = new String(Files.readAllBytes(gtfsRtsValuesXmlF.toPath()), StandardCharsets.UTF_8);
+			Matcher matcher = RTS_DB_VERSION_REGEX.matcher(content);
+			if (!matcher.find() || matcher.groupCount() < 4) {
+				System.out.printf("\nBumping DB version... SKIP (error while reading current DB version)");
+				return;
+			}
+			String currentRtsDbVersion = matcher.group(3);
+			String currentLastModifiedTimeS = currentRtsDbVersion.substring(0, 8);
+			int currentLastModifiedTimeI = Integer.parseInt(currentLastModifiedTimeS);
+			if (lastModifiedTimeDateI <= currentLastModifiedTimeI) {
+				System.out.printf("\nBumping DB version... SKIP (current DB version '%s' NOT older than last modified date '%s')", currentRtsDbVersion,
+						lastModifiedTimeDateS);
+				return;
+			}
+			while (currentRtsDbVersion.length() > lastModifiedTimeDateS.length()) {
+				lastModifiedTimeDateS = lastModifiedTimeDateS + "0";
+			}
+			String newContent = RTS_DB_VERSION_REGEX.matcher(content).replaceAll(String.format(RTS_DB_VERSION_REPLACEMENT, lastModifiedTimeDateS));
+			ow = new BufferedWriter(new FileWriter(gtfsRtsValuesXmlF));
+			ow.write(newContent);
+			System.out.printf("\nBumping DB version... DONE (new current DB version '%s')", lastModifiedTimeDateS);
+		} catch (IOException ioe) {
+			System.out.printf("\nI/O Error while bumping DB version!\n");
+			ioe.printStackTrace();
+			System.exit(-1);
+		} finally {
+			if (ow != null) {
+				try {
+					ow.close();
+				} catch (IOException ioe) {
+					System.out.printf("\nI/O Error while bumping DB version!\n");
+					ioe.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private static String getLastModified(String gtfsFile) {
+		try {
+			Path gtfsFileF = new File(gtfsFile).toPath();
+			BasicFileAttributes attr = Files.readAttributes(gtfsFileF, BasicFileAttributes.class);
+			FileTime lastModifiedTime = attr.lastModifiedTime();
+			long lastModifiedTimeInMs = lastModifiedTime.toMillis();
+			Calendar lastModifiedTimeDate = Calendar.getInstance();
+			lastModifiedTimeDate.setTimeInMillis(lastModifiedTimeInMs);
+			return DATE_FORMAT.format(lastModifiedTimeDate.getTime());
+		} catch (IOException ioe) {
+			System.out.printf("\nI/O Error while writing values file!\n");
+			ioe.printStackTrace();
+			return null;
+		}
 	}
 
 	private static final String VALUES = "values";
@@ -449,7 +546,9 @@ public class MGenerator {
 			if (ow != null) {
 				try {
 					ow.close();
-				} catch (IOException e) {
+				} catch (IOException ioe) {
+					System.out.printf("\nI/O Error while closing values file!\n");
+					ioe.printStackTrace();
 				}
 			}
 		}
@@ -507,15 +606,17 @@ public class MGenerator {
 										SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(minDate))),
 										SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
-			} catch (Exception e) {
+			} catch (Exception ioe) {
 				System.out.printf("\nError while writing store listing files!\n");
-				e.printStackTrace();
+				ioe.printStackTrace();
 				System.exit(-1);
 			} finally {
 				if (ow != null) {
 					try {
 						ow.close();
-					} catch (IOException e) {
+					} catch (IOException ioe) {
+						System.out.printf("\nError while closing store listing files!\n");
+						ioe.printStackTrace();
 					}
 				}
 			}
@@ -533,15 +634,17 @@ public class MGenerator {
 								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(minDate))),
 								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
-			} catch (Exception e) {
+			} catch (Exception ioe) {
 				System.out.printf("\nError while writing store listing files!\n");
-				e.printStackTrace();
+				ioe.printStackTrace();
 				System.exit(-1);
 			} finally {
 				if (ow != null) {
 					try {
 						ow.close();
-					} catch (IOException e) {
+					} catch (IOException ioe) {
+						System.out.printf("\nError while closing store listing files!\n");
+						ioe.printStackTrace();
 					}
 				}
 			}
