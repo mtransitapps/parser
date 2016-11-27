@@ -230,6 +230,13 @@ public final class CleanUtils {
 		return string;
 	}
 
+	private static final Pattern ID_MERGED = Pattern.compile("(([0-9]*)_merged_([0-9]*))", Pattern.CASE_INSENSITIVE);
+	private static final String ID_MERGED_REPLACEMENT = "$2";
+
+	public static String cleanMergedID(String mergedId) {
+		return ID_MERGED.matcher(mergedId).replaceAll(ID_MERGED_REPLACEMENT);
+	}
+
 	private static final String REGEX_START_END = "((^|\\W){1}(%s)(\\W|$){1})";
 	private static final String REGEX_START_END_REPLACEMENT = "$2%s$4";
 

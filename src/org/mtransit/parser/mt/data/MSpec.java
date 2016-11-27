@@ -27,6 +27,15 @@ public class MSpec {
 		this.routeFrequencies = routeFrequencies;
 	}
 
+	public boolean isValid() {
+		return hasAgencies() && hasServiceDates() && hasRoutes() && hasTrips() && hasTripStops() && hasStops() //
+				&& (hasStopSchedules() || hasRouteFrequencies());
+	}
+
+	public boolean hasAgencies() {
+		return agencies != null && agencies.size() > 0;
+	}
+
 	public ArrayList<MAgency> getAgencies() {
 		return agencies;
 	}
@@ -43,6 +52,10 @@ public class MSpec {
 		return stops != null && stops.size() > 0;
 	}
 
+	public boolean hasRoutes() {
+		return routes != null && routes.size() > 0;
+	}
+
 	public ArrayList<MRoute> getRoutes() {
 		return routes;
 	}
@@ -51,12 +64,20 @@ public class MSpec {
 		return routes != null && routes.size() > 0 ? routes.get(0) : null;
 	}
 
+	public boolean hasTrips() {
+		return trips != null && trips.size() > 0;
+	}
+
 	public ArrayList<MTrip> getTrips() {
 		return trips;
 	}
 
 	public ArrayList<MTripStop> getTripStops() {
 		return tripStops;
+	}
+
+	public boolean hasTripStops() {
+		return tripStops != null && tripStops.size() > 0;
 	}
 
 	public ArrayList<MServiceDate> getServiceDates() {
@@ -85,5 +106,19 @@ public class MSpec {
 
 	public static final SimpleDateFormat getNewTimeFormatInstance() {
 		return new SimpleDateFormat("HHmmss");
+	}
+
+	@Override
+	public String toString() {
+		return MSpec.class.getSimpleName() + "{" //
+				+ "agencies:" + agencies + "," //
+				+ "serviceDates:" + serviceDates + "," //
+				+ "routes:" + routes + "," //
+				+ "trips:" + trips + "," //
+				+ "tripStops:" + tripStops + "," //
+				+ "stops:" + stops + "," //
+				+ "stopSchedules:" + stopSchedules + "," //
+				+ "routeFrequencies:" + routeFrequencies + "," //
+				+ "}";
 	}
 }

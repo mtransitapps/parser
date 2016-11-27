@@ -166,6 +166,11 @@ public class MGenerator {
 	private static final String GTFS_RTS_STOPS = "gtfs_rts_stops";
 
 	public static void dumpFiles(MSpec mSpec, String gtfsFile, String dumpDir, final String fileBase) {
+		if (!mSpec.isValid()) {
+			System.out.printf("\nERROR: Generated data invalid (agencies:%s)!\n", mSpec);
+			System.exit(-1);
+			return;
+		}
 		long start = System.currentTimeMillis();
 		final File dumpDirF = new File(dumpDir);
 		if (!dumpDirF.exists()) {
