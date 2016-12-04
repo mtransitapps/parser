@@ -44,6 +44,11 @@ public class SplitUtils {
 		} else if (stopIdsTowardsBoth01.contains(beforeAfterStopIds)) {
 			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop0, tidTowardsStop1 }, new Integer[] { 1, gTripStop.getStopSequence() });
 		}
+		System.out.printf("\n%s: beforeAfterStopIds: %s", mRoute.getId(), beforeAfterStopIds);
+		System.out.printf("\n%s: stopIdsTowards0: %s", mRoute.getId(), stopIdsTowards0);
+		System.out.printf("\n%s: stopIdsTowards1: %s", mRoute.getId(), stopIdsTowards1);
+		System.out.printf("\n%s: stopIdsTowardsBoth10: %s", mRoute.getId(), stopIdsTowardsBoth10);
+		System.out.printf("\n%s: stopIdsTowardsBoth01: %s", mRoute.getId(), stopIdsTowardsBoth01);
 		System.out.printf("\n%s: Unexptected trip stop to split %s.\n", mRoute.getId(), gTripStop);
 		System.exit(-1);
 		return null;
@@ -94,6 +99,17 @@ public class SplitUtils {
 		if (beforeAfterStopIdCandidate != null) {
 			return beforeAfterStopIdCandidate;
 		}
+		System.out.printf("\n%s: beforeAfterStopIdCandidate: %s", mRoute.getId(), beforeAfterStopIdCandidate); // DEBUG
+		sortGTripStopsBySequence(gTripStops); // DEBUG
+		System.out.printf("\n%s: gTripStops: %s", mRoute.getId(), gTripStops); // DEBUG
+		System.out.printf("\n%s: beforeStopIds: %s", mRoute.getId(), beforeStopIds);
+		System.out.printf("\n%s: afterStopIds: %s", mRoute.getId(), afterStopIds);
+		System.out.printf("\n%s: max sequence: %s", mRoute.getId(), gStopMaxSequence);
+		System.out.printf("\n%s: gTripStop: %s", mRoute.getId(), gTripStop);
+		System.out.printf("\n%s: stopIdsTowards0: %s", mRoute.getId(), stopIdsTowards0);
+		System.out.printf("\n%s: stopIdsTowards1: %s", mRoute.getId(), stopIdsTowards1);
+		System.out.printf("\n%s: stopIdsTowardsBoth10: %s", mRoute.getId(), stopIdsTowardsBoth10);
+		System.out.printf("\n%s: stopIdsTowardsBoth01: %s", mRoute.getId(), stopIdsTowardsBoth01);
 		listRouteTripStops(mRoute.getId(), routeGTFS);
 		System.out.printf("\n%s: Unexpected trip (befores:%s|afters:%s) %s.\n", mRoute.getId(), beforeStopIds, afterStopIds, gTrip);
 		System.exit(-1);
@@ -119,7 +135,8 @@ public class SplitUtils {
 	}
 
 	public static void listRouteTripStops(long mRouteId, GSpec routeGTFS) {
-		HashSet<String> gTripStopsS = new HashSet<String>();
+		HashSet<ArrayList<Pair<String, Integer>>> gTripStopsS2 = new HashSet<ArrayList<Pair<String, Integer>>>();
+		HashMap<String, String> firstLastStopIdsName = new HashMap<String, String>();
 		for (GRoute gRoute : routeGTFS.getRoutes(mRouteId)) {
 			for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteId())) {
 				ArrayList<Pair<String, Integer>> gTripStops = new ArrayList<Pair<String, Integer>>();
@@ -135,13 +152,60 @@ public class SplitUtils {
 				}
 				sortGTripStopsBySequence(gTripStops);
 				setGTripStopSequence(gTripStops);
-				gTripStopsS.add(gTripStops.toString());
+				addFistLastStopIdName(routeGTFS, firstLastStopIdsName, gTripStops, 0);
+				addFistLastStopIdName(routeGTFS, firstLastStopIdsName, gTripStops, gTripStops.size() - 1);
+				gTripStopsS2.add(gTripStops);
 			}
 		}
-		System.out.printf("\n%s: all %s gTripStop(s):", mRouteId, gTripStopsS.size());
-		for (String gTripStopS : gTripStopsS) {
-			System.out.printf("\n%s: - %s", mRouteId, gTripStopS);
+		System.out.printf("\n%s: all %s gTripStop(s):", mRouteId, gTripStopsS2.size());
+		for (ArrayList<Pair<String, Integer>> gTripStops : gTripStopsS2) {
+			StringBuilder sb = new StringBuilder();
+			boolean newline = false;
+			sb.append("[");
+			newline = addNewLineIfNecessary(sb, newline);
+			int size = gTripStops.size();
+			String indexFormat = "%0" + String.valueOf(size).length() + "d";
+			for (int i = 0; i < size; i++) {
+				Pair<String, Integer> gTripStop = gTripStops.get(i);
+				String stopId = gTripStop.first;
+				boolean isFirstLastStop = firstLastStopIdsName.containsKey(stopId);
+				if (i + 1 == size) {
+					newline = addNewLineIfNecessary(sb, newline);
+				} else if (isFirstLastStop) {
+					newline = addNewLineIfNecessary(sb, newline);
+				}
+				sb.append("[");
+				sb.append(String.format(indexFormat, gTripStop.second));
+				sb.append("] ").append(stopId).append(", ");
+				if (isFirstLastStop) {
+					sb.append(" ").append(firstLastStopIdsName.get(stopId)).append(" ");
+				}
+				newline = false;
+				if (isFirstLastStop) {
+					newline = addNewLineIfNecessary(sb, newline);
+				} else if (i == 0) {
+					newline = addNewLineIfNecessary(sb, newline);
+				}
+			}
+			newline = addNewLineIfNecessary(sb, newline);
+			sb.append("]");
+			System.out.printf("\n%s: - %s", mRouteId, sb.toString());
 		}
+	}
+
+	private static void addFistLastStopIdName(GSpec routeGTFS, HashMap<String, String> firstLastStopIdsName, ArrayList<Pair<String, Integer>> gTripStops,
+			int firstStopIndex) {
+		if (!firstLastStopIdsName.containsKey(gTripStops.get(firstStopIndex).first)) {
+			firstLastStopIdsName.put(gTripStops.get(firstStopIndex).first, routeGTFS.getStop(gTripStops.get(firstStopIndex).first).getStopName());
+		}
+	}
+
+	private static boolean addNewLineIfNecessary(StringBuilder sb, boolean newline) {
+		if (!newline) {
+			sb.append("\n");
+			newline = true;
+		}
+		return newline;
 	}
 
 	private static String findBeforeAfterStopIdCandidate(MRoute mRoute, GTripStop gTripStop, List<String> stopIdsTowards0, List<String> stopIdsTowards1,
