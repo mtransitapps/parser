@@ -152,12 +152,8 @@ public class SplitUtils {
 				}
 				sortGTripStopsBySequence(gTripStops);
 				setGTripStopSequence(gTripStops);
-				if (!firstLastStopIdsName.containsKey(gTripStops.get(0).first)) {
-					firstLastStopIdsName.put(gTripStops.get(0).first, routeGTFS.getStop(gTripStops.get(0).first).getStopName());
-				}
-				if (!firstLastStopIdsName.containsKey(gTripStops.get(gTripStops.size() - 1).first)) {
-					firstLastStopIdsName.put(gTripStops.get(gTripStops.size() - 1).first, routeGTFS.getStop(gTripStops.get(0).first).getStopName());
-				}
+				addFistLastStopIdName(routeGTFS, firstLastStopIdsName, gTripStops, 0);
+				addFistLastStopIdName(routeGTFS, firstLastStopIdsName, gTripStops, gTripStops.size() - 1);
 				gTripStopsS2.add(gTripStops);
 			}
 		}
@@ -194,6 +190,13 @@ public class SplitUtils {
 			newline = addNewLineIfNecessary(sb, newline);
 			sb.append("]");
 			System.out.printf("\n%s: - %s", mRouteId, sb.toString());
+		}
+	}
+
+	private static void addFistLastStopIdName(GSpec routeGTFS, HashMap<String, String> firstLastStopIdsName, ArrayList<Pair<String, Integer>> gTripStops,
+			int firstStopIndex) {
+		if (!firstLastStopIdsName.containsKey(gTripStops.get(firstStopIndex).first)) {
+			firstLastStopIdsName.put(gTripStops.get(firstStopIndex).first, routeGTFS.getStop(gTripStops.get(firstStopIndex).first).getStopName());
 		}
 	}
 
