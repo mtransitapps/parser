@@ -190,6 +190,7 @@ public class SplitUtils {
 			newline = addNewLineIfNecessary(sb, newline);
 			sb.append("]");
 			System.out.printf("\n%s: - %s", mRouteId, sb.toString());
+			System.out.printf("\n%s: all first/last stop IDs: %s", mRouteId, firstLastStopIdsName.keySet());
 		}
 	}
 
