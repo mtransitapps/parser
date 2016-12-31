@@ -178,7 +178,7 @@ public class SplitUtils {
 				sb.append(String.format(indexFormat, gTripStop.second));
 				sb.append("] ").append(stopId).append(", ");
 				if (isFirstLastStop) {
-					sb.append(" ").append(firstLastStopIdsName.get(stopId)).append(" ");
+					sb.append(" \"").append(firstLastStopIdsName.get(stopId)).append("\" ");
 				}
 				newline = false;
 				if (isFirstLastStop) {
@@ -190,14 +190,16 @@ public class SplitUtils {
 			newline = addNewLineIfNecessary(sb, newline);
 			sb.append("]");
 			System.out.printf("\n%s: - %s", mRouteId, sb.toString());
-			System.out.printf("\n%s: all first/last stop IDs: %s", mRouteId, firstLastStopIdsName.keySet());
 		}
+		System.out.printf("\n%s: all first/last stop IDs: %s", mRouteId, firstLastStopIdsName.keySet());
 	}
 
 	private static void addFistLastStopIdName(GSpec routeGTFS, HashMap<String, String> firstLastStopIdsName, ArrayList<Pair<String, Integer>> gTripStops,
 			int firstStopIndex) {
-		if (!firstLastStopIdsName.containsKey(gTripStops.get(firstStopIndex).first)) {
-			firstLastStopIdsName.put(gTripStops.get(firstStopIndex).first, routeGTFS.getStop(gTripStops.get(firstStopIndex).first).getStopName());
+		String stopId = gTripStops.get(firstStopIndex).first;
+		if (!firstLastStopIdsName.containsKey(stopId)) {
+			GStop gStop = routeGTFS.getStop(stopId);
+			firstLastStopIdsName.put(stopId, gStop.getStopCode() + " - " + gStop.getStopName());
 		}
 	}
 
