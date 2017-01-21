@@ -178,7 +178,7 @@ public class SplitUtils {
 				sb.append(String.format(indexFormat, gTripStop.second));
 				sb.append("] ").append(stopId).append(", ");
 				if (isFirstLastStop) {
-					sb.append(" \"").append(firstLastStopIdsName.get(stopId)).append("\" ");
+					sb.append(" ").append(firstLastStopIdsName.get(stopId)).append(" ");
 				}
 				newline = false;
 				if (isFirstLastStop) {
@@ -199,7 +199,9 @@ public class SplitUtils {
 		String stopId = gTripStops.get(firstStopIndex).first;
 		if (!firstLastStopIdsName.containsKey(stopId)) {
 			GStop gStop = routeGTFS.getStop(stopId);
-			firstLastStopIdsName.put(stopId, gStop.getStopCode() + " - " + gStop.getStopName());
+			firstLastStopIdsName.put( //
+					stopId, "\"" + gStop.getStopCode() + "\", // " + gStop.getStopName() + //
+							" {" + gStop.getStopLat() + "," + gStop.getStopLong() + "}");
 		}
 	}
 
