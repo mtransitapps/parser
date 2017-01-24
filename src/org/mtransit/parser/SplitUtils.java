@@ -61,11 +61,15 @@ public class SplitUtils {
 		ArrayList<Integer> afterStopSequence = new ArrayList<Integer>();
 		ArrayList<String> beforeStopIds = new ArrayList<String>();
 		ArrayList<Integer> beforeStopSequence = new ArrayList<Integer>();
+		java.util.ArrayList<org.mtransit.parser.Pair<String, Integer>> gTripStops = new java.util.ArrayList<org.mtransit.parser.Pair<String, Integer>>(); // DEBUG
 		int tripStopSequence = gTripStop.getStopSequence();
 		int minStopSequence = Integer.MAX_VALUE; // can be 1... or 0 or anything according to official documentation
 		for (GStopTime gStopTime : routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null)) {
 			if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
 				continue;
+			}
+			if (Constants.DEBUG) {
+				gTripStops.add(new org.mtransit.parser.Pair<String, Integer>(gStopTime.getStopId(), gStopTime.getStopSequence())); // DEBUG
 			}
 			if (allBeforeAfterStopIds.contains(gStopTime.getStopId())) {
 				if (gStopTime.getStopSequence() < tripStopSequence) {
@@ -100,8 +104,10 @@ public class SplitUtils {
 			return beforeAfterStopIdCandidate;
 		}
 		System.out.printf("\n%s: beforeAfterStopIdCandidate: %s", mRoute.getId(), beforeAfterStopIdCandidate); // DEBUG
-		sortGTripStopsBySequence(gTripStops); // DEBUG
-		System.out.printf("\n%s: gTripStops: %s", mRoute.getId(), gTripStops); // DEBUG
+		if (Constants.DEBUG) {
+			sortGTripStopsBySequence(gTripStops); // DEBUG
+			System.out.printf("\n%s: gTripStops: %s", mRoute.getId(), gTripStops); // DEBUG
+		}
 		System.out.printf("\n%s: beforeStopIds: %s", mRoute.getId(), beforeStopIds);
 		System.out.printf("\n%s: afterStopIds: %s", mRoute.getId(), afterStopIds);
 		System.out.printf("\n%s: max sequence: %s", mRoute.getId(), gStopMaxSequence);
