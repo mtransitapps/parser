@@ -2,6 +2,8 @@ package org.mtransit.parser;
 
 public final class Constants {
 
+	public static boolean DEBUG = false;
+
 	public static final char NEW_LINE = '\n';
 
 	public static final char SPACE = ' ';
