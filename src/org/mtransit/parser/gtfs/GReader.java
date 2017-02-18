@@ -57,7 +57,7 @@ public class GReader {
 				while (filename.contains(SLASH)) { // remove directory from file name
 					filename = filename.substring(filename.indexOf(SLASH) + 1);
 				}
-				if (filename.equals(GAgency.FILENAME)) { // AGENCY
+				if (filename.equalsIgnoreCase(GAgency.FILENAME)) { // AGENCY
 					if (calendarsOnly || routeTripCalendarsOnly) {
 						continue;
 					}
@@ -67,21 +67,21 @@ public class GReader {
 							processAgency(agencyTools, gSpec, line);
 						}
 					});
-				} else if (filename.equals(GCalendarDate.FILENAME)) { // CALENDAR DATES
+				} else if (filename.equalsIgnoreCase(GCalendarDate.FILENAME)) { // CALENDAR DATES
 					readCsv(filename, reader, null, null, new LineProcessor() {
 						@Override
 						public void processLine(HashMap<String, String> line) {
 							processCalendarDate(agencyTools, gSpec, line);
 						}
 					});
-				} else if (filename.equals(GCalendar.FILENAME)) { // CALENDAR
+				} else if (filename.equalsIgnoreCase(GCalendar.FILENAME)) { // CALENDAR
 					readCsv(filename, reader, null, null, new LineProcessor() {
 						@Override
 						public void processLine(HashMap<String, String> line) {
 							processCalendar(agencyTools, gSpec, line);
 						}
 					});
-				} else if (filename.equals(GRoute.FILENAME)) { // ROUTE
+				} else if (filename.equalsIgnoreCase(GRoute.FILENAME)) { // ROUTE
 					if (calendarsOnly) {
 						continue;
 					}
@@ -91,7 +91,7 @@ public class GReader {
 							processRoute(agencyTools, gSpec, line);
 						}
 					});
-				} else if (filename.equals(GStop.FILENAME)) { // STOP
+				} else if (filename.equalsIgnoreCase(GStop.FILENAME)) { // STOP
 					if (calendarsOnly || routeTripCalendarsOnly) {
 						continue;
 					}
@@ -101,7 +101,7 @@ public class GReader {
 							processStop(agencyTools, gSpec, line);
 						}
 					});
-				} else if (filename.equals(GTrip.FILENAME)) { // TRIP
+				} else if (filename.equalsIgnoreCase(GTrip.FILENAME)) { // TRIP
 					if (calendarsOnly) {
 						continue;
 					}
@@ -111,7 +111,7 @@ public class GReader {
 							processTrip(agencyTools, gSpec, line);
 						}
 					});
-				} else if (filename.equals(GStopTime.FILENAME)) { // STOP TIME
+				} else if (filename.equalsIgnoreCase(GStopTime.FILENAME)) { // STOP TIME
 					if (calendarsOnly || routeTripCalendarsOnly) {
 						continue;
 					}
@@ -121,7 +121,7 @@ public class GReader {
 							processStopTime(agencyTools, gSpec, line);
 						}
 					});
-				} else if (filename.equals(GFrequency.FILENAME)) { // FREQUENCY
+				} else if (filename.equalsIgnoreCase(GFrequency.FILENAME)) { // FREQUENCY
 					if (calendarsOnly || routeTripCalendarsOnly) {
 						continue;
 					}
