@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
@@ -42,6 +43,15 @@ public class MTrip implements Comparable<MTrip> {
 			this.idString = this.routeId + Constants.UUID_SEPARATOR + this.headsignValue;
 		}
 		return this.idString;
+	}
+
+	public MTrip setHeadsignStringNotEmpty(String headsignString, int headsignId) {
+		if (StringUtils.isEmpty(headsignString) || headsignId < 0) {
+			System.out.printf("\nInvalid trip head sign string '%s' or ID '%s' (%s)!\n", headsignString, headsignId, this);
+			System.exit(-1);
+			return this;
+		}
+		return setHeadsignString(headsignString, headsignId);
 	}
 
 	public MTrip setHeadsignString(String headsignString, int headsignId) {
