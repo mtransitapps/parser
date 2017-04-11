@@ -1,0 +1,30 @@
+apply plugin: 'application'
+
+mainClassName = "org.mtransit.parser.DefaultAgencyTools"
+
+run {
+    def params = []
+    if (project.hasProperty('msg')) {
+        params.add(project.msg)
+        if (project.hasProperty('to')) {
+            params.add(project.to)
+        }
+    }
+    args params
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+        output.classesDir = 'bin'
+    }
+}
+
+
+dependencies {
+    compile 'org.apache.commons:commons-csv:1.1'
+    compile 'commons-io:commons-io:2.4'
+    compile 'org.apache.commons:commons-lang3:3.1'
+}
