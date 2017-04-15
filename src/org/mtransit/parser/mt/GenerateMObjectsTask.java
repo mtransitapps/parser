@@ -113,7 +113,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		MTrip mTrip;
 		for (MSchedule mSchedule : mSchedules.values()) {
 			mTrip = mTrips.get(mSchedule.getTripId());
-			if (mTrip.getHeadsignType() == mSchedule.getHeadsignType() && StringUtils.equals(mTrip.getHeadsignValue(), mSchedule.getHeadsignValue())) {
+			if (mTrip.getHeadsignType() == mSchedule.getHeadsignType() //
+					&& StringUtils.equals(mTrip.getHeadsignValue(), mSchedule.getHeadsignValue())) {
 				mSchedule.clearHeadsign();
 			}
 		}
@@ -305,8 +306,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING && tripStopTimesHeadsign != null && tripStopTimesHeadsign.length() > 0) {
 					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
 						if (!mTripStopTimesHeadsign.get(mTrip.getId()).equals(tripStopTimesHeadsign)) {
-							System.out.printf("\n%s: Trip stop times headsign different for same trip ID ('%s'!='%s')", this.routeId, tripStopTimesHeadsign,
-									mTripStopTimesHeadsign.get(mTrip.getId()));
+							if (!mTripStopTimesHeadsign.get(mTrip.getId()).contains(tripStopTimesHeadsign)) {
+								System.out.printf("\n%s: Trip stop times headsign different for same trip ID ('%s'!='%s')", this.routeId,
+										tripStopTimesHeadsign, mTripStopTimesHeadsign.get(mTrip.getId()));
+							}
 							mTripStopTimesHeadsign.put(mTrip.getId(),
 									MTrip.mergeHeadsignValue(mTripStopTimesHeadsign.get(mTrip.getId()), tripStopTimesHeadsign));
 						}

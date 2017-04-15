@@ -31,6 +31,10 @@ public class MRoute implements Comparable<MRoute> {
 		return longName;
 	}
 
+	public void setLongName(String longName) {
+		this.longName = longName;
+	}
+
 	public String getColor() {
 		return color;
 	}

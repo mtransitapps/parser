@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs.data;
 
+import java.util.Collection;
+
 import org.mtransit.parser.Constants;
 
 // https://developers.google.com/transit/gtfs/reference#trips_fields
@@ -55,6 +57,14 @@ public class GTrip {
 
 	public String getServiceId() {
 		return service_id;
+	}
+
+	public boolean isServiceId(String serviceId) {
+		return this.service_id.equals(serviceId);
+	}
+
+	public boolean isServiceIds(Collection<String> serviceIds) {
+		return serviceIds.contains(this.service_id);
 	}
 
 	public Integer getDirectionId() {

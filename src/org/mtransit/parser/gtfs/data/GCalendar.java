@@ -3,6 +3,7 @@ package org.mtransit.parser.gtfs.data;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 
 import org.mtransit.parser.Constants;
@@ -63,6 +64,14 @@ public class GCalendar {
 		return service_id;
 	}
 
+	public boolean isServiceId(String serviceId) {
+		return this.service_id.equals(serviceId);
+	}
+
+	public boolean isServiceIds(Collection<String> serviceIds) {
+		return serviceIds.contains(this.service_id);
+	}
+
 	public int getStartDate() {
 		return start_date;
 	}
@@ -85,6 +94,34 @@ public class GCalendar {
 				.append(Constants.STRING_DELIMITER).append(this.start_date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.end_date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.toString();
+	}
+
+	public boolean startsBefore(Integer date) {
+		return this.start_date < date;
+	}
+
+	public boolean startsBetween(Integer startDate, Integer endDate) {
+		return startDate <= this.start_date && this.start_date <= endDate;
+	}
+
+	public boolean isOverlapping(Integer startDate, Integer endDate) {
+		return startsBetween(startDate, endDate) || endsBetween(startDate, endDate);
+	}
+
+	public boolean isInside(Integer startDate, Integer endDate) {
+		return startsBetween(startDate, endDate) && endsBetween(startDate, endDate);
+	}
+
+	public boolean endsBetween(Integer startDate, Integer endDate) {
+		return startDate <= this.end_date && this.end_date <= endDate;
+	}
+
+	public boolean endsAfter(Integer date) {
+		return this.end_date > date;
+	}
+
+	public boolean containsDate(Integer date) {
+		return this.start_date <= date && date <= this.end_date;
 	}
 
 	public List<GCalendarDate> getDates() {

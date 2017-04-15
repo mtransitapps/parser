@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs.data;
 
+import java.util.Collection;
+
 import org.mtransit.parser.Constants;
 
 // https://developers.google.com/transit/gtfs/reference#calendar_dates_fields
@@ -26,8 +28,32 @@ public class GCalendarDate {
 		return service_id;
 	}
 
+	public boolean isServiceId(String serviceId) {
+		return this.service_id.equals(serviceId);
+	}
+
+	public boolean isServiceIds(Collection<String> serviceIds) {
+		return serviceIds.contains(this.service_id);
+	}
+
 	public int getDate() {
 		return date;
+	}
+
+	public boolean isBefore(Integer date) {
+		return this.date < date;
+	}
+
+	public boolean isBetween(Integer startDate, Integer endDate) {
+		return startDate <= this.date && this.date <= endDate;
+	}
+
+	public boolean is(Integer date) {
+		return this.date == date;
+	}
+
+	public boolean isAfter(Integer date) {
+		return this.date > date;
 	}
 
 	public GCalendarDatesExceptionType getExceptionType() {
