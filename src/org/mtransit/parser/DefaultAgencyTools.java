@@ -614,7 +614,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		HashSet<String> serviceIds = new HashSet<String>();
 		if (gCalendars != null) {
 			for (GCalendar gCalendar : gCalendars) {
-				if (gCalendar.isOverlapping(startDate, endDate)) {
+				if (gCalendar.isInside(startDate, endDate)) {
 					if (!gCalendar.isServiceIds(serviceIds)) {
 						System.out.printf("\nnew service ID from calendar active between %s and %s: %s", startDate, endDate, gCalendar.getServiceId());
 						serviceIds.add(gCalendar.getServiceId());
