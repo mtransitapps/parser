@@ -24,7 +24,11 @@ public class GStopTime {
 	public static final String PICKUP_TYPE = "pickup_type";
 	private int pickup_type;
 
-	public GStopTime(String trip_id, String arrival_time, String departure_time, String stop_id, int stop_sequence, String stop_headsign, int pickup_type) {
+	public static final String DROP_OFF_TYPE = "drop_off_type";
+	private int drop_off_type;
+
+	public GStopTime(String trip_id, String arrival_time, String departure_time, String stop_id, int stop_sequence, String stop_headsign, int pickup_type,
+			int drop_off_type) {
 		this.trip_id = trip_id;
 		this.arrival_time = arrival_time;
 		this.departure_time = departure_time;
@@ -32,6 +36,7 @@ public class GStopTime {
 		this.stop_sequence = stop_sequence;
 		this.stop_headsign = stop_headsign;
 		this.pickup_type = pickup_type;
+		this.drop_off_type = drop_off_type;
 		this.uid = null;
 	}
 
@@ -61,6 +66,10 @@ public class GStopTime {
 
 	public int getPickupType() {
 		return pickup_type;
+	}
+
+	public int getDropOffType() {
+		return drop_off_type;
 	}
 
 	public boolean hasStopHeadsign() {
@@ -96,6 +105,8 @@ public class GStopTime {
 				.append(Constants.STRING_DELIMITER).append(this.stop_headsign).append(Constants.STRING_DELIMITER) //
 				.append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.pickup_type).append(Constants.STRING_DELIMITER) //
+				.append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.drop_off_type).append(Constants.STRING_DELIMITER) //
 				.toString();
 	}
 }

@@ -11,6 +11,10 @@ public enum GDropOffType {
 		this.id = id;
 	}
 
+	public int intValue() {
+		return this.id;
+	}
+
 	public static GDropOffType parse(int id) {
 		if (REGULAR.id == id) {
 			return REGULAR;
@@ -31,6 +35,12 @@ public enum GDropOffType {
 		if (id == null || id.length() == 0) { // that's OK
 			return REGULAR; // default
 		}
-		return parse(Integer.valueOf(id));
+		try {
+			return parse(Integer.valueOf(id));
+		} catch (NumberFormatException nfe) {
+			System.out.printf("\nError while parsing '%s' as drop off tipe!\n", id);
+			nfe.printStackTrace();
+			throw nfe;
+		}
 	}
 }

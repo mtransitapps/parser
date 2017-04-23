@@ -14,7 +14,9 @@ import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
+import org.mtransit.parser.gtfs.data.GDropOffType;
 import org.mtransit.parser.gtfs.data.GFrequency;
+import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
@@ -187,7 +189,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeStopTime(GStopTime gStopTime) {
-		return false;
+		return GPickupType.NO_PICKUP.intValue() == gStopTime.getPickupType() //
+				&& GDropOffType.NO_DROP_OFF.intValue() == gStopTime.getDropOffType();
 	}
 
 	@Override

@@ -7,7 +7,8 @@ public class GFrequency {
 
 	public static final String FILENAME = "frequencies.txt";
 
-	public static final int DEFAULT_PICKUP_TYPE = 0; // Regularly scheduled pickup
+	public static final int DEFAULT_PICKUP_TYPE = GPickupType.REGULAR.intValue(); // Regularly scheduled pickup
+	public static final int DEFAULT_DROP_OFF_TYPE = GDropOffType.REGULAR.intValue(); // Regularly scheduled drop off
 
 	public static final String TRIP_ID = "trip_id";
 	private String trip_id;

@@ -314,7 +314,7 @@ public class GSpec {
 							stopTimeCal.add(Calendar.SECOND, gStopTimeIncInSec.get(gStopTime.getUID()));
 							String newDepartureTimeS = getNewDepartureTime(gDateFormat, stopTimeCal);
 							GStopTime newGStopTime = new GStopTime(tripId, newDepartureTimeS, newDepartureTimeS, gStopTime.getStopId(),
-									gStopTime.getStopSequence(), gStopTime.getStopHeadsign(), GFrequency.DEFAULT_PICKUP_TYPE);
+									gStopTime.getStopSequence(), gStopTime.getStopHeadsign(), GFrequency.DEFAULT_PICKUP_TYPE, GFrequency.DEFAULT_DROP_OFF_TYPE);
 							newGStopTimes.add(newGStopTime);
 						}
 						firstStopTimeInMs += TimeUnit.SECONDS.toMillis(gFrequency.getHeadwaySecs());
