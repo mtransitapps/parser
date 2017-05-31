@@ -147,14 +147,18 @@ public class SplitUtils {
 			for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteId())) {
 				ArrayList<Pair<String, Integer>> gTripStops = new ArrayList<Pair<String, Integer>>();
 				try {
-					for (GStopTime gStopTime : routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null)) {
-						if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
-							continue;
+					ArrayList<GStopTime> stopTimes = routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null);
+					if (stopTimes != null) {
+						for (GStopTime gStopTime : stopTimes) {
+							if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
+								continue;
+							}
+							gTripStops.add(new Pair<String, Integer>(gStopTime.getStopId(), gStopTime.getStopSequence()));
 						}
-						gTripStops.add(new Pair<String, Integer>(gStopTime.getStopId(), gStopTime.getStopSequence()));
 					}
 				} catch (Exception e) {
 					System.out.printf("\nError while listing stop times for trip ID '%s'!", gTrip.getTripId());
+					e.printStackTrace();
 				}
 				sortGTripStopsBySequence(gTripStops);
 				setGTripStopSequence(gTripStops);
@@ -202,6 +206,9 @@ public class SplitUtils {
 
 	private static void addFistLastStopIdName(GSpec routeGTFS, HashMap<String, String> firstLastStopIdsName, ArrayList<Pair<String, Integer>> gTripStops,
 			int firstStopIndex) {
+		if (firstStopIndex < 0 || firstStopIndex >= gTripStops.size()) {
+			return;
+		}
 		String stopId = gTripStops.get(firstStopIndex).first;
 		if (!firstLastStopIdsName.containsKey(stopId)) {
 			GStop gStop = routeGTFS.getStop(stopId);
