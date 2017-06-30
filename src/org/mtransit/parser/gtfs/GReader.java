@@ -175,6 +175,9 @@ public class GReader {
 		String line;
 		String[] lineColumns;
 		line = reader.readLine();
+		if (line == null || line.length() == 0) {
+			return;
+		}
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
 			System.out.printf("\nRemove 1st empty car");
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);

@@ -33,7 +33,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	public static final int THREAD_POOL_SIZE = 2;
 
-	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 3;
+	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 7;
 	private static final int MIN_COVERAGE_TOTAL_IN_DAYS = 30;
 
 	public static final boolean EXPORT_PATH_ID;
