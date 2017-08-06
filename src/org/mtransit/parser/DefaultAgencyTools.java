@@ -33,8 +33,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	public static final int THREAD_POOL_SIZE = 2;
 
-	private static final int MIN_COVERAGE_AFTER_TODAY_IN_DAYS = 7;
-	private static final int MIN_COVERAGE_TOTAL_IN_DAYS = 30;
+	private static final int MAX_LOOKUP_IN_DAYS = 30;
+	private static final int MIN_COVERAGE_TOTAL_IN_DAYS = 7;
 
 	public static final boolean EXPORT_PATH_ID;
 	public static final boolean EXPORT_ORIGINAL_ID;
@@ -48,6 +48,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final Integer OVERRIDE_DATE;
 	static {
 		OVERRIDE_DATE = null;
+	}
+
+	private static final boolean TOMORROW;
+	static {
+		TOMORROW = false;
 	}
 
 
@@ -428,7 +433,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		Period p = new Period();
 		SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
 		Calendar c = Calendar.getInstance();
-		c.add(Calendar.DAY_OF_MONTH, 1); // TOMORROW (too late to publish today's schedule)
+		if (TOMORROW) {
+			c.add(Calendar.DAY_OF_MONTH, 1); // TOMORROW (too late to publish today's schedule)
+		}
 		p.todayStringInt = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
 		if (OVERRIDE_DATE != null) {
 			p.todayStringInt = OVERRIDE_DATE;
@@ -478,11 +485,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 			boolean newDates = refreshStartEndDatesFromCalendarDates(p, todayServiceIds, gCalendarDates);
 			if (newDates) {
 				System.out.printf("\nnew start date '%s' & end date '%s' from calendar date active during service ID(s).", p.startDate, p.endDate);
-				continue;
-			}
-			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS)) {
-				p.endDate = incDateDays(DATE_FORMAT, c, p.endDate, 1); // end++
-				System.out.printf("\nnew end date because coverage lower than %s days: %s", MIN_COVERAGE_AFTER_TODAY_IN_DAYS, p.endDate);
 				continue;
 			}
 			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_COVERAGE_TOTAL_IN_DAYS)) {
@@ -541,7 +543,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 					}
 				}
 			}
-			if (todayServiceIds.size() <= minSize && diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MIN_COVERAGE_TOTAL_IN_DAYS)) {
+			if (todayServiceIds.size() <= minSize //
+					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MAX_LOOKUP_IN_DAYS)) {
 				p.todayStringInt = incDateDays(DATE_FORMAT, c, p.todayStringInt, incDays);
 				continue;
 			}
@@ -569,7 +572,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 			}
 			if ((p.startDate == null || p.endDate == null) //
-					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MIN_COVERAGE_TOTAL_IN_DAYS)) {
+					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MAX_LOOKUP_IN_DAYS)) {
 				p.todayStringInt = incDateDays(DATE_FORMAT, c, p.todayStringInt, 1);
 				System.out.printf("\nnew today because no service today: %s (initial today: %s)", p.todayStringInt, initialTodayStringInt);
 				continue;
@@ -604,9 +607,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (newDates) {
 				continue;
 			}
-			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_COVERAGE_AFTER_TODAY_IN_DAYS)) {
+			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_COVERAGE_TOTAL_IN_DAYS)) {
 				p.endDate = incDateDays(DATE_FORMAT, c, p.endDate, 1); // end++
-				System.out.printf("\nnew end date because coverage lower than %s days: %s", MIN_COVERAGE_AFTER_TODAY_IN_DAYS, p.endDate);
+				System.out.printf("\nnew end date because coverage lower than %s days: %s", MIN_COVERAGE_TOTAL_IN_DAYS, p.endDate);
 				continue;
 			}
 			break;
