@@ -219,6 +219,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public String cleanStopHeadsign(String stopHeadsign) {
+		return cleanTripHeadsign(stopHeadsign);
+	}
+
+	@Override
 	public String getStopCode(GStop gStop) {
 		return gStop.getStopCode();
 	}
@@ -241,6 +246,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public String cleanStopOriginalId(String gStopId) {
+		return gStopId;
+	}
+
+	@Override
 	public int compareEarly(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
 		return 0; // nothing
 	}
@@ -253,6 +263,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean excludeStop(GStop gStop) {
 		return false;
+	}
+
+	public boolean isGoodEnoughAccepted() {
+		return GOOD_ENOUGH_ACCEPTED;
 	}
 
 	@Override

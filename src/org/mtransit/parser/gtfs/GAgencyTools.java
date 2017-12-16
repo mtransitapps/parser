@@ -61,11 +61,15 @@ public interface GAgencyTools {
 
 	String cleanStopName(String gStopName);
 
+	String cleanStopHeadsign(String stopHeadsign);
+
 	String getStopCode(GStop gStop);
 
 	String getStopOriginalId(GStop gStop);
 
 	boolean excludeStop(GStop gStop);
+
+	String cleanStopOriginalId(String gStopId);
 
 	// CALENDAR
 	boolean excludeCalendar(GCalendar gCalendar);

@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
@@ -26,6 +27,11 @@ public class SplitUtils {
 	public static final String ALL = "*";
 
 	public static Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, GSpec routeGTFS, RouteTripSpec rts) {
+		return splitTripStop(mRoute, gTrip, gTripStop, routeGTFS, rts, null);
+	}
+
+	public static Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, GSpec routeGTFS, RouteTripSpec rts,
+			GAgencyTools agencyTools) {
 		List<String> stopIdsTowards0 = rts.getBeforeAfterStopIds(0);
 		List<String> stopIdsTowards1 = rts.getBeforeAfterStopIds(1);
 		List<String> stopIdsTowardsBoth10 = rts.getBeforeAfterBothStopIds(0);
@@ -34,7 +40,7 @@ public class SplitUtils {
 		long tidTowardsStop1 = rts.getTripId(1);
 		HashSet<String> allBeforeAfterStopIds = rts.getAllBeforeAfterStopIds();
 		String beforeAfterStopIds = getBeforeAfterStopId(routeGTFS, mRoute, gTrip, gTripStop, stopIdsTowards0, stopIdsTowards1, stopIdsTowardsBoth10,
-				stopIdsTowardsBoth01, allBeforeAfterStopIds);
+				stopIdsTowardsBoth01, allBeforeAfterStopIds, agencyTools);
 		if (stopIdsTowards0.contains(beforeAfterStopIds)) {
 			return new Pair<Long[], Integer[]>(new Long[] { tidTowardsStop0 }, new Integer[] { gTripStop.getStopSequence() });
 		} else if (stopIdsTowards1.contains(beforeAfterStopIds)) {
@@ -55,7 +61,8 @@ public class SplitUtils {
 	}
 
 	private static String getBeforeAfterStopId(GSpec routeGTFS, MRoute mRoute, GTrip gTrip, GTripStop gTripStop, List<String> stopIdsTowards0,
-			List<String> stopIdsTowards1, List<String> stopIdsTowardsBoth10, List<String> stopIdsTowardsBoth01, HashSet<String> allBeforeAfterStopIds) {
+			List<String> stopIdsTowards1, List<String> stopIdsTowardsBoth10, List<String> stopIdsTowardsBoth01, HashSet<String> allBeforeAfterStopIds,
+			GAgencyTools agencyTools) {
 		int gStopMaxSequence = -1;
 		ArrayList<String> afterStopIds = new ArrayList<String>();
 		ArrayList<Integer> afterStopSequence = new ArrayList<Integer>();
@@ -71,13 +78,14 @@ public class SplitUtils {
 			if (Constants.DEBUG) {
 				gTripStops.add(new org.mtransit.parser.Pair<String, Integer>(gStopTime.getStopId(), gStopTime.getStopSequence())); // DEBUG
 			}
-			if (allBeforeAfterStopIds.contains(gStopTime.getStopId())) {
+			String stopTimeStopId = agencyTools == null ? gStopTime.getStopId() : agencyTools.cleanStopOriginalId(gStopTime.getStopId());
+			if (allBeforeAfterStopIds.contains(stopTimeStopId)) {
 				if (gStopTime.getStopSequence() < tripStopSequence) {
-					beforeStopIds.add(gStopTime.getStopId());
+					beforeStopIds.add(stopTimeStopId);
 					beforeStopSequence.add(gStopTime.getStopSequence());
 				}
 				if (gStopTime.getStopSequence() > tripStopSequence) {
-					afterStopIds.add(gStopTime.getStopId());
+					afterStopIds.add(stopTimeStopId);
 					afterStopSequence.add(gStopTime.getStopSequence());
 				}
 			}
@@ -88,18 +96,19 @@ public class SplitUtils {
 				minStopSequence = gStopTime.getStopSequence();
 			}
 		}
-		if (allBeforeAfterStopIds.contains(gTripStop.getStopId())) {
+		String gTripStopId = agencyTools == null ? gTripStop.getStopId() : agencyTools.cleanStopOriginalId(gTripStop.getStopId());
+		if (allBeforeAfterStopIds.contains(gTripStopId)) {
 			if (tripStopSequence == minStopSequence) {
-				beforeStopIds.add(gTripStop.getStopId());
+				beforeStopIds.add(gTripStopId);
 				beforeStopSequence.add(tripStopSequence);
 			}
 			if (tripStopSequence == gStopMaxSequence) {
-				afterStopIds.add(gTripStop.getStopId());
+				afterStopIds.add(gTripStopId);
 				afterStopSequence.add(tripStopSequence);
 			}
 		}
 		String beforeAfterStopIdCandidate = findBeforeAfterStopIdCandidate(mRoute, gTripStop, stopIdsTowards0, stopIdsTowards1, stopIdsTowardsBoth10,
-				stopIdsTowardsBoth01, afterStopIds, afterStopSequence, beforeStopIds, beforeStopSequence);
+				stopIdsTowardsBoth01, afterStopIds, afterStopSequence, beforeStopIds, beforeStopSequence, agencyTools);
 		if (beforeAfterStopIdCandidate != null) {
 			return beforeAfterStopIdCandidate;
 		}
@@ -109,7 +118,9 @@ public class SplitUtils {
 			System.out.printf("\n%s: gTripStops: %s", mRoute.getId(), gTripStops); // DEBUG
 		}
 		System.out.printf("\n%s: beforeStopIds: %s", mRoute.getId(), beforeStopIds);
+		System.out.printf("\n%s: beforeStopSequence: %s", mRoute.getId(), beforeStopSequence);
 		System.out.printf("\n%s: afterStopIds: %s", mRoute.getId(), afterStopIds);
+		System.out.printf("\n%s: afterStopSequence: %s", mRoute.getId(), afterStopSequence);
 		System.out.printf("\n%s: max sequence: %s", mRoute.getId(), gStopMaxSequence);
 		System.out.printf("\n%s: gTripStop: %s", mRoute.getId(), gTripStop);
 		System.out.printf("\n%s: stopIdsTowards0: %s", mRoute.getId(), stopIdsTowards0);
@@ -140,7 +151,7 @@ public class SplitUtils {
 		return gTripStops;
 	}
 
-	public static void listRouteTripStops(long mRouteId, GSpec routeGTFS) {
+	public static void listRouteTripStops(long mRouteId, GSpec routeGTFS) { // DEBUG
 		HashSet<ArrayList<Pair<String, Integer>>> gTripStopsS2 = new HashSet<ArrayList<Pair<String, Integer>>>();
 		HashMap<String, String> firstLastStopIdsName = new HashMap<String, String>();
 		for (GRoute gRoute : routeGTFS.getRoutes(mRouteId)) {
@@ -228,7 +239,7 @@ public class SplitUtils {
 
 	private static String findBeforeAfterStopIdCandidate(MRoute mRoute, GTripStop gTripStop, List<String> stopIdsTowards0, List<String> stopIdsTowards1,
 			List<String> stopIdsTowardsBoth10, List<String> stopIdsTowardsBoth01, ArrayList<String> afterStopIds, ArrayList<Integer> afterStopSequence,
-			ArrayList<String> beforeStopIds, ArrayList<Integer> beforeStopSequence) {
+			ArrayList<String> beforeStopIds, ArrayList<Integer> beforeStopSequence, GAgencyTools agencyTools) {
 		String beforeAfterStopIdCurrent;
 		Pair<Integer, String> beforeAfterStopIdCandidate = null;
 		String beforeStopId, afterStopId;
@@ -271,7 +282,8 @@ public class SplitUtils {
 			beforeStopId = beforeStopIds.get(b);
 			for (int a = 0; a < afterStopIds.size(); a++) {
 				afterStopId = afterStopIds.get(a);
-				if (gTripStop.getStopId().equals(beforeStopId) && gTripStop.getStopId().equals(afterStopId)) {
+				String gTripStopId = agencyTools == null ? gTripStop.getStopId() : agencyTools.cleanStopOriginalId(gTripStop.getStopId());
+				if (gTripStopId.equals(beforeStopId) && gTripStopId.equals(afterStopId)) {
 					continue;
 				}
 				beforeAfterStopIdCurrent = beforeStopId + DASH + afterStopId;
@@ -527,8 +539,10 @@ public class SplitUtils {
 				return 0;
 			}
 			List<String> sortedStopIds = this.allSortedStopIds.get(directionId);
-			int ts1StopIndex = sortedStopIds.indexOf(ts1GStop.getStopId());
-			int ts2StopIndex = sortedStopIds.indexOf(ts2GStop.getStopId());
+			String ts1GStopId = agencyTools == null ? ts1GStop.getStopId() : agencyTools.cleanStopOriginalId(ts1GStop.getStopId());
+			String ts2GStopId = agencyTools == null ? ts2GStop.getStopId() : agencyTools.cleanStopOriginalId(ts2GStop.getStopId());
+			int ts1StopIndex = sortedStopIds.indexOf(ts1GStopId);
+			int ts2StopIndex = sortedStopIds.indexOf(ts2GStopId);
 			if (ts1StopIndex < 0 || ts2StopIndex < 0) {
 				System.out.printf("\n%s: Unexpected stop IDs %s AND/OR %s", routeId, ts1GStop.getStopId(), ts2GStop.getStopId());
 				System.out.printf("\n%s: Not in sorted ID list: %s", routeId, sortedStopIds);
