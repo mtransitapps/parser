@@ -14,6 +14,7 @@ import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
+import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
 import org.mtransit.parser.gtfs.data.GDropOffType;
 import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GPickupType;
@@ -31,7 +32,6 @@ import org.mtransit.parser.mt.data.MTripStop;
 
 public class DefaultAgencyTools implements GAgencyTools {
 
-	public static final int THREAD_POOL_SIZE = 2;
 
 	private static final int MAX_LOOKUP_IN_DAYS = 30;
 	private static final int MIN_COVERAGE_TOTAL_IN_DAYS = 7;
@@ -45,6 +45,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 		EXPORT_DESCENT_ONLY = false;
 	}
 
+	public static final boolean GOOD_ENOUGH_ACCEPTED;
+	static {
+		GOOD_ENOUGH_ACCEPTED = false;
+	}
+
+	private static final Integer THREAD_POOL_SIZE;
+	static {
+		THREAD_POOL_SIZE = 4;
+	}
+
 	private static final Integer OVERRIDE_DATE;
 	static {
 		OVERRIDE_DATE = null;
@@ -54,7 +64,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 	static {
 		TOMORROW = false;
 	}
-
 
 	public static void main(String[] args) {
 		new DefaultAgencyTools().start(args);
@@ -646,6 +655,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
 				if (gCalendarDate.isBetween(startDate, endDate)) {
 					if (!gCalendarDate.isServiceIds(serviceIds)) {
+						if (gCalendarDate.getExceptionType() == GCalendarDatesExceptionType.SERVICE_REMOVED) {
+							System.out.printf("\nignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", startDate, endDate,
+									gCalendarDate.getServiceId());
+							continue;
+						}
 						System.out.printf("\nnew service ID from calendar date active between %s and %s: %s", startDate, endDate, gCalendarDate.getServiceId());
 						serviceIds.add(gCalendarDate.getServiceId());
 					}
