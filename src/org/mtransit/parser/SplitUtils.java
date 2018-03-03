@@ -26,6 +26,7 @@ public class SplitUtils {
 	public static final String DASH = "-";
 	public static final String ALL = "*";
 
+	@Deprecated
 	public static Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, GSpec routeGTFS, RouteTripSpec rts) {
 		return splitTripStop(mRoute, gTrip, gTripStop, routeGTFS, rts, null);
 	}
@@ -525,7 +526,13 @@ public class SplitUtils {
 			return this;
 		}
 
+		@Deprecated
 		public int compare(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
+			return compare(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop, null);
+		}
+
+		public int compare(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop,
+				GAgencyTools agencyTools) {
 			int directionId;
 			if (MTrip.getNewId(this.routeId, this.directionId0) == ts1.getTripId()) {
 				directionId = this.directionId0;
