@@ -61,6 +61,11 @@ public class MSchedule implements Comparable<MSchedule> {
 	public String getServiceId() {
 		return serviceId;
 	}
+
+	public int getDeparture() {
+		return departure;
+	}
+
 	@Override
 	public int hashCode() {
 		return getUID().hashCode() + (this.headsignValue == null ? 0 : this.headsignValue.hashCode());

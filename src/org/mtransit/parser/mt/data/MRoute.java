@@ -113,4 +113,20 @@ public class MRoute implements Comparable<MRoute> {
 		}
 		return true;
 	}
+
+	public boolean simpleMergeLongName(MRoute mRouteToMerge) {
+		if (mRouteToMerge == null || mRouteToMerge.longName == null) {
+			return true;
+		}
+		if (this.longName == null) {
+			return true;
+		}
+		if (mRouteToMerge.longName.contains(this.longName)) {
+			return true;
+		}
+		if (this.longName.contains(mRouteToMerge.longName)) {
+			return true;
+		}
+		return false;
+	}
 }

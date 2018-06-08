@@ -3,8 +3,11 @@ package org.mtransit.parser.mt;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
@@ -148,10 +151,84 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		if (mFrequenciesList != null && mFrequenciesList.size() > 0) {
 			mRouteFrequencies.put(this.routeId, mFrequenciesList);
 		}
-		MSpec myrouteSpec = new MSpec(mAgenciesList, mStopsList, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, mStopScheduleMap,
-				mRouteFrequencies);
+		long firstTimestamp = -1L;
+		long lastTimestamp = -1L;
+		if (mServiceDatesList.size() > 0) {
+			MServiceDate firstServiceDate = mServiceDatesList.get(0);
+			MServiceDate lastServiceDate = mServiceDatesList.get(mServiceDatesList.size() - 1);
+			int firstCalendarDate = firstServiceDate.getCalendarDate();
+			int lastCalendarDate = lastServiceDate.getCalendarDate();
+			int firstDeparture = -1;
+			int lastDeparture = -1;
+			MSchedule firstSchedule = null;
+			MSchedule lastSchedule = null;
+			for (MSchedule mSchedule : mSchedulesList) {
+				if (mSchedule.getServiceId().equals(firstServiceDate.getServiceId())) {
+					if (firstSchedule == null || firstSchedule.getDeparture() > mSchedule.getDeparture()) {
+						firstSchedule = mSchedule;
+					}
+				}
+				if (mSchedule.getServiceId().equals(lastServiceDate.getServiceId())) {
+					if (lastSchedule == null || lastSchedule.getDeparture() < mSchedule.getDeparture()) {
+						lastSchedule = mSchedule;
+					}
+				}
+			}
+			if (firstSchedule != null //
+					&& (firstDeparture < 0 || firstDeparture > firstSchedule.getDeparture())) {
+				firstDeparture = firstSchedule.getDeparture();
+			}
+			if (lastSchedule != null //
+					&& (lastDeparture < 0 || lastDeparture > lastSchedule.getDeparture())) {
+				lastDeparture = lastSchedule.getDeparture();
+			}
+			MFrequency firstFrequency = null;
+			MFrequency lastFrequency = null;
+			for (MFrequency mFrequency : mFrequenciesList) {
+				if (mFrequency.getServiceId().equals(firstServiceDate.getServiceId())) {
+					if (firstFrequency == null || firstFrequency.getStartTime() > mFrequency.getStartTime()) {
+						firstFrequency = mFrequency;
+					}
+				}
+				if (mFrequency.getServiceId().equals(lastServiceDate.getServiceId())) {
+					if (lastFrequency == null || lastFrequency.getEndTime() > mFrequency.getEndTime()) {
+						lastFrequency = mFrequency;
+					}
+				}
+			}
+			if (firstFrequency != null //
+					&& (firstDeparture < -1 || firstDeparture > firstFrequency.getStartTime())) {
+				firstDeparture = firstFrequency.getStartTime();
+			}
+			if (lastFrequency != null //
+					&& (lastDeparture < -1 || lastDeparture > lastFrequency.getEndTime())) {
+				lastDeparture = lastFrequency.getEndTime();
+			}
+			SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd HHmmss", Locale.ENGLISH);
+			DATE_FORMAT.setTimeZone(TimeZone.getTimeZone(mAgenciesList.get(0).getTimezone()));
+			try {
+				Date firstDate = DATE_FORMAT.parse(firstCalendarDate + " " + String.format("%06d", firstDeparture));
+				firstTimestamp = firstDate.getTime();
+			} catch (Exception e) {
+				System.out.printf("\nError while parsing dates '%s %s'!\n", firstCalendarDate, firstDeparture);
+				e.printStackTrace();
+				System.exit(-1);
+				firstTimestamp = -1L;
+			}
+			try {
+				Date lastDate = DATE_FORMAT.parse(lastCalendarDate + " " + String.format("%06d", lastDeparture));
+				lastTimestamp = lastDate.getTime();
+			} catch (Exception e) {
+				System.out.printf("\nError while parsing dates '%s %s'!\n", lastCalendarDate, lastDeparture);
+				e.printStackTrace();
+				System.exit(-1);
+				lastTimestamp = -1L;
+			}
+		}
+		MSpec mRouteSpec = new MSpec(mAgenciesList, mStopsList, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, mStopScheduleMap,
+				mRouteFrequencies, firstTimestamp, lastTimestamp);
 		System.out.printf("\n%s: processing... DONE in %s.", this.routeId, org.mtransit.parser.Utils.getPrettyDuration(System.currentTimeMillis() - startAt));
-		return myrouteSpec;
+		return mRouteSpec;
 	}
 
 	private void parseRTS(HashMap<String, MSchedule> mSchedules, HashMap<String, MFrequency> mFrequencies, HashMap<Long, MRoute> mRoutes,
@@ -214,6 +291,16 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						System.out.printf("\n%s: Keeping non-descritive trip headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
 						tripKeptNonDescriptiveHeadsign = true; // last trip that can keep same head sign
 					}
+				}
+			}
+			for (MTrip mTrip : mTrips.values()) {
+				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING //
+						&& StringUtils.isEmpty(mTrip.getHeadsignValue())) {
+					System.out.printf("\n%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
+					System.out.printf("\n%s: %s", this.routeId, mTripHeasignStrings);
+					System.out.printf("\n%s: %s", this.routeId, mTrips);
+					System.out.printf("\n");
+					System.exit(-1);
 				}
 			}
 		}
@@ -409,9 +496,11 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		for (int i = 0; i < gStopTimes.size(); i++) {
 			GStopTime gStopTime = gStopTimes.get(i);
 			descentOnly = false;
-			if (!gStopTime.getTripId().equals(gTripStop.getTripId()) || !gStopTime.getStopId().equals(gTripStop.getStopId())
+			if (!gStopTime.getTripId().equals(gTripStop.getTripId()) //
+					|| !gStopTime.getStopId().equals(gTripStop.getStopId()) //
 					|| gStopTime.getStopSequence() != gTripStop.getStopSequence()) {
-				if (gStopTime.getTripId().equals(gTripStop.getTripId()) && gStopTime.getStopId().equals(gTripStop.getStopId())) {
+				if (gStopTime.getTripId().equals(gTripStop.getTripId()) //
+						&& gStopTime.getStopId().equals(gTripStop.getStopId())) {
 				}
 				continue;
 			}
@@ -422,21 +511,24 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			tripIdStopId = mTripId + gStopTime.getTripId() + gStopTime.getStopId();
 			if (descentOnly) {
-				if (addedMTripIdAndGStopIds.containsKey(tripIdStopId) && addedMTripIdAndGStopIds.get(tripIdStopId) != gStopTime.getStopSequence()) {
+				if (addedMTripIdAndGStopIds.containsKey(tripIdStopId) //
+						&& addedMTripIdAndGStopIds.get(tripIdStopId) != gStopTime.getStopSequence()) {
 					System.out.printf("\n%s: parseStopTimes() > SKIP same stop & descent only %s.", this.routeId, gStopTime);
 					continue;
 				}
 			}
-			mSchedule = new MSchedule(tripServiceId, mRoute.getId(), mTripId, mStopId, this.agencyTools.getTimes(this.routeId, gStopTime, routeGTFS,
-					G_TIME_FORMAT, M_TIME_FORMAT), gStopTime.getTripId());
-			if (mSchedules.containsKey(mSchedule.getUID()) && !mSchedules.get(mSchedule.getUID()).equals(mSchedule)) {
+			mSchedule = new MSchedule(tripServiceId, mRoute.getId(), mTripId, mStopId, //
+					this.agencyTools.getTimes(this.routeId, gStopTime, routeGTFS, G_TIME_FORMAT, M_TIME_FORMAT), //
+					gStopTime.getTripId());
+			if (mSchedules.containsKey(mSchedule.getUID()) //
+					&& !mSchedules.get(mSchedule.getUID()).equals(mSchedule)) {
 				System.out.printf("\n%s: Different schedule %s already in list (%s != %s)!\n", this.routeId, mSchedule.getUID(), mSchedule,
 						mSchedules.get(mSchedule.getUID()));
 				System.exit(-1);
 			}
 			mSchedule.setDescentOnly(true);
 			if (gStopTime.hasStopHeadsign()) {
-				stopHeadsign = this.agencyTools.cleanTripHeadsign(gStopTime.getStopHeadsign());
+				stopHeadsign = this.agencyTools.cleanStopHeadsign(gStopTime.getStopHeadsign());
 				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_STRING, stopHeadsign);
 				tripStopTimesHeadsign = setTripStopTimesHeadsign(tripStopTimesHeadsign, stopHeadsign);
 			} else {

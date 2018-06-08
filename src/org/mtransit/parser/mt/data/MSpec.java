@@ -3,6 +3,7 @@ package org.mtransit.parser.mt.data;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 public class MSpec {
 
@@ -15,8 +16,12 @@ public class MSpec {
 	private TreeMap<Integer, ArrayList<MSchedule>> stopSchedules;
 	private TreeMap<Long, ArrayList<MFrequency>> routeFrequencies;
 
+	private long firstTimestamp;
+	private long lastTimestamp;
+
 	public MSpec(ArrayList<MAgency> agencies, ArrayList<MStop> stops, ArrayList<MRoute> routes, ArrayList<MTrip> trips, ArrayList<MTripStop> tripStops,
-			ArrayList<MServiceDate> serviceDates, TreeMap<Integer, ArrayList<MSchedule>> stopSchedules, TreeMap<Long, ArrayList<MFrequency>> routeFrequencies) {
+			ArrayList<MServiceDate> serviceDates, TreeMap<Integer, ArrayList<MSchedule>> stopSchedules, TreeMap<Long, ArrayList<MFrequency>> routeFrequencies,
+			long firstTimestamp, long lastTimestamp) {
 		this.agencies = agencies;
 		this.stops = stops;
 		this.routes = routes;
@@ -25,6 +30,8 @@ public class MSpec {
 		this.serviceDates = serviceDates;
 		this.stopSchedules = stopSchedules;
 		this.routeFrequencies = routeFrequencies;
+		this.firstTimestamp = firstTimestamp;
+		this.lastTimestamp = lastTimestamp;
 	}
 
 	public boolean isValid() {
@@ -108,6 +115,22 @@ public class MSpec {
 		return new SimpleDateFormat("HHmmss");
 	}
 
+	public long getFirstTimestamp() {
+		return firstTimestamp;
+	}
+
+	public int getFirstTimestampInSeconds() {
+		return (int) TimeUnit.MILLISECONDS.toSeconds(firstTimestamp);
+	}
+
+	public long getLastTimestamp() {
+		return lastTimestamp;
+	}
+
+	public int getLastTimestampInSeconds() {
+		return (int) TimeUnit.MILLISECONDS.toSeconds(lastTimestamp);
+	}
+
 	@Override
 	public String toString() {
 		return MSpec.class.getSimpleName() + "{" //
@@ -119,6 +142,8 @@ public class MSpec {
 				+ "stops:" + stops + "," //
 				+ "stopSchedules:" + stopSchedules + "," //
 				+ "routeFrequencies:" + routeFrequencies + "," //
+				+ "firstTimestamp:" + firstTimestamp + "," //
+				+ "lastTimestamp:" + lastTimestamp + "," //
 				+ "}";
 	}
 }

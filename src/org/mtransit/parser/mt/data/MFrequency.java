@@ -45,6 +45,18 @@ public class MFrequency implements Comparable<MFrequency> {
 		return this.uuid;
 	}
 
+	public String getServiceId() {
+		return serviceId;
+	}
+
+	public int getStartTime() {
+		return startTime;
+	}
+
+	public int getEndTime() {
+		return endTime;
+	}
+
 	@Override
 	public int compareTo(MFrequency otherFrequency) {
 		if (!this.serviceId.equals(otherFrequency.serviceId)) {

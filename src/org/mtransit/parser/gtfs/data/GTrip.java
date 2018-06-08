@@ -18,6 +18,8 @@ public class GTrip {
 
 	public static final String TRIP_HEADSIGN = "trip_headsign";
 	private String trip_headsign;
+	public static final String TRIP_SHORT_NAME = "trip_short_name";
+	private String trip_short_name;
 	public static final String DIRECTION_ID = "direction_id";
 	private Integer direction_id;
 	public static final String SHAPE_ID = "shape_id";
@@ -25,12 +27,13 @@ public class GTrip {
 
 	private String uid;
 
-	public GTrip(String route_id, String service_id, String trip_id, Integer direction_id, String trip_headsign, String shape_id) {
+	public GTrip(String route_id, String service_id, String trip_id, Integer direction_id, String trip_headsign, String trip_short_name, String shape_id) {
 		this.route_id = route_id;
 		this.service_id = service_id;
 		this.trip_id = trip_id;
 		this.direction_id = direction_id;
 		this.trip_headsign = trip_headsign;
+		this.trip_short_name = trip_short_name;
 		this.shape_id = shape_id;
 		this.uid = getUID(this.getRouteId(), this.trip_id);
 	}
@@ -75,6 +78,10 @@ public class GTrip {
 		return trip_headsign;
 	}
 
+	public String getTripShortName() {
+		return trip_short_name;
+	}
+
 	@Override
 	public String toString() {
 		return new StringBuilder() //
@@ -82,6 +89,7 @@ public class GTrip {
 				.append(Constants.STRING_DELIMITER).append(this.service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.trip_headsign).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
+				.append(Constants.STRING_DELIMITER).append(this.trip_short_name).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.direction_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.shape_id).append(Constants.STRING_DELIMITER) //
 				.toString();

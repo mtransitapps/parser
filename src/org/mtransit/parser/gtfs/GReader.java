@@ -325,7 +325,7 @@ public class GReader {
 		try {
 			String directionId = line.get(GTrip.DIRECTION_ID);
 			GTrip gTrip = new GTrip(line.get(GTrip.ROUTE_ID), line.get(GTrip.SERVICE_ID), line.get(GTrip.TRIP_ID), StringUtils.isEmpty(directionId) ? null
-					: Integer.valueOf(directionId), line.get(GTrip.TRIP_HEADSIGN), line.get(GTrip.SHAPE_ID));
+					: Integer.valueOf(directionId), line.get(GTrip.TRIP_HEADSIGN), line.get(GTrip.TRIP_SHORT_NAME), line.get(GTrip.SHAPE_ID));
 			if (agencyTools.excludeTrip(gTrip)) {
 				return;
 			}

@@ -57,6 +57,8 @@ public class MGenerator {
 		TreeMap<Integer, ArrayList<MSchedule>> mStopSchedules = new TreeMap<Integer, ArrayList<MSchedule>>();
 		TreeMap<Long, ArrayList<MFrequency>> mRouteFrequencies = new TreeMap<Long, ArrayList<MFrequency>>();
 		HashSet<MServiceDate> mServiceDates = new HashSet<MServiceDate>(); // use set to avoid duplicates
+		long firstTimestamp = -1L;
+		long lastTimestamp = -1L;
 		ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(agencyTools.getThreadPoolSize());
 		ArrayList<Future<MSpec>> list = new ArrayList<Future<MSpec>>();
 		ArrayList<Long> routeIds = new ArrayList<Long>(gtfs.getRouteIds());
@@ -121,6 +123,12 @@ public class MGenerator {
 						System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies... DONE)", mRouteSpec
 								.getFirstRoute().getId());
 					}
+					if (firstTimestamp < 0L || firstTimestamp > mRouteSpec.getFirstTimestamp()) {
+						firstTimestamp = mRouteSpec.getFirstTimestamp();
+					}
+					if (lastTimestamp < 0L || lastTimestamp > mRouteSpec.getLastTimestamp()) {
+						lastTimestamp = mRouteSpec.getLastTimestamp();
+					}
 				} else {
 					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (EMPTY)", mRouteSpec.getFirstRoute().getId());
 				}
@@ -154,7 +162,10 @@ public class MGenerator {
 		System.out.printf("\n- Service Dates: %d", mServiceDatesList.size());
 		System.out.printf("\n- Stop with Schedules: %d", mStopSchedules.size());
 		System.out.printf("\n- Route with Frequencies: %d", mRouteFrequencies.size());
-		return new MSpec(mAgenciesList, mStopsList, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, mStopSchedules, mRouteFrequencies);
+		System.out.printf("\n- First timestamp: %d", firstTimestamp);
+		System.out.printf("\n- Last timestamp: %d", lastTimestamp);
+		return new MSpec(mAgenciesList, mStopsList, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, mStopSchedules, mRouteFrequencies,
+				firstTimestamp, lastTimestamp);
 	}
 
 	private static final String GTFS_SCHEDULE_SERVICE_DATES = "gtfs_schedule_service_dates";
@@ -416,7 +427,7 @@ public class MGenerator {
 				}
 			}
 		}
-		dumpValues(dumpDirF, mSpec, minLat, maxLat, minLng, maxLng);
+		dumpValues(dumpDirF, mSpec, minLat, maxLat, minLng, maxLng, mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds());
 		dumpStoreListing(dumpDirF, minDate, maxDate);
 		bumpDBVersion(dumpDirF, gtfsFile);
 		System.out.printf("\nWriting files (%s)... DONE in %s.", dumpDirF.toURI(), Utils.getPrettyDuration(System.currentTimeMillis() - start));
@@ -508,8 +519,11 @@ public class MGenerator {
 	private static final String GTFS_RTS_AREA_MIN_LNG = "gtfs_rts_area_min_lng";
 	private static final String GTFS_RTS_AREA_MAX_LNG = "gtfs_rts_area_max_lng";
 	private static final String GTFS_RTS_COLOR = "gtfs_rts_color";
+	private static final String GTFS_RTS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec";
+	private static final String GTFS_RTS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec";
 
-	private static void dumpValues(File dumpDirF, MSpec mSpec, Double minLat, Double maxLat, Double minLng, Double maxLng) {
+	private static void dumpValues(File dumpDirF, MSpec mSpec, Double minLat, Double maxLat, Double minLng, Double maxLng, int firstTimestampInSec,
+			int lastTimestampInSec) {
 		File file;
 		BufferedWriter ow = null;
 		File dumpDirResF = dumpDirF.getParentFile();
@@ -540,6 +554,10 @@ public class MGenerator {
 			ow.write(getRESOURCES_STRING(GTFS_RTS_AREA_MAX_LNG, maxLng));
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_STRING(GTFS_RTS_COLOR, mSpec.getFirstAgency().getColor()));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_INTEGER(GTFS_RTS_FIRST_DEPARTURE_IN_SEC, firstTimestampInSec));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_INTEGER(GTFS_RTS_LAST_DEPARTURE_IN_SEC, lastTimestampInSec));
 			ow.write(Constants.NEW_LINE);
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);
