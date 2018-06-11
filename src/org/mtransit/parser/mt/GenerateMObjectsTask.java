@@ -164,7 +164,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			MSchedule lastSchedule = null;
 			for (MSchedule mSchedule : mSchedulesList) {
 				if (mSchedule.getServiceId().equals(firstServiceDate.getServiceId())) {
-					if (firstSchedule == null || firstSchedule.getDeparture() > mSchedule.getDeparture()) {
+					if (firstSchedule == null || mSchedule.getDeparture() < firstSchedule.getDeparture()) {
 						firstSchedule = mSchedule;
 					}
 				}
@@ -175,33 +175,33 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 			}
 			if (firstSchedule != null //
-					&& (firstDeparture < 0 || firstDeparture > firstSchedule.getDeparture())) {
+					&& (firstDeparture < 0 || firstSchedule.getDeparture() < firstDeparture)) {
 				firstDeparture = firstSchedule.getDeparture();
 			}
 			if (lastSchedule != null //
-					&& (lastDeparture < 0 || lastDeparture > lastSchedule.getDeparture())) {
+					&& (lastDeparture < 0 || lastDeparture < lastSchedule.getDeparture())) {
 				lastDeparture = lastSchedule.getDeparture();
 			}
 			MFrequency firstFrequency = null;
 			MFrequency lastFrequency = null;
 			for (MFrequency mFrequency : mFrequenciesList) {
 				if (mFrequency.getServiceId().equals(firstServiceDate.getServiceId())) {
-					if (firstFrequency == null || firstFrequency.getStartTime() > mFrequency.getStartTime()) {
+					if (firstFrequency == null || mFrequency.getStartTime() < firstFrequency.getStartTime()) {
 						firstFrequency = mFrequency;
 					}
 				}
 				if (mFrequency.getServiceId().equals(lastServiceDate.getServiceId())) {
-					if (lastFrequency == null || lastFrequency.getEndTime() > mFrequency.getEndTime()) {
+					if (lastFrequency == null || lastFrequency.getEndTime() < mFrequency.getEndTime()) {
 						lastFrequency = mFrequency;
 					}
 				}
 			}
 			if (firstFrequency != null //
-					&& (firstDeparture < -1 || firstDeparture > firstFrequency.getStartTime())) {
+					&& (firstDeparture < -1 || firstFrequency.getStartTime() < firstDeparture)) {
 				firstDeparture = firstFrequency.getStartTime();
 			}
 			if (lastFrequency != null //
-					&& (lastDeparture < -1 || lastDeparture > lastFrequency.getEndTime())) {
+					&& (lastDeparture < -1 || lastDeparture < lastFrequency.getEndTime())) {
 				lastDeparture = lastFrequency.getEndTime();
 			}
 			SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd HHmmss", Locale.ENGLISH);

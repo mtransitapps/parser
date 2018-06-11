@@ -123,10 +123,10 @@ public class MGenerator {
 						System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies... DONE)", mRouteSpec
 								.getFirstRoute().getId());
 					}
-					if (firstTimestamp < 0L || firstTimestamp > mRouteSpec.getFirstTimestamp()) {
+					if (firstTimestamp < 0L || mRouteSpec.getFirstTimestamp() < firstTimestamp) {
 						firstTimestamp = mRouteSpec.getFirstTimestamp();
 					}
-					if (lastTimestamp < 0L || lastTimestamp > mRouteSpec.getLastTimestamp()) {
+					if (lastTimestamp < 0L || lastTimestamp < mRouteSpec.getLastTimestamp()) {
 						lastTimestamp = mRouteSpec.getLastTimestamp();
 					}
 				} else {
