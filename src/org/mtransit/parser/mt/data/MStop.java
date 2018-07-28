@@ -57,6 +57,7 @@ public class MStop implements Comparable<MStop> {
 	public String toString() {
 		return printString();
 	}
+
 	public String printString() {
 		StringBuilder sb = new StringBuilder(); //
 		sb.append(this.id); // ID

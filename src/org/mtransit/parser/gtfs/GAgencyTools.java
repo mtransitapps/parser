@@ -22,6 +22,8 @@ public interface GAgencyTools {
 
 	int getThreadPoolSize();
 
+	boolean excludingAll();
+
 	String getAgencyColor();
 
 	Integer getAgencyRouteType();

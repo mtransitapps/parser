@@ -177,13 +177,20 @@ public class MGenerator {
 	private static final String GTFS_RTS_STOPS = "gtfs_rts_stops";
 
 	public static void dumpFiles(MSpec mSpec, String gtfsFile, String dumpDir, final String fileBase) {
-		if (!mSpec.isValid()) {
+		dumpFiles(mSpec, gtfsFile, dumpDir, fileBase, false);
+	}
+
+	public static void dumpFiles(MSpec mSpec, String gtfsFile, String dumpDir, final String fileBase, boolean deleteAll) {
+		if (!deleteAll && (mSpec == null || !mSpec.isValid())) {
 			System.out.printf("\nERROR: Generated data invalid (agencies:%s)!\n", mSpec);
 			System.exit(-1);
 			return;
 		}
 		long start = System.currentTimeMillis();
 		final File dumpDirF = new File(dumpDir);
+		if (!dumpDirF.getParentFile().exists()) {
+			dumpDirF.getParentFile().mkdir();
+		}
 		if (!dumpDirF.exists()) {
 			dumpDirF.mkdir();
 		}
@@ -194,15 +201,18 @@ public class MGenerator {
 		file = new File(dumpDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
 		file.delete(); // delete previous
 		try {
-			ow = new BufferedWriter(new FileWriter(file));
-			for (MServiceDate mServiceDate : mSpec.getServiceDates()) {
-				ow.write(mServiceDate.toString());
-				ow.write(Constants.NEW_LINE);
-				if (minDate == null || minDate.intValue() > mServiceDate.getCalendarDate()) {
-					minDate = mServiceDate.getCalendarDate();
-				}
-				if (maxDate == null || maxDate.doubleValue() < mServiceDate.getCalendarDate()) {
-					maxDate = mServiceDate.getCalendarDate();
+			if (!deleteAll) {
+				ow = new BufferedWriter(new FileWriter(file));
+				for (MServiceDate mServiceDate : mSpec.getServiceDates()) {
+					// System.out.println("write: " + mServiceDate.toString());
+					ow.write(mServiceDate.toString());
+					ow.write(Constants.NEW_LINE);
+					if (minDate == null || minDate.intValue() > mServiceDate.getCalendarDate()) {
+						minDate = mServiceDate.getCalendarDate();
+					}
+					if (maxDate == null || maxDate.doubleValue() < mServiceDate.getCalendarDate()) {
+						maxDate = mServiceDate.getCalendarDate();
+					}
 				}
 			}
 		} catch (IOException ioe) {
@@ -235,43 +245,45 @@ public class MGenerator {
 		String fileName;
 		boolean empty;
 		ArrayList<MSchedule> mStopSchedules;
-		for (Integer stopId : mSpec.getStopSchedules().keySet()) {
-			try {
-				mStopSchedules = mSpec.getStopSchedules().get(stopId);
-				if (mStopSchedules != null && mStopSchedules.size() > 0) {
-					fileName = fileBaseScheduleStop + stopId;
-					file = new File(dumpDirF, fileName);
-					empty = true;
-					ow = new BufferedWriter(new FileWriter(file));
-					MSchedule lastSchedule = null;
-					for (MSchedule mSchedule : mStopSchedules) {
-						if (mSchedule.sameServiceIdAndTripId(lastSchedule)) {
-							ow.write(Constants.COLUMN_SEPARATOR);
-							ow.write(mSchedule.toStringSameServiceIdAndTripId(lastSchedule));
-						} else {
-							if (!empty) {
-								ow.write(Constants.NEW_LINE);
+		if (!deleteAll) {
+			for (Integer stopId : mSpec.getStopSchedules().keySet()) {
+				try {
+					mStopSchedules = mSpec.getStopSchedules().get(stopId);
+					if (mStopSchedules != null && mStopSchedules.size() > 0) {
+						fileName = fileBaseScheduleStop + stopId;
+						file = new File(dumpDirF, fileName);
+						empty = true;
+						ow = new BufferedWriter(new FileWriter(file));
+						MSchedule lastSchedule = null;
+						for (MSchedule mSchedule : mStopSchedules) {
+							if (mSchedule.sameServiceIdAndTripId(lastSchedule)) {
+								ow.write(Constants.COLUMN_SEPARATOR);
+								ow.write(mSchedule.toStringSameServiceIdAndTripId(lastSchedule));
+							} else {
+								if (!empty) {
+									ow.write(Constants.NEW_LINE);
+								}
+								ow.write(mSchedule.toStringNewServiceIdAndTripId());
 							}
-							ow.write(mSchedule.toStringNewServiceIdAndTripId());
+							empty = false;
+							lastSchedule = mSchedule;
 						}
-						empty = false;
-						lastSchedule = mSchedule;
+						if (empty) {
+							file.delete();
+						}
 					}
-					if (empty) {
-						file.delete();
-					}
-				}
-			} catch (IOException ioe) {
-				System.out.printf("\nI/O Error while writing schedule file for stop '%s'!\n", stopId);
-				ioe.printStackTrace();
-				System.exit(-1);
-			} finally {
-				if (ow != null) {
-					try {
-						ow.close();
-					} catch (IOException ioe) {
-						System.out.printf("\nI/O Error while closing file for stop '%s'!\n", stopId);
-						ioe.printStackTrace();
+				} catch (IOException ioe) {
+					System.out.printf("\nI/O Error while writing schedule file for stop '%s'!\n", stopId);
+					ioe.printStackTrace();
+					System.exit(-1);
+				} finally {
+					if (ow != null) {
+						try {
+							ow.close();
+						} catch (IOException ioe) {
+							System.out.printf("\nI/O Error while closing file for stop '%s'!\n", stopId);
+							ioe.printStackTrace();
+						}
 					}
 				}
 			}
@@ -290,34 +302,36 @@ public class MGenerator {
 			}
 		}
 		ArrayList<MFrequency> mRouteFrequencies;
-		for (Long routeId : mSpec.getRouteFrequencies().keySet()) {
-			try {
-				mRouteFrequencies = mSpec.getRouteFrequencies().get(routeId);
-				if (mRouteFrequencies != null && mRouteFrequencies.size() > 0) {
-					fileName = fileBaseRouteFrequency + routeId;
-					file = new File(dumpDirF, fileName);
-					empty = true;
-					ow = new BufferedWriter(new FileWriter(file));
-					for (MFrequency mFrequency : mRouteFrequencies) {
-						ow.write(mFrequency.toString());
-						ow.write(Constants.NEW_LINE);
-						empty = false;
+		if (!deleteAll) {
+			for (Long routeId : mSpec.getRouteFrequencies().keySet()) {
+				try {
+					mRouteFrequencies = mSpec.getRouteFrequencies().get(routeId);
+					if (mRouteFrequencies != null && mRouteFrequencies.size() > 0) {
+						fileName = fileBaseRouteFrequency + routeId;
+						file = new File(dumpDirF, fileName);
+						empty = true;
+						ow = new BufferedWriter(new FileWriter(file));
+						for (MFrequency mFrequency : mRouteFrequencies) {
+							ow.write(mFrequency.toString());
+							ow.write(Constants.NEW_LINE);
+							empty = false;
+						}
+						if (empty) {
+							file.delete();
+						}
 					}
-					if (empty) {
-						file.delete();
-					}
-				}
-			} catch (IOException ioe) {
-				System.out.printf("\nI/O Error while writing frequency file!\n");
-				ioe.printStackTrace();
-				System.exit(-1);
-			} finally {
-				if (ow != null) {
-					try {
-						ow.close();
-					} catch (IOException ioe) {
-						System.out.printf("\nI/O Error while closing frequency file!\n");
-						ioe.printStackTrace();
+				} catch (IOException ioe) {
+					System.out.printf("\nI/O Error while writing frequency file!\n");
+					ioe.printStackTrace();
+					System.exit(-1);
+				} finally {
+					if (ow != null) {
+						try {
+							ow.close();
+						} catch (IOException ioe) {
+							System.out.printf("\nI/O Error while closing frequency file!\n");
+							ioe.printStackTrace();
+						}
 					}
 				}
 			}
@@ -325,10 +339,12 @@ public class MGenerator {
 		file = new File(dumpDirF, fileBase + GTFS_RTS_ROUTES);
 		file.delete(); // delete previous
 		try {
-			ow = new BufferedWriter(new FileWriter(file));
-			for (MRoute mRoute : mSpec.getRoutes()) {
-				ow.write(mRoute.toString());
-				ow.write(Constants.NEW_LINE);
+			if (!deleteAll) {
+				ow = new BufferedWriter(new FileWriter(file));
+				for (MRoute mRoute : mSpec.getRoutes()) {
+					ow.write(mRoute.toString());
+					ow.write(Constants.NEW_LINE);
+				}
 			}
 		} catch (IOException ioe) {
 			System.out.printf("\nI/O Error while writing route file!\n");
@@ -347,10 +363,12 @@ public class MGenerator {
 		file = new File(dumpDirF, fileBase + GTFS_RTS_TRIPS);
 		file.delete(); // delete previous
 		try {
-			ow = new BufferedWriter(new FileWriter(file));
-			for (MTrip mTrip : mSpec.getTrips()) {
-				ow.write(mTrip.printString());
-				ow.write(Constants.NEW_LINE);
+			if (!deleteAll) {
+				ow = new BufferedWriter(new FileWriter(file));
+				for (MTrip mTrip : mSpec.getTrips()) {
+					ow.write(mTrip.printString());
+					ow.write(Constants.NEW_LINE);
+				}
 			}
 		} catch (IOException ioe) {
 			System.out.printf("\nI/O Error while writing trip file!\n");
@@ -369,10 +387,12 @@ public class MGenerator {
 		file = new File(dumpDirF, fileBase + GTFS_RTS_TRIP_STOPS);
 		file.delete(); // delete previous
 		try {
-			ow = new BufferedWriter(new FileWriter(file));
-			for (MTripStop mTripStop : mSpec.getTripStops()) {
-				ow.write(mTripStop.toString());
-				ow.write(Constants.NEW_LINE);
+			if (!deleteAll) {
+				ow = new BufferedWriter(new FileWriter(file));
+				for (MTripStop mTripStop : mSpec.getTripStops()) {
+					ow.write(mTripStop.toString());
+					ow.write(Constants.NEW_LINE);
+				}
 			}
 		} catch (IOException ioe) {
 			System.out.printf("\nI/O Error while writing trip stops file!\n");
@@ -392,24 +412,26 @@ public class MGenerator {
 		file = new File(dumpDirF, fileBase + GTFS_RTS_STOPS);
 		file.delete(); // delete previous
 		try {
-			ow = new BufferedWriter(new FileWriter(file));
-			for (MStop mStop : mSpec.getStops()) {
-				ow.write(mStop.printString());
-				ow.write(Constants.NEW_LINE);
-				if (mStop.hasLat()) {
-					if (minLat == null || minLat.doubleValue() > mStop.getLat()) {
-						minLat = mStop.getLat();
+			if (!deleteAll) {
+				ow = new BufferedWriter(new FileWriter(file));
+				for (MStop mStop : mSpec.getStops()) {
+					ow.write(mStop.printString());
+					ow.write(Constants.NEW_LINE);
+					if (mStop.hasLat()) {
+						if (minLat == null || minLat.doubleValue() > mStop.getLat()) {
+							minLat = mStop.getLat();
+						}
+						if (maxLat == null || maxLat.doubleValue() < mStop.getLat()) {
+							maxLat = mStop.getLat();
+						}
 					}
-					if (maxLat == null || maxLat.doubleValue() < mStop.getLat()) {
-						maxLat = mStop.getLat();
-					}
-				}
-				if (mStop.hasLng()) {
-					if (minLng == null || minLng.doubleValue() > mStop.getLng()) {
-						minLng = mStop.getLng();
-					}
-					if (maxLng == null || maxLng.doubleValue() < mStop.getLng()) {
-						maxLng = mStop.getLng();
+					if (mStop.hasLng()) {
+						if (minLng == null || minLng.doubleValue() > mStop.getLng()) {
+							minLng = mStop.getLng();
+						}
+						if (maxLng == null || maxLng.doubleValue() < mStop.getLng()) {
+							maxLng = mStop.getLng();
+						}
 					}
 				}
 			}
@@ -427,9 +449,14 @@ public class MGenerator {
 				}
 			}
 		}
-		dumpValues(dumpDirF, mSpec, minLat, maxLat, minLng, maxLng, mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds());
-		dumpStoreListing(dumpDirF, minDate, maxDate);
-		bumpDBVersion(dumpDirF, gtfsFile);
+		if (deleteAll) {
+			dumpValues(dumpDirF, fileBase, null, null, null, null, null, -1, -1, true);
+		} else {
+			dumpCommonValues(dumpDirF, mSpec);
+			dumpValues(dumpDirF, fileBase, mSpec, minLat, maxLat, minLng, maxLng, mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds(), false);
+			dumpStoreListing(dumpDirF, fileBase, minDate, maxDate);
+			bumpDBVersion(dumpDirF, fileBase, gtfsFile);
+		}
 		System.out.printf("\nWriting files (%s)... DONE in %s.", dumpDirF.toURI(), Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
@@ -441,7 +468,7 @@ public class MGenerator {
 			Pattern.CASE_INSENSITIVE);
 	private static final String RTS_DB_VERSION_REPLACEMENT = "$2%s$4";
 
-	private static void bumpDBVersion(File dumpDirF, String gtfsFile) {
+	private static void bumpDBVersion(File dumpDirF, String fileBase, String gtfsFile) {
 		System.out.printf("\nBumping DB version...");
 		BufferedWriter ow = null;
 		String lastModifiedTimeDateS = getLastModified(gtfsFile);
@@ -451,9 +478,10 @@ public class MGenerator {
 		}
 		int lastModifiedTimeDateI = Integer.parseInt(lastModifiedTimeDateS);
 		try {
-			File dumpDirResF = dumpDirF.getParentFile();
+			File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
+			File dumpDirResF = new File(dumpDirRootF, RES);
 			File valuesDirF = new File(dumpDirResF, VALUES);
-			File gtfsRtsValuesXmlF = new File(valuesDirF, GTFS_RTS_VALUES_XML);
+			File gtfsRtsValuesXmlF = new File(valuesDirF, GTFS_RTS_VALUES_XML); // shared between different schedule (current, next...)
 			String content = new String(Files.readAllBytes(gtfsRtsValuesXmlF.toPath()), StandardCharsets.UTF_8);
 			Matcher matcher = RTS_DB_VERSION_REGEX.matcher(content);
 			if (!matcher.find() || matcher.groupCount() < 4) {
@@ -507,26 +535,28 @@ public class MGenerator {
 		}
 	}
 
+	private static final String RES = "res";
 	private static final String VALUES = "values";
 	private static final String GTFS_RTS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml";
 
 	private static final String GTFS_RTS_AGENCY_TYPE = "gtfs_rts_agency_type";
+	private static final String GTFS_RTS_TIMEZONE = "gtfs_rts_timezone";
+	private static final String GTFS_RTS_COLOR = "gtfs_rts_color";
+
 	private static final String GTFS_RTS_SCHEDULE_AVAILABLE = "gtfs_rts_schedule_available";
 	private static final String GTFS_RTS_FREQUENCY_AVAILABLE = "gtfs_rts_frequency_available";
-	private static final String GTFS_RTS_TIMEZONE = "gtfs_rts_timezone";
 	private static final String GTFS_RTS_AREA_MIN_LAT = "gtfs_rts_area_min_lat";
 	private static final String GTFS_RTS_AREA_MAX_LAT = "gtfs_rts_area_max_lat";
 	private static final String GTFS_RTS_AREA_MIN_LNG = "gtfs_rts_area_min_lng";
 	private static final String GTFS_RTS_AREA_MAX_LNG = "gtfs_rts_area_max_lng";
-	private static final String GTFS_RTS_COLOR = "gtfs_rts_color";
 	private static final String GTFS_RTS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec";
 	private static final String GTFS_RTS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec";
 
-	private static void dumpValues(File dumpDirF, MSpec mSpec, Double minLat, Double maxLat, Double minLng, Double maxLng, int firstTimestampInSec,
-			int lastTimestampInSec) {
+	private static void dumpCommonValues(File dumpDirF, MSpec mSpec) {
 		File file;
 		BufferedWriter ow = null;
-		File dumpDirResF = dumpDirF.getParentFile();
+		File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
+		File dumpDirResF = new File(dumpDirRootF, RES);
 		File valuesDirF = new File(dumpDirResF, VALUES);
 		file = new File(valuesDirF, GTFS_RTS_VALUES_GEN_XML);
 		file.delete(); // delete previous
@@ -539,25 +569,79 @@ public class MGenerator {
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_INTEGER(GTFS_RTS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_BOOL(GTFS_RTS_SCHEDULE_AVAILABLE, mSpec.getStopSchedules().size() > 0));
-			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_BOOL(GTFS_RTS_FREQUENCY_AVAILABLE, mSpec.getRouteFrequencies().size() > 0));
-			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_STRING(GTFS_RTS_TIMEZONE, mSpec.getFirstAgency().getTimezone()));
-			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_STRING(GTFS_RTS_AREA_MIN_LAT, minLat));
-			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_STRING(GTFS_RTS_AREA_MAX_LAT, maxLat));
-			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_STRING(GTFS_RTS_AREA_MIN_LNG, minLng));
-			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_STRING(GTFS_RTS_AREA_MAX_LNG, maxLng));
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_STRING(GTFS_RTS_COLOR, mSpec.getFirstAgency().getColor()));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_INTEGER(GTFS_RTS_FIRST_DEPARTURE_IN_SEC, firstTimestampInSec));
+			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_INTEGER(GTFS_RTS_LAST_DEPARTURE_IN_SEC, lastTimestampInSec));
+		} catch (IOException ioe) {
+			System.out.printf("\nI/O Error while writing values file!\n");
+			ioe.printStackTrace();
+			System.exit(-1);
+		} finally {
+			if (ow != null) {
+				try {
+					ow.close();
+				} catch (IOException ioe) {
+					System.out.printf("\nI/O Error while closing values file!\n");
+					ioe.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private static void dumpValues(File dumpDirF, String fileBase, MSpec mSpec, Double minLat, Double maxLat, Double minLng, Double maxLng,
+			int firstTimestampInSec, int lastTimestampInSec, boolean deleteAll) {
+		File file;
+		BufferedWriter ow = null;
+		File dumpDirResF = dumpDirF.getParentFile();
+		if (!dumpDirResF.exists()) {
+			dumpDirResF.mkdir();
+		}
+		File valuesDirF = new File(dumpDirResF, VALUES);
+		if (!valuesDirF.exists()) {
+			valuesDirF.mkdir();
+		}
+		file = new File(valuesDirF, fileBase + GTFS_RTS_VALUES_GEN_XML);
+		file.delete(); // delete previous
+		if (deleteAll) {
+			return;
+		}
+		System.out.printf("\nGenerated values file: '%s'.", file);
+		try {
+			ow = new BufferedWriter(new FileWriter(file));
+			ow.write(XML_HEADER);
+			ow.write(Constants.NEW_LINE);
+			ow.write(RESOURCES_START);
+			ow.write(Constants.NEW_LINE);
+			if (StringUtils.isEmpty(fileBase)) {
+				ow.write(getRESOURCES_INTEGER(GTFS_RTS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
+				ow.write(Constants.NEW_LINE);
+			}
+			ow.write(getRESOURCES_BOOL(fileBase + GTFS_RTS_SCHEDULE_AVAILABLE, mSpec.getStopSchedules().size() > 0));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_BOOL(fileBase + GTFS_RTS_FREQUENCY_AVAILABLE, mSpec.getRouteFrequencies().size() > 0));
+			ow.write(Constants.NEW_LINE);
+			if (StringUtils.isEmpty(fileBase)) {
+				ow.write(getRESOURCES_STRING(GTFS_RTS_TIMEZONE, mSpec.getFirstAgency().getTimezone()));
+				ow.write(Constants.NEW_LINE);
+			}
+			ow.write(getRESOURCES_STRING(fileBase + GTFS_RTS_AREA_MIN_LAT, minLat));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_STRING(fileBase + GTFS_RTS_AREA_MAX_LAT, maxLat));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_STRING(fileBase + GTFS_RTS_AREA_MIN_LNG, minLng));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_STRING(fileBase + GTFS_RTS_AREA_MAX_LNG, maxLng));
+			ow.write(Constants.NEW_LINE);
+			if (StringUtils.isEmpty(fileBase)) {
+				ow.write(getRESOURCES_STRING(GTFS_RTS_COLOR, mSpec.getFirstAgency().getColor()));
+				ow.write(Constants.NEW_LINE);
+			}
+			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_FIRST_DEPARTURE_IN_SEC, firstTimestampInSec));
+			ow.write(Constants.NEW_LINE);
+			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_LAST_DEPARTURE_IN_SEC, lastTimestampInSec));
 			ow.write(Constants.NEW_LINE);
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);
@@ -601,15 +685,17 @@ public class MGenerator {
 	private static final String STORE_LISTING_TXT = "store-listing.txt";
 	private static final String STORE_LISTING_FR_TXT = "store-listing_fr.txt";
 
-	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from [A-Za-z]+ [0-9]{1,2}\\, [0-9]{4} to [A-Za-z]+ [0-9]{1,2}\\, [0-9]{4}\\.)",
+	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from ([A-Za-z]+ [0-9]{1,2}\\, [0-9]{4}) to ([A-Za-z]+ [0-9]{1,2}\\, [0-9]{4})\\.)",
 			Pattern.CASE_INSENSITIVE);
-	private static final String SCHEDULE_FROM_TO = "Schedule from %s to %s.";
+	private static final String SCHEDULE_FROM_TO = "Schedule from %1$s to %2$s.";
+	private static final String SCHEDULE_KEEP_FROM_TO = "Schedule from $2 to %2$s.";
 
-	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du [0-9]{1,2} [\\w]+ [0-9]{4} au [0-9]{1,2} [\\w]+ [0-9]{4}\\.)",
+	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du ([0-9]{1,2} [\\w]+ [0-9]{4}) au ([0-9]{1,2} [\\w]+ [0-9]{4})\\.)",
 			Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
-	private static final String SCHEDULE_FROM_TO_FR = "Horaires du %s au %s.";
+	private static final String SCHEDULE_FROM_TO_FR = "Horaires du %1$s au %2$s.";
+	private static final String SCHEDULE_KEEP_FROM_TO_FR = "Horaires du $2 au %2$s.";
 
-	private static void dumpStoreListing(File dumpDirF, Integer minDate, Integer maxDate) {
+	private static void dumpStoreListing(File dumpDirF, String fileBase, Integer minDate, Integer maxDate) {
 		SimpleDateFormat CALENDAR_DATE = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
 		SimpleDateFormat SCHEDULE_DATE = new SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH);
 		SimpleDateFormat SCHEDULE_DATE_FR = new SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH);
@@ -618,6 +704,7 @@ public class MGenerator {
 		File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
 		File valuesDirF = new File(dumpDirRootF, PUB);
 		file = new File(valuesDirF, STORE_LISTING_TXT);
+		boolean isNext = "next_".equalsIgnoreCase(fileBase);
 		if (file.exists()) {
 			System.out.printf("\nGenerated store listing file: '%s'.", file);
 			try {
@@ -625,7 +712,7 @@ public class MGenerator {
 				content = SCHEDULE.matcher(content)
 						.replaceAll(
 								String.format(
-										SCHEDULE_FROM_TO, //
+										isNext ? SCHEDULE_KEEP_FROM_TO : SCHEDULE_FROM_TO, //
 										SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(minDate))),
 										SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
@@ -653,7 +740,7 @@ public class MGenerator {
 				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF8);
 				content = SCHEDULE_FR.matcher(content).replaceAll(
 						String.format(
-								SCHEDULE_FROM_TO_FR, //
+								isNext ? SCHEDULE_KEEP_FROM_TO_FR : SCHEDULE_FROM_TO_FR, //
 								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(minDate))),
 								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);

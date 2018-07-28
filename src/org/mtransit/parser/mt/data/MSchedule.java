@@ -48,6 +48,7 @@ public class MSchedule implements Comparable<MSchedule> {
 
 	public String getUID() {
 		if (this.uid == null) {
+			// identifies a stop + trip + service (date) => departure
 			this.uid = this.serviceId + Constants.UUID_SEPARATOR + this.tripId + Constants.UUID_SEPARATOR + this.stopId + Constants.UUID_SEPARATOR
 					+ this.departure;
 		}
