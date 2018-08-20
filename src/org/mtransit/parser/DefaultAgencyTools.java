@@ -454,19 +454,31 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return GSpec.parseTimeString(gFrequency.getEndTime()); // GTFS standard
 	}
 
-	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
-		return extractUsefulServiceIds(args, agencyTools, false);
-	}
 
 	private static class Period {
 		Integer todayStringInt = null;
 		Integer startDate = null;
 		Integer endDate = null;
+
+		@Override
+		public String toString() {
+			return Period.class.getSimpleName() + "{" //
+					+ "todayStringInt: " + todayStringInt + ", " //
+					+ "startDate: " + startDate + ", " //
+					+ "endDate: " + endDate + ", " //
+					+ "}";
+		}
 	}
+
+	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
+		return extractUsefulServiceIds(args, agencyTools, false);
+	}
+
+	private static Period usefulPeriod = null;
 
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools, boolean agencyFilter) {
 		System.out.printf("\nExtracting useful service IDs...");
-		Period p = new Period();
+		usefulPeriod = new Period();
 		SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
 		boolean isCurrent = "current_".equalsIgnoreCase(args[2]);
 		boolean isNext = "next_".equalsIgnoreCase(args[2]);
@@ -475,9 +487,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (!isCurrentOrNext && TOMORROW) {
 			c.add(Calendar.DAY_OF_MONTH, 1); // TOMORROW (too late to publish today's schedule)
 		}
-		p.todayStringInt = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
+		usefulPeriod.todayStringInt = Integer.valueOf(DATE_FORMAT.format(c.getTime()));
 		if (!isCurrentOrNext && OVERRIDE_DATE != null) {
-			p.todayStringInt = OVERRIDE_DATE;
+			usefulPeriod.todayStringInt = OVERRIDE_DATE;
 		}
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, !agencyFilter, agencyFilter);
 		if (agencyFilter) {
@@ -488,63 +500,102 @@ public class DefaultAgencyTools implements GAgencyTools {
 		printMinMaxDate(gCalendars, gCalendarDates);
 		boolean hasCurrent = false;
 		if (gCalendars != null && gCalendars.size() > 0) {
-			parseCalendars(gCalendars, DATE_FORMAT, c, p, isCurrentOrNext);
+			parseCalendars(gCalendars, DATE_FORMAT, c, usefulPeriod, isCurrentOrNext);
 		} else if (gCalendarDates != null && gCalendarDates.size() > 0) {
-			parseCalendarDates(gCalendarDates, DATE_FORMAT, c, p, isCurrentOrNext);
+			parseCalendarDates(gCalendarDates, DATE_FORMAT, c, usefulPeriod, isCurrentOrNext);
 		} else {
-			System.out.printf("\nNO schedule available for %s! (1)\n", p.todayStringInt);
+			System.out.printf("\nNO schedule available for %s! (1)\n", usefulPeriod.todayStringInt);
 			System.exit(-1);
 			return null;
 		}
 		if (!isNext //
-				&& (p.startDate == null || p.endDate == null)) {
-			System.out.printf("\nNO schedule available for %s! (start:%s|end:%s) (isCurrent:%s|isNext:%s)\n", p.todayStringInt, p.startDate, p.endDate,
-					isCurrent, isNext);
+				&& (usefulPeriod.startDate == null || usefulPeriod.endDate == null)) {
+			System.out.printf("\nNO schedule available for %s! (start:%s|end:%s) (isCurrent:%s|isNext:%s)\n", usefulPeriod.todayStringInt,
+					usefulPeriod.startDate, usefulPeriod.endDate, isCurrent, isNext);
 			System.exit(-1);
 			return null;
 		}
-		if (p.todayStringInt != null && p.startDate != null && p.endDate != null) {
+		if (usefulPeriod.todayStringInt != null && usefulPeriod.startDate != null && usefulPeriod.endDate != null) {
 			hasCurrent = true;
 		}
-		System.out.printf("\nGenerated on %s | Schedules from %s to %s.", p.todayStringInt, p.startDate, p.endDate);
+		System.out.printf("\nGenerated on %s | Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
 		if (isNext) {
 			if (hasCurrent //
-					&& !diffLowerThan(DATE_FORMAT, c, p.todayStringInt, p.endDate, MAX_NEXT_LOOKUP_IN_DAYS)) {
+					&& !diffLowerThan(DATE_FORMAT, c, usefulPeriod.todayStringInt, usefulPeriod.endDate, MAX_NEXT_LOOKUP_IN_DAYS)) {
 				System.out.printf("\nSkipping NEXT schedules... (%d days from %s to %s)", //
-						TimeUnit.MILLISECONDS.toDays(diffInMs(DATE_FORMAT, c, p.todayStringInt, p.endDate)), //
-						p.todayStringInt, //
-						p.endDate);
-				p.todayStringInt = null; // reset
-				p.startDate = null; // reset
-				p.endDate = null; // reset
+						TimeUnit.MILLISECONDS.toDays(diffInMs(DATE_FORMAT, c, usefulPeriod.todayStringInt, usefulPeriod.endDate)), //
+						usefulPeriod.todayStringInt, //
+						usefulPeriod.endDate);
+				usefulPeriod.todayStringInt = null; // reset
+				usefulPeriod.startDate = null; // reset
+				usefulPeriod.endDate = null; // reset
 				gtfs = null;
 				return new HashSet<String>(); // non-null = service IDs
 			}
 			System.out.printf("\nLooking for NEXT schedules...");
 			if (hasCurrent) {
-				p.todayStringInt = incDateDays(DATE_FORMAT, c, p.endDate, 1); // start from next to current last date
+				usefulPeriod.todayStringInt = incDateDays(DATE_FORMAT, c, usefulPeriod.endDate, 1); // start from next to current last date
 			}
-			p.startDate = null; // reset
-			p.endDate = null; // reset
+			usefulPeriod.startDate = null; // reset
+			usefulPeriod.endDate = null; // reset
 			if (gCalendars != null && gCalendars.size() > 0) {
-				parseCalendars(gCalendars, DATE_FORMAT, c, p, false);
+				parseCalendars(gCalendars, DATE_FORMAT, c, usefulPeriod, false);
 			} else if (gCalendarDates != null && gCalendarDates.size() > 0) {
-				parseCalendarDates(gCalendarDates, DATE_FORMAT, c, p, false);
+				parseCalendarDates(gCalendarDates, DATE_FORMAT, c, usefulPeriod, false);
 			}
-			if (p.startDate == null || p.endDate == null) {
-				System.out.printf("\nNO NEXT schedule available for %s. (start:%s|end:%s)", p.todayStringInt, p.startDate, p.endDate);
-				p.todayStringInt = null; // reset
-				p.startDate = null; // reset
-				p.endDate = null; // reset
+			if (usefulPeriod.startDate == null || usefulPeriod.endDate == null) {
+				System.out.printf("\nNO NEXT schedule available for %s. (start:%s|end:%s)", usefulPeriod.todayStringInt, usefulPeriod.startDate,
+						usefulPeriod.endDate);
+				usefulPeriod.todayStringInt = null; // reset
+				usefulPeriod.startDate = null; // reset
+				usefulPeriod.endDate = null; // reset
 				gtfs = null;
 				return new HashSet<String>(); // non-null = service IDs
 			}
-			System.out.printf("\nGenerated on %s | NEXT Schedules from %s to %s.", p.todayStringInt, p.startDate, p.endDate);
+			System.out.printf("\nGenerated on %s | NEXT Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
 		}
-		HashSet<String> serviceIds = getPerdiodServiceIds(p.startDate, p.endDate, gCalendars, gCalendarDates);
+		HashSet<String> serviceIds = getPerdiodServiceIds(usefulPeriod.startDate, usefulPeriod.endDate, gCalendars, gCalendarDates);
+		improveUsefulPeriod(DATE_FORMAT, c, gCalendars, gCalendarDates);
 		System.out.printf("\nExtracting useful service IDs... DONE");
 		gtfs = null;
 		return serviceIds;
+	}
+
+	private static void improveUsefulPeriod(SimpleDateFormat DATE_FORMAT, Calendar c, List<GCalendar> gCalendars, List<GCalendarDate> gCalendarDates) {
+		if (gCalendars != null && gCalendars.size() > 0 //
+				&& gCalendarDates != null && gCalendarDates.size() > 0) {
+			boolean newDateFound = false;
+			do {
+				newDateFound = false;
+				int minNewStartDate = incDateDays(DATE_FORMAT, c, usefulPeriod.startDate, -1);
+				for (GCalendarDate gCalendarDate : gCalendarDates) {
+					if (gCalendarDate.isBefore(usefulPeriod.startDate)) {
+						if (gCalendarDate.isBetween(minNewStartDate, usefulPeriod.startDate)) {
+							System.out.printf("\nnew useful period start date '%s' because it's close to previous useful period start date '%s'.",
+									gCalendarDate.getDate(), usefulPeriod.startDate);
+							usefulPeriod.startDate = gCalendarDate.getDate();
+							newDateFound = true;
+							break;
+						}
+					}
+				}
+			} while (newDateFound);
+			do {
+				newDateFound = false;
+				int minNewEndDate = incDateDays(DATE_FORMAT, c, usefulPeriod.endDate, +1);
+				for (GCalendarDate gCalendarDate : gCalendarDates) {
+					if (gCalendarDate.isAfter(usefulPeriod.endDate)) {
+						if (gCalendarDate.isBetween(usefulPeriod.endDate, minNewEndDate)) {
+							System.out.printf("\nnew useful end date '%s' because it's close to previous useful period end data '%s'.",
+									gCalendarDate.getDate(), usefulPeriod.endDate);
+							usefulPeriod.endDate = gCalendarDate.getDate();
+							newDateFound = true;
+							break;
+						}
+					}
+				}
+			} while (newDateFound);
+		}
 	}
 
 	private static void parseCalendarDates(List<GCalendarDate> gCalendarDates, SimpleDateFormat DATE_FORMAT, Calendar c, Period p, boolean keepToday) {
@@ -797,23 +848,42 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	public static boolean excludeUselessCalendar(GCalendar gCalendar, HashSet<String> serviceIds) {
-		if (serviceIds == null) {
-			return false; // keep
+		if (serviceIds != null) {
+			boolean knownServiceId = gCalendar.isServiceIds(serviceIds);
+			if (!knownServiceId) {
+				return true; // exclude
+			}
 		}
-		return !gCalendar.isServiceIds(serviceIds);
+		return false; // keep
 	}
 
 	public static boolean excludeUselessCalendarDate(GCalendarDate gCalendarDate, HashSet<String> serviceIds) {
-		if (serviceIds == null) {
-			return false; // keep
+		if (serviceIds != null) {
+			boolean knownServiceId = gCalendarDate.isServiceIds(serviceIds);
+			if (!knownServiceId) {
+				return true; // exclude
+			}
 		}
-		return !gCalendarDate.isServiceIds(serviceIds);
+		if (usefulPeriod != null) {
+			if (gCalendarDate.getExceptionType() == GCalendarDatesExceptionType.SERVICE_ADDED) {
+				if (gCalendarDate.isBefore(usefulPeriod.startDate) //
+						|| gCalendarDate.isAfter(usefulPeriod.endDate)) {
+					System.out.printf("\nExclude calendar date \"%s\" because it's out of the useful period (start:%s|end:%s).", gCalendarDate,
+							usefulPeriod.startDate, usefulPeriod.endDate);
+					return true; // exclude
+				}
+			}
+		}
+		return false; // keep
 	}
 
 	public static boolean excludeUselessTrip(GTrip gTrip, HashSet<String> serviceIds) {
-		if (serviceIds == null) {
-			return false; // keep
+		if (serviceIds != null) {
+			boolean knownServiceId = gTrip.isServiceIds(serviceIds);
+			if (!knownServiceId) {
+				return true; // exclude
+			}
 		}
-		return !gTrip.isServiceIds(serviceIds);
+		return false; // keep
 	}
 }
