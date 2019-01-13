@@ -147,6 +147,18 @@ public class MTrip implements Comparable<MTrip> {
 		return true;
 	}
 
+	public static boolean mergeEmpty(MTrip mTrip, MTrip mTripToMerge) {
+		if (StringUtils.isEmpty(mTrip.getHeadsignValue())) {
+			mTrip.setHeadsignString(mTripToMerge.getHeadsignValue(), mTrip.getHeadsignId());
+			return true; // merged
+		} else if (StringUtils.isEmpty(mTripToMerge.getHeadsignValue())) {
+			mTrip.setHeadsignString(mTrip.getHeadsignValue(), mTrip.getHeadsignId());
+			return true; // merged
+		} else {
+			return false; // not merged
+		}
+	}
+
 	private static final String SLASH = " / ";
 
 	public boolean mergeHeadsignValue(MTrip mTripToMerge) {
