@@ -1,9 +1,11 @@
 package org.mtransit.parser.gtfs.data;
 
+import java.util.Objects;
+
 import org.mtransit.parser.Constants;
 
 // https://developers.google.com/transit/gtfs/reference#stop_times_fields
-public class GStopTime {
+public class GStopTime implements Comparable<GStopTime> {
 
 	public static final String FILENAME = "stop_times.txt";
 
@@ -68,8 +70,16 @@ public class GStopTime {
 		return pickup_type;
 	}
 
+	public void setPickupType(int pickupType) {
+		this.pickup_type = pickupType;
+	}
+
 	public int getDropOffType() {
 		return drop_off_type;
+	}
+
+	public void setDropOffType(int dropOffType) {
+		this.drop_off_type = dropOffType;
 	}
 
 	public boolean hasStopHeadsign() {
@@ -108,5 +118,51 @@ public class GStopTime {
 				.append(Constants.COLUMN_SEPARATOR) //
 				.append(Constants.STRING_DELIMITER).append(this.drop_off_type).append(Constants.STRING_DELIMITER) //
 				.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		GStopTime otherGStopTime = (GStopTime) o;
+		return Objects.equals(this.trip_id, otherGStopTime.trip_id) //
+				&& Objects.equals(this.stop_id, otherGStopTime.stop_id) //
+				&& this.stop_sequence == otherGStopTime.stop_sequence //
+				&& Objects.equals(this.arrival_time, otherGStopTime.arrival_time) //
+				&& Objects.equals(this.departure_time, otherGStopTime.departure_time) //
+				&& Objects.equals(this.stop_headsign, otherGStopTime.stop_headsign) //
+				&& this.pickup_type == otherGStopTime.pickup_type //
+				&& this.drop_off_type == otherGStopTime.drop_off_type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash( //
+				this.trip_id, //
+				this.stop_id, //
+				this.stop_sequence, //
+				this.arrival_time, //
+				this.departure_time, //
+				this.stop_headsign, //
+				this.pickup_type, //
+				this.drop_off_type //
+				);
+	}
+
+	@Override
+	public int compareTo(GStopTime otherGStopTime) {
+		// sort by trip_id, stop_sequence
+		if (!Objects.equals(this.trip_id, otherGStopTime.trip_id)) {
+			return this.trip_id.compareTo(otherGStopTime.trip_id);
+		}
+		if (this.stop_sequence != otherGStopTime.stop_sequence) {
+			return Integer.compare(this.stop_sequence, otherGStopTime.stop_sequence);
+		}
+		if (!Objects.equals(this.departure_time, otherGStopTime.departure_time)) {
+			return this.departure_time.compareTo(otherGStopTime.departure_time);
+		}
+		System.out.printf("\nUnexpected stop times to compare: '%s' & '%s'!\n", this, otherGStopTime);
+		System.exit(-1);
+		return 0;
 	}
 }

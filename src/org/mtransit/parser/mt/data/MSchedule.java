@@ -18,8 +18,6 @@ public class MSchedule implements Comparable<MSchedule> {
 	private String pathId; // trip ID
 	private int arrivalBeforeDeparture;
 
-	private boolean descentOnly = false;
-
 	public MSchedule(String serviceId, long routeId, long tripId, int stopId, Pair<Integer, Integer> times, String pathId) {
 		this(serviceId, routeId, tripId, stopId, times == null ? 0 : times.first, times == null ? 0 : times.second, pathId);
 	}
@@ -42,6 +40,10 @@ public class MSchedule implements Comparable<MSchedule> {
 	public void clearHeadsign() {
 		this.headsignType = -1;
 		this.headsignValue = null;
+	}
+
+	public boolean isDescentOnly() {
+		return this.headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY;
 	}
 
 	private String uid = null;
@@ -123,7 +125,7 @@ public class MSchedule implements Comparable<MSchedule> {
 			sb.append(Constants.COLUMN_SEPARATOR); //
 		}
 		if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
-			if (this.descentOnly) {
+			if (this.headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
 				sb.append(MTrip.HEADSIGN_TYPE_DESCENT_ONLY); // HEADSIGN TYPE
 				sb.append(Constants.COLUMN_SEPARATOR); //
 				sb.append(Constants.STRING_DELIMITER) //
@@ -141,7 +143,7 @@ public class MSchedule implements Comparable<MSchedule> {
 				sb.append(MTrip.HEADSIGN_TYPE_STRING); // HEADSIGN TYPE
 				sb.append(Constants.COLUMN_SEPARATOR); //
 				sb.append(Constants.STRING_DELIMITER) //
-						.append("Descent Only") //
+						.append("Drop Off Only") //
 						.append(Constants.STRING_DELIMITER); // HEADSIGN STRING
 			} else {
 				sb.append(this.headsignType < 0 ? Constants.EMPTY : this.headsignType); // HEADSIGN TYPE
@@ -152,14 +154,6 @@ public class MSchedule implements Comparable<MSchedule> {
 			}
 		}
 		return sb.toString();
-	}
-
-	public boolean isDescentOnly() {
-		return this.descentOnly;
-	}
-
-	public void setDescentOnly(boolean descentOnly) {
-		this.descentOnly = descentOnly;
 	}
 
 	public boolean sameServiceIdAndTripId(MSchedule lastSchedule) {

@@ -225,7 +225,7 @@ public class MTrip implements Comparable<MTrip> {
 			if (this.headsignType == HEADSIGN_TYPE_DESCENT_ONLY) {
 				sb.append(HEADSIGN_TYPE_STRING); // HEADSIGN TYPE
 				sb.append(Constants.COLUMN_SEPARATOR); //
-				sb.append(Constants.STRING_DELIMITER).append(CleanUtils.escape("Descent Only")).append(Constants.STRING_DELIMITER); // HEADSIGN STRING
+				sb.append(Constants.STRING_DELIMITER).append(CleanUtils.escape("Drop Off Only")).append(Constants.STRING_DELIMITER); // HEADSIGN STRING
 				sb.append(Constants.COLUMN_SEPARATOR); //
 			} else {
 				sb.append(this.headsignType); // HEADSIGN TYPE
