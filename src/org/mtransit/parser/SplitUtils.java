@@ -520,7 +520,7 @@ public class SplitUtils {
 				for (int i1 = 0; i1 < sortedStopIds1.size(); i1++) {
 					String stopId1 = sortedStopIds1.get(i1);
 					if (stopId1 == null) {
-						System.out.printf("\n%s: Skip NULL stop ID at index %d.", routeId, i0);
+						System.out.printf("\n%s: Skip NULL stop ID at index %d.", routeId, i1);
 						continue;
 					}
 					if (stopId0.equals(stopId1) //
