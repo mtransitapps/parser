@@ -513,10 +513,19 @@ public class SplitUtils {
 			List<String> sortedStopIds1 = this.allSortedStopIds.get(this.directionId1);
 			for (int i0 = 0; i0 < sortedStopIds0.size(); i0++) {
 				String stopId0 = sortedStopIds0.get(i0);
+				if (stopId0 == null) {
+					System.out.printf("\n%s: Skip NULL stop ID at index %d.", routeId, i0);
+					continue;
+				}
 				for (int i1 = 0; i1 < sortedStopIds1.size(); i1++) {
 					String stopId1 = sortedStopIds1.get(i1);
-					if (stopId0.equals(stopId1) || //
-							sortedStopIds0.contains(stopId1) || sortedStopIds1.contains(stopId0)) {
+					if (stopId1 == null) {
+						System.out.printf("\n%s: Skip NULL stop ID at index %d.", routeId, i0);
+						continue;
+					}
+					if (stopId0.equals(stopId1) //
+							|| sortedStopIds0.contains(stopId1) //
+							|| sortedStopIds1.contains(stopId0)) {
 						continue;
 					}
 					addBothFromTo(this.directionId0, stopId0, stopId1);
