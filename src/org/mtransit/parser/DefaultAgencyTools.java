@@ -19,6 +19,7 @@ import org.mtransit.parser.gtfs.data.GDropOffType;
 import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
+import org.mtransit.parser.gtfs.data.GRouteType;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
@@ -171,10 +172,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 			System.out.printf("\nERROR: unspecified agency route type '%s'!\n", getAgencyRouteType());
 			System.exit(-1);
 		}
-		if (getAgencyRouteType() != gRoute.getRouteType()) {
-			return true;
+		if (GRouteType.isUnknown(gRoute.getRouteType())) {
+			System.out.printf("\nERROR: unexpected route type '%s'!\n", gRoute.getRouteType());
+			System.exit(-1);
 		}
-		return false;
+		if (!GRouteType.isSameType(getAgencyRouteType(), gRoute.getRouteType())) {
+			return true; // exclude
+		}
+		return false; // keep
 	}
 
 	@Override
