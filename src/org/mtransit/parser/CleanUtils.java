@@ -213,6 +213,12 @@ public final class CleanUtils {
 		return string;
 	}
 
+	public static String keepToAndRevoveVia(String string) {
+		string = keepTo(string);
+		string = removeVia(string);
+		return string;
+	}
+
 	private static final Pattern FIRST = Pattern.compile("(^|\\s){1}(first)($|\\s){1}", Pattern.CASE_INSENSITIVE);
 	private static final String FIRST_REPLACEMENT = "$11st$3";
 	private static final Pattern SECOND = Pattern.compile("(^|\\s){1}(second)($|\\s){1}", Pattern.CASE_INSENSITIVE);
