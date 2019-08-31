@@ -199,7 +199,7 @@ public final class CleanUtils {
 		return string;
 	}
 
-	private static final Pattern STARTS_WITH_TO = Pattern.compile("(^.* to )", Pattern.CASE_INSENSITIVE);
+	private static final Pattern STARTS_WITH_TO = Pattern.compile("((^|^.* )to )", Pattern.CASE_INSENSITIVE);
 
 	public static String keepTo(String string) {
 		string = STARTS_WITH_TO.matcher(string).replaceAll(StringUtils.EMPTY);
