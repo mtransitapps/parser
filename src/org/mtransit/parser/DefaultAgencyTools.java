@@ -50,11 +50,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public static final boolean GOOD_ENOUGH_ACCEPTED;
 	static {
 		GOOD_ENOUGH_ACCEPTED = false;
+		// GOOD_ENOUGH_ACCEPTED = true; // DEBUG
 	}
 
 	private static final Integer THREAD_POOL_SIZE;
 	static {
 		THREAD_POOL_SIZE = 4;
+		// THREAD_POOL_SIZE = 1; // DEBUG
 	}
 
 	private static final Integer OVERRIDE_DATE;
