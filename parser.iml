@@ -15,7 +15,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/bin" />
     <output-test url="file://$MODULE_DIR$/build/classes/java/test" />
     <exclude-output />
@@ -32,6 +32,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="Gradle: commons-io-2.4" level="project" />
     <orderEntry type="library" exported="" name="Gradle: commons-csv-1.1" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: commons-lang3-3.1" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: commons-lang3-3.9" level="project" />
   </component>
 </module>
