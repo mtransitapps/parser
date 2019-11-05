@@ -2,6 +2,7 @@ package org.mtransit.parser;
 
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.commons.lang3.text.translate.CharSequenceTranslator;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
@@ -195,6 +196,26 @@ public final class CleanUtils {
 	public static String removePoints(String string) {
 		string = POINT1.matcher(string).replaceAll(POINT1_REPLACEMENT);
 		string = POINTS.matcher(string).replaceAll(POINTS_REPLACEMENT);
+		return string;
+	}
+
+	private static final Pattern STARTS_WITH_TO = Pattern.compile("((^|^.* )to )", Pattern.CASE_INSENSITIVE);
+
+	public static String keepTo(String string) {
+		string = STARTS_WITH_TO.matcher(string).replaceAll(StringUtils.EMPTY);
+		return string;
+	}
+
+	private static final Pattern ENDS_WITH_VIA = Pattern.compile("( via .*$)", Pattern.CASE_INSENSITIVE);
+
+	public static String removeVia(String string) {
+		string = ENDS_WITH_VIA.matcher(string).replaceAll(StringUtils.EMPTY);
+		return string;
+	}
+
+	public static String keepToAndRevoveVia(String string) {
+		string = keepTo(string);
+		string = removeVia(string);
 		return string;
 	}
 

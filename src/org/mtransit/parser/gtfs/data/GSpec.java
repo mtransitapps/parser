@@ -135,10 +135,14 @@ public class GSpec {
 	}
 
 	public void addStopTime(GStopTime gStopTime) {
-		this.stopTimes.add(gStopTime);
-		if (!this.tripIdStopTimes.containsKey(gStopTime.getTripId())) {
+		if (this.tripIdStopTimes.containsKey(gStopTime.getTripId())) { //
+			if (this.tripIdStopTimes.get(gStopTime.getTripId()).contains(gStopTime)) {
+				return;
+			}
+		} else {
 			this.tripIdStopTimes.put(gStopTime.getTripId(), new ArrayList<GStopTime>());
 		}
+		this.stopTimes.add(gStopTime);
 		this.tripIdStopTimes.get(gStopTime.getTripId()).add(gStopTime);
 		this.stopTimesCount++;
 	}
@@ -150,6 +154,7 @@ public class GSpec {
 				this.stopTimes.remove(tripStopTime);
 			}
 			this.tripIdStopTimes.remove(gTripId);
+			this.stopTimesCount--;
 		}
 	}
 
@@ -278,14 +283,24 @@ public class GSpec {
 			}
 			ArrayList<GFrequency> tripFrequencies = this.tripIdFrequencies.get(tripId);
 			ArrayList<GStopTime> tripStopTimes = this.tripIdStopTimes.get(tripId);
+			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+				if (!tripStopTimes.isEmpty()) {
+					GStopTime firstStopTime = tripStopTimes.get(0);
+					firstStopTime.setDropOffType(GDropOffType.NO_DROP_OFF.intValue());
+					GStopTime lastStopTime = tripStopTimes.get(tripStopTimes.size() - 1);
+					lastStopTime.setPickupType(GPickupType.NO_PICKUP.intValue());
+				}
+			}
 			String routeId = this.tripIdRouteId.get(tripId);
 			long mRouteId = agencyTools.getRouteId(this.routeIdRoutes.get(routeId));
 			ArrayList<GStopTime> newGStopTimes = new ArrayList<GStopTime>();
 			Calendar stopTimeCal = Calendar.getInstance();
-			long frequencyStartInMs = -1l;
-			long frequencyEndInMs = -1l;
+			long frequencyStartInMs = -1L;
+			long frequencyEndInMs = -1L;
+			long frequencyHeadwayInMs = -1L;
 			HashMap<String, Integer> gStopTimeIncInSec = new HashMap<String, Integer>();
 			Integer previousStopTimeInSec = null;
+			long lastFirstStopTimeInMs = -1L;
 			for (GStopTime gStopTime : tripStopTimes) {
 				try {
 					if (gStopTimeIncInSec.containsKey(gStopTime.getUID())) {
@@ -297,6 +312,9 @@ public class GSpec {
 					int stopTimeInSec = (int) TimeUnit.MILLISECONDS.toSeconds(stopTimeCal.getTimeInMillis());
 					gStopTimeIncInSec.put(gStopTime.getUID(), previousStopTimeInSec == null ? 0 : stopTimeInSec - previousStopTimeInSec);
 					previousStopTimeInSec = stopTimeInSec;
+					if (lastFirstStopTimeInMs < 0L) {
+						lastFirstStopTimeInMs = stopTimeCal.getTimeInMillis();
+					}
 				} catch (Exception e) {
 					System.out.printf("\nError while generating stop increments for '%s'!\n", gStopTime);
 					e.printStackTrace();
@@ -307,17 +325,38 @@ public class GSpec {
 				try {
 					frequencyStartInMs = gDateFormat.parse(gFrequency.getStartTime()).getTime();
 					frequencyEndInMs = gDateFormat.parse(gFrequency.getEndTime()).getTime();
+					frequencyHeadwayInMs = TimeUnit.SECONDS.toMillis(gFrequency.getHeadwaySecs());
 					long firstStopTimeInMs = frequencyStartInMs;
-					while (firstStopTimeInMs >= frequencyStartInMs && firstStopTimeInMs <= frequencyEndInMs) {
+					while (frequencyStartInMs <= firstStopTimeInMs && firstStopTimeInMs <= frequencyEndInMs) {
+						if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+							if (lastFirstStopTimeInMs == firstStopTimeInMs) {
+								firstStopTimeInMs += frequencyHeadwayInMs;
+								continue;
+							}
+						}
 						stopTimeCal.setTimeInMillis(firstStopTimeInMs);
-						for (GStopTime gStopTime : tripStopTimes) {
+						for (int i = 0; i < tripStopTimes.size(); i++) {
+							GStopTime gStopTime = tripStopTimes.get(i);
 							stopTimeCal.add(Calendar.SECOND, gStopTimeIncInSec.get(gStopTime.getUID()));
 							String newDepartureTimeS = getNewDepartureTime(gDateFormat, stopTimeCal);
+							int pickupType = gStopTime.getPickupType();
+							if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+								if (i == tripStopTimes.size() - 1) {
+									pickupType = GPickupType.NO_PICKUP.intValue();
+								}
+							}
+							int dropOffType = gStopTime.getDropOffType();
+							if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+								if (i == 0) {
+									dropOffType = GDropOffType.NO_DROP_OFF.intValue();
+								}
+							}
 							GStopTime newGStopTime = new GStopTime(tripId, newDepartureTimeS, newDepartureTimeS, gStopTime.getStopId(),
-									gStopTime.getStopSequence(), gStopTime.getStopHeadsign(), GFrequency.DEFAULT_PICKUP_TYPE, GFrequency.DEFAULT_DROP_OFF_TYPE);
+									gStopTime.getStopSequence(), gStopTime.getStopHeadsign(), pickupType, dropOffType);
 							newGStopTimes.add(newGStopTime);
 						}
-						firstStopTimeInMs += TimeUnit.SECONDS.toMillis(gFrequency.getHeadwaySecs());
+						lastFirstStopTimeInMs = firstStopTimeInMs;
+						firstStopTimeInMs += frequencyHeadwayInMs;
 					}
 				} catch (Exception e) {
 					System.out.printf("\nError while generating stop times for frequency '%s'!\n", gFrequency);
@@ -439,6 +478,11 @@ public class GSpec {
 
 	public void clearRawData() {
 		this.stopTimes.clear();
+		if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+			for (Entry<String, ArrayList<GStopTime>> tripIdStopTime : this.tripIdStopTimes.entrySet()) {
+				Collections.sort(tripIdStopTime.getValue());
+			}
+		}
 	}
 
 	public void clearRouteGTFS(Long mRouteId) {

@@ -2,14 +2,15 @@ package org.mtransit.parser.mt.data;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.Constants;
+import org.mtransit.parser.gtfs.data.GRouteType;
 
 public class MAgency implements Comparable<MAgency> {
 
-	public static final int ROUTE_TYPE_LIGHT_RAIL = 0;
-	public static final int ROUTE_TYPE_SUBWAY = 1;
-	public static final int ROUTE_TYPE_TRAIN = 2;
-	public static final int ROUTE_TYPE_BUS = 3;
-	public static final int ROUTE_TYPE_FERRY = 4;
+	public static final int ROUTE_TYPE_LIGHT_RAIL = GRouteType.LIGHT_RAIL.getId();
+	public static final int ROUTE_TYPE_SUBWAY = GRouteType.SUBWAY.getId();
+	public static final int ROUTE_TYPE_TRAIN = GRouteType.TRAIN.getId();
+	public static final int ROUTE_TYPE_BUS = GRouteType.BUS.getId();
+	public static final int ROUTE_TYPE_FERRY = GRouteType.FERRY.getId();
 
 	private String id;
 	private String timezone;

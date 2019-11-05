@@ -11,7 +11,7 @@ public class MTripStop implements Comparable<MTripStop> {
 	private int stopSequence;
 	private String uid;
 
-	private boolean decentOnly = false;
+	private boolean descentOnly = false;
 
 	public MTripStop(long tripId, int stopId, int stopSequence) {
 		this.tripId = tripId;
@@ -20,8 +20,12 @@ public class MTripStop implements Comparable<MTripStop> {
 		this.uid = this.tripId + Constants.EMPTY + this.stopId;
 	}
 
-	public void setDecentOnly(boolean decentOnly) {
-		this.decentOnly = decentOnly;
+	public void setDescentOnly(boolean descentOnly) {
+		this.descentOnly = descentOnly;
+	}
+
+	public boolean isDescentOnly() {
+		return this.descentOnly;
 	}
 
 	public String getUID() {
@@ -74,7 +78,7 @@ public class MTripStop implements Comparable<MTripStop> {
 		sb.append(Constants.COLUMN_SEPARATOR);
 		sb.append(this.stopSequence); // STOP SEQUENCE
 		sb.append(Constants.COLUMN_SEPARATOR);
-		sb.append(this.decentOnly ? 1 : 0); // DECENT ONLY
+		sb.append(this.descentOnly ? 1 : 0); // DESCENT ONLY
 		return sb.toString();
 	}
 

@@ -13,6 +13,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.Constants;
+import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -121,6 +122,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mSchedule.clearHeadsign();
 			}
 		}
+		int splitTripCount = this.agencyTools.splitTrip(new MRoute(this.routeId, null, null, null), null, routeGTFS).size();
+		boolean isSplitted = splitTripCount > 1;
 		routeGTFS = null; // not useful anymore
 		this.globalGTFS.clearRouteGTFS(this.routeId);
 		ArrayList<MAgency> mAgenciesList = new ArrayList<MAgency>(mAgencies.values());
@@ -133,7 +136,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Collections.sort(mTripsList);
 		ArrayList<MTripStop> mTripStopsList = new ArrayList<MTripStop>(allMTripStops.values());
 		Collections.sort(mTripStopsList);
-		setTripStopDecentOnly(mTripStopsList);
+		setTripStopDescentOnly(mTripStopsList, mSchedules, isSplitted);
 		ArrayList<MServiceDate> mServiceDatesList = new ArrayList<MServiceDate>(mServiceDates);
 		Collections.sort(mServiceDatesList);
 		ArrayList<MSchedule> mSchedulesList = new ArrayList<MSchedule>(mSchedules.values());
@@ -276,15 +279,16 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						mTrips.size());
 				for (MTrip mTrip : mTrips.values()) {
 					System.out.printf("\n%s: mTrip: %s", this.routeId, mTrip);
-					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
+					if (mTripStopTimesHeadsign.containsKey(mTrip.getId()) //
+							&& !mTrip.getHeadsignValue().equals(mTripStopTimesHeadsign.get(mTrip.getId()))) {
 						System.out.printf("\n%s: Replace trip headsign '%s' with stop times headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(),
 								mTripStopTimesHeadsign.get(mTrip.getId()), mTrip);
 						mTrip.setHeadsignString(mTripStopTimesHeadsign.get(mTrip.getId()), mTrip.getHeadsignId());
 					} else {
 						if (tripKeptNonDescriptiveHeadsign) {
 							System.out.printf("\n%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
-							System.out.printf("\n%s: %s", this.routeId, mTripHeasignStrings);
-							System.out.printf("\n%s: %s", this.routeId, mTrips);
+							System.out.printf("\n%s: trip headsigns: %s", this.routeId, mTripHeasignStrings);
+							System.out.printf("\n%s: trips: %s", this.routeId, mTrips);
 							System.out.printf("\n");
 							System.exit(-1);
 						}
@@ -493,28 +497,39 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		boolean descentOnly;
 		String tripIdStopId;
 		ArrayList<GStopTime> gStopTimes = routeGTFS.getStopTimes(null, gTripStop.getTripId(), gTripStop.getStopId(), gTripStop.getStopSequence());
+		int lastStopSequence = -1;
+		GStopTime lastStopTime = null;
 		for (int i = 0; i < gStopTimes.size(); i++) {
 			GStopTime gStopTime = gStopTimes.get(i);
+			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+				if (gStopTime.getStopSequence() < lastStopSequence) {
+					System.out.printf("\n%s: Stop sequence out of order (%s => '%s')!\n", this.routeId, lastStopSequence, gStopTime);
+					System.out.printf("\n%s: Stop sequence out of order ([%s] => [%s])!\n", this.routeId, lastStopTime, gStopTime);
+					System.exit(-1);
+				}
+			}
+			lastStopSequence = gStopTime.getStopSequence();
+			lastStopTime = gStopTime;
 			descentOnly = false;
 			if (!gStopTime.getTripId().equals(gTripStop.getTripId()) //
 					|| !gStopTime.getStopId().equals(gTripStop.getStopId()) //
 					|| gStopTime.getStopSequence() != gTripStop.getStopSequence()) {
-				if (gStopTime.getTripId().equals(gTripStop.getTripId()) //
-						&& gStopTime.getStopId().equals(gTripStop.getStopId())) {
-				}
 				continue;
 			}
-			if (i + 1 == gStopTimes.size()) {
-				descentOnly = true;
-			} else if (!descentOnly && gStopTime.getPickupType() == GPickupType.NO_PICKUP.intValue()) {
+			if (gStopTime.getPickupType() == GPickupType.NO_PICKUP.intValue() //
+					|| i == gStopTimes.size() - 1) { // last stop of the trip
 				descentOnly = true;
 			}
 			tripIdStopId = mTripId + gStopTime.getTripId() + gStopTime.getStopId();
 			if (descentOnly) {
 				if (addedMTripIdAndGStopIds.containsKey(tripIdStopId) //
 						&& addedMTripIdAndGStopIds.get(tripIdStopId) != gStopTime.getStopSequence()) {
-					System.out.printf("\n%s: parseStopTimes() > SKIP same stop & descent only %s.", this.routeId, gStopTime);
-					continue;
+					if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+						// TODO later, when UI can display multiple times same stop/POI & schedules are affected to a specific sequence, keep both
+					} else {
+						System.out.printf("\n%s: parseStopTimes() > SKIP same stop & descent only %s.", this.routeId, gStopTime);
+						continue;
+					}
 				}
 			}
 			mSchedule = new MSchedule(tripServiceId, mRoute.getId(), mTripId, mStopId, //
@@ -526,8 +541,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						mSchedules.get(mSchedule.getUID()));
 				System.exit(-1);
 			}
-			mSchedule.setDescentOnly(true);
-			if (gStopTime.hasStopHeadsign()) {
+			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY //
+					&& descentOnly) {
+				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_DESCENT_ONLY, null);
+			} else if (gStopTime.hasStopHeadsign()) {
 				stopHeadsign = this.agencyTools.cleanStopHeadsign(gStopTime.getStopHeadsign());
 				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_STRING, stopHeadsign);
 				tripStopTimesHeadsign = setTripStopTimesHeadsign(tripStopTimesHeadsign, stopHeadsign);
@@ -571,7 +588,42 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 	}
 
-	private void setTripStopDecentOnly(ArrayList<MTripStop> mTripStopsList) {
+	private void setTripStopDescentOnly(ArrayList<MTripStop> mTripStopsList, HashMap<String, MSchedule> mSchedules, boolean isSplitted) {
+		if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+			MTripStop lastTripStop = null;
+			for (MTripStop tripStop : mTripStopsList) {
+				if (lastTripStop != null && !lastTripStop.isDescentOnly() //
+						&& lastTripStop.getTripId() != tripStop.getTripId()) {
+					if (isSplitted) {
+						lastTripStop.setDescentOnly(true);
+					}
+				}
+				boolean isDescentOnly = false;
+				for (MSchedule schedule : mSchedules.values()) {
+					if (schedule.getTripId() != tripStop.getTripId()) {
+						continue;
+					}
+					if (schedule.getStopId() != tripStop.getStopId()) {
+						continue;
+					}
+					if (schedule.isDescentOnly()) {
+						isDescentOnly = true;
+						continue;
+					} else {
+						isDescentOnly = false;
+						break;
+					}
+				}
+				tripStop.setDescentOnly(isDescentOnly);
+				lastTripStop = tripStop;
+			}
+			if (lastTripStop != null && !lastTripStop.isDescentOnly()) {
+				if (isSplitted) {
+					lastTripStop.setDescentOnly(true);
+				}
+			}
+			return; // SKIP (descent only set on the stop time schedule level
+		}
 		if (mTripStopsList == null || mTripStopsList.size() == 0) {
 			return;
 		}
@@ -581,7 +633,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		do {
 			currentTripStop = mTripStopsList.get(i);
 			if (currentTripStop.getTripId() != currentTripId) {
-				currentTripStop.setDecentOnly(true);
+				currentTripStop.setDescentOnly(true);
 			} // ELSE false == default
 			currentTripId = currentTripStop.getTripId();
 			i--; // previous
@@ -680,7 +732,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (!lastInL1 && lastInL2) {
 					System.out.printf("\n%s: Resolved using last [tripID:%s|ts1.stopID:%s|ts2.stopID:%s] (last.stopID:%s) > insert: %s instead of %s.",
 							this.routeId, ts1.getTripId(), ts1.getStopId(), ts2.getStopId(), last.getStopId(), ts2, ts1);
-					// System.out.println(this.routeId + ": Inserted " + ts2 + ".");
 					newList.add(ts2);
 					newListStopIds.add(ts2.getStopId());
 					last = ts2;
