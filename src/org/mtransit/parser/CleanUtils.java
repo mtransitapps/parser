@@ -183,7 +183,7 @@ public final class CleanUtils {
 	private static final Pattern CLEAN_SLASH = Pattern.compile("(\\S)[\\s]*[/][\\s]*(\\S)");
 	private static final String CLEAN_SLASH_REPLACEMENT = "$1 / $2";
 
-	public static final String cleanSlashes(String string) {
+	public static String cleanSlashes(String string) {
 		return CLEAN_SLASH.matcher(string).replaceAll(CLEAN_SLASH_REPLACEMENT);
 	}
 
@@ -213,7 +213,12 @@ public final class CleanUtils {
 		return string;
 	}
 
+	@Deprecated
 	public static String keepToAndRevoveVia(String string) {
+		return keepToAndRemoveVia(string);
+	}
+
+	public static String keepToAndRemoveVia(String string) {
 		string = keepTo(string);
 		string = removeVia(string);
 		return string;
