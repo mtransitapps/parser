@@ -1,11 +1,13 @@
 package org.mtransit.parser;
 
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
-import org.apache.commons.lang3.text.translate.CharSequenceTranslator;
-import org.apache.commons.lang3.text.translate.LookupTranslator;
+import org.apache.commons.text.translate.CharSequenceTranslator;
+import org.apache.commons.text.translate.LookupTranslator;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public final class CleanUtils {
 
@@ -23,7 +25,14 @@ public final class CleanUtils {
 	public static final Pattern CLEAN_PARENTHESE2 = Pattern.compile("(\\w)[\\s]*[" + PARENTHESE2 + "]");
 	public static final String CLEAN_PARENTHESE2_REPLACEMENT = "$1" + PARENTHESE2;
 
-	private static final CharSequenceTranslator ESCAPE = new LookupTranslator(new String[][] { { "\'", "\'\'" }, { "_", Constants.EMPTY } });
+	private static final CharSequenceTranslator ESCAPE;
+
+	static {
+		Map<CharSequence, CharSequence> map = new HashMap<>();
+		map.put("\'", "\'\'");
+		map.put("_", Constants.EMPTY);
+		ESCAPE = new LookupTranslator(map);
+	}
 
 	public static String escape(String string) {
 		return ESCAPE.translate(string);
