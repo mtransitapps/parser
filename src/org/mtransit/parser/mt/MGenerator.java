@@ -195,7 +195,7 @@ public class MGenerator {
 			dumpDirF.mkdir();
 		}
 		System.out.printf("\nWriting MT files (%s)...", dumpDirF.toURI());
-		File file = null;
+		File file;
 		BufferedWriter ow = null;
 		Integer minDate = null, maxDate = null;
 		file = new File(dumpDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
@@ -207,7 +207,7 @@ public class MGenerator {
 					// System.out.println("write: " + mServiceDate.toString());
 					ow.write(mServiceDate.toString());
 					ow.write(Constants.NEW_LINE);
-					if (minDate == null || minDate.intValue() > mServiceDate.getCalendarDate()) {
+					if (minDate == null || minDate > mServiceDate.getCalendarDate()) {
 						minDate = mServiceDate.getCalendarDate();
 					}
 					if (maxDate == null || maxDate.doubleValue() < mServiceDate.getCalendarDate()) {
@@ -237,9 +237,11 @@ public class MGenerator {
 				return name.startsWith(fileBaseScheduleStop);
 			}
 		});
-		for (final File f : scheduleStopFiles) {
-			if (!f.delete()) {
-				System.err.printf("\nCan't remove %s!", f.getAbsolutePath());
+		if (scheduleStopFiles != null) {
+			for (final File f : scheduleStopFiles) {
+				if (!f.delete()) {
+					System.err.printf("\nCan't remove %s!", f.getAbsolutePath());
+				}
 			}
 		}
 		String fileName;
@@ -277,6 +279,7 @@ public class MGenerator {
 					ioe.printStackTrace();
 					System.exit(-1);
 				} finally {
+					//noinspection ConstantConditions // TODO WTF!
 					if (ow != null) {
 						try {
 							ow.close();
@@ -290,15 +293,17 @@ public class MGenerator {
 		}
 		// delete all "...frequencies_route_*"
 		final String fileBaseRouteFrequency = fileBase + GTFS_FREQUENCY_ROUTE;
-		File[] frequencyRoutefiles = dumpDirF.listFiles(new FilenameFilter() {
+		File[] frequencyRouteFiles = dumpDirF.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
 				return name.startsWith(fileBaseRouteFrequency);
 			}
 		});
-		for (File f : frequencyRoutefiles) {
-			if (!f.delete()) {
-				System.err.printf("\nCan't remove %s!\n", f.getAbsolutePath());
+		if (frequencyRouteFiles != null) {
+			for (File f : frequencyRouteFiles) {
+				if (!f.delete()) {
+					System.err.printf("\nCan't remove %s!\n", f.getAbsolutePath());
+				}
 			}
 		}
 		ArrayList<MFrequency> mRouteFrequencies;
@@ -325,6 +330,7 @@ public class MGenerator {
 					ioe.printStackTrace();
 					System.exit(-1);
 				} finally {
+					//noinspection ConstantConditions // TODO WTF!
 					if (ow != null) {
 						try {
 							ow.close();
@@ -418,18 +424,18 @@ public class MGenerator {
 					ow.write(mStop.printString());
 					ow.write(Constants.NEW_LINE);
 					if (mStop.hasLat()) {
-						if (minLat == null || minLat.doubleValue() > mStop.getLat()) {
+						if (minLat == null || minLat > mStop.getLat()) {
 							minLat = mStop.getLat();
 						}
-						if (maxLat == null || maxLat.doubleValue() < mStop.getLat()) {
+						if (maxLat == null || maxLat < mStop.getLat()) {
 							maxLat = mStop.getLat();
 						}
 					}
 					if (mStop.hasLng()) {
-						if (minLng == null || minLng.doubleValue() > mStop.getLng()) {
+						if (minLng == null || minLng > mStop.getLng()) {
 							minLng = mStop.getLng();
 						}
-						if (maxLng == null || maxLng.doubleValue() < mStop.getLng()) {
+						if (maxLng == null || maxLng < mStop.getLng()) {
 							maxLng = mStop.getLng();
 						}
 					}
@@ -462,7 +468,7 @@ public class MGenerator {
 
 	private static final String GTFS_RTS_VALUES_XML = "gtfs_rts_values.xml";
 
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
 
 	private static final Pattern RTS_DB_VERSION_REGEX = Pattern.compile("((<integer name=\"gtfs_rts_db_version\">)([\\d]+)(</integer>))",
 			Pattern.CASE_INSENSITIVE);
@@ -496,7 +502,7 @@ public class MGenerator {
 						lastModifiedTimeDateS);
 				return;
 			}
-			while (currentRtsDbVersion.length() > lastModifiedTimeDateS.length()) {
+			if (currentRtsDbVersion.length() > lastModifiedTimeDateS.length()) {
 				lastModifiedTimeDateS = lastModifiedTimeDateS + "0";
 			}
 			String newContent = RTS_DB_VERSION_REGEX.matcher(content).replaceAll(String.format(RTS_DB_VERSION_REPLACEMENT, lastModifiedTimeDateS));
@@ -721,6 +727,7 @@ public class MGenerator {
 				ioe.printStackTrace();
 				System.exit(-1);
 			} finally {
+				//noinspection ConstantConditions // TODO WTF!
 				if (ow != null) {
 					try {
 						ow.close();
@@ -749,6 +756,7 @@ public class MGenerator {
 				ioe.printStackTrace();
 				System.exit(-1);
 			} finally {
+				//noinspection ConstantConditions // TODO WTF!
 				if (ow != null) {
 					try {
 						ow.close();
