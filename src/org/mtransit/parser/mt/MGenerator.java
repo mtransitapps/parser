@@ -687,9 +687,11 @@ public class MGenerator {
 		return String.format(RESOURCE_STRING_AND_NAME_VALUE, resName, resValue);
 	}
 
-	private static final String PUB = "pub";
-	private static final String STORE_LISTING_TXT = "store-listing.txt";
-	private static final String STORE_LISTING_FR_TXT = "store-listing_fr.txt";
+	private static final String PLAY = "play";
+	private static final String RELEASE_NOTES = "release-notes";
+	private static final String EN_US = "en-US";
+	private static final String FR_FR = "fr-FR";
+	private static final String DEFAULT_TXT = "default.txt";
 
 	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from ([A-Za-z]+ [0-9]{1,2}\\, [0-9]{4}) to ([A-Za-z]+ [0-9]{1,2}\\, [0-9]{4})\\.)",
 			Pattern.CASE_INSENSITIVE);
@@ -708,8 +710,10 @@ public class MGenerator {
 		File file;
 		BufferedWriter ow = null;
 		File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
-		File valuesDirF = new File(dumpDirRootF, PUB);
-		file = new File(valuesDirF, STORE_LISTING_TXT);
+		File dumpDirPlayF = new File(dumpDirRootF, PLAY);
+		File dumpDirReleaseNotesF = new File(dumpDirPlayF, RELEASE_NOTES);
+		File dumpDirReleaseNotesEnUsF = new File(dumpDirReleaseNotesF, EN_US);
+		file = new File(dumpDirReleaseNotesEnUsF, DEFAULT_TXT);
 		boolean isNext = "next_".equalsIgnoreCase(fileBase);
 		if (file.exists()) {
 			System.out.printf("\nGenerated store listing file: '%s'.", file);
@@ -740,7 +744,8 @@ public class MGenerator {
 		} else {
 			System.out.printf("\nDo not generate store listing file: %s.", file);
 		}
-		file = new File(valuesDirF, STORE_LISTING_FR_TXT);
+		File dumpDirReleaseNotesFrFrF = new File(dumpDirReleaseNotesF, FR_FR);
+		file = new File(dumpDirReleaseNotesFrFrF, DEFAULT_TXT);
 		if (file.exists()) {
 			System.out.printf("\nGenerated store listing file: %s.", file);
 			try {
