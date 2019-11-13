@@ -86,7 +86,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		MTLog.log("Generating agency data...");
 		long start = System.currentTimeMillis();
-		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false, false);
+		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false);
 		gtfs.cleanupExcludedData();
 		gtfs.generateTripStops();
 		if (args.length >= 4 && Boolean.parseBoolean(args[3])) {
@@ -496,7 +496,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (!isCurrentOrNext && OVERRIDE_DATE != null) {
 			usefulPeriod.todayStringInt = OVERRIDE_DATE;
 		}
-		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, !agencyFilter, agencyFilter);
+		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, !agencyFilter);
 		if (agencyFilter) {
 			gtfs.cleanupExcludedServiceIds();
 		}

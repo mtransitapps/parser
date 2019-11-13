@@ -14,7 +14,9 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
@@ -39,8 +41,8 @@ public class GReader {
 		void processLine(HashMap<String, String> line);
 	}
 
-	public static GSpec readGtfsZipFile(String gtfsFile, final GAgencyTools agencyTools, boolean calendarsOnly, boolean routeTripCalendarsOnly) {
-		System.out.printf("\nReading GTFS file '%s'...", gtfsFile);
+	public static GSpec readGtfsZipFile(String gtfsFile, final GAgencyTools agencyTools, boolean calendarsOnly) {
+		MTLog.log("Reading GTFS file '%s'...", gtfsFile);
 		long start = System.currentTimeMillis();
 		final GSpec gSpec = new GSpec();
 		ZipInputStream zip = null;
@@ -59,109 +61,68 @@ public class GReader {
 					filename = filename.substring(filename.indexOf(SLASH) + 1);
 				}
 				if (filename.equalsIgnoreCase(GAgency.FILENAME)) { // AGENCY
-					if (calendarsOnly || routeTripCalendarsOnly) {
+					if (calendarsOnly) {
 						continue;
 					}
-					readCsv(filename, reader, null, null, new LineProcessor() {
-						@Override
-						public void processLine(HashMap<String, String> line) {
-							processAgency(agencyTools, gSpec, line);
-						}
-					});
+					readCsv(filename, reader, line ->
+							processAgency(agencyTools, gSpec, line)
+					);
 				} else if (filename.equalsIgnoreCase(GCalendarDate.FILENAME)) { // CALENDAR DATES
-					readCsv(filename, reader, null, null, new LineProcessor() {
-						@Override
-						public void processLine(HashMap<String, String> line) {
-							processCalendarDate(agencyTools, gSpec, line);
-						}
-					});
+					readCsv(filename, reader, line ->
+							processCalendarDate(agencyTools, gSpec, line)
+					);
 				} else if (filename.equalsIgnoreCase(GCalendar.FILENAME)) { // CALENDAR
-					readCsv(filename, reader, null, null, new LineProcessor() {
-						@Override
-						public void processLine(HashMap<String, String> line) {
-							processCalendar(agencyTools, gSpec, line);
-						}
-					});
+					readCsv(filename, reader, line ->
+							processCalendar(agencyTools, gSpec, line)
+					);
 				} else if (filename.equalsIgnoreCase(GRoute.FILENAME)) { // ROUTE
 					if (calendarsOnly) {
 						continue;
 					}
-					readCsv(filename, reader, null, null, new LineProcessor() {
-						@Override
-						public void processLine(HashMap<String, String> line) {
-							processRoute(agencyTools, gSpec, line);
-						}
-					});
+					readCsv(filename, reader, line ->
+							processRoute(agencyTools, gSpec, line)
+					);
 				} else if (filename.equalsIgnoreCase(GStop.FILENAME)) { // STOP
-					if (calendarsOnly || routeTripCalendarsOnly) {
+					if (calendarsOnly) {
 						continue;
 					}
-					readCsv(filename, reader, null, null, new LineProcessor() {
-						@Override
-						public void processLine(HashMap<String, String> line) {
-							processStop(agencyTools, gSpec, line);
-						}
-					});
+					readCsv(filename, reader, line ->
+							processStop(agencyTools, gSpec, line)
+					);
 				} else if (filename.equalsIgnoreCase(GTrip.FILENAME)) { // TRIP
 					if (calendarsOnly) {
 						continue;
 					}
-					readCsv(filename, reader, null, null, new LineProcessor() {
-						@Override
-						public void processLine(HashMap<String, String> line) {
-							processTrip(agencyTools, gSpec, line);
-						}
-					});
+					readCsv(filename, reader, line ->
+							processTrip(agencyTools, gSpec, line)
+					);
 				} else if (filename.equalsIgnoreCase(GStopTime.FILENAME)) { // STOP TIME
-					if (calendarsOnly || routeTripCalendarsOnly) {
+					if (calendarsOnly) {
 						continue;
 					}
-					readCsv(filename, reader, null, null, new LineProcessor() {
-						@Override
-						public void processLine(HashMap<String, String> line) {
-							processStopTime(agencyTools, gSpec, line);
-						}
-					});
+					readCsv(filename, reader, line ->
+							processStopTime(agencyTools, gSpec, line)
+					);
 				} else if (filename.equalsIgnoreCase(GFrequency.FILENAME)) { // FREQUENCY
-					if (calendarsOnly || routeTripCalendarsOnly) {
+					if (calendarsOnly) {
 						continue;
 					}
-					readCsv(filename, reader, null, null, new LineProcessor() {
-						@Override
-						public void processLine(HashMap<String, String> line) {
-							processFrequency(agencyTools, gSpec, line);
-						}
-					});
+					readCsv(filename, reader, line ->
+							processFrequency(agencyTools, gSpec, line)
+					);
 				} else {
-					System.out.printf("\nFile not used: %s", filename);
+					MTLog.log("File not used: %s", filename);
 				}
 			}
 		} catch (IOException ioe) {
-			System.out.printf("\nI/O Error while reading GTFS file!\n");
-			ioe.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(ioe, "I/O Error while reading GTFS file!");
 		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-				}
-			}
-			if (isr != null) {
-				try {
-					isr.close();
-				} catch (IOException e) {
-				}
-			}
-			if (zip != null) {
-				try {
-					zip.close();
-				} catch (IOException e) {
-				}
-			}
+			IOUtils.closeQuietly(reader);
+			IOUtils.closeQuietly(isr);
+			IOUtils.closeQuietly(zip);
 		}
-		System.out.printf("\nReading GTFS file '%1$s'... DONE in %2$s.", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
-		gSpec.print(calendarsOnly);
+		MTLog.log("Reading GTFS file '%1$s'... DONE in %2$s.", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		gSpec.print(calendarsOnly, false);
 		return gSpec;
 	}
 
@@ -169,9 +130,9 @@ public class GReader {
 
 	private static final CSVFormat CSV_FORMAT_NO_QUOTE = CSV_FORMAT.withQuote(null);
 
-	private static void readCsv(String filename, BufferedReader reader, String filterStartWith, String filterContains, LineProcessor lineProcessor)
-			throws IOException {
-		System.out.printf("\nReading file '%s'...", filename);
+	private static void readCsv(String filename, BufferedReader reader,
+								LineProcessor lineProcessor) throws IOException {
+		MTLog.log("Reading file '%s'...", filename);
 		String line;
 		String[] lineColumns;
 		line = reader.readLine();
@@ -179,7 +140,7 @@ public class GReader {
 			return;
 		}
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
-			System.out.printf("\nRemove 1st empty car");
+			MTLog.log("Remove 1st empty car");
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
 		CSVRecord recordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
@@ -188,7 +149,7 @@ public class GReader {
 			lineColumns[i] = recordColumns.get(i);
 		}
 		String[] columnNames = lineColumns;
-		if (columnNames == null || columnNames.length == 0) {
+		if (columnNames.length == 0) {
 			return;
 		}
 		List<CSVRecord> records;
@@ -197,12 +158,6 @@ public class GReader {
 		boolean noQuote;
 		while ((line = reader.readLine()) != null) {
 			try {
-				if (filterStartWith != null && !line.startsWith(filterStartWith)) {
-					continue;
-				}
-				if (filterContains != null && !line.contains(filterContains)) {
-					continue;
-				}
 				try {
 					records = CSVParser.parse(line, CSV_FORMAT).getRecords();
 					noQuote = false;
@@ -210,7 +165,7 @@ public class GReader {
 					records = CSVParser.parse(line, CSV_FORMAT_NO_QUOTE).getRecords();
 					noQuote = true;
 				}
-				if (records == null || records.size() == 0) {
+				if (records.size() == 0) {
 					continue; // empty line
 				}
 				recordColumns = records.get(0);
@@ -219,10 +174,10 @@ public class GReader {
 					lineColumns[i] = noQuote ? recordColumns.get(i).replaceAll("\"", "") : recordColumns.get(i);
 				}
 				if (columnNames.length != lineColumns.length && columnNames.length != (lineColumns.length + 1)) {
-					System.out.printf("\nFile '%s' line invalid: %s columns instead of %s: %s", filename, lineColumns.length, columnNames.length, line);
+					MTLog.log("File '%s' line invalid: %s columns instead of %s: %s", filename, lineColumns.length, columnNames.length, line);
 					continue;
 				}
-				map = new HashMap<String, String>();
+				map = new HashMap<>();
 				for (int ci = 0; ci < lineColumns.length; ++ci) {
 					map.put(columnNames[ci], lineColumns[ci]);
 				}
@@ -230,18 +185,20 @@ public class GReader {
 					lineProcessor.processLine(map);
 				}
 			} catch (Exception e) {
-				System.out.printf("\nError while processing line: %s\n", line);
-				e.printStackTrace();
-				System.exit(-1);
+				MTLog.logFatal(e, "Error while processing line: %s\n", line);
 			}
 		}
-		System.out.printf("\nFile '%s' read (lines: %s).", filename, l);
+		MTLog.log("File '%s' read (lines: %s).", filename, l);
 	}
 
 	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			GStopTime gStopTime = new GStopTime(line.get(GStopTime.TRIP_ID), line.get(GStopTime.ARRIVAL_TIME).trim(),
-					line.get(GStopTime.DEPARTURE_TIME).trim(), line.get(GStopTime.STOP_ID).trim(), Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()),
+			GStopTime gStopTime = new GStopTime(
+					line.get(GStopTime.TRIP_ID),
+					line.get(GStopTime.ARRIVAL_TIME).trim(),
+					line.get(GStopTime.DEPARTURE_TIME).trim(),
+					line.get(GStopTime.STOP_ID).trim(),
+					Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()),
 					line.get(GStopTime.STOP_HEADSIGN), //
 					GPickupType.parse(line.get(GStopTime.PICKUP_TYPE)).intValue(), //
 					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)).intValue() //
@@ -251,31 +208,29 @@ public class GReader {
 			}
 			gSpec.addStopTime(gStopTime);
 		} catch (Exception e) {
-			System.out.printf("\nError while parsing: '%s'!\n", line);
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while parsing: '%s'!\n", line);
 		}
 	}
 
-	private static void processFrequency(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
+	private static void processFrequency(@SuppressWarnings("unused") GAgencyTools agencyTools,
+										 GSpec gSpec,
+										 HashMap<String, String> line) {
 		try {
 			GFrequency gFrequency = new GFrequency(line.get(GFrequency.TRIP_ID), line.get(GFrequency.START_TIME), line.get(GFrequency.END_TIME),
 					Integer.parseInt(line.get(GFrequency.HEADWAY_SECS)));
 			gSpec.addFrequency(gFrequency);
 		} catch (Exception e) {
-			System.out.printf("\nError while parsing: '%s'!\n", line);
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while parsing: '%s'!\n", line);
 		}
 	}
 
-	private static void processAgency(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
+	private static void processAgency(@SuppressWarnings("unused") GAgencyTools agencyTools,
+									  GSpec gSpec,
+									  HashMap<String, String> line) {
 		try {
 			gSpec.addAgency(new GAgency(line.get(GAgency.AGENCY_ID), line.get(GAgency.AGENCY_TIMEZONE)));
 		} catch (Exception e) {
-			System.out.printf("\nError while processing: '%s'!\n", line);
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while processing: '%s'!\n", line);
 		}
 	}
 
@@ -285,7 +240,7 @@ public class GReader {
 			String date = line.get(GCalendarDate.DATE);
 			String exceptionDate = line.get(GCalendarDate.EXCEPTION_DATE);
 			if (StringUtils.isEmpty(serviceId) && StringUtils.isEmpty(date) && StringUtils.isEmpty(exceptionDate)) {
-				System.out.printf("\nEmpty calendar dates ignored (%s).", line);
+				MTLog.log("Empty calendar dates ignored (%s).", line);
 				return;
 			}
 			GCalendarDate gCalendarDate = new GCalendarDate(serviceId, Integer.parseInt(date), GCalendarDatesExceptionType.parse(exceptionDate));
@@ -294,9 +249,7 @@ public class GReader {
 			}
 			gSpec.addCalendarDate(gCalendarDate);
 		} catch (Exception e) {
-			System.out.printf("\nError while processing: '%s'!\n", line);
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while processing: '%s'!\n", line);
 		}
 	}
 
@@ -315,9 +268,7 @@ public class GReader {
 			}
 			gSpec.addCalendar(gCalendar);
 		} catch (Exception e) {
-			System.out.printf("\nError while processing: %s!\n", line);
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while processing: %s!\n", line);
 		}
 	}
 
@@ -331,9 +282,7 @@ public class GReader {
 			}
 			gSpec.addTrip(gTrip);
 		} catch (Exception e) {
-			System.out.printf("\nError while processing: %s\n", line);
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while processing: %s\n", line);
 		}
 	}
 
@@ -356,9 +305,7 @@ public class GReader {
 			}
 			gSpec.addStop(gStop);
 		} catch (Exception e) {
-			System.out.printf("\nError while parsing stop line %s!\n", line);
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while parsing stop line %s!\n", line);
 		}
 	}
 
@@ -373,9 +320,7 @@ public class GReader {
 			}
 			gSpec.addRoute(gRoute);
 		} catch (Exception e) {
-			System.out.printf("\nError while parsing route line %s!\n", line);
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while parsing route line %s!\n", line);
 		}
 	}
 

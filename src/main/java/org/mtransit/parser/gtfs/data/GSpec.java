@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data;
 
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +20,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
+import org.mtransit.parser.MTLog;
 import org.mtransit.parser.gtfs.GAgencyTools;
 
 // https://developers.google.com/transit/gtfs/reference#FeedFiles
@@ -120,8 +123,7 @@ public class GSpec {
 		if (optRouteId != null) {
 			return this.routeIdTrips.get(optRouteId);
 		}
-		System.out.printf("\ngetTrips() > trying to use ALL trips!");
-		System.exit(-1);
+		MTLog.logFatal("getTrips() > trying to use ALL trips!");
 		return null;
 	}
 
@@ -129,8 +131,7 @@ public class GSpec {
 		if (optGTripId != null) {
 			return this.tripIdStopTimes.get(optGTripId);
 		}
-		System.out.printf("\ngetStopTimes() > trying to use ALL stop times!");
-		System.exit(-1);
+		MTLog.logFatal("getStopTimes() > trying to use ALL stop times!");
 		return null;
 	}
 
@@ -226,10 +227,12 @@ public class GSpec {
 				.append(']').toString();
 	}
 
-	public void print(boolean calendarsOnly) {
+	public void print(boolean calendarsOnly, boolean stopTimesOnly) {
 		if (calendarsOnly) {
 			System.out.printf("\n- Calendars: %d", this.calendars.size());
 			System.out.printf("\n- CalendarDates: %d", this.calendarDates.size());
+		} else if (stopTimesOnly) {
+			System.out.printf("\n- StopTimes: %d", this.stopTimesCount);
 		} else {
 			System.out.printf("\n- Agencies: %d", this.agencies.size());
 			System.out.printf("\n- Calendars: %d", this.calendars.size());
@@ -269,7 +272,7 @@ public class GSpec {
 	}
 
 	public static SimpleDateFormat getNewTimeFormatInstance() {
-		return new SimpleDateFormat("HH:mm:ss");
+		return new SimpleDateFormat("HH:mm:ss", Locale.ENGLISH);
 	}
 
 	public void generateStopTimesFromFrequencies(GAgencyTools agencyTools) {
