@@ -268,7 +268,7 @@ public class GSpec {
 		return Integer.parseInt(TIME_SEPARATOR_REGEX.matcher(timeS).replaceAll(Constants.EMPTY));
 	}
 
-	public static final SimpleDateFormat getNewTimeFormatInstance() {
+	public static SimpleDateFormat getNewTimeFormatInstance() {
 		return new SimpleDateFormat("HH:mm:ss");
 	}
 

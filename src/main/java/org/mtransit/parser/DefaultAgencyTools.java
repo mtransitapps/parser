@@ -1,14 +1,5 @@
 package org.mtransit.parser;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
@@ -31,6 +22,15 @@ import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
 public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final int MAX_NEXT_LOOKUP_IN_DAYS = 60;
@@ -42,6 +42,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public static final boolean EXPORT_PATH_ID;
 	public static final boolean EXPORT_ORIGINAL_ID;
 	public static final boolean EXPORT_DESCENT_ONLY;
+
 	static {
 		EXPORT_PATH_ID = false;
 		EXPORT_ORIGINAL_ID = false;
@@ -49,23 +50,27 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	public static final boolean GOOD_ENOUGH_ACCEPTED;
+
 	static {
 		GOOD_ENOUGH_ACCEPTED = false;
 		// GOOD_ENOUGH_ACCEPTED = true; // DEBUG
 	}
 
 	private static final Integer THREAD_POOL_SIZE;
+
 	static {
 		THREAD_POOL_SIZE = 4;
 		// THREAD_POOL_SIZE = 1; // DEBUG
 	}
 
 	private static final Integer OVERRIDE_DATE;
+
 	static {
 		OVERRIDE_DATE = null;
 	}
 
 	private static final boolean TOMORROW;
+
 	static {
 		TOMORROW = false;
 	}
@@ -79,7 +84,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			MGenerator.dumpFiles(null, args[0], args[1], args[2], true);
 			return;
 		}
-		System.out.printf("\nGenerating agency data...");
+		MTLog.log("Generating agency data...");
 		long start = System.currentTimeMillis();
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false, false);
 		gtfs.cleanupExcludedData();
@@ -91,13 +96,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		gtfs.clearRawData();
 		MSpec mSpec = MGenerator.generateMSpec(gtfs, this);
 		MGenerator.dumpFiles(mSpec, args[0], args[1], args[2]);
-		System.out.printf("\nGenerating agency data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		MTLog.log("Generating agency data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
 	@Override
 	public boolean excludingAll() {
-		System.out.printf("\nNEED TO IMPLEMENT EXCLUDE ALL\n");
-		System.exit(-1);
+		MTLog.logFatal("NEED TO IMPLEMENT EXCLUDE ALL");
 		return false;
 	}
 
@@ -121,9 +125,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		try {
 			return Long.parseLong(gRoute.getRouteId());
 		} catch (Exception e) {
-			System.out.printf("\nError while extracting route ID from %s!\n", gRoute);
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while extracting route ID from %s!\n", gRoute);
 			return -1;
 		}
 	}
@@ -131,8 +133,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String getRouteShortName(GRoute gRoute) {
 		if (StringUtils.isEmpty(gRoute.getRouteShortName())) {
-			System.out.printf("\nNo default route short name for %s!\n", gRoute);
-			System.exit(-1);
+			MTLog.logFatal("No default route short name for %s!\n", gRoute);
 			return null;
 		}
 		return gRoute.getRouteShortName();
@@ -141,8 +142,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
 		if (StringUtils.isEmpty(gRoute.getRouteLongName())) {
-			System.out.printf("\nNo default route long name for %s!\n", gRoute);
-			System.exit(-1);
+			MTLog.logFatal("No default route long name for %s!\n", gRoute);
 			return null;
 		}
 		return CleanUtils.cleanLabel(gRoute.getRouteLongName());
@@ -161,8 +161,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return null;
 		}
 		if (WHITE.equalsIgnoreCase(gRoute.getRouteColor())) {
-			System.out.printf("\nERROR: invalid route color for '%s'!\n", gRoute);
-			System.exit(-1);
+			MTLog.logFatal("ERROR: invalid route color for '%s'!\n", gRoute);
 			return null;
 		}
 		return gRoute.getRouteColor();
@@ -171,12 +170,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
 		if (getAgencyRouteType() == null) {
-			System.out.printf("\nERROR: unspecified agency route type '%s'!\n", getAgencyRouteType());
-			System.exit(-1);
+			MTLog.logFatal("ERROR: unspecified agency route type '%s'!\n", getAgencyRouteType());
+			return false;
 		}
 		if (GRouteType.isUnknown(gRoute.getRouteType())) {
-			System.out.printf("\nERROR: unexpected route type '%s'!\n", gRoute.getRouteType());
-			System.exit(-1);
+			MTLog.logFatal("ERROR: unexpected route type '%s'!\n", gRoute.getRouteType());
+			return false;
 		}
 		if (!GRouteType.isSameType(getAgencyRouteType(), gRoute.getRouteType())) {
 			return true; // exclude
@@ -193,21 +192,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, ArrayList<MTrip> splitTrips, GSpec routeGTFS) {
-		return new Pair<Long[], Integer[]>(new Long[] { splitTrips.get(0).getId() }, new Integer[] { gTripStop.getStopSequence() });
+		return new Pair<Long[], Integer[]>(new Long[]{splitTrips.get(0).getId()}, new Integer[]{gTripStop.getStopSequence()});
 	}
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
 		if (gTrip.getDirectionId() == null || gTrip.getDirectionId() < 0 || gTrip.getDirectionId() > 1) {
-			System.out.printf("\nERROR: default agency implementation required 'direction_id' field in 'trips.txt'!\n");
-			System.exit(-1);
+			MTLog.logFatal("ERROR: default agency implementation required 'direction_id' field in 'trips.txt'!\n");
+			return;
 		}
 		try {
 			mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId());
 		} catch (NumberFormatException nfe) {
-			System.out.printf("\nERROR: default agency implementation not possible!\n");
-			nfe.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(nfe, "ERROR: default agency implementation not possible!\n");
 		}
 	}
 
@@ -267,9 +264,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		try {
 			return Integer.parseInt(gStop.getStopId());
 		} catch (Exception e) {
-			System.out.printf("\nError while extracting stop ID from %s!\n", gStop);
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while extracting stop ID from %s!\n", gStop);
 			return -1;
 		}
 	}
@@ -316,7 +311,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	public static Pair<Integer, Integer> extractTimes(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat,
-			SimpleDateFormat mDateFormat) {
+													  SimpleDateFormat mDateFormat) {
 		try {
 			Pair<Long, Long> timesInMs = extractTimeInMs(gStopTime, routeGTFS, gDateFormat);
 			long arrivalTimeInMs = timesInMs.first;
@@ -334,9 +329,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			return new Pair<Integer, Integer>(cleanExtraSeconds(arrivalTime), cleanExtraSeconds(departureTime));
 		} catch (Exception e) {
-			System.out.printf("\nError while interpolating times for %s!\n", gStopTime);
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while interpolating times for %s!\n", gStopTime);
 			return null;
 		}
 	}
@@ -399,7 +392,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	private static int cleanExtraSeconds(Integer time) {
-		int extraSeconds = time == null ? 0 : time.intValue() % PRECISON_IN_SECONDS;
+		int extraSeconds = time == null ? 0 : time % PRECISON_IN_SECONDS;
 		if (extraSeconds > 0) { // IF too precise DO
 			return cleanTime(time, extraSeconds);
 		}
@@ -413,10 +406,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static int cleanTime(Integer time, int extraSeconds) {
 		try {
-			String timeS = String.valueOf(time);
-			while (timeS.length() < 6) {
-				timeS = CLEAN_TIME_LEADING_ZERO + timeS;
-			}
+			String timeS = convertTimeToString(time);
 			String newHours = timeS.substring(0, 2);
 			String newMinutes = timeS.substring(2, 4);
 			String newSeconds = timeS.substring(4, 6);
@@ -444,11 +434,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 			newHours = String.valueOf(Integer.parseInt(newHours) + 1);
 			return Integer.parseInt(newHours + newMinutes + newSeconds);
 		} catch (Exception e) {
-			System.out.printf("\nError while cleaning time '%s' '%s' !\n", time, extraSeconds);
+			MTLog.log("Error while cleaning time '%s' '%s' !\n", time, extraSeconds);
 			e.printStackTrace();
 			System.exit(-1);
 			return -1;
 		}
+	}
+
+	protected static String convertTimeToString(Integer time) {
+		StringBuilder sb = new StringBuilder(time.toString());
+		while (sb.length() < 6) {
+			sb.insert(0, CLEAN_TIME_LEADING_ZERO);
+		}
+		return sb.toString();
 	}
 
 	@Override
@@ -484,7 +482,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static Period usefulPeriod = null;
 
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools, boolean agencyFilter) {
-		System.out.printf("\nExtracting useful service IDs...");
+		MTLog.log("Extracting useful service IDs...");
 		usefulPeriod = new Period();
 		SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
 		boolean isCurrent = "current_".equalsIgnoreCase(args[2]);
@@ -511,13 +509,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 		} else if (gCalendarDates != null && gCalendarDates.size() > 0) {
 			parseCalendarDates(gCalendarDates, DATE_FORMAT, c, usefulPeriod, isCurrentOrNext);
 		} else {
-			System.out.printf("\nNO schedule available for %s! (1)\n", usefulPeriod.todayStringInt);
+			MTLog.log("NO schedule available for %s! (1)\n", usefulPeriod.todayStringInt);
 			System.exit(-1);
 			return null;
 		}
 		if (!isNext //
 				&& (usefulPeriod.startDate == null || usefulPeriod.endDate == null)) {
-			System.out.printf("\nNO schedule available for %s! (start:%s|end:%s) (isCurrent:%s|isNext:%s)\n", usefulPeriod.todayStringInt,
+			MTLog.log("NO schedule available for %s! (start:%s|end:%s) (isCurrent:%s|isNext:%s)\n", usefulPeriod.todayStringInt,
 					usefulPeriod.startDate, usefulPeriod.endDate, isCurrent, isNext);
 			System.exit(-1);
 			return null;
@@ -525,11 +523,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (usefulPeriod.todayStringInt != null && usefulPeriod.startDate != null && usefulPeriod.endDate != null) {
 			hasCurrent = true;
 		}
-		System.out.printf("\nGenerated on %s | Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
+		MTLog.log("Generated on %s | Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
 		if (isNext) {
 			if (hasCurrent //
 					&& !diffLowerThan(DATE_FORMAT, c, usefulPeriod.todayStringInt, usefulPeriod.endDate, MAX_NEXT_LOOKUP_IN_DAYS)) {
-				System.out.printf("\nSkipping NEXT schedules... (%d days from %s to %s)", //
+				MTLog.log("Skipping NEXT schedules... (%d days from %s to %s)", //
 						TimeUnit.MILLISECONDS.toDays(diffInMs(DATE_FORMAT, c, usefulPeriod.todayStringInt, usefulPeriod.endDate)), //
 						usefulPeriod.todayStringInt, //
 						usefulPeriod.endDate);
@@ -539,7 +537,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				gtfs = null;
 				return new HashSet<String>(); // non-null = service IDs
 			}
-			System.out.printf("\nLooking for NEXT schedules...");
+			MTLog.log("Looking for NEXT schedules...");
 			if (hasCurrent) {
 				usefulPeriod.todayStringInt = incDateDays(DATE_FORMAT, c, usefulPeriod.endDate, 1); // start from next to current last date
 			}
@@ -551,7 +549,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				parseCalendarDates(gCalendarDates, DATE_FORMAT, c, usefulPeriod, false);
 			}
 			if (usefulPeriod.startDate == null || usefulPeriod.endDate == null) {
-				System.out.printf("\nNO NEXT schedule available for %s. (start:%s|end:%s)", usefulPeriod.todayStringInt, usefulPeriod.startDate,
+				MTLog.log("NO NEXT schedule available for %s. (start:%s|end:%s)", usefulPeriod.todayStringInt, usefulPeriod.startDate,
 						usefulPeriod.endDate);
 				usefulPeriod.todayStringInt = null; // reset
 				usefulPeriod.startDate = null; // reset
@@ -559,11 +557,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 				gtfs = null;
 				return new HashSet<String>(); // non-null = service IDs
 			}
-			System.out.printf("\nGenerated on %s | NEXT Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
+			MTLog.log("Generated on %s | NEXT Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
 		}
 		HashSet<String> serviceIds = getPerdiodServiceIds(usefulPeriod.startDate, usefulPeriod.endDate, gCalendars, gCalendarDates);
 		improveUsefulPeriod(DATE_FORMAT, c, gCalendars, gCalendarDates);
-		System.out.printf("\nExtracting useful service IDs... DONE");
+		MTLog.log("Extracting useful service IDs... DONE");
 		gtfs = null;
 		return serviceIds;
 	}
@@ -578,7 +576,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				for (GCalendarDate gCalendarDate : gCalendarDates) {
 					if (gCalendarDate.isBefore(usefulPeriod.startDate)) {
 						if (gCalendarDate.isBetween(minNewStartDate, usefulPeriod.startDate)) {
-							System.out.printf("\nnew useful period start date '%s' because it's close to previous useful period start date '%s'.",
+							MTLog.log("new useful period start date '%s' because it's close to previous useful period start date '%s'.",
 									gCalendarDate.getDate(), usefulPeriod.startDate);
 							usefulPeriod.startDate = gCalendarDate.getDate();
 							newDateFound = true;
@@ -593,7 +591,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				for (GCalendarDate gCalendarDate : gCalendarDates) {
 					if (gCalendarDate.isAfter(usefulPeriod.endDate)) {
 						if (gCalendarDate.isBetween(usefulPeriod.endDate, minNewEndDate)) {
-							System.out.printf("\nnew useful end date '%s' because it's close to previous useful period end data '%s'.",
+							MTLog.log("new useful end date '%s' because it's close to previous useful period end data '%s'.",
 									gCalendarDate.getDate(), usefulPeriod.endDate);
 							usefulPeriod.endDate = gCalendarDate.getDate();
 							newDateFound = true;
@@ -608,16 +606,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static void parseCalendarDates(List<GCalendarDate> gCalendarDates, SimpleDateFormat DATE_FORMAT, Calendar c, Period p, boolean keepToday) {
 		HashSet<String> todayServiceIds = findTodayServiceIds(gCalendarDates, DATE_FORMAT, c, p, keepToday ? 0 : 1, 1);
 		if (todayServiceIds == null || todayServiceIds.size() == 0) {
-			System.out.printf("\nNO schedule available for %s in calendar dates.\n", p.todayStringInt);
+			MTLog.log("NO schedule available for %s in calendar dates.\n", p.todayStringInt);
 			return;
 		}
 		refreshStartEndDatesFromCalendarDates(p, todayServiceIds, gCalendarDates);
 		while (true) {
-			System.out.printf("\nSchedules from %s to %s... ", p.startDate, p.endDate);
+			MTLog.log("Schedules from %s to %s... ", p.startDate, p.endDate);
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
 				if (gCalendarDate.isBetween(p.startDate, p.endDate)) {
 					if (!gCalendarDate.isServiceIds(todayServiceIds)) {
-						System.out.printf("\nnew service ID from calendar date active on %s between %s and %s: '%s'", gCalendarDate.getDate(), p.startDate,
+						MTLog.log("new service ID from calendar date active on %s between %s and %s: '%s'", gCalendarDate.getDate(), p.startDate,
 								p.endDate, gCalendarDate.getServiceId());
 						todayServiceIds.add(gCalendarDate.getServiceId());
 					}
@@ -625,12 +623,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			boolean newDates = refreshStartEndDatesFromCalendarDates(p, todayServiceIds, gCalendarDates);
 			if (newDates) {
-				System.out.printf("\nnew start date '%s' & end date '%s' from calendar date active during service ID(s).", p.startDate, p.endDate);
+				MTLog.log("new start date '%s' & end date '%s' from calendar date active during service ID(s).", p.startDate, p.endDate);
 				continue;
 			}
 			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_COVERAGE_TOTAL_IN_DAYS)) {
 				p.endDate = incDateDays(DATE_FORMAT, c, p.endDate, 1); // end++
-				System.out.printf("\nnew end date because coverage lower than %s days: %s", MIN_COVERAGE_TOTAL_IN_DAYS, p.endDate);
+				MTLog.log("new end date because coverage lower than %s days: %s", MIN_COVERAGE_TOTAL_IN_DAYS, p.endDate);
 				continue;
 			}
 			Period pNext = new Period();
@@ -639,7 +637,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			refreshStartEndDatesFromCalendarDates(pNext, nextDayServiceIds, gCalendarDates);
 			if (pNext.todayStringInt.equals(pNext.startDate) && pNext.todayStringInt.equals(pNext.endDate)) {
 				p.endDate = pNext.endDate;
-				System.out.printf("\nnew end date '%s' because next day has own service ID(s)", p.endDate);
+				MTLog.log("new end date '%s' because next day has own service ID(s)", p.endDate);
 				continue;
 			}
 			Period pPrevious = new Period();
@@ -648,7 +646,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			refreshStartEndDatesFromCalendarDates(pPrevious, previousDayServiceIds, gCalendarDates);
 			if (pPrevious.todayStringInt.equals(pPrevious.startDate) && pPrevious.todayStringInt.equals(pPrevious.endDate)) {
 				p.startDate = pPrevious.startDate;
-				System.out.printf("\nnew start date '%s' because previous day has own service ID(s)", p.startDate);
+				MTLog.log("new start date '%s' because previous day has own service ID(s)", p.startDate);
 				continue;
 			}
 			break;
@@ -673,7 +671,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	private static HashSet<String> findTodayServiceIds(List<GCalendarDate> gCalendarDates, SimpleDateFormat DATE_FORMAT, Calendar c, Period p, int minSize,
-			int incDays) {
+													   int incDays) {
 		HashSet<String> todayServiceIds = new HashSet<String>();
 		final int initialTodayStringInt = p.todayStringInt;
 		while (true) {
@@ -687,7 +685,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (todayServiceIds.size() < minSize //
 					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MAX_LOOKUP_IN_DAYS)) {
 				p.todayStringInt = incDateDays(DATE_FORMAT, c, p.todayStringInt, incDays);
-				System.out.printf("\nnew today because not enougth service today: %s (initial today: %s, min: %s)", p.todayStringInt, initialTodayStringInt,
+				MTLog.log("new today because not enougth service today: %s (initial today: %s, min: %s)", p.todayStringInt, initialTodayStringInt,
 						minSize);
 				continue;
 			}
@@ -703,12 +701,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 			for (GCalendar gCalendar : gCalendars) {
 				if (gCalendar.containsDate(p.todayStringInt)) {
 					if (p.startDate == null || gCalendar.startsBefore(p.startDate)) {
-						System.out.printf("\nnew start date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getStartDate(), p.startDate);
+						MTLog.log("new start date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getStartDate(), p.startDate);
 						p.startDate = gCalendar.getStartDate();
 						newDates = true;
 					}
 					if (p.endDate == null || gCalendar.endsAfter(p.endDate)) {
-						System.out.printf("\nnew end date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getEndDate(), p.endDate);
+						MTLog.log("new end date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getEndDate(), p.endDate);
 						p.endDate = gCalendar.getEndDate();
 						newDates = true;
 					}
@@ -718,29 +716,30 @@ public class DefaultAgencyTools implements GAgencyTools {
 					&& (p.startDate == null || p.endDate == null) //
 					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MAX_LOOKUP_IN_DAYS)) {
 				p.todayStringInt = incDateDays(DATE_FORMAT, c, p.todayStringInt, 1);
-				System.out.printf("\nnew today because no service today: %s (initial today: %s)", p.todayStringInt, initialTodayStringInt);
+				MTLog.log("new today because no service today: %s (initial today: %s)", p.todayStringInt, initialTodayStringInt);
+				//noinspection UnnecessaryContinue
 				continue;
 			} else {
 				break;
 			}
 		}
 		if (p.startDate == null || p.endDate == null) {
-			System.out.printf("\nNO schedule available for %s in calendars. (start:%s|end:%s)\n", p.todayStringInt, p.startDate, p.endDate);
+			MTLog.log("NO schedule available for %s in calendars. (start:%s|end:%s)\n", p.todayStringInt, p.startDate, p.endDate);
 			return;
 		}
 		while (true) {
-			System.out.printf("\nSchedules from %s to %s... ", p.startDate, p.endDate);
+			MTLog.log("Schedules from %s to %s... ", p.startDate, p.endDate);
 			newDates = false;
 			for (GCalendar gCalendar : gCalendars) {
 				if (gCalendar.isOverlapping(p.startDate, p.endDate)) {
 					if (p.startDate == null || gCalendar.startsBefore(p.startDate)) {
-						System.out.printf("\nnew start date from calendar active between %s and %s: %s (was: %s)", p.startDate, p.endDate,
+						MTLog.log("new start date from calendar active between %s and %s: %s (was: %s)", p.startDate, p.endDate,
 								gCalendar.getStartDate(), p.startDate);
 						p.startDate = gCalendar.getStartDate();
 						newDates = true;
 					}
 					if (p.endDate == null || gCalendar.endsAfter(p.endDate)) {
-						System.out.printf("\nnew end date from calendar active between %s and %s: %s (was: %s)", p.startDate, p.endDate,
+						MTLog.log("new end date from calendar active between %s and %s: %s (was: %s)", p.startDate, p.endDate,
 								gCalendar.getEndDate(), p.endDate);
 						p.endDate = gCalendar.getEndDate();
 						newDates = true;
@@ -752,7 +751,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_COVERAGE_TOTAL_IN_DAYS)) {
 				p.endDate = incDateDays(DATE_FORMAT, c, p.endDate, 1); // end++
-				System.out.printf("\nnew end date because coverage lower than %s days: %s", MIN_COVERAGE_TOTAL_IN_DAYS, p.endDate);
+				MTLog.log("new end date because coverage lower than %s days: %s", MIN_COVERAGE_TOTAL_IN_DAYS, p.endDate);
 				continue;
 			}
 			break;
@@ -765,7 +764,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			for (GCalendar gCalendar : gCalendars) {
 				if (gCalendar.isInside(startDate, endDate)) {
 					if (!gCalendar.isServiceIds(serviceIds)) {
-						System.out.printf("\nnew service ID from calendar active between %s and %s: %s", startDate, endDate, gCalendar.getServiceId());
+						MTLog.log("new service ID from calendar active between %s and %s: %s", startDate, endDate, gCalendar.getServiceId());
 						serviceIds.add(gCalendar.getServiceId());
 					}
 				}
@@ -776,17 +775,17 @@ public class DefaultAgencyTools implements GAgencyTools {
 				if (gCalendarDate.isBetween(startDate, endDate)) {
 					if (!gCalendarDate.isServiceIds(serviceIds)) {
 						if (gCalendarDate.getExceptionType() == GCalendarDatesExceptionType.SERVICE_REMOVED) {
-							System.out.printf("\nignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", startDate, endDate,
+							MTLog.log("ignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", startDate, endDate,
 									gCalendarDate.getServiceId());
 							continue;
 						}
-						System.out.printf("\nnew service ID from calendar date active between %s and %s: %s", startDate, endDate, gCalendarDate.getServiceId());
+						MTLog.log("new service ID from calendar date active between %s and %s: %s", startDate, endDate, gCalendarDate.getServiceId());
 						serviceIds.add(gCalendarDate.getServiceId());
 					}
 				}
 			}
 		}
-		System.out.printf("\nService IDs: %s", serviceIds);
+		MTLog.log("Service IDs: %s", serviceIds);
 		return serviceIds;
 	}
 
@@ -812,7 +811,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 			}
 		}
-		System.out.printf("\nSchedule available from %s to %s.", p.startDate, p.endDate);
+		MTLog.log("Schedule available from %s to %s.", p.startDate, p.endDate);
 	}
 
 	private static int incDateDays(SimpleDateFormat dateFormat, Calendar calendar, int dateInt, int numberOfDays) {
@@ -821,7 +820,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			calendar.add(Calendar.DAY_OF_MONTH, numberOfDays);
 			return Integer.parseInt(dateFormat.format(calendar.getTime()));
 		} catch (Exception e) {
-			System.out.printf("\nError while increasing end date!\n");
+			MTLog.log("Error while increasing end date!\n");
 			e.printStackTrace();
 			System.exit(-1);
 			return -1;
@@ -832,7 +831,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		try {
 			return diffInMs(dateFormat, calendar, startDateInt, enDateInt) < TimeUnit.DAYS.toMillis(diffInDays);
 		} catch (Exception e) {
-			System.out.printf("\nError while checking date difference!\n");
+			MTLog.log("Error while checking date difference!\n");
 			e.printStackTrace();
 			System.exit(-1);
 			return false;
@@ -847,7 +846,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			long endDateInMs = calendar.getTimeInMillis();
 			return endDateInMs - startDateInMs;
 		} catch (Exception e) {
-			System.out.printf("\nError while checking date difference!\n");
+			MTLog.log("Error while checking date difference!\n");
 			e.printStackTrace();
 			System.exit(-1);
 			return -1L;
@@ -875,7 +874,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (gCalendarDate.getExceptionType() == GCalendarDatesExceptionType.SERVICE_ADDED) {
 				if (gCalendarDate.isBefore(usefulPeriod.startDate) //
 						|| gCalendarDate.isAfter(usefulPeriod.endDate)) {
-					System.out.printf("\nExclude calendar date \"%s\" because it's out of the useful period (start:%s|end:%s).", gCalendarDate,
+					MTLog.log("Exclude calendar date \"%s\" because it's out of the useful period (start:%s|end:%s).", gCalendarDate,
 							usefulPeriod.startDate, usefulPeriod.endDate);
 					return true; // exclude
 				}

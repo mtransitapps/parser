@@ -1,11 +1,29 @@
 package org.mtransit.parser.mt;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.mtransit.parser.Constants;
+import org.mtransit.parser.FileUtils;
+import org.mtransit.parser.MTLog;
+import org.mtransit.parser.Utils;
+import org.mtransit.parser.gtfs.GAgencyTools;
+import org.mtransit.parser.gtfs.GReader;
+import org.mtransit.parser.gtfs.data.GSpec;
+import org.mtransit.parser.mt.data.MAgency;
+import org.mtransit.parser.mt.data.MFrequency;
+import org.mtransit.parser.mt.data.MRoute;
+import org.mtransit.parser.mt.data.MSchedule;
+import org.mtransit.parser.mt.data.MServiceDate;
+import org.mtransit.parser.mt.data.MSpec;
+import org.mtransit.parser.mt.data.MStop;
+import org.mtransit.parser.mt.data.MTrip;
+import org.mtransit.parser.mt.data.MTripStop;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -28,44 +46,27 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.mtransit.parser.Constants;
-import org.mtransit.parser.Utils;
-import org.mtransit.parser.gtfs.GAgencyTools;
-import org.mtransit.parser.gtfs.GReader;
-import org.mtransit.parser.gtfs.data.GSpec;
-import org.mtransit.parser.mt.data.MAgency;
-import org.mtransit.parser.mt.data.MFrequency;
-import org.mtransit.parser.mt.data.MRoute;
-import org.mtransit.parser.mt.data.MSchedule;
-import org.mtransit.parser.mt.data.MServiceDate;
-import org.mtransit.parser.mt.data.MSpec;
-import org.mtransit.parser.mt.data.MStop;
-import org.mtransit.parser.mt.data.MTrip;
-import org.mtransit.parser.mt.data.MTripStop;
-
 public class MGenerator {
 
 	public static MSpec generateMSpec(GSpec gtfs, GAgencyTools agencyTools) {
-		System.out.printf("\nGenerating routes, trips, trip stops & stops objects... ");
-		HashSet<MAgency> mAgencies = new HashSet<MAgency>(); // use set to avoid duplicates
-		HashSet<MRoute> mRoutes = new HashSet<MRoute>(); // use set to avoid duplicates
-		HashSet<MTrip> mTrips = new HashSet<MTrip>(); // use set to avoid duplicates
-		HashSet<MTripStop> mTripStops = new HashSet<MTripStop>(); // use set to avoid duplicates
-		HashMap<Integer, MStop> mStops = new HashMap<Integer, MStop>();
-		TreeMap<Integer, ArrayList<MSchedule>> mStopSchedules = new TreeMap<Integer, ArrayList<MSchedule>>();
-		TreeMap<Long, ArrayList<MFrequency>> mRouteFrequencies = new TreeMap<Long, ArrayList<MFrequency>>();
-		HashSet<MServiceDate> mServiceDates = new HashSet<MServiceDate>(); // use set to avoid duplicates
+		MTLog.log("\nGenerating routes, trips, trip stops & stops objects... ");
+		HashSet<MAgency> mAgencies = new HashSet<>(); // use set to avoid duplicates
+		HashSet<MRoute> mRoutes = new HashSet<>(); // use set to avoid duplicates
+		HashSet<MTrip> mTrips = new HashSet<>(); // use set to avoid duplicates
+		HashSet<MTripStop> mTripStops = new HashSet<>(); // use set to avoid duplicates
+		HashMap<Integer, MStop> mStops = new HashMap<>();
+		TreeMap<Integer, ArrayList<MSchedule>> mStopSchedules = new TreeMap<>();
+		TreeMap<Long, ArrayList<MFrequency>> mRouteFrequencies = new TreeMap<>();
+		HashSet<MServiceDate> mServiceDates = new HashSet<>(); // use set to avoid duplicates
 		long firstTimestamp = -1L;
 		long lastTimestamp = -1L;
 		ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(agencyTools.getThreadPoolSize());
-		ArrayList<Future<MSpec>> list = new ArrayList<Future<MSpec>>();
-		ArrayList<Long> routeIds = new ArrayList<Long>(gtfs.getRouteIds());
+		ArrayList<Future<MSpec>> list = new ArrayList<>();
+		ArrayList<Long> routeIds = new ArrayList<>(gtfs.getRouteIds());
 		Collections.sort(routeIds);
 		for (Long routeId : routeIds) {
 			if (!gtfs.hasRouteTrips(routeId)) {
-				System.out.printf("\n%s: Skip route because no route trips", routeId);
+				MTLog.log("%s: Skip route because no route trips", routeId);
 				continue;
 			}
 			list.add(threadPoolExecutor.submit(new GenerateMObjectsTask(routeId, agencyTools, gtfs)));
@@ -73,54 +74,54 @@ public class MGenerator {
 		for (Future<MSpec> future : list) {
 			try {
 				MSpec mRouteSpec = future.get();
-				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging...)", mRouteSpec.getFirstRoute().getId());
+				MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging...)", mRouteSpec.getFirstRoute().getId());
 				if (mRouteSpec.hasStops() && mRouteSpec.hasServiceDates()) {
 					mAgencies.addAll(mRouteSpec.getAgencies());
 					mRoutes.addAll(mRouteSpec.getRoutes());
 					mTrips.addAll(mRouteSpec.getTrips());
 					mTripStops.addAll(mRouteSpec.getTripStops());
-					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stops...)", mRouteSpec.getFirstRoute().getId());
+					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging stops...)", mRouteSpec.getFirstRoute().getId());
 					for (MStop mStop : mRouteSpec.getStops()) {
 						if (mStops.containsKey(mStop.getId())) {
 							if (!mStops.get(mStop.getId()).equals(mStop)) {
-								System.out.printf("\nStop ID '%s' already in list! (%s instead of %s)", mStop.getId(), mStops.get(mStop.getId()), mStop);
+								MTLog.log("Stop ID '%s' already in list! (%s instead of %s)", mStop.getId(), mStops.get(mStop.getId()), mStop);
 							}
 							continue;
 						}
 						mStops.put(mStop.getId(), mStop);
 					}
-					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stops... DONE)", mRouteSpec.getFirstRoute()
+					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging stops... DONE)", mRouteSpec.getFirstRoute()
 							.getId());
-					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging service dates...)", mRouteSpec.getFirstRoute()
+					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging service dates...)", mRouteSpec.getFirstRoute()
 							.getId());
 					mServiceDates.addAll(mRouteSpec.getServiceDates());
-					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging service dates... DONE)", mRouteSpec
+					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging service dates... DONE)", mRouteSpec
 							.getFirstRoute().getId());
 					if (mRouteSpec.hasStopSchedules()) {
-						System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules...)", mRouteSpec
+						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules...)", mRouteSpec
 								.getFirstRoute().getId());
 						for (Entry<Integer, ArrayList<MSchedule>> stopScheduleEntry : mRouteSpec.getStopSchedules().entrySet()) {
 							if (!mStopSchedules.containsKey(stopScheduleEntry.getKey())) {
-								mStopSchedules.put(stopScheduleEntry.getKey(), new ArrayList<MSchedule>());
+								mStopSchedules.put(stopScheduleEntry.getKey(), new ArrayList<>());
 							}
 							mStopSchedules.get(stopScheduleEntry.getKey()).addAll(stopScheduleEntry.getValue());
 						}
-						System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules... DONE)", mRouteSpec
+						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules... DONE)", mRouteSpec
 								.getFirstRoute().getId());
 					}
 					if (mRouteSpec.hasRouteFrequencies()) {
-						System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies...)", mRouteSpec
+						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies...)", mRouteSpec
 								.getFirstRoute().getId());
 						for (Entry<Long, ArrayList<MFrequency>> routeFrequenciesEntry : mRouteSpec.getRouteFrequencies().entrySet()) {
 							if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().size() == 0) {
 								continue;
 							}
 							if (!mRouteFrequencies.containsKey(routeFrequenciesEntry.getKey())) {
-								mRouteFrequencies.put(routeFrequenciesEntry.getKey(), new ArrayList<MFrequency>());
+								mRouteFrequencies.put(routeFrequenciesEntry.getKey(), new ArrayList<>());
 							}
 							mRouteFrequencies.get(routeFrequenciesEntry.getKey()).addAll(routeFrequenciesEntry.getValue());
 						}
-						System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies... DONE)", mRouteSpec
+						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies... DONE)", mRouteSpec
 								.getFirstRoute().getId());
 					}
 					if (firstTimestamp < 0L || mRouteSpec.getFirstTimestamp() < firstTimestamp) {
@@ -130,40 +131,38 @@ public class MGenerator {
 						lastTimestamp = mRouteSpec.getLastTimestamp();
 					}
 				} else {
-					System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (EMPTY)", mRouteSpec.getFirstRoute().getId());
+					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (EMPTY)", mRouteSpec.getFirstRoute().getId());
 				}
-				System.out.printf("\n%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				e.printStackTrace();
+				MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
+			} catch (InterruptedException | ExecutionException e) {
+				MTLog.logNonFatal(e);
 			}
 		}
-		System.out.printf("\nGenerating routes, trips, trip stops & stops objects... (all routes completed)");
+		MTLog.log("Generating routes, trips, trip stops & stops objects... (all routes completed)");
 		threadPoolExecutor.shutdown();
-		ArrayList<MAgency> mAgenciesList = new ArrayList<MAgency>(mAgencies);
+		ArrayList<MAgency> mAgenciesList = new ArrayList<>(mAgencies);
 		Collections.sort(mAgenciesList);
-		ArrayList<MStop> mStopsList = new ArrayList<MStop>(mStops.values());
+		ArrayList<MStop> mStopsList = new ArrayList<>(mStops.values());
 		Collections.sort(mStopsList);
-		ArrayList<MRoute> mRoutesList = new ArrayList<MRoute>(mRoutes);
+		ArrayList<MRoute> mRoutesList = new ArrayList<>(mRoutes);
 		Collections.sort(mRoutesList);
-		ArrayList<MTrip> mTripsList = new ArrayList<MTrip>(mTrips);
+		ArrayList<MTrip> mTripsList = new ArrayList<>(mTrips);
 		Collections.sort(mTripsList);
-		ArrayList<MTripStop> mTripStopsList = new ArrayList<MTripStop>(mTripStops);
+		ArrayList<MTripStop> mTripStopsList = new ArrayList<>(mTripStops);
 		Collections.sort(mTripStopsList);
-		ArrayList<MServiceDate> mServiceDatesList = new ArrayList<MServiceDate>(mServiceDates);
+		ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
 		Collections.sort(mServiceDatesList);
-		System.out.printf("\nGenerating routes, trips, trip stops & stops objects... DONE");
-		System.out.printf("\n- Agencies: %d", mAgenciesList.size());
-		System.out.printf("\n- Routes: %d", mRoutesList.size());
-		System.out.printf("\n- Trips: %d", mTripsList.size());
-		System.out.printf("\n- Trip stops: %d", mTripStopsList.size());
-		System.out.printf("\n- Stops: %d", mStopsList.size());
-		System.out.printf("\n- Service Dates: %d", mServiceDatesList.size());
-		System.out.printf("\n- Stop with Schedules: %d", mStopSchedules.size());
-		System.out.printf("\n- Route with Frequencies: %d", mRouteFrequencies.size());
-		System.out.printf("\n- First timestamp: %d", firstTimestamp);
-		System.out.printf("\n- Last timestamp: %d", lastTimestamp);
+		MTLog.log("Generating routes, trips, trip stops & stops objects... DONE");
+		MTLog.log("- Agencies: %d", mAgenciesList.size());
+		MTLog.log("- Routes: %d", mRoutesList.size());
+		MTLog.log("- Trips: %d", mTripsList.size());
+		MTLog.log("- Trip stops: %d", mTripStopsList.size());
+		MTLog.log("- Stops: %d", mStopsList.size());
+		MTLog.log("- Service Dates: %d", mServiceDatesList.size());
+		MTLog.log("- Stop with Schedules: %d", mStopSchedules.size());
+		MTLog.log("- Route with Frequencies: %d", mRouteFrequencies.size());
+		MTLog.log("- First timestamp: %d", firstTimestamp);
+		MTLog.log("- Last timestamp: %d", lastTimestamp);
 		return new MSpec(mAgenciesList, mStopsList, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, mStopSchedules, mRouteFrequencies,
 				firstTimestamp, lastTimestamp);
 	}
@@ -182,24 +181,23 @@ public class MGenerator {
 
 	public static void dumpFiles(MSpec mSpec, String gtfsFile, String dumpDir, final String fileBase, boolean deleteAll) {
 		if (!deleteAll && (mSpec == null || !mSpec.isValid())) {
-			System.out.printf("\nERROR: Generated data invalid (agencies:%s)!\n", mSpec);
-			System.exit(-1);
+			MTLog.logFatal("ERROR: Generated data invalid (agencies:%s)!", mSpec);
 			return;
 		}
 		long start = System.currentTimeMillis();
 		final File dumpDirF = new File(dumpDir);
 		if (!dumpDirF.getParentFile().exists()) {
-			dumpDirF.getParentFile().mkdir();
+			FileUtils.mkdir(dumpDirF.getParentFile());
 		}
 		if (!dumpDirF.exists()) {
-			dumpDirF.mkdir();
+			FileUtils.mkdir(dumpDirF);
 		}
-		System.out.printf("\nWriting MT files (%s)...", dumpDirF.toURI());
+		MTLog.log("Writing MT files (%s)...", dumpDirF.toURI());
 		File file;
 		BufferedWriter ow = null;
 		Integer minDate = null, maxDate = null;
 		file = new File(dumpDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
-		file.delete(); // delete previous
+		FileUtils.deleteIfExist(file); // delete previous
 		try {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
@@ -216,32 +214,18 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			System.out.printf("\nI/O Error while writing service dates file!\n");
-			ioe.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(ioe, "I/O Error while writing service dates file!");
 		} finally {
-			if (ow != null) {
-				try {
-					ow.close();
-				} catch (IOException ioe) {
-					System.out.printf("\nI/O Error while closing service dates file!\n");
-					ioe.printStackTrace();
-				}
-			}
+			IOUtils.closeQuietly(ow);
 		}
 		// delete all "...schedules_stop_*"
 		final String fileBaseScheduleStop = fileBase + GTFS_SCHEDULE_STOP;
-		final File[] scheduleStopFiles = dumpDirF.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(final File dir, final String name) {
-				return name.startsWith(fileBaseScheduleStop);
-			}
-		});
+		final File[] scheduleStopFiles = dumpDirF.listFiles((dir, name) ->
+				name.startsWith(fileBaseScheduleStop)
+		);
 		if (scheduleStopFiles != null) {
 			for (final File f : scheduleStopFiles) {
-				if (!f.delete()) {
-					System.err.printf("\nCan't remove %s!", f.getAbsolutePath());
-				}
+				FileUtils.delete(f);
 			}
 		}
 		String fileName;
@@ -271,39 +255,22 @@ public class MGenerator {
 							lastSchedule = mSchedule;
 						}
 						if (empty) {
-							file.delete();
+							FileUtils.delete(file);
 						}
 					}
 				} catch (IOException ioe) {
-					System.out.printf("\nI/O Error while writing schedule file for stop '%s'!\n", stopId);
-					ioe.printStackTrace();
-					System.exit(-1);
+					MTLog.logFatal(ioe, "I/O Error while writing schedule file for stop '%s'!", stopId);
 				} finally {
-					//noinspection ConstantConditions // TODO WTF!
-					if (ow != null) {
-						try {
-							ow.close();
-						} catch (IOException ioe) {
-							System.out.printf("\nI/O Error while closing file for stop '%s'!\n", stopId);
-							ioe.printStackTrace();
-						}
-					}
+					IOUtils.closeQuietly(ow);
 				}
 			}
 		}
 		// delete all "...frequencies_route_*"
 		final String fileBaseRouteFrequency = fileBase + GTFS_FREQUENCY_ROUTE;
-		File[] frequencyRouteFiles = dumpDirF.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.startsWith(fileBaseRouteFrequency);
-			}
-		});
+		File[] frequencyRouteFiles = dumpDirF.listFiles((dir, name) -> name.startsWith(fileBaseRouteFrequency));
 		if (frequencyRouteFiles != null) {
 			for (File f : frequencyRouteFiles) {
-				if (!f.delete()) {
-					System.err.printf("\nCan't remove %s!\n", f.getAbsolutePath());
-				}
+				FileUtils.delete(f);
 			}
 		}
 		ArrayList<MFrequency> mRouteFrequencies;
@@ -322,28 +289,18 @@ public class MGenerator {
 							empty = false;
 						}
 						if (empty) {
-							file.delete();
+							FileUtils.delete(file);
 						}
 					}
 				} catch (IOException ioe) {
-					System.out.printf("\nI/O Error while writing frequency file!\n");
-					ioe.printStackTrace();
-					System.exit(-1);
+					MTLog.logFatal(ioe, "I/O Error while writing frequency file!");
 				} finally {
-					//noinspection ConstantConditions // TODO WTF!
-					if (ow != null) {
-						try {
-							ow.close();
-						} catch (IOException ioe) {
-							System.out.printf("\nI/O Error while closing frequency file!\n");
-							ioe.printStackTrace();
-						}
-					}
+					IOUtils.closeQuietly(ow);
 				}
 			}
 		}
 		file = new File(dumpDirF, fileBase + GTFS_RTS_ROUTES);
-		file.delete(); // delete previous
+		FileUtils.deleteIfExist(file); // delete previous
 		try {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
@@ -353,21 +310,12 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			System.out.printf("\nI/O Error while writing route file!\n");
-			ioe.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(ioe, "I/O Error while writing route file!");
 		} finally {
-			if (ow != null) {
-				try {
-					ow.close();
-				} catch (IOException ioe) {
-					System.out.printf("\nI/O Error while closing route file!\n");
-					ioe.printStackTrace();
-				}
-			}
+			IOUtils.closeQuietly(ow);
 		}
 		file = new File(dumpDirF, fileBase + GTFS_RTS_TRIPS);
-		file.delete(); // delete previous
+		FileUtils.deleteIfExist(file); // delete previous
 		try {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
@@ -377,21 +325,12 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			System.out.printf("\nI/O Error while writing trip file!\n");
-			ioe.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(ioe, "I/O Error while writing trip file!");
 		} finally {
-			if (ow != null) {
-				try {
-					ow.close();
-				} catch (IOException ioe) {
-					System.out.printf("\nI/O Error while closing trip file!\n");
-					ioe.printStackTrace();
-				}
-			}
+			IOUtils.closeQuietly(ow);
 		}
 		file = new File(dumpDirF, fileBase + GTFS_RTS_TRIP_STOPS);
-		file.delete(); // delete previous
+		FileUtils.deleteIfExist(file); // delete previous
 		try {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
@@ -401,22 +340,13 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			System.out.printf("\nI/O Error while writing trip stops file!\n");
-			ioe.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(ioe, "I/O Error while writing trip stops file!");
 		} finally {
-			if (ow != null) {
-				try {
-					ow.close();
-				} catch (IOException ioe) {
-					System.out.printf("\nI/O Error while closing trip stops file!\n");
-					ioe.printStackTrace();
-				}
-			}
+			IOUtils.closeQuietly(ow);
 		}
 		Double minLat = null, maxLat = null, minLng = null, maxLng = null;
 		file = new File(dumpDirF, fileBase + GTFS_RTS_STOPS);
-		file.delete(); // delete previous
+		FileUtils.deleteIfExist(file); // delete previous
 		try {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
@@ -442,18 +372,9 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			System.out.printf("\nI/O Error while writing stop file!\n");
-			ioe.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(ioe, "I/O Error while writing stop file!");
 		} finally {
-			if (ow != null) {
-				try {
-					ow.close();
-				} catch (IOException ioe) {
-					System.out.printf("\nI/O Error while closing stop file!\n");
-					ioe.printStackTrace();
-				}
-			}
+			IOUtils.closeQuietly(ow);
 		}
 		if (deleteAll) {
 			dumpValues(dumpDirF, fileBase, null, null, null, null, null, -1, -1, true);
@@ -461,9 +382,9 @@ public class MGenerator {
 			dumpCommonValues(dumpDirF, mSpec);
 			dumpValues(dumpDirF, fileBase, mSpec, minLat, maxLat, minLng, maxLng, mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds(), false);
 			dumpStoreListing(dumpDirF, fileBase, minDate, maxDate);
-			bumpDBVersion(dumpDirF, fileBase, gtfsFile);
+			bumpDBVersion(dumpDirF, gtfsFile);
 		}
-		System.out.printf("\nWriting files (%s)... DONE in %s.", dumpDirF.toURI(), Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		MTLog.log("Writing files (%s)... DONE in %s.", dumpDirF.toURI(), Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
 	private static final String GTFS_RTS_VALUES_XML = "gtfs_rts_values.xml";
@@ -474,12 +395,12 @@ public class MGenerator {
 			Pattern.CASE_INSENSITIVE);
 	private static final String RTS_DB_VERSION_REPLACEMENT = "$2%s$4";
 
-	private static void bumpDBVersion(File dumpDirF, String fileBase, String gtfsFile) {
-		System.out.printf("\nBumping DB version...");
+	private static void bumpDBVersion(File dumpDirF, String gtfsFile) {
+		MTLog.log("Bumping DB version...");
 		BufferedWriter ow = null;
 		String lastModifiedTimeDateS = getLastModified(gtfsFile);
 		if (StringUtils.isEmpty(lastModifiedTimeDateS)) {
-			System.out.printf("\nBumping DB version... SKIP (error while reading last modified time)");
+			MTLog.log("Bumping DB version... SKIP (error while reading last modified time)");
 			return;
 		}
 		int lastModifiedTimeDateI = Integer.parseInt(lastModifiedTimeDateS);
@@ -491,14 +412,14 @@ public class MGenerator {
 			String content = new String(Files.readAllBytes(gtfsRtsValuesXmlF.toPath()), StandardCharsets.UTF_8);
 			Matcher matcher = RTS_DB_VERSION_REGEX.matcher(content);
 			if (!matcher.find() || matcher.groupCount() < 4) {
-				System.out.printf("\nBumping DB version... SKIP (error while reading current DB version)");
+				MTLog.log("Bumping DB version... SKIP (error while reading current DB version)");
 				return;
 			}
 			String currentRtsDbVersion = matcher.group(3);
 			String currentLastModifiedTimeS = currentRtsDbVersion.substring(0, 8);
 			int currentLastModifiedTimeI = Integer.parseInt(currentLastModifiedTimeS);
 			if (lastModifiedTimeDateI <= currentLastModifiedTimeI) {
-				System.out.printf("\nBumping DB version... SKIP (current DB version '%s' NOT older than last modified date '%s')", currentRtsDbVersion,
+				MTLog.log("Bumping DB version... SKIP (current DB version '%s' NOT older than last modified date '%s')", currentRtsDbVersion,
 						lastModifiedTimeDateS);
 				return;
 			}
@@ -508,20 +429,11 @@ public class MGenerator {
 			String newContent = RTS_DB_VERSION_REGEX.matcher(content).replaceAll(String.format(RTS_DB_VERSION_REPLACEMENT, lastModifiedTimeDateS));
 			ow = new BufferedWriter(new FileWriter(gtfsRtsValuesXmlF));
 			ow.write(newContent);
-			System.out.printf("\nBumping DB version... DONE (new current DB version '%s')", lastModifiedTimeDateS);
+			MTLog.log("Bumping DB version... DONE (new current DB version '%s')", lastModifiedTimeDateS);
 		} catch (IOException ioe) {
-			System.out.printf("\nI/O Error while bumping DB version!\n");
-			ioe.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(ioe, "I/O Error while bumping DB version!");
 		} finally {
-			if (ow != null) {
-				try {
-					ow.close();
-				} catch (IOException ioe) {
-					System.out.printf("\nI/O Error while bumping DB version!\n");
-					ioe.printStackTrace();
-				}
-			}
+			IOUtils.closeQuietly(ow);
 		}
 	}
 
@@ -535,8 +447,7 @@ public class MGenerator {
 			lastModifiedTimeDate.setTimeInMillis(lastModifiedTimeInMs);
 			return DATE_FORMAT.format(lastModifiedTimeDate.getTime());
 		} catch (IOException ioe) {
-			System.out.printf("\nI/O Error while writing values file!\n");
-			ioe.printStackTrace();
+			MTLog.logFatal(ioe, "I/O Error while writing values file!");
 			return null;
 		}
 	}
@@ -559,14 +470,13 @@ public class MGenerator {
 	private static final String GTFS_RTS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec";
 
 	private static void dumpCommonValues(File dumpDirF, MSpec mSpec) {
-		File file;
 		BufferedWriter ow = null;
 		File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
 		File dumpDirResF = new File(dumpDirRootF, RES);
 		File valuesDirF = new File(dumpDirResF, VALUES);
-		file = new File(valuesDirF, GTFS_RTS_VALUES_GEN_XML);
-		file.delete(); // delete previous
-		System.out.printf("\nGenerated values file: '%s'.", file);
+		File file = new File(valuesDirF, GTFS_RTS_VALUES_GEN_XML);
+		FileUtils.deleteIfExist(file); // delete previous
+		MTLog.log("Generated values file: '%s'.", file);
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
 			ow.write(XML_HEADER);
@@ -582,39 +492,30 @@ public class MGenerator {
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);
 		} catch (IOException ioe) {
-			System.out.printf("\nI/O Error while writing values file!\n");
-			ioe.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(ioe, "I/O Error while writing values file!");
 		} finally {
-			if (ow != null) {
-				try {
-					ow.close();
-				} catch (IOException ioe) {
-					System.out.printf("\nI/O Error while closing values file!\n");
-					ioe.printStackTrace();
-				}
-			}
+			IOUtils.closeQuietly(ow);
 		}
 	}
 
 	private static void dumpValues(File dumpDirF, String fileBase, MSpec mSpec, Double minLat, Double maxLat, Double minLng, Double maxLng,
-			int firstTimestampInSec, int lastTimestampInSec, boolean deleteAll) {
+								   int firstTimestampInSec, int lastTimestampInSec, boolean deleteAll) {
 		File file;
 		BufferedWriter ow = null;
 		File dumpDirResF = dumpDirF.getParentFile();
 		if (!dumpDirResF.exists()) {
-			dumpDirResF.mkdir();
+			FileUtils.mkdir(dumpDirResF);
 		}
 		File valuesDirF = new File(dumpDirResF, VALUES);
 		if (!valuesDirF.exists()) {
-			valuesDirF.mkdir();
+			FileUtils.mkdir(valuesDirF);
 		}
 		file = new File(valuesDirF, fileBase + GTFS_RTS_VALUES_GEN_XML);
-		file.delete(); // delete previous
+		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) {
 			return;
 		}
-		System.out.printf("\nGenerated values file: '%s'.", file);
+		MTLog.log("Generated values file: '%s'.", file);
 		try {
 			ow = new BufferedWriter(new FileWriter(file));
 			ow.write(XML_HEADER);
@@ -652,18 +553,9 @@ public class MGenerator {
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);
 		} catch (IOException ioe) {
-			System.out.printf("\nI/O Error while writing values file!\n");
-			ioe.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(ioe, "I/O Error while writing values file!");
 		} finally {
-			if (ow != null) {
-				try {
-					ow.close();
-				} catch (IOException ioe) {
-					System.out.printf("\nI/O Error while closing values file!\n");
-					ioe.printStackTrace();
-				}
-			}
+			IOUtils.closeQuietly(ow);
 		}
 	}
 
@@ -693,7 +585,7 @@ public class MGenerator {
 	private static final String FR_FR = "fr-FR";
 	private static final String DEFAULT_TXT = "default.txt";
 
-	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from ([A-Za-z]+ [0-9]{1,2}\\, [0-9]{4}) to ([A-Za-z]+ [0-9]{1,2}\\, [0-9]{4})\\.)",
+	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from ([A-Za-z]+ [0-9]{1,2}, [0-9]{4}) to ([A-Za-z]+ [0-9]{1,2}, [0-9]{4})\\.)",
 			Pattern.CASE_INSENSITIVE);
 	private static final String SCHEDULE_FROM_TO = "Schedule from %1$s to %2$s.";
 	private static final String SCHEDULE_KEEP_FROM_TO = "Schedule from $2 to %2$s.";
@@ -716,7 +608,7 @@ public class MGenerator {
 		file = new File(dumpDirReleaseNotesEnUsF, DEFAULT_TXT);
 		boolean isNext = "next_".equalsIgnoreCase(fileBase);
 		if (file.exists()) {
-			System.out.printf("\nGenerated store listing file: '%s'.", file);
+			MTLog.log("Generated store listing file: '%s'.", file);
 			try {
 				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF8);
 				content = SCHEDULE.matcher(content)
@@ -727,27 +619,17 @@ public class MGenerator {
 										SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
 			} catch (Exception ioe) {
-				System.out.printf("\nError while writing store listing files!\n");
-				ioe.printStackTrace();
-				System.exit(-1);
+				MTLog.logFatal(ioe, "Error while writing store listing files!");
 			} finally {
-				//noinspection ConstantConditions // TODO WTF!
-				if (ow != null) {
-					try {
-						ow.close();
-					} catch (IOException ioe) {
-						System.out.printf("\nError while closing store listing files!\n");
-						ioe.printStackTrace();
-					}
-				}
+				IOUtils.closeQuietly(ow);
 			}
 		} else {
-			System.out.printf("\nDo not generate store listing file: %s.", file);
+			MTLog.log("Do not generate store listing file: %s.", file);
 		}
 		File dumpDirReleaseNotesFrFrF = new File(dumpDirReleaseNotesF, FR_FR);
 		file = new File(dumpDirReleaseNotesFrFrF, DEFAULT_TXT);
 		if (file.exists()) {
-			System.out.printf("\nGenerated store listing file: %s.", file);
+			MTLog.log("Generated store listing file: %s.", file);
 			try {
 				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF8);
 				content = SCHEDULE_FR.matcher(content).replaceAll(
@@ -757,22 +639,12 @@ public class MGenerator {
 								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
 			} catch (Exception ioe) {
-				System.out.printf("\nError while writing store listing files!\n");
-				ioe.printStackTrace();
-				System.exit(-1);
+				MTLog.logFatal(ioe, "Error while writing store listing files!");
 			} finally {
-				//noinspection ConstantConditions // TODO WTF!
-				if (ow != null) {
-					try {
-						ow.close();
-					} catch (IOException ioe) {
-						System.out.printf("\nError while closing store listing files!\n");
-						ioe.printStackTrace();
-					}
-				}
+				IOUtils.closeQuietly(ow);
 			}
 		} else {
-			System.out.printf("\nDo not generate store listing file: %s.", file);
+			MTLog.log("Do not generate store listing file: %s.", file);
 		}
 	}
 }

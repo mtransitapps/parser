@@ -2,6 +2,7 @@ package org.mtransit.parser;
 
 import java.util.regex.Pattern;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class Utils {
 
 	private Utils() {
@@ -28,6 +29,7 @@ public final class Utils {
 		durationInMs -= m * MILLIS_PER_MINUTE;
 		long h = durationInMs / MILLIS_PER_HOUR;
 		boolean printing = false;
+		//noinspection ConstantConditions
 		if (printing || h > 0) {
 			printing = true;
 			if (sb.length() > 0) {
@@ -43,6 +45,7 @@ public final class Utils {
 			sb.append(m).append(M);
 		}
 		if (printing || s > 0) {
+			//noinspection UnusedAssignment
 			printing = true;
 			if (sb.length() > 0) {
 				sb.append(Constants.SPACE);

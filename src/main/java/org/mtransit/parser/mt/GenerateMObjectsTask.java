@@ -579,7 +579,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mFrequency = new MFrequency(tripServiceId, mRoute.getId(), mTrip.getId(), this.agencyTools.getStartTime(gFrequency),
 						this.agencyTools.getEndTime(gFrequency), gFrequency.getHeadwaySecs());
 				if (mFrequencies.containsKey(mFrequency.getUID()) && !mFrequencies.get(mFrequency.getUID()).equals(mFrequency)) {
-					System.out.printf("\n%s%s: Different frequency %s already in list (%s != %s)\n!", this.routeId, mFrequency.getUID(), mFrequency.toString(),
+					System.out.printf("\n%s: Different frequency %s already in list (%s != %s)\n!", this.routeId, mFrequency.getUID(), mFrequency.toString(),
 							mFrequencies.get(mFrequency.getUID()).toString());
 					System.exit(-1);
 				}
@@ -608,6 +608,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					}
 					if (schedule.isDescentOnly()) {
 						isDescentOnly = true;
+						//noinspection UnnecessaryContinue
 						continue;
 					} else {
 						isDescentOnly = false;
@@ -828,12 +829,14 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				newListStopIds.add(ts1.getStopId());
 				last = ts1;
 				i1++;
+				//noinspection UnnecessaryContinue
 				continue;
 			} else {
 				newList.add(ts2);
 				newListStopIds.add(ts2.getStopId());
 				last = ts2;
 				i2++;
+				//noinspection UnnecessaryContinue
 				continue;
 			}
 		}
