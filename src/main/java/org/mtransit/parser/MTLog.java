@@ -3,6 +3,10 @@ package org.mtransit.parser;
 @SuppressWarnings("unused")
 public final class MTLog {
 
+	public static void log(Character character) {
+		System.out.print(character);
+	}
+
 	public static void log(String format, Object... args) {
 		System.out.printf("\n" + format, args);
 	}
