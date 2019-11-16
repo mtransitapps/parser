@@ -3,6 +3,7 @@ package org.mtransit.parser;
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
+import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
@@ -116,6 +117,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public boolean excludeAgencyNullable(GAgency gAgency) {
+		if (gAgency == null) {
+			return true; // exclude
+		}
+		return excludeAgency(gAgency);
+	}
+
+	@Override
+	public boolean excludeAgency(GAgency gAgency) {
+		return false; // keep
+	}
+
+	@Override
 	public String cleanServiceId(String serviceId) {
 		return serviceId;
 	}
@@ -165,6 +179,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return null;
 		}
 		return gRoute.getRouteColor();
+	}
+
+	@Override
+	public boolean excludeRouteNullable(GRoute gRoute) {
+		if (gRoute == null) {
+			return true; // exclude
+		}
+		return excludeRoute(gRoute);
 	}
 
 	@Override
@@ -225,8 +247,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public boolean excludeTripNullable(GTrip gTrip) {
+		if (gTrip == null) {
+			return true; // exclude
+		}
+		return excludeTrip(gTrip);
+	}
+
+	@Override
 	public boolean excludeTrip(GTrip gTrip) {
-		return false;
+		return false; // keep
 	}
 
 	@Override
@@ -285,8 +315,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public boolean excludeStopNullable(GStop gStop) {
+		if (gStop == null) {
+			return true; // exclude
+		}
+		return excludeStop(gStop);
+	}
+
+	@Override
 	public boolean excludeStop(GStop gStop) {
-		return false;
+		return false; // keep
 	}
 
 	public boolean isGoodEnoughAccepted() {

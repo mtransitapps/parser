@@ -1,16 +1,5 @@
 package org.mtransit.parser.gtfs;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -31,95 +20,144 @@ import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class GReader {
 
-	private static final String SLASH = "/";
-
 	public static final Charset UTF8 = Charset.forName("UTF-8");
-
-	private interface LineProcessor {
-		void processLine(HashMap<String, String> line);
-	}
 
 	public static GSpec readGtfsZipFile(String gtfsFile, final GAgencyTools agencyTools, boolean calendarsOnly) {
 		MTLog.log("Reading GTFS file '%s'...", gtfsFile);
 		long start = System.currentTimeMillis();
 		final GSpec gSpec = new GSpec();
-		ZipInputStream zip = null;
-		InputStreamReader isr = null;
+		String gtfsDir = gtfsFile.substring(0, gtfsFile.length() - 4);
+		File gtfsDirF = new File(gtfsDir);
+		if (!gtfsDirF.exists()) {
+			MTLog.logFatal("'%s' GTFS directory does not exist!", gtfsDirF);
+			return null;
+		}
+		FileReader fr = null;
 		BufferedReader reader = null;
 		try {
-			zip = new ZipInputStream(new FileInputStream(gtfsFile));
-			isr = new InputStreamReader(zip, UTF8);
-			reader = new BufferedReader(isr);
-			for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
-				if (entry.isDirectory()) {
-					continue;
-				}
-				String filename = entry.getName();
-				while (filename.contains(SLASH)) { // remove directory from file name
-					filename = filename.substring(filename.indexOf(SLASH) + 1);
-				}
-				if (filename.equalsIgnoreCase(GAgency.FILENAME)) { // AGENCY
-					if (calendarsOnly) {
-						continue;
-					}
-					readCsv(filename, reader, line ->
+			// AGENCY
+			if (!calendarsOnly) {
+				File agencyFile = new File(gtfsDir, GAgency.FILENAME);
+				if (!agencyFile.exists()) {
+					MTLog.logFatal("'%s' agency file does not exist!", agencyFile);
+					return null;
+				} else {
+					fr = new FileReader(agencyFile);
+					reader = new BufferedReader(fr);
+					readCsv(agencyFile.getName(), reader, line ->
 							processAgency(agencyTools, gSpec, line)
 					);
-				} else if (filename.equalsIgnoreCase(GCalendarDate.FILENAME)) { // CALENDAR DATES
-					readCsv(filename, reader, line ->
-							processCalendarDate(agencyTools, gSpec, line)
-					);
-				} else if (filename.equalsIgnoreCase(GCalendar.FILENAME)) { // CALENDAR
-					readCsv(filename, reader, line ->
-							processCalendar(agencyTools, gSpec, line)
-					);
-				} else if (filename.equalsIgnoreCase(GRoute.FILENAME)) { // ROUTE
-					if (calendarsOnly) {
-						continue;
-					}
-					readCsv(filename, reader, line ->
-							processRoute(agencyTools, gSpec, line)
-					);
-				} else if (filename.equalsIgnoreCase(GStop.FILENAME)) { // STOP
-					if (calendarsOnly) {
-						continue;
-					}
-					readCsv(filename, reader, line ->
-							processStop(agencyTools, gSpec, line)
-					);
-				} else if (filename.equalsIgnoreCase(GTrip.FILENAME)) { // TRIP
-					if (calendarsOnly) {
-						continue;
-					}
-					readCsv(filename, reader, line ->
-							processTrip(agencyTools, gSpec, line)
-					);
-				} else if (filename.equalsIgnoreCase(GStopTime.FILENAME)) { // STOP TIME
-					if (calendarsOnly) {
-						continue;
-					}
-					readCsv(filename, reader, line ->
-							processStopTime(agencyTools, gSpec, line)
-					);
-				} else if (filename.equalsIgnoreCase(GFrequency.FILENAME)) { // FREQUENCY
-					if (calendarsOnly) {
-						continue;
-					}
-					readCsv(filename, reader, line ->
-							processFrequency(agencyTools, gSpec, line)
-					);
-				} else {
-					MTLog.log("File not used: %s", filename);
 				}
 			}
+			// CALENDAR DATES
+			File calendarDateFile = new File(gtfsDir, GCalendarDate.FILENAME);
+			if (!calendarDateFile.exists()) {
+				MTLog.logFatal("'%s' calendar date file does not exist!", calendarDateFile);
+				return null;
+			} else {
+				fr = new FileReader(calendarDateFile);
+				reader = new BufferedReader(fr);
+				readCsv(calendarDateFile.getName(), reader, line ->
+						processCalendarDate(agencyTools, gSpec, line)
+				);
+			}
+			// CALENDAR
+			File calendarFile = new File(gtfsDir, GCalendar.FILENAME);
+			if (!calendarFile.exists()) {
+				MTLog.logFatal("'%s' calendar file does not exist!", calendarFile);
+				return null;
+			} else {
+				fr = new FileReader(calendarFile);
+				reader = new BufferedReader(fr);
+				readCsv(calendarFile.getName(), reader, line ->
+						processCalendar(agencyTools, gSpec, line)
+				);
+			}
+			// ROUTES
+			if (!calendarsOnly) {
+				File routeFile = new File(gtfsDir, GRoute.FILENAME);
+				if (!routeFile.exists()) {
+					MTLog.logFatal("'%s' route file does not exist!", routeFile);
+					return null;
+				} else {
+					fr = new FileReader(routeFile);
+					reader = new BufferedReader(fr);
+					readCsv(routeFile.getName(), reader, line ->
+							processRoute(agencyTools, gSpec, line)
+					);
+				}
+			}
+			// TRIPS
+			if (!calendarsOnly) {
+				File tripFile = new File(gtfsDir, GTrip.FILENAME);
+				if (!tripFile.exists()) {
+					MTLog.logFatal("'%s' trip file does not exist!", tripFile);
+					return null;
+				} else {
+					fr = new FileReader(tripFile);
+					reader = new BufferedReader(fr);
+					readCsv(tripFile.getName(), reader, line ->
+							processTrip(agencyTools, gSpec, line)
+					);
+				}
+			}
+			// FREQUENCIES
+			if (!calendarsOnly) {
+				File frequencyFile = new File(gtfsDir, GFrequency.FILENAME);
+				if (!frequencyFile.exists()) {
+					MTLog.log("'%s' frequency file does not exist.", frequencyFile);
+				} else {
+					fr = new FileReader(frequencyFile);
+					reader = new BufferedReader(fr);
+					readCsv(frequencyFile.getName(), reader, line ->
+							processFrequency(agencyTools, gSpec, line)
+					);
+				}
+			}
+			// STOPS
+			if (!calendarsOnly) {
+				File stopFile = new File(gtfsDir, GStop.FILENAME);
+				if (!stopFile.exists()) {
+					MTLog.logFatal("'%s' stop file does not exist!", stopFile);
+					return null;
+				} else {
+					fr = new FileReader(stopFile);
+					reader = new BufferedReader(fr);
+					readCsv(stopFile.getName(), reader, line ->
+							processStop(agencyTools, gSpec, line)
+					);
+				}
+			}
+			// STOP TIMES
+			if (!calendarsOnly) {
+				File stopTimeFile = new File(gtfsDir, GStopTime.FILENAME);
+				if (!stopTimeFile.exists()) {
+					MTLog.log("'%s' stop time file does not exist.", stopTimeFile);
+				} else {
+					fr = new FileReader(stopTimeFile);
+					reader = new BufferedReader(fr);
+					readCsv(stopTimeFile.getName(), reader, line ->
+							processStopTime(agencyTools, gSpec, line)
+					);
+				}
+			}
+			// TODO OTHER FILE TYPE
 		} catch (IOException ioe) {
 			MTLog.logFatal(ioe, "I/O Error while reading GTFS file!");
 		} finally {
 			IOUtils.closeQuietly(reader);
-			IOUtils.closeQuietly(isr);
-			IOUtils.closeQuietly(zip);
+			IOUtils.closeQuietly(fr);
 		}
 		MTLog.log("Reading GTFS file '%1$s'... DONE in %2$s.", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
 		gSpec.print(calendarsOnly, false);
@@ -206,6 +244,12 @@ public class GReader {
 			if (agencyTools.excludeStopTime(gStopTime)) {
 				return;
 			}
+			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripId()))) {
+				return;
+			}
+			if (agencyTools.excludeStopNullable(gSpec.getStop(gStopTime.getStopId()))) {
+				return;
+			}
 			gSpec.addStopTime(gStopTime);
 		} catch (Exception e) {
 			MTLog.logFatal(e, "Error while parsing: '%s'!\n", line);
@@ -216,8 +260,15 @@ public class GReader {
 										 GSpec gSpec,
 										 HashMap<String, String> line) {
 		try {
-			GFrequency gFrequency = new GFrequency(line.get(GFrequency.TRIP_ID), line.get(GFrequency.START_TIME), line.get(GFrequency.END_TIME),
-					Integer.parseInt(line.get(GFrequency.HEADWAY_SECS)));
+			GFrequency gFrequency = new GFrequency(
+					line.get(GFrequency.TRIP_ID),
+					line.get(GFrequency.START_TIME),
+					line.get(GFrequency.END_TIME),
+					Integer.parseInt(line.get(GFrequency.HEADWAY_SECS))
+			);
+			if (agencyTools.excludeTripNullable(gSpec.getTrip(gFrequency.getTripId()))) {
+				return;
+			}
 			gSpec.addFrequency(gFrequency);
 		} catch (Exception e) {
 			MTLog.logFatal(e, "Error while parsing: '%s'!\n", line);
@@ -275,9 +326,19 @@ public class GReader {
 	private static void processTrip(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
 			String directionId = line.get(GTrip.DIRECTION_ID);
-			GTrip gTrip = new GTrip(line.get(GTrip.ROUTE_ID), line.get(GTrip.SERVICE_ID), line.get(GTrip.TRIP_ID), StringUtils.isEmpty(directionId) ? null
-					: Integer.valueOf(directionId), line.get(GTrip.TRIP_HEADSIGN), line.get(GTrip.TRIP_SHORT_NAME), line.get(GTrip.SHAPE_ID));
+			GTrip gTrip = new GTrip(
+					line.get(GTrip.ROUTE_ID),
+					line.get(GTrip.SERVICE_ID),
+					line.get(GTrip.TRIP_ID),
+					StringUtils.isEmpty(directionId) ? null : Integer.valueOf(directionId),
+					line.get(GTrip.TRIP_HEADSIGN),
+					line.get(GTrip.TRIP_SHORT_NAME),
+					line.get(GTrip.SHAPE_ID)
+			);
 			if (agencyTools.excludeTrip(gTrip)) {
+				return;
+			}
+			if (agencyTools.excludeRouteNullable(gSpec.getRoute(gTrip.getRouteId()))) {
 				return;
 			}
 			gSpec.addTrip(gTrip);
@@ -298,8 +359,13 @@ public class GReader {
 				return; // skip entrance stations
 			}
 			String code = line.get(GStop.STOP_CODE);
-			GStop gStop = new GStop(line.get(GStop.STOP_ID), line.get(GStop.STOP_NAME), Double.parseDouble(line.get(GStop.STOP_LAT)), Double.parseDouble(line
-					.get(GStop.STOP_LON)), code == null ? null : code.trim());
+			GStop gStop = new GStop(
+					line.get(GStop.STOP_ID),
+					line.get(GStop.STOP_NAME),
+					Double.parseDouble(line.get(GStop.STOP_LAT)),
+					Double.parseDouble(line.get(GStop.STOP_LON)),
+					code == null ? null : code.trim()
+			);
 			if (agencyTools.excludeStop(gStop)) {
 				return;
 			}
@@ -312,10 +378,18 @@ public class GReader {
 	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
 			String routeColor = line.get(GRoute.ROUTE_COLOR);
-			GRoute gRoute = new GRoute(line.get(GRoute.AGENCY_ID), line.get(GRoute.ROUTE_ID), line.get(GRoute.ROUTE_SHORT_NAME),
-					line.get(GRoute.ROUTE_LONG_NAME), line.get(GRoute.ROUTE_DESC), Integer.parseInt(line.get(GRoute.ROUTE_TYPE)), routeColor == null ? null
-							: routeColor.trim());
+			GRoute gRoute = new GRoute(
+					line.get(GRoute.AGENCY_ID),
+					line.get(GRoute.ROUTE_ID),
+					line.get(GRoute.ROUTE_SHORT_NAME),
+					line.get(GRoute.ROUTE_LONG_NAME),
+					line.get(GRoute.ROUTE_DESC),
+					Integer.parseInt(line.get(GRoute.ROUTE_TYPE)),
+					routeColor == null ? null : routeColor.trim());
 			if (agencyTools.excludeRoute(gRoute)) {
+				return;
+			}
+			if (agencyTools.excludeAgencyNullable(gSpec.getAgency(gRoute.getAgencyId()))) {
 				return;
 			}
 			gSpec.addRoute(gRoute);
@@ -325,5 +399,9 @@ public class GReader {
 	}
 
 	private GReader() {
+	}
+
+	private interface LineProcessor {
+		void processLine(HashMap<String, String> line);
 	}
 }

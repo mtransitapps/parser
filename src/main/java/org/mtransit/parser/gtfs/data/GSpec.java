@@ -1,6 +1,12 @@
 package org.mtransit.parser.gtfs.data;
 
 
+import org.apache.commons.lang3.StringUtils;
+import org.mtransit.parser.Constants;
+import org.mtransit.parser.DefaultAgencyTools;
+import org.mtransit.parser.MTLog;
+import org.mtransit.parser.gtfs.GAgencyTools;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,16 +23,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-import org.mtransit.parser.Constants;
-import org.mtransit.parser.DefaultAgencyTools;
-import org.mtransit.parser.MTLog;
-import org.mtransit.parser.gtfs.GAgencyTools;
-
 // https://developers.google.com/transit/gtfs/reference#FeedFiles
 public class GSpec {
 
-	private ArrayList<GAgency> agencies = new ArrayList<GAgency>();
+	private HashMap<String, GAgency> agencies = new HashMap<String, GAgency>();
 	private ArrayList<GCalendar> calendars = new ArrayList<GCalendar>();
 	private ArrayList<GCalendarDate> calendarDates = new ArrayList<GCalendarDate>();
 	private HashSet<String> allServiceIds = new HashSet<String>();
@@ -54,15 +54,19 @@ public class GSpec {
 	}
 
 	public void addAgency(GAgency gAgency) {
-		this.agencies.add(gAgency);
+		this.agencies.put(gAgency.getAgencyId(), gAgency);
 	}
 
-	public void addAllAgencies(ArrayList<GAgency> agencies) {
-		this.agencies.addAll(agencies);
+	public void addAllAgencies(HashMap<String, GAgency> agencies) {
+		this.agencies.putAll(agencies);
 	}
 
-	public ArrayList<GAgency> getAllAgencies() {
-		return this.agencies;
+	public Collection<GAgency> getAllAgencies() {
+		return this.agencies.values();
+	}
+
+	public GAgency getAgency(String agencyId) {
+		return this.agencies.get(agencyId);
 	}
 
 	public void addCalendar(GCalendar gCalendar) {
@@ -119,6 +123,22 @@ public class GSpec {
 		this.tripsCount++;
 	}
 
+	public GTrip getTrip(String tripId) {
+		ArrayList<GTrip> routeTrips = this.routeIdTrips.get(getTripIdRouteId(tripId));
+		if (routeTrips != null) {
+			for (GTrip trip : routeTrips) {
+				if (tripId.equals(trip.getTripId())) {
+					return trip;
+				}
+			}
+		}
+		return null;
+	}
+
+	private String getTripIdRouteId(String tripId) {
+		return this.tripIdRouteId.get(tripId);
+	}
+
 	public ArrayList<GTrip> getTrips(String optRouteId) {
 		if (optRouteId != null) {
 			return this.routeIdTrips.get(optRouteId);
@@ -172,7 +192,7 @@ public class GSpec {
 			if (this.tripIdFrequencies.containsKey(optTripId)) {
 				return this.tripIdFrequencies.get(optTripId);
 			} else {
-				return Collections.<GFrequency> emptyList();
+				return Collections.<GFrequency>emptyList();
 			}
 		}
 		System.out.printf("\ngetFrequencies() > trying to use ALL frequencies!");
@@ -185,7 +205,7 @@ public class GSpec {
 			if (this.tripIdTripStops.containsKey(optTripId)) {
 				return this.tripIdTripStops.get(optTripId);
 			} else {
-				return Collections.<GTripStop> emptyList();
+				return Collections.<GTripStop>emptyList();
 			}
 		}
 		System.out.printf("\ngetTripStops() > trying to use ALL trip stops!");
@@ -294,7 +314,7 @@ public class GSpec {
 					lastStopTime.setPickupType(GPickupType.NO_PICKUP.intValue());
 				}
 			}
-			String routeId = this.tripIdRouteId.get(tripId);
+			String routeId = getTripIdRouteId(tripId);
 			long mRouteId = agencyTools.getRouteId(this.routeIdRoutes.get(routeId));
 			ArrayList<GStopTime> newGStopTimes = new ArrayList<GStopTime>();
 			Calendar stopTimeCal = Calendar.getInstance();

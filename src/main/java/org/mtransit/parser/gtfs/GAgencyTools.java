@@ -1,10 +1,7 @@
 package org.mtransit.parser.gtfs;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.mtransit.parser.Pair;
+import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GFrequency;
@@ -18,6 +15,11 @@ import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+@SuppressWarnings("unused")
 public interface GAgencyTools {
 
 	int getThreadPoolSize();
@@ -27,6 +29,10 @@ public interface GAgencyTools {
 	String getAgencyColor();
 
 	Integer getAgencyRouteType();
+
+	boolean excludeAgencyNullable(GAgency gAgency);
+
+	boolean excludeAgency(GAgency gAgency);
 
 	String cleanServiceId(String serviceId);
 
@@ -41,6 +47,8 @@ public interface GAgencyTools {
 
 	String getRouteColor(GRoute gRoute);
 
+	boolean excludeRouteNullable(GRoute gRoute);
+
 	boolean excludeRoute(GRoute gRoute);
 
 	// TRIP
@@ -49,6 +57,8 @@ public interface GAgencyTools {
 	String cleanTripHeadsign(String tripHeadsign);
 
 	boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge);
+
+	boolean excludeTripNullable(GTrip gTrip);
 
 	boolean excludeTrip(GTrip gTrip);
 
@@ -68,6 +78,8 @@ public interface GAgencyTools {
 	String getStopCode(GStop gStop);
 
 	String getStopOriginalId(GStop gStop);
+
+	boolean excludeStopNullable(GStop gStop);
 
 	boolean excludeStop(GStop gStop);
 
