@@ -227,8 +227,11 @@ public class GReader {
 			} catch (Exception e) {
 				MTLog.logFatal(e, "Error while processing line: %s\n", line);
 			}
-			if (l++ % 1000 == 0) { // LOG
+			if (l++ % 10_000 == 0) { // LOG
 				System.out.print(POINT); // LOG
+			} // LOG
+			if (l % 100_000 == 0) { // LOG
+				MTLog.log("Reading file '%s' (lines: %s)...", filename, l); // LOG
 			} // LOG
 		}
 		MTLog.log("File '%s' read (lines: %s).", filename, l);
