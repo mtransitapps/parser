@@ -63,8 +63,7 @@ public class GReader {
 			// CALENDAR DATES
 			File calendarDateFile = new File(gtfsDir, GCalendarDate.FILENAME);
 			if (!calendarDateFile.exists()) {
-				MTLog.logFatal("'%s' calendar date file does not exist!", calendarDateFile);
-				return null;
+				MTLog.log("'%s' calendar date file does not exist.", calendarDateFile);
 			} else {
 				fr = new FileReader(calendarDateFile);
 				reader = new BufferedReader(fr);
