@@ -167,7 +167,7 @@ public class GReader {
 
 	private static final CSVFormat CSV_FORMAT_NO_QUOTE = CSV_FORMAT.withQuote(null);
 
-	private static final String POINT = ".";
+	private static final Character POINT = '.';
 
 	private static void readCsv(String filename, BufferedReader reader,
 								LineProcessor lineProcessor) throws IOException {
@@ -396,7 +396,8 @@ public class GReader {
 			if (agencyTools.excludeRoute(gRoute)) {
 				return;
 			}
-			if (agencyTools.excludeAgencyNullable(gSpec.getAgency(gRoute.getAgencyId()))) {
+			if (!StringUtils.isEmpty(gRoute.getAgencyId())
+					&& agencyTools.excludeAgencyNullable(gSpec.getAgency(gRoute.getAgencyId()))) {
 				return;
 			}
 			gSpec.addRoute(gRoute);
