@@ -497,7 +497,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return GSpec.parseTimeString(gFrequency.getEndTime()); // GTFS standard
 	}
 
-
 	private static class Period {
 		Integer todayStringInt = null;
 		Integer startDate = null;
@@ -553,6 +552,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		if (!isNext //
 				&& (usefulPeriod.startDate == null || usefulPeriod.endDate == null)) {
+			if (isCurrent) {
+				MTLog.log("No CURRENT schedules for %s. (start:%s|end:%s)", usefulPeriod.todayStringInt,
+					usefulPeriod.startDate, usefulPeriod.endDate);
+				System.exit(0); // keeping current schedule
+				return null;
+			}
 			MTLog.log("NO schedule available for %s! (start:%s|end:%s) (isCurrent:%s|isNext:%s)\n", usefulPeriod.todayStringInt,
 					usefulPeriod.startDate, usefulPeriod.endDate, isCurrent, isNext);
 			System.exit(-1);
