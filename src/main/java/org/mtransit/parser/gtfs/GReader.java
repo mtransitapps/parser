@@ -233,7 +233,7 @@ public class GReader {
 				MTLog.log("Reading file '%s' (lines: %s)...", filename, l); // LOG
 			} // LOG
 		}
-		MTLog.log("File '%s' read (lines: %s).", filename, l);
+		MTLog.log("Reading file '%s' (lines: %s)... DONE", filename, l);
 	}
 
 	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
