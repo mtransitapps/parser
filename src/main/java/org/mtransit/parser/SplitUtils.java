@@ -56,7 +56,7 @@ public class SplitUtils {
 		System.out.printf("\n%s: stopIdsTowards1: %s", mRoute.getId(), stopIdsTowards1);
 		System.out.printf("\n%s: stopIdsTowardsBoth10: %s", mRoute.getId(), stopIdsTowardsBoth10);
 		System.out.printf("\n%s: stopIdsTowardsBoth01: %s", mRoute.getId(), stopIdsTowardsBoth01);
-		System.out.printf("\n%s: Unexptected trip stop to split %s.\n", mRoute.getId(), gTripStop);
+		System.out.printf("\n%s: Unexpected trip stop to split %s.\n", mRoute.getId(), gTripStop);
 		System.exit(-1);
 		return null;
 	}
