@@ -61,10 +61,12 @@ public class GReader {
 				}
 			}
 			// CALENDAR DATES
+			boolean hasCalendar = false;
 			File calendarDateFile = new File(gtfsDir, GCalendarDate.FILENAME);
 			if (!calendarDateFile.exists()) {
 				MTLog.log("'%s' calendar date file does not exist.", calendarDateFile);
 			} else {
+				hasCalendar = true;
 				fr = new FileReader(calendarDateFile);
 				reader = new BufferedReader(fr);
 				readCsv(calendarDateFile.getName(), reader, line ->
@@ -74,14 +76,18 @@ public class GReader {
 			// CALENDAR
 			File calendarFile = new File(gtfsDir, GCalendar.FILENAME);
 			if (!calendarFile.exists()) {
-				MTLog.logFatal("'%s' calendar file does not exist!", calendarFile);
-				return null;
+				MTLog.log("'%s' calendar file does not exist.", calendarFile);
 			} else {
+				hasCalendar = true;
 				fr = new FileReader(calendarFile);
 				reader = new BufferedReader(fr);
 				readCsv(calendarFile.getName(), reader, line ->
 						processCalendar(agencyTools, gSpec, line)
 				);
+			}
+			if (!hasCalendar) {
+				MTLog.logFatal("'%s' & '%s' file do not exist!", GCalendar.FILENAME, GCalendarDate.FILENAME);
+				return null;
 			}
 			// ROUTES
 			if (!calendarsOnly) {
