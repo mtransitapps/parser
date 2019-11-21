@@ -1,6 +1,6 @@
 package org.mtransit.parser;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class MTLog {
 
 	public static void log(Character character) {
