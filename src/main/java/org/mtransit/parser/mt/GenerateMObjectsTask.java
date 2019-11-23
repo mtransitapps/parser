@@ -272,13 +272,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					headsignTypeString = true;
 				}
 			}
+			HashSet<String> mTripStopHeasignStrings = new HashSet<>(mTripStopTimesHeadsign.values());
 			tripKeptNonDescriptiveHeadsign = false; // 1 trip can keep the same non descriptive head sign
 			if (headsignTypeString && mTripHeasignStrings.size() != mTrips.size()) {
-				System.out.printf("\n%s: Non descriptive trip headsigns (%s different heasign(s) for %s trips)", this.routeId, mTripHeasignStrings.size(),
+				System.out.printf("\n%s: Non descriptive trip headsigns (%s different headsign(s) for %s trips)", this.routeId, mTripHeasignStrings.size(),
 						mTrips.size());
 				for (MTrip mTrip : mTrips.values()) {
 					System.out.printf("\n%s: mTrip: %s", this.routeId, mTrip);
-					if (mTripStopTimesHeadsign.containsKey(mTrip.getId()) //
+					if (mTripStopHeasignStrings.size() == mTrips.size()
+							&& mTripStopTimesHeadsign.containsKey(mTrip.getId()) //
 							&& !mTrip.getHeadsignValue().equals(mTripStopTimesHeadsign.get(mTrip.getId()))) {
 						System.out.printf("\n%s: Replace trip headsign '%s' with stop times headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(),
 								mTripStopTimesHeadsign.get(mTrip.getId()), mTrip);
@@ -291,7 +293,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 							System.out.printf("\n");
 							System.exit(-1);
 						}
-						System.out.printf("\n%s: Keeping non-descritive trip headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
+						System.out.printf("\n%s: Keeping non-descriptive trip headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
 						tripKeptNonDescriptiveHeadsign = true; // last trip that can keep same head sign
 					}
 				}
