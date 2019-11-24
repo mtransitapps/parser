@@ -492,9 +492,7 @@ public class GSpec {
 				}
 			}
 		} catch (Exception e) {
-			System.out.printf("\nError while removing more excluded service IDs!\n");
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while removing more excluded service IDs!");
 		}
 		System.out.printf("\nRemoving more excluded service IDs... DONE (%d removed objects)", r);
 	}

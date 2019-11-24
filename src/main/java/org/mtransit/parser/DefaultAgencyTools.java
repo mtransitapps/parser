@@ -512,6 +512,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
+	@SuppressWarnings("unused")
+	@Deprecated
 	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
 		return extractUsefulServiceIds(args, agencyTools, false);
 	}
@@ -533,8 +535,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (!isCurrentOrNext && OVERRIDE_DATE != null) {
 			usefulPeriod.todayStringInt = OVERRIDE_DATE;
 		}
-		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, !agencyFilter);
-		if (agencyFilter) {
+		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, agencyFilter);
+		if (!agencyFilter) {
 			gtfs.cleanupExcludedServiceIds();
 		}
 		List<GCalendar> gCalendars = gtfs.getAllCalendars();
