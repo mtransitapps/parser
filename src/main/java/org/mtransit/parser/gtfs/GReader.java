@@ -33,7 +33,7 @@ public class GReader {
 
 	public static final Charset UTF8 = Charset.forName("UTF-8");
 
-	public static GSpec readGtfsZipFile(String gtfsFile, final GAgencyTools agencyTools, boolean calendarsOnly) {
+	public static GSpec readGtfsZipFile(String gtfsFile, final GAgencyTools agencyTools, boolean calendarsOnly, boolean routeTripCalendarsOnly) {
 		MTLog.log("Reading GTFS file '%s'...", gtfsFile);
 		long start = System.currentTimeMillis();
 		final GSpec gSpec = new GSpec();
@@ -64,7 +64,7 @@ public class GReader {
 			boolean hasCalendar = false;
 			File calendarDateFile = new File(gtfsDir, GCalendarDate.FILENAME);
 			if (!calendarDateFile.exists()) {
-				MTLog.log("'%s' calendar date file does not exist.", calendarDateFile);
+				MTLog.log("Skipping non-existing file '%s'.", calendarDateFile);
 			} else {
 				hasCalendar = true;
 				fr = new FileReader(calendarDateFile);
@@ -76,7 +76,7 @@ public class GReader {
 			// CALENDAR
 			File calendarFile = new File(gtfsDir, GCalendar.FILENAME);
 			if (!calendarFile.exists()) {
-				MTLog.log("'%s' calendar file does not exist.", calendarFile);
+				MTLog.log("Skipping non-existing file '%s'.", calendarFile);
 			} else {
 				hasCalendar = true;
 				fr = new FileReader(calendarFile);
@@ -118,10 +118,10 @@ public class GReader {
 				}
 			}
 			// FREQUENCIES
-			if (!calendarsOnly) {
+			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				File frequencyFile = new File(gtfsDir, GFrequency.FILENAME);
 				if (!frequencyFile.exists()) {
-					MTLog.log("'%s' frequency file does not exist.", frequencyFile);
+					MTLog.log("Skipping non-existing file '%s'.", calendarDateFile);
 				} else {
 					fr = new FileReader(frequencyFile);
 					reader = new BufferedReader(fr);
@@ -131,7 +131,7 @@ public class GReader {
 				}
 			}
 			// STOPS
-			if (!calendarsOnly) {
+			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				File stopFile = new File(gtfsDir, GStop.FILENAME);
 				if (!stopFile.exists()) {
 					MTLog.logFatal("'%s' stop file does not exist!", stopFile);
@@ -145,10 +145,10 @@ public class GReader {
 				}
 			}
 			// STOP TIMES
-			if (!calendarsOnly) {
+			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				File stopTimeFile = new File(gtfsDir, GStopTime.FILENAME);
 				if (!stopTimeFile.exists()) {
-					MTLog.log("'%s' stop time file does not exist.", stopTimeFile);
+					MTLog.log("Skipping non-existing file '%s'.", calendarDateFile);
 				} else {
 					fr = new FileReader(stopTimeFile);
 					reader = new BufferedReader(fr);
