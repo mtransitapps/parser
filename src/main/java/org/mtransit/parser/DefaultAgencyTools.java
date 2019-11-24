@@ -60,7 +60,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final Integer THREAD_POOL_SIZE;
 
 	static {
-		THREAD_POOL_SIZE = 4;
+		if (!System.getenv("CI").isEmpty()) {
+			THREAD_POOL_SIZE = 1;
+		} else {
+			THREAD_POOL_SIZE = 4;
+		}
 		// THREAD_POOL_SIZE = 1; // DEBUG
 	}
 
