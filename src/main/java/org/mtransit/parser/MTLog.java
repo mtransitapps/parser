@@ -11,13 +11,13 @@ public final class MTLog {
 		System.out.printf("\n" + format, args);
 	}
 
-	public static void logNonFatal(Exception e) {
-		logNonFatal(e, e.getMessage());
+	public static void logNonFatal(Throwable t) {
+		logNonFatal(t, t.getMessage());
 	}
 
-	public static void logNonFatal(Exception e, String format, Object... args) {
+	public static void logNonFatal(Throwable t, String format, Object... args) {
 		System.out.printf("\n" + format, args);
-		e.printStackTrace(); // NON-FATAL
+		t.printStackTrace(); // NON-FATAL
 	}
 
 	public static void logFatal(String format, Object... args) {
@@ -25,9 +25,9 @@ public final class MTLog {
 		System.exit(-1);
 	}
 
-	public static void logFatal(Exception e, String format, Object... args) {
+	public static void logFatal(Throwable t, String format, Object... args) {
 		log("ERROR: " + format + "\n", args);
-		e.printStackTrace();
+		t.printStackTrace();
 		System.exit(-1);
 	}
 }

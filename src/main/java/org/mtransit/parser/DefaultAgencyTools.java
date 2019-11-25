@@ -60,7 +60,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final Integer THREAD_POOL_SIZE;
 
 	static {
-		if (!System.getenv("CI").isEmpty()) {
+		final String isCI = System.getenv("CI");
+		if (isCI != null && !isCI.isEmpty()) {
 			THREAD_POOL_SIZE = 1;
 		} else {
 			THREAD_POOL_SIZE = 4;
@@ -560,7 +561,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				&& (usefulPeriod.startDate == null || usefulPeriod.endDate == null)) {
 			if (isCurrent) {
 				MTLog.log("No CURRENT schedules for %s. (start:%s|end:%s)", usefulPeriod.todayStringInt,
-					usefulPeriod.startDate, usefulPeriod.endDate);
+						usefulPeriod.startDate, usefulPeriod.endDate);
 				System.exit(0); // keeping current schedule
 				return null;
 			}
