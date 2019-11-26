@@ -65,8 +65,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 			THREAD_POOL_SIZE = 1;
 		} else {
 			THREAD_POOL_SIZE = 4;
+			// THREAD_POOL_SIZE = 1; // DEBUG
 		}
-		// THREAD_POOL_SIZE = 1; // DEBUG
 	}
 
 	private static final Integer OVERRIDE_DATE;

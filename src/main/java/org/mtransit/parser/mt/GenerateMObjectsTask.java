@@ -100,7 +100,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()), gCalendarDate.getDate()));
 				break;
 			default:
-				System.out.printf("\n%s: Unexpected calendar date exeception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
+				System.out.printf("\n%s: Unexpected calendar date exception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
 			}
 		}
 		for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
@@ -124,7 +124,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 		int splitTripCount = this.agencyTools.splitTrip(new MRoute(this.routeId, null, null, null), null, routeGTFS).size();
 		boolean isSplitted = splitTripCount > 1;
-		this.globalGTFS.clearRouteGTFS(this.routeId);
+		this.globalGTFS.cleanupRouteGTFS(this.routeId);
 		ArrayList<MAgency> mAgenciesList = new ArrayList<>(mAgencies.values());
 		Collections.sort(mAgenciesList);
 		ArrayList<MStop> mStopsList = new ArrayList<>(mStops.values());
@@ -150,7 +150,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			mStopScheduleMap.get(schedule.getStopId()).add(schedule);
 		}
 		TreeMap<Long, ArrayList<MFrequency>> mRouteFrequencies = new TreeMap<>();
-		if (mFrequenciesList != null && mFrequenciesList.size() > 0) {
+		if (mFrequenciesList.size() > 0) {
 			mRouteFrequencies.put(this.routeId, mFrequenciesList);
 		}
 		long firstTimestamp = -1L;
@@ -209,7 +209,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd HHmmss", Locale.ENGLISH);
 			DATE_FORMAT.setTimeZone(TimeZone.getTimeZone(mAgenciesList.get(0).getTimezone()));
 			try {
-				Date firstDate = DATE_FORMAT.parse(firstCalendarDate + " " + String.format("%06d", firstDeparture));
+				Date firstDate = DATE_FORMAT.parse(firstCalendarDate + " " + String.format(Locale.ENGLISH, "%06d", firstDeparture));
 				firstTimestamp = firstDate.getTime();
 			} catch (Exception e) {
 				System.out.printf("\nError while parsing dates '%s %s'!\n", firstCalendarDate, firstDeparture);
@@ -218,7 +218,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				firstTimestamp = -1L;
 			}
 			try {
-				Date lastDate = DATE_FORMAT.parse(lastCalendarDate + " " + String.format("%06d", lastDeparture));
+				Date lastDate = DATE_FORMAT.parse(lastCalendarDate + " " + String.format(Locale.ENGLISH,"%06d", lastDeparture));
 				lastTimestamp = lastDate.getTime();
 			} catch (Exception e) {
 				System.out.printf("\nError while parsing dates '%s %s'!\n", lastCalendarDate, lastDeparture);
@@ -646,10 +646,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		if (l1 == null && l2 == null) {
 			return true;
 		}
-		if (l1.size() != l2.size()) {
+		int s1 = l1 == null ? 0: l1.size();
+		int s2 = l2 == null ? 0: l2.size();
+		if (s1 != s2) {
 			return false;
 		}
-		for (int i = 0; i < l1.size(); i++) {
+		for (int i = 0; i < s1; i++) {
 			if (!l1.get(i).equals(l2.get(i))) {
 				return false;
 			}
