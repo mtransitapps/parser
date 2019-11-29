@@ -585,12 +585,12 @@ public class MGenerator {
 	private static final String FR_FR = "fr-FR";
 	private static final String DEFAULT_TXT = "default.txt";
 
-	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from ([A-Za-z]+ [0-9]{1,2}, [0-9]{4}) to ([A-Za-z]+ [0-9]{1,2}, [0-9]{4})\\.)",
+	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from ([A-Za-z]+ [0-9]{1,2}, [0-9]{4}) to ([A-Za-z]+ [0-9]{1,2}, [0-9]{4})(\\.)?)",
 			Pattern.CASE_INSENSITIVE);
 	private static final String SCHEDULE_FROM_TO = "Schedule from %1$s to %2$s.";
 	private static final String SCHEDULE_KEEP_FROM_TO = "Schedule from $2 to %2$s.";
 
-	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du ([0-9]{1,2} [\\w]+ [0-9]{4}) au ([0-9]{1,2} [\\w]+ [0-9]{4})\\.)",
+	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du ([0-9]{1,2} [\\w]+ [0-9]{4}) au ([0-9]{1,2} [\\w]+ [0-9]{4})(\\.)?)",
 			Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
 	private static final String SCHEDULE_FROM_TO_FR = "Horaires du %1$s au %2$s.";
 	private static final String SCHEDULE_KEEP_FROM_TO_FR = "Horaires du $2 au %2$s.";
@@ -611,12 +611,13 @@ public class MGenerator {
 			MTLog.log("Generated store listing file: '%s'.", file);
 			try {
 				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF8);
-				content = SCHEDULE.matcher(content)
-						.replaceAll(
-								String.format(
-										isNext ? SCHEDULE_KEEP_FROM_TO : SCHEDULE_FROM_TO, //
-										SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(minDate))),
-										SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
+				content = SCHEDULE.matcher(content).replaceAll(
+						String.format(
+								isNext ? SCHEDULE_KEEP_FROM_TO : SCHEDULE_FROM_TO, //
+								SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(minDate))),
+								SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))
+						)
+				);
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
 			} catch (Exception ioe) {
 				MTLog.logFatal(ioe, "Error while writing store listing files!");
