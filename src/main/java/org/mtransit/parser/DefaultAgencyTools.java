@@ -40,6 +40,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final int MIN_COVERAGE_TOTAL_IN_DAYS = 14;
 
+	private static final int MIN_PREVIOUS_NEXT_ADDED_DAYS = 2;
+
 	public static final boolean EXPORT_PATH_ID;
 	public static final boolean EXPORT_ORIGINAL_ID;
 	public static final boolean EXPORT_DESCENT_ONLY;
@@ -665,7 +667,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
 				if (gCalendarDate.isBetween(p.startDate, p.endDate)) {
 					if (!gCalendarDate.isServiceIds(todayServiceIds)) {
-						MTLog.log("new service ID from calendar date active on %s between %s and %s: '%s'", gCalendarDate.getDate(), p.startDate,
+						MTLog.log("> new service ID from calendar date active on %s between %s and %s: '%s'", gCalendarDate.getDate(), p.startDate,
 								p.endDate, gCalendarDate.getServiceId());
 						todayServiceIds.add(gCalendarDate.getServiceId());
 					}
@@ -673,7 +675,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			boolean newDates = refreshStartEndDatesFromCalendarDates(p, todayServiceIds, gCalendarDates);
 			if (newDates) {
-				MTLog.log("new start date '%s' & end date '%s' from calendar date active during service ID(s).", p.startDate, p.endDate);
+				MTLog.log("> new start date '%s' & end date '%s' from calendar date active during service ID(s).", p.startDate, p.endDate);
 				continue;
 			}
 			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_COVERAGE_TOTAL_IN_DAYS)) {
@@ -685,18 +687,20 @@ public class DefaultAgencyTools implements GAgencyTools {
 			pNext.todayStringInt = incDateDays(DATE_FORMAT, c, p.endDate, 1);
 			HashSet<String> nextDayServiceIds = findTodayServiceIds(gCalendarDates, DATE_FORMAT, c, pNext, 0, 1);
 			refreshStartEndDatesFromCalendarDates(pNext, nextDayServiceIds, gCalendarDates);
-			if (pNext.todayStringInt.equals(pNext.startDate) && pNext.todayStringInt.equals(pNext.endDate)) {
+			if (pNext.startDate != null && pNext.endDate != null
+					&& diffLowerThan(DATE_FORMAT, c, pNext.startDate, pNext.endDate, MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
 				p.endDate = pNext.endDate;
-				MTLog.log("new end date '%s' because next day has own service ID(s)", p.endDate);
+				MTLog.log("> new end date '%s' because next day has own service ID(s)", p.endDate);
 				continue;
 			}
 			Period pPrevious = new Period();
 			pPrevious.todayStringInt = incDateDays(DATE_FORMAT, c, p.startDate, -1);
 			HashSet<String> previousDayServiceIds = findTodayServiceIds(gCalendarDates, DATE_FORMAT, c, pPrevious, 0, -1);
 			refreshStartEndDatesFromCalendarDates(pPrevious, previousDayServiceIds, gCalendarDates);
-			if (pPrevious.todayStringInt.equals(pPrevious.startDate) && pPrevious.todayStringInt.equals(pPrevious.endDate)) {
+			if (pPrevious.startDate != null && pPrevious.endDate != null
+					&& diffLowerThan(DATE_FORMAT, c, pPrevious.startDate, pPrevious.endDate, MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
 				p.startDate = pPrevious.startDate;
-				MTLog.log("new start date '%s' because previous day has own service ID(s)", p.startDate);
+				MTLog.log("> new start date '%s' because previous day has own service ID(s)", p.startDate);
 				continue;
 			}
 			break;
@@ -877,9 +881,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	private static boolean diffLowerThan(SimpleDateFormat dateFormat, Calendar calendar, int startDateInt, int enDateInt, int diffInDays) {
+	private static boolean diffLowerThan(SimpleDateFormat dateFormat, Calendar calendar, int startDateInt, int endDateInt, int diffInDays) {
 		try {
-			return diffInMs(dateFormat, calendar, startDateInt, enDateInt) < TimeUnit.DAYS.toMillis(diffInDays);
+			return diffInMs(dateFormat, calendar, startDateInt, endDateInt) < TimeUnit.DAYS.toMillis(diffInDays);
 		} catch (Exception e) {
 			MTLog.log("Error while checking date difference!\n");
 			e.printStackTrace();
@@ -888,11 +892,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	private static long diffInMs(SimpleDateFormat dateFormat, Calendar calendar, int startDateInt, int enDateInt) {
+	private static long diffInMs(SimpleDateFormat dateFormat, Calendar calendar, int startDateInt, int endDateInt) {
 		try {
 			calendar.setTime(dateFormat.parse(String.valueOf(startDateInt)));
 			long startDateInMs = calendar.getTimeInMillis();
-			calendar.setTime(dateFormat.parse(String.valueOf(enDateInt)));
+			calendar.setTime(dateFormat.parse(String.valueOf(endDateInt)));
 			long endDateInMs = calendar.getTimeInMillis();
 			return endDateInMs - startDateInMs;
 		} catch (Exception e) {
