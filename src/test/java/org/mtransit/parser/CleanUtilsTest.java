@@ -14,8 +14,7 @@ public class CleanUtilsTest {
 	public void testCleanWords_Null() {
 		// Arrange
 		// Act
-		//noinspection ConfusingArgumentToVarargsMethod
-		CleanUtils.cleanWords(null);
+		CleanUtils.cleanWords((String[]) null);
 		// Assert
 	}
 
@@ -54,7 +53,7 @@ public class CleanUtilsTest {
 		Pattern result = CleanUtils.cleanWordsPlural("word1", "word2");
 		// Assert
 		assertNotNull(result);
-		assertEquals("((^|\\W)(word1|word2)([s]?))(\\W|$))", result.pattern());
+		assertEquals("((^|\\W)((word1|word2)([s]?))(\\W|$))", result.pattern());
 	}
 
 	@Test()
