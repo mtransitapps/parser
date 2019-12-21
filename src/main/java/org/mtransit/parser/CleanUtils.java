@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class CleanUtils {
 
 	private CleanUtils() {
@@ -63,8 +64,8 @@ public final class CleanUtils {
 	private static final String PLACE_CHAR_LES = "les ";
 	private static final String PLACE_CHAR_L = "l'";
 
-	private static final Pattern[] START_WITH_CHARS = new Pattern[] { //
-	Pattern.compile("^(" + PLACE_CHAR_DE_L + ")", Pattern.CASE_INSENSITIVE), //
+	private static final Pattern[] START_WITH_CHARS = new Pattern[]{ //
+			Pattern.compile("^(" + PLACE_CHAR_DE_L + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("^(" + PLACE_CHAR_DE_LA + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("^(" + PLACE_CHAR_D + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("^(" + PLACE_CHAR_DE + ")", Pattern.CASE_INSENSITIVE), //
@@ -76,8 +77,8 @@ public final class CleanUtils {
 			Pattern.compile("^(" + PLACE_CHAR_L + ")", Pattern.CASE_INSENSITIVE) //
 	};
 
-	public static final Pattern[] SPACE_CHARS = new Pattern[] { //
-	Pattern.compile("( " + PLACE_CHAR_DE_L + ")", Pattern.CASE_INSENSITIVE), //
+	public static final Pattern[] SPACE_CHARS = new Pattern[]{ //
+			Pattern.compile("( " + PLACE_CHAR_DE_L + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("( " + PLACE_CHAR_DE_LA + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("( " + PLACE_CHAR_D + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("( " + PLACE_CHAR_DE + ")", Pattern.CASE_INSENSITIVE), //
@@ -89,8 +90,8 @@ public final class CleanUtils {
 			Pattern.compile("( " + PLACE_CHAR_L + ")", Pattern.CASE_INSENSITIVE) //
 	};
 
-	private static final Pattern[] SLASH_CHARS = new Pattern[] {//
-	Pattern.compile("(/ " + PLACE_CHAR_DE_L + ")", Pattern.CASE_INSENSITIVE), //
+	private static final Pattern[] SLASH_CHARS = new Pattern[]{//
+			Pattern.compile("(/ " + PLACE_CHAR_DE_L + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("(/ " + PLACE_CHAR_DE_LA + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("(/ " + PLACE_CHAR_D + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("(/ " + PLACE_CHAR_DE + ")", Pattern.CASE_INSENSITIVE), //
@@ -115,8 +116,8 @@ public final class CleanUtils {
 	private static final String PLACE_CHAR_RUE = "rue ";
 	private static final String PLACE_CHAR_TSSE = "tsse ";
 
-	private static final Pattern[] START_WITH_ST = new Pattern[] { //
-	Pattern.compile("^(" + PLACE_CHAR_ARRONDISSEMENT + ")", Pattern.CASE_INSENSITIVE), //
+	private static final Pattern[] START_WITH_ST = new Pattern[]{ //
+			Pattern.compile("^(" + PLACE_CHAR_ARRONDISSEMENT + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("^(" + PLACE_CHAR_AV + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("^(" + PLACE_CHAR_AVENUE + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("^(" + PLACE_CHAR_BOUL + ")", Pattern.CASE_INSENSITIVE), //
@@ -130,8 +131,8 @@ public final class CleanUtils {
 			Pattern.compile("^(" + PLACE_CHAR_TSSE + ")", Pattern.CASE_INSENSITIVE) //
 	};
 
-	public static final Pattern[] SPACE_ST = new Pattern[] { //
-	Pattern.compile("( " + PLACE_CHAR_ARRONDISSEMENT + ")", Pattern.CASE_INSENSITIVE), //
+	public static final Pattern[] SPACE_ST = new Pattern[]{ //
+			Pattern.compile("( " + PLACE_CHAR_ARRONDISSEMENT + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("( " + PLACE_CHAR_AV + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("( " + PLACE_CHAR_AVENUE + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("( " + PLACE_CHAR_BOUL + ")", Pattern.CASE_INSENSITIVE), //
@@ -145,8 +146,8 @@ public final class CleanUtils {
 			Pattern.compile("( " + PLACE_CHAR_TSSE + ")", Pattern.CASE_INSENSITIVE) //
 	};
 
-	private static final Pattern[] SLASH_ST = new Pattern[] { //
-	Pattern.compile("(/ " + PLACE_CHAR_ARRONDISSEMENT + ")", Pattern.CASE_INSENSITIVE), //
+	private static final Pattern[] SLASH_ST = new Pattern[]{ //
+			Pattern.compile("(/ " + PLACE_CHAR_ARRONDISSEMENT + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("(/ " + PLACE_CHAR_AV + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("(/ " + PLACE_CHAR_AVENUE + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("(/ " + PLACE_CHAR_BOUL + ")", Pattern.CASE_INSENSITIVE), //
@@ -160,17 +161,65 @@ public final class CleanUtils {
 			Pattern.compile("(/ " + PLACE_CHAR_TSSE + ")", Pattern.CASE_INSENSITIVE) //
 	};
 
+	public static Pattern cleanWords(String... words) {
+		if (words == null || words.length <= 0) {
+			throw new RuntimeException("Cannot clean empty list of words!");
+		}
+		StringBuilder sb = new StringBuilder("((^|\\W)(");
+		boolean firstWorld = true;
+		for (String word : words) {
+			if (!firstWorld) {
+				sb.append('|');
+			}
+			sb.append(word);
+			firstWorld = false;
+		}
+		sb.append(")(\\W|$))");
+		return Pattern.compile(sb.toString(), Pattern.CASE_INSENSITIVE);
+	}
+
+	public static String cleanWordsReplacement(String replacement) {
+		if (replacement == null || replacement.length() <= 0) {
+			return StringUtils.EMPTY;
+		}
+		return "$2" + replacement + "$4";
+	}
+
+	public static Pattern cleanWordsPlural(String... words) {
+		if (words == null || words.length <= 0) {
+			throw new RuntimeException("Cannot clean empty list of words!");
+		}
+		StringBuilder sb = new StringBuilder("((^|\\W)((");
+		boolean firstWorld = true;
+		for (String word : words) {
+			if (!firstWorld) {
+				sb.append('|');
+			}
+			sb.append(word);
+			firstWorld = false;
+		}
+		sb.append(")([s]?))(\\W|$))");
+		return Pattern.compile(sb.toString(), Pattern.CASE_INSENSITIVE);
+	}
+
+	public static String cleanWordsReplacementPlural(String replacement) {
+		if (replacement == null || replacement.length() <= 0) {
+			return StringUtils.EMPTY;
+		}
+		return "$2" + replacement + "$5" + "$6";
+	}
+
 	public static final Pattern SAINT = Pattern.compile("(saint)", Pattern.CASE_INSENSITIVE);
 	public static final String SAINT_REPLACEMENT = "St";
 
-	public static final Pattern CLEAN_AT = Pattern.compile("((^|\\W){1}(at)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
-	public static final String CLEAN_AT_REPLACEMENT = "$2@$4";
+	public static final Pattern CLEAN_AT = cleanWords("at");
+	public static final String CLEAN_AT_REPLACEMENT = cleanWordsReplacement("@");
 
-	public static final Pattern CLEAN_AND = Pattern.compile("((^|\\W){1}(and)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
-	public static final String CLEAN_AND_REPLACEMENT = "$2&$4";
+	public static final Pattern CLEAN_AND = cleanWords("and");
+	public static final String CLEAN_AND_REPLACEMENT = cleanWordsReplacement("&");
 
-	public static final Pattern CLEAN_ET = Pattern.compile("((^|\\W){1}(et)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
-	public static final String CLEAN_ET_REPLACEMENT = "$2&$4";
+	public static final Pattern CLEAN_ET = cleanWords("et");
+	public static final String CLEAN_ET_REPLACEMENT = CLEAN_AND_REPLACEMENT;
 
 	public static final String SPACE = " ";
 	public static final char SPACE_CHAR = ' ';
@@ -190,17 +239,17 @@ public final class CleanUtils {
 	}
 
 	private static final Pattern CLEAN_SLASH = Pattern.compile("(\\S)[\\s]*[/][\\s]*(\\S)");
-	private static final String CLEAN_SLASH_REPLACEMENT = "$1 / $2";
+	private static final String CLEAN_SLASH_REPLACEMENT = "$1" + " / " + "$2";
 
 	public static String cleanSlashes(String string) {
 		return CLEAN_SLASH.matcher(string).replaceAll(CLEAN_SLASH_REPLACEMENT);
 	}
 
-	private static final Pattern POINT1 = Pattern.compile("((^|\\W){1}([\\w]{1})\\.(\\W|$){1})", Pattern.CASE_INSENSITIVE);
-	private static final String POINT1_REPLACEMENT = "$2$3$4";
+	private static final Pattern POINT1 = Pattern.compile("((^|\\W)([\\w])\\.(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final String POINT1_REPLACEMENT = "$2" + "$3" + "$4";
 
-	private static final Pattern POINTS = Pattern.compile("((^|\\W){1}([\\w]+)\\.(\\W|$){1})", Pattern.CASE_INSENSITIVE);
-	private static final String POINTS_REPLACEMENT = "$2$3$4";
+	private static final Pattern POINTS = Pattern.compile("((^|\\W)([\\w]+)\\.(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final String POINTS_REPLACEMENT = "$2" + "$3" + "$4";
 
 	public static String removePoints(String string) {
 		string = POINT1.matcher(string).replaceAll(POINT1_REPLACEMENT);
@@ -233,24 +282,25 @@ public final class CleanUtils {
 		return string;
 	}
 
-	private static final Pattern FIRST = Pattern.compile("(^|\\s){1}(first)($|\\s){1}", Pattern.CASE_INSENSITIVE);
-	private static final String FIRST_REPLACEMENT = "$11st$3";
-	private static final Pattern SECOND = Pattern.compile("(^|\\s){1}(second)($|\\s){1}", Pattern.CASE_INSENSITIVE);
-	private static final String SECOND_REPLACEMENT = "$12nd$3";
-	private static final Pattern THIRD = Pattern.compile("(^|\\s){1}(third)($|\\s){1}", Pattern.CASE_INSENSITIVE);
-	private static final String THIRD_REPLACEMENT = "$13rd$3";
-	private static final Pattern FOURTH = Pattern.compile("(^|\\s){1}(fourth)($|\\s){1}", Pattern.CASE_INSENSITIVE);
-	private static final String FOURTH_REPLACEMENT = "$14th$3";
-	private static final Pattern FIFTH = Pattern.compile("(^|\\s){1}(fifth)($|\\s){1}", Pattern.CASE_INSENSITIVE);
-	private static final String FIFTH_REPLACEMENT = "$15th$3";
-	private static final Pattern SIXTH = Pattern.compile("(^|\\s){1}(sixth)($|\\s){1}", Pattern.CASE_INSENSITIVE);
-	private static final String SIXTH_REPLACEMENT = "$16th$3";
-	private static final Pattern SEVENTH = Pattern.compile("(^|\\s){1}(seventh)($|\\s){1}", Pattern.CASE_INSENSITIVE);
-	private static final String SEVENTH_REPLACEMENT = "$17th$3";
-	private static final Pattern EIGHTH = Pattern.compile("(^|\\s){1}(eighth)($|\\s){1}", Pattern.CASE_INSENSITIVE);
-	private static final String EIGHTH_REPLACEMENT = "$18th$3";
-	private static final Pattern NINTH = Pattern.compile("(^|\\s){1}(ninth)($|\\s){1}", Pattern.CASE_INSENSITIVE);
-	private static final String NINTH_REPLACEMENT = "$19th$3";
+	// TODO white-space VS non-word?
+	private static final Pattern FIRST = cleanWords("first");
+	private static final String FIRST_REPLACEMENT = cleanWordsReplacement("1st");
+	private static final Pattern SECOND = cleanWords("second");
+	private static final String SECOND_REPLACEMENT = cleanWordsReplacement("2nd");
+	private static final Pattern THIRD = cleanWords("third");
+	private static final String THIRD_REPLACEMENT = cleanWordsReplacement("3rd");
+	private static final Pattern FOURTH = cleanWords("fourth");
+	private static final String FOURTH_REPLACEMENT = cleanWordsReplacement("4th");
+	private static final Pattern FIFTH = cleanWords("fifth");
+	private static final String FIFTH_REPLACEMENT = cleanWordsReplacement("5th");
+	private static final Pattern SIXTH = cleanWords("sixth");
+	private static final String SIXTH_REPLACEMENT = cleanWordsReplacement("6th");
+	private static final Pattern SEVENTH = cleanWords("seventh");
+	private static final String SEVENTH_REPLACEMENT = cleanWordsReplacement("7th");
+	private static final Pattern EIGHTH = cleanWords("eighth");
+	private static final String EIGHTH_REPLACEMENT = cleanWordsReplacement("8th");
+	private static final Pattern NINTH = cleanWords("ninth");
+	private static final String NINTH_REPLACEMENT = cleanWordsReplacement("9th");
 
 	public static String cleanNumbers(String string) {
 		string = FIRST.matcher(string).replaceAll(FIRST_REPLACEMENT);
@@ -272,117 +322,111 @@ public final class CleanUtils {
 		return ID_MERGED.matcher(mergedId).replaceAll(ID_MERGED_REPLACEMENT);
 	}
 
-	private static final String REGEX_START_END = "((^|\\W){1}(%s)(\\W|$){1})";
-	private static final String REGEX_START_END_REPLACEMENT = "$2%s$4";
-
-	private static final String REGEX_START_END_S = "((^|\\W){1}((%s)([s]?))(\\W|$){1})";
-	private static final String REGEX_START_END_S_REPLACEMENT = "$2%s$5$6";
-
 	// http://www.semaphorecorp.com/cgi/abbrev.html
-	private static final Pattern STREET = Pattern.compile(String.format(REGEX_START_END, "street"), Pattern.CASE_INSENSITIVE);
-	private static final String STREET_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "St");
-	private static final Pattern AVENUE = Pattern.compile(String.format(REGEX_START_END, "avenue"), Pattern.CASE_INSENSITIVE);
-	private static final String AVENUE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Ave");
-	private static final Pattern ROAD = Pattern.compile(String.format(REGEX_START_END, "road"), Pattern.CASE_INSENSITIVE);
-	private static final String ROAD_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Rd");
-	private static final Pattern HIGHWAY = Pattern.compile(String.format(REGEX_START_END, "highway"), Pattern.CASE_INSENSITIVE);
-	private static final String HIGHWAY_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Hwy");
-	private static final Pattern BOULEVARD = Pattern.compile(String.format(REGEX_START_END, "boulevard"), Pattern.CASE_INSENSITIVE);
-	private static final String BOULEVARD_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Blvd");
-	private static final Pattern DRIVE = Pattern.compile(String.format(REGEX_START_END, "drive"), Pattern.CASE_INSENSITIVE);
-	private static final String DRIVE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Dr");
-	private static final Pattern PLACE = Pattern.compile(String.format(REGEX_START_END, "place"), Pattern.CASE_INSENSITIVE);
-	private static final String PLACE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pl");
-	private static final Pattern PLAZA = Pattern.compile(String.format(REGEX_START_END, "plaza"), Pattern.CASE_INSENSITIVE);
-	private static final String PLAZA_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Plz");
-	private static final Pattern LANE = Pattern.compile(String.format(REGEX_START_END, "lane"), Pattern.CASE_INSENSITIVE);
-	private static final String LANE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Ln");
-	private static final Pattern CRESCENT = Pattern.compile(String.format(REGEX_START_END, "crescent"), Pattern.CASE_INSENSITIVE);
-	private static final String CRESCENT_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Cr");
-	private static final Pattern HEIGHTS = Pattern.compile(String.format(REGEX_START_END, "heights"), Pattern.CASE_INSENSITIVE);
-	private static final String HEIGHTS_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Hts");
-	private static final Pattern GROVE = Pattern.compile(String.format(REGEX_START_END, "grove"), Pattern.CASE_INSENSITIVE);
-	private static final String GROVE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Grv");
-	public static final Pattern POINT = Pattern.compile(String.format(REGEX_START_END, "point"), Pattern.CASE_INSENSITIVE);
-	public static final String POINT_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pt");
-	private static final Pattern POINTE = Pattern.compile(String.format(REGEX_START_END, "pointe"), Pattern.CASE_INSENSITIVE);
-	private static final String POINTE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pte");
-	private static final Pattern TERRACE = Pattern.compile(String.format(REGEX_START_END, "terrace"), Pattern.CASE_INSENSITIVE);
-	private static final String TERRACE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Ter");
-	private static final Pattern MANOR = Pattern.compile(String.format(REGEX_START_END, "manor"), Pattern.CASE_INSENSITIVE);
-	private static final String MANOR_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mnr");
-	private static final Pattern GREEN = Pattern.compile(String.format(REGEX_START_END, "green"), Pattern.CASE_INSENSITIVE);
-	private static final String GREEN_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Grn");
-	private static final Pattern VALLEY = Pattern.compile(String.format(REGEX_START_END, "valley|vallley"), Pattern.CASE_INSENSITIVE);
-	private static final String VALLEY_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Vly");
-	private static final Pattern HILL = Pattern.compile(String.format(REGEX_START_END_S, "hill|h ill"), Pattern.CASE_INSENSITIVE);
-	private static final String HILL_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Hl");
-	private static final Pattern LAKE = Pattern.compile(String.format(REGEX_START_END_S, "lake"), Pattern.CASE_INSENSITIVE);
-	private static final String LAKE_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Lk");
-	private static final Pattern MEADOW = Pattern.compile(String.format(REGEX_START_END_S, "meadow"), Pattern.CASE_INSENSITIVE);
-	private static final String MEADOW_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Mdw");
-	private static final Pattern CIRCLE = Pattern.compile(String.format(REGEX_START_END, "circle"), Pattern.CASE_INSENSITIVE);
-	private static final String CIRCLE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Cir");
-	private static final Pattern GLEN = Pattern.compile(String.format(REGEX_START_END, "glen"), Pattern.CASE_INSENSITIVE);
-	private static final String GLEN_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Gln");
-	private static final Pattern RIDGE = Pattern.compile(String.format(REGEX_START_END_S, "ridge"), Pattern.CASE_INSENSITIVE);
-	private static final String RIDGE_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Rdg");
-	private static final Pattern GARDEN = Pattern.compile(String.format(REGEX_START_END_S, "garden"), Pattern.CASE_INSENSITIVE);
-	private static final String GARDEN_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Gdn");
-	private static final Pattern CENTER = Pattern.compile(String.format(REGEX_START_END, "center|centre"), Pattern.CASE_INSENSITIVE);
-	private static final String CENTER_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Ctr");
-	private static final Pattern ESTATE = Pattern.compile(String.format(REGEX_START_END_S, "estate"), Pattern.CASE_INSENSITIVE);
-	private static final String ESTATE_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Est");
-	private static final Pattern LANDING = Pattern.compile(String.format(REGEX_START_END, "landing"), Pattern.CASE_INSENSITIVE);
-	private static final String LANDING_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Lndg");
-	private static final Pattern TRAIL = Pattern.compile(String.format(REGEX_START_END, "trail"), Pattern.CASE_INSENSITIVE);
-	private static final String TRAIL_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Trl");
-	private static final Pattern SPRING = Pattern.compile(String.format(REGEX_START_END_S, "spring"), Pattern.CASE_INSENSITIVE);
-	private static final String SPRING_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Spg");
-	private static final Pattern VIEW = Pattern.compile(String.format(REGEX_START_END, "view"), Pattern.CASE_INSENSITIVE);
-	private static final String VIEW_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Vw");
-	private static final Pattern VILLAGE = Pattern.compile(String.format(REGEX_START_END, "village"), Pattern.CASE_INSENSITIVE);
-	private static final String VILLAGE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Vlg");
-	private static final Pattern STATION = Pattern.compile(String.format(REGEX_START_END, "station"), Pattern.CASE_INSENSITIVE);
-	private static final String STATION_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Sta");
-	private static final Pattern RANCH = Pattern.compile(String.format(REGEX_START_END, "ranch"), Pattern.CASE_INSENSITIVE);
-	private static final String RANCH_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Rnch");
-	private static final Pattern COVE = Pattern.compile(String.format(REGEX_START_END, "cove"), Pattern.CASE_INSENSITIVE);
-	private static final String COVE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Cv");
-	private static final Pattern SQUARE = Pattern.compile(String.format(REGEX_START_END, "square"), Pattern.CASE_INSENSITIVE);
-	private static final String SQUARE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Sq");
-	private static final Pattern BROOK = Pattern.compile(String.format(REGEX_START_END, "brook"), Pattern.CASE_INSENSITIVE);
-	private static final String BROOK_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Brk");
-	private static final Pattern CREEK = Pattern.compile(String.format(REGEX_START_END, "creek"), Pattern.CASE_INSENSITIVE);
-	private static final String CREEK_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Crk");
-	private static final Pattern CROSSING = Pattern.compile(String.format(REGEX_START_END, "crossing"), Pattern.CASE_INSENSITIVE);
-	private static final String CROSSING_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Xing");
-	private static final Pattern CLIFF = Pattern.compile(String.format(REGEX_START_END_S, "cliff"), Pattern.CASE_INSENSITIVE);
-	private static final String CLIFF_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Clf");
-	private static final Pattern SHORE = Pattern.compile(String.format(REGEX_START_END_S, "shore"), Pattern.CASE_INSENSITIVE);
-	private static final String SHORE_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Shr");
-	private static final Pattern MOUNT = Pattern.compile(String.format(REGEX_START_END, "mount"), Pattern.CASE_INSENSITIVE);
-	private static final String MOUNT_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mt");
-	private static final Pattern MOUNTAIN = Pattern.compile(String.format(REGEX_START_END, "mountain"), Pattern.CASE_INSENSITIVE);
-	private static final String MOUNTAIN_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mtn");
-	private static final Pattern MARKET = Pattern.compile(String.format(REGEX_START_END, "market"), Pattern.CASE_INSENSITIVE);
-	private static final String MARKET_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mkt");
-	private static final Pattern BUILDING = Pattern.compile(String.format(REGEX_START_END, "building"), Pattern.CASE_INSENSITIVE);
-	private static final String BUILDING_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Bldg");
-	private static final Pattern GREENS = Pattern.compile(String.format(REGEX_START_END, "Greens"), Pattern.CASE_INSENSITIVE);
-	private static final String GREENS_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Grns");
-	private static final Pattern PARKWAY = Pattern.compile(String.format(REGEX_START_END, "parkway"), Pattern.CASE_INSENSITIVE);
-	private static final String PARKWAY_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pkwy");
-	private static final Pattern ISLAND = Pattern.compile(String.format(REGEX_START_END_S, "island"), Pattern.CASE_INSENSITIVE);
-	private static final String ISLAND_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Isl");
-	private static final Pattern PARK = Pattern.compile(String.format(REGEX_START_END, "park"), Pattern.CASE_INSENSITIVE);
-	private static final String PARK_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pk"); // not official
-	private static final Pattern GATE = Pattern.compile(String.format(REGEX_START_END_S, "gate"), Pattern.CASE_INSENSITIVE);
-	private static final String GATE_REPLACEMENT = String.format(REGEX_START_END_S_REPLACEMENT, "Gt"); // not official
-	private static final Pattern PARKING = Pattern.compile(String.format(REGEX_START_END, "parking"), Pattern.CASE_INSENSITIVE);
-	private static final String PARKING_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Pkng"); // not official
-	private static final Pattern HOSPITAL = Pattern.compile(String.format(REGEX_START_END, "hospital"), Pattern.CASE_INSENSITIVE);
-	private static final String HOSPITAL_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Hosp"); // not official
+	private static final Pattern STREET = cleanWords("street");
+	private static final String STREET_REPLACEMENT = cleanWordsReplacement("St");
+	private static final Pattern AVENUE = cleanWords("avenue");
+	private static final String AVENUE_REPLACEMENT = cleanWordsReplacement("Ave");
+	private static final Pattern ROAD = cleanWords("road");
+	private static final String ROAD_REPLACEMENT = cleanWordsReplacement("Rd");
+	private static final Pattern HIGHWAY = cleanWords("highway");
+	private static final String HIGHWAY_REPLACEMENT = cleanWordsReplacement("Hwy");
+	private static final Pattern BOULEVARD = cleanWords("boulevard");
+	private static final String BOULEVARD_REPLACEMENT = cleanWordsReplacement("Blvd");
+	private static final Pattern DRIVE = cleanWords("drive");
+	private static final String DRIVE_REPLACEMENT = cleanWordsReplacement("Dr");
+	private static final Pattern PLACE = cleanWords("place");
+	private static final String PLACE_REPLACEMENT = cleanWordsReplacement("Pl");
+	private static final Pattern PLAZA = cleanWords("plaza");
+	private static final String PLAZA_REPLACEMENT = cleanWordsReplacement("Plz");
+	private static final Pattern LANE = cleanWords("lane");
+	private static final String LANE_REPLACEMENT = cleanWordsReplacement("Ln");
+	private static final Pattern CRESCENT = cleanWords("crescent");
+	private static final String CRESCENT_REPLACEMENT = cleanWordsReplacement("Cr");
+	private static final Pattern HEIGHTS = cleanWords("heights");
+	private static final String HEIGHTS_REPLACEMENT = cleanWordsReplacement("Hts");
+	private static final Pattern GROVE = cleanWords("grove");
+	private static final String GROVE_REPLACEMENT = cleanWordsReplacement("Grv");
+	public static final Pattern POINT = cleanWords("point");
+	public static final String POINT_REPLACEMENT = cleanWordsReplacement("Pt");
+	private static final Pattern POINTE = cleanWords("pointe");
+	private static final String POINTE_REPLACEMENT = cleanWordsReplacement("Pte");
+	private static final Pattern TERRACE = cleanWords("terrace");
+	private static final String TERRACE_REPLACEMENT = cleanWordsReplacement("Ter");
+	private static final Pattern MANOR = cleanWords("manor");
+	private static final String MANOR_REPLACEMENT = cleanWordsReplacement("Mnr");
+	private static final Pattern GREEN = cleanWords("green");
+	private static final String GREEN_REPLACEMENT = cleanWordsReplacement("Grn");
+	private static final Pattern VALLEY = cleanWords("valley", "vallley");
+	private static final String VALLEY_REPLACEMENT = cleanWordsReplacement("Vly");
+	private static final Pattern HILL = cleanWordsPlural("hill", "h ill");
+	private static final String HILL_REPLACEMENT = cleanWordsReplacementPlural("Hl");
+	private static final Pattern LAKE = cleanWordsPlural("lake");
+	private static final String LAKE_REPLACEMENT = cleanWordsReplacementPlural("Lk");
+	private static final Pattern MEADOW = cleanWordsPlural("meadow");
+	private static final String MEADOW_REPLACEMENT = cleanWordsReplacementPlural("Mdw");
+	private static final Pattern CIRCLE = cleanWords("circle");
+	private static final String CIRCLE_REPLACEMENT = cleanWordsReplacement("Cir");
+	private static final Pattern GLEN = cleanWords("glen");
+	private static final String GLEN_REPLACEMENT = cleanWordsReplacement("Gln");
+	private static final Pattern RIDGE = cleanWordsPlural("ridge");
+	private static final String RIDGE_REPLACEMENT = cleanWordsReplacementPlural("Rdg");
+	private static final Pattern GARDEN = cleanWordsPlural("garden");
+	private static final String GARDEN_REPLACEMENT = cleanWordsReplacementPlural("Gdn");
+	private static final Pattern CENTER = cleanWords("center", "centre");
+	private static final String CENTER_REPLACEMENT = cleanWordsReplacement("Ctr");
+	private static final Pattern ESTATE = cleanWordsPlural("estate");
+	private static final String ESTATE_REPLACEMENT = cleanWordsReplacementPlural("Est");
+	private static final Pattern LANDING = cleanWords("landing");
+	private static final String LANDING_REPLACEMENT = cleanWordsReplacement("Lndg");
+	private static final Pattern TRAIL = cleanWords("trail");
+	private static final String TRAIL_REPLACEMENT = cleanWordsReplacement("Trl");
+	private static final Pattern SPRING = cleanWordsPlural("spring");
+	private static final String SPRING_REPLACEMENT = cleanWordsReplacementPlural("Spg");
+	private static final Pattern VIEW = cleanWords("view");
+	private static final String VIEW_REPLACEMENT = cleanWordsReplacement("Vw");
+	private static final Pattern VILLAGE = cleanWords("village");
+	private static final String VILLAGE_REPLACEMENT = cleanWordsReplacement("Vlg");
+	private static final Pattern STATION = cleanWords("station");
+	private static final String STATION_REPLACEMENT = cleanWordsReplacement("Sta");
+	private static final Pattern RANCH = cleanWords("ranch");
+	private static final String RANCH_REPLACEMENT = cleanWordsReplacement("Rnch");
+	private static final Pattern COVE = cleanWords("cove");
+	private static final String COVE_REPLACEMENT = cleanWordsReplacement("Cv");
+	private static final Pattern SQUARE = cleanWords("square");
+	private static final String SQUARE_REPLACEMENT = cleanWordsReplacement("Sq");
+	private static final Pattern BROOK = cleanWords("brook");
+	private static final String BROOK_REPLACEMENT = cleanWordsReplacement("Brk");
+	private static final Pattern CREEK = cleanWords("creek");
+	private static final String CREEK_REPLACEMENT = cleanWordsReplacement("Crk");
+	private static final Pattern CROSSING = cleanWords("crossing");
+	private static final String CROSSING_REPLACEMENT = cleanWordsReplacement("Xing");
+	private static final Pattern CLIFF = cleanWordsPlural("cliff");
+	private static final String CLIFF_REPLACEMENT = cleanWordsReplacementPlural("Clf");
+	private static final Pattern SHORE = cleanWordsPlural("shore");
+	private static final String SHORE_REPLACEMENT = cleanWordsReplacementPlural("Shr");
+	private static final Pattern MOUNT = cleanWords("mount");
+	private static final String MOUNT_REPLACEMENT = cleanWordsReplacement("Mt");
+	private static final Pattern MOUNTAIN = cleanWords("mountain");
+	private static final String MOUNTAIN_REPLACEMENT = cleanWordsReplacement("Mtn");
+	private static final Pattern MARKET = cleanWords("market");
+	private static final String MARKET_REPLACEMENT = cleanWordsReplacement("Mkt");
+	private static final Pattern BUILDING = cleanWords("building");
+	private static final String BUILDING_REPLACEMENT = cleanWordsReplacement("Bldg");
+	private static final Pattern GREENS = cleanWords("greens");
+	private static final String GREENS_REPLACEMENT = cleanWordsReplacement("Grns");
+	private static final Pattern PARKWAY = cleanWords("parkway");
+	private static final String PARKWAY_REPLACEMENT = cleanWordsReplacement("Pkwy");
+	private static final Pattern ISLAND = cleanWordsPlural("island");
+	private static final String ISLAND_REPLACEMENT = cleanWordsReplacementPlural("Isl");
+	private static final Pattern PARK = cleanWords("park");
+	private static final String PARK_REPLACEMENT = cleanWordsReplacement("Pk"); // not official
+	private static final Pattern GATE = cleanWordsPlural("gate");
+	private static final String GATE_REPLACEMENT = cleanWordsReplacementPlural("Gt"); // not official
+	private static final Pattern PARKING = cleanWords("parking");
+	private static final String PARKING_REPLACEMENT = cleanWordsReplacement("Pkng"); // not official
+	private static final Pattern HOSPITAL = cleanWords("hospital");
+	private static final String HOSPITAL_REPLACEMENT = cleanWordsReplacement("Hosp"); // not official
 
 	public static String cleanStreetTypes(String string) {
 		string = LANE.matcher(string).replaceAll(LANE_REPLACEMENT);
@@ -441,34 +485,34 @@ public final class CleanUtils {
 	}
 
 	// FR-CA : http://www.toponymie.gouv.qc.ca/ct/normes-procedures/terminologie-geographique/liste-termes-geographiques.html
-	private static final Pattern FR_CA_AVENUE = Pattern.compile(String.format(REGEX_START_END, "avenue"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_AVENUE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Av.");
-	private static final Pattern FR_CA_AUTOROUTE = Pattern.compile(String.format(REGEX_START_END, "autoroute"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_AUTOROUTE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Aut.");
-	private static final Pattern FR_CA_BOULEVARD = Pattern.compile(String.format(REGEX_START_END, "boulevard"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_BOULEVARD_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Boul.");
-	private static final Pattern FR_CA_CARREFOUR = Pattern.compile(String.format(REGEX_START_END, "carrefour"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_CARREFOUR_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Carref.");
-	private static final Pattern FR_CA_MONTAGNE = Pattern.compile(String.format(REGEX_START_END, "montagne"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_MONTAGNE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mgne");
-	private static final Pattern FR_CA_MONTEE = Pattern.compile(String.format(REGEX_START_END, "mont[é|e]e"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_MONTEE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Mtée");
-	private static final Pattern FR_CA_PARC_INDUSTRIEL = Pattern.compile(String.format(REGEX_START_END, "parc industriel"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_PARC_INDUSTRIEL_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Parc Ind.");
-	private static final Pattern FR_CA_RIVIERE = Pattern.compile(String.format(REGEX_START_END, "rivi[e|è]re"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_RIVIERE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Riv.");
-	private static final Pattern FR_CA_SECTEUR = Pattern.compile(String.format(REGEX_START_END, "secteur"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_SECTEUR_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Sect.");
-	private static final Pattern FR_CA_STATION_DE_METRO = Pattern.compile(String.format(REGEX_START_END, "Station de m[é|e]tro"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_STATION_DE_METRO_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Ston mét.");
-	private static final Pattern FR_CA_STATION = Pattern.compile(String.format(REGEX_START_END, "station"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_STATION_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Ston");
-	private static final Pattern FR_CA_STATIONNEMENT = Pattern.compile(String.format(REGEX_START_END, "stationnement"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_STATIONNEMENT_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Stat");
-	private static final Pattern FR_CA_TERRASSE = Pattern.compile(String.format(REGEX_START_END, "terrasse"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_TERRASSE_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Tsse");
-	private static final Pattern FR_CA_TERRASSES = Pattern.compile(String.format(REGEX_START_END, "terrasses"), Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_TERRASSES_REPLACEMENT = String.format(REGEX_START_END_REPLACEMENT, "Tsses");
+	private static final Pattern FR_CA_AVENUE = cleanWords("avenue");
+	private static final String FR_CA_AVENUE_REPLACEMENT = cleanWordsReplacement("Av.");
+	private static final Pattern FR_CA_AUTOROUTE = cleanWords("autoroute");
+	private static final String FR_CA_AUTOROUTE_REPLACEMENT = cleanWordsReplacement("Aut.");
+	private static final Pattern FR_CA_BOULEVARD = cleanWords("boulevard");
+	private static final String FR_CA_BOULEVARD_REPLACEMENT = cleanWordsReplacement("Boul.");
+	private static final Pattern FR_CA_CARREFOUR = cleanWords("carrefour");
+	private static final String FR_CA_CARREFOUR_REPLACEMENT = cleanWordsReplacement("Carref.");
+	private static final Pattern FR_CA_MONTAGNE = cleanWords("montagne");
+	private static final String FR_CA_MONTAGNE_REPLACEMENT = cleanWordsReplacement("Mgne");
+	private static final Pattern FR_CA_MONTEE = cleanWords("mont[é|e]e");
+	private static final String FR_CA_MONTEE_REPLACEMENT = cleanWordsReplacement("Mtée");
+	private static final Pattern FR_CA_PARC_INDUSTRIEL = cleanWords("parc industriel");
+	private static final String FR_CA_PARC_INDUSTRIEL_REPLACEMENT = cleanWordsReplacement("Parc Ind.");
+	private static final Pattern FR_CA_RIVIERE = cleanWords("rivi[e|è]re");
+	private static final String FR_CA_RIVIERE_REPLACEMENT = cleanWordsReplacement("Riv.");
+	private static final Pattern FR_CA_SECTEUR = cleanWords("secteur");
+	private static final String FR_CA_SECTEUR_REPLACEMENT = cleanWordsReplacement("Sect.");
+	private static final Pattern FR_CA_STATION_DE_METRO = cleanWords("Station de m[é|e]tro");
+	private static final String FR_CA_STATION_DE_METRO_REPLACEMENT = cleanWordsReplacement("Ston mét.");
+	private static final Pattern FR_CA_STATION = cleanWords("station");
+	private static final String FR_CA_STATION_REPLACEMENT = cleanWordsReplacement("Ston");
+	private static final Pattern FR_CA_STATIONNEMENT = cleanWords("stationnement");
+	private static final String FR_CA_STATIONNEMENT_REPLACEMENT = cleanWordsReplacement("Stat");
+	private static final Pattern FR_CA_TERRASSE = cleanWords("terrasse");
+	private static final String FR_CA_TERRASSE_REPLACEMENT = cleanWordsReplacement("Tsse");
+	private static final Pattern FR_CA_TERRASSES = cleanWords("terrasses");
+	private static final String FR_CA_TERRASSES_REPLACEMENT = cleanWordsReplacement("Tsses");
 
 	public static String cleanStreetTypesFRCA(String string) {
 		string = FR_CA_AVENUE.matcher(string).replaceAll(FR_CA_AVENUE_REPLACEMENT);

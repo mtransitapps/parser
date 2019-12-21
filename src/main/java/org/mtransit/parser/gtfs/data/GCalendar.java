@@ -1,12 +1,12 @@
 package org.mtransit.parser.gtfs.data;
 
+import org.mtransit.parser.Constants;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
-
-import org.mtransit.parser.Constants;
 
 // https://developers.google.com/transit/gtfs/reference#calendar_fields
 public class GCalendar {
@@ -45,8 +45,24 @@ public class GCalendar {
 
 	private ArrayList<GCalendarDate> allDates;
 
-	public GCalendar(String service_id, boolean monday, boolean tuesday, boolean wednesday, boolean thursday, boolean friday, boolean saturday, boolean sunday,
-			int start_date, int end_date) {
+	public GCalendar(String service_id,
+					 int monday, int tuesday, int wednesday, int thursday, int friday, int saturday, int sunday,
+					 int start_date, int end_date) {
+		this(service_id,
+				monday == 1,
+				tuesday == 1,
+				wednesday == 1,
+				thursday == 1,
+				friday == 1,
+				saturday == 1,
+				sunday == 1,
+				start_date,
+				end_date);
+	}
+
+	public GCalendar(String service_id,
+					 boolean monday, boolean tuesday, boolean wednesday, boolean thursday, boolean friday, boolean saturday, boolean sunday,
+					 int start_date, int end_date) {
 		this.service_id = service_id;
 		this.monday = monday;
 		this.tuesday = tuesday;

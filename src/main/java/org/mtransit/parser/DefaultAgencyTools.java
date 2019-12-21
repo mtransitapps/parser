@@ -38,7 +38,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final int MAX_LOOKUP_IN_DAYS = 60;
 
-	private static final int MIN_COVERAGE_TOTAL_IN_DAYS = 14;
+	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 0;
+	private static final int MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS = 14;
 
 	private static final int MIN_PREVIOUS_NEXT_ADDED_DAYS = 2;
 
@@ -174,18 +175,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return mRoute.mergeLongName(mRouteToMerge);
 	}
 
-	public static final String WHITE = "FFFFFF";
-
 	@Override
 	public String getRouteColor(GRoute gRoute) {
 		if (getAgencyColor() != null && getAgencyColor().equalsIgnoreCase(gRoute.getRouteColor())) {
 			return null;
 		}
-		if (WHITE.equalsIgnoreCase(gRoute.getRouteColor())) {
-			MTLog.logFatal("ERROR: invalid route color for '%s'!\n", gRoute);
-			return null;
-		}
-		return gRoute.getRouteColor();
+		return ColorUtils.darkenIfTooLight(gRoute.getRouteColor());
 	}
 
 	@Override
@@ -504,7 +499,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return GSpec.parseTimeString(gFrequency.getEndTime()); // GTFS standard
 	}
 
-	private static class Period {
+	protected static class Period {
 		Integer todayStringInt = null;
 		Integer startDate = null;
 		Integer endDate = null;
@@ -611,7 +606,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			MTLog.log("Generated on %s | NEXT Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
 		}
-		HashSet<String> serviceIds = getPerdiodServiceIds(usefulPeriod.startDate, usefulPeriod.endDate, gCalendars, gCalendarDates);
+		HashSet<String> serviceIds = getPeriodServiceIds(usefulPeriod.startDate, usefulPeriod.endDate, gCalendars, gCalendarDates);
 		improveUsefulPeriod(DATE_FORMAT, c, gCalendars, gCalendarDates);
 		MTLog.log("Extracting useful service IDs... DONE");
 		gtfs = null;
@@ -678,9 +673,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 				MTLog.log("> new start date '%s' & end date '%s' from calendar date active during service ID(s).", p.startDate, p.endDate);
 				continue;
 			}
-			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_COVERAGE_TOTAL_IN_DAYS)) {
+			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS)) {
 				p.endDate = incDateDays(DATE_FORMAT, c, p.endDate, 1); // end++
-				MTLog.log("new end date because coverage lower than %s days: %s", MIN_COVERAGE_TOTAL_IN_DAYS, p.endDate);
+				MTLog.log("new end date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.endDate);
 				continue;
 			}
 			Period pNext = new Period();
@@ -739,7 +734,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (todayServiceIds.size() < minSize //
 					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MAX_LOOKUP_IN_DAYS)) {
 				p.todayStringInt = incDateDays(DATE_FORMAT, c, p.todayStringInt, incDays);
-				MTLog.log("new today because not enougth service today: %s (initial today: %s, min: %s)", p.todayStringInt, initialTodayStringInt,
+				MTLog.log("new today because not enough service today: %s (initial today: %s, min: %s)", p.todayStringInt, initialTodayStringInt,
 						minSize);
 				continue;
 			}
@@ -803,16 +798,78 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (newDates) {
 				continue;
 			}
-			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_COVERAGE_TOTAL_IN_DAYS)) {
+			Period pNext = new Period();
+			pNext.todayStringInt = incDateDays(DATE_FORMAT, c, p.endDate, 1);
+			findDayServiceIdsPeriod(gCalendars, pNext);
+			if (pNext.startDate != null && pNext.endDate != null
+					&& diffLowerThan(DATE_FORMAT, c, pNext.startDate, pNext.endDate, MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
+				p.endDate = pNext.endDate;
+				MTLog.log("> new end date '%s' because next day has own service ID(s)", p.endDate);
+				continue;
+			}
+			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS)) {
 				p.endDate = incDateDays(DATE_FORMAT, c, p.endDate, 1); // end++
-				MTLog.log("new end date because coverage lower than %s days: %s", MIN_COVERAGE_TOTAL_IN_DAYS, p.endDate);
+				MTLog.log("new end date because coverage lower than %s days: %s", MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS, p.endDate);
 				continue;
 			}
 			break;
 		}
 	}
 
-	private static HashSet<String> getPerdiodServiceIds(Integer startDate, Integer endDate, List<GCalendar> gCalendars, List<GCalendarDate> gCalendarDates) {
+	static void findDayServiceIdsPeriod(List<GCalendar> gCalendars, Period p) {
+		boolean newDates;
+		while (true) {
+			newDates = false;
+			for (GCalendar gCalendar : gCalendars) {
+				if (gCalendar.containsDate(p.todayStringInt)) {
+					if (p.startDate == null || gCalendar.startsBefore(p.startDate)) {
+						MTLog.log(">> new start date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getStartDate(), p.startDate);
+						p.startDate = gCalendar.getStartDate();
+						newDates = true;
+					}
+					if (p.endDate == null || gCalendar.endsAfter(p.endDate)) {
+						MTLog.log(">> new end date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getEndDate(), p.endDate);
+						p.endDate = gCalendar.getEndDate();
+						newDates = true;
+					}
+				}
+			}
+			if (newDates) {
+				continue;
+			}
+			break;
+		}
+		if (p.startDate == null || p.endDate == null) {
+			MTLog.log(">> NO schedule available for %s in calendars. (start:%s|end:%s)\n", p.todayStringInt, p.startDate, p.endDate);
+			return;
+		}
+		while (true) {
+			MTLog.log(">> Schedules from %s to %s... ", p.startDate, p.endDate);
+			newDates = false;
+			for (GCalendar gCalendar : gCalendars) {
+				if (gCalendar.isOverlapping(p.startDate, p.endDate)) {
+					if (p.startDate == null || gCalendar.startsBefore(p.startDate)) {
+						MTLog.log(">> new start date from calendar active between %s and %s: %s (was: %s)", p.startDate, p.endDate,
+								gCalendar.getStartDate(), p.startDate);
+						p.startDate = gCalendar.getStartDate();
+						newDates = true;
+					}
+					if (p.endDate == null || gCalendar.endsAfter(p.endDate)) {
+						MTLog.log(">> new end date from calendar active between %s and %s: %s (was: %s)", p.startDate, p.endDate,
+								gCalendar.getEndDate(), p.endDate);
+						p.endDate = gCalendar.getEndDate();
+						newDates = true;
+					}
+				}
+			}
+			if (newDates) {
+				continue;
+			}
+			break;
+		}
+	}
+
+	private static HashSet<String> getPeriodServiceIds(Integer startDate, Integer endDate, List<GCalendar> gCalendars, List<GCalendarDate> gCalendarDates) {
 		HashSet<String> serviceIds = new HashSet<String>();
 		if (gCalendars != null) {
 			for (GCalendar gCalendar : gCalendars) {
