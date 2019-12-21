@@ -38,7 +38,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final int MAX_LOOKUP_IN_DAYS = 60;
 
-	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 0;
+	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 3;
 	private static final int MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS = 14;
 
 	private static final int MIN_PREVIOUS_NEXT_ADDED_DAYS = 2;
@@ -804,12 +804,30 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (pNext.startDate != null && pNext.endDate != null
 					&& diffLowerThan(DATE_FORMAT, c, pNext.startDate, pNext.endDate, MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
 				p.endDate = pNext.endDate;
-				MTLog.log("> new end date '%s' because next day has own service ID(s)", p.endDate);
+				MTLog.log("new end date '%s' because next day has own service ID(s)", p.endDate);
+				continue;
+			}
+			Period pPrevious = new Period();
+			pPrevious.todayStringInt = incDateDays(DATE_FORMAT, c, p.startDate, -1);
+			findDayServiceIdsPeriod(gCalendars, pPrevious);
+			if (keepToday // NOT next schedule, only current schedule can look behind
+					&& pPrevious.startDate != null && pPrevious.endDate != null
+					&& diffLowerThan(DATE_FORMAT, c, pPrevious.startDate, pPrevious.endDate, MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
+				p.startDate = pPrevious.startDate;
+				MTLog.log("new start date '%s' because previous day has own service ID(s)", p.startDate);
 				continue;
 			}
 			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS)) {
-				p.endDate = incDateDays(DATE_FORMAT, c, p.endDate, 1); // end++
-				MTLog.log("new end date because coverage lower than %s days: %s", MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS, p.endDate);
+				long nextPeriodCoverageInMs = pNext.startDate == null || pNext.endDate == null ? 0L : diffInMs(DATE_FORMAT, c, pNext.startDate, pNext.endDate);
+				long previousPeriodCoverageInMs = pPrevious.startDate == null || pPrevious.endDate == null ? 0L : diffInMs(DATE_FORMAT, c, pPrevious.startDate, pPrevious.endDate);
+				if (keepToday // NOT next schedule, only current schedule can look behind
+						&& previousPeriodCoverageInMs > 0L && previousPeriodCoverageInMs < nextPeriodCoverageInMs) {
+					p.startDate = incDateDays(DATE_FORMAT, c, p.startDate, -1); // start--
+					MTLog.log("new start date because coverage lower than %s days: %s", MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS, p.startDate);
+				} else {
+					p.endDate = incDateDays(DATE_FORMAT, c, p.endDate, 1); // end++
+					MTLog.log("new end date because coverage lower than %s days: %s", MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS, p.endDate);
+				}
 				continue;
 			}
 			break;
@@ -840,7 +858,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			break;
 		}
 		if (p.startDate == null || p.endDate == null) {
-			MTLog.log(">> NO schedule available for %s in calendars. (start:%s|end:%s)\n", p.todayStringInt, p.startDate, p.endDate);
+			MTLog.log(">> NO schedule available for %s in calendars. (start:%s|end:%s)", p.todayStringInt, p.startDate, p.endDate);
 			return;
 		}
 		while (true) {
