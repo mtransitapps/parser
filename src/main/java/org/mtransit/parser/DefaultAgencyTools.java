@@ -177,6 +177,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public String getRouteColor(GRoute gRoute) {
+		if (gRoute.getRouteColor() == null) {
+			return null; // use agency color
+		}
 		if (getAgencyColor() != null && getAgencyColor().equalsIgnoreCase(gRoute.getRouteColor())) {
 			return null;
 		}
