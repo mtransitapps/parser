@@ -38,7 +38,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final int MAX_LOOKUP_IN_DAYS = 60;
 
-	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 3;
+	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 5;
 	private static final int MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS = 14;
 
 	private static final int MIN_PREVIOUS_NEXT_ADDED_DAYS = 2;
@@ -212,14 +212,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public ArrayList<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs) {
-		ArrayList<MTrip> mTrips = new ArrayList<MTrip>();
+		ArrayList<MTrip> mTrips = new ArrayList<>();
 		mTrips.add(new MTrip(mRoute.getId()));
 		return mTrips;
 	}
 
 	@Override
 	public Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, ArrayList<MTrip> splitTrips, GSpec routeGTFS) {
-		return new Pair<Long[], Integer[]>(new Long[]{splitTrips.get(0).getId()}, new Integer[]{gTripStop.getStopSequence()});
+		return new Pair<>(new Long[]{splitTrips.get(0).getId()}, new Integer[]{gTripStop.getStopSequence()});
 	}
 
 	@Override
@@ -341,15 +341,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return THREAD_POOL_SIZE;
 	}
 
-	private static final int PRECISON_IN_SECONDS = 10;
-
 	@Override
 	public Pair<Integer, Integer> getTimes(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat, SimpleDateFormat mDateFormat) {
 		if (StringUtils.isEmpty(gStopTime.getArrivalTime()) || StringUtils.isEmpty(gStopTime.getDepartureTime())) {
 			return extractTimes(mRouteId, gStopTime, routeGTFS, gDateFormat, mDateFormat);
 		} else {
-			return new Pair<Integer, Integer>(cleanExtraSeconds(GSpec.parseTimeString(gStopTime.getArrivalTime())),
-					cleanExtraSeconds(GSpec.parseTimeString(gStopTime.getDepartureTime())));
+			return new Pair<>(
+					TimeUtils.cleanExtraSeconds(GSpec.parseTimeString(gStopTime.getArrivalTime())),
+					TimeUtils.cleanExtraSeconds(GSpec.parseTimeString(gStopTime.getDepartureTime())));
 		}
 	}
 
@@ -360,17 +359,17 @@ public class DefaultAgencyTools implements GAgencyTools {
 			long arrivalTimeInMs = timesInMs.first;
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTimeInMillis(arrivalTimeInMs);
-			Integer arrivalTime = Integer.parseInt(mDateFormat.format(calendar.getTime()));
+			int arrivalTime = Integer.parseInt(mDateFormat.format(calendar.getTime()));
 			if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
 				arrivalTime += 240000;
 			}
 			long departureTimeInMs = timesInMs.second;
 			calendar.setTimeInMillis(departureTimeInMs);
-			Integer departureTime = Integer.parseInt(mDateFormat.format(calendar.getTime()));
+			int departureTime = Integer.parseInt(mDateFormat.format(calendar.getTime()));
 			if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
 				departureTime += 240000;
 			}
-			return new Pair<Integer, Integer>(cleanExtraSeconds(arrivalTime), cleanExtraSeconds(departureTime));
+			return new Pair<>(TimeUtils.cleanExtraSeconds(arrivalTime), TimeUtils.cleanExtraSeconds(departureTime));
 		} catch (Exception e) {
 			MTLog.logFatal(e, "Error while interpolating times for %s!\n", gStopTime);
 			return null;
@@ -392,27 +391,38 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			if (aStopTime.getStopSequence() < gStopTime.getStopSequence()) {
 				if (!StringUtils.isEmpty(aStopTime.getDepartureTime())) {
-					if (previousDepartureTime == null || previousDepartureTimeStopSequence == null
+					//noinspection ConstantConditions
+					if (previousDepartureTime == null
+							|| previousDepartureTimeStopSequence == null
 							|| previousDepartureTimeStopSequence < aStopTime.getStopSequence()) {
 						previousDepartureTime = aStopTime.getDepartureTime();
 						previousDepartureTimeStopSequence = aStopTime.getStopSequence();
 					}
 				}
 				if (!StringUtils.isEmpty(aStopTime.getArrivalTime())) {
-					if (previousArrivalTime == null || previousArrivalTimeStopSequence == null || previousArrivalTimeStopSequence < aStopTime.getStopSequence()) {
+					//noinspection ConstantConditions
+					if (previousArrivalTime == null
+							|| previousArrivalTimeStopSequence == null
+							|| previousArrivalTimeStopSequence < aStopTime.getStopSequence()) {
 						previousArrivalTime = aStopTime.getArrivalTime();
 						previousArrivalTimeStopSequence = aStopTime.getStopSequence();
 					}
 				}
 			} else if (aStopTime.getStopSequence() > gStopTime.getStopSequence()) {
 				if (!StringUtils.isEmpty(aStopTime.getDepartureTime())) {
-					if (nextDepartureTime == null || nextDepartureTimeStopSequence == null || nextDepartureTimeStopSequence > aStopTime.getStopSequence()) {
+					//noinspection ConstantConditions
+					if (nextDepartureTime == null
+							|| nextDepartureTimeStopSequence == null
+							|| nextDepartureTimeStopSequence > aStopTime.getStopSequence()) {
 						nextDepartureTime = aStopTime.getDepartureTime();
 						nextDepartureTimeStopSequence = aStopTime.getStopSequence();
 					}
 				}
 				if (!StringUtils.isEmpty(aStopTime.getArrivalTime())) {
-					if (nextArrivalTime == null || nextArrivalTimeStopSequence == null || nextArrivalTimeStopSequence > aStopTime.getStopSequence()) {
+					//noinspection ConstantConditions
+					if (nextArrivalTime == null
+							|| nextArrivalTimeStopSequence == null
+							|| nextArrivalTimeStopSequence > aStopTime.getStopSequence()) {
 						nextArrivalTime = aStopTime.getArrivalTime();
 						nextArrivalTimeStopSequence = aStopTime.getStopSequence();
 					}
@@ -425,71 +435,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 		long nextDepartureTimeInMs = gDateFormat.parse(nextDepartureTime).getTime();
 		long arrivalTimeDiffInMs = nextArrivalTimeInMs - previousArrivalTimeInMs;
 		long departureTimeDiffInMs = nextDepartureTimeInMs - previousDepartureTimeInMs;
+		//noinspection ConstantConditions // FIXME
 		int arrivalNbStop = nextArrivalTimeStopSequence - previousArrivalTimeStopSequence;
+		//noinspection ConstantConditions // FIXME
 		int departureNbStop = nextDepartureTimeStopSequence - previousDepartureTimeStopSequence;
 		long arrivalTimeBetweenStopInMs = arrivalTimeDiffInMs / arrivalNbStop;
 		long departureTimeBetweenStopInMs = departureTimeDiffInMs / departureNbStop;
 		long arrivalTime = previousArrivalTimeInMs + (arrivalTimeBetweenStopInMs * (gStopTime.getStopSequence() - previousArrivalTimeStopSequence));
 		long departureTime = previousDepartureTimeInMs + (departureTimeBetweenStopInMs * (gStopTime.getStopSequence() - previousDepartureTimeStopSequence));
-		return new Pair<Long, Long>(arrivalTime, departureTime);
-	}
-
-	private static int cleanExtraSeconds(Integer time) {
-		int extraSeconds = time == null ? 0 : time % PRECISON_IN_SECONDS;
-		if (extraSeconds > 0) { // IF too precise DO
-			return cleanTime(time, extraSeconds);
-		}
-		return time; // GTFS standard
-	}
-
-	private static final String CLEAN_TIME_FORMAT = "%02d";
-	private static final String CLEAN_TIME_LEADING_ZERO = "0";
-	private static final String CLEAN_TIME_DEFAULT_MINUTES = "00";
-	private static final String CLEAN_TIME_DEFAULT_SECONDS = "00";
-
-	private static int cleanTime(Integer time, int extraSeconds) {
-		try {
-			String timeS = convertTimeToString(time);
-			String newHours = timeS.substring(0, 2);
-			String newMinutes = timeS.substring(2, 4);
-			String newSeconds = timeS.substring(4, 6);
-			int seconds = Integer.parseInt(newSeconds);
-			if (extraSeconds < 5) {
-				if (extraSeconds > seconds) {
-					newSeconds = CLEAN_TIME_DEFAULT_SECONDS;
-				} else {
-					newSeconds = String.format(CLEAN_TIME_FORMAT, seconds - extraSeconds);
-				}
-				return Integer.parseInt(newHours + newMinutes + newSeconds);
-			}
-			int secondsToAdd = PRECISON_IN_SECONDS - extraSeconds;
-			if (seconds + secondsToAdd < 60) {
-				newSeconds = String.format(CLEAN_TIME_FORMAT, seconds + secondsToAdd);
-				return Integer.parseInt(newHours + newMinutes + newSeconds);
-			}
-			newSeconds = CLEAN_TIME_DEFAULT_SECONDS;
-			int minutes = Integer.parseInt(newMinutes);
-			if (minutes + 1 < 60) {
-				newMinutes = String.format(CLEAN_TIME_FORMAT, minutes + 1);
-				return Integer.parseInt(newHours + newMinutes + newSeconds);
-			}
-			newMinutes = CLEAN_TIME_DEFAULT_MINUTES;
-			newHours = String.valueOf(Integer.parseInt(newHours) + 1);
-			return Integer.parseInt(newHours + newMinutes + newSeconds);
-		} catch (Exception e) {
-			MTLog.log("Error while cleaning time '%s' '%s' !\n", time, extraSeconds);
-			e.printStackTrace();
-			System.exit(-1);
-			return -1;
-		}
-	}
-
-	protected static String convertTimeToString(Integer time) {
-		StringBuilder sb = new StringBuilder(time.toString());
-		while (sb.length() < 6) {
-			sb.insert(0, CLEAN_TIME_LEADING_ZERO);
-		}
-		return sb.toString();
+		return new Pair<>(arrivalTime, departureTime);
 	}
 
 	@Override
@@ -584,8 +538,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 				usefulPeriod.todayStringInt = null; // reset
 				usefulPeriod.startDate = null; // reset
 				usefulPeriod.endDate = null; // reset
+				//noinspection UnusedAssignment // FIXME
 				gtfs = null;
-				return new HashSet<String>(); // non-null = service IDs
+				return new HashSet<>(); // non-null = service IDs
 			}
 			MTLog.log("Looking for NEXT schedules...");
 			if (hasCurrent) {
@@ -604,14 +559,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 				usefulPeriod.todayStringInt = null; // reset
 				usefulPeriod.startDate = null; // reset
 				usefulPeriod.endDate = null; // reset
+				//noinspection UnusedAssignment // FIXME
 				gtfs = null;
-				return new HashSet<String>(); // non-null = service IDs
+				return new HashSet<>(); // non-null = service IDs
 			}
 			MTLog.log("Generated on %s | NEXT Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
 		}
 		HashSet<String> serviceIds = getPeriodServiceIds(usefulPeriod.startDate, usefulPeriod.endDate, gCalendars, gCalendarDates);
 		improveUsefulPeriod(DATE_FORMAT, c, gCalendars, gCalendarDates);
 		MTLog.log("Extracting useful service IDs... DONE");
+		//noinspection UnusedAssignment // FIXME
 		gtfs = null;
 		return serviceIds;
 	}
@@ -619,7 +576,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static void improveUsefulPeriod(SimpleDateFormat DATE_FORMAT, Calendar c, List<GCalendar> gCalendars, List<GCalendarDate> gCalendarDates) {
 		if (gCalendars != null && gCalendars.size() > 0 //
 				&& gCalendarDates != null && gCalendarDates.size() > 0) {
-			boolean newDateFound = false;
+			boolean newDateFound;
 			do {
 				newDateFound = false;
 				int minNewStartDate = incDateDays(DATE_FORMAT, c, usefulPeriod.startDate, -1);
@@ -724,7 +681,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static HashSet<String> findTodayServiceIds(List<GCalendarDate> gCalendarDates, SimpleDateFormat DATE_FORMAT, Calendar c, Period p, int minSize,
 													   int incDays) {
-		HashSet<String> todayServiceIds = new HashSet<String>();
+		HashSet<String> todayServiceIds = new HashSet<>();
 		final int initialTodayStringInt = p.todayStringInt;
 		while (true) {
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
@@ -746,7 +703,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return todayServiceIds;
 	}
 
-	private static void parseCalendars(List<GCalendar> gCalendars, SimpleDateFormat DATE_FORMAT, Calendar c, Period p, boolean keepToday) {
+	static void parseCalendars(List<GCalendar> gCalendars, SimpleDateFormat DATE_FORMAT, Calendar c, Period p, boolean keepToday) {
 		final int initialTodayStringInt = p.todayStringInt;
 		boolean newDates;
 		while (true) {
@@ -755,11 +712,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 					if (p.startDate == null || gCalendar.startsBefore(p.startDate)) {
 						MTLog.log("new start date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getStartDate(), p.startDate);
 						p.startDate = gCalendar.getStartDate();
+						//noinspection UnusedAssignment // FIXME
 						newDates = true;
 					}
 					if (p.endDate == null || gCalendar.endsAfter(p.endDate)) {
 						MTLog.log("new end date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getEndDate(), p.endDate);
 						p.endDate = gCalendar.getEndDate();
+						//noinspection UnusedAssignment // FIXME
 						newDates = true;
 					}
 				}
@@ -813,13 +772,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 			Period pPrevious = new Period();
 			pPrevious.todayStringInt = incDateDays(DATE_FORMAT, c, p.startDate, -1);
 			findDayServiceIdsPeriod(gCalendars, pPrevious);
-			if (keepToday // NOT next schedule, only current schedule can look behind
-					&& pPrevious.startDate != null && pPrevious.endDate != null
-					&& diffLowerThan(DATE_FORMAT, c, pPrevious.startDate, pPrevious.endDate, MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
-				p.startDate = pPrevious.startDate;
-				MTLog.log("new start date '%s' because previous day has own service ID(s)", p.startDate);
-				continue;
-			}
 			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS)) {
 				long nextPeriodCoverageInMs = pNext.startDate == null || pNext.endDate == null ? 0L : diffInMs(DATE_FORMAT, c, pNext.startDate, pNext.endDate);
 				long previousPeriodCoverageInMs = pPrevious.startDate == null || pPrevious.endDate == null ? 0L : diffInMs(DATE_FORMAT, c, pPrevious.startDate, pPrevious.endDate);
@@ -844,12 +796,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 			for (GCalendar gCalendar : gCalendars) {
 				if (gCalendar.containsDate(p.todayStringInt)) {
 					if (p.startDate == null || gCalendar.startsBefore(p.startDate)) {
-						MTLog.log(">> new start date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getStartDate(), p.startDate);
+						MTLog.logDebug("findDayServiceIdsPeriod() > new start date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getStartDate(), p.startDate);
 						p.startDate = gCalendar.getStartDate();
 						newDates = true;
 					}
 					if (p.endDate == null || gCalendar.endsAfter(p.endDate)) {
-						MTLog.log(">> new end date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getEndDate(), p.endDate);
+						MTLog.logDebug("findDayServiceIdsPeriod() > new end date from calendar active on %s: %s (was: %s)", p.todayStringInt, gCalendar.getEndDate(), p.endDate);
 						p.endDate = gCalendar.getEndDate();
 						newDates = true;
 					}
@@ -861,22 +813,23 @@ public class DefaultAgencyTools implements GAgencyTools {
 			break;
 		}
 		if (p.startDate == null || p.endDate == null) {
-			MTLog.log(">> NO schedule available for %s in calendars. (start:%s|end:%s)", p.todayStringInt, p.startDate, p.endDate);
+			MTLog.logDebug("findDayServiceIdsPeriod() > NO schedule available for %s in calendars. (start:%s|end:%s)", p.todayStringInt, p.startDate, p.endDate);
+			MTLog.logDebugMethodEnd("findDayServiceIdsPeriod");
 			return;
 		}
 		while (true) {
-			MTLog.log(">> Schedules from %s to %s... ", p.startDate, p.endDate);
+			MTLog.logDebug("findDayServiceIdsPeriod() > Schedules from %s to %s... ", p.startDate, p.endDate);
 			newDates = false;
 			for (GCalendar gCalendar : gCalendars) {
 				if (gCalendar.isOverlapping(p.startDate, p.endDate)) {
 					if (p.startDate == null || gCalendar.startsBefore(p.startDate)) {
-						MTLog.log(">> new start date from calendar active between %s and %s: %s (was: %s)", p.startDate, p.endDate,
+						MTLog.logDebug("findDayServiceIdsPeriod() > new start date from calendar active between %s and %s: %s (was: %s)", p.startDate, p.endDate,
 								gCalendar.getStartDate(), p.startDate);
 						p.startDate = gCalendar.getStartDate();
 						newDates = true;
 					}
 					if (p.endDate == null || gCalendar.endsAfter(p.endDate)) {
-						MTLog.log(">> new end date from calendar active between %s and %s: %s (was: %s)", p.startDate, p.endDate,
+						MTLog.logDebug("findDayServiceIdsPeriod() > new end date from calendar active between %s and %s: %s (was: %s)", p.startDate, p.endDate,
 								gCalendar.getEndDate(), p.endDate);
 						p.endDate = gCalendar.getEndDate();
 						newDates = true;
@@ -888,10 +841,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			break;
 		}
+		MTLog.logDebugMethodEnd("findDayServiceIdsPeriod");
 	}
 
 	private static HashSet<String> getPeriodServiceIds(Integer startDate, Integer endDate, List<GCalendar> gCalendars, List<GCalendarDate> gCalendarDates) {
-		HashSet<String> serviceIds = new HashSet<String>();
+		HashSet<String> serviceIds = new HashSet<>();
 		if (gCalendars != null) {
 			for (GCalendar gCalendar : gCalendars) {
 				if (gCalendar.isInside(startDate, endDate)) {

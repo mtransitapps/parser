@@ -1,8 +1,10 @@
 package org.mtransit.parser;
 
+@SuppressWarnings("WeakerAccess")
 public final class Constants {
 
 	public static boolean DEBUG = false;
+	// public static boolean DEBUG = true; // DEBUG
 
 	public static final char NEW_LINE = '\n';
 

@@ -41,7 +41,7 @@ public class GReader {
 		File gtfsDirF = new File(gtfsDir);
 		if (!gtfsDirF.exists()) {
 			MTLog.logFatal("'%s' GTFS directory does not exist!", gtfsDirF);
-			return null;
+			return gSpec;
 		}
 		FileReader fr = null;
 		BufferedReader reader = null;
@@ -51,7 +51,7 @@ public class GReader {
 				File agencyFile = new File(gtfsDir, GAgency.FILENAME);
 				if (!agencyFile.exists()) {
 					MTLog.logFatal("'%s' agency file does not exist!", agencyFile);
-					return null;
+					return gSpec;
 				} else {
 					fr = new FileReader(agencyFile);
 					reader = new BufferedReader(fr);
@@ -87,14 +87,14 @@ public class GReader {
 			}
 			if (!hasCalendar) {
 				MTLog.logFatal("'%s' & '%s' file do not exist!", GCalendar.FILENAME, GCalendarDate.FILENAME);
-				return null;
+				return gSpec;
 			}
 			// ROUTES
 			if (!calendarsOnly) {
 				File routeFile = new File(gtfsDir, GRoute.FILENAME);
 				if (!routeFile.exists()) {
 					MTLog.logFatal("'%s' route file does not exist!", routeFile);
-					return null;
+					return gSpec;
 				} else {
 					fr = new FileReader(routeFile);
 					reader = new BufferedReader(fr);
@@ -108,7 +108,7 @@ public class GReader {
 				File tripFile = new File(gtfsDir, GTrip.FILENAME);
 				if (!tripFile.exists()) {
 					MTLog.logFatal("'%s' trip file does not exist!", tripFile);
-					return null;
+					return gSpec;
 				} else {
 					fr = new FileReader(tripFile);
 					reader = new BufferedReader(fr);
@@ -135,7 +135,7 @@ public class GReader {
 				File stopFile = new File(gtfsDir, GStop.FILENAME);
 				if (!stopFile.exists()) {
 					MTLog.logFatal("'%s' stop file does not exist!", stopFile);
-					return null;
+					return gSpec;
 				} else {
 					fr = new FileReader(stopFile);
 					reader = new BufferedReader(fr);
