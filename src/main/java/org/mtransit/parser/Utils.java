@@ -1,5 +1,7 @@
 package org.mtransit.parser;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.regex.Pattern;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -104,16 +106,34 @@ public final class Utils {
 		return true;
 	}
 
-	public static boolean isUppercaseOnly(CharSequence str, boolean allowWhitespace, boolean checkAZonly) {
+	public static boolean isUppercaseOnly(String str, boolean allowWhitespace, boolean checkAZOnly, String... excludedWords) {
+		return isUppercaseOnly(
+				CleanUtils.cleanWords(excludedWords)
+						.matcher(str).replaceAll(
+						CleanUtils.cleanWordsReplacement(StringUtils.EMPTY)
+				),
+				allowWhitespace, checkAZOnly);
+	}
+
+	public static boolean isUppercaseOnly(CharSequence str, boolean allowWhitespace, boolean checkAZOnly) {
 		final int len = str.length();
 		for (int i = 0; i < len; i++) {
-			if (checkAZonly && !Character.isAlphabetic(str.charAt(i))) {
+			if (checkAZOnly && !Character.isAlphabetic(str.charAt(i))) {
+				continue;
+			}
+			if (Character.isWhitespace(str.charAt(i))) {
+				if (allowWhitespace) {
+					continue;
+				} else {
+					return false;
+				}
+			}
+			if (checkAZOnly && !Character.isAlphabetic(str.charAt(i))) {
 				continue;
 			}
 			if (!Character.isUpperCase(str.charAt(i))) {
-				if (!allowWhitespace || !Character.isWhitespace(str.charAt(i))) {
-					return false;
-				}
+				// MTLog.logDebug(" > Non-upper-case character found '%s' at %d in '%s'.", str.charAt(i), i, str);
+				return false;
 			}
 		}
 		return true;

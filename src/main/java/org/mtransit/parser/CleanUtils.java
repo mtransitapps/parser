@@ -6,6 +6,7 @@ import org.apache.commons.text.translate.CharSequenceTranslator;
 import org.apache.commons.text.translate.LookupTranslator;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -282,6 +283,40 @@ public final class CleanUtils {
 		return string;
 	}
 
+	public static String toLowerCaseUpperCaseWords(Locale locale, String string, String... ignoreWords) {
+		if (string.isEmpty()) {
+			return string;
+		}
+		StringBuilder sb = new StringBuilder();
+		String[] words = string.split(SPACE);
+		for (String word : words) {
+			if (sb.length() > 0) {
+				sb.append(SPACE);
+			}
+			if (Utils.isUppercaseOnly(word, false, true)) {
+				if (containsIgnoreCase(word, ignoreWords)) {
+					sb.append(word);
+				} else {
+					sb.append(word.toLowerCase(locale));
+				}
+			} else {
+				sb.append(word);
+			}
+		}
+		return sb.toString();
+	}
+
+	private static boolean containsIgnoreCase(String string, String... strings) {
+		if (strings.length > 0) {
+			for (String s : strings) {
+				if (s.equalsIgnoreCase(string)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	// TODO white-space VS non-word?
 	private static final Pattern FIRST = cleanWords("first");
 	private static final String FIRST_REPLACEMENT = cleanWordsReplacement("1st");
@@ -427,6 +462,8 @@ public final class CleanUtils {
 	private static final String PARKING_REPLACEMENT = cleanWordsReplacement("Pkng"); // not official
 	private static final Pattern HOSPITAL = cleanWords("hospital");
 	private static final String HOSPITAL_REPLACEMENT = cleanWordsReplacement("Hosp"); // not official
+	private static final Pattern OPPOSITE_ = cleanWords("opposite");
+	private static final String OPPOSITE_REPLACEMENT = cleanWordsReplacement("Opp"); // not official
 
 	public static String cleanStreetTypes(String string) {
 		string = LANE.matcher(string).replaceAll(LANE_REPLACEMENT);
@@ -481,6 +518,7 @@ public final class CleanUtils {
 		string = GREENS.matcher(string).replaceAll(GREENS_REPLACEMENT);
 		string = PARKWAY.matcher(string).replaceAll(PARKWAY_REPLACEMENT);
 		string = ISLAND.matcher(string).replaceAll(ISLAND_REPLACEMENT);
+		string = OPPOSITE_.matcher(string).replaceAll(OPPOSITE_REPLACEMENT);
 		return string;
 	}
 
