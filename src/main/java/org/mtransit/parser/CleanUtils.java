@@ -258,6 +258,13 @@ public final class CleanUtils {
 		return string;
 	}
 
+	private static final Pattern STARTS_WITH_VERS = Pattern.compile("((^|^.* )vers )", Pattern.CASE_INSENSITIVE);
+
+	public static String keepToFR(String string) {
+		string = STARTS_WITH_VERS.matcher(string).replaceAll(StringUtils.EMPTY);
+		return string;
+	}
+
 	private static final Pattern STARTS_WITH_TO = Pattern.compile("((^|^.* )to )", Pattern.CASE_INSENSITIVE);
 
 	public static String keepTo(String string) {
