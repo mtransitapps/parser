@@ -28,6 +28,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class GReader {
 
@@ -175,11 +176,13 @@ public class GReader {
 
 	private static final Character POINT = '.';
 
+	private static final Pattern QUOTE_ = Pattern.compile("\"");
+
 	private static void readCsv(String filename, BufferedReader reader,
 								LineProcessor lineProcessor) throws IOException {
 		MTLog.log("Reading file '%s'...", filename);
 		String line;
-		String[] lineColumns;
+		String[] columnNames;
 		line = reader.readLine();
 		if (line == null || line.length() == 0) {
 			return;
@@ -189,48 +192,52 @@ public class GReader {
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
 		CSVRecord recordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
-		lineColumns = new String[recordColumns.size()];
+		columnNames = new String[recordColumns.size()];
 		for (int i = 0; i < recordColumns.size(); i++) {
-			lineColumns[i] = recordColumns.get(i);
+			columnNames[i] = recordColumns.get(i);
 		}
-		String[] columnNames = lineColumns;
 		if (columnNames.length == 0) {
 			return;
 		}
 		List<CSVRecord> records;
-		HashMap<String, String> map;
+		HashMap<String, String> map = new HashMap<>();
+		String[] lineColumns = new String[columnNames.length];
+		int recordColumnsSize;
 		int l = 0;
-		boolean noQuote;
+		boolean withQuotes;
 		while ((line = reader.readLine()) != null) {
 			try {
 				try {
 					records = CSVParser.parse(line, CSV_FORMAT).getRecords();
-					noQuote = false;
+					withQuotes = true;
 				} catch (Exception e) {
 					records = CSVParser.parse(line, CSV_FORMAT_NO_QUOTE).getRecords();
-					noQuote = true;
+					withQuotes = false;
 				}
 				if (records.size() == 0) {
 					continue; // empty line
 				}
 				recordColumns = records.get(0);
-				lineColumns = new String[recordColumns.size()];
-				for (int i = 0; i < recordColumns.size(); i++) {
-					lineColumns[i] = noQuote ? recordColumns.get(i).replaceAll("\"", "") : recordColumns.get(i);
-				}
-				if (columnNames.length != lineColumns.length && columnNames.length != (lineColumns.length + 1)) {
-					MTLog.log("File '%s' line invalid: %s columns instead of %s: %s", filename, lineColumns.length, columnNames.length, line);
+				recordColumnsSize = recordColumns.size();
+				if (columnNames.length != recordColumnsSize
+						&& columnNames.length != (recordColumnsSize + 1)) {
+					MTLog.log("File '%s' line invalid: %s columns instead of %s: %s", filename, recordColumnsSize, columnNames.length, line);
 					continue;
 				}
-				map = new HashMap<>();
-				for (int ci = 0; ci < lineColumns.length; ++ci) {
+				for (int i = 0; i < lineColumns.length; i++) {
+					lineColumns[i] = withQuotes ?
+							recordColumns.get(i) :
+							QUOTE_.matcher(recordColumns.get(i)).replaceAll(StringUtils.EMPTY);
+				}
+				map.clear();
+				for (int ci = 0; ci < recordColumnsSize; ++ci) {
 					map.put(columnNames[ci], lineColumns[ci]);
 				}
 				if (lineProcessor != null) {
 					lineProcessor.processLine(map);
 				}
 			} catch (Exception e) {
-				MTLog.logFatal(e, "Error while processing line: %s\n", line);
+				MTLog.logFatal(e, "Error while processing line: [%s],", line);
 			}
 			if (l++ % 10_000 == 0) { // LOG
 				MTLog.log(POINT); // LOG

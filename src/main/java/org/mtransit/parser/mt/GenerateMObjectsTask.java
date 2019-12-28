@@ -3,6 +3,7 @@ package org.mtransit.parser.mt;
 import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
+import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -43,7 +44,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	private final long routeId;
 	private final GSpec globalGTFS;
 
-	public GenerateMObjectsTask(long routeId, GAgencyTools agencyTools, GSpec gtfs) {
+	GenerateMObjectsTask(long routeId, GAgencyTools agencyTools, GSpec gtfs) {
 		this.routeId = routeId;
 		this.agencyTools = agencyTools;
 		this.globalGTFS = gtfs;
@@ -176,10 +177,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					}
 				}
 			}
+			//noinspection ConstantConditions // FIXME
 			if (firstSchedule != null //
 					&& (firstDeparture < 0 || firstSchedule.getDeparture() < firstDeparture)) {
 				firstDeparture = firstSchedule.getDeparture();
 			}
+			//noinspection ConstantConditions // FIXME
 			if (lastSchedule != null //
 					&& (lastDeparture < 0 || lastDeparture < lastSchedule.getDeparture())) {
 				lastDeparture = lastSchedule.getDeparture();
@@ -218,7 +221,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				firstTimestamp = -1L;
 			}
 			try {
-				Date lastDate = DATE_FORMAT.parse(lastCalendarDate + " " + String.format(Locale.ENGLISH,"%06d", lastDeparture));
+				Date lastDate = DATE_FORMAT.parse(lastCalendarDate + " " + String.format(Locale.ENGLISH, "%06d", lastDeparture));
 				lastTimestamp = lastDate.getTime();
 			} catch (Exception e) {
 				System.out.printf("\nError while parsing dates '%s %s'!\n", lastCalendarDate, lastDeparture);
@@ -240,7 +243,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		boolean mergeSuccessful;
 		HashMap<Long, String> mTripStopTimesHeadsign;
 		HashMap<Long, ArrayList<MTripStop>> tripIdToMTripStops = new HashMap<>();
-		HashSet<String> mTripHeasignStrings;
+		HashSet<String> mTripHeadsignStrings;
 		boolean headsignTypeString;
 		boolean tripKeptNonDescriptiveHeadsign;
 		for (GRoute gRoute : routeGTFS.getRoutes(this.routeId)) {
@@ -264,23 +267,21 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			mRoutes.put(mRoute.getId(), mRoute);
 			mTripStopTimesHeadsign = new HashMap<>();
 			parseTrips(mSchedules, mFrequencies, mTrips, mStops, serviceIds, mRoute, mTripStopTimesHeadsign, tripIdToMTripStops, gRoute, routeGTFS);
-			mTripHeasignStrings = new HashSet<>();
+			mTripHeadsignStrings = new HashSet<>();
 			headsignTypeString = false;
 			for (MTrip mTrip : mTrips.values()) {
 				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
-					mTripHeasignStrings.add(mTrip.getHeadsignValue());
+					mTripHeadsignStrings.add(mTrip.getHeadsignValue());
 					headsignTypeString = true;
 				}
 			}
-			HashSet<String> mTripStopHeasignStrings = new HashSet<>(mTripStopTimesHeadsign.values());
+			HashSet<String> mTripStopHeadsignStrings = new HashSet<>(mTripStopTimesHeadsign.values());
 			tripKeptNonDescriptiveHeadsign = false; // 1 trip can keep the same non descriptive head sign
-			if (headsignTypeString && mTripHeasignStrings.size() != mTrips.size()) {
-				System.out.printf("\n%s: Non descriptive trip headsigns (%s different headsign(s) for %s trips)", this.routeId, mTripHeasignStrings.size(),
-						mTrips.size());
+			if (headsignTypeString && mTripHeadsignStrings.size() != mTrips.size()) {
+				MTLog.log("%s: Non descriptive trip headsigns (%s different headsign(s) for %s trips)", this.routeId, mTripHeadsignStrings.size(), mTrips.size());
 				for (MTrip mTrip : mTrips.values()) {
 					System.out.printf("\n%s: mTrip: %s", this.routeId, mTrip);
-					if (mTripStopHeasignStrings.size() == mTrips.size()
-							&& mTripStopTimesHeadsign.containsKey(mTrip.getId()) //
+					if (mTripStopTimesHeadsign.containsKey(mTrip.getId()) //
 							&& !mTrip.getHeadsignValue().equals(mTripStopTimesHeadsign.get(mTrip.getId()))) {
 						System.out.printf("\n%s: Replace trip headsign '%s' with stop times headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(),
 								mTripStopTimesHeadsign.get(mTrip.getId()), mTrip);
@@ -288,7 +289,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					} else {
 						if (tripKeptNonDescriptiveHeadsign) {
 							System.out.printf("\n%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
-							System.out.printf("\n%s: trip headsigns: %s", this.routeId, mTripHeasignStrings);
+							System.out.printf("\n%s: trip headsigns: %s", this.routeId, mTripHeadsignStrings);
 							System.out.printf("\n%s: trips: %s", this.routeId, mTrips);
 							System.out.printf("\n");
 							System.exit(-1);
@@ -302,7 +303,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING //
 						&& StringUtils.isEmpty(mTrip.getHeadsignValue())) {
 					System.out.printf("\n%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
-					System.out.printf("\n%s: %s", this.routeId, mTripHeasignStrings);
+					System.out.printf("\n%s: %s", this.routeId, mTripHeadsignStrings);
 					System.out.printf("\n%s: %s", this.routeId, mTrips);
 					System.out.printf("\n");
 					System.exit(-1);
@@ -346,7 +347,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			originalTripHeadsign = new HashMap<>();
 			for (MTrip mTrip : splitTrips) {
 				this.agencyTools.setTripHeadsign(mRoute, mTrip, gTrip, routeGTFS);
-				originalTripHeadsign.put(mTrip.getId(), new Pair<>(mTrip.getHeadsignType(), mTrip.getHeadsignValue()));
+				originalTripHeadsign.put(mTrip.getId(),
+						new Pair<>(mTrip.getHeadsignType(), mTrip.getHeadsignValue()));
 			}
 			for (MTrip mTrip : splitTrips) {
 				if (mTrips.containsKey(mTrip.getId()) && !mTrips.get(mTrip.getId()).equals(mTrip)) {
@@ -395,7 +397,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					continue;
 				}
 				String tripStopTimesHeadsign = splitTripStopTimesHeadsign.get(mTrip.getId());
-				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING && tripStopTimesHeadsign != null && tripStopTimesHeadsign.length() > 0) {
+				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING
+						&& tripStopTimesHeadsign != null
+						&& tripStopTimesHeadsign.length() > 0) {
 					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
 						if (!mTripStopTimesHeadsign.get(mTrip.getId()).equals(tripStopTimesHeadsign)) {
 							if (!mTripStopTimesHeadsign.get(mTrip.getId()).contains(tripStopTimesHeadsign)) {
@@ -403,7 +407,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 										tripStopTimesHeadsign, mTripStopTimesHeadsign.get(mTrip.getId()));
 							}
 							mTripStopTimesHeadsign.put(mTrip.getId(),
-									MTrip.mergeHeadsignValue(mTripStopTimesHeadsign.get(mTrip.getId()), tripStopTimesHeadsign));
+									MTrip.mergeHeadsignValue(
+											mTripStopTimesHeadsign.get(mTrip.getId()),
+											tripStopTimesHeadsign));
 						}
 					} else {
 						mTripStopTimesHeadsign.put(mTrip.getId(), tripStopTimesHeadsign);
@@ -426,7 +432,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	private HashMap<Long, String> parseTripStops(HashMap<String, MSchedule> mSchedules, HashSet<String> serviceIds, MRoute mRoute,
 												 HashMap<Integer, MStop> mStops, GTrip gTrip, HashMap<Long, Pair<Integer, String>> originalTripHeadsign, ArrayList<MTrip> splitTrips,
 												 String tripServiceId, HashMap<Long, HashMap<String, MTripStop>> splitTripStops, GSpec routeGTFS) {
-		HashMap<Long, String> splitTripStopTimesHeadsign = new HashMap<>();
+		HashMap<Long, String> splitTripStopTimesHeadSign = new HashMap<>();
 		int mStopId;
 		GStop gStop;
 		MTripStop mTripStop;
@@ -465,33 +471,47 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				} else {
 					splitTripStops.get(mTripId).put(mTripStop.getUID(), mTripStop);
 				}
-				tripStopTimesHeadsign = splitTripStopTimesHeadsign.get(mTripId);
+				tripStopTimesHeadsign = splitTripStopTimesHeadSign.get(mTripId);
 				if (!originalTripHeadsign.containsKey(mTripId)) {
 					System.out.printf("\n%s: Unexpected trip headsign ID '%s'! (%s)\n", this.routeId, mTripId, originalTripHeadsign);
 					System.exit(-1);
 				}
 				tripStopTimesHeadsign = parseStopTimes(mSchedules, mRoute, //
-						originalTripHeadsign.get(mTripId).first, originalTripHeadsign.get(mTripId).second, //
-						mTripId, tripServiceId, tripStopTimesHeadsign, gTripStop, mStopId, routeGTFS, addedMTripIdAndGStopIds);
-				splitTripStopTimesHeadsign.put(mTripId, tripStopTimesHeadsign);
+						mTripId, tripServiceId,
+						originalTripHeadsign.get(mTripId).first,
+						originalTripHeadsign.get(mTripId).second,
+						tripStopTimesHeadsign,
+						gTripStop,
+						mStopId, routeGTFS,
+						addedMTripIdAndGStopIds);
+				splitTripStopTimesHeadSign.put(mTripId, tripStopTimesHeadsign);
 				serviceIds.add(tripServiceId);
 			}
 			if (!mStops.containsKey(mStopId)) {
 				mStops.put(
 						mStopId,
-						new MStop(mStopId, this.agencyTools.getStopCode(gStop), this.agencyTools.getStopOriginalId(gStop), this.agencyTools.cleanStopName(gStop
-								.getStopName()), gStop.getStopLat(), gStop.getStopLong()));
+						new MStop(mStopId,
+								this.agencyTools.getStopCode(gStop),
+								this.agencyTools.getStopOriginalId(gStop),
+								this.agencyTools.cleanStopName(gStop.getStopName()),
+								gStop.getStopLat(),
+								gStop.getStopLong()
+						));
 			}
 		}
-		return splitTripStopTimesHeadsign;
+		return splitTripStopTimesHeadSign;
 	}
 
 	private SimpleDateFormat G_TIME_FORMAT = GSpec.getNewTimeFormatInstance(); // not static - not sharable between threads!
 
 	private SimpleDateFormat M_TIME_FORMAT = MSpec.getNewTimeFormatInstance(); // not static - not sharable between threads!
 
-	private String parseStopTimes(HashMap<String, MSchedule> mSchedules, MRoute mRoute, int originalTripHeadsignType, String originalTripHeadsignValue,
-								  long mTripId, String tripServiceId, String tripStopTimesHeadsign, GTripStop gTripStop, int mStopId, GSpec routeGTFS,
+	private String parseStopTimes(HashMap<String, MSchedule> mSchedules, MRoute mRoute,
+								  long mTripId, String tripServiceId,
+								  int originalTripHeadsignType, String originalTripHeadsignValue,
+								  String tripStopTimesHeadsign,
+								  GTripStop gTripStop,
+								  int mStopId, GSpec routeGTFS,
 								  HashMap<String, Integer> addedMTripIdAndGStopIds) {
 		MSchedule mSchedule;
 		String stopHeadsign;
@@ -558,12 +578,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return tripStopTimesHeadsign;
 	}
 
-	private String setTripStopTimesHeadsign(String tripStopTimesHeadsign, String stopHeadsign) {
+	private static String setTripStopTimesHeadsign(String tripStopTimesHeadsign, String stopHeadSign) {
 		if (tripStopTimesHeadsign == null) {
-			tripStopTimesHeadsign = stopHeadsign;
+			tripStopTimesHeadsign = stopHeadSign;
 		} else if (Constants.EMPTY.equals(tripStopTimesHeadsign)) { // disabled
 			// nothing to do
-		} else if (!tripStopTimesHeadsign.equals(stopHeadsign)) {
+		} else if (!tripStopTimesHeadsign.equals(stopHeadSign)) {
 			tripStopTimesHeadsign = Constants.EMPTY; // disable
 		}
 		return tripStopTimesHeadsign;
@@ -642,12 +662,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		} while (i >= 0);
 	}
 
-	public static boolean equalsMyTripStopLists(ArrayList<MTripStop> l1, ArrayList<MTripStop> l2) {
+	private static boolean equalsMyTripStopLists(ArrayList<MTripStop> l1, ArrayList<MTripStop> l2) {
 		if (l1 == null && l2 == null) {
 			return true;
 		}
-		int s1 = l1 == null ? 0: l1.size();
-		int s2 = l2 == null ? 0: l2.size();
+		int s1 = l1 == null ? 0 : l1.size();
+		int s2 = l2 == null ? 0 : l2.size();
 		if (s1 != s2) {
 			return false;
 		}
@@ -864,7 +884,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 
 	private MTripStop[] findFirstCommonStop(ArrayList<MTripStop> l1, ArrayList<MTripStop> l2) {
 		MTripStop previousTs1 = null;
-		MTripStop previousTs2 = null;
+		MTripStop previousTs2;
 		MTripStop[] commonStopAndPrevious;
 		for (MTripStop tts1 : l1) {
 			previousTs2 = null;
@@ -895,7 +915,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return results[0];
 	}
 
-	HashMap<Integer, GStop> gStopsCache = new HashMap<>();
+	private HashMap<Integer, GStop> gStopsCache = new HashMap<>();
 
 	// https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/location/java/android/location/Location.java
 	private static void computeDistanceAndBearing(double lat1, double lon1, double lat2, double lon2, float[] results) {
@@ -928,10 +948,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 
 		double sigma = 0.0;
 		double deltaSigma = 0.0;
-		double cosSqAlpha = 0.0;
-		double cos2SM = 0.0;
-		double cosSigma = 0.0;
-		double sinSigma = 0.0;
+		double cosSqAlpha;
+		double cos2SM;
+		double cosSigma;
+		double sinSigma;
 		double cosLambda = 0.0;
 		double sinLambda = 0.0;
 

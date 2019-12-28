@@ -22,6 +22,9 @@ import java.util.List;
 @SuppressWarnings("unused")
 public interface GAgencyTools {
 
+	boolean EXCLUDE = true;
+	boolean KEEP = false;
+
 	int getThreadPoolSize();
 
 	boolean excludingAll();
