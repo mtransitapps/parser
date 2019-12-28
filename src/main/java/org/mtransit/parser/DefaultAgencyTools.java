@@ -633,11 +633,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 				MTLog.log("> new start date '%s' & end date '%s' from calendar date active during service ID(s).", p.startDate, p.endDate);
 				continue;
 			}
-			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS)) {
-				p.endDate = incDateDays(DATE_FORMAT, c, p.endDate, 1); // end++
-				MTLog.log("new end date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.endDate);
-				continue;
-			}
 			Period pNext = new Period();
 			pNext.todayStringInt = incDateDays(DATE_FORMAT, c, p.endDate, 1);
 			HashSet<String> nextDayServiceIds = findTodayServiceIds(gCalendarDates, DATE_FORMAT, c, pNext, 0, 1);
@@ -652,10 +647,26 @@ public class DefaultAgencyTools implements GAgencyTools {
 			pPrevious.todayStringInt = incDateDays(DATE_FORMAT, c, p.startDate, -1);
 			HashSet<String> previousDayServiceIds = findTodayServiceIds(gCalendarDates, DATE_FORMAT, c, pPrevious, 0, -1);
 			refreshStartEndDatesFromCalendarDates(pPrevious, previousDayServiceIds, gCalendarDates);
-			if (pPrevious.startDate != null && pPrevious.endDate != null
-					&& diffLowerThan(DATE_FORMAT, c, pPrevious.startDate, pPrevious.endDate, MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
-				p.startDate = pPrevious.startDate;
-				MTLog.log("> new start date '%s' because previous day has own service ID(s)", p.startDate);
+			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS)) {
+				long nextPeriodCoverageInMs = pNext.startDate == null || pNext.endDate == null ? 0L :
+						diffInMs(DATE_FORMAT, c,
+								pNext.startDate, // morning
+								pNext.endDate + 1 // midnight ≈ tomorrow
+						);
+				long previousPeriodCoverageInMs = pPrevious.startDate == null || pPrevious.endDate == null ? 0L :
+						diffInMs(DATE_FORMAT, c,
+								pPrevious.startDate, // morning
+								pPrevious.endDate + 1 // midnight ≈ tomorrow
+						);
+				if (keepToday // NOT next schedule, only current schedule can look behind
+						&& previousPeriodCoverageInMs > 0L
+						&& (nextPeriodCoverageInMs <= 0L || previousPeriodCoverageInMs < nextPeriodCoverageInMs)) {
+					p.startDate = incDateDays(DATE_FORMAT, c, p.startDate, -1); // start--
+					MTLog.log("new start date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.startDate);
+				} else {
+					p.endDate = incDateDays(DATE_FORMAT, c, p.endDate, 1); // end++
+					MTLog.log("new end date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.endDate);
+				}
 				continue;
 			}
 			break;
@@ -679,8 +690,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return newDates;
 	}
 
-	private static HashSet<String> findTodayServiceIds(List<GCalendarDate> gCalendarDates, SimpleDateFormat DATE_FORMAT, Calendar c, Period p, int minSize,
-													   int incDays) {
+	private static HashSet<String> findTodayServiceIds(List<GCalendarDate> gCalendarDates, SimpleDateFormat DATE_FORMAT, Calendar c, Period p, int minSize, int incDays) {
 		HashSet<String> todayServiceIds = new HashSet<>();
 		final int initialTodayStringInt = p.todayStringInt;
 		while (true) {
@@ -924,7 +934,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	private static long diffInMs(SimpleDateFormat dateFormat, Calendar calendar, int startDateInt, int endDateInt) {
+	static long diffInMs(SimpleDateFormat dateFormat, Calendar calendar, int startDateInt, int endDateInt) {
 		try {
 			calendar.setTime(dateFormat.parse(String.valueOf(startDateInt)));
 			long startDateInMs = calendar.getTimeInMillis();
@@ -932,9 +942,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			long endDateInMs = calendar.getTimeInMillis();
 			return endDateInMs - startDateInMs;
 		} catch (Exception e) {
-			MTLog.log("Error while checking date difference!\n");
-			e.printStackTrace();
-			System.exit(-1);
+			MTLog.logFatal(e, "Error while checking date difference!\n");
 			return -1L;
 		}
 	}
