@@ -647,6 +647,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 			pPrevious.todayStringInt = incDateDays(DATE_FORMAT, c, p.startDate, -1);
 			HashSet<String> previousDayServiceIds = findTodayServiceIds(gCalendarDates, DATE_FORMAT, c, pPrevious, 0, -1);
 			refreshStartEndDatesFromCalendarDates(pPrevious, previousDayServiceIds, gCalendarDates);
+			if (keepToday // NOT next schedule, only current schedule can look behind
+					&& pPrevious.startDate != null && pPrevious.endDate != null
+					&& diffLowerThan(DATE_FORMAT, c, pPrevious.startDate, pPrevious.endDate, MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
+				p.startDate = pPrevious.startDate;
+				MTLog.log("> new start date '%s' because previous day has own service ID(s)", p.endDate);
+				continue;
+			}
 			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS)) {
 				long nextPeriodCoverageInMs = pNext.startDate == null || pNext.endDate == null ? 0L :
 						diffInMs(DATE_FORMAT, c,
