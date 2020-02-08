@@ -59,4 +59,11 @@ public enum GRouteType {
 		}
 		return false;
 	}
+
+	@Override
+	public String toString() {
+		return GRouteType.class.getSimpleName() + "{" +
+				"id=" + id +
+				'}';
+	}
 }

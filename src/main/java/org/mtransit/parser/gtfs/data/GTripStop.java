@@ -44,17 +44,17 @@ public class GTripStop {
 		return this.stop_sequence;
 	}
 
-	@Override
-	public String toString() {
-		return new StringBuilder(GTripStop.class.getSimpleName()).append('{') //
-				.append(Constants.STRING_DELIMITER).append(this.uid).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.stop_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.stop_sequence).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append('}').toString();
-	}
-
 	public static String getUID(String trip_uid, String stop_id, int stop_sequence) {
 		return stop_id + Constants.UUID_SEPARATOR + stop_sequence + Constants.UUID_SEPARATOR + trip_uid;
+	}
+
+	@Override
+	public String toString() {
+		return GTripStop.class.getSimpleName() + "{" +
+				"uid='" + uid + '\'' +
+				", trip_id='" + trip_id + '\'' +
+				", stop_id='" + stop_id + '\'' +
+				", stop_sequence=" + stop_sequence +
+				'}';
 	}
 }

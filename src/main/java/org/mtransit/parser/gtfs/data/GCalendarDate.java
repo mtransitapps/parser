@@ -2,8 +2,6 @@ package org.mtransit.parser.gtfs.data;
 
 import java.util.Collection;
 
-import org.mtransit.parser.Constants;
-
 // https://developers.google.com/transit/gtfs/reference#calendar_dates_fields
 public class GCalendarDate {
 
@@ -60,16 +58,16 @@ public class GCalendarDate {
 		return exception_type;
 	}
 
-	@Override
-	public String toString() {
-		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(this.service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.exception_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.toString();
-	}
-
 	public String getUID() {
 		return this.date + this.service_id;
+	}
+
+	@Override
+	public String toString() {
+		return GCalendarDate.class.getSimpleName() + "{" +
+				"service_id='" + service_id + '\'' +
+				", date=" + date +
+				", exception_type=" + exception_type +
+				'}';
 	}
 }

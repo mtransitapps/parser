@@ -1,7 +1,5 @@
 package org.mtransit.parser.gtfs.data;
 
-import org.mtransit.parser.Constants;
-
 // https://developers.google.com/transit/gtfs/reference#frequencies_fields
 public class GFrequency {
 
@@ -44,11 +42,11 @@ public class GFrequency {
 
 	@Override
 	public String toString() {
-		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(this.trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.start_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.end_time).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(this.headway_secs).append(Constants.COLUMN_SEPARATOR) //
-				.toString();
+		return GFrequency.class.getSimpleName() + "{" +
+				"trip_id='" + trip_id + '\'' +
+				", start_time='" + start_time + '\'' +
+				", end_time='" + end_time + '\'' +
+				", headway_secs=" + headway_secs +
+				'}';
 	}
 }

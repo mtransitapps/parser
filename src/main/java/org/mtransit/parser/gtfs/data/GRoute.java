@@ -1,7 +1,5 @@
 package org.mtransit.parser.gtfs.data;
 
-import org.mtransit.parser.Constants;
-
 // https://developers.google.com/transit/gtfs/reference#routes_fields
 public class GRoute {
 
@@ -63,14 +61,14 @@ public class GRoute {
 
 	@Override
 	public String toString() {
-		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(this.route_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.route_short_name).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.route_long_name).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.route_type).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.agency_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.route_desc).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.route_color).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.toString();
+		return GRoute.class.getSimpleName() + "{" +
+				"route_id='" + route_id + '\'' +
+				", route_short_name='" + route_short_name + '\'' +
+				", route_long_name='" + route_long_name + '\'' +
+				", route_type=" + route_type +
+				", agency_id='" + agency_id + '\'' +
+				", route_desc='" + route_desc + '\'' +
+				", route_color='" + route_color + '\'' +
+				'}';
 	}
 }

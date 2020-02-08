@@ -27,4 +27,12 @@ public class GAgency {
 	public String getAgencyTimezone() {
 		return agency_timezone;
 	}
+
+	@Override
+	public String toString() {
+		return GAgency.class.getSimpleName() + "{" +
+				"agency_id='" + agency_id + '\'' +
+				", agency_timezone='" + agency_timezone + '\'' +
+				'}';
+	}
 }

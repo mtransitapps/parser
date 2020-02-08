@@ -1,8 +1,8 @@
 package org.mtransit.parser.gtfs.data;
 
-import java.util.Objects;
-
 import org.mtransit.parser.Constants;
+
+import java.util.Objects;
 
 // https://developers.google.com/transit/gtfs/reference#stop_times_fields
 public class GStopTime implements Comparable<GStopTime> {
@@ -30,7 +30,7 @@ public class GStopTime implements Comparable<GStopTime> {
 	private int drop_off_type;
 
 	public GStopTime(String trip_id, String arrival_time, String departure_time, String stop_id, int stop_sequence, String stop_headsign, int pickup_type,
-			int drop_off_type) {
+					 int drop_off_type) {
 		this.trip_id = trip_id;
 		this.arrival_time = arrival_time;
 		this.departure_time = departure_time;
@@ -100,27 +100,6 @@ public class GStopTime implements Comparable<GStopTime> {
 	}
 
 	@Override
-	public String toString() {
-		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(this.trip_id).append(Constants.STRING_DELIMITER) //
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.stop_id).append(Constants.STRING_DELIMITER) //
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.stop_sequence).append(Constants.STRING_DELIMITER) //
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.arrival_time).append(Constants.STRING_DELIMITER) //
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.departure_time).append(Constants.STRING_DELIMITER) //
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.stop_headsign).append(Constants.STRING_DELIMITER) //
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.pickup_type).append(Constants.STRING_DELIMITER) //
-				.append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.drop_off_type).append(Constants.STRING_DELIMITER) //
-				.toString();
-	}
-
-	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
@@ -146,7 +125,7 @@ public class GStopTime implements Comparable<GStopTime> {
 				this.stop_headsign, //
 				this.pickup_type, //
 				this.drop_off_type //
-				);
+		);
 	}
 
 	@Override
@@ -164,5 +143,20 @@ public class GStopTime implements Comparable<GStopTime> {
 		System.out.printf("\nUnexpected stop times to compare: '%s' & '%s'!\n", this, otherGStopTime);
 		System.exit(-1);
 		return 0;
+	}
+
+	@Override
+	public String toString() {
+		return GStopTime.class.getSimpleName() + "{" +
+				"trip_id='" + trip_id + '\'' +
+				", stop_id='" + stop_id + '\'' +
+				", stop_sequence=" + stop_sequence +
+				", arrival_time='" + arrival_time + '\'' +
+				", departure_time='" + departure_time + '\'' +
+				", stop_headsign='" + stop_headsign + '\'' +
+				", pickup_type=" + pickup_type +
+				", drop_off_type=" + drop_off_type +
+				", uid='" + uid + '\'' +
+				'}';
 	}
 }

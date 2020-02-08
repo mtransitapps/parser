@@ -2,8 +2,6 @@ package org.mtransit.parser.gtfs.data;
 
 import java.util.Collection;
 
-import org.mtransit.parser.Constants;
-
 // https://developers.google.com/transit/gtfs/reference#trips_fields
 public class GTrip {
 
@@ -84,14 +82,15 @@ public class GTrip {
 
 	@Override
 	public String toString() {
-		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(this.route_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.trip_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.trip_headsign).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.trip_short_name).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.direction_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.shape_id).append(Constants.STRING_DELIMITER) //
-				.toString();
+		return GTrip.class.getSimpleName() + "{" +
+				"route_id='" + route_id + '\'' +
+				", service_id='" + service_id + '\'' +
+				", trip_id='" + trip_id + '\'' +
+				", trip_headsign='" + trip_headsign + '\'' +
+				", trip_short_name='" + trip_short_name + '\'' +
+				", direction_id=" + direction_id +
+				", shape_id='" + shape_id + '\'' +
+				", uid='" + uid + '\'' +
+				'}';
 	}
 }

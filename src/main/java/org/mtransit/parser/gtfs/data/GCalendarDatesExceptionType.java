@@ -30,6 +30,8 @@ public enum GCalendarDatesExceptionType {
 
 	@Override
 	public String toString() {
-		return String.valueOf(id);
+		return GCalendarDatesExceptionType.class.getSimpleName() + "{" +
+				"id=" + id +
+				'}';
 	}
 }

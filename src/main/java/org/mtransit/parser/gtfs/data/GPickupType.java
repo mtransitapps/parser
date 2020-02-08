@@ -43,4 +43,11 @@ public enum GPickupType {
 			throw nfe;
 		}
 	}
+
+	@Override
+	public String toString() {
+		return GPickupType.class.getSimpleName() + "{" +
+				"id=" + id +
+				'}';
+	}
 }

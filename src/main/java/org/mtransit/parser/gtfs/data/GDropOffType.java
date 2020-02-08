@@ -43,4 +43,11 @@ public enum GDropOffType {
 			throw nfe;
 		}
 	}
+
+	@Override
+	public String toString() {
+		return GDropOffType.class.getSimpleName() + "{" +
+				"id=" + id +
+				'}';
+	}
 }

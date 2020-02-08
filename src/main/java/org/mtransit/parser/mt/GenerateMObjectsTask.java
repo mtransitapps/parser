@@ -403,7 +403,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
 						if (!mTripStopTimesHeadsign.get(mTrip.getId()).equals(tripStopTimesHeadsign)) {
 							if (!mTripStopTimesHeadsign.get(mTrip.getId()).contains(tripStopTimesHeadsign)) {
-								System.out.printf("\n%s: Trip stop times headsign different for same trip ID ('%s'!='%s')", this.routeId,
+								System.out.printf("\n%s: Trip stop times head-sign different for same trip ID ('%s'!='%s')", this.routeId,
 										tripStopTimesHeadsign, mTripStopTimesHeadsign.get(mTrip.getId()));
 							}
 							mTripStopTimesHeadsign.put(mTrip.getId(),
@@ -451,7 +451,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			mStopId = this.agencyTools.getStopId(gStop);
 			this.gStopsCache.put(mStopId, gStop);
 			if (mStopId < 0) {
-				System.out.printf("\n%s: Can't find gtfs stop ID (%s) '%s' from trip ID '%s' (%s)\n", this.routeId, mStopId, gTripStop.getStopId(),
+				System.out.printf("\n%s: Can't find GTFS stop ID (%s) '%s' from trip ID '%s' (%s)\n", this.routeId, mStopId, gTripStop.getStopId(),
 						gTripStop.getTripId(), gStop);
 				System.exit(-1);
 			}
@@ -473,7 +473,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 				tripStopTimesHeadsign = splitTripStopTimesHeadSign.get(mTripId);
 				if (!originalTripHeadsign.containsKey(mTripId)) {
-					System.out.printf("\n%s: Unexpected trip headsign ID '%s'! (%s)\n", this.routeId, mTripId, originalTripHeadsign);
+					System.out.printf("\n%s: Unexpected trip head-sign ID '%s'! (%s)\n", this.routeId, mTripId, originalTripHeadsign);
 					System.exit(-1);
 				}
 				tripStopTimesHeadsign = parseStopTimes(mSchedules, mRoute, //

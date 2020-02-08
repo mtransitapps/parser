@@ -1,7 +1,5 @@
 package org.mtransit.parser.gtfs.data;
 
-import org.mtransit.parser.Constants;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -94,22 +92,6 @@ public class GCalendar {
 
 	public int getEndDate() {
 		return end_date;
-	}
-
-	@Override
-	public String toString() {
-		return new StringBuilder() //
-				.append(Constants.STRING_DELIMITER).append(this.service_id).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.monday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.tuesday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.wednesday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.thursday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.friday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.saturday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.sunday).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.start_date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.append(Constants.STRING_DELIMITER).append(this.end_date).append(Constants.STRING_DELIMITER).append(Constants.COLUMN_SEPARATOR) //
-				.toString();
 	}
 
 	public boolean startsBefore(Integer date) {
@@ -217,5 +199,22 @@ public class GCalendar {
 			e.printStackTrace();
 			System.exit(-1);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return GCalendar.class.getSimpleName() + "{" +
+				"service_id='" + service_id + '\'' +
+				", monday=" + monday +
+				", tuesday=" + tuesday +
+				", wednesday=" + wednesday +
+				", thursday=" + thursday +
+				", friday=" + friday +
+				", saturday=" + saturday +
+				", sunday=" + sunday +
+				", start_date=" + start_date +
+				", end_date=" + end_date +
+				", allDates=" + allDates +
+				'}';
 	}
 }
