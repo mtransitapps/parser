@@ -1,22 +1,29 @@
 package org.mtransit.parser.mt.data;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
+
+import java.util.Objects;
 
 public class MStop implements Comparable<MStop> {
 
 	private int id;
 
+	@NotNull
 	private String code;
+	@NotNull
 	private String name;
 
 	private double lat;
 	private double lng;
 
+	@Nullable
 	private String originalId;
 
-	public MStop(int id, String code, String originalId, String name, double lat, double lng) {
+	public MStop(int id, @NotNull String code, @Nullable String originalId, @NotNull String name, double lat, double lng) {
 		this.id = id;
 		this.code = code;
 		this.originalId = originalId;
@@ -29,10 +36,13 @@ public class MStop implements Comparable<MStop> {
 		return id;
 	}
 
+	@NotNull
+	@SuppressWarnings("unused")
 	public String getCode() {
 		return code;
 	}
 
+	@NotNull
 	public String getName() {
 		return name;
 	}
@@ -62,7 +72,7 @@ public class MStop implements Comparable<MStop> {
 		StringBuilder sb = new StringBuilder(); //
 		sb.append(this.id); // ID
 		sb.append(Constants.COLUMN_SEPARATOR); //
-		sb.append(Constants.STRING_DELIMITER).append(this.code == null ? Constants.EMPTY : this.code).append(Constants.STRING_DELIMITER); // code
+		sb.append(Constants.STRING_DELIMITER).append(this.code).append(Constants.STRING_DELIMITER); // code
 		if (DefaultAgencyTools.EXPORT_ORIGINAL_ID) {
 			sb.append(Constants.COLUMN_SEPARATOR); //
 			sb.append(Constants.STRING_DELIMITER).append(this.originalId == null ? Constants.EMPTY : this.originalId).append(Constants.STRING_DELIMITER); //
@@ -83,11 +93,17 @@ public class MStop implements Comparable<MStop> {
 
 	@Override
 	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
 		MStop o = (MStop) obj;
 		if (this.id != o.id) {
 			return false;
 		}
-		if (this.code != null && !this.code.equals(o.code)) {
+		if (!this.code.equals(o.code)) {
 			return false;
 		}
 		if (!this.name.equals(o.name)) {
@@ -99,7 +115,8 @@ public class MStop implements Comparable<MStop> {
 		if (this.lng != o.lng) {
 			return false;
 		}
-		if (this.originalId != o.originalId) {
+		//noinspection RedundantIfStatement
+		if (!Objects.equals(this.originalId, o.originalId)) {
 			return false;
 		}
 		return true;

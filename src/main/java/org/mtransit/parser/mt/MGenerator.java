@@ -610,7 +610,7 @@ public class MGenerator {
 		if (file.exists()) {
 			MTLog.log("Generated store listing file: '%s'.", file);
 			try {
-				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF8);
+				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF_8);
 				content = SCHEDULE.matcher(content).replaceAll(
 						String.format(
 								isNext ? SCHEDULE_KEEP_FROM_TO : SCHEDULE_FROM_TO, //
@@ -618,7 +618,7 @@ public class MGenerator {
 								SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))
 						)
 				);
-				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
+				IOUtils.write(content, new FileOutputStream(file), GReader.UTF_8);
 			} catch (Exception ioe) {
 				MTLog.logFatal(ioe, "Error while writing store listing files!");
 			} finally {
@@ -632,13 +632,13 @@ public class MGenerator {
 		if (file.exists()) {
 			MTLog.log("Generated store listing file: %s.", file);
 			try {
-				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF8);
+				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF_8);
 				content = SCHEDULE_FR.matcher(content).replaceAll(
 						String.format(
 								isNext ? SCHEDULE_KEEP_FROM_TO_FR : SCHEDULE_FROM_TO_FR, //
 								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(minDate))),
 								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
-				IOUtils.write(content, new FileOutputStream(file), GReader.UTF8);
+				IOUtils.write(content, new FileOutputStream(file), GReader.UTF_8);
 			} catch (Exception ioe) {
 				MTLog.logFatal(ioe, "Error while writing store listing files!");
 			} finally {

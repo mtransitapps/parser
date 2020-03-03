@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
@@ -78,8 +80,10 @@ public interface GAgencyTools {
 
 	String cleanStopHeadsign(String stopHeadsign);
 
+	@NotNull
 	String getStopCode(GStop gStop);
 
+	@Nullable
 	String getStopOriginalId(GStop gStop);
 
 	boolean excludeStopNullable(GStop gStop);

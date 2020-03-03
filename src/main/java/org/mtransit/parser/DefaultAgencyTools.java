@@ -1,6 +1,8 @@
 package org.mtransit.parser;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -284,11 +286,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return cleanTripHeadsign(stopHeadsign);
 	}
 
+	@NotNull
 	@Override
 	public String getStopCode(GStop gStop) {
 		return gStop.getStopCode();
 	}
 
+	@Nullable
 	@Override
 	public String getStopOriginalId(GStop gStop) {
 		return null; // only if not stop code or stop ID

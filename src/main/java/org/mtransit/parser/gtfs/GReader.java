@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ import java.util.regex.Pattern;
 
 public class GReader {
 
-	public static final Charset UTF8 = Charset.forName("UTF-8");
+	public static final Charset UTF_8 = StandardCharsets.UTF_8;
 
 	public static GSpec readGtfsZipFile(String gtfsFile, final GAgencyTools agencyTools, boolean calendarsOnly, boolean routeTripCalendarsOnly) {
 		MTLog.log("Reading GTFS file '%s'...", gtfsFile);
@@ -384,7 +385,7 @@ public class GReader {
 					line.get(GStop.STOP_NAME),
 					Double.parseDouble(line.get(GStop.STOP_LAT)),
 					Double.parseDouble(line.get(GStop.STOP_LON)),
-					code == null ? null : code.trim()
+					code == null ? StringUtils.EMPTY : code.trim()
 			);
 			if (agencyTools.excludeStop(gStop)) {
 				return;
