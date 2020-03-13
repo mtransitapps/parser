@@ -357,6 +357,23 @@ public final class CleanUtils {
 		return string;
 	}
 
+	private static final Pattern EASTBOUND_ = cleanWords("eastbound");
+	private static final String EASTBOUND_REPLACEMENT = cleanWordsReplacement("EB");
+	private static final Pattern WESTBOUND_ = cleanWords("westbound");
+	private static final String WESTBOUND_REPLACEMENT = cleanWordsReplacement("WB");
+	private static final Pattern SOUTHBOUND_ = cleanWords("southbound");
+	private static final String SOUTHBOUND_REPLACEMENT = cleanWordsReplacement("SB");
+	private static final Pattern NORTHBOUND_ = cleanWords("northbound");
+	private static final String NORTHBOUND_REPLACEMENT = cleanWordsReplacement("NB");
+
+	public static String cleanBounds(String string) {
+		string = EASTBOUND_.matcher(string).replaceAll(EASTBOUND_REPLACEMENT);
+		string = WESTBOUND_.matcher(string).replaceAll(WESTBOUND_REPLACEMENT);
+		string = SOUTHBOUND_.matcher(string).replaceAll(SOUTHBOUND_REPLACEMENT);
+		string = NORTHBOUND_.matcher(string).replaceAll(NORTHBOUND_REPLACEMENT);
+		return string;
+	}
+
 	private static final Pattern ID_MERGED = Pattern.compile("(([0-9]*)_merged_([0-9]*))", Pattern.CASE_INSENSITIVE);
 	private static final String ID_MERGED_REPLACEMENT = "$2";
 
