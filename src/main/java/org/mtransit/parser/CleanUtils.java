@@ -357,13 +357,13 @@ public final class CleanUtils {
 		return string;
 	}
 
-	private static final Pattern EASTBOUND_ = cleanWords("eastbound");
+	private static final Pattern EASTBOUND_ = cleanWords("eastbound", "eb");
 	private static final String EASTBOUND_REPLACEMENT = cleanWordsReplacement("EB");
-	private static final Pattern WESTBOUND_ = cleanWords("westbound");
+	private static final Pattern WESTBOUND_ = cleanWords("westbound", "wb");
 	private static final String WESTBOUND_REPLACEMENT = cleanWordsReplacement("WB");
-	private static final Pattern SOUTHBOUND_ = cleanWords("southbound");
+	private static final Pattern SOUTHBOUND_ = cleanWords("southbound", "sb");
 	private static final String SOUTHBOUND_REPLACEMENT = cleanWordsReplacement("SB");
-	private static final Pattern NORTHBOUND_ = cleanWords("northbound");
+	private static final Pattern NORTHBOUND_ = cleanWords("northbound", "nb");
 	private static final String NORTHBOUND_REPLACEMENT = cleanWordsReplacement("NB");
 
 	public static String cleanBounds(String string) {
