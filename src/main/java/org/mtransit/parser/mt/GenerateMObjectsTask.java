@@ -123,7 +123,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mSchedule.clearHeadsign();
 			}
 		}
-		int splitTripCount = this.agencyTools.splitTrip(new MRoute(this.routeId, null, null, null), null, routeGTFS).size();
+		int splitTripCount = this.agencyTools.splitTrip(new MRoute(this.routeId, mRoutes.get(this.routeId).getShortName(), null, null), null, routeGTFS).size();
 		boolean isSplitted = splitTripCount > 1;
 		this.globalGTFS.cleanupRouteGTFS(this.routeId);
 		ArrayList<MAgency> mAgenciesList = new ArrayList<>(mAgencies.values());
@@ -275,6 +275,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					headsignTypeString = true;
 				}
 			}
+			//noinspection unused,MismatchedQueryAndUpdateOfCollection
 			HashSet<String> mTripStopHeadsignStrings = new HashSet<>(mTripStopTimesHeadsign.values());
 			tripKeptNonDescriptiveHeadsign = false; // 1 trip can keep the same non descriptive head sign
 			if (headsignTypeString && mTripHeadsignStrings.size() != mTrips.size()) {
@@ -291,7 +292,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 							System.out.printf("\n%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
 							System.out.printf("\n%s: trip headsigns: %s", this.routeId, mTripHeadsignStrings);
 							System.out.printf("\n%s: trips: %s", this.routeId, mTrips);
-							System.out.printf("\n");
+							System.out.print("\n");
 							System.exit(-1);
 						}
 						System.out.printf("\n%s: Keeping non-descriptive trip headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
@@ -305,7 +306,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					System.out.printf("\n%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
 					System.out.printf("\n%s: %s", this.routeId, mTripHeadsignStrings);
 					System.out.printf("\n%s: %s", this.routeId, mTrips);
-					System.out.printf("\n");
+					System.out.print("\n");
 					System.exit(-1);
 				}
 			}
@@ -786,7 +787,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				ts1Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts1GStop.getStopLat(), ts1GStop.getStopLong());
 				ts2Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts2GStop.getStopLat(), ts2GStop.getStopLong());
 				if (ts1Distance < ts2Distance) {
-					System.out.printf("\n" + this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
+					System.out.print("\n" + this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
 							+ "|stopID2:" + ts2.getStopId() + "] (lastStopID:" + last.getStopId() + "|distance1:" + ts1Distance + "|distance2:" + ts2Distance
 							+ ") > insert: " + ts1 + " instead of " + ts2);
 					newList.add(ts1);
@@ -795,7 +796,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					i1++;
 					continue;
 				} else {
-					System.out.printf("\n" + this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
+					System.out.print("\n" + this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
 							+ "|stopID2:" + ts2.getStopId() + "] (lastStopID:" + last.getStopId() + "|distance1:" + ts1Distance + "|distance2:" + ts2Distance
 							+ ") > insert: " + ts2 + " instead of " + ts1);
 					newList.add(ts2);
@@ -815,7 +816,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						previousTs1GStop.getStopLong());
 				previousTs2Distance = findDistance(commonGStop.getStopLat(), commonGStop.getStopLong(), previousTs2GStop.getStopLat(),
 						previousTs2GStop.getStopLong());
-				System.out.printf("\n" + this.routeId + ": Resolved using 1st common stop trip ID:" + ts1.getTripId() + ", stop IDs:" + ts1.getStopId() + ","
+				System.out.print("\n" + this.routeId + ": Resolved using 1st common stop trip ID:" + ts1.getTripId() + ", stop IDs:" + ts1.getStopId() + ","
 						+ ts2.getStopId() + " (" + commonStopAndPrevious[1].getStopId() + " " + previousTs1Distance + ", "
 						+ commonStopAndPrevious[2].getStopId() + " " + previousTs2Distance + ")");
 				if (previousTs1Distance > previousTs2Distance) {
@@ -891,7 +892,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			for (MTripStop tts2 : l2) {
 				if (tts1.getStopId() == tts2.getStopId()) {
 					if (previousTs1 == null || previousTs2 == null) {
-						System.out.printf("\n" + this.routeId + ": findFirstCommonStop() > Common stop found '" + tts1.getStopId()
+						System.out.print("\n" + this.routeId + ": findFirstCommonStop() > Common stop found '" + tts1.getStopId()
 								+ "' but no previous stop! Looking for next common stop...");
 					} else {
 						commonStopAndPrevious = new MTripStop[3];
