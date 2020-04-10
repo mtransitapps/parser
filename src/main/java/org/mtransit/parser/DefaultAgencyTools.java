@@ -38,7 +38,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final int MAX_NEXT_LOOKUP_IN_DAYS = 60;
 
-	private static final int MAX_LOOKUP_IN_DAYS = 60;
+	private static final int MAX_LOOK_BACKWARD_IN_DAYS = 7;
+	private static final int MAX_LOOK_FORWARD_IN_DAYS = 60;
 
 	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 5;
 	private static final int MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS = 14;
@@ -710,7 +711,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@NotNull
 	private static HashSet<String> findTodayServiceIds(@NotNull List<GCalendarDate> gCalendarDates,
-													   SimpleDateFormat DATE_FORMAT, Calendar c, Period p,
+													   SimpleDateFormat DATE_FORMAT,
+													   Calendar c,
+													   Period p,
 													   int minSizeBackward,
 													   int minSizeForward,
 													   int incDays) {
@@ -725,13 +728,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 			}
 			if (todayServiceIds.size() < minSizeForward //
-					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MAX_LOOKUP_IN_DAYS)) {
+					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MAX_LOOK_FORWARD_IN_DAYS)) {
 				p.todayStringInt = incDateDays(DATE_FORMAT, c, p.todayStringInt, incDays);
 				MTLog.log("new today because not enough service today: %s (initial today: %s, min: %s)", p.todayStringInt, initialTodayStringInt,
 						minSizeForward);
 				continue;
 			} else if (todayServiceIds.size() < minSizeBackward //
-					&& diffLowerThan(DATE_FORMAT, c, p.todayStringInt, initialTodayStringInt, MAX_LOOKUP_IN_DAYS)) {
+					&& diffLowerThan(DATE_FORMAT, c, p.todayStringInt, initialTodayStringInt, MAX_LOOK_BACKWARD_IN_DAYS)) {
 				p.todayStringInt = incDateDays(DATE_FORMAT, c, p.todayStringInt, -incDays);
 				MTLog.log("new today because not enough service today: %s (initial today: %s, min: %s)", p.todayStringInt, initialTodayStringInt,
 						minSizeBackward);
@@ -764,7 +767,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			if (!keepToday //
 					&& (p.startDate == null || p.endDate == null) //
-					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MAX_LOOKUP_IN_DAYS)) {
+					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MAX_LOOK_FORWARD_IN_DAYS)) {
 				p.todayStringInt = incDateDays(DATE_FORMAT, c, p.todayStringInt, 1);
 				MTLog.log("new today because no service today: %s (initial today: %s)", p.todayStringInt, initialTodayStringInt);
 				//noinspection UnnecessaryContinue
