@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -35,7 +36,11 @@ public class GReader {
 
 	public static final Charset UTF_8 = StandardCharsets.UTF_8;
 
-	public static GSpec readGtfsZipFile(String gtfsFile, final GAgencyTools agencyTools, boolean calendarsOnly, boolean routeTripCalendarsOnly) {
+	@NotNull
+	public static GSpec readGtfsZipFile(@NotNull String gtfsFile,
+										@NotNull final GAgencyTools agencyTools,
+										boolean calendarsOnly,
+										boolean routeTripCalendarsOnly) {
 		MTLog.log("Reading GTFS file '%s'...", gtfsFile);
 		long start = System.currentTimeMillis();
 		final GSpec gSpec = new GSpec();

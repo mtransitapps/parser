@@ -1,5 +1,8 @@
 package org.mtransit.parser;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class MTLog {
 
@@ -70,5 +73,18 @@ public final class MTLog {
 		log("ERROR: " + format + "\n", args);
 		t.printStackTrace();
 		System.exit(-1);
+	}
+
+	public static class Fatal extends RuntimeException {
+		public Fatal(@NotNull String format, @Nullable Object... args) {
+			super();
+			log("ERROR: " + format + "\n", args);
+		}
+
+		public Fatal(@NotNull Throwable t, @NotNull String format, @Nullable Object... args) {
+			super();
+			log("ERROR: " + format + "\n", args);
+			t.printStackTrace();
+		}
 	}
 }

@@ -1,6 +1,9 @@
 package org.mtransit.parser.gtfs.data;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.Constants;
+import org.mtransit.parser.MTLog;
 
 import java.util.Objects;
 
@@ -86,7 +89,8 @@ public class GStopTime implements Comparable<GStopTime> {
 		return this.stop_headsign != null && this.stop_headsign.length() > 0;
 	}
 
-	private String uid = null;
+	@Nullable
+	private String uid;
 
 	public String getUID() {
 		if (this.uid == null) {
@@ -129,7 +133,7 @@ public class GStopTime implements Comparable<GStopTime> {
 	}
 
 	@Override
-	public int compareTo(GStopTime otherGStopTime) {
+	public int compareTo(@NotNull GStopTime otherGStopTime) {
 		// sort by trip_id, stop_sequence
 		if (!Objects.equals(this.trip_id, otherGStopTime.trip_id)) {
 			return this.trip_id.compareTo(otherGStopTime.trip_id);
@@ -140,9 +144,7 @@ public class GStopTime implements Comparable<GStopTime> {
 		if (!Objects.equals(this.departure_time, otherGStopTime.departure_time)) {
 			return this.departure_time.compareTo(otherGStopTime.departure_time);
 		}
-		System.out.printf("\nUnexpected stop times to compare: '%s' & '%s'!\n", this, otherGStopTime);
-		System.exit(-1);
-		return 0;
+		throw new MTLog.Fatal("Unexpected stop times to compare: '%s' & '%s'!", this, otherGStopTime);
 	}
 
 	@Override

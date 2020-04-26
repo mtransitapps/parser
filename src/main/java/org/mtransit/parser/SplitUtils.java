@@ -159,7 +159,7 @@ public class SplitUtils {
 			for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteId())) {
 				ArrayList<Pair<String, Integer>> gTripStops = new ArrayList<Pair<String, Integer>>();
 				try {
-					ArrayList<GStopTime> stopTimes = routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null);
+					List<GStopTime> stopTimes = routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null);
 					if (stopTimes != null) {
 						for (GStopTime gStopTime : stopTimes) {
 							if (!gStopTime.getTripId().equals(gTrip.getTripId())) {

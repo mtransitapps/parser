@@ -1,6 +1,7 @@
 package org.mtransit.parser.mt;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -50,15 +52,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		this.globalGTFS = gtfs;
 	}
 
+	@NotNull
 	@Override
 	public MSpec call() {
 		try {
 			return doCall();
 		} catch (Exception e) {
-			System.out.printf("\n%s: FATAL ERROR!\n", this.routeId);
-			e.printStackTrace();
-			System.exit(-1);
-			return null;
+			throw new MTLog.Fatal("%s: FATAL ERROR!", this.routeId);
 		}
 	}
 
@@ -518,7 +518,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		String stopHeadsign;
 		boolean descentOnly;
 		String tripIdStopId;
-		ArrayList<GStopTime> gStopTimes = routeGTFS.getStopTimes(null, gTripStop.getTripId(), gTripStop.getStopId(), gTripStop.getStopSequence());
+		List<GStopTime> gStopTimes = routeGTFS.getStopTimes(null, gTripStop.getTripId(), gTripStop.getStopId(), gTripStop.getStopSequence());
 		int lastStopSequence = -1;
 		GStopTime lastStopTime = null;
 		for (int i = 0; i < gStopTimes.size(); i++) {
