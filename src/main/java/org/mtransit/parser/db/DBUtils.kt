@@ -8,10 +8,22 @@ import java.sql.DriverManager
 
 object DBUtils {
 
-    private const val CONNECTION_STRING = "jdbc:sqlite:input/db_file"
+    private const val IN_MEMORY_CONNECTION_STRING = "jdbc:sqlite::memory:" // faster
+    private const val FILE_CONNECTION_STRING = "jdbc:sqlite:input/db_file" // less RAM
+
     private const val STOP_TIMES_TABLE_NAME = "g_stop_times"
 
-    private val connection: Connection by lazy { DriverManager.getConnection(CONNECTION_STRING) }
+    private val isCI: Boolean by lazy { System.getenv("CI")?.isNotEmpty() ?: false }
+
+    private val connection: Connection by lazy {
+        DriverManager.getConnection(
+            if (System.getenv("CI")?.isNotEmpty() != true) {
+                IN_MEMORY_CONNECTION_STRING
+            } else {
+                FILE_CONNECTION_STRING
+            }
+        )
+    }
 
     init {
         val statement = connection.createStatement()
