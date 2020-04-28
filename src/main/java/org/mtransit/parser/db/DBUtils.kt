@@ -16,6 +16,8 @@ object DBUtils {
 
     private const val STOP_TIMES_TABLE_NAME = "g_stop_times"
 
+    private const val SQL_NULL = "null"
+
     private val connection: Connection by lazy {
         DriverManager.getConnection(
             if (System.getenv("CI")?.isNotEmpty() != true) {
@@ -93,12 +95,22 @@ object DBUtils {
     @JvmStatic
     fun selectStopTimes(
         tripId: String? = null,
+        tripIds: List<String>? = null,
         limitMaxNbRow: Int? = null,
         limitOffset: Int? = null
     ): List<GStopTime> {
         var query = "SELECT * FROM $STOP_TIMES_TABLE_NAME"
         tripId?.let {
             query += " WHERE ${GStopTime.TRIP_ID} = '$tripId'"
+        }
+        tripIds?.let {
+            query += " WHERE ${GStopTime.TRIP_ID} IN ${tripIds
+                .distinct()
+                .joinToString(
+                    separator = ",",
+                    prefix = "(",
+                    postfix = ")"
+                ) { "'$it'" }}"
         }
         query += " ORDER BY " +
                 "${GStopTime.TRIP_ID} ASC, " +
@@ -113,8 +125,8 @@ object DBUtils {
         val result = ArrayList<GStopTime>()
         val rs = executeQuery(connection.createStatement(), query)
         while (rs.next()) {
-            var stopHeadSign = rs.getString(GStopTime.STOP_HEADSIGN)
-            if ("null" == stopHeadSign) {
+            var stopHeadSign: String? = rs.getString(GStopTime.STOP_HEADSIGN)
+            if (stopHeadSign == SQL_NULL) {
                 stopHeadSign = null
             }
             result.add(

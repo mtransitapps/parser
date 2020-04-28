@@ -6,21 +6,21 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class MTLog {
 
-	public static void logDebug(Character character) {
+	public static void logDebug(@NotNull Character character) {
 		if (!Constants.DEBUG) {
 			return;
 		}
 		System.out.print(character);
 	}
 
-	public static void logDebug(String format, Object... args) {
+	public static void logDebug(@NotNull String format, @Nullable Object... args) {
 		if (!Constants.DEBUG) {
 			return;
 		}
 		System.out.printf("\n" + format, args);
 	}
 
-	public static void logDebugMethodCall(String methodName, Object... args) {
+	public static void logDebugMethodCall(@NotNull String methodName, @Nullable Object... args) {
 		if (!Constants.DEBUG) {
 			return;
 		}
@@ -40,37 +40,37 @@ public final class MTLog {
 		System.out.printf(sb.toString(), args);
 	}
 
-	public static void logDebugMethodEnd(String methodName) {
+	public static void logDebugMethodEnd(@NotNull String methodName) {
 		if (!Constants.DEBUG) {
 			return;
 		}
 		System.out.print("\n" + "----------" + methodName + "()");
 	}
 
-	public static void log(Character character) {
+	public static void log(@NotNull Character character) {
 		System.out.print(character);
 	}
 
-	public static void log(String format, Object... args) {
+	public static void log(@NotNull String format, @Nullable Object... args) {
 		System.out.printf("\n" + format, args);
 	}
 
-	public static void logNonFatal(Throwable t) {
+	public static void logNonFatal(@NotNull Throwable t) {
 		logNonFatal(t, t.getMessage());
 	}
 
-	public static void logNonFatal(Throwable t, String format, Object... args) {
+	public static void logNonFatal(@NotNull Throwable t, @NotNull String format, @Nullable Object... args) {
 		System.out.printf("\n" + format, args);
 		t.printStackTrace(); // NON-FATAL
 	}
 
-	public static void logFatal(String format, Object... args) {
-		log("ERROR: " + format + "\n", args);
+	public static void logFatal(@NotNull String format, @Nullable Object... args) {
+		log("FATAL ERROR: " + format + "\n", args);
 		System.exit(-1);
 	}
 
-	public static void logFatal(Throwable t, String format, Object... args) {
-		log("ERROR: " + format + "\n", args);
+	public static void logFatal(@NotNull Throwable t, @NotNull String format, @Nullable Object... args) {
+		log("FATAL ERROR: " + format + "\n", args);
 		t.printStackTrace();
 		System.exit(-1);
 	}
@@ -78,12 +78,12 @@ public final class MTLog {
 	public static class Fatal extends RuntimeException {
 		public Fatal(@NotNull String format, @Nullable Object... args) {
 			super();
-			log("ERROR: " + format + "\n", args);
+			log("FATAL ERROR: " + format + "\n", args);
 		}
 
 		public Fatal(@NotNull Throwable t, @NotNull String format, @Nullable Object... args) {
 			super();
-			log("ERROR: " + format + "\n", args);
+			log("FATAL ERROR: " + format + "\n", args);
 			t.printStackTrace();
 		}
 	}

@@ -6,6 +6,7 @@ import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
+import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
@@ -36,17 +37,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
 public class GenerateMObjectsTask implements Callable<MSpec> {
 
+	@NotNull
 	private final GAgencyTools agencyTools;
 	private final long routeId;
+	@NotNull
 	private final GSpec globalGTFS;
+	@NotNull
+	private final Map<String, List<GStopTime>> routeTripIdStopTimes = new HashMap<>();
 
-	GenerateMObjectsTask(long routeId, GAgencyTools agencyTools, GSpec gtfs) {
+	GenerateMObjectsTask(long routeId, @NotNull GAgencyTools agencyTools, @NotNull GSpec gtfs) {
 		this.routeId = routeId;
 		this.agencyTools = agencyTools;
 		this.globalGTFS = gtfs;
@@ -58,13 +64,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		try {
 			return doCall();
 		} catch (Exception e) {
-			throw new MTLog.Fatal("%s: FATAL ERROR!", this.routeId);
+			throw new MTLog.Fatal(e, "%s: FATAL ERROR!", this.routeId);
 		}
 	}
 
 	private MSpec doCall() {
 		long startAt = System.currentTimeMillis();
-		System.out.printf("\n%s: processing... ", this.routeId);
+		MTLog.log("%s: processing... ", this.routeId);
 		HashMap<String, MAgency> mAgencies = new HashMap<>();
 		HashSet<MServiceDate> mServiceDates = new HashSet<>();
 		HashMap<String, MSchedule> mSchedules = new HashMap<>();
@@ -76,14 +82,28 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		HashSet<Integer> tripStopIds = new HashSet<>(); // the list of stop IDs used by trips
 		HashSet<String> serviceIds = new HashSet<>();
 		final GSpec routeGTFS = this.globalGTFS.getRouteGTFS(this.routeId);
+		List<String> routeTripsIds = new ArrayList<>();
+		for (GRoute gRoute : routeGTFS.getRoutes(this.routeId)) {
+			List<GTrip> routeTrips = routeGTFS.getTrips(gRoute.getRouteId());
+			for (GTrip gTrip : routeTrips) {
+				routeTripsIds.add(gTrip.getTripId());
+			}
+		}
+		for (GStopTime gStopTime : DBUtils.selectStopTimes(null, routeTripsIds, null, null)) {
+			List<GStopTime> tripIdStopTimes = routeTripIdStopTimes.get(gStopTime.getTripId());
+			if (tripIdStopTimes == null) {
+				tripIdStopTimes = new ArrayList<>();
+			}
+			tripIdStopTimes.add(gStopTime);
+			routeTripIdStopTimes.put(gStopTime.getTripId(), tripIdStopTimes);
+		}
 		MAgency mAgency;
 		for (GAgency gAgency : routeGTFS.getAllAgencies()) {
 			mAgency = new MAgency(gAgency.getAgencyId(), gAgency.getAgencyTimezone(), this.agencyTools.getAgencyColor(), this.agencyTools.getAgencyRouteType());
 			if (mAgencies.containsKey(mAgency.getId()) && !mAgencies.get(mAgency.getId()).equals(mAgency)) {
-				System.out.printf("\n%s: Agency %s already in list!", this.routeId, mAgency.getId());
-				System.out.printf("\n%s: %s", this.routeId, mAgency.toString());
-				System.out.printf("\n%s: %s", this.routeId, mAgencies.get(mAgency.getId()).toString());
-				System.exit(-1);
+				MTLog.log("%s: Agency %s already in list!", this.routeId, mAgency.getId());
+				MTLog.log("%s: %s", this.routeId, mAgency.toString());
+				throw new MTLog.Fatal("%s: %s", this.routeId, mAgencies.get(mAgency.getId()).toString());
 			}
 			mAgencies.put(mAgency.getId(), mAgency);
 		}
@@ -101,7 +121,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()), gCalendarDate.getDate()));
 				break;
 			default:
-				System.out.printf("\n%s: Unexpected calendar date exception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
+				throw new MTLog.Fatal("%s: Unexpected calendar date exception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
 			}
 		}
 		for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
@@ -215,24 +235,18 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				Date firstDate = DATE_FORMAT.parse(firstCalendarDate + " " + String.format(Locale.ENGLISH, "%06d", firstDeparture));
 				firstTimestamp = firstDate.getTime();
 			} catch (Exception e) {
-				System.out.printf("\nError while parsing dates '%s %s'!\n", firstCalendarDate, firstDeparture);
-				e.printStackTrace();
-				System.exit(-1);
-				firstTimestamp = -1L;
+				throw new MTLog.Fatal(e, "Error while parsing dates '%s %s'!", firstCalendarDate, firstDeparture);
 			}
 			try {
 				Date lastDate = DATE_FORMAT.parse(lastCalendarDate + " " + String.format(Locale.ENGLISH, "%06d", lastDeparture));
 				lastTimestamp = lastDate.getTime();
 			} catch (Exception e) {
-				System.out.printf("\nError while parsing dates '%s %s'!\n", lastCalendarDate, lastDeparture);
-				e.printStackTrace();
-				System.exit(-1);
-				lastTimestamp = -1L;
+				throw new MTLog.Fatal(e, "Error while parsing dates '%s %s'!", lastCalendarDate, lastDeparture);
 			}
 		}
 		MSpec mRouteSpec = new MSpec(mAgenciesList, mStopsList, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, mStopScheduleMap,
 				mRouteFrequencies, firstTimestamp, lastTimestamp);
-		System.out.printf("\n%s: processing... DONE in %s.", this.routeId, org.mtransit.parser.Utils.getPrettyDuration(System.currentTimeMillis() - startAt));
+		MTLog.log("%s: processing... DONE in %s.", this.routeId, org.mtransit.parser.Utils.getPrettyDuration(System.currentTimeMillis() - startAt));
 		return mRouteSpec;
 	}
 
@@ -258,10 +272,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					mergeSuccessful = this.agencyTools.mergeRouteLongName(mRoute, mRoutes.get(mRoute.getId()));
 				}
 				if (!mergeSuccessful) {
-					System.out.printf("\n%s: Route %s already in list!", this.routeId, mRoute.getId());
-					System.out.printf("\n%s: %s", this.routeId, mRoute.toString());
-					System.out.printf("\n%s: %s.\n", this.routeId, mRoutes.get(mRoute.getId()).toString());
-					System.exit(-1);
+					MTLog.log("%s: Route %s already in list!", this.routeId, mRoute.getId());
+					MTLog.log("%s: %s", this.routeId, mRoute.toString());
+					throw new MTLog.Fatal("%s: %s.", this.routeId, mRoutes.get(mRoute.getId()).toString());
 				}
 			}
 			mRoutes.put(mRoute.getId(), mRoute);
@@ -281,21 +294,20 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			if (headsignTypeString && mTripHeadsignStrings.size() != mTrips.size()) {
 				MTLog.log("%s: Non descriptive trip headsigns (%s different headsign(s) for %s trips)", this.routeId, mTripHeadsignStrings.size(), mTrips.size());
 				for (MTrip mTrip : mTrips.values()) {
-					System.out.printf("\n%s: mTrip: %s", this.routeId, mTrip);
+					MTLog.log("%s: mTrip: %s", this.routeId, mTrip);
 					if (mTripStopTimesHeadsign.containsKey(mTrip.getId()) //
 							&& !mTrip.getHeadsignValue().equals(mTripStopTimesHeadsign.get(mTrip.getId()))) {
-						System.out.printf("\n%s: Replace trip headsign '%s' with stop times headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(),
+						MTLog.log("%s: Replace trip headsign '%s' with stop times headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(),
 								mTripStopTimesHeadsign.get(mTrip.getId()), mTrip);
 						mTrip.setHeadsignString(mTripStopTimesHeadsign.get(mTrip.getId()), mTrip.getHeadsignId());
 					} else {
 						if (tripKeptNonDescriptiveHeadsign) {
-							System.out.printf("\n%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
-							System.out.printf("\n%s: trip headsigns: %s", this.routeId, mTripHeadsignStrings);
-							System.out.printf("\n%s: trips: %s", this.routeId, mTrips);
-							System.out.print("\n");
-							System.exit(-1);
+							MTLog.log("%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
+							MTLog.log("%s: trip headsigns: %s", this.routeId, mTripHeadsignStrings);
+							MTLog.log("%s: trips: %s", this.routeId, mTrips);
+							throw new MTLog.Fatal("");
 						}
-						System.out.printf("\n%s: Keeping non-descriptive trip headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
+						MTLog.log("%s: Keeping non-descriptive trip headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
 						tripKeptNonDescriptiveHeadsign = true; // last trip that can keep same head sign
 					}
 				}
@@ -303,11 +315,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			for (MTrip mTrip : mTrips.values()) {
 				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING //
 						&& StringUtils.isEmpty(mTrip.getHeadsignValue())) {
-					System.out.printf("\n%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
-					System.out.printf("\n%s: %s", this.routeId, mTripHeadsignStrings);
-					System.out.printf("\n%s: %s", this.routeId, mTrips);
-					System.out.print("\n");
-					System.exit(-1);
+					MTLog.log("%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
+					MTLog.log("%s: %s", this.routeId, mTripHeadsignStrings);
+					MTLog.log("%s: %s", this.routeId, mTrips);
+					throw new MTLog.Fatal("");
 				}
 			}
 		}
@@ -315,7 +326,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			setMTripStopSequence(mTripStops);
 			for (MTripStop mTripStop : mTripStops) {
 				if (allMTripStops.containsKey(mTripStop.getUID()) && !allMTripStops.get(mTripStop.getUID()).equals(mTripStop)) {
-					System.out.printf("\n%s: Different trip stop %s already in route list (%s != %s)!", this.routeId, mTripStop.getUID(), mTripStop.toString(),
+					MTLog.log("%s: Different trip stop %s already in route list (%s != %s)!", this.routeId, mTripStop.getUID(), mTripStop.toString(),
 							allMTripStops.get(mTripStop.getUID()).toString());
 					continue;
 				}
@@ -358,8 +369,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						mergeSuccessful = this.agencyTools.mergeHeadsign(mTrip, mTrips.get(mTrip.getId()));
 					}
 					if (!mergeSuccessful) {
-						System.out.printf("\n%s: Different trip %s already in list (%s != %s)", this.routeId, mTrip.getId(), mTrip, mTrips.get(mTrip.getId()));
-						System.exit(-1);
+						throw new MTLog.Fatal("%s: Different trip %s already in list (%s != %s)", this.routeId, mTrip.getId(), mTrip, mTrips.get(mTrip.getId()));
 					}
 				}
 			}
@@ -382,7 +392,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (tripIdToMTripStops.containsKey(mTrip.getId())) {
 					cTripStopsList = tripIdToMTripStops.get(mTrip.getId());
 					if (!equalsMyTripStopLists(mTripStopsList, cTripStopsList)) {
-						System.out.printf("\n%s: Need to merge trip ID '%s'.", this.routeId, mTrip.getId());
+						MTLog.log("%s: Need to merge trip ID '%s'.", this.routeId, mTrip.getId());
 						tripIdToMTripStops.put(mTrip.getId(), setMTripStopSequence(mergeMyTripStopLists(mTripStopsList, cTripStopsList)));
 					}
 				} else { // just use it
@@ -404,7 +414,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
 						if (!mTripStopTimesHeadsign.get(mTrip.getId()).equals(tripStopTimesHeadsign)) {
 							if (!mTripStopTimesHeadsign.get(mTrip.getId()).contains(tripStopTimesHeadsign)) {
-								System.out.printf("\n%s: Trip stop times head-sign different for same trip ID ('%s'!='%s')", this.routeId,
+								MTLog.log("%s: Trip stop times head-sign different for same trip ID ('%s'!='%s')", this.routeId,
 										tripStopTimesHeadsign, mTripStopTimesHeadsign.get(mTrip.getId()));
 							}
 							mTripStopTimesHeadsign.put(mTrip.getId(),
@@ -427,7 +437,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				System.out.print(POINT); // LOG
 			} // LOG
 		}
-		System.out.printf("\n%s: parsing trips... DONE", this.routeId);
+		MTLog.log("%s: parsing trips... DONE", this.routeId);
 	}
 
 	private HashMap<Long, String> parseTripStops(HashMap<String, MSchedule> mSchedules, HashSet<String> serviceIds, MRoute mRoute,
@@ -452,9 +462,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			mStopId = this.agencyTools.getStopId(gStop);
 			this.gStopsCache.put(mStopId, gStop);
 			if (mStopId < 0) {
-				System.out.printf("\n%s: Can't find GTFS stop ID (%s) '%s' from trip ID '%s' (%s)\n", this.routeId, mStopId, gTripStop.getStopId(),
+				throw new MTLog.Fatal("%s: Can't find GTFS stop ID (%s) '%s' from trip ID '%s' (%s)", this.routeId, mStopId, gTripStop.getStopId(),
 						gTripStop.getTripId(), gStop);
-				System.exit(-1);
 			}
 			mTripsAndStopSequences = this.agencyTools.splitTripStop(mRoute, gTrip, gTripStop, splitTrips, routeGTFS);
 			for (int i = 0; i < mTripsAndStopSequences.first.length; i++) {
@@ -465,17 +474,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 				if (splitTripStops.get(mTripId).containsKey(mTripStop.getUID())) {
 					if (!splitTripStops.get(mTripId).get(mTripStop.getUID()).equalsExceptStopSequence(mTripStop)) {
-						System.out.printf("\n%s: Different trip stop %s already in list (%s != %s)!\n", this.routeId, mTripStop.getUID(), mTripStop.toString(),
+						throw new MTLog.Fatal("%s: Different trip stop %s already in list (%s != %s)!", this.routeId, mTripStop.getUID(), mTripStop.toString(),
 								splitTripStops.get(mTripId).get(mTripStop.getUID()).toString());
-						System.exit(-1);
 					}
 				} else {
 					splitTripStops.get(mTripId).put(mTripStop.getUID(), mTripStop);
 				}
 				tripStopTimesHeadsign = splitTripStopTimesHeadSign.get(mTripId);
 				if (!originalTripHeadsign.containsKey(mTripId)) {
-					System.out.printf("\n%s: Unexpected trip head-sign ID '%s'! (%s)\n", this.routeId, mTripId, originalTripHeadsign);
-					System.exit(-1);
+					throw new MTLog.Fatal("%s: Unexpected trip head-sign ID '%s'! (%s)", this.routeId, mTripId, originalTripHeadsign);
 				}
 				tripStopTimesHeadsign = parseStopTimes(mSchedules, mRoute, //
 						mTripId, tripServiceId,
@@ -518,16 +525,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		String stopHeadsign;
 		boolean descentOnly;
 		String tripIdStopId;
-		List<GStopTime> gStopTimes = routeGTFS.getStopTimes(null, gTripStop.getTripId(), gTripStop.getStopId(), gTripStop.getStopSequence());
+		List<GStopTime> gStopTimes = routeTripIdStopTimes.get(gTripStop.getTripId());
 		int lastStopSequence = -1;
 		GStopTime lastStopTime = null;
 		for (int i = 0; i < gStopTimes.size(); i++) {
 			GStopTime gStopTime = gStopTimes.get(i);
 			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
 				if (gStopTime.getStopSequence() < lastStopSequence) {
-					System.out.printf("\n%s: Stop sequence out of order (%s => '%s')!\n", this.routeId, lastStopSequence, gStopTime);
-					System.out.printf("\n%s: Stop sequence out of order ([%s] => [%s])!\n", this.routeId, lastStopTime, gStopTime);
-					System.exit(-1);
+					MTLog.log("%s: Stop sequence out of order (%s => '%s')!", this.routeId, lastStopSequence, gStopTime);
+					throw new MTLog.Fatal("%s: Stop sequence out of order ([%s] => [%s])!", this.routeId, lastStopTime, gStopTime);
 				}
 			}
 			lastStopSequence = gStopTime.getStopSequence();
@@ -549,7 +555,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
 						// TODO later, when UI can display multiple times same stop/POI & schedules are affected to a specific sequence, keep both
 					} else {
-						System.out.printf("\n%s: parseStopTimes() > SKIP same stop & descent only %s.", this.routeId, gStopTime);
+						MTLog.log("%s: parseStopTimes() > SKIP same stop & descent only %s.", this.routeId, gStopTime);
 						continue;
 					}
 				}
@@ -559,9 +565,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					gStopTime.getTripId());
 			if (mSchedules.containsKey(mSchedule.getUID()) //
 					&& !mSchedules.get(mSchedule.getUID()).equals(mSchedule)) {
-				System.out.printf("\n%s: Different schedule %s already in list (%s != %s)!\n", this.routeId, mSchedule.getUID(), mSchedule,
+				throw new MTLog.Fatal("%s: Different schedule %s already in list (%s != %s)!", this.routeId, mSchedule.getUID(), mSchedule,
 						mSchedules.get(mSchedule.getUID()));
-				System.exit(-1);
 			}
 			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY //
 					&& descentOnly) {
@@ -601,9 +606,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mFrequency = new MFrequency(tripServiceId, mRoute.getId(), mTrip.getId(), this.agencyTools.getStartTime(gFrequency),
 						this.agencyTools.getEndTime(gFrequency), gFrequency.getHeadwaySecs());
 				if (mFrequencies.containsKey(mFrequency.getUID()) && !mFrequencies.get(mFrequency.getUID()).equals(mFrequency)) {
-					System.out.printf("\n%s: Different frequency %s already in list (%s != %s)\n!", this.routeId, mFrequency.getUID(), mFrequency.toString(),
+					throw new MTLog.Fatal("%s: Different frequency %s already in list (%s != %s)\n!", this.routeId, mFrequency.getUID(), mFrequency.toString(),
 							mFrequencies.get(mFrequency.getUID()).toString());
-					System.exit(-1);
 				}
 				mFrequencies.put(mFrequency.getUID(), mFrequency);
 			}
@@ -705,12 +709,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			ts1 = list1.get(i1);
 			ts2 = list2.get(i2);
 			if (newListStopIds.contains(ts1.getStopId())) {
-				System.out.printf("\n%s: Skipped %s because already in the merged list (1).", this.routeId, ts1.toString());
+				MTLog.log("%s: Skipped %s because already in the merged list (1).", this.routeId, ts1.toString());
 				i1++; // skip this stop because already in the merged list
 				continue;
 			}
 			if (newListStopIds.contains(ts2.getStopId())) {
-				System.out.printf("\n%s: Skipped %s because already in the merged list (2).", this.routeId, ts2.toString());
+				MTLog.log("%s: Skipped %s because already in the merged list (2).", this.routeId, ts2.toString());
 				i2++; // skip this stop because already in the merged list
 				continue;
 			}
@@ -746,7 +750,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				lastInL1 = list1StopIds.contains(last.getStopId());
 				lastInL2 = list2StopIds.contains(last.getStopId());
 				if (lastInL1 && !lastInL2) {
-					System.out.printf("\n%s: Resolved using last [tripID:%s|ts1.stopID:%s|ts2.stopID:%s] (last.stopID:%s) > insert: %s instead of %s.",
+					MTLog.log("%s: Resolved using last [tripID:%s|ts1.stopID:%s|ts2.stopID:%s] (last.stopID:%s) > insert: %s instead of %s.",
 							this.routeId, ts1.getTripId(), ts1.getStopId(), ts2.getStopId(), last.getStopId(), ts1, ts2);
 					newList.add(ts1);
 					newListStopIds.add(ts1.getStopId());
@@ -755,7 +759,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					continue;
 				}
 				if (!lastInL1 && lastInL2) {
-					System.out.printf("\n%s: Resolved using last [tripID:%s|ts1.stopID:%s|ts2.stopID:%s] (last.stopID:%s) > insert: %s instead of %s.",
+					MTLog.log("%s: Resolved using last [tripID:%s|ts1.stopID:%s|ts2.stopID:%s] (last.stopID:%s) > insert: %s instead of %s.",
 							this.routeId, ts1.getTripId(), ts1.getStopId(), ts2.getStopId(), last.getStopId(), ts2, ts1);
 					newList.add(ts2);
 					newListStopIds.add(ts2.getStopId());
@@ -787,7 +791,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				ts1Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts1GStop.getStopLat(), ts1GStop.getStopLong());
 				ts2Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts2GStop.getStopLat(), ts2GStop.getStopLong());
 				if (ts1Distance < ts2Distance) {
-					System.out.print("\n" + this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
+					MTLog.log("" + this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
 							+ "|stopID2:" + ts2.getStopId() + "] (lastStopID:" + last.getStopId() + "|distance1:" + ts1Distance + "|distance2:" + ts2Distance
 							+ ") > insert: " + ts1 + " instead of " + ts2);
 					newList.add(ts1);
@@ -796,7 +800,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					i1++;
 					continue;
 				} else {
-					System.out.print("\n" + this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
+					MTLog.log("" + this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
 							+ "|stopID2:" + ts2.getStopId() + "] (lastStopID:" + last.getStopId() + "|distance1:" + ts1Distance + "|distance2:" + ts2Distance
 							+ ") > insert: " + ts2 + " instead of " + ts1);
 					newList.add(ts2);
@@ -816,7 +820,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						previousTs1GStop.getStopLong());
 				previousTs2Distance = findDistance(commonGStop.getStopLat(), commonGStop.getStopLong(), previousTs2GStop.getStopLat(),
 						previousTs2GStop.getStopLong());
-				System.out.print("\n" + this.routeId + ": Resolved using 1st common stop trip ID:" + ts1.getTripId() + ", stop IDs:" + ts1.getStopId() + ","
+				MTLog.log("" + this.routeId + ": Resolved using 1st common stop trip ID:" + ts1.getTripId() + ", stop IDs:" + ts1.getStopId() + ","
 						+ ts2.getStopId() + " (" + commonStopAndPrevious[1].getStopId() + " " + previousTs1Distance + ", "
 						+ commonStopAndPrevious[2].getStopId() + " " + previousTs2Distance + ")");
 				if (previousTs1Distance > previousTs2Distance) {
@@ -892,7 +896,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			for (MTripStop tts2 : l2) {
 				if (tts1.getStopId() == tts2.getStopId()) {
 					if (previousTs1 == null || previousTs2 == null) {
-						System.out.print("\n" + this.routeId + ": findFirstCommonStop() > Common stop found '" + tts1.getStopId()
+						MTLog.log("" + this.routeId + ": findFirstCommonStop() > Common stop found '" + tts1.getStopId()
 								+ "' but no previous stop! Looking for next common stop...");
 					} else {
 						commonStopAndPrevious = new MTripStop[3];

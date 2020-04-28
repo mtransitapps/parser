@@ -2,6 +2,7 @@ package org.mtransit.parser.mt;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.FileUtils;
 import org.mtransit.parser.MTLog;
@@ -48,7 +49,7 @@ import java.util.regex.Pattern;
 
 public class MGenerator {
 
-	public static MSpec generateMSpec(GSpec gtfs, GAgencyTools agencyTools) {
+	public static MSpec generateMSpec(@NotNull GSpec gtfs, @NotNull GAgencyTools agencyTools) {
 		MTLog.log("\nGenerating routes, trips, trip stops & stops objects... ");
 		HashSet<MAgency> mAgencies = new HashSet<>(); // use set to avoid duplicates
 		HashSet<MRoute> mRoutes = new HashSet<>(); // use set to avoid duplicates
@@ -134,8 +135,6 @@ public class MGenerator {
 					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (EMPTY)", mRouteSpec.getFirstRoute().getId());
 				}
 				MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
-			} catch (InterruptedException | ExecutionException e) {
-				MTLog.logFatal(e, e.getMessage());
 			} catch (Throwable t) {
 				MTLog.logFatal(t, t.getMessage());
 			}
