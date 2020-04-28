@@ -299,7 +299,6 @@ public class GSpec {
 				addTripStops(new GTripStop(uid, gStopTime.getTripId(), gStopTime.getStopId(), gStopTime.getStopSequence()));
 			}
 		}
-		}
 		MTLog.log("Generating GTFS trip stops... DONE");
 		MTLog.log("- Trip stops: %d", this.tripStopsCount);
 	}
