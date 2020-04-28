@@ -282,8 +282,9 @@ public class GSpec {
 		String tripUID;
 		int stopTimesCount = readStopTimesCount();
 		int offset = 0;
-		int maxRowNumber = 1_000_000;
+		int maxRowNumber = 100_000;
 		while (offset < stopTimesCount) {
+			MTLog.log("Generating GTFS trip stops... (%d -> %d)", offset, offset + maxRowNumber);
 			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(null, maxRowNumber, offset);
 			offset += tripStopTimes.size();
 			for (GStopTime gStopTime : tripStopTimes) {
