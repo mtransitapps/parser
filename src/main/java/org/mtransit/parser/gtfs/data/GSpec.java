@@ -173,7 +173,7 @@ public class GSpec {
 										@SuppressWarnings("unused") @Nullable String optGStopId,
 										@SuppressWarnings("unused") @Nullable Integer optGStopSequence) {
 		if (optGTripId != null) {
-			return DBUtils.selectStopTimes(optGTripId);
+			return DBUtils.selectStopTimes(optGTripId, null, null);
 		}
 		throw new MTLog.Fatal("getStopTimes() > trying to use ALL stop times!");
 	}
@@ -280,18 +280,25 @@ public class GSpec {
 		MTLog.log("Generating GTFS trip stops...");
 		String uid;
 		String tripUID;
-		List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(null);
-		for (GStopTime gStopTime : tripStopTimes) {
-			tripUID = this.tripIdsUIDs.get(gStopTime.getTripId());
-			if (tripUID == null) {
-				continue;
+		int stopTimesCount = readStopTimesCount();
+		int offset = 0;
+		int maxRowNumber = 1_000_000;
+		while (offset < stopTimesCount) {
+			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(null, maxRowNumber, offset);
+			offset += tripStopTimes.size();
+			for (GStopTime gStopTime : tripStopTimes) {
+				tripUID = this.tripIdsUIDs.get(gStopTime.getTripId());
+				if (tripUID == null) {
+					continue;
+				}
+				uid = GTripStop.getUID(tripUID, gStopTime.getStopId(), gStopTime.getStopSequence());
+				if (this.tripStopsUIDs.contains(uid)) {
+					MTLog.log("Generating GTFS trip stops... > (uid: %s) SKIP %s", uid, gStopTime);
+					continue;
+				}
+				addTripStops(new GTripStop(uid, gStopTime.getTripId(), gStopTime.getStopId(), gStopTime.getStopSequence()));
 			}
-			uid = GTripStop.getUID(tripUID, gStopTime.getStopId(), gStopTime.getStopSequence());
-			if (this.tripStopsUIDs.contains(uid)) {
-				MTLog.log("Generating GTFS trip stops... > (uid: %s) SKIP %s", uid, gStopTime);
-				continue;
-			}
-			addTripStops(new GTripStop(uid, gStopTime.getTripId(), gStopTime.getStopId(), gStopTime.getStopSequence()));
+		}
 		}
 		MTLog.log("Generating GTFS trip stops... DONE");
 		MTLog.log("- Trip stops: %d", this.tripStopsCount);
@@ -312,13 +319,14 @@ public class GSpec {
 		MTLog.log("Generating GTFS stop times from frequencies...");
 		MTLog.log("- Stop times: %d (before)", readStopTimesCount());
 		SimpleDateFormat gDateFormat = getNewTimeFormatInstance();
+		DBUtils.setAutoCommit(false);
 		int st = 0;
 		for (String tripId : this.tripIdFrequencies.keySet()) {
 			if (!this.tripIdsUIDs.containsKey(tripId)) {
 				continue; // excluded service ID
 			}
 			ArrayList<GFrequency> tripFrequencies = this.tripIdFrequencies.get(tripId);
-			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripId);
+			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripId, null, null);
 			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
 				if (!tripStopTimes.isEmpty()) {
 					GStopTime firstStopTime = tripStopTimes.get(0);
@@ -401,13 +409,14 @@ public class GSpec {
 				st++;
 			}
 		}
+		DBUtils.setAutoCommit(true);
 		MTLog.log("Generating GTFS stop times from frequencies... DONE");
 		MTLog.log("- Stop times: %d (after) (new: %d)", readStopTimesCount(), st);
 	}
 
 	@SuppressWarnings("UnusedReturnValue")
 	@NotNull
-	private Calendar getDepartureTimeCal(@NotNull Calendar calendar, SimpleDateFormat gDateFormat, long mRouteId, GStopTime gStopTime) throws ParseException {
+	private Calendar getDepartureTimeCal(@NotNull Calendar calendar, @NotNull SimpleDateFormat gDateFormat, long mRouteId, GStopTime gStopTime) throws ParseException {
 		if (StringUtils.isEmpty(gStopTime.getDepartureTime())) {
 			long departureTimeInMs = DefaultAgencyTools.extractTimeInMs(gStopTime, getRouteGTFS(mRouteId), gDateFormat).second;
 			calendar.setTimeInMillis(departureTimeInMs);

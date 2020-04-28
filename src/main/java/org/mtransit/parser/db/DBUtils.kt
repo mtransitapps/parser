@@ -48,11 +48,13 @@ object DBUtils {
         )
     }
 
+    @Suppress("unused")
     fun beginTransaction() {
         val statement = connection.createStatement()
         executeQuery(statement, "BEGIN TRANSACTION")
     }
 
+    @Suppress("unused")
     fun endTransaction() {
         val statement = connection.createStatement()
         executeQuery(statement, "END TRANSACTION")
@@ -63,6 +65,7 @@ object DBUtils {
         connection.autoCommit = autoCommit
     }
 
+    @Suppress("unused")
     @JvmStatic
     fun commit() {
         connection.commit()
@@ -88,7 +91,11 @@ object DBUtils {
 
     @Suppress("unused")
     @JvmStatic
-    fun selectStopTimes(tripId: String? = null): List<GStopTime> {
+    fun selectStopTimes(
+        tripId: String? = null,
+        limitMaxNbRow: Int? = null,
+        limitOffset: Int? = null
+    ): List<GStopTime> {
         var query = "SELECT * FROM $STOP_TIMES_TABLE_NAME"
         tripId?.let {
             query += " WHERE ${GStopTime.TRIP_ID} = '$tripId'"
@@ -97,6 +104,12 @@ object DBUtils {
                 "${GStopTime.TRIP_ID} ASC, " +
                 "${GStopTime.STOP_SEQUENCE} ASC, " +
                 "${GStopTime.DEPARTURE_TIME} ASC"
+        limitMaxNbRow?.let {
+            query += " LIMIT $limitMaxNbRow"
+            limitOffset?.let {
+                query += " OFFSET $limitOffset"
+            }
+        }
         val result = ArrayList<GStopTime>()
         val rs = executeQuery(connection.createStatement(), query)
         while (rs.next()) {
@@ -162,21 +175,21 @@ object DBUtils {
 
     private fun execute(statement: Statement, query: String): Boolean {
         if (Constants.LOG_SQL) {
-            MTLog.logDebug("SQL: $query.")
+            MTLog.logDebug("SQL > $query.")
         }
         return statement.execute(query)
     }
 
     private fun executeQuery(statement: Statement, query: String): ResultSet {
         if (Constants.LOG_SQL_QUERY) {
-            MTLog.logDebug("SQL: $query.")
+            MTLog.logDebug("SQL > $query.")
         }
         return statement.executeQuery(query)
     }
 
     private fun executeUpdate(statement: Statement, query: String): Int {
         if (Constants.LOG_SQL_UPDATE) {
-            MTLog.logDebug("SQL: $query.")
+            MTLog.logDebug("SQL > $query.")
         }
         return statement.executeUpdate(query)
     }

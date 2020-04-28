@@ -384,7 +384,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	public static Pair<Long, Long> extractTimeInMs(GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat) throws ParseException {
+	@NotNull
+	public static Pair<Long, Long> extractTimeInMs(@NotNull GStopTime gStopTime,
+												   @NotNull GSpec routeGTFS,
+												   @NotNull SimpleDateFormat gDateFormat) throws ParseException {
 		String previousArrivalTime = null;
 		Integer previousArrivalTimeStopSequence = null;
 		String previousDepartureTime = null;
@@ -465,8 +468,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	protected static class Period {
+		@Nullable
 		Integer todayStringInt = null;
+		@Nullable
 		Integer startDate = null;
+		@Nullable
 		Integer endDate = null;
 
 		@Override
@@ -512,9 +518,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		List<GCalendarDate> gCalendarDates = gtfs.getAllCalendarDates();
 		printMinMaxDate(gCalendars, gCalendarDates);
 		boolean hasCurrent = false;
-		if (gCalendars != null && gCalendars.size() > 0) {
+		if (gCalendars.size() > 0) {
 			parseCalendars(gCalendars, DATE_FORMAT, c, usefulPeriod, isCurrentOrNext); // CURRENT OR NEXT
-		} else if (gCalendarDates != null && gCalendarDates.size() > 0) {
+		} else if (gCalendarDates.size() > 0) {
 			parseCalendarDates(gCalendarDates, DATE_FORMAT, c, usefulPeriod, isCurrentOrNext); // CURRENT OR NEXT
 		} else {
 			MTLog.logFatal("NO schedule available for %s! (1)", usefulPeriod.todayStringInt);
@@ -557,9 +563,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			usefulPeriod.startDate = null; // reset
 			usefulPeriod.endDate = null; // reset
-			if (gCalendars != null && gCalendars.size() > 0) {
+			if (gCalendars.size() > 0) {
 				parseCalendars(gCalendars, DATE_FORMAT, c, usefulPeriod, false); // NEXT
-			} else if (gCalendarDates != null && gCalendarDates.size() > 0) {
+			} else if (gCalendarDates.size() > 0) {
 				parseCalendarDates(gCalendarDates, DATE_FORMAT, c, usefulPeriod, false); // NEXT
 			}
 			if (usefulPeriod.startDate == null || usefulPeriod.endDate == null) {
