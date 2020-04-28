@@ -8,6 +8,15 @@ public final class Constants {
 	public static boolean DEBUG = false;
 	// public static boolean DEBUG = true; // DEBUG
 
+	public static boolean LOG_SQL = false;
+	// public static boolean LOG_SQL = true; // DEBUG
+
+	public static boolean LOG_SQL_UPDATE = false;
+	// public static boolean LOG_SQL_UPDATE = true; // DEBUG
+
+	public static boolean LOG_SQL_QUERY = false;
+	// public static boolean LOG_SQL_QUERY = true; // DEBUG
+
 	public static final char NEW_LINE = '\n';
 
 	public static final char SPACE = ' ';

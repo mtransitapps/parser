@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Utils;
+import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
@@ -159,9 +160,11 @@ public class GReader {
 				} else {
 					fr = new FileReader(stopTimeFile);
 					reader = new BufferedReader(fr);
+					DBUtils.setAutoCommit(false);
 					readCsv(stopTimeFile.getName(), reader, line ->
 							processStopTime(agencyTools, gSpec, line)
 					);
+					DBUtils.setAutoCommit(true); // true => commit()
 				}
 			}
 			// TODO OTHER FILE TYPE

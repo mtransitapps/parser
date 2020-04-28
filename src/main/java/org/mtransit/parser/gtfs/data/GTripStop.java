@@ -2,8 +2,9 @@ package org.mtransit.parser.gtfs.data;
 
 import org.mtransit.parser.Constants;
 
-// https://developers.google.com/transit/gtfs/reference#stop_times_trip_id_field
-// https://developers.google.com/transit/gtfs/reference#stop_times_stop_id_field
+// https://developers.google.com/transit/gtfs/reference#stop_timestxt
+// -_trip_id field
+// - stop_id field
 public class GTripStop {
 
 	private String uid;

@@ -280,20 +280,18 @@ public class GSpec {
 		MTLog.log("Generating GTFS trip stops...");
 		String uid;
 		String tripUID;
-		for (String tripId : this.tripIdsUIDs.keySet()) {
-			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripId);
-			for (GStopTime gStopTime : tripStopTimes) {
-				tripUID = this.tripIdsUIDs.get(gStopTime.getTripId());
-				if (tripUID == null) {
-					continue;
-				}
-				uid = GTripStop.getUID(tripUID, gStopTime.getStopId(), gStopTime.getStopSequence());
-				if (this.tripStopsUIDs.contains(uid)) {
-					MTLog.log("Generating GTFS trip stops... > (uid: %s) SKIP %s", uid, gStopTime);
-					continue;
-				}
-				addTripStops(new GTripStop(uid, gStopTime.getTripId(), gStopTime.getStopId(), gStopTime.getStopSequence()));
+		List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(null);
+		for (GStopTime gStopTime : tripStopTimes) {
+			tripUID = this.tripIdsUIDs.get(gStopTime.getTripId());
+			if (tripUID == null) {
+				continue;
 			}
+			uid = GTripStop.getUID(tripUID, gStopTime.getStopId(), gStopTime.getStopSequence());
+			if (this.tripStopsUIDs.contains(uid)) {
+				MTLog.log("Generating GTFS trip stops... > (uid: %s) SKIP %s", uid, gStopTime);
+				continue;
+			}
+			addTripStops(new GTripStop(uid, gStopTime.getTripId(), gStopTime.getStopId(), gStopTime.getStopSequence()));
 		}
 		MTLog.log("Generating GTFS trip stops... DONE");
 		MTLog.log("- Trip stops: %d", this.tripStopsCount);
