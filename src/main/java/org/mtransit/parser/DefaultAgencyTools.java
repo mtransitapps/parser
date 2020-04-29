@@ -64,11 +64,18 @@ public class DefaultAgencyTools implements GAgencyTools {
 		// GOOD_ENOUGH_ACCEPTED = true; // DEBUG
 	}
 
+	public static final boolean IS_CI;
+	static {
+		final String isCI = System.getenv("CI");
+		IS_CI = isCI != null && !isCI.isEmpty();
+		// IS_CI = true; // DEBUG
+	}
+
 	private static final Integer THREAD_POOL_SIZE;
 
 	static {
-		final String isCI = System.getenv("CI");
-		if (isCI != null && !isCI.isEmpty()) {
+		//noinspection ConstantConditions
+		if (IS_CI) {
 			THREAD_POOL_SIZE = 1;
 		} else {
 			THREAD_POOL_SIZE = 4;
@@ -487,15 +494,17 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@SuppressWarnings("unused")
 	@Deprecated
-	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools) {
+	@NotNull
+	public static HashSet<String> extractUsefulServiceIds(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools) {
 		return extractUsefulServiceIds(args, agencyTools, false);
 	}
 
 	@Nullable
 	private static Period usefulPeriod = null;
 
+	@NotNull
 	@SuppressWarnings("WeakerAccess")
-	public static HashSet<String> extractUsefulServiceIds(String[] args, DefaultAgencyTools agencyTools, boolean agencyFilter) {
+	public static HashSet<String> extractUsefulServiceIds(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools, boolean agencyFilter) {
 		MTLog.log("Extracting useful service IDs...");
 		usefulPeriod = new Period();
 		SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
@@ -523,8 +532,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		} else if (gCalendarDates.size() > 0) {
 			parseCalendarDates(gCalendarDates, DATE_FORMAT, c, usefulPeriod, isCurrentOrNext); // CURRENT OR NEXT
 		} else {
-			MTLog.logFatal("NO schedule available for %s! (1)", usefulPeriod.todayStringInt);
-			return null;
+			throw new MTLog.Fatal("NO schedule available for %s! (1)", usefulPeriod.todayStringInt);
 		}
 		if (!isNext //
 				&& (usefulPeriod.startDate == null || usefulPeriod.endDate == null)) {
@@ -535,9 +543,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 				return null;
 			}
 			//noinspection ConstantConditions
-			MTLog.logFatal("NO schedule available for %s! (start:%s|end:%s) (isCurrent:%s|isNext:%s)", usefulPeriod.todayStringInt,
+			throw new MTLog.Fatal("NO schedule available for %s! (start:%s|end:%s) (isCurrent:%s|isNext:%s)", usefulPeriod.todayStringInt,
 					usefulPeriod.startDate, usefulPeriod.endDate, isCurrent, isNext);
-			return null;
 		}
 		if (usefulPeriod.todayStringInt != null && usefulPeriod.startDate != null && usefulPeriod.endDate != null) {
 			hasCurrent = true;
@@ -892,6 +899,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		MTLog.logDebugMethodEnd("findDayServiceIdsPeriod");
 	}
 
+	@NotNull
 	private static HashSet<String> getPeriodServiceIds(Integer startDate, Integer endDate, List<GCalendar> gCalendars, List<GCalendarDate> gCalendarDates) {
 		HashSet<String> serviceIds = new HashSet<>();
 		if (gCalendars != null) {

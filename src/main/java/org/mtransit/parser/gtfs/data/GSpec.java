@@ -46,14 +46,11 @@ public class GSpec {
 	@NotNull
 	private final HashMap<String, String> tripIdsUIDs = new HashMap<>();
 	private int frequenciesCount = 0;
-	private int tripStopsCount = 0;
 	@NotNull
 	private final HashSet<String> tripStopsUIDs = new HashSet<>();
 
 	@NotNull
 	private final HashMap<String, ArrayList<GTrip>> routeIdTrips = new HashMap<>();
-	@NotNull
-	private final HashMap<String, ArrayList<GTripStop>> tripIdTripStops = new HashMap<>();
 	@NotNull
 	private final HashMap<String, ArrayList<GFrequency>> tripIdFrequencies = new HashMap<>();
 
@@ -210,22 +207,14 @@ public class GSpec {
 	@NotNull
 	public List<GTripStop> getTripStops(@Nullable String optTripId) {
 		if (optTripId != null) {
-			if (this.tripIdTripStops.containsKey(optTripId)) {
-				return this.tripIdTripStops.get(optTripId);
-			} else {
-				return Collections.emptyList();
-			}
+			return DBUtils.selectTripStops(optTripId, null, null, null);
 		}
 		throw new MTLog.Fatal("getTripStops() > trying to use ALL trip stops!");
 	}
 
 	private void addTripStops(@NotNull GTripStop gTripStop) {
 		this.tripStopsUIDs.add(gTripStop.getUID());
-		if (!this.tripIdTripStops.containsKey(gTripStop.getTripId())) {
-			this.tripIdTripStops.put(gTripStop.getTripId(), new ArrayList<>());
-		}
-		this.tripIdTripStops.get(gTripStop.getTripId()).add(gTripStop);
-		this.tripStopsCount++;
+		DBUtils.insertTripStop(gTripStop);
 	}
 
 	private static final String AGENCIES = "agencies:";
@@ -249,7 +238,7 @@ public class GSpec {
 				STOPS + this.stopIdStops.size() + Constants.COLUMN_SEPARATOR + //
 				STOP_TIMES + readStopTimesCount() + Constants.COLUMN_SEPARATOR + //
 				FREQUENCIES + this.frequenciesCount + Constants.COLUMN_SEPARATOR + //
-				TRIP_STOPS + this.tripStopsCount + Constants.COLUMN_SEPARATOR + //
+				TRIP_STOPS + readTripStopsCount() + Constants.COLUMN_SEPARATOR + //
 				']';
 	}
 
@@ -275,13 +264,18 @@ public class GSpec {
 		return DBUtils.countStopTimes();
 	}
 
+	private int readTripStopsCount() {
+		return DBUtils.countTripStops();
+	}
+
 	public void generateTripStops() {
 		MTLog.log("Generating GTFS trip stops...");
 		String uid;
 		String tripUID;
 		int stopTimesCount = readStopTimesCount();
 		int offset = 0;
-		int maxRowNumber = 100_000;
+		int maxRowNumber = DefaultAgencyTools.IS_CI ? 100_000 : 1_000_000;
+		DBUtils.setAutoCommit(false);
 		while (offset < stopTimesCount) {
 			MTLog.log("Generating GTFS trip stops... (%d -> %d)", offset, offset + maxRowNumber);
 			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(null, null, maxRowNumber, offset);
@@ -291,7 +285,7 @@ public class GSpec {
 				if (tripUID == null) {
 					continue;
 				}
-				uid = GTripStop.getUID(tripUID, gStopTime.getStopId(), gStopTime.getStopSequence());
+				uid = GTripStop.getNewUID(tripUID, gStopTime.getStopId(), gStopTime.getStopSequence());
 				if (this.tripStopsUIDs.contains(uid)) {
 					MTLog.log("Generating GTFS trip stops... > (uid: %s) SKIP %s", uid, gStopTime);
 					continue;
@@ -299,8 +293,9 @@ public class GSpec {
 				addTripStops(new GTripStop(uid, gStopTime.getTripId(), gStopTime.getStopId(), gStopTime.getStopSequence()));
 			}
 		}
+		DBUtils.setAutoCommit(true); // true => commit()
 		MTLog.log("Generating GTFS trip stops... DONE");
-		MTLog.log("- Trip stops: %d", this.tripStopsCount);
+		MTLog.log("- Trip stops: %d", readTripStopsCount());
 	}
 
 	private static final Pattern TIME_SEPARATOR_REGEX = Pattern.compile(":");
@@ -325,7 +320,7 @@ public class GSpec {
 				continue; // excluded service ID
 			}
 			ArrayList<GFrequency> tripFrequencies = this.tripIdFrequencies.get(tripId);
-			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripId, null, null,null);
+			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripId, null, null, null);
 			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
 				if (!tripStopTimes.isEmpty()) {
 					GStopTime firstStopTime = tripStopTimes.get(0);
@@ -519,6 +514,7 @@ public class GSpec {
 	public void clearRawData() {
 	}
 
+	@SuppressWarnings("unused")
 	public void cleanupRouteGTFS(@NotNull Long mRouteId) {
 		MTLog.log("%d: Removing route data...", mRouteId);
 		int r = 0;

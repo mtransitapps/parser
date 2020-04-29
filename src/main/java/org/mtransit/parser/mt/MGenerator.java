@@ -3,6 +3,7 @@ package org.mtransit.parser.mt;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.FileUtils;
 import org.mtransit.parser.MTLog;
@@ -40,7 +41,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -49,6 +49,7 @@ import java.util.regex.Pattern;
 
 public class MGenerator {
 
+	@NotNull
 	public static MSpec generateMSpec(@NotNull GSpec gtfs, @NotNull GAgencyTools agencyTools) {
 		MTLog.log("\nGenerating routes, trips, trip stops & stops objects... ");
 		HashSet<MAgency> mAgencies = new HashSet<>(); // use set to avoid duplicates
@@ -136,7 +137,7 @@ public class MGenerator {
 				}
 				MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
 			} catch (Throwable t) {
-				MTLog.logFatal(t, t.getMessage());
+				throw new MTLog.Fatal(t, t.getMessage());
 			}
 		}
 		MTLog.log("Generating routes, trips, trip stops & stops objects... (all routes completed)");
@@ -176,11 +177,11 @@ public class MGenerator {
 	private static final String GTFS_RTS_TRIP_STOPS = "gtfs_rts_trip_stops";
 	private static final String GTFS_RTS_STOPS = "gtfs_rts_stops";
 
-	public static void dumpFiles(MSpec mSpec, String gtfsFile, String dumpDir, final String fileBase) {
+	public static void dumpFiles(@Nullable MSpec mSpec, @NotNull String gtfsFile, @NotNull String dumpDir, final @NotNull String fileBase) {
 		dumpFiles(mSpec, gtfsFile, dumpDir, fileBase, false);
 	}
 
-	public static void dumpFiles(MSpec mSpec, String gtfsFile, String dumpDir, final String fileBase, boolean deleteAll) {
+	public static void dumpFiles(@Nullable MSpec mSpec, @NotNull String gtfsFile, @NotNull String dumpDir, final @NotNull String fileBase, boolean deleteAll) {
 		if (!deleteAll && (mSpec == null || !mSpec.isValid())) {
 			MTLog.logFatal("ERROR: Generated data invalid (agencies:%s)!", mSpec);
 			return;
@@ -601,7 +602,6 @@ public class MGenerator {
 		SimpleDateFormat SCHEDULE_DATE = new SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH);
 		SimpleDateFormat SCHEDULE_DATE_FR = new SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH);
 		File file;
-		BufferedWriter ow = null;
 		File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
 		File dumpDirPlayF = new File(dumpDirRootF, PLAY);
 		File dumpDirReleaseNotesF = new File(dumpDirPlayF, RELEASE_NOTES);
@@ -622,8 +622,6 @@ public class MGenerator {
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF_8);
 			} catch (Exception ioe) {
 				MTLog.logFatal(ioe, "Error while writing store listing files!");
-			} finally {
-				IOUtils.closeQuietly(ow);
 			}
 		} else {
 			MTLog.log("Do not generate store listing file: %s.", file);
@@ -642,8 +640,6 @@ public class MGenerator {
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF_8);
 			} catch (Exception ioe) {
 				MTLog.logFatal(ioe, "Error while writing store listing files!");
-			} finally {
-				IOUtils.closeQuietly(ow);
 			}
 		} else {
 			MTLog.log("Do not generate store listing file: %s.", file);

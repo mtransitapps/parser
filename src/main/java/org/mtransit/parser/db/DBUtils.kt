@@ -1,8 +1,10 @@
 package org.mtransit.parser.db
 
 import org.mtransit.parser.Constants
+import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.data.GStopTime
+import org.mtransit.parser.gtfs.data.GTripStop
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
@@ -14,15 +16,17 @@ object DBUtils {
     private const val FILE_CONNECTION_STRING = "jdbc:sqlite:input/db_file" // less RAM
 
     private const val STOP_TIMES_TABLE_NAME = "g_stop_times"
+    private const val TRIP_STOPS_TABLE_NAME = "g_trip_stops"
 
+    private const val SQL_RESULT_ALIAS = "result"
     private const val SQL_NULL = "null"
 
     private val connection: Connection by lazy {
         DriverManager.getConnection(
-            if (System.getenv("CI")?.isNotEmpty() != true) {
-                IN_MEMORY_CONNECTION_STRING
-            } else {
+            if (DefaultAgencyTools.IS_CI) {
                 FILE_CONNECTION_STRING
+            } else {
+                IN_MEMORY_CONNECTION_STRING
             }
         )
     }
@@ -34,6 +38,7 @@ object DBUtils {
         execute(statement, "PRAGMA journal_mode = MEMORY")
         execute(statement, "PRAGMA auto_vacuum = NONE")
         executeUpdate(statement, "DROP TABLE IF EXISTS $STOP_TIMES_TABLE_NAME")
+        executeUpdate(statement, "DROP TABLE IF EXISTS $TRIP_STOPS_TABLE_NAME")
         executeUpdate(
             statement,
             "CREATE TABLE $STOP_TIMES_TABLE_NAME (" +
@@ -45,6 +50,15 @@ object DBUtils {
                     "${GStopTime.STOP_HEADSIGN} string, " +
                     "${GStopTime.PICKUP_TYPE} integer, " +
                     "${GStopTime.DROP_OFF_TYPE} integer" +
+                    ")"
+        )
+        executeUpdate(
+            statement,
+            "CREATE TABLE $TRIP_STOPS_TABLE_NAME (" +
+                    "${GTripStop.UID} string, " +
+                    "${GTripStop.TRIP_ID} string, " +
+                    "${GTripStop.STOP_ID} string, " +
+                    "${GTripStop.STOP_SEQUENCE} integer" +
                     ")"
         )
     }
@@ -90,7 +104,20 @@ object DBUtils {
         return rs > 0
     }
 
-    @Suppress("unused")
+    @JvmStatic
+    fun insertTripStop(gTripStop: GTripStop): Boolean {
+        val rs = executeUpdate(
+            connection.createStatement(),
+            "INSERT INTO $TRIP_STOPS_TABLE_NAME VALUES(" +
+                    "'${gTripStop.uID}'," +
+                    "'${gTripStop.tripId}'," +
+                    "'${gTripStop.stopId}'," +
+                    "${gTripStop.stopSequence}" +
+                    ")"
+        )
+        return rs > 0
+    }
+
     @JvmStatic
     fun selectStopTimes(
         tripId: String? = null,
@@ -144,6 +171,47 @@ object DBUtils {
         return result
     }
 
+    @JvmStatic
+    fun selectTripStops(
+        tripId: String? = null,
+        tripIds: List<String>? = null,
+        limitMaxNbRow: Int? = null,
+        limitOffset: Int? = null
+    ): List<GTripStop> {
+        var query = "SELECT * FROM $TRIP_STOPS_TABLE_NAME"
+        tripId?.let {
+            query += " WHERE ${GTripStop.TRIP_ID} = '$tripId'"
+        }
+        tripIds?.let {
+            query += " WHERE ${GTripStop.TRIP_ID} IN ${tripIds
+                .distinct()
+                .joinToString(
+                    separator = ",",
+                    prefix = "(",
+                    postfix = ")"
+                ) { "'$it'" }}"
+        }
+        limitMaxNbRow?.let {
+            query += " LIMIT $limitMaxNbRow"
+            limitOffset?.let {
+                query += " OFFSET $limitOffset"
+            }
+        }
+        val result = ArrayList<GTripStop>()
+        val rs = executeQuery(connection.createStatement(), query)
+        while (rs.next()) {
+            result.add(
+                GTripStop(
+                    rs.getString(GTripStop.UID),
+                    rs.getString(GTripStop.TRIP_ID),
+                    rs.getString(GTripStop.STOP_ID),
+                    rs.getInt(GTripStop.STOP_SEQUENCE)
+                )
+            )
+        }
+        return result
+    }
+
     @Suppress("unused")
     @JvmStatic
     fun deleteStopTime(gStopTime: GStopTime): Boolean {
@@ -173,15 +241,26 @@ object DBUtils {
 
     @JvmStatic
     fun countStopTimes(): Int {
-        val alias = "result"
         val rs = executeQuery(
             connection.createStatement(),
-            "SELECT COUNT(*) AS $alias FROM $STOP_TIMES_TABLE_NAME"
+            "SELECT COUNT(*) AS $SQL_RESULT_ALIAS FROM $STOP_TIMES_TABLE_NAME"
         )
         if (rs.next()) {
-            return rs.getInt(alias)
+            return rs.getInt(SQL_RESULT_ALIAS)
         }
         throw MTLog.Fatal("Error while counting stop times!")
+    }
+
+    @JvmStatic
+    fun countTripStops(): Int {
+        val rs = executeQuery(
+            connection.createStatement(),
+            "SELECT COUNT(*) AS $SQL_RESULT_ALIAS FROM $TRIP_STOPS_TABLE_NAME"
+        )
+        if (rs.next()) {
+            return rs.getInt(SQL_RESULT_ALIAS)
+        }
+        throw MTLog.Fatal("Error while counting trip stops!")
     }
 
     private fun execute(statement: Statement, query: String): Boolean {

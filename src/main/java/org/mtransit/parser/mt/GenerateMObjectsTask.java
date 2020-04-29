@@ -51,11 +51,17 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	private final GSpec globalGTFS;
 	@NotNull
 	private final Map<String, List<GStopTime>> routeTripIdStopTimes = new HashMap<>();
+	@NotNull
+	private final Map<String, List<GTripStop>> routeTripIdTripStops = new HashMap<>();
 
 	GenerateMObjectsTask(long routeId, @NotNull GAgencyTools agencyTools, @NotNull GSpec gtfs) {
 		this.routeId = routeId;
 		this.agencyTools = agencyTools;
 		this.globalGTFS = gtfs;
+	}
+
+	public long getRouteId() {
+		return routeId;
 	}
 
 	@NotNull
@@ -96,6 +102,14 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			tripIdStopTimes.add(gStopTime);
 			routeTripIdStopTimes.put(gStopTime.getTripId(), tripIdStopTimes);
+		}
+		for (GTripStop gTripStop : DBUtils.selectTripStops(null, routeTripsIds, null, null)) {
+			List<GTripStop> tripIdTripStops = routeTripIdTripStops.get(gTripStop.getTripId());
+			if (tripIdTripStops == null) {
+				tripIdTripStops = new ArrayList<>();
+			}
+			tripIdTripStops.add(gTripStop);
+			routeTripIdTripStops.put(gTripStop.getTripId(), tripIdTripStops);
 		}
 		MAgency mAgency;
 		for (GAgency gAgency : routeGTFS.getAllAgencies()) {
@@ -450,7 +464,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		String tripStopTimesHeadsign;
 		Pair<Long[], Integer[]> mTripsAndStopSequences;
 		HashMap<String, Integer> addedMTripIdAndGStopIds = new HashMap<>();
-		for (GTripStop gTripStop : routeGTFS.getTripStops(gTrip.getTripId())) {
+		final List<GTripStop> tripStops = this.routeTripIdTripStops.get(gTrip.getTripId());
+		for (GTripStop gTripStop : tripStops) {
 			if (!gTripStop.getTripId().equals(gTrip.getTripId())) {
 				continue;
 			}
