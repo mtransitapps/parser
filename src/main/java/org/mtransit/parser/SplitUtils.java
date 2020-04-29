@@ -67,7 +67,6 @@ public class SplitUtils {
 	private static String getBeforeAfterStopId(GSpec routeGTFS, MRoute mRoute, GTrip gTrip, GTripStop gTripStop, List<String> stopIdsTowards0,
 											   List<String> stopIdsTowards1, List<String> stopIdsTowardsBoth10, List<String> stopIdsTowardsBoth01, HashSet<String> allBeforeAfterStopIds,
 											   GAgencyTools agencyTools) {
-		MTLog.logDebug("getBeforeAfterStopId(%s)", mRoute);
 		int gStopMaxSequence = -1;
 		ArrayList<String> afterStopIds = new ArrayList<>();
 		ArrayList<Integer> afterStopSequence = new ArrayList<>();

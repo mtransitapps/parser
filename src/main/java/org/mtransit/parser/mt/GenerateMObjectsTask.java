@@ -145,7 +145,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 		int splitTripCount = this.agencyTools.splitTrip(new MRoute(this.routeId, mRoutes.get(this.routeId).getShortName(), null, null), null, routeGTFS).size();
 		boolean isSplitted = splitTripCount > 1;
-		this.globalGTFS.cleanupRouteGTFS(this.routeId);
 		ArrayList<MAgency> mAgenciesList = new ArrayList<>(mAgencies.values());
 		Collections.sort(mAgenciesList);
 		ArrayList<MStop> mStopsList = new ArrayList<>(mStops.values());

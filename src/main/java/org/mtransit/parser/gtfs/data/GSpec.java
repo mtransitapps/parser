@@ -126,7 +126,7 @@ public class GSpec {
 		this.stopIdStops.put(gStop.getStopId(), gStop);
 	}
 
-	@NotNull
+	@Nullable
 	public GStop getStop(@NotNull String gStopId) {
 		return this.stopIdStops.get(gStopId);
 	}
@@ -523,10 +523,10 @@ public class GSpec {
 		MTLog.log("%d: Removing route data...", mRouteId);
 		int r = 0;
 		try {
-			ArrayList<GRoute> gRoutes = mRouteIdRoutes.get(mRouteId);
+			List<GRoute> gRoutes = this.mRouteIdRoutes.get(mRouteId);
 			if (gRoutes != null) {
 				for (GRoute gRoute : gRoutes) {
-					ArrayList<GTrip> routeTrips = this.routeIdTrips.get(gRoute.getRouteId());
+					List<GTrip> routeTrips = this.routeIdTrips.get(gRoute.getRouteId());
 					if (routeTrips != null) {
 						for (GTrip gTrip : routeTrips) {
 							r += removeTripStopTimes(gTrip.getTripId());

@@ -8,7 +8,6 @@ import java.sql.DriverManager
 import java.sql.ResultSet
 import java.sql.Statement
 
-
 object DBUtils {
 
     private const val IN_MEMORY_CONNECTION_STRING = "jdbc:sqlite::memory:" // faster

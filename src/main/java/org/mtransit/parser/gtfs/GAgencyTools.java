@@ -86,7 +86,7 @@ public interface GAgencyTools {
 	@Nullable
 	String getStopOriginalId(GStop gStop);
 
-	boolean excludeStopNullable(GStop gStop);
+	boolean excludeStopNullable(@Nullable GStop gStop);
 
 	boolean excludeStop(GStop gStop);
 
