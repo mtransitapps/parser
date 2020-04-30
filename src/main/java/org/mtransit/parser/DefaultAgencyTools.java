@@ -65,6 +65,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	public static final boolean IS_CI;
+
 	static {
 		final String isCI = System.getenv("CI");
 		IS_CI = isCI != null && !isCI.isEmpty();
@@ -95,11 +96,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 		TOMORROW = false;
 	}
 
-	public static void main(String[] args) {
+	public static void main(@NotNull String[] args) {
 		new DefaultAgencyTools().start(args);
 	}
 
-	public void start(String[] args) {
+	public void start(@NotNull String[] args) {
 		if (excludingAll()) {
 			MGenerator.dumpFiles(null, args[0], args[1], args[2], true);
 			return;
@@ -121,22 +122,23 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludingAll() {
-		MTLog.logFatal("NEED TO IMPLEMENT EXCLUDE ALL");
-		return false;
+		throw new MTLog.Fatal("NEED TO IMPLEMENT EXCLUDE ALL");
 	}
 
+	@NotNull
 	@Override
 	public String getAgencyColor() {
-		return null;
+		throw new MTLog.Fatal("AGENCY COLOR NOT PROVIDED");
 	}
 
+	@NotNull
 	@Override
 	public Integer getAgencyRouteType() {
-		return null;
+		throw new MTLog.Fatal("AGENCY ROUTE TYPE NOT PROVIDED");
 	}
 
 	@Override
-	public boolean excludeAgencyNullable(GAgency gAgency) {
+	public boolean excludeAgencyNullable(@Nullable GAgency gAgency) {
 		if (gAgency == null) {
 			return true; // exclude
 		}
@@ -154,7 +156,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public long getRouteId(GRoute gRoute) {
+	public long getRouteId(@NotNull GRoute gRoute) {
 		try {
 			return Long.parseLong(gRoute.getRouteId());
 		} catch (Exception e) {
@@ -163,20 +165,20 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
+	@NotNull
 	@Override
-	public String getRouteShortName(GRoute gRoute) {
+	public String getRouteShortName(@NotNull GRoute gRoute) {
 		if (StringUtils.isEmpty(gRoute.getRouteShortName())) {
-			MTLog.logFatal("No default route short name for %s!", gRoute);
-			return null;
+			throw new MTLog.Fatal("No default route short name for %s!", gRoute);
 		}
 		return gRoute.getRouteShortName();
 	}
 
+	@NotNull
 	@Override
-	public String getRouteLongName(GRoute gRoute) {
+	public String getRouteLongName(@NotNull GRoute gRoute) {
 		if (StringUtils.isEmpty(gRoute.getRouteLongName())) {
-			MTLog.logFatal("No default route long name for %s!", gRoute);
-			return null;
+			throw new MTLog.Fatal("No default route long name for %s!", gRoute);
 		}
 		return CleanUtils.cleanLabel(gRoute.getRouteLongName());
 	}
@@ -186,8 +188,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return mRoute.mergeLongName(mRouteToMerge);
 	}
 
+	@Nullable
 	@Override
-	public String getRouteColor(GRoute gRoute) {
+	public String getRouteColor(@NotNull GRoute gRoute) {
 		if (gRoute.getRouteColor() == null || gRoute.getRouteColor().isEmpty()) {
 			return null; // use agency color
 		}
@@ -475,11 +478,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	protected static class Period {
-		@Nullable
+		// TODO @Nullable
 		Integer todayStringInt = null;
-		@Nullable
+		// TODO @Nullable
 		Integer startDate = null;
-		@Nullable
+		// TODO @Nullable
 		Integer endDate = null;
 
 		@Override
@@ -734,7 +737,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		final int initialTodayStringInt = p.todayStringInt;
 		while (true) {
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
-				if (gCalendarDate.is(p.todayStringInt)) {
+				if (gCalendarDate.isDate(p.todayStringInt)) {
 					if (!gCalendarDate.isServiceIds(todayServiceIds)) {
 						todayServiceIds.add(gCalendarDate.getServiceId());
 					}

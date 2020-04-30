@@ -137,6 +137,8 @@ public class MGenerator {
 				}
 				MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
 			} catch (Throwable t) {
+				threadPoolExecutor.shutdownNow();
+				MTLog.logFatal(t, t.getMessage()); // STOP ASAP
 				throw new MTLog.Fatal(t, t.getMessage());
 			}
 		}

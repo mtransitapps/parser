@@ -63,7 +63,7 @@ public interface GAgencyTools {
 
 	boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge);
 
-	boolean excludeTripNullable(GTrip gTrip);
+	boolean excludeTripNullable(@Nullable GTrip gTrip);
 
 	boolean excludeTrip(GTrip gTrip);
 
