@@ -7,10 +7,10 @@ import java.util.Date
 // http://gtfs.org/reference/static#stop_timestxt
 // https://developers.google.com/transit/gtfs/reference#stop_times_fields
 data class GStopTime(
-    val tripId: Int,
+    val tripIdInt: Int,
     private val _arrivalTime: Int,
     private val _departureTime: Int,
-    val stopId: Int,
+    val stopIdInt: Int,
     val stopSequence: Int,
     val stopHeadsign: String?,
     var pickupType: Int,
@@ -18,44 +18,46 @@ data class GStopTime(
 ) : Comparable<GStopTime> {
 
     constructor(
-        tripIdString: String,
+        tripId: String,
         arrivalTime: String,
         departureTime: String,
-        stopIdString: String,
+        stopId: String,
         stopSequence: Int,
         stopHeadsign: String?,
         pickupType: Int,
         dropOffType: Int
     ) : this(
-        GIDs.getInt(tripIdString),
+        GIDs.getInt(tripId),
         GTime.fromString(arrivalTime),
         GTime.fromString(departureTime),
-        GIDs.getInt(stopIdString),
+        GIDs.getInt(stopId),
         stopSequence,
         stopHeadsign,
         pickupType,
         dropOffType
     )
 
-    val tripIdString: String
+    val tripId: String
         get() {
-            return GIDs.getString(tripId)
+            return GIDs.getString(tripIdInt)
         }
 
-    val stopIdString: String
+    val stopId: String
         get() {
-            return GIDs.getString(stopId)
+            return GIDs.getString(stopIdInt)
         }
 
     val arrivalTime: Int = _arrivalTime
 
     fun hasArrivalTime() = _arrivalTime >= 0
 
+    @Suppress("unused")
     val arrivalTimeMs: Long
         get() {
             return GTime.toMs(_arrivalTime)
         }
 
+    @Suppress("unused")
     val arrivalTimeDate: Date
         get() {
             return GTime.toDate(_arrivalTime)
@@ -65,6 +67,7 @@ data class GStopTime(
 
     fun hasDepartureTime() = _departureTime >= 0
 
+    @Suppress("unused")
     val departureTimeMs: Long
         get() {
             return GTime.toMs(_arrivalTime)
@@ -78,14 +81,14 @@ data class GStopTime(
     val uID: String
 
     init {
-        uID = getNewUID(tripIdString, stopIdString, stopSequence)
+        uID = getNewUID(tripIdInt, stopIdInt, stopSequence)
     }
 
     fun hasStopHeadsign() = !this.stopHeadsign.isNullOrEmpty()
 
     override fun compareTo(other: GStopTime): Int {
-        if (this.tripId != other.tripId) {
-            return this.tripId.compareTo(other.tripId)
+        if (this.tripIdInt != other.tripIdInt) {
+            return this.tripIdInt.compareTo(other.tripIdInt)
         }
         if (this.stopSequence != other.stopSequence) {
             return this.stopSequence.compareTo(other.stopSequence)
@@ -110,11 +113,11 @@ data class GStopTime(
 
         @JvmStatic
         fun getNewUID(
-            trip_uid: String,
-            stop_id: String,
-            stop_sequence: Int
+            tripIdInt: Int,
+            stopIdInt: Int,
+            stopSequence: Int
         ): String {
-            return stop_id + Constants.UUID_SEPARATOR + stop_sequence + Constants.UUID_SEPARATOR + trip_uid
+            return "$stopIdInt${Constants.UUID_SEPARATOR}$stopSequence${Constants.UUID_SEPARATOR}$tripIdInt"
         }
     }
 }

@@ -273,10 +273,10 @@ public class GReader {
 			if (agencyTools.excludeStopTime(gStopTime)) {
 				return;
 			}
-			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripId()))) {
+			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
 				return;
 			}
-			if (agencyTools.excludeStopNullable(gSpec.getStop(gStopTime.getStopId()))) {
+			if (agencyTools.excludeStopNullable(gSpec.getStop(gStopTime.getStopIdInt()))) {
 				return;
 			}
 			gSpec.addStopTime(gStopTime);
@@ -295,7 +295,7 @@ public class GReader {
 					line.get(GFrequency.END_TIME),
 					Integer.parseInt(line.get(GFrequency.HEADWAY_SECS))
 			);
-			if (agencyTools.excludeTripNullable(gSpec.getTrip(gFrequency.getTripId()))) {
+			if (agencyTools.excludeTripNullable(gSpec.getTrip(gFrequency.getTripIdInt()))) {
 				return;
 			}
 			gSpec.addFrequency(gFrequency);
@@ -372,7 +372,7 @@ public class GReader {
 			if (agencyTools.excludeTrip(gTrip)) {
 				return;
 			}
-			if (agencyTools.excludeRouteNullable(gSpec.getRoute(gTrip.getRouteId()))) {
+			if (agencyTools.excludeRouteNullable(gSpec.getRoute(gTrip.getRouteIdInt()))) {
 				return;
 			}
 			gSpec.addTrip(gTrip);
@@ -423,7 +423,7 @@ public class GReader {
 				return;
 			}
 			if (gRoute.hasAgencyId()
-					&& agencyTools.excludeAgencyNullable(gSpec.getAgency(gRoute.getAgencyId()))) {
+					&& agencyTools.excludeAgencyNullable(gSpec.getAgency(gRoute.getAgencyIdInt()))) {
 				return;
 			}
 			gSpec.addRoute(gRoute);

@@ -1,51 +1,53 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.parser.Constants
+
 // https://developers.google.com/transit/gtfs/reference#calendar_dates_fields
 // http://gtfs.org/reference/static/#calendar_datestxt
 data class GCalendarDate(
-    val serviceId: Int,
+    val serviceIdInt: Int,
     val date: Int, // YYYYMMDD
     val exceptionType: GCalendarDatesExceptionType
 ) {
 
     constructor(
-        serviceIdString: String,
+        serviceId: String,
         date: Int,
         exceptionType: GCalendarDatesExceptionType
     ) : this(
-        GIDs.getInt(serviceIdString),
+        GIDs.getInt(serviceId),
         date,
         exceptionType
     )
 
-    val serviceIdString: String // TODO use too much
+    val serviceId: String
         get() {
-            return GIDs.getString(serviceId)
+            return GIDs.getString(serviceIdInt)
         }
-
 
     val uID: String
 
     init {
-        uID = getNewUID(date, serviceIdString)
+        uID = getNewUID(date, serviceIdInt)
     }
 
     @Suppress("unused")
-    fun isServiceId(serviceIdString: String): Boolean {
-        return this.serviceIdString == serviceIdString
-    }
-
-    @Suppress("unused")
-    fun isServiceId(serviceId: Int): Boolean {
+    fun isServiceId(serviceId: String): Boolean {
         return this.serviceId == serviceId
     }
 
-    fun isServiceIdStrings(serviceIdStrings: Collection<String?>): Boolean {
-        return serviceIdStrings.contains(serviceIdString)
+    @Suppress("unused")
+    fun isServiceIdInt(serviceId: Int): Boolean {
+        return this.serviceIdInt == serviceId
     }
 
-    fun isServiceIds(serviceIds: Collection<Int?>): Boolean {
+    @Suppress("unused")
+    fun isServiceIds(serviceIds: Collection<String?>): Boolean {
         return serviceIds.contains(serviceId)
+    }
+
+    fun isServiceIdInts(serviceIdInts: Collection<Int?>): Boolean {
+        return serviceIdInts.contains(serviceIdInt)
     }
 
     fun isBefore(date: Int): Boolean {
@@ -74,9 +76,9 @@ data class GCalendarDate(
         @JvmStatic
         fun getNewUID(
             date: Int,
-            serviceId: String
+            serviceIdInt: Int
         ): String {
-            return date.toString() + serviceId
+            return "$date${Constants.UUID_SEPARATOR}$serviceIdInt"
         }
     }
 }

@@ -28,8 +28,9 @@ object GTime {
     }
 
     @JvmStatic
-    fun fromDateS(date: Date) = getNewTimeFormatInstance().format(date)
+    fun fromDateS(date: Date): String = getNewTimeFormatInstance().format(date)
 
+    @Suppress("unused")
     @JvmStatic
     fun fromCal(cal: Calendar): Int {
         return fromDate(cal.time)

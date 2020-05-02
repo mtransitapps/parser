@@ -4,39 +4,41 @@ import java.util.Date
 
 // https://developers.google.com/transit/gtfs/reference#frequencies_fields
 data class GFrequency(
-    val tripId: Int,
+    val tripIdInt: Int,
     private val _startTime: Int,
     private val _endTime: Int,
     val headwaySecs: Int
 ) {
 
+    @Suppress("unused")
     constructor(
-        tripIdString: String,
+        tripId: String,
         startTime: Int,
         endTime: Int,
         headwaySecs: Int
     ) : this(
-        GIDs.getInt(tripIdString),
+        GIDs.getInt(tripId),
         startTime,
         endTime,
         headwaySecs
     )
 
     constructor(
-        tripIdString: String,
+        tripId: String,
         startTime: String,
         endTime: String,
         headwaySecs: Int
     ) : this(
-        GIDs.getInt(tripIdString),
+        GIDs.getInt(tripId),
         GTime.fromString(startTime),
         GTime.fromString(endTime),
         headwaySecs
     )
 
-    val tripIdString: String
+    @Suppress("unused")
+    val tripId: String
         get() {
-            return GIDs.getString(tripId)
+            return GIDs.getString(tripIdInt)
         }
 
     val startTime: Int = _startTime
@@ -46,6 +48,7 @@ data class GFrequency(
             return GTime.toDate(_startTime)
         }
 
+    @Suppress("unused")
     val startTimeMs: Long
         get() {
             return GTime.toMs(_startTime)
@@ -58,6 +61,7 @@ data class GFrequency(
             return GTime.toDate(_endTime)
         }
 
+    @Suppress("unused")
     val endTimeMs: Long
         get() {
             return GTime.toMs(_endTime)

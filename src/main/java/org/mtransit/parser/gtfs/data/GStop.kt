@@ -2,7 +2,7 @@ package org.mtransit.parser.gtfs.data
 
 // https://developers.google.com/transit/gtfs/reference#stops_fields
 data class GStop(
-    val stopId: Int,
+    val stopIdInt: Int,
     val stopName: String,
     val stopLat: Double,
     val stopLong: Double,
@@ -10,26 +10,27 @@ data class GStop(
 ) {
 
     constructor(
-        stopIdString: String,
+        stopId: String,
         stopName: String,
         stopLat: Double,
         stopLong: Double,
         stopCode: String
     ) : this(
-        GIDs.getInt(stopIdString),
+        GIDs.getInt(stopId),
         stopName,
         stopLat,
         stopLong,
         stopCode
     )
 
-    val stopIdString: String
+    val stopId: String
         get() {
-            return GIDs.getString(stopId)
+            return GIDs.getString(stopIdInt)
         }
 
     companion object {
         const val FILENAME = "stops.txt"
+
         const val STOP_ID = "stop_id"
         const val STOP_NAME = "stop_name"
         const val STOP_LAT = "stop_lat"

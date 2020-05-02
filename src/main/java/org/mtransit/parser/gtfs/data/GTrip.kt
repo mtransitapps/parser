@@ -1,26 +1,27 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.parser.Constants
+
 // https://developers.google.com/transit/gtfs/reference#trips_fields
 data class GTrip(
-    val routeId: Int,
-    val serviceId: Int,
-    val tripId: Int,
+    val routeIdInt: Int,
+    val serviceIdInt: Int,
+    val tripIdInt: Int,
     val directionId: Int?,
     val tripHeadsign: String,
     val tripShortName: String?
-    // val shapeId: String
 ) {
     constructor(
-        routeIdString: String,
-        serviceIdString: String,
-        tripIdString: String,
+        routeId: String,
+        serviceId: String,
+        tripId: String,
         directionId: Int?,
         tripHeadsign: String,
         tripShortName: String?
     ) : this(
-        GIDs.getInt(routeIdString),
-        GIDs.getInt(serviceIdString),
-        GIDs.getInt(tripIdString),
+        GIDs.getInt(routeId),
+        GIDs.getInt(serviceId),
+        GIDs.getInt(tripId),
         directionId,
         tripHeadsign,
         tripShortName
@@ -29,32 +30,37 @@ data class GTrip(
     val uID: String
 
     init {
-        uID = getNewUID(routeIdString, tripIdString)
+        uID = getNewUID(routeIdInt, tripIdInt)
     }
 
-    val routeIdString: String
+    val routeId: String
         get() {
-            return GIDs.getString(routeId)
-        }
-    val serviceIdString: String
-        get() {
-            return GIDs.getString(serviceId)
-        }
-    val tripIdString: String
-        get() {
-            return GIDs.getString(tripId)
+            return GIDs.getString(routeIdInt)
         }
 
-    fun isServiceIdString(serviceIdString: String): Boolean {
-        return this.serviceIdString == serviceIdString
+    val serviceId: String
+        get() {
+            return GIDs.getString(serviceIdInt)
+        }
+
+    @Suppress("unused")
+    val tripId: String
+        get() {
+            return GIDs.getString(tripIdInt)
+        }
+
+    @Suppress("unused")
+    fun isServiceId(serviceId: String): Boolean {
+        return this.serviceId == serviceId
     }
 
-    fun isServiceIdStrings(serviceIdStrings: Collection<String?>): Boolean {
-        return serviceIdStrings.contains(serviceIdString)
-    }
-
-    fun isServiceIds(serviceIds: Collection<Int?>): Boolean {
+    @Suppress("unused")
+    fun isServiceIds(serviceIds: Collection<String?>): Boolean {
         return serviceIds.contains(serviceId)
+    }
+
+    fun isServiceIdInts(serviceIdInts: Collection<Int?>): Boolean {
+        return serviceIdInts.contains(serviceIdInt)
     }
 
     companion object {
@@ -66,11 +72,18 @@ data class GTrip(
         const val TRIP_HEADSIGN = "trip_headsign"
         const val TRIP_SHORT_NAME = "trip_short_name"
         const val DIRECTION_ID = "direction_id"
-        const val SHAPE_ID = "shape_id"
 
         @JvmStatic
-        fun getNewUID(routeId: String, tripId: String): String {
-            return routeId + tripId
+        fun extractRouteIdInt(tripUID: String): Int {
+            return tripUID.substring(tripUID.indexOf(Constants.UUID_SEPARATOR)).toInt()
+        }
+
+        @JvmStatic
+        fun getNewUID(
+            routeIdInt: Int,
+            tripIdInt: Int
+        ): String {
+            return "$routeIdInt${Constants.UUID_SEPARATOR}$tripIdInt"
         }
     }
 }

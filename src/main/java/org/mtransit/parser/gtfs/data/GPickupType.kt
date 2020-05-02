@@ -40,5 +40,4 @@ enum class GPickupType(private val id: Int) {
             }
         }
     }
-
 }

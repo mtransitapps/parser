@@ -55,6 +55,7 @@ object DBUtils {
         executeUpdate(
             statement,
             "CREATE TABLE $TRIP_STOPS_TABLE_NAME (" +
+                    "${GTripStop.ROUTE_ID} integer, " +
                     "${GTripStop.TRIP_ID} integer, " +
                     "${GTripStop.STOP_ID} integer, " +
                     "${GTripStop.STOP_SEQUENCE} integer" +
@@ -90,8 +91,8 @@ object DBUtils {
         val rs = executeUpdate(
             connection.createStatement(),
             "INSERT INTO $STOP_TIMES_TABLE_NAME VALUES(" +
-                    "${gStopTime.tripId}," +
-                    "${gStopTime.stopId}," +
+                    "${gStopTime.tripIdInt}," +
+                    "${gStopTime.stopIdInt}," +
                     "${gStopTime.stopSequence}," +
                     "${gStopTime.arrivalTime}," +
                     "${gStopTime.departureTime}," +
@@ -108,8 +109,9 @@ object DBUtils {
         val rs = executeUpdate(
             connection.createStatement(),
             "INSERT INTO $TRIP_STOPS_TABLE_NAME VALUES(" +
-                    "'${gTripStop.tripId}'," +
-                    "'${gTripStop.stopId}'," +
+                    "'${gTripStop.routeIdInt}'," +
+                    "'${gTripStop.tripIdInt}'," +
+                    "'${gTripStop.stopIdInt}'," +
                     "${gTripStop.stopSequence}" +
                     ")"
         )
@@ -200,6 +202,7 @@ object DBUtils {
         while (rs.next()) {
             result.add(
                 GTripStop(
+                    rs.getInt(GTripStop.ROUTE_ID),
                     rs.getInt(GTripStop.TRIP_ID),
                     rs.getInt(GTripStop.STOP_ID),
                     rs.getInt(GTripStop.STOP_SEQUENCE)
@@ -214,9 +217,9 @@ object DBUtils {
     fun deleteStopTime(gStopTime: GStopTime): Boolean {
         var query = "DELETE FROM $STOP_TIMES_TABLE_NAME"
         query += " WHERE " +
-                "${GStopTime.TRIP_ID} = ${gStopTime.tripId}" +
+                "${GStopTime.TRIP_ID} = ${gStopTime.tripIdInt}" +
                 " AND " +
-                "${GStopTime.STOP_ID} = ${gStopTime.stopId}" +
+                "${GStopTime.STOP_ID} = ${gStopTime.stopIdInt}" +
                 " AND " +
                 "${GStopTime.STOP_SEQUENCE} = ${gStopTime.stopSequence}"
         val rs = executeUpdate(connection.createStatement(), query)

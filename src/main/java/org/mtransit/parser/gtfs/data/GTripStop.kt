@@ -7,38 +7,63 @@ import org.mtransit.parser.Constants
 // -_trip_id field
 // - stop_id field
 data class GTripStop(
-    val tripId: Int,
-    val stopId: Int,
+    val routeIdInt: Int,
+    val tripIdInt: Int,
+    val stopIdInt: Int,
     val stopSequence: Int
 ) {
 
+    constructor(
+        tripUID: String,
+        tripId: Int,
+        stopId: Int,
+        stopSequence: Int
+    ) : this(
+        GTrip.extractRouteIdInt(tripUID),
+        tripId,
+        stopId,
+        stopSequence
+    )
+
     val uID: String
         get() {
-            return getNewUID(tripIdString, stopIdString, stopSequence)
+            return getNewUID(routeIdInt, tripIdInt, stopIdInt, stopSequence)
         }
 
-    val tripIdString: String
+    @Suppress("unused")
+    val tripId: String
         get() {
-            return GIDs.getString(tripId)
+            return GIDs.getString(tripIdInt)
         }
 
-    val stopIdString: String
+    val stopId: String
         get() {
-            return GIDs.getString(stopId)
+            return GIDs.getString(stopIdInt)
         }
 
     companion object {
+        const val ROUTE_ID = "route_id"
         const val TRIP_ID = "trip_id"
         const val STOP_ID = "stop_id"
         const val STOP_SEQUENCE = "stop_sequence"
 
         @JvmStatic
         fun getNewUID(
-            trip_uid: String,
-            stop_id: String,
-            stop_sequence: Int
+            tripUID: String,
+            stopIdInt: Int,
+            stopSequence: Int
         ): String {
-            return stop_id + Constants.UUID_SEPARATOR + stop_sequence + Constants.UUID_SEPARATOR + trip_uid
+            return "$stopIdInt${Constants.UUID_SEPARATOR}$stopSequence${Constants.UUID_SEPARATOR}$tripUID"
+        }
+
+        @JvmStatic
+        fun getNewUID(
+            routeIdInt: Int,
+            tripIdInt: Int,
+            stopIdInt: Int,
+            stopSequence: Int
+        ): String {
+            return "$stopIdInt${Constants.UUID_SEPARATOR}$stopSequence${Constants.UUID_SEPARATOR}$routeIdInt${Constants.UUID_SEPARATOR}$tripIdInt"
         }
     }
 }

@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("WeakerAccess")
 public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final int MAX_NEXT_LOOKUP_IN_DAYS = 60;
@@ -56,7 +57,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 		EXPORT_DESCENT_ONLY = false;
 	}
 
-	@SuppressWarnings("WeakerAccess")
 	public static final boolean GOOD_ENOUGH_ACCEPTED;
 
 	static {
@@ -159,7 +159,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public long getRouteId(@NotNull GRoute gRoute) {
 		try {
-			return Long.parseLong(gRoute.getRouteIdString());
+			return Long.parseLong(gRoute.getRouteId());
 		} catch (Exception e) {
 			MTLog.logFatal(e, "Error while extracting route ID from %s!", gRoute);
 			return -1;
@@ -324,7 +324,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public int getStopId(@NotNull GStop gStop) {
 		try {
-			return Integer.parseInt(gStop.getStopIdString());
+			return Integer.parseInt(gStop.getStopId());
 		} catch (Exception e) {
 			MTLog.logFatal(e, "Error while extracting stop ID from %s!", gStop);
 			return -1;
@@ -432,8 +432,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		int nextArrivalTimeStopSequence = -1;
 		int nextDepartureTime = -1;
 		int nextDepartureTimeStopSequence = -1;
-		for (GStopTime aStopTime : routeGTFS.getStopTimes(null, gStopTime.getTripId(), null, null)) {
-			if (gStopTime.getTripId() != aStopTime.getTripId()) {
+		for (GStopTime aStopTime : routeGTFS.getStopTimes(null, gStopTime.getTripIdInt(), null, null)) {
+			if (gStopTime.getTripIdInt() != aStopTime.getTripIdInt()) {
 				continue;
 			}
 			if (aStopTime.getStopSequence() < gStopTime.getStopSequence()) {
@@ -515,19 +515,35 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	@Deprecated
 	@NotNull
-	public static HashSet<Integer> extractUsefulServiceIds(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools) {
+	public static HashSet<String> extractUsefulServiceIds(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools) {
 		return extractUsefulServiceIds(args, agencyTools, false);
+	}
+
+	@Deprecated
+	@NotNull
+	public static HashSet<Integer> extractUsefulServiceIdInts(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools) {
+		return extractUsefulServiceIdInts(args, agencyTools, false);
+	}
+
+	@Deprecated
+	@NotNull
+	public static HashSet<String> extractUsefulServiceIds(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools, boolean agencyFilter) {
+		HashSet<Integer> serviceIds = extractUsefulServiceIdInts(args, agencyTools, agencyFilter);
+
+		HashSet<String> serviceIdsS = new HashSet<>();
+		for (Integer serviceId : serviceIds) {
+			serviceIdsS.add(serviceId.toString());
+		}
+		return serviceIdsS;
 	}
 
 	@Nullable
 	private static Period usefulPeriod = null;
 
 	@NotNull
-	@SuppressWarnings("WeakerAccess")
-	public static HashSet<Integer> extractUsefulServiceIds(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools, boolean agencyFilter) {
+	public static HashSet<Integer> extractUsefulServiceIdInts(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools, boolean agencyFilter) {
 		MTLog.log("Extracting useful service IDs...");
 		usefulPeriod = new Period();
 		SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
@@ -669,10 +685,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 			MTLog.log("Schedules from %s to %s... ", p.startDate, p.endDate);
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
 				if (gCalendarDate.isBetween(p.startDate, p.endDate)) {
-					if (!gCalendarDate.isServiceIds(todayServiceIds)) {
+					if (!gCalendarDate.isServiceIdInts(todayServiceIds)) {
 						MTLog.log("> new service ID from calendar date active on %s between %s and %s: '%s'", gCalendarDate.getDate(), p.startDate,
-								p.endDate, gCalendarDate.getServiceId());
-						todayServiceIds.add(gCalendarDate.getServiceId());
+								p.endDate, gCalendarDate.getServiceIdInt());
+						todayServiceIds.add(gCalendarDate.getServiceIdInt());
 					}
 				}
 			}
@@ -731,7 +747,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static boolean refreshStartEndDatesFromCalendarDates(Period p, HashSet<Integer> todayServiceIds, List<GCalendarDate> gCalendarDates) {
 		boolean newDates = false;
 		for (GCalendarDate gCalendarDate : gCalendarDates) {
-			if (gCalendarDate.isServiceIds(todayServiceIds)) {
+			if (gCalendarDate.isServiceIdInts(todayServiceIds)) {
 				if (p.startDate == null || gCalendarDate.isBefore(p.startDate)) {
 					p.startDate = gCalendarDate.getDate();
 					newDates = true;
@@ -758,8 +774,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		while (true) {
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
 				if (gCalendarDate.isDate(p.todayStringInt)) {
-					if (!gCalendarDate.isServiceIds(todayServiceIds)) {
-						todayServiceIds.add(gCalendarDate.getServiceId());
+					if (!gCalendarDate.isServiceIdInts(todayServiceIds)) {
+						todayServiceIds.add(gCalendarDate.getServiceIdInt());
 					}
 				}
 			}
@@ -928,9 +944,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (gCalendars != null) {
 			for (GCalendar gCalendar : gCalendars) {
 				if (gCalendar.isInside(startDate, endDate)) {
-					if (!gCalendar.isServiceIds(serviceIds)) {
-						MTLog.log("new service ID from calendar active between %s and %s: %s", startDate, endDate, gCalendar.getServiceId());
-						serviceIds.add(gCalendar.getServiceId());
+					if (!gCalendar.isServiceIdInts(serviceIds)) {
+						MTLog.log("new service ID from calendar active between %s and %s: %s", startDate, endDate, gCalendar.getServiceIdInt());
+						serviceIds.add(gCalendar.getServiceIdInt());
 					}
 				}
 			}
@@ -938,14 +954,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (gCalendarDates != null) {
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
 				if (gCalendarDate.isBetween(startDate, endDate)) {
-					if (!gCalendarDate.isServiceIds(serviceIds)) {
+					if (!gCalendarDate.isServiceIdInts(serviceIds)) {
 						if (gCalendarDate.getExceptionType() == GCalendarDatesExceptionType.SERVICE_REMOVED) {
 							MTLog.log("ignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", startDate, endDate,
-									gCalendarDate.getServiceId());
+									gCalendarDate.getServiceIdInt());
 							continue;
 						}
-						MTLog.log("new service ID from calendar date active between %s and %s: %s", startDate, endDate, gCalendarDate.getServiceId());
-						serviceIds.add(gCalendarDate.getServiceId());
+						MTLog.log("new service ID from calendar date active between %s and %s: %s", startDate, endDate, gCalendarDate.getServiceIdInt());
+						serviceIds.add(gCalendarDate.getServiceIdInt());
 					}
 				}
 			}
@@ -1012,9 +1028,21 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	protected static boolean excludeUselessCalendar(@NotNull GCalendar gCalendar, @Nullable HashSet<Integer> serviceIds) {
+	@Deprecated
+	protected static boolean excludeUselessCalendar(@NotNull GCalendar gCalendar, @Nullable HashSet<String> serviceIdsS) {
+		HashSet<Integer> serviceIds = null;
+		if (serviceIdsS != null) {
+			serviceIds = new HashSet<>();
+			for (String serviceIdS : serviceIdsS) {
+				serviceIds.add(Integer.valueOf(serviceIdS));
+			}
+		}
+		return excludeUselessCalendarInt(gCalendar, serviceIds);
+	}
+
+	protected static boolean excludeUselessCalendarInt(@NotNull GCalendar gCalendar, @Nullable HashSet<Integer> serviceIds) {
 		if (serviceIds != null) {
-			boolean knownServiceId = gCalendar.isServiceIds(serviceIds);
+			boolean knownServiceId = gCalendar.isServiceIdInts(serviceIds);
 			//noinspection RedundantIfStatement
 			if (!knownServiceId) {
 				return true; // exclude
@@ -1023,9 +1051,21 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return false; // keep
 	}
 
-	protected static boolean excludeUselessCalendarDate(@NotNull GCalendarDate gCalendarDate, @Nullable HashSet<Integer> serviceIds) {
+	@Deprecated
+	protected static boolean excludeUselessCalendarDate(@NotNull GCalendarDate gCalendarDate, @Nullable HashSet<String> serviceIdsS) {
+		HashSet<Integer> serviceIds = null;
+		if (serviceIdsS != null) {
+			serviceIds = new HashSet<>();
+			for (String serviceIdS : serviceIdsS) {
+				serviceIds.add(Integer.valueOf(serviceIdS));
+			}
+		}
+		return excludeUselessCalendarDateInt(gCalendarDate, serviceIds);
+	}
+
+	protected static boolean excludeUselessCalendarDateInt(@NotNull GCalendarDate gCalendarDate, @Nullable HashSet<Integer> serviceIds) {
 		if (serviceIds != null) {
-			boolean knownServiceId = gCalendarDate.isServiceIds(serviceIds);
+			boolean knownServiceId = gCalendarDate.isServiceIdInts(serviceIds);
 			if (!knownServiceId) {
 				return true; // exclude
 			}
@@ -1043,10 +1083,23 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return false; // keep
 	}
 
+	@Deprecated
 	protected static boolean excludeUselessTrip(@NotNull GTrip gTrip,
-												@Nullable HashSet<Integer> serviceIds) {
+												@Nullable HashSet<String> serviceIdsS) {
+		HashSet<Integer> serviceIds = null;
+		if (serviceIdsS != null) {
+			serviceIds = new HashSet<>();
+			for (String serviceIdS : serviceIdsS) {
+				serviceIds.add(Integer.valueOf(serviceIdS));
+			}
+		}
+		return excludeUselessTripInt(gTrip, serviceIds);
+	}
+
+	protected static boolean excludeUselessTripInt(@NotNull GTrip gTrip,
+												   @Nullable HashSet<Integer> serviceIds) {
 		if (serviceIds != null) {
-			boolean knownServiceId = gTrip.isServiceIds(serviceIds);
+			boolean knownServiceId = gTrip.isServiceIdInts(serviceIds);
 			//noinspection RedundantIfStatement
 			if (!knownServiceId) {
 				return true; // exclude

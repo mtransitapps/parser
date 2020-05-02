@@ -3,8 +3,8 @@ package org.mtransit.parser.gtfs.data
 // https://developers.google.com/transit/gtfs/reference#routestxt
 // http://gtfs.org/reference/static/#routestxt
 data class GRoute(
-    val agencyId: Int,
-    val routeId: Int,
+    val agencyIdInt: Int,
+    val routeIdInt: Int,
     val routeShortName: String,
     val routeLongName: String?,
     val routeType: Int,
@@ -27,16 +27,17 @@ data class GRoute(
         routeColor
     )
 
-    fun hasAgencyId() : Boolean = agencyId >= 0
+    fun hasAgencyId() : Boolean = agencyIdInt >= 0
 
-    val agencyIdString: String
+    @Suppress("unused")
+    val agencyId: String
         get() {
-            return GIDs.getString(agencyId)
+            return GIDs.getString(agencyIdInt)
         }
 
-    val routeIdString: String
+    val routeId: String
         get() {
-            return GIDs.getString(routeId)
+            return GIDs.getString(routeIdInt)
         }
 
     @Suppress("unused")

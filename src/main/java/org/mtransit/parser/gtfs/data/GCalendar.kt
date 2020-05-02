@@ -8,7 +8,7 @@ import java.util.Locale
 // https://developers.google.com/transit/gtfs/reference#calendar_fields
 // http://gtfs.org/reference/static/#calendartxt
 data class GCalendar(
-    val serviceId: Int,
+    val serviceIdInt: Int,
     private val monday: Boolean,
     private val tuesday: Boolean,
     private val wednesday: Boolean,
@@ -20,7 +20,7 @@ data class GCalendar(
     val endDate: Int  // YYYYMMDD
 ) {
     constructor(
-        serviceIdString: String,
+        serviceId: String,
         monday: Boolean,
         tuesday: Boolean,
         wednesday: Boolean,
@@ -31,7 +31,7 @@ data class GCalendar(
         startDate: Int,
         endDate: Int
     ) : this(
-        GIDs.getInt(serviceIdString),
+        GIDs.getInt(serviceId),
         monday,
         tuesday,
         wednesday,
@@ -44,7 +44,7 @@ data class GCalendar(
     )
 
     constructor(
-        serviceIdString: String,
+        serviceId: String,
         monday: Int,
         tuesday: Int,
         wednesday: Int,
@@ -55,7 +55,7 @@ data class GCalendar(
         startDate: Int,
         endDate: Int
     ) : this(
-        GIDs.getInt(serviceIdString),
+        GIDs.getInt(serviceId),
         monday == 1,
         tuesday == 1,
         wednesday == 1,
@@ -67,14 +67,14 @@ data class GCalendar(
         endDate
     )
 
-    val serviceIdString: String
+    val serviceId: String
         get() {
-            return GIDs.getString(serviceId)
+            return GIDs.getString(serviceIdInt)
         }
 
     val dates: List<GCalendarDate> by lazy {
         initAllDates(
-            serviceId,
+            serviceIdInt,
             monday,
             tuesday,
             wednesday,
@@ -87,12 +87,18 @@ data class GCalendar(
         )
     }
 
-    fun isServiceIdStrings(serviceIdStrings: Collection<String?>): Boolean {
-        return serviceIdStrings.contains(serviceIdString)
+    @Suppress("unused")
+    fun isServiceId(serviceId: String): Boolean {
+        return this.serviceId == serviceId
     }
 
-    fun isServiceIds(serviceIds: Collection<Int?>): Boolean {
+    @Suppress("unused")
+    fun isServiceIds(serviceIds: Collection<String?>): Boolean {
         return serviceIds.contains(serviceId)
+    }
+
+    fun isServiceIdInts(serviceIdInts: Collection<Int?>): Boolean {
+        return serviceIdInts.contains(serviceIdInt)
     }
 
     @Suppress("unused")
