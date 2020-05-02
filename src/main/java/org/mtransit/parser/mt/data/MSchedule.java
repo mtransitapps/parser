@@ -1,5 +1,7 @@
 package org.mtransit.parser.mt.data;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
@@ -7,22 +9,28 @@ import org.mtransit.parser.Pair;
 
 public class MSchedule implements Comparable<MSchedule> {
 
+	@NotNull
 	private String serviceId;
 	private long tripId; // direction ID
 	private int stopId;
 	private int departure;
 
 	private int headsignType = -1;
+	@Nullable
 	private String headsignValue = null;
 
+	@NotNull
 	private String pathId; // trip ID
 	private int arrivalBeforeDeparture;
 
-	public MSchedule(String serviceId, long routeId, long tripId, int stopId, Pair<Integer, Integer> times, String pathId) {
-		this(serviceId, routeId, tripId, stopId, times == null ? 0 : times.first, times == null ? 0 : times.second, pathId);
+	public MSchedule(@NotNull String serviceId, long tripId, int stopId, @Nullable Pair<Integer, Integer> times, @NotNull String pathId) {
+		this(serviceId, tripId, stopId,
+				times == null ? 0 : times.first,
+				times == null ? 0 : times.second,
+				pathId);
 	}
 
-	private MSchedule(String serviceId, long routeId, long tripId, int stopId, int arrival, int departure, String pathId) {
+	private MSchedule(@NotNull String serviceId, long tripId, int stopId, int arrival, int departure, @NotNull String pathId) {
 		this.stopId = stopId;
 		this.tripId = tripId;
 		this.serviceId = serviceId;
@@ -32,7 +40,7 @@ public class MSchedule implements Comparable<MSchedule> {
 		resetUID();
 	}
 
-	public void setHeadsign(int headsignType, String headsignValue) {
+	public void setHeadsign(int headsignType, @Nullable String headsignValue) {
 		this.headsignType = headsignType;
 		this.headsignValue = headsignValue;
 	}
@@ -46,8 +54,10 @@ public class MSchedule implements Comparable<MSchedule> {
 		return this.headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY;
 	}
 
+	@Nullable
 	private String uid = null;
 
+	@NotNull
 	public String getUID() {
 		if (this.uid == null) {
 			// identifies a stop + trip + service (date) => departure
@@ -61,6 +71,7 @@ public class MSchedule implements Comparable<MSchedule> {
 		this.uid = null;
 	}
 
+	@NotNull
 	public String getServiceId() {
 		return serviceId;
 	}
@@ -79,6 +90,7 @@ public class MSchedule implements Comparable<MSchedule> {
 		return toStringNewServiceIdAndTripId();
 	}
 
+	@NotNull
 	public String toStringNewServiceIdAndTripId() {
 		StringBuilder sb = new StringBuilder(); //
 		sb.append(Constants.STRING_DELIMITER).append(CleanUtils.escape(this.serviceId)).append(Constants.STRING_DELIMITER); // service ID
@@ -90,6 +102,7 @@ public class MSchedule implements Comparable<MSchedule> {
 		sb.append(Constants.COLUMN_SEPARATOR); //
 		if (DefaultAgencyTools.EXPORT_PATH_ID) {
 			if (this.arrivalBeforeDeparture > 0) {
+				// TODO ?
 			}
 			sb.append(this.arrivalBeforeDeparture <= 0 ? Constants.EMPTY : this.arrivalBeforeDeparture); // arrival before departure
 			sb.append(Constants.COLUMN_SEPARATOR); //
@@ -106,7 +119,8 @@ public class MSchedule implements Comparable<MSchedule> {
 		return sb.toString();
 	}
 
-	public String toStringSameServiceIdAndTripId(MSchedule lastSchedule) {
+	@NotNull
+	public String toStringSameServiceIdAndTripId(@Nullable MSchedule lastSchedule) {
 		StringBuilder sb = new StringBuilder(); //
 		if (lastSchedule == null) {
 			sb.append(this.departure); // departure
@@ -116,6 +130,7 @@ public class MSchedule implements Comparable<MSchedule> {
 		sb.append(Constants.COLUMN_SEPARATOR); //
 		if (DefaultAgencyTools.EXPORT_PATH_ID) {
 			if (this.arrivalBeforeDeparture > 0) {
+				// TODO ?
 			}
 			sb.append(this.arrivalBeforeDeparture <= 0 ? Constants.EMPTY : this.arrivalBeforeDeparture); // arrival before departure
 			sb.append(Constants.COLUMN_SEPARATOR); //
@@ -156,7 +171,7 @@ public class MSchedule implements Comparable<MSchedule> {
 		return sb.toString();
 	}
 
-	public boolean sameServiceIdAndTripId(MSchedule lastSchedule) {
+	public boolean sameServiceIdAndTripId(@Nullable MSchedule lastSchedule) {
 		if (lastSchedule == null) {
 			return false;
 		}
@@ -164,7 +179,7 @@ public class MSchedule implements Comparable<MSchedule> {
 	}
 
 	@Override
-	public int compareTo(MSchedule otherSchedule) {
+	public int compareTo(@NotNull MSchedule otherSchedule) {
 		// sort by service_id => trip_id => stop_id => departure
 		if (!this.serviceId.equals(otherSchedule.serviceId)) {
 			return this.serviceId.compareTo(otherSchedule.serviceId);
@@ -179,10 +194,11 @@ public class MSchedule implements Comparable<MSchedule> {
 		return this.departure - otherSchedule.departure;
 	}
 
+	@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 	@Override
 	public boolean equals(Object obj) {
 		MSchedule ts = (MSchedule) obj;
-		if (ts.serviceId != null && !ts.serviceId.equals(this.serviceId)) {
+		if (!ts.serviceId.equals(this.serviceId)) {
 			return false;
 		}
 		// no route ID, just for file split
@@ -192,6 +208,7 @@ public class MSchedule implements Comparable<MSchedule> {
 		if (ts.stopId != 0 && ts.stopId != this.stopId) {
 			return false;
 		}
+		//noinspection RedundantIfStatement
 		if (ts.departure != 0 && ts.departure != this.departure) {
 			return false;
 		}
@@ -202,6 +219,7 @@ public class MSchedule implements Comparable<MSchedule> {
 		return this.headsignType;
 	}
 
+	@Nullable
 	public String getHeadsignValue() {
 		return this.headsignValue;
 	}

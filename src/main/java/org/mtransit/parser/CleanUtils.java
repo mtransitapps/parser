@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.commons.text.translate.CharSequenceTranslator;
 import org.apache.commons.text.translate.LookupTranslator;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -46,7 +47,8 @@ public final class CleanUtils {
 	private static final Pattern CLEAN_P2 = Pattern.compile("[\\s]+\\)");
 	private static final String CLEAN_P2_REPLACEMENT = ")";
 
-	public static String cleanLabel(String label) {
+	@NotNull
+	public static String cleanLabel(@NotNull String label) {
 		label = CLEAN_SPACES.matcher(label).replaceAll(SPACE);
 		label = CLEAN_P1.matcher(label).replaceAll(CLEAN_P1_REPLACEMENT);
 		label = CLEAN_P2.matcher(label).replaceAll(CLEAN_P2_REPLACEMENT);

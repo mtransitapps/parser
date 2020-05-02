@@ -42,11 +42,11 @@ object DBUtils {
         executeUpdate(
             statement,
             "CREATE TABLE $STOP_TIMES_TABLE_NAME (" +
-                    "${GStopTime.TRIP_ID} string, " +
-                    "${GStopTime.STOP_ID} string, " +
+                    "${GStopTime.TRIP_ID} integer, " +
+                    "${GStopTime.STOP_ID} integer, " +
                     "${GStopTime.STOP_SEQUENCE} integer, " +
-                    "${GStopTime.ARRIVAL_TIME} string, " +
-                    "${GStopTime.DEPARTURE_TIME} string, " +
+                    "${GStopTime.ARRIVAL_TIME} integer, " +
+                    "${GStopTime.DEPARTURE_TIME} integer, " +
                     "${GStopTime.STOP_HEADSIGN} string, " +
                     "${GStopTime.PICKUP_TYPE} integer, " +
                     "${GStopTime.DROP_OFF_TYPE} integer" +
@@ -55,9 +55,8 @@ object DBUtils {
         executeUpdate(
             statement,
             "CREATE TABLE $TRIP_STOPS_TABLE_NAME (" +
-                    "${GTripStop.UID} string, " +
-                    "${GTripStop.TRIP_ID} string, " +
-                    "${GTripStop.STOP_ID} string, " +
+                    "${GTripStop.TRIP_ID} integer, " +
+                    "${GTripStop.STOP_ID} integer, " +
                     "${GTripStop.STOP_SEQUENCE} integer" +
                     ")"
         )
@@ -91,11 +90,11 @@ object DBUtils {
         val rs = executeUpdate(
             connection.createStatement(),
             "INSERT INTO $STOP_TIMES_TABLE_NAME VALUES(" +
-                    "'${gStopTime.tripId}'," +
-                    "'${gStopTime.stopId}'," +
+                    "${gStopTime.tripId}," +
+                    "${gStopTime.stopId}," +
                     "${gStopTime.stopSequence}," +
-                    "'${gStopTime.arrivalTime}'," +
-                    "'${gStopTime.departureTime}'," +
+                    "${gStopTime.arrivalTime}," +
+                    "${gStopTime.departureTime}," +
                     "'${gStopTime.stopHeadsign}'," +
                     "${gStopTime.pickupType}," +
                     "${gStopTime.dropOffType}" +
@@ -109,7 +108,6 @@ object DBUtils {
         val rs = executeUpdate(
             connection.createStatement(),
             "INSERT INTO $TRIP_STOPS_TABLE_NAME VALUES(" +
-                    "'${gTripStop.uID}'," +
                     "'${gTripStop.tripId}'," +
                     "'${gTripStop.stopId}'," +
                     "${gTripStop.stopSequence}" +
@@ -120,14 +118,14 @@ object DBUtils {
 
     @JvmStatic
     fun selectStopTimes(
-        tripId: String? = null,
-        tripIds: List<String>? = null,
+        tripId: Int? = null,
+        tripIds: List<Int>? = null,
         limitMaxNbRow: Int? = null,
         limitOffset: Int? = null
     ): List<GStopTime> {
         var query = "SELECT * FROM $STOP_TIMES_TABLE_NAME"
         tripId?.let {
-            query += " WHERE ${GStopTime.TRIP_ID} = '$tripId'"
+            query += " WHERE ${GStopTime.TRIP_ID} = $tripId"
         }
         tripIds?.let {
             query += " WHERE ${GStopTime.TRIP_ID} IN ${tripIds
@@ -136,7 +134,7 @@ object DBUtils {
                     separator = ",",
                     prefix = "(",
                     postfix = ")"
-                ) { "'$it'" }}"
+                ) { "$it" }}"
         }
         query += " ORDER BY " +
                 "${GStopTime.TRIP_ID} ASC, " +
@@ -157,10 +155,10 @@ object DBUtils {
             }
             result.add(
                 GStopTime(
-                    rs.getString(GStopTime.TRIP_ID),
-                    rs.getString(GStopTime.ARRIVAL_TIME),
-                    rs.getString(GStopTime.DEPARTURE_TIME),
-                    rs.getString(GStopTime.STOP_ID),
+                    rs.getInt(GStopTime.TRIP_ID),
+                    rs.getInt(GStopTime.ARRIVAL_TIME),
+                    rs.getInt(GStopTime.DEPARTURE_TIME),
+                    rs.getInt(GStopTime.STOP_ID),
                     rs.getInt(GStopTime.STOP_SEQUENCE),
                     stopHeadSign,
                     rs.getInt(GStopTime.PICKUP_TYPE),
@@ -173,14 +171,14 @@ object DBUtils {
 
     @JvmStatic
     fun selectTripStops(
-        tripId: String? = null,
-        tripIds: List<String>? = null,
+        tripId: Int? = null,
+        tripIds: List<Int>? = null,
         limitMaxNbRow: Int? = null,
         limitOffset: Int? = null
     ): List<GTripStop> {
         var query = "SELECT * FROM $TRIP_STOPS_TABLE_NAME"
         tripId?.let {
-            query += " WHERE ${GTripStop.TRIP_ID} = '$tripId'"
+            query += " WHERE ${GTripStop.TRIP_ID} = $tripId"
         }
         tripIds?.let {
             query += " WHERE ${GTripStop.TRIP_ID} IN ${tripIds
@@ -189,7 +187,7 @@ object DBUtils {
                     separator = ",",
                     prefix = "(",
                     postfix = ")"
-                ) { "'$it'" }}"
+                ) { "$it" }}"
         }
         limitMaxNbRow?.let {
             query += " LIMIT $limitMaxNbRow"
@@ -202,9 +200,8 @@ object DBUtils {
         while (rs.next()) {
             result.add(
                 GTripStop(
-                    rs.getString(GTripStop.UID),
-                    rs.getString(GTripStop.TRIP_ID),
-                    rs.getString(GTripStop.STOP_ID),
+                    rs.getInt(GTripStop.TRIP_ID),
+                    rs.getInt(GTripStop.STOP_ID),
                     rs.getInt(GTripStop.STOP_SEQUENCE)
                 )
             )
@@ -217,11 +214,11 @@ object DBUtils {
     fun deleteStopTime(gStopTime: GStopTime): Boolean {
         var query = "DELETE FROM $STOP_TIMES_TABLE_NAME"
         query += " WHERE " +
-                "${GStopTime.TRIP_ID} = '${gStopTime.tripId}'" +
+                "${GStopTime.TRIP_ID} = ${gStopTime.tripId}" +
                 " AND " +
-                "${GStopTime.STOP_ID} = '${gStopTime.stopId}'" +
+                "${GStopTime.STOP_ID} = ${gStopTime.stopId}" +
                 " AND " +
-                "${GStopTime.STOP_SEQUENCE} = '${gStopTime.stopSequence}'"
+                "${GStopTime.STOP_SEQUENCE} = ${gStopTime.stopSequence}"
         val rs = executeUpdate(connection.createStatement(), query)
         if (rs > 1) {
             throw MTLog.Fatal("Deleted too many stop times!")
@@ -230,11 +227,11 @@ object DBUtils {
     }
 
     @JvmStatic
-    fun deleteStopTimes(tripId: String? = null): Int {
+    fun deleteStopTimes(tripId: Int? = null): Int {
         var query = "DELETE FROM $STOP_TIMES_TABLE_NAME"
         tripId?.let {
             query += " WHERE " +
-                    "${GStopTime.TRIP_ID} = '${tripId}'"
+                    "${GStopTime.TRIP_ID} = $tripId"
         }
         return executeUpdate(connection.createStatement(), query)
     }

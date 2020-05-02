@@ -267,8 +267,8 @@ public class GReader {
 					line.get(GStopTime.STOP_ID).trim(),
 					Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()),
 					line.get(GStopTime.STOP_HEADSIGN), //
-					GPickupType.parse(line.get(GStopTime.PICKUP_TYPE)).intValue(), //
-					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)).intValue() //
+					GPickupType.parse(line.get(GStopTime.PICKUP_TYPE)).ordinal(), //
+					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)).ordinal() //
 			);
 			if (agencyTools.excludeStopTime(gStopTime)) {
 				return;
@@ -337,12 +337,18 @@ public class GReader {
 
 	private static void processCalendar(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			GCalendar gCalendar = new GCalendar(line.get(GCalendar.SERVICE_ID), //
-					DAY_TRUE.equals(line.get(GCalendar.MONDAY)), DAY_TRUE.equals(line.get(GCalendar.TUESDAY)), //
-					DAY_TRUE.equals(line.get(GCalendar.WEDNESDAY)), DAY_TRUE.equals(line.get(GCalendar.THURSDAY)), //
-					DAY_TRUE.equals(line.get(GCalendar.FRIDAY)), DAY_TRUE.equals(line.get(GCalendar.SATURDAY)), //
+			GCalendar gCalendar = new GCalendar( //
+					line.get(GCalendar.SERVICE_ID), //
+					DAY_TRUE.equals(line.get(GCalendar.MONDAY)), //
+					DAY_TRUE.equals(line.get(GCalendar.TUESDAY)), //
+					DAY_TRUE.equals(line.get(GCalendar.WEDNESDAY)), //
+					DAY_TRUE.equals(line.get(GCalendar.THURSDAY)), //
+					DAY_TRUE.equals(line.get(GCalendar.FRIDAY)), //
+					DAY_TRUE.equals(line.get(GCalendar.SATURDAY)), //
 					DAY_TRUE.equals(line.get(GCalendar.SUNDAY)), //
-					Integer.parseInt(line.get(GCalendar.START_DATE)), Integer.parseInt(line.get(GCalendar.END_DATE)));
+					Integer.parseInt(line.get(GCalendar.START_DATE)), //
+					Integer.parseInt(line.get(GCalendar.END_DATE)) //
+			);
 			if (agencyTools.excludeCalendar(gCalendar)) {
 				return;
 			}
@@ -361,8 +367,7 @@ public class GReader {
 					line.get(GTrip.TRIP_ID),
 					StringUtils.isEmpty(directionId) ? null : Integer.valueOf(directionId),
 					line.get(GTrip.TRIP_HEADSIGN),
-					line.get(GTrip.TRIP_SHORT_NAME),
-					line.get(GTrip.SHAPE_ID)
+					line.get(GTrip.TRIP_SHORT_NAME)
 			);
 			if (agencyTools.excludeTrip(gTrip)) {
 				return;
@@ -412,13 +417,12 @@ public class GReader {
 					line.get(GRoute.ROUTE_ID),
 					line.get(GRoute.ROUTE_SHORT_NAME),
 					line.get(GRoute.ROUTE_LONG_NAME),
-					line.get(GRoute.ROUTE_DESC),
 					Integer.parseInt(line.get(GRoute.ROUTE_TYPE)),
 					routeColor == null ? null : routeColor.trim());
 			if (agencyTools.excludeRoute(gRoute)) {
 				return;
 			}
-			if (!StringUtils.isEmpty(gRoute.getAgencyId())
+			if (gRoute.hasAgencyId()
 					&& agencyTools.excludeAgencyNullable(gSpec.getAgency(gRoute.getAgencyId()))) {
 				return;
 			}

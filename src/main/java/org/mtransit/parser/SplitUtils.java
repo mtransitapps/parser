@@ -1,6 +1,5 @@
 package org.mtransit.parser;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.gtfs.GAgencyTools;
@@ -72,17 +71,17 @@ public class SplitUtils {
 		ArrayList<Integer> afterStopSequence = new ArrayList<>();
 		ArrayList<String> beforeStopIds = new ArrayList<>();
 		ArrayList<Integer> beforeStopSequence = new ArrayList<>();
-		java.util.ArrayList<org.mtransit.parser.Pair<String, Integer>> gTripStops = new java.util.ArrayList<>(); // DEBUG
+		java.util.ArrayList<org.mtransit.parser.Pair<Integer, Integer>> gTripStops = new java.util.ArrayList<>(); // DEBUG
 		int tripStopSequence = gTripStop.getStopSequence();
 		int minStopSequence = Integer.MAX_VALUE; // can be 1... or 0 or anything according to official documentation
 		for (GStopTime gStopTime : routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null)) {
-			if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
+			if (gStopTime.getTripId() != gTrip.getTripId()) {
 				continue;
 			}
 			if (Constants.DEBUG) {
 				gTripStops.add(new org.mtransit.parser.Pair<>(gStopTime.getStopId(), gStopTime.getStopSequence())); // DEBUG
 			}
-			String stopTimeStopId = agencyTools == null ? gStopTime.getStopId() : agencyTools.cleanStopOriginalId(gStopTime.getStopId());
+			String stopTimeStopId = agencyTools == null ? gStopTime.getStopIdString() : agencyTools.cleanStopOriginalId(gStopTime.getStopIdString());
 			if (allBeforeAfterStopIds.contains(stopTimeStopId)) {
 				if (gStopTime.getStopSequence() < tripStopSequence) {
 					beforeStopIds.add(stopTimeStopId);
@@ -100,7 +99,7 @@ public class SplitUtils {
 				minStopSequence = gStopTime.getStopSequence();
 			}
 		}
-		String gTripStopId = agencyTools == null ? gTripStop.getStopId() : agencyTools.cleanStopOriginalId(gTripStop.getStopId());
+		String gTripStopId = agencyTools == null ? gTripStop.getStopIdString() : agencyTools.cleanStopOriginalId(gTripStop.getStopIdString());
 		if (allBeforeAfterStopIds.contains(gTripStopId)) {
 			if (tripStopSequence == minStopSequence) {
 				beforeStopIds.add(gTripStopId);
@@ -136,28 +135,28 @@ public class SplitUtils {
 		throw new MTLog.Fatal("%s: Unexpected trip (before:%s|after:%s) %s.\n", mRoute.getId(), beforeStopIds, afterStopIds, gTrip);
 	}
 
-	public static void sortGTripStopsBySequence(@NotNull List<Pair<String, Integer>> gTripStops) {
+	public static void sortGTripStopsBySequence(@NotNull List<Pair<Integer, Integer>> gTripStops) {
 		Collections.sort(gTripStops, (o1, o2) ->
 				o1.second - o2.second
 		);
 	}
 
-	public static void setGTripStopSequence(@NotNull List<Pair<String, Integer>> gTripStops) {
+	public static void setGTripStopSequence(@NotNull List<Pair<Integer, Integer>> gTripStops) {
 		for (int i = 0; i < gTripStops.size(); i++) {
 			gTripStops.set(i, new Pair<>(gTripStops.get(i).first, i + 1));
 		}
 	}
 
 	public static void listRouteTripStops(long mRouteId, @NotNull GSpec routeGTFS) { // DEBUG
-		HashSet<ArrayList<Pair<String, Integer>>> gTripStopsS2 = new HashSet<>();
-		HashMap<String, String> firstLastStopIdsName = new HashMap<>();
+		HashSet<ArrayList<Pair<Integer, Integer>>> gTripStopsS2 = new HashSet<>();
+		HashMap<Integer, String> firstLastStopIdsName = new HashMap<>();
 		for (GRoute gRoute : routeGTFS.getRoutes(mRouteId)) {
 			for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteId())) {
-				ArrayList<Pair<String, Integer>> gTripStops = new ArrayList<>();
+				ArrayList<Pair<Integer, Integer>> gTripStops = new ArrayList<>();
 				try {
 					List<GStopTime> stopTimes = routeGTFS.getStopTimes(null, gTrip.getTripId(), null, null);
 					for (GStopTime gStopTime : stopTimes) {
-						if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
+						if (gStopTime.getTripId() != gTrip.getTripId()) {
 							continue;
 						}
 						gTripStops.add(new Pair<>(gStopTime.getStopId(), gStopTime.getStopSequence()));
@@ -173,15 +172,15 @@ public class SplitUtils {
 			}
 		}
 		MTLog.log("%s: all %s gTripStop(s):", mRouteId, gTripStopsS2.size());
-		for (ArrayList<Pair<String, Integer>> gTripStops : gTripStopsS2) {
+		for (ArrayList<Pair<Integer, Integer>> gTripStops : gTripStopsS2) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("[");
 			boolean newline = addNewLineIfNecessary(sb, false);
 			int size = gTripStops.size();
 			String indexFormat = "%0" + String.valueOf(size).length() + "d";
 			for (int i = 0; i < size; i++) {
-				Pair<String, Integer> gTripStop = gTripStops.get(i);
-				String stopId = gTripStop.first;
+				Pair<Integer, Integer> gTripStop = gTripStops.get(i);
+				Integer stopId = gTripStop.first;
 				boolean isFirstLastStop = firstLastStopIdsName.containsKey(stopId);
 				if (i + 1 == size) {
 					addNewLineIfNecessary(sb, newline);
@@ -208,14 +207,15 @@ public class SplitUtils {
 		MTLog.log("%s: all first/last stop IDs: %s", mRouteId, firstLastStopIdsName.keySet());
 	}
 
-	private static void addFistLastStopIdName(GSpec routeGTFS, HashMap<String, String> firstLastStopIdsName, ArrayList<Pair<String, Integer>> gTripStops,
+	private static void addFistLastStopIdName(GSpec routeGTFS, HashMap<Integer, String> firstLastStopIdsName, ArrayList<Pair<Integer, Integer>> gTripStops,
 											  int firstStopIndex) {
 		if (firstStopIndex < 0 || firstStopIndex >= gTripStops.size()) {
 			return;
 		}
-		String stopId = gTripStops.get(firstStopIndex).first;
+		Integer stopId = gTripStops.get(firstStopIndex).first;
 		if (!firstLastStopIdsName.containsKey(stopId)) {
 			GStop gStop = routeGTFS.getStop(stopId);
+			//noinspection ConstantConditions
 			firstLastStopIdsName.put( //
 					stopId, "\"" + gStop.getStopCode() + "\", // " + gStop.getStopName() + //
 							" {" + gStop.getStopLat() + "," + gStop.getStopLong() + "}");
@@ -275,7 +275,7 @@ public class SplitUtils {
 			beforeStopId = beforeStopIds.get(b);
 			for (int a = 0; a < afterStopIds.size(); a++) {
 				afterStopId = afterStopIds.get(a);
-				String gTripStopId = agencyTools == null ? gTripStop.getStopId() : agencyTools.cleanStopOriginalId(gTripStop.getStopId());
+				String gTripStopId = agencyTools == null ? gTripStop.getStopIdString() : agencyTools.cleanStopOriginalId(gTripStop.getStopIdString());
 				if (gTripStopId.equals(beforeStopId) && gTripStopId.equals(afterStopId)) {
 					continue;
 				}
@@ -312,11 +312,11 @@ public class SplitUtils {
 	}
 
 	@NotNull
-	public static String getFirstStopId(@NotNull MRoute mRoute, @NotNull GSpec gtfs, @NotNull GTrip gTrip) {
+	public static Integer getFirstStopId(@NotNull MRoute mRoute, @NotNull GSpec gtfs, @NotNull GTrip gTrip) {
 		int gStopMaxSequence = -1;
-		String gStopId = null;
+		Integer gStopId = null;
 		for (GStopTime gStopTime : gtfs.getStopTimes(mRoute.getId(), gTrip.getTripId(), null, null)) {
-			if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
+			if (gStopTime.getTripId() != gTrip.getTripId()) {
 				continue;
 			}
 			if (gStopTime.getStopSequence() > gStopMaxSequence) {
@@ -327,18 +327,18 @@ public class SplitUtils {
 			}
 			gStopId = gStopTime.getStopId();
 		}
-		if (StringUtils.isEmpty(gStopId)) {
+		if (gStopId == null) {
 			throw new MTLog.Fatal("%s: Unexpected trip (no 1st stop) %s.\n", mRoute.getId(), gTrip);
 		}
 		return gStopId;
 	}
 
 	@NotNull
-	public static String getLastStopId(@NotNull MRoute mRoute, @NotNull GSpec gtfs, @NotNull GTrip gTrip) {
+	public static Integer getLastStopId(@NotNull MRoute mRoute, @NotNull GSpec gtfs, @NotNull GTrip gTrip) {
 		int gStopMaxSequence = -1;
-		String gStopId = null;
+		Integer gStopId = null;
 		for (GStopTime gStopTime : gtfs.getStopTimes(mRoute.getId(), gTrip.getTripId(), null, null)) {
-			if (!gStopTime.getTripId().equals(gTrip.getTripId())) {
+			if (gStopTime.getTripId() != gTrip.getTripId()) {
 				continue;
 			}
 			if (gStopTime.getStopSequence() < gStopMaxSequence) {
@@ -347,7 +347,7 @@ public class SplitUtils {
 			gStopMaxSequence = gStopTime.getStopSequence();
 			gStopId = gStopTime.getStopId();
 		}
-		if (StringUtils.isEmpty(gStopId)) {
+		if (gStopId == null) {
 			throw new MTLog.Fatal("%s: Unexpected trip (no last stop) %s.\n", mRoute.getId(), gTrip);
 		}
 		return gStopId;
@@ -355,7 +355,7 @@ public class SplitUtils {
 
 	public static boolean isLastTripStop(@NotNull GTrip gTrip, @NotNull GTripStop gTripStop, @NotNull GSpec routeGTFS) {
 		for (GTripStop ts : routeGTFS.getTripStops(gTrip.getTripId())) {
-			if (!ts.getTripId().equals(gTrip.getTripId())) {
+			if (ts.getTripId() != gTrip.getTripId()) {
 				continue;
 			}
 			if (ts.getStopSequence() > gTripStop.getStopSequence()) {
@@ -558,8 +558,8 @@ public class SplitUtils {
 				throw new MTLog.Fatal("%s: 2: %s", routeId, list2);
 			}
 			List<String> sortedStopIds = this.allSortedStopIds.get(directionId);
-			String ts1GStopId = agencyTools == null ? ts1GStop.getStopId() : agencyTools.cleanStopOriginalId(ts1GStop.getStopId());
-			String ts2GStopId = agencyTools == null ? ts2GStop.getStopId() : agencyTools.cleanStopOriginalId(ts2GStop.getStopId());
+			String ts1GStopId = agencyTools == null ? ts1GStop.getStopIdString() : agencyTools.cleanStopOriginalId(ts1GStop.getStopIdString());
+			String ts2GStopId = agencyTools == null ? ts2GStop.getStopIdString() : agencyTools.cleanStopOriginalId(ts2GStop.getStopIdString());
 			int ts1StopIndex = sortedStopIds.indexOf(ts1GStopId);
 			int ts2StopIndex = sortedStopIds.indexOf(ts2GStopId);
 			if (ts1StopIndex < 0 || ts2StopIndex < 0) {

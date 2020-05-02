@@ -8,7 +8,7 @@ import java.util.Locale
 // https://developers.google.com/transit/gtfs/reference#calendar_fields
 // http://gtfs.org/reference/static/#calendartxt
 data class GCalendar(
-    val serviceId: String,
+    val serviceId: Int,
     private val monday: Boolean,
     private val tuesday: Boolean,
     private val wednesday: Boolean,
@@ -20,7 +20,31 @@ data class GCalendar(
     val endDate: Int  // YYYYMMDD
 ) {
     constructor(
-        serviceId: String,
+        serviceIdString: String,
+        monday: Boolean,
+        tuesday: Boolean,
+        wednesday: Boolean,
+        thursday: Boolean,
+        friday: Boolean,
+        saturday: Boolean,
+        sunday: Boolean,
+        startDate: Int,
+        endDate: Int
+    ) : this(
+        GIDs.getInt(serviceIdString),
+        monday,
+        tuesday,
+        wednesday,
+        thursday,
+        friday,
+        saturday,
+        sunday,
+        startDate,
+        endDate
+    )
+
+    constructor(
+        serviceIdString: String,
         monday: Int,
         tuesday: Int,
         wednesday: Int,
@@ -31,7 +55,7 @@ data class GCalendar(
         startDate: Int,
         endDate: Int
     ) : this(
-        serviceId,
+        GIDs.getInt(serviceIdString),
         monday == 1,
         tuesday == 1,
         wednesday == 1,
@@ -42,6 +66,11 @@ data class GCalendar(
         startDate,
         endDate
     )
+
+    val serviceIdString: String
+        get() {
+            return GIDs.getString(serviceId)
+        }
 
     val dates: List<GCalendarDate> by lazy {
         initAllDates(
@@ -58,12 +87,11 @@ data class GCalendar(
         )
     }
 
-    @Suppress("unused")
-    fun isServiceId(serviceId: String): Boolean {
-        return this.serviceId == serviceId
+    fun isServiceIdStrings(serviceIdStrings: Collection<String?>): Boolean {
+        return serviceIdStrings.contains(serviceIdString)
     }
 
-    fun isServiceIds(serviceIds: Collection<String?>): Boolean {
+    fun isServiceIds(serviceIds: Collection<Int?>): Boolean {
         return serviceIds.contains(serviceId)
     }
 
@@ -117,7 +145,7 @@ data class GCalendar(
         const val END_DATE = "end_date"
 
         private fun initAllDates(
-            _serviceId: String,
+            _serviceId: Int,
             _monday: Boolean,
             _tuesday: Boolean,
             _wednesday: Boolean,

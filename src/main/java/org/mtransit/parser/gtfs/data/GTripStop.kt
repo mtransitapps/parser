@@ -7,14 +7,27 @@ import org.mtransit.parser.Constants
 // -_trip_id field
 // - stop_id field
 data class GTripStop(
-    val uID: String,
-    val tripId: String,
-    val stopId: String,
+    val tripId: Int,
+    val stopId: Int,
     val stopSequence: Int
 ) {
 
+    val uID: String
+        get() {
+            return getNewUID(tripIdString, stopIdString, stopSequence)
+        }
+
+    val tripIdString: String
+        get() {
+            return GIDs.getString(tripId)
+        }
+
+    val stopIdString: String
+        get() {
+            return GIDs.getString(stopId)
+        }
+
     companion object {
-        const val UID = "uid"
         const val TRIP_ID = "trip_id"
         const val STOP_ID = "stop_id"
         const val STOP_SEQUENCE = "stop_sequence"

@@ -1,5 +1,8 @@
 package org.mtransit.parser;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Locale;
 
 @SuppressWarnings("WeakerAccess")
@@ -7,7 +10,8 @@ public final class TimeUtils {
 
 	private static final int PRECISION_IN_SECONDS = 10;
 
-	public static Integer cleanExtraSeconds(Integer time) {
+	@Nullable
+	public static Integer cleanExtraSeconds(@Nullable Integer time) {
 		int extraSeconds = time == null ? 0 : time % PRECISION_IN_SECONDS;
 		if (extraSeconds > 0) { // IF too precise DO
 			return cleanTime(time, extraSeconds);

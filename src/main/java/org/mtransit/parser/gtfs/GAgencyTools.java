@@ -31,83 +31,106 @@ public interface GAgencyTools {
 
 	boolean excludingAll();
 
+	@NotNull
 	String getAgencyColor();
 
+	@NotNull
 	Integer getAgencyRouteType();
 
-	boolean excludeAgencyNullable(GAgency gAgency);
+	boolean excludeAgencyNullable(@Nullable GAgency gAgency);
 
-	boolean excludeAgency(GAgency gAgency);
+	boolean excludeAgency(@NotNull GAgency gAgency);
 
-	String cleanServiceId(String serviceId);
+	@NotNull
+	String cleanServiceId(@NotNull String serviceIdString); // TODO used too much during parsing?
 
 	// ROUTE
-	long getRouteId(GRoute gRoute);
+	long getRouteId(@NotNull GRoute gRoute);
 
-	String getRouteShortName(GRoute gRoute);
+	@NotNull
+	String getRouteShortName(@NotNull GRoute gRoute);
 
-	String getRouteLongName(GRoute gRoute);
+	@NotNull
+	String getRouteLongName(@NotNull GRoute gRoute);
 
-	boolean mergeRouteLongName(MRoute mRoute, MRoute mRouteToMerge);
+	boolean mergeRouteLongName(@NotNull MRoute mRoute, @NotNull MRoute mRouteToMerge);
 
-	String getRouteColor(GRoute gRoute);
+	@Nullable
+	String getRouteColor(@NotNull GRoute gRoute);
 
-	boolean excludeRouteNullable(GRoute gRoute);
+	boolean excludeRouteNullable(@Nullable GRoute gRoute);
 
-	boolean excludeRoute(GRoute gRoute);
+	boolean excludeRoute(@NotNull GRoute gRoute);
 
 	// TRIP
-	void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs);
+	void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs);
 
-	String cleanTripHeadsign(String tripHeadsign);
+	@NotNull
+	String cleanTripHeadsign(@NotNull String tripHeadsign);
 
-	boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge);
+	boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge);
 
 	boolean excludeTripNullable(@Nullable GTrip gTrip);
 
-	boolean excludeTrip(GTrip gTrip);
-
-	ArrayList<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs);
-
-	Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, ArrayList<MTrip> splitTrips, GSpec routeGTFS);
-
-	boolean excludeStopTime(GStopTime gStopTime);
-
-	// STOP
-	int getStopId(GStop gStop);
-
-	String cleanStopName(String gStopName);
-
-	String cleanStopHeadsign(String stopHeadsign);
+	boolean excludeTrip(@NotNull GTrip gTrip);
 
 	@NotNull
-	String getStopCode(GStop gStop);
+	ArrayList<MTrip> splitTrip(@NotNull MRoute mRoute, @Nullable GTrip gTrip, @NotNull GSpec gtfs);
+
+	@NotNull
+	Pair<Long[], Integer[]> splitTripStop(@NotNull MRoute mRoute, @NotNull GTrip gTrip, @NotNull GTripStop gTripStop, @NotNull ArrayList<MTrip> splitTrips, @NotNull GSpec routeGTFS);
+
+	boolean excludeStopTime(@NotNull GStopTime gStopTime);
+
+	// STOP
+	int getStopId(@NotNull GStop gStop);
+
+	@NotNull
+	String cleanStopName(@NotNull String gStopName);
 
 	@Nullable
-	String getStopOriginalId(GStop gStop);
+	String cleanStopHeadsign(@Nullable String stopHeadsign);
+
+	@NotNull
+	String getStopCode(@NotNull GStop gStop);
+
+	@Nullable
+	String getStopOriginalId(@NotNull GStop gStop);
 
 	boolean excludeStopNullable(@Nullable GStop gStop);
 
-	boolean excludeStop(GStop gStop);
+	boolean excludeStop(@NotNull GStop gStop);
 
-	String cleanStopOriginalId(String gStopId);
+	@NotNull
+	String cleanStopOriginalId(@NotNull String gStopIdString);
 
 	// CALENDAR
-	boolean excludeCalendar(GCalendar gCalendar);
+	boolean excludeCalendar(@NotNull GCalendar gCalendar);
 
 	// CALENDAR DATE
-	boolean excludeCalendarDate(GCalendarDate gCalendarDate);
+	boolean excludeCalendarDate(@NotNull GCalendarDate gCalendarDate);
 
 	// SCHEDULE
-	Pair<Integer, Integer> getTimes(long mRouteId, GStopTime gStopTime, GSpec routeGTFS, SimpleDateFormat gDateFormat, SimpleDateFormat mDateFormat);
+	@NotNull
+	Pair<Integer, Integer> getTimes(long mRouteId, @NotNull GStopTime gStopTime, @NotNull GSpec routeGTFS, @NotNull SimpleDateFormat mDateFormat);
+
+	@Deprecated
+	@NotNull
+	Pair<Integer, Integer> getTimes(long mRouteId, @NotNull GStopTime gStopTime, @NotNull GSpec routeGTFS, @Nullable SimpleDateFormat gDateFormat, @NotNull SimpleDateFormat mDateFormat);
 
 	// FREQUENCY
-	int getStartTime(GFrequency gFrequency);
+	int getStartTime(@NotNull GFrequency gFrequency);
 
-	int getEndTime(GFrequency gFrequency);
+	int getEndTime(@NotNull GFrequency gFrequency);
 
 	// DEPARTURE TIME
-	int compareEarly(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop);
+	int compareEarly(long routeId,
+					 @NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2,
+					 @NotNull MTripStop ts1, @NotNull MTripStop ts2,
+					 @NotNull GStop ts1GStop, @NotNull GStop ts2GStop);
 
-	int compare(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop);
+	int compare(long routeId,
+				@NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2,
+				@NotNull MTripStop ts1, @NotNull MTripStop ts2,
+				@NotNull GStop ts1GStop, @NotNull GStop ts2GStop);
 }

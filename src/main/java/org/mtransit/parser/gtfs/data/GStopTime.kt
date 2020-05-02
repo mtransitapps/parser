@@ -2,29 +2,86 @@ package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
+import java.util.Date
 
 // http://gtfs.org/reference/static#stop_timestxt
 // https://developers.google.com/transit/gtfs/reference#stop_times_fields
 data class GStopTime(
-    val tripId: String,
-    val arrivalTime: String, // TODO Int
-    val departureTime: String, // TODO Int
-    val stopId: String,
+    val tripId: Int,
+    private val _arrivalTime: Int,
+    private val _departureTime: Int,
+    val stopId: Int,
     val stopSequence: Int,
     val stopHeadsign: String?,
     var pickupType: Int,
     var dropOffType: Int
 ) : Comparable<GStopTime> {
 
+    constructor(
+        tripIdString: String,
+        arrivalTime: String,
+        departureTime: String,
+        stopIdString: String,
+        stopSequence: Int,
+        stopHeadsign: String?,
+        pickupType: Int,
+        dropOffType: Int
+    ) : this(
+        GIDs.getInt(tripIdString),
+        GTime.fromString(arrivalTime),
+        GTime.fromString(departureTime),
+        GIDs.getInt(stopIdString),
+        stopSequence,
+        stopHeadsign,
+        pickupType,
+        dropOffType
+    )
+
+    val tripIdString: String
+        get() {
+            return GIDs.getString(tripId)
+        }
+
+    val stopIdString: String
+        get() {
+            return GIDs.getString(stopId)
+        }
+
+    val arrivalTime: Int = _arrivalTime
+
+    fun hasArrivalTime() = _arrivalTime >= 0
+
+    val arrivalTimeMs: Long
+        get() {
+            return GTime.toMs(_arrivalTime)
+        }
+
+    val arrivalTimeDate: Date
+        get() {
+            return GTime.toDate(_arrivalTime)
+        }
+
+    val departureTime: Int = _departureTime
+
+    fun hasDepartureTime() = _departureTime >= 0
+
+    val departureTimeMs: Long
+        get() {
+            return GTime.toMs(_arrivalTime)
+        }
+
+    val departureTimeDate: Date
+        get() {
+            return GTime.toDate(_arrivalTime)
+        }
+
     val uID: String
 
     init {
-        uID = getNewUID(tripId, stopId, stopSequence)
+        uID = getNewUID(tripIdString, stopIdString, stopSequence)
     }
 
-    fun hasStopHeadsign(): Boolean {
-        return this.stopHeadsign.isNullOrEmpty()
-    }
+    fun hasStopHeadsign() = !this.stopHeadsign.isNullOrEmpty()
 
     override fun compareTo(other: GStopTime): Int {
         if (this.tripId != other.tripId) {
@@ -33,8 +90,8 @@ data class GStopTime(
         if (this.stopSequence != other.stopSequence) {
             return this.stopSequence.compareTo(other.stopSequence)
         }
-        if (this.departureTime != other.departureTime) {
-            return this.departureTime.compareTo(other.departureTime)
+        if (this._departureTime != other._departureTime) {
+            return this._departureTime.compareTo(other._departureTime)
         }
         throw MTLog.Fatal("Unexpected stop times to compare: '$this' & '$other'!")
     }
