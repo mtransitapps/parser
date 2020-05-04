@@ -179,13 +179,13 @@ public class MGenerator {
 	private static final String GTFS_RTS_TRIP_STOPS = "gtfs_rts_trip_stops";
 	private static final String GTFS_RTS_STOPS = "gtfs_rts_stops";
 
-	public static void dumpFiles(@Nullable MSpec mSpec, @NotNull String gtfsFile, @NotNull String dumpDir, final @NotNull String fileBase) {
-		dumpFiles(mSpec, gtfsFile, dumpDir, fileBase, false);
+	public static void dumpFiles(@NotNull GAgencyTools gAgencyTools, @Nullable MSpec mSpec, @NotNull String gtfsFile, @NotNull String dumpDir, final @NotNull String fileBase) {
+		dumpFiles(gAgencyTools, mSpec, gtfsFile, dumpDir, fileBase, false);
 	}
 
-	public static void dumpFiles(@Nullable MSpec mSpec, @NotNull String gtfsFile, @NotNull String dumpDir, final @NotNull String fileBase, boolean deleteAll) {
+	public static void dumpFiles(@NotNull GAgencyTools gAgencyTools,@Nullable MSpec mSpec, @NotNull String gtfsFile, @NotNull String dumpDir, final @NotNull String fileBase, boolean deleteAll) {
 		if (!deleteAll && (mSpec == null || !mSpec.isValid())) {
-			MTLog.logFatal("ERROR: Generated data invalid (agencies:%s)!", mSpec);
+			MTLog.logFatal("Generated data invalid (agencies:%s)!", mSpec);
 			return;
 		}
 		long start = System.currentTimeMillis();
@@ -207,7 +207,7 @@ public class MGenerator {
 				ow = new BufferedWriter(new FileWriter(file));
 				for (MServiceDate mServiceDate : mSpec.getServiceDates()) {
 					// System.out.println("write: " + mServiceDate.toString());
-					ow.write(mServiceDate.toString());
+					ow.write(mServiceDate.toFile(gAgencyTools));
 					ow.write(Constants.NEW_LINE);
 					if (minDate == null || minDate > mServiceDate.getCalendarDate()) {
 						minDate = mServiceDate.getCalendarDate();
@@ -248,12 +248,12 @@ public class MGenerator {
 						for (MSchedule mSchedule : mStopSchedules) {
 							if (mSchedule.sameServiceIdAndTripId(lastSchedule)) {
 								ow.write(Constants.COLUMN_SEPARATOR);
-								ow.write(mSchedule.toStringSameServiceIdAndTripId(lastSchedule));
+								ow.write(mSchedule.toFileSameServiceIdAndTripId(lastSchedule));
 							} else {
 								if (!empty) {
 									ow.write(Constants.NEW_LINE);
 								}
-								ow.write(mSchedule.toStringNewServiceIdAndTripId());
+								ow.write(mSchedule.toFileNewServiceIdAndTripId(gAgencyTools));
 							}
 							empty = false;
 							lastSchedule = mSchedule;
@@ -288,7 +288,7 @@ public class MGenerator {
 						empty = true;
 						ow = new BufferedWriter(new FileWriter(file));
 						for (MFrequency mFrequency : mRouteFrequencies) {
-							ow.write(mFrequency.toString());
+							ow.write(mFrequency.toFile(gAgencyTools));
 							ow.write(Constants.NEW_LINE);
 							empty = false;
 						}
@@ -309,7 +309,7 @@ public class MGenerator {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
 				for (MRoute mRoute : mSpec.getRoutes()) {
-					ow.write(mRoute.toString());
+					ow.write(mRoute.toFile());
 					ow.write(Constants.NEW_LINE);
 				}
 			}
@@ -324,7 +324,7 @@ public class MGenerator {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
 				for (MTrip mTrip : mSpec.getTrips()) {
-					ow.write(mTrip.printString());
+					ow.write(mTrip.toFile());
 					ow.write(Constants.NEW_LINE);
 				}
 			}
@@ -339,7 +339,7 @@ public class MGenerator {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
 				for (MTripStop mTripStop : mSpec.getTripStops()) {
-					ow.write(mTripStop.toString());
+					ow.write(mTripStop.toFile());
 					ow.write(Constants.NEW_LINE);
 				}
 			}
@@ -355,7 +355,7 @@ public class MGenerator {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
 				for (MStop mStop : mSpec.getStops()) {
-					ow.write(mStop.printString());
+					ow.write(mStop.toFile());
 					ow.write(Constants.NEW_LINE);
 					if (mStop.hasLat()) {
 						if (minLat == null || minLat > mStop.getLat()) {

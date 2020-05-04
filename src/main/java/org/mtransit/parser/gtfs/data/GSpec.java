@@ -39,10 +39,10 @@ public class GSpec {
 	private final HashMap<Integer, GRoute> routeIdRoutes = new HashMap<>();
 	private int tripsCount = 0;
 	@NotNull
-	private final HashMap<Integer, String> tripIdsUIDs = new HashMap<>();
+	private final HashMap<Integer, Integer> tripIdsUIDs = new HashMap<>();
 	private int frequenciesCount = 0;
 	@NotNull
-	private final HashSet<String> tripStopsUIDs = new HashSet<>();
+	private final HashSet<Integer> tripStopsUIDs = new HashSet<>();
 
 	@NotNull
 	private final HashMap<Integer, ArrayList<GTrip>> routeIdTrips = new HashMap<>();
@@ -266,8 +266,8 @@ public class GSpec {
 
 	public void generateTripStops() {
 		MTLog.log("Generating GTFS trip stops...");
-		String uid;
-		String tripUID;
+		Integer uid;
+		Integer tripUID;
 		GStopTime gStopTime;
 		List<GStopTime> tripStopTimes;
 		GTripStop gTripStop;
@@ -327,7 +327,7 @@ public class GSpec {
 			long frequencyStartInMs;
 			long frequencyEndInMs;
 			long frequencyHeadwayInMs;
-			HashMap<String, Integer> gStopTimeIncInSec = new HashMap<>();
+			HashMap<Integer, Integer> gStopTimeIncInSec = new HashMap<>();
 			Integer previousStopTimeInSec = null;
 			long lastFirstStopTimeInMs = -1L;
 			for (GStopTime gStopTime : tripStopTimes) {

@@ -197,19 +197,21 @@ object DBUtils {
                 query += " OFFSET $limitOffset"
             }
         }
-        val result = ArrayList<GTripStop>()
-        val rs = executeQuery(connection.createStatement(), query)
-        while (rs.next()) {
-            result.add(
+        return executeQuery(connection.createStatement(), query)
+            .use {
+                generateSequence {
+                    it.takeIf {
+                        it.next()
+                    }
+                }
+            }.map {
                 GTripStop(
-                    rs.getInt(GTripStop.ROUTE_ID),
-                    rs.getInt(GTripStop.TRIP_ID),
-                    rs.getInt(GTripStop.STOP_ID),
-                    rs.getInt(GTripStop.STOP_SEQUENCE)
+                    it.getInt(GTripStop.ROUTE_ID),
+                    it.getInt(GTripStop.TRIP_ID),
+                    it.getInt(GTripStop.STOP_ID),
+                    it.getInt(GTripStop.STOP_SEQUENCE)
                 )
-            )
-        }
-        return result
+            }.toList()
     }
 
     @Suppress("unused")

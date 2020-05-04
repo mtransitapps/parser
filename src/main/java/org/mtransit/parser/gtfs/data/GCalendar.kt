@@ -1,6 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.gtfs.GAgencyTools
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -67,10 +68,15 @@ data class GCalendar(
         endDate
     )
 
-    val serviceId: String
+    private val serviceId: String
         get() {
             return GIDs.getString(serviceIdInt)
         }
+
+    @Suppress("unused")
+    fun getCleanServiceId(agencyTools: GAgencyTools): String {
+        return agencyTools.cleanServiceId(serviceId)
+    }
 
     val dates: List<GCalendarDate> by lazy {
         initAllDates(
@@ -85,16 +91,6 @@ data class GCalendar(
             startDate,
             endDate
         )
-    }
-
-    @Suppress("unused")
-    fun isServiceId(serviceId: String): Boolean {
-        return this.serviceId == serviceId
-    }
-
-    @Suppress("unused")
-    fun isServiceIds(serviceIds: Collection<String?>): Boolean {
-        return serviceIds.contains(serviceId)
     }
 
     fun isServiceIdInts(serviceIdInts: Collection<Int?>): Boolean {

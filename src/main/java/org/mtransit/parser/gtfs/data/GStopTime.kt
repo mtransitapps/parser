@@ -1,6 +1,5 @@
 package org.mtransit.parser.gtfs.data
 
-import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 import java.util.Date
 
@@ -78,11 +77,7 @@ data class GStopTime(
             return GTime.toDate(_arrivalTime)
         }
 
-    val uID: String
-
-    init {
-        uID = getNewUID(tripIdInt, stopIdInt, stopSequence)
-    }
+    val uID: Int = getNewUID(tripIdInt, stopIdInt, stopSequence)
 
     fun hasStopHeadsign() = !this.stopHeadsign.isNullOrEmpty()
 
@@ -116,8 +111,12 @@ data class GStopTime(
             tripIdInt: Int,
             stopIdInt: Int,
             stopSequence: Int
-        ): String {
-            return "$stopIdInt${Constants.UUID_SEPARATOR}$stopSequence${Constants.UUID_SEPARATOR}$tripIdInt"
+        ): Int {
+            var result = 0
+            result = 31 * result + tripIdInt
+            result = 31 * result + stopIdInt
+            result = 31 * result + stopSequence
+            return result
         }
     }
 }

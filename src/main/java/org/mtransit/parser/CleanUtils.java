@@ -37,8 +37,14 @@ public final class CleanUtils {
 		ESCAPE = new LookupTranslator(map);
 	}
 
-	public static String escape(String string) {
+	@NotNull
+	public static String escape(@NotNull String string) {
 		return ESCAPE.translate(string);
+	}
+
+	@NotNull
+	public static String quotes(@NotNull String string) {
+		return "\'" + string + "\'";
 	}
 
 	private static final Pattern CLEAN_SPACES = Pattern.compile("\\s+");

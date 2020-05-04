@@ -102,7 +102,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	public void start(@NotNull String[] args) {
 		if (excludingAll()) {
-			MGenerator.dumpFiles(null, args[0], args[1], args[2], true);
+			MGenerator.dumpFiles(this, null, args[0], args[1], args[2], true);
 			return;
 		}
 		MTLog.log("Generating agency data...");
@@ -116,7 +116,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		gtfs.splitByRouteId(this);
 		gtfs.clearRawData();
 		MSpec mSpec = MGenerator.generateMSpec(gtfs, this);
-		MGenerator.dumpFiles(mSpec, args[0], args[1], args[2]);
+		MGenerator.dumpFiles(this, mSpec, args[0], args[1], args[2]);
 		MTLog.log("Generating agency data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 

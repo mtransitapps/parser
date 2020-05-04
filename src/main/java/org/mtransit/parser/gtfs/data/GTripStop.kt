@@ -1,7 +1,5 @@
 package org.mtransit.parser.gtfs.data
 
-import org.mtransit.parser.Constants
-
 // https://developers.google.com/transit/gtfs/reference#stop_timestxt
 // http://gtfs.org/reference/static#stop_timestxt
 // -_trip_id field
@@ -13,19 +11,29 @@ data class GTripStop(
     val stopSequence: Int
 ) {
 
+    @Suppress("unused")
     constructor(
-        tripUID: String,
-        tripId: Int,
+        routeAndTripUIDInt: Int,
         stopId: Int,
         stopSequence: Int
     ) : this(
-        GTrip.extractRouteIdInt(tripUID),
-        tripId,
+        GTrip.split(routeAndTripUIDInt),
         stopId,
         stopSequence
     )
 
-    val uID: String
+    constructor(
+        routeAndTripUIDInt: Pair<Int, Int>,
+        stopId: Int,
+        stopSequence: Int
+    ) : this(
+        routeAndTripUIDInt.first,
+        routeAndTripUIDInt.second,
+        stopId,
+        stopSequence
+    )
+
+    val uID: Int
         get() {
             return getNewUID(routeIdInt, tripIdInt, stopIdInt, stopSequence)
         }
@@ -49,11 +57,15 @@ data class GTripStop(
 
         @JvmStatic
         fun getNewUID(
-            tripUID: String,
+            tripUIDInt: Int,
             stopIdInt: Int,
             stopSequence: Int
-        ): String {
-            return "$stopIdInt${Constants.UUID_SEPARATOR}$stopSequence${Constants.UUID_SEPARATOR}$tripUID"
+        ): Int {
+            var result = 0
+            result = 31 * result + tripUIDInt
+            result = 31 * result + stopIdInt
+            result = 31 * result + stopSequence
+            return result
         }
 
         @JvmStatic
@@ -62,8 +74,13 @@ data class GTripStop(
             tripIdInt: Int,
             stopIdInt: Int,
             stopSequence: Int
-        ): String {
-            return "$stopIdInt${Constants.UUID_SEPARATOR}$stopSequence${Constants.UUID_SEPARATOR}$routeIdInt${Constants.UUID_SEPARATOR}$tripIdInt"
+        ): Int {
+            var result = 0
+            result = 31 * result + routeIdInt
+            result = 31 * result + tripIdInt
+            result = 31 * result + stopIdInt
+            result = 31 * result + stopSequence
+            return result
         }
     }
 }

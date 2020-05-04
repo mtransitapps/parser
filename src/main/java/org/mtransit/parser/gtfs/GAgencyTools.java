@@ -42,7 +42,7 @@ public interface GAgencyTools {
 	boolean excludeAgency(@NotNull GAgency gAgency);
 
 	@NotNull
-	String cleanServiceId(@NotNull String serviceIdString); // TODO used too much during parsing?
+	String cleanServiceId(@NotNull String serviceIdString);
 
 	// ROUTE
 	long getRouteId(@NotNull GRoute gRoute);

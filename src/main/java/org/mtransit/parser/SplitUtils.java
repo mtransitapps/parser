@@ -469,20 +469,20 @@ public class SplitUtils {
 		private void initAllTrips() {
 			this.allTrips = new ArrayList<>();
 			if (this.headsignType0 == MTrip.HEADSIGN_TYPE_STRING) {
-				this.allTrips.add(new MTrip(this.routeId).setHeadsignString(this.headsignString0, this.directionId0));
+				this.allTrips.add(new MTrip(this.routeId, this.headsignString0, this.directionId0));
 			} else if (this.headsignType0 == MTrip.HEADSIGN_TYPE_DIRECTION) {
-				this.allTrips.add(new MTrip(this.routeId).setHeadsignDirection(MDirectionType.parse(this.headsignString0)));
+				this.allTrips.add(new MTrip(this.routeId, MDirectionType.parse(this.headsignString0)));
 			} else if (this.headsignType0 == MTrip.HEADSIGN_TYPE_INBOUND) {
-				this.allTrips.add(new MTrip(this.routeId).setHeadsignInbound(MInboundType.parse(this.headsignString0)));
+				this.allTrips.add(new MTrip(this.routeId, MInboundType.parse(this.headsignString0)));
 			} else {
 				throw new MTLog.Fatal("%s: Unexpected trip type %s for %s.\n", this.routeId, this.headsignType0, this.routeId);
 			}
 			if (this.headsignType1 == MTrip.HEADSIGN_TYPE_STRING) {
-				this.allTrips.add(new MTrip(this.routeId).setHeadsignString(this.headsignString1, this.directionId1));
+				this.allTrips.add(new MTrip(this.routeId, this.headsignString1, this.directionId1));
 			} else if (this.headsignType1 == MTrip.HEADSIGN_TYPE_DIRECTION) {
-				this.allTrips.add(new MTrip(this.routeId).setHeadsignDirection(MDirectionType.parse(this.headsignString1)));
+				this.allTrips.add(new MTrip(this.routeId, MDirectionType.parse(this.headsignString1)));
 			} else if (this.headsignType1 == MTrip.HEADSIGN_TYPE_INBOUND) {
-				this.allTrips.add(new MTrip(this.routeId).setHeadsignInbound(MInboundType.parse(this.headsignString1)));
+				this.allTrips.add(new MTrip(this.routeId, MInboundType.parse(this.headsignString1)));
 			} else {
 				throw new MTLog.Fatal("%s: Unexpected trip type %s for %s\n.", this.routeId, this.headsignType1, this.routeId);
 			}

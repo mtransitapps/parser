@@ -2,6 +2,7 @@ package org.mtransit.parser.mt;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
@@ -60,10 +61,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		this.globalGTFS = gtfs;
 	}
 
-	public long getRouteId() {
-		return routeId;
-	}
-
 	@NotNull
 	@Override
 	public MSpec call() {
@@ -77,16 +74,16 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	private MSpec doCall() {
 		long startAt = System.currentTimeMillis();
 		MTLog.log("%s: processing... ", this.routeId);
-		HashMap<String, MAgency> mAgencies = new HashMap<>();
+		HashMap<Integer, MAgency> mAgencies = new HashMap<>();
 		HashSet<MServiceDate> mServiceDates = new HashSet<>();
-		HashMap<String, MSchedule> mSchedules = new HashMap<>();
-		HashMap<String, MFrequency> mFrequencies = new HashMap<>();
+		HashMap<Integer, MSchedule> mSchedules = new HashMap<>();
+		HashMap<Integer, MFrequency> mFrequencies = new HashMap<>();
 		HashMap<Long, MRoute> mRoutes = new HashMap<>();
 		HashMap<Long, MTrip> mTrips = new HashMap<>();
-		HashMap<String, MTripStop> allMTripStops = new HashMap<>();
+		HashMap<Integer, MTripStop> allMTripStops = new HashMap<>();
 		HashMap<Integer, MStop> mStops = new HashMap<>();
 		HashSet<Integer> tripStopIds = new HashSet<>(); // the list of stop IDs used by trips
-		HashSet<String> serviceIds = new HashSet<>();
+		HashSet<Integer> serviceIdInts = new HashSet<>();
 		final GSpec routeGTFS = this.globalGTFS.getRouteGTFS(this.routeId);
 		List<Integer> routeTripsIds = new ArrayList<>();
 		for (GRoute gRoute : routeGTFS.getRoutes(this.routeId)) {
@@ -113,18 +110,18 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 		MAgency mAgency;
 		for (GAgency gAgency : routeGTFS.getAllAgencies()) {
-			mAgency = new MAgency(gAgency.getAgencyId(), gAgency.getAgencyTimezone(), this.agencyTools.getAgencyColor(), this.agencyTools.getAgencyRouteType());
-			if (mAgencies.containsKey(mAgency.getId()) && !mAgencies.get(mAgency.getId()).equals(mAgency)) {
+			mAgency = new MAgency(gAgency, this.agencyTools);
+			if (mAgencies.containsKey(mAgency.getIdInt()) && !mAgencies.get(mAgency.getIdInt()).equals(mAgency)) {
 				MTLog.log("%s: Agency %s already in list!", this.routeId, mAgency.getId());
 				MTLog.log("%s: %s", this.routeId, mAgency.toString());
-				throw new MTLog.Fatal("%s: %s", this.routeId, mAgencies.get(mAgency.getId()).toString());
+				throw new MTLog.Fatal("%s: %s", this.routeId, mAgencies.get(mAgency.getIdInt()).toString());
 			}
-			mAgencies.put(mAgency.getId(), mAgency);
+			mAgencies.put(mAgency.getIdInt(), mAgency);
 		}
-		parseRTS(mSchedules, mFrequencies, mRoutes, mTrips, mStops, allMTripStops, tripStopIds, serviceIds, routeGTFS);
-		HashSet<String> gCalendarDateServiceRemoved = new HashSet<>();
+		parseRTS(mSchedules, mFrequencies, mRoutes, mTrips, mStops, allMTripStops, tripStopIds, serviceIdInts, routeGTFS);
+		HashSet<Integer> gCalendarDateServiceRemoved = new HashSet<>();
 		for (GCalendarDate gCalendarDate : routeGTFS.getAllCalendarDates()) {
-			if (!serviceIds.contains(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()))) {
+			if (!serviceIdInts.contains(gCalendarDate.getServiceIdInt())) {
 				continue;
 			}
 			switch (gCalendarDate.getExceptionType()) {
@@ -132,21 +129,21 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				gCalendarDateServiceRemoved.add(gCalendarDate.getUID());
 				break;
 			case SERVICE_ADDED:
-				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()), gCalendarDate.getDate()));
+				mServiceDates.add(new MServiceDate(gCalendarDate.getServiceIdInt(), gCalendarDate.getDate()));
 				break;
 			default:
 				throw new MTLog.Fatal("%s: Unexpected calendar date exception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
 			}
 		}
 		for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
-			if (!serviceIds.contains(this.agencyTools.cleanServiceId(gCalendar.getServiceId()))) {
+			if (!serviceIdInts.contains(gCalendar.getServiceIdInt())) {
 				continue;
 			}
 			for (GCalendarDate gCalendarDate : gCalendar.getDates()) {
 				if (gCalendarDateServiceRemoved.contains(gCalendarDate.getUID())) {
 					continue; // service REMOVED at this date
 				}
-				mServiceDates.add(new MServiceDate(this.agencyTools.cleanServiceId(gCalendarDate.getServiceId()), gCalendarDate.getDate()));
+				mServiceDates.add(new MServiceDate(gCalendarDate.getServiceIdInt(), gCalendarDate.getDate()));
 			}
 		}
 		MTrip mTrip;
@@ -157,7 +154,16 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mSchedule.clearHeadsign();
 			}
 		}
-		int splitTripCount = this.agencyTools.splitTrip(new MRoute(this.routeId, mRoutes.get(this.routeId).getShortName(), null, null), null, routeGTFS).size();
+		int splitTripCount = this.agencyTools.splitTrip(
+				new MRoute(
+						this.routeId,
+						mRoutes.get(this.routeId).getShortName(),
+						mRoutes.get(this.routeId).getLongName(),
+						null
+				),
+				null,
+				routeGTFS
+		).size();
 		boolean isSplitted = splitTripCount > 1;
 		ArrayList<MAgency> mAgenciesList = new ArrayList<>(mAgencies.values());
 		Collections.sort(mAgenciesList);
@@ -199,12 +205,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			MSchedule firstSchedule = null;
 			MSchedule lastSchedule = null;
 			for (MSchedule mSchedule : mSchedulesList) {
-				if (mSchedule.getServiceId().equals(firstServiceDate.getServiceId())) {
+				if (mSchedule.getServiceIdInt() == firstServiceDate.getServiceIdInt()) {
 					if (firstSchedule == null || mSchedule.getDeparture() < firstSchedule.getDeparture()) {
 						firstSchedule = mSchedule;
 					}
 				}
-				if (mSchedule.getServiceId().equals(lastServiceDate.getServiceId())) {
+				if (mSchedule.getServiceIdInt() == lastServiceDate.getServiceIdInt()) {
 					if (lastSchedule == null || lastSchedule.getDeparture() < mSchedule.getDeparture()) {
 						lastSchedule = mSchedule;
 					}
@@ -223,12 +229,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			MFrequency firstFrequency = null;
 			MFrequency lastFrequency = null;
 			for (MFrequency mFrequency : mFrequenciesList) {
-				if (mFrequency.getServiceId().equals(firstServiceDate.getServiceId())) {
+				if (mFrequency.getServiceIdInt() == firstServiceDate.getServiceIdInt()) {
 					if (firstFrequency == null || mFrequency.getStartTime() < firstFrequency.getStartTime()) {
 						firstFrequency = mFrequency;
 					}
 				}
-				if (mFrequency.getServiceId().equals(lastServiceDate.getServiceId())) {
+				if (mFrequency.getServiceIdInt() == lastServiceDate.getServiceIdInt()) {
 					if (lastFrequency == null || lastFrequency.getEndTime() < mFrequency.getEndTime()) {
 						lastFrequency = mFrequency;
 					}
@@ -263,9 +269,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return mRouteSpec;
 	}
 
-	private void parseRTS(HashMap<String, MSchedule> mSchedules, HashMap<String, MFrequency> mFrequencies, HashMap<Long, MRoute> mRoutes,
-						  HashMap<Long, MTrip> mTrips, HashMap<Integer, MStop> mStops, HashMap<String, MTripStop> allMTripStops, HashSet<Integer> tripStopIds,
-						  HashSet<String> serviceIds, GSpec routeGTFS) {
+	private void parseRTS(HashMap<Integer, MSchedule> mSchedules,
+						  HashMap<Integer, MFrequency> mFrequencies,
+						  HashMap<Long, MRoute> mRoutes,
+						  HashMap<Long, MTrip> mTrips,
+						  HashMap<Integer, MStop> mStops,
+						  HashMap<Integer, MTripStop> allMTripStops,
+						  HashSet<Integer> tripStopIds,
+						  HashSet<Integer> serviceIdInts,
+						  GSpec routeGTFS) {
 		MRoute mRoute;
 		boolean mergeSuccessful;
 		HashMap<Long, String> mTripStopTimesHeadsign;
@@ -277,8 +289,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			if (this.agencyTools.getRouteId(gRoute) != this.routeId) {
 				continue;
 			}
-			mRoute = new MRoute(this.routeId, this.agencyTools.getRouteShortName(gRoute), this.agencyTools.getRouteLongName(gRoute),
-					this.agencyTools.getRouteColor(gRoute));
+			mRoute = new MRoute(
+					this.routeId,
+					this.agencyTools.getRouteShortName(gRoute),
+					this.agencyTools.getRouteLongName(gRoute),
+					this.agencyTools.getRouteColor(gRoute)
+			);
 			if (mRoutes.containsKey(mRoute.getId()) && !mRoute.equals(mRoutes.get(mRoute.getId()))) {
 				mergeSuccessful = false;
 				if (mRoute.equalsExceptLongName(mRoutes.get(mRoute.getId()))) {
@@ -292,7 +308,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			mRoutes.put(mRoute.getId(), mRoute);
 			mTripStopTimesHeadsign = new HashMap<>();
-			parseTrips(mSchedules, mFrequencies, mTrips, mStops, serviceIds, mRoute, mTripStopTimesHeadsign, tripIdToMTripStops, gRoute, routeGTFS);
+			parseTrips(mSchedules, mFrequencies, mTrips, mStops, serviceIdInts, mRoute, mTripStopTimesHeadsign, tripIdToMTripStops, gRoute, routeGTFS);
 			mTripHeadsignStrings = new HashSet<>();
 			headsignTypeString = false;
 			for (MTrip mTrip : mTrips.values()) {
@@ -351,17 +367,24 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 
 	private static final String POINT = ".";
 
-	private void parseTrips(HashMap<String, MSchedule> mSchedules, HashMap<String, MFrequency> mFrequencies, HashMap<Long, MTrip> mTrips,
-							HashMap<Integer, MStop> mStops, HashSet<String> serviceIds, MRoute mRoute, HashMap<Long, String> mTripStopTimesHeadsign,
-							HashMap<Long, ArrayList<MTripStop>> tripIdToMTripStops, GRoute gRoute, GSpec routeGTFS) {
+	private void parseTrips(HashMap<Integer, MSchedule> mSchedules,
+							HashMap<Integer, MFrequency> mFrequencies,
+							HashMap<Long, MTrip> mTrips,
+							HashMap<Integer, MStop> mStops,
+							HashSet<Integer> serviceIdInts,
+							MRoute mRoute,
+							HashMap<Long, String> mTripStopTimesHeadsign,
+							HashMap<Long, ArrayList<MTripStop>> tripIdToMTripStops,
+							GRoute gRoute,
+							GSpec routeGTFS) {
 		boolean mergeSuccessful;
 		HashMap<Long, HashSet<String>> mergedTripIdToMTripStops = new HashMap<>();
 		HashMap<Long, Pair<Integer, String>> originalTripHeadsign;
 		ArrayList<MTrip> splitTrips;
-		HashMap<Long, HashMap<String, MTripStop>> splitTripStops;
+		HashMap<Long, HashMap<Integer, MTripStop>> splitTripStops;
 		ArrayList<MTripStop> cTripStopsList;
 		ArrayList<MTripStop> mTripStopsList;
-		String tripServiceId;
+		Integer tripServiceIdInt;
 		HashMap<Long, String> splitTripStopTimesHeadsign;
 		int g = 0;
 		for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteIdInt())) {
@@ -386,10 +409,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					}
 				}
 			}
-			tripServiceId = this.agencyTools.cleanServiceId(gTrip.getServiceId());
-			parseFrequencies(mFrequencies, mRoute, gTrip, splitTrips, tripServiceId, routeGTFS);
+			tripServiceIdInt = gTrip.getServiceIdInt();
+			parseFrequencies(mFrequencies, gTrip, splitTrips, tripServiceIdInt, routeGTFS);
 			splitTripStops = new HashMap<>();
-			splitTripStopTimesHeadsign = parseTripStops(mSchedules, serviceIds, mRoute, mStops, gTrip, originalTripHeadsign, splitTrips, tripServiceId,
+			splitTripStopTimesHeadsign = parseTripStops(mSchedules, serviceIdInts, mRoute, mStops, gTrip, originalTripHeadsign, splitTrips, tripServiceIdInt,
 					splitTripStops, routeGTFS);
 			for (MTrip mTrip : splitTrips) {
 				if (!splitTripStops.containsKey(mTrip.getId())) {
@@ -453,9 +476,16 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		MTLog.log("%s: parsing trips... DONE", this.routeId);
 	}
 
-	private HashMap<Long, String> parseTripStops(HashMap<String, MSchedule> mSchedules, HashSet<String> serviceIds, MRoute mRoute,
-												 HashMap<Integer, MStop> mStops, GTrip gTrip, HashMap<Long, Pair<Integer, String>> originalTripHeadsign, ArrayList<MTrip> splitTrips,
-												 String tripServiceId, HashMap<Long, HashMap<String, MTripStop>> splitTripStops, GSpec routeGTFS) {
+	private HashMap<Long, String> parseTripStops(HashMap<Integer, MSchedule> mSchedules,
+												 HashSet<Integer> serviceIdInts,
+												 MRoute mRoute,
+												 HashMap<Integer, MStop> mStops,
+												 GTrip gTrip,
+												 HashMap<Long, Pair<Integer, String>> originalTripHeadsign,
+												 ArrayList<MTrip> splitTrips,
+												 Integer tripServiceIdInt,
+												 HashMap<Long, HashMap<Integer, MTripStop>> splitTripStops,
+												 GSpec routeGTFS) {
 		HashMap<Long, String> splitTripStopTimesHeadSign = new HashMap<>();
 		int mStopId;
 		GStop gStop;
@@ -499,7 +529,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					throw new MTLog.Fatal("%s: Unexpected trip head-sign ID '%s'! (%s)", this.routeId, mTripId, originalTripHeadsign);
 				}
 				tripStopTimesHeadsign = parseStopTimes(mSchedules,  //
-						mTripId, tripServiceId,
+						mTripId, tripServiceIdInt,
 						originalTripHeadsign.get(mTripId).first,
 						originalTripHeadsign.get(mTripId).second,
 						tripStopTimesHeadsign,
@@ -507,7 +537,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						mStopId, routeGTFS,
 						addedMTripIdAndGStopIds);
 				splitTripStopTimesHeadSign.put(mTripId, tripStopTimesHeadsign);
-				serviceIds.add(tripServiceId);
+				serviceIdInts.add(tripServiceIdInt);
 			}
 			if (!mStops.containsKey(mStopId)) {
 				mStops.put(
@@ -526,12 +556,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 
 	private SimpleDateFormat M_TIME_FORMAT = MSpec.getNewTimeFormatInstance(); // not static - not sharable between threads!
 
-	private String parseStopTimes(HashMap<String, MSchedule> mSchedules,
-								  long mTripId, String tripServiceId,
-								  int originalTripHeadsignType, String originalTripHeadsignValue,
+	private String parseStopTimes(HashMap<Integer, MSchedule> mSchedules,
+								  long mTripId,
+								  Integer tripServiceIdInt,
+								  int originalTripHeadsignType,
+								  String originalTripHeadsignValue,
 								  String tripStopTimesHeadsign,
 								  GTripStop gTripStop,
-								  int mStopId, GSpec routeGTFS,
+								  int mStopId,
+								  GSpec routeGTFS,
 								  HashMap<String, Integer> addedMTripIdAndGStopIds) {
 		MSchedule mSchedule;
 		String stopHeadsign;
@@ -572,7 +605,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					}
 				}
 			}
-			mSchedule = new MSchedule(tripServiceId, mTripId, mStopId, //
+			mSchedule = new MSchedule(tripServiceIdInt, mTripId, mStopId, //
 					this.agencyTools.getTimes(this.routeId, gStopTime, routeGTFS, M_TIME_FORMAT), //
 					gStopTime.getTripId());
 			if (mSchedules.containsKey(mSchedule.getUID()) //
@@ -607,7 +640,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return tripStopTimesHeadsign;
 	}
 
-	private void parseFrequencies(HashMap<String, MFrequency> mFrequencies, MRoute mRoute, GTrip gTrip, ArrayList<MTrip> splitTrips, String tripServiceId,
+	private void parseFrequencies(HashMap<Integer, MFrequency> mFrequencies,
+								  GTrip gTrip,
+								  ArrayList<MTrip> splitTrips,
+								  Integer tripServiceIdInt,
 								  GSpec routeGTFS) {
 		MFrequency mFrequency;
 		for (GFrequency gFrequency : routeGTFS.getFrequencies(gTrip.getTripIdInt())) {
@@ -615,8 +651,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				continue;
 			}
 			for (MTrip mTrip : splitTrips) {
-				mFrequency = new MFrequency(tripServiceId, mRoute.getId(), mTrip.getId(), this.agencyTools.getStartTime(gFrequency),
-						this.agencyTools.getEndTime(gFrequency), gFrequency.getHeadwaySecs());
+				mFrequency = new MFrequency(
+						tripServiceIdInt,
+						mTrip.getId(),
+						this.agencyTools.getStartTime(gFrequency),
+						this.agencyTools.getEndTime(gFrequency),
+						gFrequency.getHeadwaySecs()
+				);
 				if (mFrequencies.containsKey(mFrequency.getUID()) && !mFrequencies.get(mFrequency.getUID()).equals(mFrequency)) {
 					throw new MTLog.Fatal("%s: Different frequency %s already in list (%s != %s)\n!", this.routeId, mFrequency.getUID(), mFrequency.toString(),
 							mFrequencies.get(mFrequency.getUID()).toString());
@@ -626,7 +667,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 	}
 
-	private void setTripStopDescentOnly(ArrayList<MTripStop> mTripStopsList, HashMap<String, MSchedule> mSchedules, boolean isSplitted) {
+	private void setTripStopDescentOnly(ArrayList<MTripStop> mTripStopsList, HashMap<Integer, MSchedule> mSchedules, boolean isSplitted) {
 		if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
 			MTripStop lastTripStop = null;
 			for (MTripStop tripStop : mTripStopsList) {
@@ -890,7 +931,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return newList;
 	}
 
-	private ArrayList<MTripStop> setMTripStopSequence(ArrayList<MTripStop> mTripStops) {
+	@Nullable
+	private ArrayList<MTripStop> setMTripStopSequence(@Nullable ArrayList<MTripStop> mTripStops) {
 		if (mTripStops != null) {
 			for (int i = 0; i < mTripStops.size(); i++) {
 				mTripStops.get(i).setStopSequence(i + 1);

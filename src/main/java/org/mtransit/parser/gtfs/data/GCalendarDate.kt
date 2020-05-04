@@ -1,6 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
-import org.mtransit.parser.Constants
+import org.mtransit.parser.gtfs.GAgencyTools
 
 // https://developers.google.com/transit/gtfs/reference#calendar_dates_fields
 // http://gtfs.org/reference/static/#calendar_datestxt
@@ -20,30 +20,21 @@ data class GCalendarDate(
         exceptionType
     )
 
-    val serviceId: String
+    private val serviceId: String
         get() {
             return GIDs.getString(serviceIdInt)
         }
 
-    val uID: String
-
-    init {
-        uID = getNewUID(date, serviceIdInt)
+    @Suppress("unused")
+    fun getCleanServiceId(agencyTools: GAgencyTools): String {
+        return agencyTools.cleanServiceId(serviceId)
     }
 
-    @Suppress("unused")
-    fun isServiceId(serviceId: String): Boolean {
-        return this.serviceId == serviceId
-    }
+    val uID: Int = getNewUID(date, serviceIdInt)
 
     @Suppress("unused")
-    fun isServiceIdInt(serviceId: Int): Boolean {
-        return this.serviceIdInt == serviceId
-    }
-
-    @Suppress("unused")
-    fun isServiceIds(serviceIds: Collection<String?>): Boolean {
-        return serviceIds.contains(serviceId)
+    fun isServiceIdInt(serviceIdInt: Int): Boolean {
+        return this.serviceIdInt == serviceIdInt
     }
 
     fun isServiceIdInts(serviceIdInts: Collection<Int?>): Boolean {
@@ -77,8 +68,11 @@ data class GCalendarDate(
         fun getNewUID(
             date: Int,
             serviceIdInt: Int
-        ): String {
-            return "$date${Constants.UUID_SEPARATOR}$serviceIdInt"
+        ): Int {
+            var result = 0
+            result = 31 * result + date
+            result = 31 * result + serviceIdInt
+            return result
         }
     }
 }
