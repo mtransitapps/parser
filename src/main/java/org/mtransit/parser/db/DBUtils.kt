@@ -109,9 +109,9 @@ object DBUtils {
         val rs = executeUpdate(
             connection.createStatement(),
             "INSERT INTO $TRIP_STOPS_TABLE_NAME VALUES(" +
-                    "'${gTripStop.routeIdInt}'," +
-                    "'${gTripStop.tripIdInt}'," +
-                    "'${gTripStop.stopIdInt}'," +
+                    "${gTripStop.routeIdInt}," +
+                    "${gTripStop.tripIdInt}," +
+                    "${gTripStop.stopIdInt}," +
                     "${gTripStop.stopSequence}" +
                     ")"
         )
@@ -173,17 +173,17 @@ object DBUtils {
 
     @JvmStatic
     fun selectTripStops(
-        tripId: Int? = null,
-        tripIds: List<Int>? = null,
+        tripIdInt: Int? = null,
+        tripIdInts: List<Int>? = null,
         limitMaxNbRow: Int? = null,
         limitOffset: Int? = null
     ): List<GTripStop> {
         var query = "SELECT * FROM $TRIP_STOPS_TABLE_NAME"
-        tripId?.let {
-            query += " WHERE ${GTripStop.TRIP_ID} = $tripId"
+        tripIdInt?.let {
+            query += " WHERE ${GTripStop.TRIP_ID} = $tripIdInt"
         }
-        tripIds?.let {
-            query += " WHERE ${GTripStop.TRIP_ID} IN ${tripIds
+        tripIdInts?.let {
+            query += " WHERE ${GTripStop.TRIP_ID} IN ${tripIdInts
                 .distinct()
                 .joinToString(
                     separator = ",",
@@ -197,21 +197,19 @@ object DBUtils {
                 query += " OFFSET $limitOffset"
             }
         }
-        return executeQuery(connection.createStatement(), query)
-            .use {
-                generateSequence {
-                    it.takeIf {
-                        it.next()
-                    }
-                }
-            }.map {
+        val result = ArrayList<GTripStop>()
+        val rs = executeQuery(connection.createStatement(), query)
+        while (rs.next()) {
+            result.add(
                 GTripStop(
-                    it.getInt(GTripStop.ROUTE_ID),
-                    it.getInt(GTripStop.TRIP_ID),
-                    it.getInt(GTripStop.STOP_ID),
-                    it.getInt(GTripStop.STOP_SEQUENCE)
+                    rs.getInt(GTripStop.ROUTE_ID),
+                    rs.getInt(GTripStop.TRIP_ID),
+                    rs.getInt(GTripStop.STOP_ID),
+                    rs.getInt(GTripStop.STOP_SEQUENCE)
                 )
-            }.toList()
+            )
+        }
+        return result
     }
 
     @Suppress("unused")

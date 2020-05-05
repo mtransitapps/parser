@@ -21,7 +21,7 @@ class MTripStop(
         false
     )
 
-    val uID: Int = getNewUID(tripId, stopId)
+    val uID by lazy { getNewUID(tripId, stopId) }
 
     fun equalsExceptStopSequence(ts: MTripStop): Boolean {
         return ts.tripId != 0L && ts.tripId != tripId
@@ -63,11 +63,6 @@ class MTripStop(
         fun getNewUID(
             tripId: Long,
             stopId: Int
-        ): Int {
-            var result = 0
-            result = 31 * result + tripId.hashCode()
-            result = 31 * result + stopId
-            return result
-        }
+        ) = "${tripId}0${stopId}".toLong()
     }
 }

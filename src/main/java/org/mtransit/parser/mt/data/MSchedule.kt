@@ -73,7 +73,7 @@ data class MSchedule(
     val isDescentOnly: Boolean
         get() = headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY
 
-    val uID: Int = getNewUID(serviceIdInt, tripId, stopId, departure)
+    val uID by lazy { getNewUID(serviceIdInt, tripId, stopId, departure) }
 
     fun toFileNewServiceIdAndTripId(agencyTools: GAgencyTools): String {
         val sb = StringBuilder() //
@@ -155,7 +155,7 @@ data class MSchedule(
         // sort by service_id => trip_id => stop_id => departure
         return when {
             serviceIdInt != other.serviceIdInt -> {
-                serviceIdInt.compareTo(other.serviceIdInt)
+                serviceId.compareTo(other.serviceId)
             }
             // no route ID, just for file split
             tripId != other.tripId -> {
@@ -177,13 +177,6 @@ data class MSchedule(
             tripId: Long,
             stopId: Int,
             departure: Int
-        ): Int {
-            var result = 0
-            result = 31 * result + serviceIdInt
-            result = 31 * result + tripId.hashCode()
-            result = 31 * result + stopId
-            result = 31 * result + departure
-            return result
-        }
+        ) = "${serviceIdInt}0${tripId}0${stopId}0${departure}"
     }
 }

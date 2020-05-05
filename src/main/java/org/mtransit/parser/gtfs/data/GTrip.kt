@@ -27,7 +27,7 @@ data class GTrip(
         tripShortName
     )
 
-    val uID: Int = getNewUID(routeIdInt, tripIdInt)
+    val uID by lazy { getNewUID(routeIdInt, tripIdInt) }
 
     val routeId: String
         get() {
@@ -66,34 +66,28 @@ data class GTrip(
 
         @Suppress("unused")
         @JvmStatic
-        fun extractRouteIdInt(tripUID: Int): Int {
+        fun extractRouteIdInt(tripUID: String): Int {
             val (_, routeIdInt) = split(tripUID)
             return routeIdInt
         }
 
         @Suppress("unused")
         @JvmStatic
-        fun extractTripIdInt(tripUID: Int): Int {
+        fun extractTripIdInt(tripUID: String): Int {
             val (tripIdInt, _) = split(tripUID)
             return tripIdInt
         }
 
         @JvmStatic
-        fun split(tripUID: Int): Pair<Int, Int> {
-            val tripIdInt = tripUID % 31
-            val routeIdInt = tripUID - (tripIdInt * 31)
-            return Pair(tripIdInt, routeIdInt)
+        fun split(tripUID: String): Pair<Int, Int> {
+            val s = tripUID.split("-")
+            return Pair(s[0].toInt(), s[1].toInt())
         }
 
         @JvmStatic
         fun getNewUID(
             routeIdInt: Int,
             tripIdInt: Int
-        ): Int {
-            var result = 0
-            result = 31 * result + routeIdInt
-            result = 31 * result + tripIdInt
-            return result
-        }
+        ) = "${routeIdInt}-${tripIdInt}"
     }
 }

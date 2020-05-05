@@ -77,13 +77,13 @@ data class GStopTime(
             return GTime.toDate(_arrivalTime)
         }
 
-    val uID: Int = getNewUID(tripIdInt, stopIdInt, stopSequence)
+    val uID by lazy { getNewUID(tripIdInt, stopIdInt, stopSequence) }
 
     fun hasStopHeadsign() = !this.stopHeadsign.isNullOrEmpty()
 
     override fun compareTo(other: GStopTime): Int {
         if (this.tripIdInt != other.tripIdInt) {
-            return this.tripIdInt.compareTo(other.tripIdInt)
+            return this.tripId.compareTo(other.tripId)
         }
         if (this.stopSequence != other.stopSequence) {
             return this.stopSequence.compareTo(other.stopSequence)
@@ -111,12 +111,6 @@ data class GStopTime(
             tripIdInt: Int,
             stopIdInt: Int,
             stopSequence: Int
-        ): Int {
-            var result = 0
-            result = 31 * result + tripIdInt
-            result = 31 * result + stopIdInt
-            result = 31 * result + stopSequence
-            return result
-        }
+        ) = "${tripIdInt}0${stopIdInt}0${stopSequence}".toLong()
     }
 }

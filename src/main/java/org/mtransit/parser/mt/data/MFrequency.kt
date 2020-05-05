@@ -37,7 +37,7 @@ data class MFrequency(
         return agencyTools.cleanServiceId(serviceId)
     }
 
-    val uID: Int = getNewUID(serviceIdInt, tripId, startTime, endTime)
+    val uID by lazy { getNewUID(serviceIdInt, tripId, startTime, endTime) }
 
     fun toFile(agencyTools: GAgencyTools): String {
         return CleanUtils.quotes(CleanUtils.escape(getCleanServiceId(agencyTools))) + // service ID
@@ -57,7 +57,7 @@ data class MFrequency(
                 +1
             }
             serviceIdInt != other.serviceIdInt -> {
-                serviceIdInt.compareTo(other.serviceIdInt)
+                serviceId.compareTo(other.serviceId)
             }
             tripId != other.tripId -> {
                 tripId.compareTo(other.tripId)
@@ -81,13 +81,6 @@ data class MFrequency(
             tripId: Long,
             startTime: Int,
             endTime: Int
-        ): Int {
-            var result = 0
-            result = 31 * result + serviceIdInt
-            result = 31 * result + tripId.hashCode()
-            result = 31 * result + startTime
-            result = 31 * result + endTime
-            return result
-        }
+        ) = "${serviceIdInt}0${tripId}0${startTime}0${endTime}".toLong()
     }
 }

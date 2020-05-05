@@ -30,7 +30,7 @@ data class GCalendarDate(
         return agencyTools.cleanServiceId(serviceId)
     }
 
-    val uID: Int = getNewUID(date, serviceIdInt)
+    val uID by lazy { getNewUID(date, serviceIdInt) }
 
     @Suppress("unused")
     fun isServiceIdInt(serviceIdInt: Int): Boolean {
@@ -68,11 +68,6 @@ data class GCalendarDate(
         fun getNewUID(
             date: Int,
             serviceIdInt: Int
-        ): Int {
-            var result = 0
-            result = 31 * result + date
-            result = 31 * result + serviceIdInt
-            return result
-        }
+        ) = "${date}0${serviceIdInt}".toInt()
     }
 }

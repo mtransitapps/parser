@@ -13,30 +13,40 @@ data class GTripStop(
 
     @Suppress("unused")
     constructor(
-        routeAndTripUIDInt: Int,
+        routeAndTripUID: String,
         stopId: Int,
         stopSequence: Int
     ) : this(
-        GTrip.split(routeAndTripUIDInt),
+        GTrip.split(routeAndTripUID),
+        stopId,
+        stopSequence
+    )
+
+    @Suppress("unused")
+    constructor(
+        routeAndTripUID: String,
+        tripIdInt: Int,
+        stopId: Int,
+        stopSequence: Int
+    ) : this(
+        GTrip.extractRouteIdInt(routeAndTripUID),
+        tripIdInt,
         stopId,
         stopSequence
     )
 
     constructor(
-        routeAndTripUIDInt: Pair<Int, Int>,
+        routeAndTripUID: Pair<Int, Int>,
         stopId: Int,
         stopSequence: Int
     ) : this(
-        routeAndTripUIDInt.first,
-        routeAndTripUIDInt.second,
+        routeAndTripUID.first,
+        routeAndTripUID.second,
         stopId,
         stopSequence
     )
 
-    val uID: Int
-        get() {
-            return getNewUID(routeIdInt, tripIdInt, stopIdInt, stopSequence)
-        }
+    val uID by lazy { getNewUID(routeIdInt, tripIdInt, stopIdInt, stopSequence) }
 
     @Suppress("unused")
     val tripId: String
@@ -57,16 +67,10 @@ data class GTripStop(
 
         @JvmStatic
         fun getNewUID(
-            tripUIDInt: Int,
+            tripUID: String,
             stopIdInt: Int,
             stopSequence: Int
-        ): Int {
-            var result = 0
-            result = 31 * result + tripUIDInt
-            result = 31 * result + stopIdInt
-            result = 31 * result + stopSequence
-            return result
-        }
+        ) = "${tripUID}-${stopIdInt}-${stopSequence}"
 
         @JvmStatic
         fun getNewUID(
@@ -74,13 +78,6 @@ data class GTripStop(
             tripIdInt: Int,
             stopIdInt: Int,
             stopSequence: Int
-        ): Int {
-            var result = 0
-            result = 31 * result + routeIdInt
-            result = 31 * result + tripIdInt
-            result = 31 * result + stopIdInt
-            result = 31 * result + stopSequence
-            return result
-        }
+        ) = "${routeIdInt}-${tripIdInt}-${stopIdInt}-${stopSequence}"
     }
 }
