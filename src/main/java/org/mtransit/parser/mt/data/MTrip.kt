@@ -1,6 +1,5 @@
 package org.mtransit.parser.mt.data
 
-import org.apache.commons.lang3.StringUtils
 import org.mtransit.parser.CleanUtils
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
@@ -219,11 +218,11 @@ data class MTrip(
             mTripToMerge: MTrip
         ): Boolean {
             return when {
-                StringUtils.isEmpty(mTrip.headsignValue) -> {
+                mTrip.headsignValue.isEmpty() -> {
                     mTrip.setHeadsignString(mTripToMerge.headsignValue, mTrip.headsignId)
                     true // merged
                 }
-                StringUtils.isEmpty(mTripToMerge.headsignValue) -> {
+                mTripToMerge.headsignValue.isEmpty() -> {
                     mTrip.setHeadsignString(mTrip.headsignValue, mTrip.headsignId)
                     true // merged
                 }

@@ -120,7 +120,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			mAgencies.put(mAgency.getIdInt(), mAgency);
 		}
 		parseRTS(mSchedules, mFrequencies, mRoutes, mTrips, mStops, allMTripStops, tripStopIds, serviceIdInts, routeGTFS);
-		HashSet<Integer> gCalendarDateServiceRemoved = new HashSet<>();
+		HashSet<String> gCalendarDateServiceRemoved = new HashSet<>();
 		for (GCalendarDate gCalendarDate : routeGTFS.getAllCalendarDates()) {
 			if (!serviceIdInts.contains(gCalendarDate.getServiceIdInt())) {
 				continue;

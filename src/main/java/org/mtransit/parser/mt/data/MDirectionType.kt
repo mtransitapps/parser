@@ -16,10 +16,10 @@ enum class MDirectionType(val id: String) {
 
     fun intValue(): Int {
         return when (id) {
-            id -> 1
-            id -> 2
-            id -> 3
-            id -> 4
+            EAST.id -> 1
+            WEST.id -> 2
+            NORTH.id -> 3
+            SOUTH.id -> 4
             else -> throw MTLog.Fatal("Unknown direction type '$id'!")
         }
     }

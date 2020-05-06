@@ -1,6 +1,5 @@
 package org.mtransit.parser.mt.data
 
-import org.apache.commons.lang3.StringUtils
 import org.mtransit.parser.CleanUtils
 import org.mtransit.parser.Constants
 
@@ -31,7 +30,7 @@ data class MRoute(
         val o = obj as MRoute
         return when {
             id != o.id -> false
-            !StringUtils.equals(shortName, o.shortName) -> false // not equal
+            shortName != o.shortName -> false // not equal
             else -> true // mostly equal
         }
     }

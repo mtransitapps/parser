@@ -68,6 +68,6 @@ data class GCalendarDate(
         fun getNewUID(
             date: Int,
             serviceIdInt: Int
-        ) = "${date}0${serviceIdInt}".toInt()
+        ) = "${date}0${serviceIdInt}"
     }
 }
