@@ -75,6 +75,13 @@ data class MSchedule(
 
     val uID by lazy { getNewUID(serviceIdInt, tripId, stopId, departure) }
 
+    fun print(): String {
+        return toString() +
+                "+(serviceId:$serviceId)" +
+                "+(isDescentOnly:$isDescentOnly)" +
+                "+(uID:$uID)"
+    }
+
     fun toFileNewServiceIdAndTripId(agencyTools: GAgencyTools): String {
         val sb = StringBuilder() //
         sb.append(CleanUtils.quotes(CleanUtils.escape(getCleanServiceId(agencyTools)))) // service ID
@@ -146,9 +153,26 @@ data class MSchedule(
         return sb.toString()
     }
 
-    fun sameServiceIdAndTripId(lastSchedule: MSchedule?): Boolean {
+    fun isSameServiceAndTrip(lastSchedule: MSchedule?): Boolean {
         return lastSchedule?.serviceIdInt == serviceIdInt
                 && lastSchedule.tripId == tripId
+    }
+
+    fun isSameServiceRTSDeparture(ts: MSchedule): Boolean {
+        if (ts.serviceId != serviceId) {
+            return false
+        }
+        // no route ID, just for file split
+        if (ts.tripId != 0L && ts.tripId != tripId) {
+            return false
+        }
+        if (ts.stopId != 0 && ts.stopId != stopId) {
+            return false
+        }
+        if (ts.departure != 0 && ts.departure != departure) {
+            return false
+        }
+        return true
     }
 
     override fun compareTo(other: MSchedule): Int {
@@ -177,6 +201,6 @@ data class MSchedule(
             tripId: Long,
             stopId: Int,
             departure: Int
-        ) = "${serviceIdInt}0${tripId}0${stopId}0${departure}"
+        ) = "${serviceIdInt}-${tripId}-${stopId}-${departure}"
     }
 }

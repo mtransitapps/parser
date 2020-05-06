@@ -246,7 +246,7 @@ public class MGenerator {
 						ow = new BufferedWriter(new FileWriter(file));
 						MSchedule lastSchedule = null;
 						for (MSchedule mSchedule : mStopSchedules) {
-							if (mSchedule.sameServiceIdAndTripId(lastSchedule)) {
+							if (mSchedule.isSameServiceAndTrip(lastSchedule)) {
 								ow.write(Constants.COLUMN_SEPARATOR);
 								ow.write(mSchedule.toFileSameServiceIdAndTripId(lastSchedule));
 							} else {

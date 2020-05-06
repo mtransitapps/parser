@@ -120,7 +120,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			mAgencies.put(mAgency.getIdInt(), mAgency);
 		}
 		parseRTS(mSchedules, mFrequencies, mRoutes, mTrips, mStops, allMTripStops, tripStopIds, serviceIdInts, routeGTFS);
-		HashSet<String> gCalendarDateServiceRemoved = new HashSet<>();
+		HashSet<Long> gCalendarDateServiceRemoved = new HashSet<>();
 		for (GCalendarDate gCalendarDate : routeGTFS.getAllCalendarDates()) {
 			if (!serviceIdInts.contains(gCalendarDate.getServiceIdInt())) {
 				continue;
@@ -612,13 +612,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					this.agencyTools.getTimes(this.routeId, gStopTime, routeGTFS, M_TIME_FORMAT), //
 					gStopTime.getTripId());
 			if (mSchedules.containsKey(mSchedule.getUID()) //
-					&& !mSchedules.get(mSchedule.getUID()).equals(mSchedule)) {
+					&& !mSchedules.get(mSchedule.getUID()).isSameServiceRTSDeparture(mSchedule)) {
 				throw new MTLog.Fatal("%s: Different schedule %s (%s) already in list (%s != %s)!",
 						this.routeId,
 						mSchedule.getUID(),
 						mSchedules.get(mSchedule.getUID()).getUID(),
-						mSchedule,
-						mSchedules.get(mSchedule.getUID()));
+						mSchedule.print(),
+						mSchedules.get(mSchedule.getUID()).print());
 			}
 			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY //
 					&& descentOnly) {
