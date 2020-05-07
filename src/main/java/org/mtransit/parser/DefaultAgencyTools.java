@@ -166,7 +166,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	@NotNull
+	@Nullable
 	@Override
 	public String getRouteShortName(@NotNull GRoute gRoute) {
 		if (StringUtils.isEmpty(gRoute.getRouteShortName())) {

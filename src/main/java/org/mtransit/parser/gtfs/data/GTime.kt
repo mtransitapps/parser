@@ -30,7 +30,6 @@ object GTime {
     @JvmStatic
     fun fromDateS(date: Date): String = getNewTimeFormatInstance().format(date)
 
-    @Suppress("unused")
     @JvmStatic
     fun fromCal(cal: Calendar): Int {
         return fromDate(cal.time)
@@ -44,6 +43,9 @@ object GTime {
     fun toString(time: Int): String? {
         if (time < 0) {
             return null
+        }
+        if (time < 10_00_00) {
+            return "0${time}"
         }
         return time.toString()
     }

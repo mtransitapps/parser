@@ -1,6 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
 import java.util.Date
+import java.util.concurrent.TimeUnit
 
 // https://developers.google.com/transit/gtfs/reference#frequencies_fields
 data class GFrequency(
@@ -9,19 +10,6 @@ data class GFrequency(
     private val _endTime: Int,
     val headwaySecs: Int
 ) {
-
-    @Suppress("unused")
-    constructor(
-        tripId: String,
-        startTime: Int,
-        endTime: Int,
-        headwaySecs: Int
-    ) : this(
-        GIDs.getInt(tripId),
-        startTime,
-        endTime,
-        headwaySecs
-    )
 
     constructor(
         tripId: String,
@@ -43,12 +31,12 @@ data class GFrequency(
 
     val startTime: Int = _startTime
 
+    @Suppress("unused")
     val startTimeDate: Date
         get() {
             return GTime.toDate(_startTime)
         }
 
-    @Suppress("unused")
     val startTimeMs: Long
         get() {
             return GTime.toMs(_startTime)
@@ -56,15 +44,20 @@ data class GFrequency(
 
     val endTime: Int = _endTime
 
+    @Suppress("unused")
     val endTimeDate: Date
         get() {
             return GTime.toDate(_endTime)
         }
 
-    @Suppress("unused")
     val endTimeMs: Long
         get() {
             return GTime.toMs(_endTime)
+        }
+
+    val headwayMs: Long
+        get() {
+            return TimeUnit.SECONDS.toMillis(headwaySecs.toLong())
         }
 
     companion object {

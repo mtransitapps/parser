@@ -5,7 +5,7 @@ import org.mtransit.parser.Constants
 
 data class MRoute(
     val id: Long,
-    val shortName: String,
+    val shortName: String?,
     var longName: String,
     private val color: String?
 ) : Comparable<MRoute> {
@@ -14,7 +14,7 @@ data class MRoute(
         return id.toString() +  // ID
                 Constants.COLUMN_SEPARATOR +  //
                 // (this.shortName == null ? Constants.EMPTY : CleanUtils.escape(this.shortName)) + // short name
-                CleanUtils.quotes(CleanUtils.escape(shortName)) +  // short name
+                CleanUtils.quotes(CleanUtils.escape(shortName ?: Constants.EMPTY)) +  // short name
                 Constants.COLUMN_SEPARATOR +  //
                 // (this.longName == null ? Constants.EMPTY : CleanUtils.escape(this.longName)) + // long name
                 CleanUtils.quotes(CleanUtils.escape(longName)) +  // long name

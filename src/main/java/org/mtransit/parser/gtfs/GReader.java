@@ -285,7 +285,7 @@ public class GReader {
 		}
 	}
 
-	private static void processFrequency(@SuppressWarnings("unused") GAgencyTools agencyTools,
+	private static void processFrequency(GAgencyTools agencyTools,
 										 GSpec gSpec,
 										 HashMap<String, String> line) {
 		try {
@@ -308,7 +308,12 @@ public class GReader {
 									  GSpec gSpec,
 									  HashMap<String, String> line) {
 		try {
-			gSpec.addAgency(new GAgency(line.get(GAgency.AGENCY_ID), line.get(GAgency.AGENCY_TIMEZONE)));
+			gSpec.addAgency(
+					new GAgency(
+							line.get(GAgency.AGENCY_ID),
+							line.get(GAgency.AGENCY_TIMEZONE)
+					)
+			);
 		} catch (Exception e) {
 			MTLog.logFatal(e, "Error while processing: '%s'!\n", line);
 		}

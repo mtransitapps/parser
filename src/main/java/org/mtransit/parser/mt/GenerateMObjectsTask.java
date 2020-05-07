@@ -78,7 +78,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		HashMap<Integer, MAgency> mAgencies = new HashMap<>();
 		HashSet<MServiceDate> mServiceDates = new HashSet<>();
 		HashMap<String, MSchedule> mSchedules = new HashMap<>();
-		HashMap<Long, MFrequency> mFrequencies = new HashMap<>();
+		HashMap<String, MFrequency> mFrequencies = new HashMap<>();
 		HashMap<Long, MRoute> mRoutes = new HashMap<>();
 		HashMap<Long, MTrip> mTrips = new HashMap<>();
 		HashMap<Long, MTripStop> allMTripStops = new HashMap<>();
@@ -271,7 +271,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	}
 
 	private void parseRTS(HashMap<String, MSchedule> mSchedules,
-						  HashMap<Long, MFrequency> mFrequencies,
+						  HashMap<String, MFrequency> mFrequencies,
 						  HashMap<Long, MRoute> mRoutes,
 						  HashMap<Long, MTrip> mTrips,
 						  HashMap<Integer, MStop> mStops,
@@ -369,7 +369,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	private static final String POINT = ".";
 
 	private void parseTrips(HashMap<String, MSchedule> mSchedules,
-							HashMap<Long, MFrequency> mFrequencies,
+							HashMap<String, MFrequency> mFrequencies,
 							HashMap<Long, MTrip> mTrips,
 							HashMap<Integer, MStop> mStops,
 							HashSet<Integer> serviceIdInts,
@@ -647,7 +647,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return tripStopTimesHeadsign;
 	}
 
-	private void parseFrequencies(HashMap<Long, MFrequency> mFrequencies,
+	private void parseFrequencies(HashMap<String, MFrequency> mFrequencies,
 								  GTrip gTrip,
 								  ArrayList<MTrip> splitTrips,
 								  Integer tripServiceIdInt,

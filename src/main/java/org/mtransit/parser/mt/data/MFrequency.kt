@@ -13,21 +13,6 @@ data class MFrequency(
     private val headwayInSec: Int
 ) : Comparable<MFrequency?> {
 
-    @Suppress("unused")
-    constructor(
-        serviceId: String,
-        tripId: Long,
-        startTime: Int,
-        endTime: Int,
-        headwayInSec: Int
-    ) : this(
-        GIDs.getInt(serviceId),
-        tripId,
-        startTime,
-        endTime,
-        headwayInSec
-    )
-
     private val serviceId: String
         get() {
             return GIDs.getString(serviceIdInt)
@@ -81,6 +66,6 @@ data class MFrequency(
             tripId: Long,
             startTime: Int,
             endTime: Int
-        ) = "${serviceIdInt}0${tripId}0${startTime}0${endTime}".toLong()
+        ) = "${serviceIdInt}-${tripId}-${startTime}-${endTime}"
     }
 }

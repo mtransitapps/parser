@@ -36,10 +36,10 @@ public class GSpec {
 	private final HashMap<Integer, GStop> stopIdStops = new HashMap<>();
 	private int routesCount = 0;
 	@NotNull
-	private final HashMap<Integer, GRoute> routeIdRoutes = new HashMap<>();
+	private final HashMap<Integer, GRoute> routeIdIntRoutes = new HashMap<>();
 	private int tripsCount = 0;
 	@NotNull
-	private final HashMap<Integer, String> tripIdsUIDs = new HashMap<>();
+	private final HashMap<Integer, String> tripIdIntsUIDs = new HashMap<>();
 	private int frequenciesCount = 0;
 	@NotNull
 	private final HashSet<String> tripStopsUIDs = new HashSet<>();
@@ -47,12 +47,12 @@ public class GSpec {
 	@NotNull
 	private final HashMap<Integer, ArrayList<GTrip>> routeIdTrips = new HashMap<>();
 	@NotNull
-	private final HashMap<Integer, ArrayList<GFrequency>> tripIdFrequencies = new HashMap<>();
+	private final HashMap<Integer, ArrayList<GFrequency>> tripIdIntFrequencies = new HashMap<>();
 
 	@NotNull
 	private final HashMap<Long, ArrayList<GRoute>> mRouteIdRoutes = new HashMap<>();
 	@NotNull
-	private final HashMap<Integer, Integer> tripIdRouteId = new HashMap<>();
+	private final HashMap<Integer, Integer> tripIdIntRouteId = new HashMap<>();
 
 	public GSpec() {
 	}
@@ -97,7 +97,7 @@ public class GSpec {
 	}
 
 	public void addRoute(@NotNull GRoute gRoute) {
-		this.routeIdRoutes.put(gRoute.getRouteIdInt(), gRoute);
+		this.routeIdIntRoutes.put(gRoute.getRouteIdInt(), gRoute);
 		this.routesCount++;
 	}
 
@@ -110,8 +110,8 @@ public class GSpec {
 	}
 
 	@Nullable
-	public GRoute getRoute(@NotNull Integer gRouteId) {
-		return this.routeIdRoutes.get(gRouteId);
+	public GRoute getRoute(@NotNull Integer routeIdInt) {
+		return this.routeIdIntRoutes.get(routeIdInt);
 	}
 
 	public void addStop(@NotNull GStop gStop) {
@@ -128,17 +128,17 @@ public class GSpec {
 			this.routeIdTrips.put(gTrip.getRouteIdInt(), new ArrayList<>());
 		}
 		this.routeIdTrips.get(gTrip.getRouteIdInt()).add(gTrip);
-		this.tripIdRouteId.put(gTrip.getTripIdInt(), gTrip.getRouteIdInt());
-		this.tripIdsUIDs.put(gTrip.getTripIdInt(), gTrip.getUID());
+		this.tripIdIntRouteId.put(gTrip.getTripIdInt(), gTrip.getRouteIdInt());
+		this.tripIdIntsUIDs.put(gTrip.getTripIdInt(), gTrip.getUID());
 		this.tripsCount++;
 	}
 
 	@Nullable
-	public GTrip getTrip(@NotNull Integer tripId) {
-		ArrayList<GTrip> routeTrips = this.routeIdTrips.get(getTripIdRouteId(tripId));
+	public GTrip getTrip(@NotNull Integer tripIdInt) {
+		ArrayList<GTrip> routeTrips = this.routeIdTrips.get(getTripRouteId(tripIdInt));
 		if (routeTrips != null) {
 			for (GTrip trip : routeTrips) {
-				if (tripId.equals(trip.getTripIdInt())) {
+				if (tripIdInt.equals(trip.getTripIdInt())) {
 					return trip;
 				}
 			}
@@ -146,8 +146,8 @@ public class GSpec {
 		return null;
 	}
 
-	private Integer getTripIdRouteId(Integer tripId) {
-		return this.tripIdRouteId.get(tripId);
+	private Integer getTripRouteId(Integer tripIdInt) {
+		return this.tripIdIntRouteId.get(tripIdInt);
 	}
 
 	@NotNull
@@ -180,18 +180,18 @@ public class GSpec {
 	}
 
 	public void addFrequency(@NotNull GFrequency gFrequency) {
-		if (!this.tripIdFrequencies.containsKey(gFrequency.getTripIdInt())) {
-			this.tripIdFrequencies.put(gFrequency.getTripIdInt(), new ArrayList<>());
+		if (!this.tripIdIntFrequencies.containsKey(gFrequency.getTripIdInt())) {
+			this.tripIdIntFrequencies.put(gFrequency.getTripIdInt(), new ArrayList<>());
 		}
-		this.tripIdFrequencies.get(gFrequency.getTripIdInt()).add(gFrequency);
+		this.tripIdIntFrequencies.get(gFrequency.getTripIdInt()).add(gFrequency);
 		this.frequenciesCount++;
 	}
 
 	@NotNull
 	public List<GFrequency> getFrequencies(@Nullable Integer optTripId) {
 		if (optTripId != null) {
-			if (this.tripIdFrequencies.containsKey(optTripId)) {
-				return this.tripIdFrequencies.get(optTripId);
+			if (this.tripIdIntFrequencies.containsKey(optTripId)) {
+				return this.tripIdIntFrequencies.get(optTripId);
 			} else {
 				return Collections.emptyList();
 			}
@@ -282,7 +282,7 @@ public class GSpec {
 			offset += tripStopTimes.size();
 			for (int i = 0; i < tripStopTimes.size(); i++) {
 				gStopTime = tripStopTimes.get(i);
-				tripUID = this.tripIdsUIDs.get(gStopTime.getTripIdInt());
+				tripUID = this.tripIdIntsUIDs.get(gStopTime.getTripIdInt());
 				if (tripUID == null) {
 					continue;
 				}
@@ -306,12 +306,12 @@ public class GSpec {
 		MTLog.log("- Stop times: %d (before)", readStopTimesCount());
 		DBUtils.setAutoCommit(false);
 		int st = 0;
-		for (Integer tripId : this.tripIdFrequencies.keySet()) {
-			if (!this.tripIdsUIDs.containsKey(tripId)) {
+		for (Integer tripIdInt : this.tripIdIntFrequencies.keySet()) {
+			if (!this.tripIdIntsUIDs.containsKey(tripIdInt)) {
 				continue; // excluded service ID
 			}
-			ArrayList<GFrequency> tripFrequencies = this.tripIdFrequencies.get(tripId);
-			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripId, null, null, null);
+			ArrayList<GFrequency> tripFrequencies = this.tripIdIntFrequencies.get(tripIdInt);
+			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripIdInt, null, null, null);
 			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
 				if (!tripStopTimes.isEmpty()) {
 					GStopTime firstStopTime = tripStopTimes.get(0);
@@ -320,8 +320,8 @@ public class GSpec {
 					lastStopTime.setPickupType(GPickupType.NO_PICKUP.ordinal());
 				}
 			}
-			Integer routeId = getTripIdRouteId(tripId);
-			long mRouteId = agencyTools.getRouteId(this.routeIdRoutes.get(routeId));
+			Integer routeId = getTripRouteId(tripIdInt);
+			long mRouteId = agencyTools.getRouteId(this.routeIdIntRoutes.get(routeId));
 			ArrayList<GStopTime> newGStopTimes = new ArrayList<>();
 			Calendar stopTimeCal = Calendar.getInstance();
 			long frequencyStartInMs;
@@ -336,7 +336,7 @@ public class GSpec {
 						throw new MTLog.Fatal("stop time UID '%s' already in list with value '%s'!", gStopTime.getUID(),
 								gStopTimeIncInSec.get(gStopTime.getUID()));
 					}
-					getDepartureTimeCal(stopTimeCal, mRouteId, gStopTime);
+					setDepartureTimeCal(stopTimeCal, mRouteId, gStopTime);
 					int stopTimeInSec = (int) TimeUnit.MILLISECONDS.toSeconds(stopTimeCal.getTimeInMillis());
 					gStopTimeIncInSec.put(gStopTime.getUID(), previousStopTimeInSec == null ? 0 : stopTimeInSec - previousStopTimeInSec);
 					previousStopTimeInSec = stopTimeInSec;
@@ -349,9 +349,9 @@ public class GSpec {
 			}
 			for (GFrequency gFrequency : tripFrequencies) {
 				try {
-					frequencyStartInMs = gFrequency.getStartTimeDate().getTime();
-					frequencyEndInMs = gFrequency.getEndTimeDate().getTime();
-					frequencyHeadwayInMs = TimeUnit.SECONDS.toMillis(gFrequency.getHeadwaySecs());
+					frequencyStartInMs = gFrequency.getStartTimeMs();
+					frequencyEndInMs = gFrequency.getEndTimeMs();
+					frequencyHeadwayInMs = gFrequency.getHeadwayMs();
 					long firstStopTimeInMs = frequencyStartInMs;
 					while (frequencyStartInMs <= firstStopTimeInMs && firstStopTimeInMs <= frequencyEndInMs) {
 						if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
@@ -377,8 +377,16 @@ public class GSpec {
 									dropOffType = GDropOffType.NO_DROP_OFF.ordinal();
 								}
 							}
-							GStopTime newGStopTime = new GStopTime(tripId, newDepartureTime, newDepartureTime, gStopTime.getStopIdInt(),
-									gStopTime.getStopSequence(), gStopTime.getStopHeadsign(), pickupType, dropOffType);
+							GStopTime newGStopTime = new GStopTime(
+									tripIdInt,
+									newDepartureTime,
+									newDepartureTime,
+									gStopTime.getStopIdInt(),
+									gStopTime.getStopSequence(),
+									gStopTime.getStopHeadsign(),
+									pickupType,
+									dropOffType
+							);
 							newGStopTimes.add(newGStopTime);
 						}
 						lastFirstStopTimeInMs = firstStopTimeInMs;
@@ -398,18 +406,17 @@ public class GSpec {
 		MTLog.log("- Stop times: %d (after) (new: %d)", readStopTimesCount(), st);
 	}
 
-	@SuppressWarnings("UnusedReturnValue")
-	private void getDepartureTimeCal(@NotNull Calendar calendar, long mRouteId, GStopTime gStopTime) {
+	private void setDepartureTimeCal(@NotNull Calendar calendar, long mRouteId, @NotNull GStopTime gStopTime) {
 		if (gStopTime.hasDepartureTime()) {
-			calendar.setTime(gStopTime.getDepartureTimeDate());
+			calendar.setTimeInMillis(gStopTime.getDepartureTimeMs());
 		} else {
 			long departureTimeInMs = DefaultAgencyTools.extractTimeInMs(gStopTime, getRouteGTFS(mRouteId)).second;
 			calendar.setTimeInMillis(departureTimeInMs);
 		}
 	}
 
-	private int getNewDepartureTime(Calendar stopTimeCal) {
-		int newDepartureTime = GTime.fromDate(stopTimeCal.getTime());
+	private int getNewDepartureTime(@NotNull Calendar stopTimeCal) {
+		int newDepartureTime = GTime.fromCal(stopTimeCal);
 		if (stopTimeCal.get(Calendar.DAY_OF_YEAR) > 1) {
 			newDepartureTime = GTime.add24Hours(newDepartureTime);
 		}
@@ -438,15 +445,15 @@ public class GSpec {
 			Iterator<Entry<Integer, ArrayList<GTrip>>> it = this.routeIdTrips.entrySet().iterator();
 			while (it.hasNext()) {
 				Entry<Integer, ArrayList<GTrip>> routeAndTrip = it.next();
-				if (!this.routeIdRoutes.containsKey(routeAndTrip.getKey())) {
+				if (!this.routeIdIntRoutes.containsKey(routeAndTrip.getKey())) {
 					for (GTrip gTrip : routeAndTrip.getValue()) {
-						if (this.tripIdsUIDs.remove(gTrip.getTripIdInt()) != null) {
+						if (this.tripIdIntsUIDs.remove(gTrip.getTripIdInt()) != null) {
 							r++;
 						}
 						if (DBUtils.deleteStopTimes(gTrip.getTripIdInt()) > 0) {
 							r++;
 						}
-						if (this.tripIdFrequencies.remove(gTrip.getTripIdInt()) != null) {
+						if (this.tripIdIntFrequencies.remove(gTrip.getTripIdInt()) != null) {
 							r++;
 						}
 					}
@@ -466,7 +473,7 @@ public class GSpec {
 		int r = 0;
 		try {
 			HashSet<Integer> routeTripServiceIds = new HashSet<>();
-			for (Integer gRouteId : this.routeIdRoutes.keySet()) {
+			for (Integer gRouteId : this.routeIdIntRoutes.keySet()) {
 				if (this.routeIdTrips.containsKey(gRouteId)) {
 					for (GTrip gTrip : this.routeIdTrips.get(gRouteId)) {
 						routeTripServiceIds.add(gTrip.getServiceIdInt());
@@ -531,7 +538,7 @@ public class GSpec {
 		this.mRouteWithTripIds.clear();
 		Long mRouteId;
 		Collection<GTrip> routeTrips;
-		for (GRoute gRoute : this.routeIdRoutes.values()) {
+		for (GRoute gRoute : this.routeIdIntRoutes.values()) {
 			mRouteId = agencyTools.getRouteId(gRoute);
 			routeTrips = this.routeIdTrips.get(gRoute.getRouteIdInt());
 			if (routeTrips == null || routeTrips.size() == 0) {

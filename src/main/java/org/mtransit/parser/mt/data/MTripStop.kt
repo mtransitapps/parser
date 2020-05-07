@@ -2,7 +2,7 @@ package org.mtransit.parser.mt.data
 
 import org.mtransit.parser.Constants
 
-class MTripStop(
+data class MTripStop(
     val tripId: Long,
     val stopId: Int,
     var stopSequence: Int,

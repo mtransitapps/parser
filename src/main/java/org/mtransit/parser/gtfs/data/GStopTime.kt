@@ -66,15 +66,15 @@ data class GStopTime(
 
     fun hasDepartureTime() = _departureTime >= 0
 
-    @Suppress("unused")
     val departureTimeMs: Long
         get() {
-            return GTime.toMs(_arrivalTime)
+            return GTime.toMs(_departureTime)
         }
 
+    @Suppress("unused")
     val departureTimeDate: Date
         get() {
-            return GTime.toDate(_arrivalTime)
+            return GTime.toDate(_departureTime)
         }
 
     val uID by lazy { getNewUID(tripIdInt, stopIdInt, stopSequence) }

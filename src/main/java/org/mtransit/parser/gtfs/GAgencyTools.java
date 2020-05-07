@@ -47,7 +47,7 @@ public interface GAgencyTools {
 	// ROUTE
 	long getRouteId(@NotNull GRoute gRoute);
 
-	@NotNull
+	@Nullable
 	String getRouteShortName(@NotNull GRoute gRoute);
 
 	@NotNull
