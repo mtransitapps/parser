@@ -24,8 +24,13 @@ data class MTripStop(
     val uID by lazy { getNewUID(tripId, stopId) }
 
     fun equalsExceptStopSequence(ts: MTripStop): Boolean {
-        return ts.tripId != 0L && ts.tripId != tripId
-                && ts.stopId != 0 && ts.stopId != stopId
+        if (ts.tripId != 0L && ts.tripId != tripId) {
+            return false
+        }
+        if (ts.stopId != 0 && ts.stopId != stopId) {
+            return false
+        }
+        return true
     }
 
     fun toFile(): String {

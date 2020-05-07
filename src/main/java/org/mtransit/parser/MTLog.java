@@ -79,12 +79,14 @@ public final class MTLog {
 		public Fatal(@NotNull String format, @Nullable Object... args) {
 			super();
 			log("FATAL ERROR: " + format + "\n", args);
+			System.exit(-1);
 		}
 
 		public Fatal(@NotNull Throwable t, @NotNull String format, @Nullable Object... args) {
 			super();
 			log("FATAL ERROR: " + format + "\n", args);
 			t.printStackTrace();
+			System.exit(-1);
 		}
 	}
 }

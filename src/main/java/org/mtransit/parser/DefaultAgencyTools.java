@@ -239,7 +239,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public Pair<Long[], Integer[]> splitTripStop(@NotNull MRoute mRoute, @NotNull GTrip gTrip, @NotNull GTripStop gTripStop, @NotNull ArrayList<MTrip> splitTrips, @NotNull GSpec routeGTFS) {
-		return new Pair<>(new Long[]{splitTrips.get(0).getId()}, new Integer[]{gTripStop.getStopSequence()});
+		return new Pair<>(
+				new Long[]{splitTrips.get(0).getId()},
+				new Integer[]{gTripStop.getStopSequence()}
+		);
 	}
 
 	@Override

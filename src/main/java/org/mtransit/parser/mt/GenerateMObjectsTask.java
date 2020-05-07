@@ -355,8 +355,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		for (ArrayList<MTripStop> mTripStops : tripIdToMTripStops.values()) {
 			setMTripStopSequence(mTripStops);
 			for (MTripStop mTripStop : mTripStops) {
-				if (allMTripStops.containsKey(mTripStop.getUID()) && !allMTripStops.get(mTripStop.getUID()).equals(mTripStop)) {
-					MTLog.log("%s: Different trip stop %s already in route list (%s != %s)!", this.routeId, mTripStop.getUID(), mTripStop.toString(),
+				if (allMTripStops.containsKey(mTripStop.getUID())
+						&& !allMTripStops.get(mTripStop.getUID()).equals(mTripStop)) {
+					MTLog.log("%s: Different trip stop '%s' already in route list (%s != %s)!", this.routeId, mTripStop.getUID(), mTripStop.toString(),
 							allMTripStops.get(mTripStop.getUID()).toString());
 					continue;
 				}
@@ -519,7 +520,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 				if (splitTripStops.get(mTripId).containsKey(mTripStop.getUID())) {
 					if (!splitTripStops.get(mTripId).get(mTripStop.getUID()).equalsExceptStopSequence(mTripStop)) {
-						throw new MTLog.Fatal("%s: Different trip stop %s already in list (%s != %s)!", this.routeId, mTripStop.getUID(), mTripStop.toString(),
+						throw new MTLog.Fatal("%s: Different slit trip stop '%s' already in list (%s != %s)!",
+								this.routeId,
+								mTripStop.getUID(),
+								mTripStop.toString(),
 								splitTripStops.get(mTripId).get(mTripStop.getUID()).toString());
 					}
 				} else {
