@@ -2,9 +2,12 @@ package org.mtransit.parser.db
 
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
+import org.mtransit.parser.FileUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTripStop
+import org.mtransit.parser.mt.data.MSchedule
+import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
@@ -13,15 +16,18 @@ import java.sql.Statement
 object DBUtils {
 
     private const val IN_MEMORY_CONNECTION_STRING = "jdbc:sqlite::memory:" // faster
-    private const val FILE_CONNECTION_STRING = "jdbc:sqlite:input/db_file" // less RAM
+    private const val FILE_PATH = "input/db_file"
+    private const val FILE_CONNECTION_STRING = "jdbc:sqlite:$FILE_PATH" // less RAM
 
     private const val STOP_TIMES_TABLE_NAME = "g_stop_times"
     private const val TRIP_STOPS_TABLE_NAME = "g_trip_stops"
+    private const val SCHEDULES_TABLE_NAME = "m_schedule"
 
     private const val SQL_RESULT_ALIAS = "result"
     private const val SQL_NULL = "null"
 
     private val connection: Connection by lazy {
+        FileUtils.deleteIfExist(File(FILE_PATH)) // delete previous
         DriverManager.getConnection(
             if (DefaultAgencyTools.IS_CI) {
                 FILE_CONNECTION_STRING
@@ -31,6 +37,13 @@ object DBUtils {
         )
     }
 
+    private var selectCount = 0
+    private var selectRowCount = 0
+    private var insertCount = 0
+    private var insertRowCount = 0
+    private var deleteCount = 0
+    private var deletedRowCount = 0
+
     init {
         val statement = connection.createStatement()
 
@@ -39,6 +52,7 @@ object DBUtils {
         execute(statement, "PRAGMA auto_vacuum = NONE")
         executeUpdate(statement, "DROP TABLE IF EXISTS $STOP_TIMES_TABLE_NAME")
         executeUpdate(statement, "DROP TABLE IF EXISTS $TRIP_STOPS_TABLE_NAME")
+        executeUpdate(statement, "DROP TABLE IF EXISTS $SCHEDULES_TABLE_NAME")
         executeUpdate(
             statement,
             "CREATE TABLE $STOP_TIMES_TABLE_NAME (" +
@@ -59,6 +73,19 @@ object DBUtils {
                     "${GTripStop.TRIP_ID} integer, " +
                     "${GTripStop.STOP_ID} integer, " +
                     "${GTripStop.STOP_SEQUENCE} integer" +
+                    ")"
+        )
+        executeUpdate(
+            statement,
+            "CREATE TABLE $SCHEDULES_TABLE_NAME (" +
+                    "${MSchedule.SERVICE_ID} integer, " +
+                    "${MSchedule.TRIP_ID} integer, " +
+                    "${MSchedule.STOP_ID} integer, " +
+                    "${MSchedule.ARRIVAL} integer, " +
+                    "${MSchedule.DEPARTURE} integer, " +
+                    "${MSchedule.PATH_ID} string, " +
+                    "${MSchedule.HEADSIGN_TYPE} integer, " +
+                    "${MSchedule.HEADSIGN_VALUE} string" +
                     ")"
         )
     }
@@ -101,6 +128,8 @@ object DBUtils {
                     "${gStopTime.dropOffType}" +
                     ")"
         )
+        insertRowCount++
+        insertCount++
         return rs > 0
     }
 
@@ -115,6 +144,28 @@ object DBUtils {
                     "${gTripStop.stopSequence}" +
                     ")"
         )
+        insertRowCount++
+        insertCount++
+        return rs > 0
+    }
+
+    @JvmStatic
+    fun insertSchedule(mSchedule: MSchedule): Boolean {
+        val rs = executeUpdate(
+            connection.createStatement(),
+            "INSERT INTO $SCHEDULES_TABLE_NAME VALUES(" +
+                    "${mSchedule.serviceIdInt}," +
+                    "${mSchedule.tripId}," +
+                    "${mSchedule.stopId}," +
+                    "${mSchedule.arrival}," +
+                    "${mSchedule.departure}," +
+                    "'${mSchedule.pathId}'," +
+                    "${mSchedule.headsignType}," +
+                    "'${mSchedule.headsignValue}'" +
+                    ")"
+        )
+        insertRowCount++
+        insertCount++
         return rs > 0
     }
 
@@ -167,7 +218,9 @@ object DBUtils {
                     rs.getInt(GStopTime.DROP_OFF_TYPE)
                 )
             )
+            selectRowCount++
         }
+        selectCount++
         return result
     }
 
@@ -208,7 +261,160 @@ object DBUtils {
                     rs.getInt(GTripStop.STOP_SEQUENCE)
                 )
             )
+            selectRowCount++
         }
+        selectCount++
+        return result
+    }
+
+    @JvmStatic
+    fun selectSchedules(
+        serviceIdInt: Int? = null,
+        serviceIdInts: List<Int>? = null,
+        tripId: Long? = null,
+        tripIds: List<Long>? = null,
+        stopIdInt: Int? = null,
+        stopIdInts: List<Int>? = null,
+        arrival: Int? = null,
+        departure: Int? = null,
+        limitMaxNbRow: Int? = null,
+        limitOffset: Int? = null
+    ): List<MSchedule> {
+        var query = "SELECT * FROM $SCHEDULES_TABLE_NAME"
+        var whereAdded = false
+        // SERVICE ID
+        serviceIdInt?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.SERVICE_ID} = $serviceIdInt"
+        }
+        serviceIdInts?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.SERVICE_ID} IN ${serviceIdInts
+                .distinct()
+                .joinToString(
+                    separator = ",",
+                    prefix = "(",
+                    postfix = ")"
+                ) { "$it" }}"
+            whereAdded = true
+        }
+        // TRIP ID
+        tripId?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.TRIP_ID} = $tripId"
+
+        }
+        tripIds?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.TRIP_ID} IN ${tripIds
+                .distinct()
+                .joinToString(
+                    separator = ",",
+                    prefix = "(",
+                    postfix = ")"
+                ) { "$it" }}"
+            whereAdded = true
+        }
+        // STOP ID
+        stopIdInt?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.STOP_ID} = $stopIdInt"
+
+        }
+        stopIdInts?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.STOP_ID} IN ${stopIdInts
+                .distinct()
+                .joinToString(
+                    separator = ",",
+                    prefix = "(",
+                    postfix = ")"
+                ) { "$it" }}"
+            whereAdded = true
+        }
+        // ARRIVAL & DEPARTURE
+        arrival?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.ARRIVAL} = $arrival"
+        }
+        departure?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.DEPARTURE} = $departure"
+        }
+        query += " ORDER BY " +
+                "${MSchedule.SERVICE_ID} ASC, " +
+                "${MSchedule.TRIP_ID} ASC, " +
+                "${MSchedule.STOP_ID} ASC, " +
+                "${MSchedule.DEPARTURE} ASC"
+        // LIMIT
+        limitMaxNbRow?.let {
+            query += " LIMIT $limitMaxNbRow"
+            limitOffset?.let {
+                query += " OFFSET $limitOffset"
+            }
+        }
+        val result = ArrayList<MSchedule>()
+        val rs = executeQuery(connection.createStatement(), query)
+        while (rs.next()) {
+            var headsignValue: String? = rs.getString(MSchedule.HEADSIGN_VALUE)
+            if (headsignValue == SQL_NULL) {
+                headsignValue = null
+            }
+            result.add(
+                MSchedule(
+                    rs.getInt(MSchedule.SERVICE_ID),
+                    rs.getLong(MSchedule.TRIP_ID),
+                    rs.getInt(MSchedule.STOP_ID),
+                    rs.getInt(MSchedule.ARRIVAL),
+                    rs.getInt(MSchedule.DEPARTURE),
+                    rs.getString(MSchedule.PATH_ID),
+                    rs.getInt(MSchedule.HEADSIGN_TYPE),
+                    headsignValue
+                )
+            )
+            selectRowCount++
+        }
+        selectCount++
         return result
     }
 
@@ -223,9 +429,11 @@ object DBUtils {
                 " AND " +
                 "${GStopTime.STOP_SEQUENCE} = ${gStopTime.stopSequence}"
         val rs = executeUpdate(connection.createStatement(), query)
+        deletedRowCount += rs
         if (rs > 1) {
             throw MTLog.Fatal("Deleted too many stop times!")
         }
+        deleteCount++
         return rs > 0
     }
 
@@ -236,7 +444,76 @@ object DBUtils {
             query += " WHERE " +
                     "${GStopTime.TRIP_ID} = $tripId"
         }
-        return executeUpdate(connection.createStatement(), query)
+        deleteCount++
+        val rs = executeUpdate(connection.createStatement(), query)
+        deletedRowCount += rs
+        return rs
+    }
+
+    @Suppress("unused")
+    @JvmStatic
+    fun deleteSchedules(
+        serviceIdInt: Int? = null,
+        tripId: Long? = null,
+        stopIdInt: Int? = null,
+        arrival: Int? = null,
+        departure: Int? = null
+    ): Int {
+        var query = "DELETE FROM $SCHEDULES_TABLE_NAME"
+        var whereAdded = false
+        serviceIdInt?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.SERVICE_ID} = $serviceIdInt"
+        }
+        tripId?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.TRIP_ID} = $tripId"
+
+        }
+        // STOP ID
+        stopIdInt?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.STOP_ID} = $stopIdInt"
+
+        }
+        // ARRIVAL & DEPARTURE
+        arrival?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.ARRIVAL} = $arrival"
+        }
+        departure?.let {
+            query += if (whereAdded) {
+                " AND"
+            } else {
+                " WHERE"
+            }
+            whereAdded = true
+            query += " ${MSchedule.DEPARTURE} = $departure"
+        }
+        deleteCount++
+        val rs = executeUpdate(connection.createStatement(), query)
+        deletedRowCount += rs
+        return rs
     }
 
     @JvmStatic
@@ -245,7 +522,9 @@ object DBUtils {
             connection.createStatement(),
             "SELECT COUNT(*) AS $SQL_RESULT_ALIAS FROM $STOP_TIMES_TABLE_NAME"
         )
+        selectCount++
         if (rs.next()) {
+            selectRowCount++
             return rs.getInt(SQL_RESULT_ALIAS)
         }
         throw MTLog.Fatal("Error while counting stop times!")
@@ -257,10 +536,31 @@ object DBUtils {
             connection.createStatement(),
             "SELECT COUNT(*) AS $SQL_RESULT_ALIAS FROM $TRIP_STOPS_TABLE_NAME"
         )
+        selectCount++
         if (rs.next()) {
+            selectRowCount++
             return rs.getInt(SQL_RESULT_ALIAS)
         }
         throw MTLog.Fatal("Error while counting trip stops!")
+    }
+
+    @JvmStatic
+    fun countSchedule(): Int {
+        val rs = executeQuery(
+            connection.createStatement(),
+            "SELECT COUNT(*) AS $SQL_RESULT_ALIAS FROM $SCHEDULES_TABLE_NAME"
+        )
+        selectCount++
+        if (rs.next()) {
+            selectRowCount++
+            return rs.getInt(SQL_RESULT_ALIAS)
+        }
+        throw MTLog.Fatal("Error while counting schedules!")
+    }
+
+    @JvmStatic
+    fun printStats() {
+        MTLog.log("SQL: insert [$insertCount|$insertRowCount], select [$selectCount|$selectRowCount], delete [$deleteCount|$deletedRowCount].")
     }
 
     private fun execute(statement: Statement, query: String): Boolean {

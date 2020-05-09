@@ -401,7 +401,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@NotNull
-	private static Pair<Integer, Integer> extractTimes(GStopTime gStopTime, GSpec routeGTFS,
+	private static Pair<Integer, Integer> extractTimes(GStopTime gStopTime,
+													   GSpec routeGTFS,
 													   SimpleDateFormat mDateFormat) {
 		try {
 			Pair<Long, Long> timesInMs = extractTimeInMs(gStopTime, routeGTFS);

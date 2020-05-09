@@ -183,8 +183,6 @@ public class GReader {
 
 	private static final CSVFormat CSV_FORMAT_NO_QUOTE = CSV_FORMAT.withQuote(null);
 
-	private static final Character POINT = '.';
-
 	private static final Pattern QUOTE_ = Pattern.compile("\"");
 
 	private static void readCsv(String filename, BufferedReader reader,
@@ -249,7 +247,7 @@ public class GReader {
 				MTLog.logFatal(e, "Error while processing line: [%s],", line);
 			}
 			if (l++ % 10_000 == 0) { // LOG
-				MTLog.log(POINT); // LOG
+				MTLog.logPOINT(); // LOG
 			} // LOG
 			if (l % 100_000 == 0) { // LOG
 				MTLog.log("Reading file '%s' (lines: %s)...", filename, l); // LOG

@@ -436,8 +436,6 @@ public class GSpec {
 		return this;
 	}
 
-	private static final String POINT = ".";
-
 	public void cleanupExcludedData() {
 		MTLog.log("Removing more excluded data...");
 		int r = 0;
@@ -459,7 +457,7 @@ public class GSpec {
 					}
 					it.remove();
 					r++;
-					System.out.print(POINT);
+					MTLog.logPOINT();
 				}
 			}
 		} catch (Exception e) {
@@ -486,7 +484,7 @@ public class GSpec {
 				if (!routeTripServiceIds.contains(gCalendar.getServiceIdInt())) {
 					itGCalendar.remove();
 					r++;
-					System.out.print(POINT);
+					MTLog.logPOINT();
 				}
 			}
 			Iterator<GCalendarDate> itGCalendarDate = this.calendarDates.iterator();
@@ -495,7 +493,7 @@ public class GSpec {
 				if (!routeTripServiceIds.contains(gCalendarDate.getServiceIdInt())) {
 					itGCalendarDate.remove();
 					r++;
-					System.out.print(POINT);
+					MTLog.logPOINT();
 				}
 			}
 		} catch (Exception e) {

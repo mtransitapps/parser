@@ -209,7 +209,12 @@ data class MTrip(
 
         @JvmStatic
         fun getNewId(routeId: Long, headsignId: Int): Long {
-            return (routeId.toString() + ZERO + headsignId).toLong()
+            return "$routeId$ZERO$headsignId".toLong()
+        }
+
+        @JvmStatic
+        fun extractRouteId(tripId: Long): Long {
+            return tripId / 100L
         }
 
         @Suppress("unused")

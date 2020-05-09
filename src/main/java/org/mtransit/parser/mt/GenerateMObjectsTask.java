@@ -119,7 +119,17 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			mAgencies.put(mAgency.getIdInt(), mAgency);
 		}
-		parseRTS(mSchedules, mFrequencies, mRoutes, mTrips, mStops, allMTripStops, tripStopIds, serviceIdInts, routeGTFS);
+		parseRTS(
+				mSchedules,
+				mFrequencies,
+				mRoutes,
+				mTrips,
+				mStops,
+				allMTripStops,
+				tripStopIds,
+				serviceIdInts,
+				routeGTFS
+		);
 		HashSet<Long> gCalendarDateServiceRemoved = new HashSet<>();
 		for (GCalendarDate gCalendarDate : routeGTFS.getAllCalendarDates()) {
 			if (!serviceIdInts.contains(gCalendarDate.getServiceIdInt())) {
@@ -179,17 +189,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		setTripStopDescentOnly(mTripStopsList, mSchedules.values(), isSplitted);
 		ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
 		Collections.sort(mServiceDatesList);
-		ArrayList<MSchedule> mSchedulesList = new ArrayList<>(mSchedules.values());
-		Collections.sort(mSchedulesList);
 		ArrayList<MFrequency> mFrequenciesList = new ArrayList<>(mFrequencies.values());
 		Collections.sort(mFrequenciesList);
-		TreeMap<Integer, ArrayList<MSchedule>> mStopScheduleMap = new TreeMap<>();
-		for (MSchedule schedule : mSchedulesList) {
-			if (!mStopScheduleMap.containsKey(schedule.getStopId())) {
-				mStopScheduleMap.put(schedule.getStopId(), new ArrayList<>());
-			}
-			mStopScheduleMap.get(schedule.getStopId()).add(schedule);
-		}
 		TreeMap<Long, ArrayList<MFrequency>> mRouteFrequencies = new TreeMap<>();
 		if (mFrequenciesList.size() > 0) {
 			mRouteFrequencies.put(this.routeId, mFrequenciesList);
@@ -205,14 +206,16 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			int lastDeparture = -1;
 			MSchedule firstSchedule = null;
 			MSchedule lastSchedule = null;
-			for (MSchedule mSchedule : mSchedulesList) {
+			for (MSchedule mSchedule : mSchedules.values()) {
 				if (mSchedule.getServiceIdInt() == firstServiceDate.getServiceIdInt()) {
-					if (firstSchedule == null || mSchedule.getDeparture() < firstSchedule.getDeparture()) {
+					if (firstSchedule == null
+							|| mSchedule.getDeparture() < firstSchedule.getDeparture()) {
 						firstSchedule = mSchedule;
 					}
 				}
 				if (mSchedule.getServiceIdInt() == lastServiceDate.getServiceIdInt()) {
-					if (lastSchedule == null || lastSchedule.getDeparture() < mSchedule.getDeparture()) {
+					if (lastSchedule == null
+							|| lastSchedule.getDeparture() < mSchedule.getDeparture()) {
 						lastSchedule = mSchedule;
 					}
 				}
@@ -264,8 +267,22 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				throw new MTLog.Fatal(e, "Error while parsing dates '%s %s'!", lastCalendarDate, lastDeparture);
 			}
 		}
-		MSpec mRouteSpec = new MSpec(mAgenciesList, mStopsList, mRoutesList, mTripsList, mTripStopsList, mServiceDatesList, mStopScheduleMap,
-				mRouteFrequencies, firstTimestamp, lastTimestamp);
+		MSpec mRouteSpec = new MSpec(
+				mAgenciesList,
+				mStopsList,
+				mRoutesList,
+				mTripsList,
+				mTripStopsList,
+				mServiceDatesList,
+				mRouteFrequencies,
+				firstTimestamp,
+				lastTimestamp
+		);
+		DBUtils.setAutoCommit(false);
+		for (MSchedule mSchedule : mSchedules.values()) {
+			DBUtils.insertSchedule(mSchedule);
+		}
+		DBUtils.setAutoCommit(true); // true => commit()
 		MTLog.log("%s: processing... DONE in %s.", this.routeId, org.mtransit.parser.Utils.getPrettyDuration(System.currentTimeMillis() - startAt));
 		return mRouteSpec;
 	}
@@ -309,7 +326,18 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			mRoutes.put(mRoute.getId(), mRoute);
 			mTripStopTimesHeadsign = new HashMap<>();
-			parseTrips(mSchedules, mFrequencies, mTrips, mStops, serviceIdInts, mRoute, mTripStopTimesHeadsign, tripIdToMTripStops, gRoute, routeGTFS);
+			parseTrips(
+					mSchedules,
+					mFrequencies,
+					mTrips,
+					mStops,
+					serviceIdInts,
+					mRoute,
+					mTripStopTimesHeadsign,
+					tripIdToMTripStops,
+					gRoute,
+					routeGTFS
+			);
 			mTripHeadsignStrings = new HashSet<>();
 			headsignTypeString = false;
 			for (MTrip mTrip : mTrips.values()) {
@@ -367,8 +395,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 	}
 
-	private static final String POINT = ".";
-
 	private void parseTrips(HashMap<String, MSchedule> mSchedules,
 							HashMap<String, MFrequency> mFrequencies,
 							HashMap<Long, MTrip> mTrips,
@@ -414,8 +440,18 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			tripServiceIdInt = gTrip.getServiceIdInt();
 			parseFrequencies(mFrequencies, gTrip, splitTrips, tripServiceIdInt, routeGTFS);
 			splitTripStops = new HashMap<>();
-			splitTripStopTimesHeadsign = parseTripStops(mSchedules, serviceIdInts, mRoute, mStops, gTrip, originalTripHeadsign, splitTrips, tripServiceIdInt,
-					splitTripStops, routeGTFS);
+			splitTripStopTimesHeadsign = parseTripStops(
+					mSchedules,
+					serviceIdInts,
+					mRoute,
+					mStops,
+					gTrip,
+					originalTripHeadsign,
+					splitTrips,
+					tripServiceIdInt,
+					splitTripStops,
+					routeGTFS
+			);
 			for (MTrip mTrip : splitTrips) {
 				if (!splitTripStops.containsKey(mTrip.getId())) {
 					continue;
@@ -472,7 +508,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mTrips.put(mTrip.getId(), mTrip);
 			}
 			if (g++ % 10 == 0) { // LOG
-				System.out.print(POINT); // LOG
+				MTLog.logPOINT(); // LOG
 			} // LOG
 		}
 		MTLog.log("%s: parsing trips... DONE", this.routeId);
@@ -533,7 +569,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (!originalTripHeadsign.containsKey(mTripId)) {
 					throw new MTLog.Fatal("%s: Unexpected trip head-sign ID '%s'! (%s)", this.routeId, mTripId, originalTripHeadsign);
 				}
-				tripStopTimesHeadsign = parseStopTimes(mSchedules,  //
+				tripStopTimesHeadsign = parseStopTimes(
+						mSchedules,
 						mTripId,
 						tripServiceIdInt,
 						originalTripHeadsign.get(mTripId).first,
@@ -542,7 +579,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						gTripStop,
 						mStopId,
 						routeGTFS,
-						addedMTripIdAndGStopIds);
+						addedMTripIdAndGStopIds
+				);
 				splitTripStopTimesHeadSign.put(mTripId, tripStopTimesHeadsign);
 				serviceIdInts.add(tripServiceIdInt);
 			}

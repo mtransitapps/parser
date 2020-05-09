@@ -1,6 +1,7 @@
 package org.mtransit.parser.mt.data
 
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.db.DBUtils
 import java.text.SimpleDateFormat
 import java.util.ArrayList
 import java.util.Locale
@@ -15,7 +16,6 @@ data class MSpec(
     val trips: ArrayList<MTrip>,
     val tripStops: ArrayList<MTripStop>,
     val serviceDates: ArrayList<MServiceDate>,
-    val stopSchedules: TreeMap<Int, ArrayList<MSchedule>>,
     val routeFrequencies: TreeMap<Long, ArrayList<MFrequency>>,
     val firstTimestamp: Long,
     val lastTimestamp: Long
@@ -66,7 +66,7 @@ data class MSpec(
     }
 
     fun hasStopSchedules(): Boolean {
-        return stopSchedules.size > 0
+        return DBUtils.countSchedule() > 0
     }
 
     fun hasRouteFrequencies(): Boolean {

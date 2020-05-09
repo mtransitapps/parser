@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class MTLog {
 
+	private static final Character POINT = '.';
+
 	public static void logDebug(@NotNull Character character) {
 		if (!Constants.DEBUG) {
 			return;
@@ -45,6 +47,10 @@ public final class MTLog {
 			return;
 		}
 		System.out.print("\n" + "----------" + methodName + "()");
+	}
+
+	public static void logPOINT() {
+		log(POINT);
 	}
 
 	public static void log(@NotNull Character character) {

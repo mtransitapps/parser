@@ -56,6 +56,8 @@ data class MSchedule(
             return GIDs.getString(serviceIdInt)
         }
 
+    private val routeId: Long by lazy { MTrip.extractRouteId(tripId) }
+
     private fun getCleanServiceId(agencyTools: GAgencyTools): String {
         return agencyTools.cleanServiceId(serviceId)
     }
@@ -70,15 +72,24 @@ data class MSchedule(
         headsignValue = null
     }
 
-    val isDescentOnly: Boolean
-        get() = headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY
+    @Suppress("unused")
+    fun hasHeadsign(): Boolean {
+        if (headsignType == -1) {
+            return false
+        }
+        if (headsignValue.isNullOrBlank()) {
+            return false
+        }
+        return true
+    }
+
+    fun isDescentOnly() = headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY
 
     val uID by lazy { getNewUID(serviceIdInt, tripId, stopId, departure) }
 
     fun print(): String {
         return toString() +
                 "+(serviceId:$serviceId)" +
-                "+(isDescentOnly:$isDescentOnly)" +
                 "+(uID:$uID)"
     }
 
@@ -159,7 +170,7 @@ data class MSchedule(
     }
 
     fun isSameServiceRTSDeparture(ts: MSchedule): Boolean {
-        if (ts.serviceId != serviceId) {
+        if (ts.serviceIdInt != serviceIdInt) {
             return false
         }
         // no route ID, just for file split
@@ -176,12 +187,14 @@ data class MSchedule(
     }
 
     override fun compareTo(other: MSchedule): Int {
-        // sort by service_id => trip_id => stop_id => departure
+        // sort by route_id => service_id => trip_id => stop_id => departure
         return when {
+            routeId != other.routeId -> {
+                routeId.compareTo(other.routeId)
+            }
             serviceIdInt != other.serviceIdInt -> {
                 serviceId.compareTo(other.serviceId)
             }
-            // no route ID, just for file split
             tripId != other.tripId -> {
                 tripId.compareTo(other.tripId)
             }
@@ -195,6 +208,15 @@ data class MSchedule(
     }
 
     companion object {
+        const val SERVICE_ID = "service_id"
+        const val TRIP_ID = "trip_id"
+        const val STOP_ID = "stop_id"
+        const val ARRIVAL = "arrival"
+        const val DEPARTURE = "departure"
+        const val PATH_ID = "path_id"
+        const val HEADSIGN_TYPE = "headsign_type"
+        const val HEADSIGN_VALUE = "headsign_value"
+
         @JvmStatic
         fun getNewUID(
             serviceIdInt: Int,
