@@ -1,5 +1,6 @@
 package org.mtransit.parser.db
 
+import org.mtransit.parser.CleanUtils
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
@@ -7,6 +8,7 @@ import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTripStop
 import org.mtransit.parser.mt.data.MSchedule
+import org.sqlite.SQLiteException
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
@@ -123,7 +125,7 @@ object DBUtils {
                     "${gStopTime.stopSequence}," +
                     "${gStopTime.arrivalTime}," +
                     "${gStopTime.departureTime}," +
-                    "'${gStopTime.stopHeadsign}'," +
+                    "${gStopTime.stopHeadsign?.let { CleanUtils.quotes(CleanUtils.escape(it)) }}," +
                     "${gStopTime.pickupType}," +
                     "${gStopTime.dropOffType}" +
                     ")"
@@ -159,9 +161,9 @@ object DBUtils {
                     "${mSchedule.stopId}," +
                     "${mSchedule.arrival}," +
                     "${mSchedule.departure}," +
-                    "'${mSchedule.pathId}'," +
+                    "${CleanUtils.quotes(mSchedule.pathId)}," +
                     "${mSchedule.headsignType}," +
-                    "'${mSchedule.headsignValue}'" +
+                    "${mSchedule.headsignValue?.let { CleanUtils.quotes(CleanUtils.escape(it)) }}" +
                     ")"
         )
         insertRowCount++
@@ -567,20 +569,32 @@ object DBUtils {
         if (Constants.LOG_SQL) {
             MTLog.logDebug("SQL > $query.")
         }
-        return statement.execute(query)
+        try {
+            return statement.execute(query)
+        } catch (e: SQLiteException) {
+            throw MTLog.Fatal(e, "SQL error while executing '$query'!")
+        }
     }
 
     private fun executeQuery(statement: Statement, query: String): ResultSet {
         if (Constants.LOG_SQL_QUERY) {
             MTLog.logDebug("SQL > $query.")
         }
-        return statement.executeQuery(query)
+        try {
+            return statement.executeQuery(query)
+        } catch (e: SQLiteException) {
+            throw MTLog.Fatal(e, "SQL error while executing '$query'!")
+        }
     }
 
     private fun executeUpdate(statement: Statement, query: String): Int {
         if (Constants.LOG_SQL_UPDATE) {
             MTLog.logDebug("SQL > $query.")
         }
-        return statement.executeUpdate(query)
+        try {
+            return statement.executeUpdate(query)
+        } catch (e: SQLiteException) {
+            throw MTLog.Fatal(e, "SQL error while executing '$query'!")
+        }
     }
 }
