@@ -9,6 +9,7 @@ data class GRoute(
     val routeIdInt: Int,
     val routeShortName: String,
     val routeLongName: String?,
+    val routeDesc: String?,
     val routeType: Int,
     val routeColor: String?
 ) {
@@ -18,6 +19,7 @@ data class GRoute(
         routeId: String,
         routeShortName: String,
         routeLongName: String?,
+        routeDesc: String?,
         routeType: Int,
         routeColor: String?
     ) : this(
@@ -25,6 +27,7 @@ data class GRoute(
         GIDs.getInt(routeId),
         routeShortName,
         routeLongName,
+        routeDesc,
         routeType,
         routeColor
     )
@@ -71,6 +74,7 @@ data class GRoute(
         const val ROUTE_LONG_NAME = "route_long_name"
         const val ROUTE_TYPE = "route_type"
         const val AGENCY_ID = "agency_id"
+        const val ROUTE_DESC = "route_desc"
         const val ROUTE_COLOR = "route_color"
     }
 }

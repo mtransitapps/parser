@@ -421,8 +421,10 @@ public class GReader {
 					line.get(GRoute.ROUTE_ID),
 					line.get(GRoute.ROUTE_SHORT_NAME),
 					line.get(GRoute.ROUTE_LONG_NAME),
+					line.get(GRoute.ROUTE_DESC),
 					Integer.parseInt(line.get(GRoute.ROUTE_TYPE)),
-					routeColor == null ? null : routeColor.trim());
+					routeColor == null ? null : routeColor.trim()
+			);
 			if (agencyTools.excludeRoute(gRoute)) {
 				return;
 			}
