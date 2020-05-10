@@ -1,6 +1,5 @@
 package org.mtransit.parser;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.gtfs.GAgencyTools;
@@ -238,7 +237,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@NotNull
 	@Override
-	public Pair<Long[], Integer[]> splitTripStop(@NotNull MRoute mRoute, @NotNull GTrip gTrip, @NotNull GTripStop gTripStop, @NotNull ArrayList<MTrip> splitTrips, @NotNull GSpec routeGTFS) {
+	public Pair<Long[], Integer[]> splitTripStop(@NotNull MRoute mRoute,
+												 @NotNull GTrip gTrip,
+												 @NotNull GTripStop gTripStop,
+												 @NotNull ArrayList<MTrip> splitTrips,
+												 @NotNull GSpec routeGTFS) {
 		return new Pair<>(
 				new Long[]{splitTrips.get(0).getId()},
 				new Integer[]{gTripStop.getStopSequence()}

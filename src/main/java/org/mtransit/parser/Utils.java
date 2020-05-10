@@ -1,7 +1,5 @@
 package org.mtransit.parser;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.regex.Pattern;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -110,7 +108,7 @@ public final class Utils {
 		return isUppercaseOnly(
 				CleanUtils.cleanWords(excludedWords)
 						.matcher(str).replaceAll(
-						CleanUtils.cleanWordsReplacement(StringUtils.EMPTY)
+						CleanUtils.cleanWordsReplacement(Constants.EMPTY)
 				),
 				allowWhitespace, checkAZOnly);
 	}

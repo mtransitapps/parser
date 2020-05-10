@@ -13,13 +13,17 @@ data class MFrequency(
     private val headwayInSec: Int
 ) : Comparable<MFrequency?> {
 
-    private val serviceId: String
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val serviceId = _serviceId
+
+    private val _serviceId: String
         get() {
             return GIDs.getString(serviceIdInt)
         }
 
     private fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(serviceId)
+        return agencyTools.cleanServiceId(_serviceId)
     }
 
     val uID by lazy { getNewUID(serviceIdInt, tripId, startTime, endTime) }
@@ -42,7 +46,7 @@ data class MFrequency(
                 +1
             }
             serviceIdInt != other.serviceIdInt -> {
-                serviceId.compareTo(other.serviceId)
+                _serviceId.compareTo(other._serviceId)
             }
             tripId != other.tripId -> {
                 tripId.compareTo(other.tripId)

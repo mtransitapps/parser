@@ -23,8 +23,12 @@ data class GFrequency(
         headwaySecs
     )
 
+    @Deprecated(message = "Not memory efficient")
     @Suppress("unused")
-    val tripId: String
+    val tripId = _tripId
+
+    @Suppress("unused")
+    private val _tripId: String
         get() {
             return GIDs.getString(tripIdInt)
         }

@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.parser.Constants
+
 // https://developers.google.com/transit/gtfs/reference#agency_fields
 data class GAgency(
     val agencyIdInt: Int,
@@ -7,14 +9,18 @@ data class GAgency(
 ) {
 
     constructor(
-        agencyId: String,
+        agencyId: String?,
         agencyTimezone: String
     ) : this(
-        GIDs.getInt(agencyId),
+        GIDs.getInt(agencyId ?: Constants.EMPTY),
         agencyTimezone
     )
 
-    val agencyId: String
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val agencyId = _agencyId
+
+    private val _agencyId: String
         get() {
             return GIDs.getString(agencyIdInt)
         }

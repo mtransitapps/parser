@@ -1,6 +1,5 @@
 package org.mtransit.parser;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.commons.text.translate.CharSequenceTranslator;
 import org.apache.commons.text.translate.LookupTranslator;
@@ -189,7 +188,7 @@ public final class CleanUtils {
 
 	public static String cleanWordsReplacement(String replacement) {
 		if (replacement == null || replacement.length() <= 0) {
-			return StringUtils.EMPTY;
+			return Constants.EMPTY;
 		}
 		return "$2" + replacement + "$4";
 	}
@@ -213,7 +212,7 @@ public final class CleanUtils {
 
 	public static String cleanWordsReplacementPlural(String replacement) {
 		if (replacement == null || replacement.length() <= 0) {
-			return StringUtils.EMPTY;
+			return Constants.EMPTY;
 		}
 		return "$2" + replacement + "$5" + "$6";
 	}
@@ -240,9 +239,9 @@ public final class CleanUtils {
 		label = CLEAN_PARENTHESE1.matcher(label).replaceAll(CLEAN_PARENTHESE1_REPLACEMENT);
 		label = CLEAN_PARENTHESE2.matcher(label).replaceAll(CLEAN_PARENTHESE2_REPLACEMENT);
 		label = SAINT.matcher(label).replaceAll(SAINT_REPLACEMENT);
-		label = Utils.replaceAll(label.trim(), START_WITH_ST, SPACE); // StringUtils.EMPTY); // SPACE);
+		label = Utils.replaceAll(label.trim(), START_WITH_ST, SPACE); // Constants.EMPTY); // SPACE);
 		label = Utils.replaceAll(label, SLASH_ST, SLASH_SPACE);
-		label = Utils.replaceAll(label.trim(), START_WITH_CHARS, SPACE); // , StringUtils.EMPTY); //
+		label = Utils.replaceAll(label.trim(), START_WITH_CHARS, SPACE); // , Constants.EMPTY); //
 		label = Utils.replaceAll(label, SLASH_CHARS, SLASH_SPACE);
 		return cleanLabel(label);
 	}
@@ -269,21 +268,21 @@ public final class CleanUtils {
 	private static final Pattern STARTS_WITH_VERS = Pattern.compile("((^|^.* )vers )", Pattern.CASE_INSENSITIVE);
 
 	public static String keepToFR(String string) {
-		string = STARTS_WITH_VERS.matcher(string).replaceAll(StringUtils.EMPTY);
+		string = STARTS_WITH_VERS.matcher(string).replaceAll(Constants.EMPTY);
 		return string;
 	}
 
 	private static final Pattern STARTS_WITH_TO = Pattern.compile("((^|^.* )to )", Pattern.CASE_INSENSITIVE);
 
 	public static String keepTo(String string) {
-		string = STARTS_WITH_TO.matcher(string).replaceAll(StringUtils.EMPTY);
+		string = STARTS_WITH_TO.matcher(string).replaceAll(Constants.EMPTY);
 		return string;
 	}
 
 	private static final Pattern ENDS_WITH_VIA = Pattern.compile("( via .*$)", Pattern.CASE_INSENSITIVE);
 
 	public static String removeVia(String string) {
-		string = ENDS_WITH_VIA.matcher(string).replaceAll(StringUtils.EMPTY);
+		string = ENDS_WITH_VIA.matcher(string).replaceAll(Constants.EMPTY);
 		return string;
 	}
 

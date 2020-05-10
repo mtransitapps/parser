@@ -4,9 +4,10 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.mtransit.parser.Constants;
 import org.mtransit.parser.MTLog;
+import org.mtransit.parser.StringUtils;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -234,7 +235,7 @@ public class GReader {
 				for (int i = 0; i < lineColumns.length; i++) {
 					lineColumns[i] = withQuotes ?
 							recordColumns.get(i) :
-							QUOTE_.matcher(recordColumns.get(i)).replaceAll(StringUtils.EMPTY);
+							QUOTE_.matcher(recordColumns.get(i)).replaceAll(Constants.EMPTY);
 				}
 				map.clear();
 				for (int ci = 0; ci < recordColumnsSize; ++ci) {
@@ -401,7 +402,7 @@ public class GReader {
 					line.get(GStop.STOP_NAME),
 					Double.parseDouble(line.get(GStop.STOP_LAT)),
 					Double.parseDouble(line.get(GStop.STOP_LON)),
-					code == null ? StringUtils.EMPTY : code.trim()
+					code == null ? Constants.EMPTY : code.trim()
 			);
 			if (agencyTools.excludeStop(gStop)) {
 				return;

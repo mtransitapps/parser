@@ -23,13 +23,17 @@ data class MAgency(
         agencyTools.agencyRouteType
     )
 
-    val id: String
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val id = _id
+
+    private val _id: String
         get() {
             return GIDs.getString(idInt)
         }
 
     fun toFile(): String {
-        return id +  //
+        return _id +  //
                 Constants.COLUMN_SEPARATOR +  //
                 timezone +  //
                 Constants.COLUMN_SEPARATOR +  //
@@ -38,13 +42,18 @@ data class MAgency(
                 type //
     }
 
+    fun toStringPlus(): String {
+        return toString() +
+                "+(_id:$_id)"
+    }
+
     override fun compareTo(other: MAgency?): Int {
         return when {
             other !is MAgency -> {
                 +1
             }
             idInt == other.idInt -> {
-                id.compareTo(other.id)
+                _id.compareTo(other._id)
             }
             timezone == other.timezone -> {
                 timezone.compareTo(other.timezone)

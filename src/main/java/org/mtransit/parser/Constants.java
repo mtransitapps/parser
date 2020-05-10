@@ -1,7 +1,5 @@
 package org.mtransit.parser;
 
-import org.apache.commons.lang3.StringUtils;
-
 @SuppressWarnings("WeakerAccess")
 public final class Constants {
 
@@ -25,7 +23,7 @@ public final class Constants {
 
 	public static final char STRING_DELIMITER = '\'';
 
-	public static final String EMPTY = StringUtils.EMPTY;
+	public static final String EMPTY = "";
 
 	public static final String UUID_SEPARATOR = "-";
 

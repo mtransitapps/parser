@@ -68,14 +68,18 @@ data class GCalendar(
         endDate
     )
 
-    private val serviceId: String
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val serviceId = _serviceId
+
+    private val _serviceId: String
         get() {
             return GIDs.getString(serviceIdInt)
         }
 
     @Suppress("unused")
     fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(serviceId)
+        return agencyTools.cleanServiceId(_serviceId)
     }
 
     val dates: List<GCalendarDate> by lazy {

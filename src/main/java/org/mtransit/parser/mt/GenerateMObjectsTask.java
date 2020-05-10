@@ -1,12 +1,12 @@
 package org.mtransit.parser.mt;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
+import org.mtransit.parser.StringUtils;
 import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -113,7 +113,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		for (GAgency gAgency : routeGTFS.getAllAgencies()) {
 			mAgency = new MAgency(gAgency, this.agencyTools);
 			if (mAgencies.containsKey(mAgency.getIdInt()) && !mAgencies.get(mAgency.getIdInt()).equals(mAgency)) {
-				MTLog.log("%s: Agency %s already in list!", this.routeId, mAgency.getId());
+				MTLog.log("%s: Agency %s already in list!", this.routeId, mAgency.toStringPlus());
 				MTLog.log("%s: %s", this.routeId, mAgency.toString());
 				throw new MTLog.Fatal("%s: %s", this.routeId, mAgencies.get(mAgency.getIdInt()).toString());
 			}
@@ -659,8 +659,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						this.routeId,
 						mSchedule.getUID(),
 						mSchedules.get(mSchedule.getUID()).getUID(),
-						mSchedule.print(),
-						mSchedules.get(mSchedule.getUID()).print());
+						mSchedule.toStringPlus(),
+						mSchedules.get(mSchedule.getUID()).toStringPlus());
 			}
 			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY //
 					&& descentOnly) {

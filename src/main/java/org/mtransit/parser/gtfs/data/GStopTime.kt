@@ -36,12 +36,20 @@ data class GStopTime(
         dropOffType
     )
 
-    val tripId: String
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val tripId = _tripId
+
+    private val _tripId: String
         get() {
             return GIDs.getString(tripIdInt)
         }
 
-    val stopId: String
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val stopId = _stopId
+
+    private val _stopId: String
         get() {
             return GIDs.getString(stopIdInt)
         }
@@ -83,7 +91,7 @@ data class GStopTime(
 
     override fun compareTo(other: GStopTime): Int {
         if (this.tripIdInt != other.tripIdInt) {
-            return this.tripId.compareTo(other.tripId)
+            return this._tripId.compareTo(other._tripId)
         }
         if (this.stopSequence != other.stopSequence) {
             return this.stopSequence.compareTo(other.stopSequence)

@@ -51,7 +51,11 @@ data class MSchedule(
         pathId
     )
 
-    private val serviceId: String
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val serviceId = _serviceId
+
+    private val _serviceId: String
         get() {
             return GIDs.getString(serviceIdInt)
         }
@@ -59,7 +63,7 @@ data class MSchedule(
     private val routeId: Long by lazy { MTrip.extractRouteId(tripId) }
 
     private fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(serviceId)
+        return agencyTools.cleanServiceId(_serviceId)
     }
 
     fun setHeadsign(headsignType: Int, headsignValue: String?) {
@@ -87,9 +91,9 @@ data class MSchedule(
 
     val uID by lazy { getNewUID(serviceIdInt, tripId, stopId, departure) }
 
-    fun print(): String {
+    fun toStringPlus(): String {
         return toString() +
-                "+(serviceId:$serviceId)" +
+                "+(serviceId:$_serviceId)" +
                 "+(uID:$uID)"
     }
 
@@ -193,7 +197,7 @@ data class MSchedule(
                 routeId.compareTo(other.routeId)
             }
             serviceIdInt != other.serviceIdInt -> {
-                serviceId.compareTo(other.serviceId)
+                _serviceId.compareTo(other._serviceId)
             }
             tripId != other.tripId -> {
                 tripId.compareTo(other.tripId)

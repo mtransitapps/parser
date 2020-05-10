@@ -1,13 +1,13 @@
 package org.mtransit.parser.mt;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.FileUtils;
 import org.mtransit.parser.MTLog;
+import org.mtransit.parser.StringUtils;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
@@ -501,6 +501,7 @@ public class MGenerator {
 		}
 	}
 
+	@NotNull
 	private static String getLastModified(String gtfsFile) {
 		try {
 			Path gtfsFileF = new File(gtfsFile).toPath();
@@ -511,8 +512,7 @@ public class MGenerator {
 			lastModifiedTimeDate.setTimeInMillis(lastModifiedTimeInMs);
 			return DATE_FORMAT.format(lastModifiedTimeDate.getTime());
 		} catch (IOException ioe) {
-			MTLog.logFatal(ioe, "I/O Error while writing values file!");
-			return null;
+			throw new MTLog.Fatal(ioe, "I/O Error while writing values file!");
 		}
 	}
 

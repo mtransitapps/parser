@@ -29,23 +29,35 @@ data class GTrip(
 
     val uID by lazy { getNewUID(routeIdInt, tripIdInt) }
 
-    val routeId: String
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val routeId = _routeId
+
+    private val _routeId: String
         get() {
             return GIDs.getString(routeIdInt)
         }
 
-    private val serviceId: String
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val serviceId = _serviceId
+
+    private val _serviceId: String
         get() {
             return GIDs.getString(serviceIdInt)
         }
 
     @Suppress("unused")
     private fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(serviceId)
+        return agencyTools.cleanServiceId(_serviceId)
     }
 
+    @Deprecated(message = "Not memory efficient")
     @Suppress("unused")
-    val tripId: String
+    val tripId = _tripId
+
+    @Suppress("unused")
+    private val _tripId: String
         get() {
             return GIDs.getString(tripIdInt)
         }

@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.parser.Constants
+
 // https://developers.google.com/transit/gtfs/reference#routestxt
 // http://gtfs.org/reference/static/#routestxt
 data class GRoute(
@@ -12,14 +14,14 @@ data class GRoute(
 ) {
 
     constructor(
-        agencyId: String,
+        agencyId: String?,
         routeId: String,
         routeShortName: String,
         routeLongName: String?,
         routeType: Int,
         routeColor: String?
     ) : this(
-        GIDs.getInt(agencyId),
+        GIDs.getInt(agencyId ?: Constants.EMPTY),
         GIDs.getInt(routeId),
         routeShortName,
         routeLongName,
@@ -29,13 +31,20 @@ data class GRoute(
 
     fun hasAgencyId() : Boolean = agencyIdInt >= 0
 
+    @Deprecated(message = "Not memory efficient")
     @Suppress("unused")
-    val agencyId: String
+    val agencyId = _agencyId
+
+    private val _agencyId: String
         get() {
             return GIDs.getString(agencyIdInt)
         }
 
-    val routeId: String
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val routeId = _routeId
+
+    private val _routeId: String
         get() {
             return GIDs.getString(routeIdInt)
         }

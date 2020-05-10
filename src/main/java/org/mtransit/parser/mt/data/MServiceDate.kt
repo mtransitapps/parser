@@ -10,6 +10,7 @@ data class MServiceDate(
     val calendarDate: Int
 ) : Comparable<MServiceDate> {
 
+    @Suppress("unused")
     constructor(
         serviceId: String,
         calendarDate: Int
@@ -18,20 +19,24 @@ data class MServiceDate(
         calendarDate
     )
 
-    private val serviceId: String
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val serviceId = _serviceId
+
+    private val _serviceId: String
         get() {
             return GIDs.getString(serviceIdInt)
         }
 
     private fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(serviceId)
+        return agencyTools.cleanServiceId(_serviceId)
     }
 
     override fun compareTo(other: MServiceDate): Int {
         val cd = calendarDate - other.calendarDate
         return if (cd != 0) {
             cd
-        } else serviceId.compareTo(other.serviceId, ignoreCase = true) // SORT BY real service ID
+        } else _serviceId.compareTo(other._serviceId, ignoreCase = true) // SORT BY real service ID
     }
 
     fun toFile(agencyTools: GAgencyTools): String {
