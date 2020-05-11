@@ -27,6 +27,8 @@ data class GTrip(
         tripShortName
     )
 
+    val directionIdOrDefault : Int = directionId ?: -1
+
     val uID by lazy { getNewUID(routeIdInt, tripIdInt) }
 
     @Deprecated(message = "Not memory efficient")

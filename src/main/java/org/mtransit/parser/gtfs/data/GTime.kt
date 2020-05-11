@@ -16,7 +16,7 @@ object GTime {
 
     @JvmStatic
     fun fromString(timeS: String?): Int {
-        if (timeS == null) {
+        if (timeS.isNullOrEmpty()) {
             return -1
         }
         return TIME_SEPARATOR_REGEX.matcher(timeS).replaceAll(Constants.EMPTY).toInt()

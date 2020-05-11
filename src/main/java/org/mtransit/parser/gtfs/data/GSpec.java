@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
+import org.mtransit.parser.Pair;
 import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 
@@ -109,6 +110,17 @@ public class GSpec {
 		throw new MTLog.Fatal("getRoutes() > trying to use ALL routes!");
 	}
 
+	@Deprecated
+	@Nullable
+	public GRoute getRoute(@NotNull String gRouteId) {
+		for (GRoute gRoute : this.routeIdIntRoutes.values()) {
+			if (gRouteId.equals(gRoute.getRouteId())) {
+				return gRoute;
+			}
+		}
+		throw new MTLog.Fatal("getRoute() > Cannot find route with ID '%s'!", gRouteId);
+	}
+
 	@Nullable
 	public GRoute getRoute(@NotNull Integer routeIdInt) {
 		return this.routeIdIntRoutes.get(routeIdInt);
@@ -158,6 +170,7 @@ public class GSpec {
 		throw new MTLog.Fatal("getTrips() > trying to use ALL trips!");
 	}
 
+	@Deprecated
 	@NotNull
 	public List<GStopTime> getStopTimes(@SuppressWarnings("unused") @Nullable Long optMRouteId,
 										@Nullable Integer optGTripId,
@@ -336,7 +349,7 @@ public class GSpec {
 						throw new MTLog.Fatal("stop time UID '%s' already in list with value '%s'!", gStopTime.getUID(),
 								gStopTimeIncInSec.get(gStopTime.getUID()));
 					}
-					setDepartureTimeCal(stopTimeCal, mRouteId, gStopTime);
+					setDepartureTimeCal(stopTimeCal, gStopTime, tripStopTimes);
 					int stopTimeInSec = (int) TimeUnit.MILLISECONDS.toSeconds(stopTimeCal.getTimeInMillis());
 					gStopTimeIncInSec.put(gStopTime.getUID(), previousStopTimeInSec == null ? 0 : stopTimeInSec - previousStopTimeInSec);
 					previousStopTimeInSec = stopTimeInSec;
@@ -406,11 +419,14 @@ public class GSpec {
 		MTLog.log("- Stop times: %d (after) (new: %d)", readStopTimesCount(), st);
 	}
 
-	private void setDepartureTimeCal(@NotNull Calendar calendar, long mRouteId, @NotNull GStopTime gStopTime) {
+	private void setDepartureTimeCal(@NotNull Calendar calendar,
+									 @NotNull GStopTime gStopTime,
+									 @NotNull List<GStopTime> tripStopTimes) {
 		if (gStopTime.hasDepartureTime()) {
 			calendar.setTimeInMillis(gStopTime.getDepartureTimeMs());
 		} else {
-			long departureTimeInMs = DefaultAgencyTools.extractTimeInMs(gStopTime, getRouteGTFS(mRouteId)).second;
+			final Pair<Long, Long> arrivalAndDeparture = DefaultAgencyTools.extractTimeInMs(gStopTime, tripStopTimes);
+			final long departureTimeInMs = arrivalAndDeparture.second;
 			calendar.setTimeInMillis(departureTimeInMs);
 		}
 	}

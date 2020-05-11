@@ -158,6 +158,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public long getRouteId(@NotNull GRoute gRoute) {
 		try {
+			//noinspection deprecation
 			return Long.parseLong(gRoute.getRouteId());
 		} catch (Exception e) {
 			MTLog.logFatal(e, "Error while extracting route ID from %s!", gRoute);
@@ -180,7 +181,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (StringUtils.isEmpty(gRoute.getRouteLongName())) {
 			throw new MTLog.Fatal("No default route long name for %s!", gRoute);
 		}
-		return CleanUtils.cleanLabel(gRoute.getRouteLongName());
+		return CleanUtils.cleanLabel(gRoute.getRouteLongNameOrDefault());
 	}
 
 	@Override
@@ -330,6 +331,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public int getStopId(@NotNull GStop gStop) {
 		try {
+			//noinspection deprecation
 			return Integer.parseInt(gStop.getStopId());
 		} catch (Exception e) {
 			MTLog.logFatal(e, "Error while extracting stop ID from %s!", gStop);
@@ -382,20 +384,23 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return THREAD_POOL_SIZE;
 	}
 
+	@Deprecated
 	@NotNull
 	@Override
-	public Pair<Integer, Integer> getTimes(long mRouteId, @NotNull GStopTime gStopTime, @NotNull GSpec routeGTFS, @Nullable SimpleDateFormat gDateFormat, @NotNull SimpleDateFormat mDateFormat) {
-		return getTimes(mRouteId, gStopTime, routeGTFS, mDateFormat);
+	public Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime,
+										   @NotNull List<GStopTime> tripStopTimes,
+										   @Nullable SimpleDateFormat gDateFormat,
+										   @NotNull SimpleDateFormat mDateFormat) {
+		return getTimes(gStopTime, tripStopTimes, mDateFormat);
 	}
 
 	@NotNull
 	@Override
-	public Pair<Integer, Integer> getTimes(long mRouteId,
-										   @NotNull GStopTime gStopTime,
-										   @NotNull GSpec routeGTFS,
+	public Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime,
+										   @NotNull List<GStopTime> tripStopTimes,
 										   @NotNull SimpleDateFormat mDateFormat) {
 		if (!gStopTime.hasArrivalTime() || !gStopTime.hasDepartureTime()) {
-			return extractTimes(gStopTime, routeGTFS, mDateFormat);
+			return extractTimes(gStopTime, tripStopTimes, mDateFormat);
 		} else {
 			return new Pair<>(
 					TimeUtils.cleanExtraSeconds(gStopTime.getArrivalTime()),
@@ -405,10 +410,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@NotNull
 	private static Pair<Integer, Integer> extractTimes(GStopTime gStopTime,
-													   GSpec routeGTFS,
+													   @NotNull List<GStopTime> tripStopTimes,
 													   SimpleDateFormat mDateFormat) {
 		try {
-			Pair<Long, Long> timesInMs = extractTimeInMs(gStopTime, routeGTFS);
+			Pair<Long, Long> timesInMs = extractTimeInMs(gStopTime, tripStopTimes);
 			long arrivalTimeInMs = timesInMs.first;
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTimeInMillis(arrivalTimeInMs);
@@ -430,7 +435,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@NotNull
 	public static Pair<Long, Long> extractTimeInMs(@NotNull GStopTime gStopTime,
-												   @NotNull GSpec routeGTFS) {
+												   @NotNull List<GStopTime> tripStopTimes) {
 		int previousArrivalTime = -1;
 		int previousArrivalTimeStopSequence = -1;
 		int previousDepartureTime = -1;
@@ -439,7 +444,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		int nextArrivalTimeStopSequence = -1;
 		int nextDepartureTime = -1;
 		int nextDepartureTimeStopSequence = -1;
-		for (GStopTime aStopTime : routeGTFS.getStopTimes(null, gStopTime.getTripIdInt(), null, null)) {
+		for (GStopTime aStopTime : tripStopTimes) {
 			if (gStopTime.getTripIdInt() != aStopTime.getTripIdInt()) {
 				continue;
 			}

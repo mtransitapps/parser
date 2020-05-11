@@ -85,7 +85,7 @@ object DBUtils {
                     "${MSchedule.STOP_ID} integer, " +
                     "${MSchedule.ARRIVAL} integer, " +
                     "${MSchedule.DEPARTURE} integer, " +
-                    "${MSchedule.PATH_ID} string, " +
+                    "${MSchedule.PATH_ID} integer, " +
                     "${MSchedule.HEADSIGN_TYPE} integer, " +
                     "${MSchedule.HEADSIGN_VALUE} string" +
                     ")"
@@ -161,7 +161,7 @@ object DBUtils {
                     "${mSchedule.stopId}," +
                     "${mSchedule.arrival}," +
                     "${mSchedule.departure}," +
-                    "${CleanUtils.quotes(mSchedule.pathId)}," +
+                    "${mSchedule.pathIdInt}," +
                     "${mSchedule.headsignType}," +
                     "${mSchedule.headsignValue?.let { CleanUtils.quotes(CleanUtils.escape(it)) }}" +
                     ")"
@@ -409,7 +409,7 @@ object DBUtils {
                     rs.getInt(MSchedule.STOP_ID),
                     rs.getInt(MSchedule.ARRIVAL),
                     rs.getInt(MSchedule.DEPARTURE),
-                    rs.getString(MSchedule.PATH_ID),
+                    rs.getInt(MSchedule.PATH_ID),
                     rs.getInt(MSchedule.HEADSIGN_TYPE),
                     headsignValue
                 )

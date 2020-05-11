@@ -578,7 +578,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						tripStopTimesHeadsign,
 						gTripStop,
 						mStopId,
-						routeGTFS,
 						addedMTripIdAndGStopIds
 				);
 				splitTripStopTimesHeadSign.put(mTripId, tripStopTimesHeadsign);
@@ -609,7 +608,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								  String tripStopTimesHeadsign,
 								  GTripStop gTripStop,
 								  int mStopId,
-								  GSpec routeGTFS,
 								  HashMap<String, Integer> addedMTripIdAndGStopIds) {
 		MSchedule mSchedule;
 		String stopHeadsign;
@@ -638,7 +636,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					|| i == gStopTimes.size() - 1) { // last stop of the trip
 				descentOnly = true;
 			}
-			tripIdStopId = mTripId + gStopTime.getTripId() + gStopTime.getStopId();
+			tripIdStopId = String.valueOf(mTripId) + gStopTime.getTripIdInt() + gStopTime.getStopIdInt();
 			if (descentOnly) {
 				if (addedMTripIdAndGStopIds.containsKey(tripIdStopId) //
 						&& addedMTripIdAndGStopIds.get(tripIdStopId) != gStopTime.getStopSequence()) {
@@ -650,9 +648,17 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					}
 				}
 			}
-			mSchedule = new MSchedule(tripServiceIdInt, mTripId, mStopId, //
-					this.agencyTools.getTimes(this.routeId, gStopTime, routeGTFS, M_TIME_FORMAT), //
-					gStopTime.getTripId());
+			mSchedule = new MSchedule(
+					tripServiceIdInt,
+					mTripId,
+					mStopId,
+					this.agencyTools.getTimes(
+							gStopTime,
+							this.routeTripIdStopTimes.get(gStopTime.getTripIdInt()),
+							M_TIME_FORMAT
+					),
+					gStopTime.getTripIdInt()
+			);
 			if (mSchedules.containsKey(mSchedule.getUID()) //
 					&& !mSchedules.get(mSchedule.getUID()).isSameServiceRTSDeparture(mSchedule)) {
 				throw new MTLog.Fatal("%s: Different schedule %s (%s) already in list (%s != %s)!",

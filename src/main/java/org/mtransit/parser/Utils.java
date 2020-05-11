@@ -1,5 +1,8 @@
 package org.mtransit.parser;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.regex.Pattern;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -19,6 +22,7 @@ public final class Utils {
 	private static final String S = "s";
 	private static final String MS = "ms";
 
+	@NotNull
 	public static String getPrettyDuration(long durationInMs) {
 		StringBuilder sb = new StringBuilder();
 		long ms = durationInMs / MILLIS_PER_MILLIS % MILLIS_PER_SECOND;
@@ -59,7 +63,8 @@ public final class Utils {
 		return sb.toString();
 	}
 
-	public static String replaceAll(String string, Pattern[] patterns, String replacement) {
+	@Nullable
+	public static String replaceAll(@Nullable String string, @Nullable Pattern[] patterns, @NotNull String replacement) {
 		if (string == null || string.length() == 0) {
 			return string;
 		}
@@ -72,7 +77,7 @@ public final class Utils {
 	}
 
 	// from the Android Open Source Project by Google
-	public static boolean isDigitsOnly(CharSequence str) {
+	public static boolean isDigitsOnly(@NotNull CharSequence str) {
 		final int len = str.length();
 		for (int i = 0; i < len; i++) {
 			if (!Character.isDigit(str.charAt(i))) {
@@ -82,7 +87,7 @@ public final class Utils {
 		return true;
 	}
 
-	public static boolean isLettersOnly(CharSequence str) {
+	public static boolean isLettersOnly(@NotNull CharSequence str) {
 		final int len = str.length();
 		for (int i = 0; i < len; i++) {
 			if (!Character.isLetter(str.charAt(i))) {
@@ -92,7 +97,7 @@ public final class Utils {
 		return true;
 	}
 
-	public static boolean isLettersOnly(CharSequence str, boolean allowWhitespace) {
+	public static boolean isLettersOnly(@NotNull CharSequence str, boolean allowWhitespace) {
 		final int len = str.length();
 		for (int i = 0; i < len; i++) {
 			if (!Character.isLetter(str.charAt(i))) {
@@ -104,7 +109,7 @@ public final class Utils {
 		return true;
 	}
 
-	public static boolean isUppercaseOnly(String str, boolean allowWhitespace, boolean checkAZOnly, String... excludedWords) {
+	public static boolean isUppercaseOnly(@NotNull String str, boolean allowWhitespace, boolean checkAZOnly, @NotNull String... excludedWords) {
 		return isUppercaseOnly(
 				CleanUtils.cleanWords(excludedWords)
 						.matcher(str).replaceAll(
@@ -113,7 +118,7 @@ public final class Utils {
 				allowWhitespace, checkAZOnly);
 	}
 
-	public static boolean isUppercaseOnly(CharSequence str, boolean allowWhitespace, boolean checkAZOnly) {
+	public static boolean isUppercaseOnly(@NotNull CharSequence str, boolean allowWhitespace, boolean checkAZOnly) {
 		final int len = str.length();
 		for (int i = 0; i < len; i++) {
 			if (checkAZOnly && !Character.isAlphabetic(str.charAt(i))) {

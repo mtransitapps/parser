@@ -18,8 +18,8 @@ data class GStopTime(
 
     constructor(
         tripId: String,
-        arrivalTime: String,
-        departureTime: String,
+        arrivalTime: String?,
+        departureTime: String?,
         stopId: String,
         stopSequence: Int,
         stopHeadsign: String?,

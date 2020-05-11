@@ -13,7 +13,7 @@ data class MSchedule(
     val stopId: Int,
     val arrival: Int,
     val departure: Int,
-    val pathId: String, // trip ID
+    val pathIdInt: Int, // trip ID
     var headsignType: Int = -1,
     var headsignValue: String? = null
 ) : Comparable<MSchedule> {
@@ -25,14 +25,14 @@ data class MSchedule(
         tripId: Long,
         stopId: Int,
         times: Pair<Int?, Int?>,
-        pathId: String
+        pathIdInt: Int
     ) : this(
         serviceIdInt,
         tripId,
         stopId,
         (times.first ?: 0),
         (times.second ?: 0),
-        pathId
+        pathIdInt
     )
 
     @Suppress("unused")
@@ -41,14 +41,14 @@ data class MSchedule(
         tripId: Long,
         stopId: Int,
         times: Pair<Int?, Int?>,
-        pathId: String
+        pathIdInt: Int
     ) : this(
         GIDs.getInt(serviceId),
         tripId,
         stopId,
         (times.first ?: 0),
         (times.second ?: 0),
-        pathId
+        pathIdInt
     )
 
     @Deprecated(message = "Not memory efficient")
@@ -58,6 +58,15 @@ data class MSchedule(
     private val _serviceId: String
         get() {
             return GIDs.getString(serviceIdInt)
+        }
+
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val pathId = _pathId
+
+    private val _pathId: String
+        get() {
+            return GIDs.getString(pathIdInt)
         }
 
     private val routeId: Long by lazy { MTrip.extractRouteId(tripId) }
@@ -115,7 +124,7 @@ data class MSchedule(
             sb.append(Constants.COLUMN_SEPARATOR) //
         }
         if (DefaultAgencyTools.EXPORT_PATH_ID) {
-            sb.append(CleanUtils.quotes(pathId)) // original trip ID
+            sb.append(CleanUtils.quotes(_pathId)) // original trip ID
             sb.append(Constants.COLUMN_SEPARATOR) //
         }
         sb.append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
@@ -141,7 +150,7 @@ data class MSchedule(
             sb.append(Constants.COLUMN_SEPARATOR) //
         }
         if (DefaultAgencyTools.EXPORT_PATH_ID) {
-            sb.append(pathId) // original trip ID
+            sb.append(_pathId) // original trip ID
             sb.append(Constants.COLUMN_SEPARATOR) //
         }
         if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {

@@ -32,7 +32,9 @@ data class GRoute(
         routeColor
     )
 
-    fun hasAgencyId() : Boolean = agencyIdInt >= 0
+    val routeLongNameOrDefault: String = routeLongName ?: Constants.EMPTY
+
+    fun hasAgencyId(): Boolean = agencyIdInt >= 0
 
     @Deprecated(message = "Not memory efficient")
     @Suppress("unused")
