@@ -218,6 +218,7 @@ data class MTrip(
         }
 
         @Suppress("unused")
+        @JvmStatic
         fun mergeEmpty(
             mTrip: MTrip,
             mTripToMerge: MTrip
