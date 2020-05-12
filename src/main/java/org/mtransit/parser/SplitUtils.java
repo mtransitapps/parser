@@ -702,6 +702,25 @@ public class SplitUtils {
 				this.before = before;
 				this.after = after;
 			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (this == o) return true;
+				if (o == null || getClass() != o.getClass()) return false;
+
+				BeforeAfter that = (BeforeAfter) o;
+
+				return before == that.before
+						&& after == that.after;
+			}
+
+			@Override
+			public int hashCode() {
+				int result = 0;
+				result = 31 * result + before;
+				result = 31 * result + after;
+				return result;
+			}
 		}
 	}
 }
