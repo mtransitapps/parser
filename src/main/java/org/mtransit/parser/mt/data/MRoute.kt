@@ -10,6 +10,8 @@ data class MRoute(
     private val color: String?
 ) : Comparable<MRoute> {
 
+    val shortNameOrDefault: String = shortName ?: Constants.EMPTY
+
     fun toFile(): String {
         return id.toString() +  // ID
                 Constants.COLUMN_SEPARATOR +  //

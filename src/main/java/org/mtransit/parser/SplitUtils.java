@@ -3,6 +3,7 @@ package org.mtransit.parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.gtfs.GAgencyTools;
+import org.mtransit.parser.gtfs.data.GIDs;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
@@ -531,8 +532,18 @@ public class SplitUtils {
 			}
 		}
 
+		@Deprecated
 		@NotNull
-		public RouteTripSpec addTripSort(int directionId, @NotNull List<Integer> sortedStopIdInts) {
+		public RouteTripSpec addTripSort(int directionId, @NotNull List<String> sortedStopIds) {
+			List<Integer> sortedStopIdInts = new ArrayList<>();
+			for (String sortedStopId : sortedStopIds) {
+				sortedStopIdInts.add(GIDs.getInt(sortedStopId));
+			}
+			return addTripSortInt(directionId, sortedStopIdInts);
+		}
+
+		@NotNull
+		public RouteTripSpec addTripSortInt(int directionId, @NotNull List<Integer> sortedStopIdInts) {
 			this.allSortedStopIdInts.put(directionId, sortedStopIdInts);
 			ArrayList<Integer> beforeStopIds = new ArrayList<>();
 			Integer currentStopId;
