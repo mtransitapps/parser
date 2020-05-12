@@ -537,6 +537,9 @@ public class SplitUtils {
 		public RouteTripSpec addTripSort(int directionId, @NotNull List<String> sortedStopIds) {
 			List<Integer> sortedStopIdInts = new ArrayList<>();
 			for (String sortedStopId : sortedStopIds) {
+				if (sortedStopId == null) {
+					continue;
+				}
 				sortedStopIdInts.add(GIDs.getInt(sortedStopId));
 			}
 			return addTripSortInt(directionId, sortedStopIdInts);
@@ -720,6 +723,14 @@ public class SplitUtils {
 				result = 31 * result + before;
 				result = 31 * result + after;
 				return result;
+			}
+
+			@Override
+			public String toString() {
+				return BeforeAfter.class.getSimpleName() + "{" +
+						"before=" + before +
+						", after=" + after +
+						'}';
 			}
 		}
 	}
