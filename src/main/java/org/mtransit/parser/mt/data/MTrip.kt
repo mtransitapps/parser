@@ -212,11 +212,6 @@ data class MTrip(
             return "$routeId$ZERO$headsignId".toLong()
         }
 
-        @JvmStatic
-        fun extractRouteId(tripId: Long): Long {
-            return tripId / 100L
-        }
-
         @Suppress("unused")
         @JvmStatic
         fun mergeEmpty(

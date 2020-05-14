@@ -8,6 +8,7 @@ import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 
 data class MSchedule(
+    val routeId: Long,
     val serviceIdInt: Int,
     val tripId: Long,  // direction ID
     val stopId: Int,
@@ -21,29 +22,15 @@ data class MSchedule(
     private val arrivalBeforeDeparture: Int = departure - arrival
 
     constructor(
+        routeId: Long,
         serviceIdInt: Int,
         tripId: Long,
         stopId: Int,
         times: Pair<Int?, Int?>,
         pathIdInt: Int
     ) : this(
+        routeId,
         serviceIdInt,
-        tripId,
-        stopId,
-        (times.first ?: 0),
-        (times.second ?: 0),
-        pathIdInt
-    )
-
-    @Suppress("unused")
-    constructor(
-        serviceId: String,
-        tripId: Long,
-        stopId: Int,
-        times: Pair<Int?, Int?>,
-        pathIdInt: Int
-    ) : this(
-        GIDs.getInt(serviceId),
         tripId,
         stopId,
         (times.first ?: 0),
@@ -68,8 +55,6 @@ data class MSchedule(
         get() {
             return GIDs.getString(pathIdInt)
         }
-
-    private val routeId: Long by lazy { MTrip.extractRouteId(tripId) }
 
     private fun getCleanServiceId(agencyTools: GAgencyTools): String {
         return agencyTools.cleanServiceId(_serviceId)
@@ -221,6 +206,7 @@ data class MSchedule(
     }
 
     companion object {
+        const val ROUTE_ID = "route_id"
         const val SERVICE_ID = "service_id"
         const val TRIP_ID = "trip_id"
         const val STOP_ID = "stop_id"

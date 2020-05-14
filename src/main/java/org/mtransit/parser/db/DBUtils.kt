@@ -80,6 +80,7 @@ object DBUtils {
         executeUpdate(
             statement,
             "CREATE TABLE $SCHEDULES_TABLE_NAME (" +
+                    "${MSchedule.ROUTE_ID} integer, " +
                     "${MSchedule.SERVICE_ID} integer, " +
                     "${MSchedule.TRIP_ID} integer, " +
                     "${MSchedule.STOP_ID} integer, " +
@@ -156,6 +157,7 @@ object DBUtils {
         val rs = executeUpdate(
             connection.createStatement(),
             "INSERT INTO $SCHEDULES_TABLE_NAME VALUES(" +
+                    "${mSchedule.routeId}," +
                     "${mSchedule.serviceIdInt}," +
                     "${mSchedule.tripId}," +
                     "${mSchedule.stopId}," +
@@ -404,6 +406,7 @@ object DBUtils {
             }
             result.add(
                 MSchedule(
+                    rs.getLong(MSchedule.ROUTE_ID),
                     rs.getInt(MSchedule.SERVICE_ID),
                     rs.getLong(MSchedule.TRIP_ID),
                     rs.getInt(MSchedule.STOP_ID),

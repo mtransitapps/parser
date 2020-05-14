@@ -649,6 +649,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 			}
 			mSchedule = new MSchedule(
+					this.routeId,
 					tripServiceIdInt,
 					mTripId,
 					mStopId,
