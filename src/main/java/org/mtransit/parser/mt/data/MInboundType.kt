@@ -15,8 +15,8 @@ enum class MInboundType(val id: String) {
     @Suppress("unused")
     fun intValue(): Int {
         return when (id) {
-            id -> 1
-            id -> 0
+            INBOUND.id -> 1
+            OUTBOUND.id -> 0
             else -> throw MTLog.Fatal("Unknown inbound type '%s'!", id)
         }
     }
