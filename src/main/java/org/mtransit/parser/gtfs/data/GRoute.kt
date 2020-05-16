@@ -23,7 +23,7 @@ data class GRoute(
         routeType: Int,
         routeColor: String?
     ) : this(
-        if (agencyId == null) {
+        if (agencyId.isNullOrBlank()) {
             null
         } else {
             GIDs.getInt(agencyId)
@@ -38,6 +38,7 @@ data class GRoute(
 
     val routeLongNameOrDefault: String = routeLongName ?: Constants.EMPTY
 
+    @Suppress("unused")
     fun hasAgencyId(): Boolean = agencyIdInt != null
 
     @Deprecated(message = "Not memory efficient")
