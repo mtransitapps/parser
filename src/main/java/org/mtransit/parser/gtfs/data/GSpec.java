@@ -73,8 +73,8 @@ public class GSpec {
 	}
 
 	@NotNull
-	public GAgency getAgency(@NotNull Integer agencyId) {
-		return this.agencies.get(agencyId);
+	public GAgency getAgency(@NotNull Integer agencyIdInt) {
+		return this.agencies.get(agencyIdInt);
 	}
 
 	public void addCalendar(@NotNull GCalendar gCalendar) {

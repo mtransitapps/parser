@@ -428,8 +428,9 @@ public class GReader {
 			if (agencyTools.excludeRoute(gRoute)) {
 				return;
 			}
-			if (gRoute.hasAgencyId()
-					&& agencyTools.excludeAgencyNullable(gSpec.getAgency(gRoute.getAgencyIdInt()))) {
+			final Integer routeAgencyIdInt = gRoute.getAgencyIdInt();
+			if (routeAgencyIdInt != null
+					&& agencyTools.excludeAgencyNullable(gSpec.getAgency(routeAgencyIdInt))) {
 				return;
 			}
 			gSpec.addRoute(gRoute);

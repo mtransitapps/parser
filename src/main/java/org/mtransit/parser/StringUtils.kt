@@ -4,6 +4,8 @@ package org.mtransit.parser
 
 object StringUtils {
 
+    const val EMPTY = Constants.EMPTY
+
     @JvmStatic
     fun isEmpty(string: String?) = string.isNullOrEmpty()
 

@@ -5,13 +5,13 @@ import org.mtransit.parser.Constants
 // https://developers.google.com/transit/gtfs/reference#routestxt
 // http://gtfs.org/reference/static/#routestxt
 data class GRoute(
-    val agencyIdInt: Int,
+    val agencyIdInt: Int?, // Optional
     val routeIdInt: Int,
-    val routeShortName: String,
-    val routeLongName: String?,
-    val routeDesc: String?,
+    val routeShortName: String, // Conditionally required
+    val routeLongName: String?, // Conditionally required
+    val routeDesc: String?, // Optional
     val routeType: Int,
-    val routeColor: String?
+    val routeColor: String? // Optional
 ) {
 
     constructor(
@@ -23,7 +23,11 @@ data class GRoute(
         routeType: Int,
         routeColor: String?
     ) : this(
-        GIDs.getInt(agencyId ?: Constants.EMPTY),
+        if (agencyId == null) {
+            null
+        } else {
+            GIDs.getInt(agencyId)
+        },
         GIDs.getInt(routeId),
         routeShortName,
         routeLongName,
@@ -34,15 +38,19 @@ data class GRoute(
 
     val routeLongNameOrDefault: String = routeLongName ?: Constants.EMPTY
 
-    fun hasAgencyId(): Boolean = agencyIdInt >= 0
+    fun hasAgencyId(): Boolean = agencyIdInt != null
 
     @Deprecated(message = "Not memory efficient")
     @Suppress("unused")
-    val agencyId = _agencyId
+    val agencyId: String? = _agencyId
 
-    private val _agencyId: String
+    private val _agencyId: String?
         get() {
-            return GIDs.getString(agencyIdInt)
+            return if (agencyIdInt == null) {
+                null
+            } else {
+                GIDs.getString(agencyIdInt)
+            }
         }
 
     @Deprecated(message = "Not memory efficient")
