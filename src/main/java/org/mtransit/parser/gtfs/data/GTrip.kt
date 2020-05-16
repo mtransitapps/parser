@@ -1,22 +1,24 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.parser.StringUtils
 import org.mtransit.parser.gtfs.GAgencyTools
 
-// https://developers.google.com/transit/gtfs/reference#trips_fields
+// https://developers.google.com/transit/gtfs/reference#tripstxt
+// http://gtfs.org/reference/static/#tripstxt
 data class GTrip(
     val routeIdInt: Int,
     val serviceIdInt: Int,
     val tripIdInt: Int,
-    val directionId: Int?,
-    val tripHeadsign: String,
-    val tripShortName: String?
+    val directionId: Int?, // Optional
+    val tripHeadsign: String?, // Optional
+    val tripShortName: String? // Optional
 ) {
     constructor(
         routeId: String,
         serviceId: String,
         tripId: String,
         directionId: Int?,
-        tripHeadsign: String,
+        tripHeadsign: String?,
         tripShortName: String?
     ) : this(
         GIDs.getInt(routeId),
@@ -27,7 +29,14 @@ data class GTrip(
         tripShortName
     )
 
-    val directionIdOrDefault : Int = directionId ?: -1
+    @Suppress("unused")
+    val directionIdOrDefault: Int = directionId ?: -1
+
+    @Suppress("unused")
+    val tripHeadsignOrDefault: String = tripHeadsign ?: StringUtils.EMPTY
+
+    @Suppress("unused")
+    val tripShortNameOrDefault: String = tripShortName ?: StringUtils.EMPTY
 
     val uID by lazy { getNewUID(routeIdInt, tripIdInt) }
 

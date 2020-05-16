@@ -255,7 +255,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 			throw new MTLog.Fatal("Default agency implementation required 'direction_id' field in 'trips.txt'!");
 		}
 		try {
-			mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId());
+			mTrip.setHeadsignString(
+					cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
+					gTrip.getDirectionId()
+			);
 		} catch (NumberFormatException nfe) {
 			throw new MTLog.Fatal(nfe, "Default agency implementation not possible!");
 		}
