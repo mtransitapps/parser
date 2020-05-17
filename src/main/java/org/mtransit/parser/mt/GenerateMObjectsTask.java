@@ -13,6 +13,7 @@ import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GFrequency;
+import org.mtransit.parser.gtfs.data.GIDs;
 import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
@@ -140,7 +141,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				gCalendarDateServiceRemoved.add(gCalendarDate.getUID());
 				break;
 			case SERVICE_ADDED:
-				mServiceDates.add(new MServiceDate(gCalendarDate.getServiceIdInt(), gCalendarDate.getDate()));
+				mServiceDates.add(new MServiceDate(
+						gCalendarDate.getServiceIdInt(),
+						gCalendarDate.getDate()
+				));
 				break;
 			default:
 				throw new MTLog.Fatal("%s: Unexpected calendar date exception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
@@ -154,7 +158,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (gCalendarDateServiceRemoved.contains(gCalendarDate.getUID())) {
 					continue; // service REMOVED at this date
 				}
-				mServiceDates.add(new MServiceDate(gCalendarDate.getServiceIdInt(), gCalendarDate.getDate()));
+				mServiceDates.add(new MServiceDate(
+						gCalendarDate.getServiceIdInt(),
+						gCalendarDate.getDate()
+				));
 			}
 		}
 		MTrip mTrip;
@@ -278,11 +285,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				firstTimestamp,
 				lastTimestamp
 		);
-		DBUtils.setAutoCommit(false);
-		for (MSchedule mSchedule : mSchedules.values()) {
-			DBUtils.insertSchedule(mSchedule);
-		}
-		DBUtils.setAutoCommit(true); // true => commit()
+		mRouteSpec.setSchedules(mSchedules.values());
 		MTLog.log("%s: processing... DONE in %s.", this.routeId, org.mtransit.parser.Utils.getPrettyDuration(System.currentTimeMillis() - startAt));
 		return mRouteSpec;
 	}

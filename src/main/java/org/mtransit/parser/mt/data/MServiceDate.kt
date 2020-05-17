@@ -44,4 +44,18 @@ data class MServiceDate(
                 "${Constants.COLUMN_SEPARATOR}" +
                 "$calendarDate" // calendar date
     }
+
+    @Suppress("unused")
+    fun toStringPlus(): String {
+        return toString() +
+                "+(serviceIdInt:$_serviceId)"
+    }
+
+    companion object {
+        @Suppress("unused")
+        @JvmStatic
+        fun toStringPlus(serviceDates: Iterable<MServiceDate>): String {
+            return serviceDates.joinToString { it.toStringPlus() }
+        }
+    }
 }

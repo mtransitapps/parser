@@ -61,6 +61,12 @@ data class GCalendarDate(
         return this.date > date
     }
 
+    @Suppress("unused")
+    fun toStringPlus(): String {
+        return toString() +
+                "+(serviceIdInt:$_serviceId)"
+    }
+
     companion object {
         const val FILENAME = "calendar_dates.txt"
 

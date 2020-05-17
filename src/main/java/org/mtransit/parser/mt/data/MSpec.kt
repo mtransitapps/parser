@@ -21,6 +21,8 @@ data class MSpec(
     val lastTimestamp: Long
 ) {
 
+    var schedules: Collection<MSchedule>? = null
+
     val isValid: Boolean
         get() = (hasAgencies() && hasServiceDates() && hasRoutes() && hasTrips() && hasTripStops() && hasStops() //
                 && (hasStopSchedules() || hasRouteFrequencies()))
@@ -66,7 +68,7 @@ data class MSpec(
     }
 
     fun hasStopSchedules(): Boolean {
-        return DBUtils.countSchedule() > 0
+        return this.schedules?.isNotEmpty() ?: (DBUtils.countSchedule() > 0)
     }
 
     fun hasRouteFrequencies(): Boolean {

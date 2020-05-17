@@ -31,4 +31,10 @@ object GIDs {
     fun count(): Int {
         return increment
     }
+
+    @Suppress("unused")
+    @JvmStatic
+    fun toStringPlus(integers: Iterable<Int>): String {
+        return integers.joinToString { getString(it) }
+    }
 }

@@ -50,11 +50,15 @@ public final class MTLog {
 	}
 
 	public static void logPOINT() {
-		log(POINT);
+		logChar(POINT);
 	}
 
-	public static void log(@NotNull Character character) {
+	public static void logChar(@NotNull Character character) {
 		System.out.print(character);
+	}
+
+	public static void logChar(@NotNull String string) {
+		System.out.print(string);
 	}
 
 	public static void log(@NotNull String format, @Nullable Object... args) {

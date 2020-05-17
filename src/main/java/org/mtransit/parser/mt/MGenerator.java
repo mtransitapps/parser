@@ -102,6 +102,20 @@ public class MGenerator {
 					mServiceDates.addAll(mRouteSpec.getServiceDates());
 					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging service dates... DONE)", mRouteSpec
 							.getFirstRoute().getId());
+					if (mRouteSpec.hasStopSchedules()) {
+						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules...)", mRouteSpec
+								.getFirstRoute().getId());
+						if (mRouteSpec.getSchedules() != null) {
+							DBUtils.setAutoCommit(false);
+							for (MSchedule mSchedule : mRouteSpec.getSchedules()) {
+								DBUtils.insertSchedule(mSchedule);
+							}
+							DBUtils.setAutoCommit(true); // true => commit()
+						}
+						mRouteSpec.setSchedules(null); // clear
+						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules... DONE)", mRouteSpec
+								.getFirstRoute().getId());
+					}
 					if (mRouteSpec.hasRouteFrequencies()) {
 						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies...)", mRouteSpec
 								.getFirstRoute().getId());

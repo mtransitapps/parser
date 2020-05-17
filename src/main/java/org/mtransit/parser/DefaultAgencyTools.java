@@ -10,6 +10,7 @@ import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
 import org.mtransit.parser.gtfs.data.GDropOffType;
 import org.mtransit.parser.gtfs.data.GFrequency;
+import org.mtransit.parser.gtfs.data.GIDs;
 import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GRouteType;
@@ -967,13 +968,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@NotNull
 	private static HashSet<Integer> getPeriodServiceIds(Integer startDate, Integer endDate, List<GCalendar> gCalendars, List<GCalendarDate> gCalendarDates) {
-		HashSet<Integer> serviceIds = new HashSet<>();
+		HashSet<Integer> serviceIdInts = new HashSet<>();
 		if (gCalendars != null) {
 			for (GCalendar gCalendar : gCalendars) {
 				if (gCalendar.isInside(startDate, endDate)) {
-					if (!gCalendar.isServiceIdInts(serviceIds)) {
-						MTLog.log("new service ID from calendar active between %s and %s: %s", startDate, endDate, gCalendar.getServiceIdInt());
-						serviceIds.add(gCalendar.getServiceIdInt());
+					if (!gCalendar.isServiceIdInts(serviceIdInts)) {
+						//noinspection deprecation
+						MTLog.log("new service ID from calendar active between %s and %s: %s", startDate, endDate, gCalendar.getServiceId());
+						serviceIdInts.add(gCalendar.getServiceIdInt());
 					}
 				}
 			}
@@ -981,20 +983,22 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (gCalendarDates != null) {
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
 				if (gCalendarDate.isBetween(startDate, endDate)) {
-					if (!gCalendarDate.isServiceIdInts(serviceIds)) {
+					if (!gCalendarDate.isServiceIdInts(serviceIdInts)) {
 						if (gCalendarDate.getExceptionType() == GCalendarDatesExceptionType.SERVICE_REMOVED) {
+							//noinspection deprecation
 							MTLog.log("ignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", startDate, endDate,
-									gCalendarDate.getServiceIdInt());
+									gCalendarDate.getServiceId());
 							continue;
 						}
-						MTLog.log("new service ID from calendar date active between %s and %s: %s", startDate, endDate, gCalendarDate.getServiceIdInt());
-						serviceIds.add(gCalendarDate.getServiceIdInt());
+						//noinspection deprecation
+						MTLog.log("new service ID from calendar date active between %s and %s: %s", startDate, endDate, gCalendarDate.getServiceId());
+						serviceIdInts.add(gCalendarDate.getServiceIdInt());
 					}
 				}
 			}
 		}
-		MTLog.log("Service IDs: %s", serviceIds);
-		return serviceIds;
+		MTLog.log("Service IDs: %s.", GIDs.toStringPlus(serviceIdInts));
+		return serviceIdInts;
 	}
 
 	private static void printMinMaxDate(List<GCalendar> gCalendars, List<GCalendarDate> gCalendarDates) {
