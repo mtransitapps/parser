@@ -18,6 +18,26 @@ data class GStopTime(
 
     constructor(
         tripId: String,
+        arrivalTime: Int,
+        departureTime: Int,
+        stopIdInt: Int,
+        stopSequence: Int,
+        stopHeadsign: String?,
+        pickupType: Int,
+        dropOffType: Int
+    ) : this(
+        GIDs.getInt(tripId),
+        arrivalTime,
+        departureTime,
+        stopIdInt,
+        stopSequence,
+        stopHeadsign,
+        pickupType,
+        dropOffType
+    )
+
+    constructor(
+        tripId: String,
         arrivalTime: String?,
         departureTime: String?,
         stopId: String,
@@ -100,6 +120,13 @@ data class GStopTime(
             return this._departureTime.compareTo(other._departureTime)
         }
         throw MTLog.Fatal("Unexpected stop times to compare: '$this' & '$other'!")
+    }
+
+    @Suppress("unused")
+    fun toStringPlus(): String {
+        return toString() +
+                "+(tripId:$_tripId)" +
+                "+(stopId:$_stopId)"
     }
 
     companion object {

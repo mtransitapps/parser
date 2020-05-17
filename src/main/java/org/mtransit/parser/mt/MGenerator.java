@@ -211,7 +211,6 @@ public class MGenerator {
 					MTLog.logPOINT(); // LOG
 				} // LOG
 				for (MServiceDate mServiceDate : mSpec.getServiceDates()) {
-					// System.out.println("write: " + mServiceDate.toString());
 					ow.write(mServiceDate.toFile(gAgencyTools));
 					ow.write(Constants.NEW_LINE);
 					if (minDate == null || minDate > mServiceDate.getCalendarDate()) {

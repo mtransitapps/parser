@@ -314,7 +314,7 @@ public class GSpec {
 		MTLog.log("- IDs: %d", GIDs.count());
 	}
 
-	public void generateStopTimesFromFrequencies(@NotNull GAgencyTools agencyTools) {
+	public void generateStopTimesFromFrequencies(@SuppressWarnings("unused") @NotNull GAgencyTools agencyTools) {
 		MTLog.log("Generating GTFS stop times from frequencies...");
 		MTLog.log("- Stop times: %d (before)", readStopTimesCount());
 		DBUtils.setAutoCommit(false);
@@ -323,7 +323,6 @@ public class GSpec {
 			if (!this.tripIdIntsUIDs.containsKey(tripIdInt)) {
 				continue; // excluded service ID
 			}
-			ArrayList<GFrequency> tripFrequencies = this.tripIdIntFrequencies.get(tripIdInt);
 			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripIdInt, null, null, null);
 			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
 				if (!tripStopTimes.isEmpty()) {
@@ -333,13 +332,8 @@ public class GSpec {
 					lastStopTime.setPickupType(GPickupType.NO_PICKUP.ordinal());
 				}
 			}
-			Integer routeId = getTripRouteId(tripIdInt);
-			long mRouteId = agencyTools.getRouteId(this.routeIdIntRoutes.get(routeId));
 			ArrayList<GStopTime> newGStopTimes = new ArrayList<>();
 			Calendar stopTimeCal = Calendar.getInstance();
-			long frequencyStartInMs;
-			long frequencyEndInMs;
-			long frequencyHeadwayInMs;
 			HashMap<Long, Integer> gStopTimeIncInSec = new HashMap<>();
 			Integer previousStopTimeInSec = null;
 			long lastFirstStopTimeInMs = -1L;
@@ -360,6 +354,10 @@ public class GSpec {
 					throw new MTLog.Fatal("Error while generating stop increments for '%s'!", gStopTime);
 				}
 			}
+			long frequencyStartInMs;
+			long frequencyEndInMs;
+			long frequencyHeadwayInMs;
+			ArrayList<GFrequency> tripFrequencies = this.tripIdIntFrequencies.get(tripIdInt);
 			for (GFrequency gFrequency : tripFrequencies) {
 				try {
 					frequencyStartInMs = gFrequency.getStartTimeMs();
@@ -414,7 +412,7 @@ public class GSpec {
 				st++;
 			}
 		}
-		DBUtils.setAutoCommit(true);
+		DBUtils.setAutoCommit(true); // true => commit()
 		MTLog.log("Generating GTFS stop times from frequencies... DONE");
 		MTLog.log("- Stop times: %d (after) (new: %d)", readStopTimesCount(), st);
 	}

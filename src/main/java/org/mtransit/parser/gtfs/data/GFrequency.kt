@@ -3,7 +3,8 @@ package org.mtransit.parser.gtfs.data
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-// https://developers.google.com/transit/gtfs/reference#frequencies_fields
+// https://developers.google.com/transit/gtfs/reference#frequenciestxt
+// http://gtfs.org/reference/static/#frequenciestxt
 data class GFrequency(
     val tripIdInt: Int,
     private val _startTime: Int,
@@ -63,6 +64,12 @@ data class GFrequency(
         get() {
             return TimeUnit.SECONDS.toMillis(headwaySecs.toLong())
         }
+
+    @Suppress("unused")
+    fun toStringPlus(): String {
+        return toString() +
+                "+(tripId:$_tripId)"
+    }
 
     companion object {
         const val FILENAME = "frequencies.txt"

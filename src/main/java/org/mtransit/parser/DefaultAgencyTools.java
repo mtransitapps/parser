@@ -74,7 +74,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final Integer THREAD_POOL_SIZE;
 
 	static {
-		//noinspection ConstantConditions
+		// //noinspection ConstantConditions // DEBUG
 		if (IS_CI) {
 			THREAD_POOL_SIZE = 1;
 		} else {
@@ -430,7 +430,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
 				departureTime += 24_00_00;
 			}
-			return new Pair<>(TimeUtils.cleanExtraSeconds(arrivalTime), TimeUtils.cleanExtraSeconds(departureTime));
+			return new Pair<>(
+					TimeUtils.cleanExtraSeconds(arrivalTime),
+					TimeUtils.cleanExtraSeconds(departureTime)
+			);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while interpolating times for %s!", gStopTime);
 		}
@@ -450,6 +453,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 		for (GStopTime aStopTime : tripStopTimes) {
 			if (gStopTime.getTripIdInt() != aStopTime.getTripIdInt()) {
 				continue;
+			}
+			if (aStopTime.getStopSequence() == gStopTime.getStopSequence()
+					&& aStopTime.getStopIdInt() == gStopTime.getStopIdInt()
+					&& aStopTime.hasArrivalTime()
+					&& aStopTime.hasDepartureTime()) {
+				return new Pair<>( // re-use provided stop times from another trip #frequencies
+						aStopTime.getArrivalTimeMs(),
+						aStopTime.getDepartureTimeMs()
+				);
 			}
 			if (aStopTime.getStopSequence() < gStopTime.getStopSequence()) {
 				if (aStopTime.hasDepartureTime()) {
