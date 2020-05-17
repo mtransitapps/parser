@@ -67,6 +67,13 @@ data class GTripStop(
             return GIDs.getString(stopIdInt)
         }
 
+    @Suppress("unused")
+    fun toStringPlus(): String {
+        return toString() +
+                "+(stopId:$_stopId)" +
+                "+(tripId:$_tripId)"
+    }
+
     companion object {
         const val ROUTE_ID = "route_id"
         const val TRIP_ID = "trip_id"
@@ -87,5 +94,11 @@ data class GTripStop(
             stopIdInt: Int,
             stopSequence: Int
         ) = "${routeIdInt}-${tripIdInt}-${stopIdInt}-${stopSequence}"
+
+        @Suppress("unused")
+        @JvmStatic
+        fun toStringPlus(serviceDates: Iterable<GTripStop>): String {
+            return serviceDates.joinToString { it.toStringPlus() }
+        }
     }
 }

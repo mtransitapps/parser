@@ -1,6 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.Pair
 
 object GIDs {
 
@@ -36,5 +37,11 @@ object GIDs {
     @JvmStatic
     fun toStringPlus(integers: Iterable<Int>): String {
         return integers.joinToString { getString(it) }
+    }
+
+    @Suppress("unused")
+    @JvmStatic
+    fun toStringPlusP1(integers: Iterable<Pair<Int, Int>>): String {
+        return integers.joinToString { "[1:" + getString(it.first) + "|2:" + it.second + "]" }
     }
 }

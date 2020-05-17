@@ -104,17 +104,21 @@ public class SplitUtils {
 			if (gStopTime.getTripIdInt() != gTrip.getTripIdInt()) {
 				continue;
 			}
+			final int originalStopIdCleanInt = agencyTools == null ? gStopTime.getStopIdInt() :
+					GIDs.getInt(agencyTools.cleanStopOriginalId(GIDs.getString(gStopTime.getStopIdInt())));
 			if (Constants.DEBUG) {
-				gTripStops.add(new org.mtransit.parser.Pair<>(gStopTime.getStopIdInt(), gStopTime.getStopSequence())); // DEBUG
+				gTripStops.add(new org.mtransit.parser.Pair<>(
+						originalStopIdCleanInt,
+						gStopTime.getStopSequence()
+				)); // DEBUG
 			}
-			int stopTimeStopId = gStopTime.getStopIdInt();
-			if (allBeforeAfterStopIds.contains(stopTimeStopId)) {
+			if (allBeforeAfterStopIds.contains(originalStopIdCleanInt)) {
 				if (gStopTime.getStopSequence() < tripStopSequence) {
-					beforeStopIds.add(stopTimeStopId);
+					beforeStopIds.add(originalStopIdCleanInt);
 					beforeStopSequence.add(gStopTime.getStopSequence());
 				}
 				if (gStopTime.getStopSequence() > tripStopSequence) {
-					afterStopIds.add(stopTimeStopId);
+					afterStopIds.add(originalStopIdCleanInt);
 					afterStopSequence.add(gStopTime.getStopSequence());
 				}
 			}
@@ -125,14 +129,17 @@ public class SplitUtils {
 				minStopSequence = gStopTime.getStopSequence();
 			}
 		}
-		int gTripStopId = gTripStop.getStopIdInt();
-		if (allBeforeAfterStopIds.contains(gTripStopId)) {
+		final int stopIdInt = gTripStop.getStopIdInt();
+		final String originalStopId = GIDs.getString(stopIdInt);
+		final String originalStopIdClean = agencyTools == null ? originalStopId : agencyTools.cleanStopOriginalId(originalStopId);
+		final int originalStopIdCleanInt = GIDs.getInt(originalStopIdClean);
+		if (allBeforeAfterStopIds.contains(originalStopIdCleanInt)) {
 			if (tripStopSequence == minStopSequence) {
-				beforeStopIds.add(gTripStopId);
+				beforeStopIds.add(originalStopIdCleanInt);
 				beforeStopSequence.add(tripStopSequence);
 			}
 			if (tripStopSequence == gStopMaxSequence) {
-				afterStopIds.add(gTripStopId);
+				afterStopIds.add(originalStopIdCleanInt);
 				afterStopSequence.add(tripStopSequence);
 			}
 		}
@@ -156,7 +163,7 @@ public class SplitUtils {
 		MTLog.log("%s: beforeAfterStopIdCandidate: %s", mRoute.getId(), beforeAfterStopIdCandidate); // DEBUG
 		if (Constants.DEBUG) {
 			sortGTripStopsBySequence(gTripStops); // DEBUG
-			MTLog.log("%s: gTripStops: %s", mRoute.getId(), gTripStops); // DEBUG
+			MTLog.log("%s: gTripStops: %s", mRoute.getId(), GIDs.toStringPlusP1(gTripStops)); // DEBUG
 		}
 		MTLog.log("%s: beforeStopIds: %s", mRoute.getId(), beforeStopIds);
 		MTLog.log("%s: beforeStopSequence: %s", mRoute.getId(), beforeStopSequence);
@@ -168,7 +175,7 @@ public class SplitUtils {
 		MTLog.log("%s: stopIdsTowards1: %s", mRoute.getId(), stopIdsTowards1);
 		MTLog.log("%s: stopIdsTowardsBoth10: %s", mRoute.getId(), stopIdsTowardsBoth10);
 		MTLog.log("%s: stopIdsTowardsBoth01: %s", mRoute.getId(), stopIdsTowardsBoth01);
-		listRouteTripStops(mRoute.getId(), routeGTFS);
+		listRouteTripStops(agencyTools, mRoute.getId(), routeGTFS);
 		throw new MTLog.Fatal("%s: Unexpected trip (before:%s|after:%s) %s.\n", mRoute.getId(), beforeStopIds, afterStopIds, gTrip);
 	}
 
@@ -184,7 +191,7 @@ public class SplitUtils {
 		}
 	}
 
-	public static void listRouteTripStops(long mRouteId, @NotNull GSpec routeGTFS) { // DEBUG
+	public static void listRouteTripStops(@Nullable GAgencyTools agencyTools, long mRouteId, @NotNull GSpec routeGTFS) { // DEBUG
 		HashSet<ArrayList<Pair<Integer, Integer>>> gTripStopsS2 = new HashSet<>();
 		HashMap<Integer, String> firstLastStopIdsName = new HashMap<>();
 		for (GRoute gRoute : routeGTFS.getRoutes(mRouteId)) {
@@ -196,7 +203,11 @@ public class SplitUtils {
 						if (gStopTime.getTripIdInt() != gTrip.getTripIdInt()) {
 							continue;
 						}
-						gTripStops.add(new Pair<>(gStopTime.getStopIdInt(), gStopTime.getStopSequence()));
+						gTripStops.add(new Pair<>(
+								agencyTools == null ? gStopTime.getStopIdInt() :
+										GIDs.getInt(agencyTools.cleanStopOriginalId(GIDs.getString(gStopTime.getStopIdInt()))),
+								gStopTime.getStopSequence()
+						));
 					}
 				} catch (Exception e) {
 					throw new MTLog.Fatal(e, "Error while listing stop times for trip ID '%s'!", gTrip.getTripIdInt());
@@ -217,8 +228,8 @@ public class SplitUtils {
 			String indexFormat = "%0" + String.valueOf(size).length() + "d";
 			for (int i = 0; i < size; i++) {
 				Pair<Integer, Integer> gTripStop = gTripStops.get(i);
-				Integer stopId = gTripStop.first;
-				boolean isFirstLastStop = firstLastStopIdsName.containsKey(stopId);
+				Integer stopIdInt = gTripStop.first;
+				boolean isFirstLastStop = firstLastStopIdsName.containsKey(stopIdInt);
 				if (i + 1 == size) {
 					addNewLineIfNecessary(sb, newline);
 				} else if (isFirstLastStop) {
@@ -226,9 +237,9 @@ public class SplitUtils {
 				}
 				sb.append("[");
 				sb.append(String.format(Locale.ENGLISH, indexFormat, gTripStop.second));
-				sb.append("] ").append(stopId).append(", ");
+				sb.append("] ").append(GIDs.getString(stopIdInt)).append(", ");
 				if (isFirstLastStop) {
-					sb.append(" ").append(firstLastStopIdsName.get(stopId)).append(" ");
+					sb.append(" ").append(firstLastStopIdsName.get(stopIdInt)).append(" ");
 				}
 				newline = false;
 				if (isFirstLastStop) {
@@ -276,12 +287,16 @@ public class SplitUtils {
 																			ArrayList<Integer> afterStopSequence,
 																			ArrayList<Integer> beforeStopIds,
 																			ArrayList<Integer> beforeStopSequence,
-																			GAgencyTools agencyTools) {
+																			@Nullable GAgencyTools agencyTools) {
 		RouteTripSpec.BeforeAfter beforeAfterStopIdCurrent;
 		Pair<Integer, RouteTripSpec.BeforeAfter> beforeAfterStopIdCandidate = null;
 		int beforeStopId, afterStopId;
 		int size;
-		int tripStopSequence = gTripStop.getStopSequence();
+		final int stopIdInt = gTripStop.getStopIdInt();
+		final String originalStopId = GIDs.getString(stopIdInt);
+		final String originalStopIdClean = agencyTools == null ? originalStopId : agencyTools.cleanStopOriginalId(originalStopId);
+		final int originalStopIdCleanInt = GIDs.getInt(originalStopIdClean);
+		final int tripStopSequence = gTripStop.getStopSequence();
 		for (int b = 0; b < beforeStopIds.size(); b++) {
 			beforeStopId = beforeStopIds.get(b);
 			for (int a = 0; a < afterStopIds.size(); a++) {
@@ -319,8 +334,7 @@ public class SplitUtils {
 			beforeStopId = beforeStopIds.get(b);
 			for (int a = 0; a < afterStopIds.size(); a++) {
 				afterStopId = afterStopIds.get(a);
-				int gTripStopId = gTripStop.getStopIdInt();
-				if (gTripStopId == beforeStopId && gTripStopId == afterStopId) {
+				if (originalStopIdCleanInt == beforeStopId && originalStopIdCleanInt == afterStopId) {
 					continue;
 				}
 				beforeAfterStopIdCurrent = new RouteTripSpec.BeforeAfter(beforeStopId, afterStopId);
@@ -355,8 +369,14 @@ public class SplitUtils {
 		return beforeAfterStopIdCandidate == null ? null : beforeAfterStopIdCandidate.second;
 	}
 
+	@Deprecated
 	@NotNull
 	public static Integer getFirstStopId(@NotNull MRoute mRoute, @NotNull GSpec gtfs, @NotNull GTrip gTrip) {
+		return getFirstStopId(mRoute, gtfs, gTrip, null);
+	}
+
+	@NotNull
+	public static Integer getFirstStopId(@NotNull MRoute mRoute, @NotNull GSpec gtfs, @NotNull GTrip gTrip, @Nullable GAgencyTools agencyTools) {
 		int gStopMaxSequence = -1;
 		Integer gStopId = null;
 		for (GStopTime gStopTime : gtfs.getStopTimes(mRoute.getId(), gTrip.getTripIdInt(), null, null)) {
@@ -369,7 +389,8 @@ public class SplitUtils {
 			if (gStopTime.getStopSequence() != 1) {
 				continue;
 			}
-			gStopId = gStopTime.getStopIdInt();
+			gStopId = agencyTools == null ? gStopTime.getStopIdInt() :
+					GIDs.getInt(agencyTools.cleanStopOriginalId(GIDs.getString(gStopTime.getStopIdInt())));
 		}
 		if (gStopId == null) {
 			throw new MTLog.Fatal("%s: Unexpected trip (no 1st stop) %s.\n", mRoute.getId(), gTrip);
@@ -377,8 +398,14 @@ public class SplitUtils {
 		return gStopId;
 	}
 
+	@Deprecated
 	@NotNull
 	public static Integer getLastStopId(@NotNull MRoute mRoute, @NotNull GSpec gtfs, @NotNull GTrip gTrip) {
+		return getLastStopId(mRoute, gtfs, gTrip, null);
+	}
+
+	@NotNull
+	public static Integer getLastStopId(@NotNull MRoute mRoute, @NotNull GSpec gtfs, @NotNull GTrip gTrip, @Nullable GAgencyTools agencyTools) {
 		int gStopMaxSequence = -1;
 		Integer gStopId = null;
 		for (GStopTime gStopTime : gtfs.getStopTimes(mRoute.getId(), gTrip.getTripIdInt(), null, null)) {
@@ -389,7 +416,8 @@ public class SplitUtils {
 				continue;
 			}
 			gStopMaxSequence = gStopTime.getStopSequence();
-			gStopId = gStopTime.getStopIdInt();
+			gStopId = agencyTools == null ? gStopTime.getStopIdInt() :
+					GIDs.getInt(agencyTools.cleanStopOriginalId(GIDs.getString(gStopTime.getStopIdInt())));
 		}
 		if (gStopId == null) {
 			throw new MTLog.Fatal("%s: Unexpected trip (no last stop) %s.\n", mRoute.getId(), gTrip);
@@ -615,12 +643,14 @@ public class SplitUtils {
 				throw new MTLog.Fatal("%s: 2: %s", routeId, list2);
 			}
 			List<Integer> sortedStopIds = this.allSortedStopIdInts.get(directionId);
-			int ts1GStopId = ts1GStop.getStopIdInt();
-			int ts2GStopId = ts2GStop.getStopIdInt();
+			final int ts1GStopId = agencyTools == null ? ts1GStop.getStopIdInt() :
+					GIDs.getInt(agencyTools.cleanStopOriginalId(GIDs.getString(ts1GStop.getStopIdInt())));
+			final int ts2GStopId = agencyTools == null ? ts2GStop.getStopIdInt() :
+					GIDs.getInt(agencyTools.cleanStopOriginalId(GIDs.getString(ts2GStop.getStopIdInt())));
 			int ts1StopIndex = sortedStopIds.indexOf(ts1GStopId);
 			int ts2StopIndex = sortedStopIds.indexOf(ts2GStopId);
 			if (ts1StopIndex < 0 || ts2StopIndex < 0) {
-				MTLog.log("%s: Unexpected stop IDs %s AND/OR %s", routeId, ts1GStop.getStopIdInt(), ts2GStop.getStopIdInt());
+				MTLog.log("%s: Unexpected stop IDs %s AND/OR %s", routeId, ts1GStopId, ts2GStopId);
 				MTLog.log("%s: Not in sorted ID list: %s", routeId, sortedStopIds);
 				MTLog.log("%s: 1: %s", routeId, list1);
 				MTLog.log("%s: 2: %s", routeId, list2);
@@ -698,12 +728,12 @@ public class SplitUtils {
 		}
 
 		private static class BeforeAfter {
-			public final int before;
-			public final int after;
+			public final int beforeInt;
+			public final int afterInt;
 
-			public BeforeAfter(int before, int after) {
-				this.before = before;
-				this.after = after;
+			public BeforeAfter(int beforeInt, int after) {
+				this.beforeInt = beforeInt;
+				this.afterInt = after;
 			}
 
 			@Override
@@ -713,23 +743,23 @@ public class SplitUtils {
 
 				BeforeAfter that = (BeforeAfter) o;
 
-				return before == that.before
-						&& after == that.after;
+				return beforeInt == that.beforeInt
+						&& afterInt == that.afterInt;
 			}
 
 			@Override
 			public int hashCode() {
 				int result = 0;
-				result = 31 * result + before;
-				result = 31 * result + after;
+				result = 31 * result + beforeInt;
+				result = 31 * result + afterInt;
 				return result;
 			}
 
 			@Override
 			public String toString() {
 				return BeforeAfter.class.getSimpleName() + "{" +
-						"before=" + before +
-						", after=" + after +
+						"b=" + GIDs.getString(beforeInt) +
+						", a=" + GIDs.getString(afterInt) +
 						'}';
 			}
 		}

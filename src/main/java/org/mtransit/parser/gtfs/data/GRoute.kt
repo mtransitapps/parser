@@ -77,6 +77,13 @@ data class GRoute(
         routeLongName
     }
 
+    @Suppress("unused")
+    fun toStringPlus(): String {
+        return toString() +
+                "+(routeId:$_routeId)" +
+                "+(agencyId:$_agencyId)"
+    }
+
     companion object {
         const val FILENAME = "routes.txt"
 
