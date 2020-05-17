@@ -533,66 +533,68 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Pair<Long[], Integer[]> mTripsAndStopSequences;
 		HashMap<String, Integer> addedMTripIdAndGStopIds = new HashMap<>();
 		final List<GTripStop> tripStops = this.routeTripIdTripStops.get(gTrip.getTripIdInt());
-		for (GTripStop gTripStop : tripStops) {
-			if (gTripStop.getTripIdInt() != gTrip.getTripIdInt()) {
-				continue;
-			}
-			gStop = routeGTFS.getStop(gTripStop.getStopIdInt());
-			if (gStop == null) { // was excluded previously
-				continue;
-			}
-			mStopId = this.agencyTools.getStopId(gStop);
-			this.gStopsCache.put(mStopId, gStop);
-			if (mStopId < 0) {
-				throw new MTLog.Fatal("%s: Can't find GTFS stop ID (%s) '%s' from trip ID '%s' (%s)", this.routeId, mStopId, gTripStop.getStopIdInt(),
-						gTripStop.getTripIdInt(), gStop);
-			}
-			mTripsAndStopSequences = this.agencyTools.splitTripStop(mRoute, gTrip, gTripStop, splitTrips, routeGTFS);
-			for (int i = 0; i < mTripsAndStopSequences.first.length; i++) {
-				mTripId = mTripsAndStopSequences.first[i];
-				mTripStop = new MTripStop(mTripId, mStopId, mTripsAndStopSequences.second[i]);
-				if (!splitTripStops.containsKey(mTripId)) {
-					splitTripStops.put(mTripId, new HashMap<>());
+		if (tripStops != null) {
+			for (GTripStop gTripStop : tripStops) {
+				if (gTripStop.getTripIdInt() != gTrip.getTripIdInt()) {
+					continue;
 				}
-				if (splitTripStops.get(mTripId).containsKey(mTripStop.getUID())) {
-					if (!splitTripStops.get(mTripId).get(mTripStop.getUID()).equalsExceptStopSequence(mTripStop)) {
-						throw new MTLog.Fatal("%s: Different slit trip stop '%s' already in list (%s != %s)!",
-								this.routeId,
-								mTripStop.getUID(),
-								mTripStop.toString(),
-								splitTripStops.get(mTripId).get(mTripStop.getUID()).toString());
+				gStop = routeGTFS.getStop(gTripStop.getStopIdInt());
+				if (gStop == null) { // was excluded previously
+					continue;
+				}
+				mStopId = this.agencyTools.getStopId(gStop);
+				this.gStopsCache.put(mStopId, gStop);
+				if (mStopId < 0) {
+					throw new MTLog.Fatal("%s: Can't find GTFS stop ID (%s) '%s' from trip ID '%s' (%s)", this.routeId, mStopId, gTripStop.getStopIdInt(),
+							gTripStop.getTripIdInt(), gStop);
+				}
+				mTripsAndStopSequences = this.agencyTools.splitTripStop(mRoute, gTrip, gTripStop, splitTrips, routeGTFS);
+				for (int i = 0; i < mTripsAndStopSequences.first.length; i++) {
+					mTripId = mTripsAndStopSequences.first[i];
+					mTripStop = new MTripStop(mTripId, mStopId, mTripsAndStopSequences.second[i]);
+					if (!splitTripStops.containsKey(mTripId)) {
+						splitTripStops.put(mTripId, new HashMap<>());
 					}
-				} else {
-					splitTripStops.get(mTripId).put(mTripStop.getUID(), mTripStop);
+					if (splitTripStops.get(mTripId).containsKey(mTripStop.getUID())) {
+						if (!splitTripStops.get(mTripId).get(mTripStop.getUID()).equalsExceptStopSequence(mTripStop)) {
+							throw new MTLog.Fatal("%s: Different slit trip stop '%s' already in list (%s != %s)!",
+									this.routeId,
+									mTripStop.getUID(),
+									mTripStop.toString(),
+									splitTripStops.get(mTripId).get(mTripStop.getUID()).toString());
+						}
+					} else {
+						splitTripStops.get(mTripId).put(mTripStop.getUID(), mTripStop);
+					}
+					tripStopTimesHeadsign = splitTripStopTimesHeadSign.get(mTripId);
+					if (!originalTripHeadsign.containsKey(mTripId)) {
+						throw new MTLog.Fatal("%s: Unexpected trip head-sign ID '%s'! (%s)", this.routeId, mTripId, originalTripHeadsign);
+					}
+					tripStopTimesHeadsign = parseStopTimes(
+							mSchedules,
+							mTripId,
+							tripServiceIdInt,
+							originalTripHeadsign.get(mTripId).first,
+							originalTripHeadsign.get(mTripId).second,
+							tripStopTimesHeadsign,
+							gTripStop,
+							mStopId,
+							addedMTripIdAndGStopIds
+					);
+					splitTripStopTimesHeadSign.put(mTripId, tripStopTimesHeadsign);
+					serviceIdInts.add(tripServiceIdInt);
 				}
-				tripStopTimesHeadsign = splitTripStopTimesHeadSign.get(mTripId);
-				if (!originalTripHeadsign.containsKey(mTripId)) {
-					throw new MTLog.Fatal("%s: Unexpected trip head-sign ID '%s'! (%s)", this.routeId, mTripId, originalTripHeadsign);
+				if (!mStops.containsKey(mStopId)) {
+					mStops.put(
+							mStopId,
+							new MStop(mStopId,
+									this.agencyTools.getStopCode(gStop),
+									this.agencyTools.getStopOriginalId(gStop),
+									this.agencyTools.cleanStopName(gStop.getStopName()),
+									gStop.getStopLat(),
+									gStop.getStopLong()
+							));
 				}
-				tripStopTimesHeadsign = parseStopTimes(
-						mSchedules,
-						mTripId,
-						tripServiceIdInt,
-						originalTripHeadsign.get(mTripId).first,
-						originalTripHeadsign.get(mTripId).second,
-						tripStopTimesHeadsign,
-						gTripStop,
-						mStopId,
-						addedMTripIdAndGStopIds
-				);
-				splitTripStopTimesHeadSign.put(mTripId, tripStopTimesHeadsign);
-				serviceIdInts.add(tripServiceIdInt);
-			}
-			if (!mStops.containsKey(mStopId)) {
-				mStops.put(
-						mStopId,
-						new MStop(mStopId,
-								this.agencyTools.getStopCode(gStop),
-								this.agencyTools.getStopOriginalId(gStop),
-								this.agencyTools.cleanStopName(gStop.getStopName()),
-								gStop.getStopLat(),
-								gStop.getStopLong()
-						));
 			}
 		}
 		return splitTripStopTimesHeadSign;
