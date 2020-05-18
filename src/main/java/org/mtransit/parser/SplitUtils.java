@@ -165,9 +165,9 @@ public class SplitUtils {
 			sortGTripStopsBySequence(gTripStops); // DEBUG
 			MTLog.log("%s: gTripStops: %s", mRoute.getId(), GIDs.toStringPlusP1(gTripStops)); // DEBUG
 		}
-		MTLog.log("%s: beforeStopIds: %s", mRoute.getId(), beforeStopIds);
+		MTLog.log("%s: beforeStopIds: %s", mRoute.getId(), GIDs.toStringPlus(beforeStopIds));
 		MTLog.log("%s: beforeStopSequence: %s", mRoute.getId(), beforeStopSequence);
-		MTLog.log("%s: afterStopIds: %s", mRoute.getId(), afterStopIds);
+		MTLog.log("%s: afterStopIds: %s", mRoute.getId(), GIDs.toStringPlus(afterStopIds));
 		MTLog.log("%s: afterStopSequence: %s", mRoute.getId(), afterStopSequence);
 		MTLog.log("%s: max sequence: %s", mRoute.getId(), gStopMaxSequence);
 		MTLog.log("%s: gTripStop: %s", mRoute.getId(), gTripStop);
@@ -757,10 +757,11 @@ public class SplitUtils {
 
 			@Override
 			public String toString() {
-				return BeforeAfter.class.getSimpleName() + "{" +
-						"b=" + GIDs.getString(beforeInt) +
-						", a=" + GIDs.getString(afterInt) +
-						'}';
+				// return "[b:" + GIDs.getString(beforeInt) + "|a:" + GIDs.getString(afterInt) + "]";
+				return "[" +
+						"b:" + GIDs.getString(beforeInt) +
+						"|a:" + GIDs.getString(afterInt) +
+						']';
 			}
 		}
 	}
