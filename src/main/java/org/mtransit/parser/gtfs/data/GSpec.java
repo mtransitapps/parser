@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 
 // https://developers.google.com/transit/gtfs/reference#FeedFiles
@@ -58,7 +57,7 @@ public class GSpec {
 	private final HashMap<Integer, Integer> tripIdIntRouteId = new HashMap<>();
 
 	@NotNull
-	private final WeakHashMap<Long, GenerateMObjectsTask> routeGenerators = new WeakHashMap<>();
+	private final HashMap<Long, GenerateMObjectsTask> routeGenerators = new HashMap<>();
 
 	public GSpec() {
 	}
@@ -192,7 +191,7 @@ public class GSpec {
 		if (routeGenerator != null) {
 			return routeGenerator.getTripStopTimes(gTripIdInt);
 		}
-		throw new MTLog.Fatal("getStopTimes() > trying to use ALL stop times!");
+		throw new MTLog.Fatal("getStopTimes() > trying to use ALL stop times (route:%s|trip:%s)!", mRouteId, GIDs.getString(gTripIdInt));
 	}
 
 	public void addStopTime(@NotNull GStopTime gStopTime) {
