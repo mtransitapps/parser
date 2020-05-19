@@ -1,6 +1,6 @@
 package org.mtransit.parser;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class Constants {
 
 	public static boolean DEBUG = false;

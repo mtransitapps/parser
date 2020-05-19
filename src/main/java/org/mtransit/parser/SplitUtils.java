@@ -100,7 +100,7 @@ public class SplitUtils {
 		java.util.ArrayList<org.mtransit.parser.Pair<Integer, Integer>> gTripStops = new java.util.ArrayList<>(); // DEBUG
 		int tripStopSequence = gTripStop.getStopSequence();
 		int minStopSequence = Integer.MAX_VALUE; // can be 1... or 0 or anything according to official documentation
-		for (GStopTime gStopTime : routeGTFS.getStopTimes(null, gTrip.getTripIdInt(), null, null)) {
+		for (GStopTime gStopTime : routeGTFS.getStopTimes(mRoute.getId(), gTrip.getTripIdInt(), null, null)) {
 			if (gStopTime.getTripIdInt() != gTrip.getTripIdInt()) {
 				continue;
 			}
@@ -198,7 +198,7 @@ public class SplitUtils {
 			for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteIdInt())) {
 				ArrayList<Pair<Integer, Integer>> gTripStops = new ArrayList<>();
 				try {
-					List<GStopTime> stopTimes = routeGTFS.getStopTimes(null, gTrip.getTripIdInt(), null, null);
+					List<GStopTime> stopTimes = routeGTFS.getStopTimes(mRouteId, gTrip.getTripIdInt(), null, null);
 					for (GStopTime gStopTime : stopTimes) {
 						if (gStopTime.getTripIdInt() != gTrip.getTripIdInt()) {
 							continue;

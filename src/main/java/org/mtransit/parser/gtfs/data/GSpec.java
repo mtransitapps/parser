@@ -8,6 +8,7 @@ import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
+import org.mtransit.parser.mt.GenerateMObjectsTask;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 
 // https://developers.google.com/transit/gtfs/reference#FeedFiles
@@ -54,6 +56,9 @@ public class GSpec {
 	private final HashMap<Long, ArrayList<GRoute>> mRouteIdRoutes = new HashMap<>();
 	@NotNull
 	private final HashMap<Integer, Integer> tripIdIntRouteId = new HashMap<>();
+
+	@NotNull
+	private final WeakHashMap<Long, GenerateMObjectsTask> routeGenerators = new WeakHashMap<>();
 
 	public GSpec() {
 	}
@@ -170,14 +175,22 @@ public class GSpec {
 		throw new MTLog.Fatal("getTrips() > trying to use ALL trips!");
 	}
 
-	@Deprecated
+	public void add(long mRouteId, @NotNull GenerateMObjectsTask routeGenerator) {
+		this.routeGenerators.put(mRouteId, routeGenerator);
+	}
+
+	public void remove(long mRouteId) {
+		this.routeGenerators.remove(mRouteId);
+	}
+
 	@NotNull
-	public List<GStopTime> getStopTimes(@SuppressWarnings("unused") @Nullable Long optMRouteId,
-										@Nullable Integer optGTripId,
+	public List<GStopTime> getStopTimes(@NotNull Long mRouteId,
+										@NotNull Integer gTripIdInt,
 										@SuppressWarnings("unused") @Nullable String optGStopId,
 										@SuppressWarnings("unused") @Nullable Integer optGStopSequence) {
-		if (optGTripId != null) {
-			return DBUtils.selectStopTimes(optGTripId, null, null, null);
+		GenerateMObjectsTask routeGenerator = this.routeGenerators.get(mRouteId);
+		if (routeGenerator != null) {
+			return routeGenerator.getTripStopTimes(gTripIdInt);
 		}
 		throw new MTLog.Fatal("getStopTimes() > trying to use ALL stop times!");
 	}

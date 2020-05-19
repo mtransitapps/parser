@@ -13,7 +13,6 @@ import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GFrequency;
-import org.mtransit.parser.gtfs.data.GIDs;
 import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
@@ -73,9 +72,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 	}
 
+	@NotNull
+	public List<GStopTime> getTripStopTimes(int tripIdInt) {
+		return this.routeTripIdStopTimes.getOrDefault(tripIdInt, Collections.emptyList());
+	}
+
 	private MSpec doCall() {
 		long startAt = System.currentTimeMillis();
 		MTLog.log("%s: processing... ", this.routeId);
+		this.globalGTFS.add(this.routeId, this);
 		HashMap<Integer, MAgency> mAgencies = new HashMap<>();
 		HashSet<MServiceDate> mServiceDates = new HashSet<>();
 		HashMap<String, MSchedule> mSchedules = new HashMap<>();
@@ -286,6 +291,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				lastTimestamp
 		);
 		mRouteSpec.setSchedules(mSchedules.values());
+		this.globalGTFS.remove(this.routeId);
 		MTLog.log("%s: processing... DONE in %s.", this.routeId, org.mtransit.parser.Utils.getPrettyDuration(System.currentTimeMillis() - startAt));
 		return mRouteSpec;
 	}
