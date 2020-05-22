@@ -77,6 +77,14 @@ data class GTrip(
         return serviceIdInts.contains(serviceIdInt)
     }
 
+    @Suppress("unused")
+    fun toStringPlus(): String {
+        return toString() +
+                "+(routeId:$_routeId)" +
+                "+(serviceId:$_serviceId)" +
+                "+(tripId:$_tripId)"
+    }
+
     companion object {
         const val FILENAME = "trips.txt"
 
