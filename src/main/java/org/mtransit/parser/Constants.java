@@ -25,6 +25,8 @@ public final class Constants {
 
 	public static final String EMPTY = "";
 
+	public static final String SPACE_ = " ";
+
 	public static final String UUID_SEPARATOR = "-";
 
 }
