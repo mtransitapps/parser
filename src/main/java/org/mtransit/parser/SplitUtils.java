@@ -204,8 +204,7 @@ public class SplitUtils {
 							continue;
 						}
 						gTripStops.add(new Pair<>(
-								agencyTools == null ? gStopTime.getStopIdInt() :
-										GIDs.getInt(agencyTools.cleanStopOriginalId(GIDs.getString(gStopTime.getStopIdInt()))),
+								gStopTime.getStopIdInt(),
 								gStopTime.getStopSequence()
 						));
 					}
@@ -255,18 +254,23 @@ public class SplitUtils {
 		MTLog.log("%s: all first/last stop IDs: %s", mRouteId, firstLastStopIdsName.keySet());
 	}
 
-	private static void addFistLastStopIdName(GSpec routeGTFS, HashMap<Integer, String> firstLastStopIdsName, ArrayList<Pair<Integer, Integer>> gTripStops,
+	private static void addFistLastStopIdName(GSpec routeGTFS,
+											  HashMap<Integer, String> firstLastStopIdsName,
+											  ArrayList<Pair<Integer, Integer>> gTripStops,
 											  int firstStopIndex) {
 		if (firstStopIndex < 0 || firstStopIndex >= gTripStops.size()) {
 			return;
 		}
-		Integer stopId = gTripStops.get(firstStopIndex).first;
-		if (!firstLastStopIdsName.containsKey(stopId)) {
-			GStop gStop = routeGTFS.getStop(stopId);
+		Integer stopIdInt = gTripStops.get(firstStopIndex).first;
+		String stopId = GIDs.getString(stopIdInt);
+		if (!firstLastStopIdsName.containsKey(stopIdInt)) {
+			GStop gStop = routeGTFS.getStop(stopIdInt);
 			//noinspection ConstantConditions
 			firstLastStopIdsName.put( //
-					stopId, "\"" + gStop.getStopCode() + "\", // " + gStop.getStopName() + //
-							" {" + gStop.getStopLat() + "," + gStop.getStopLong() + "}");
+					stopIdInt,
+					"\"" + gStop.getStopCode() + "\", // " + gStop.getStopName() + //
+						" {" + gStop.getStopLat() + "," + gStop.getStopLong() + "}"
+			);
 		}
 	}
 
