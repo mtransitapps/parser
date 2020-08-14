@@ -642,16 +642,16 @@ public class SplitUtils {
 				MTLog.log("%s: 1: %s", routeId, list1);
 				throw new MTLog.Fatal("%s: 2: %s", routeId, list2);
 			}
-			List<Integer> sortedStopIds = this.allSortedStopIdInts.get(directionId);
+			List<Integer> sortedStopIdInts = this.allSortedStopIdInts.get(directionId);
 			final int ts1GStopId = agencyTools == null ? ts1GStop.getStopIdInt() :
 					GIDs.getInt(agencyTools.cleanStopOriginalId(GIDs.getString(ts1GStop.getStopIdInt())));
 			final int ts2GStopId = agencyTools == null ? ts2GStop.getStopIdInt() :
 					GIDs.getInt(agencyTools.cleanStopOriginalId(GIDs.getString(ts2GStop.getStopIdInt())));
-			int ts1StopIndex = sortedStopIds.indexOf(ts1GStopId);
-			int ts2StopIndex = sortedStopIds.indexOf(ts2GStopId);
+			int ts1StopIndex = sortedStopIdInts.indexOf(ts1GStopId);
+			int ts2StopIndex = sortedStopIdInts.indexOf(ts2GStopId);
 			if (ts1StopIndex < 0 || ts2StopIndex < 0) {
-				MTLog.log("%s: Unexpected stop IDs %s AND/OR %s", routeId, ts1GStopId, ts2GStopId);
-				MTLog.log("%s: Not in sorted ID list: %s", routeId, sortedStopIds);
+				MTLog.log("%s: Unexpected stop IDs %s AND/OR %s", routeId, GIDs.getString(ts1GStopId), GIDs.getString(ts2GStopId));
+				MTLog.log("%s: Not in sorted ID list: %s", routeId, GIDs.toStringPlus(sortedStopIdInts));
 				MTLog.log("%s: 1: %s", routeId, list1);
 				MTLog.log("%s: 2: %s", routeId, list2);
 				throw new MTLog.Fatal("");
