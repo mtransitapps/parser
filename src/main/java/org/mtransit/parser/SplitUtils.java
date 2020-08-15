@@ -82,7 +82,7 @@ public class SplitUtils {
 		MTLog.log("%s: stopIdsTowards1: %s", mRoute.getId(), stopIdsTowards1);
 		MTLog.log("%s: stopIdsTowardsBoth10: %s", mRoute.getId(), stopIdsTowardsBoth10);
 		MTLog.log("%s: stopIdsTowardsBoth01: %s", mRoute.getId(), stopIdsTowardsBoth01);
-		throw new MTLog.Fatal("%s: Unexpected trip stop to split %s.\n", mRoute.getId(), gTripStop);
+		throw new MTLog.Fatal("%s: Unexpected trip stop to split %s.\n", mRoute.getId(), gTripStop.toStringPlus());
 	}
 
 	private static RouteTripSpec.BeforeAfter getBeforeAfterStopId(GSpec routeGTFS,
@@ -179,7 +179,7 @@ public class SplitUtils {
 		MTLog.log("%s: stopIdsTowardsBoth10: %s", mRoute.getId(), stopIdsTowardsBoth10);
 		MTLog.log("%s: stopIdsTowardsBoth01: %s", mRoute.getId(), stopIdsTowardsBoth01);
 		listRouteTripStops(agencyTools, mRoute.getId(), routeGTFS);
-		throw new MTLog.Fatal("%s: Unexpected trip (before:%s|after:%s) %s.\n", mRoute.getId(), beforeStopIds, afterStopIds, gTrip);
+		throw new MTLog.Fatal("%s: Unexpected trip (before:%s|after:%s) %s.\n", mRoute.getId(), GIDs.toStringPlus(beforeStopIds), GIDs.toStringPlus(afterStopIds), gTrip.toStringPlus());
 	}
 
 	public static void sortGTripStopsBySequence(@NotNull List<Pair<Integer, Integer>> gTripStops) {
