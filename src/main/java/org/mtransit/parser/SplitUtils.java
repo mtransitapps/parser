@@ -46,6 +46,9 @@ public class SplitUtils {
 														@NotNull GSpec routeGTFS,
 														@NotNull RouteTripSpec rts,
 														@Nullable GAgencyTools agencyTools) {
+		if (rts.routeId != mRoute.getId()) {
+			throw new MTLog.Fatal("Unexpected route ID: %d instead of %d!", mRoute.getId(), rts.routeId);
+		}
 		List<RouteTripSpec.BeforeAfter> stopIdsTowards0 = rts.getBeforeAfterStopIds(0);
 		List<RouteTripSpec.BeforeAfter> stopIdsTowards1 = rts.getBeforeAfterStopIds(1);
 		List<RouteTripSpec.BeforeAfter> stopIdsTowardsBoth10 = rts.getBeforeAfterBothStopIds(0);
@@ -636,6 +639,9 @@ public class SplitUtils {
 						   @NotNull MTripStop ts1, @NotNull MTripStop ts2,
 						   @NotNull GStop ts1GStop, @NotNull GStop ts2GStop,
 						   @Nullable GAgencyTools agencyTools) {
+			if (this.routeId != routeId) {
+				throw new MTLog.Fatal("Unexpected route ID: %d instead of %d!", routeId, this.routeId);
+			}
 			int directionId;
 			if (MTrip.getNewId(this.routeId, this.directionId0) == ts1.getTripId()) {
 				directionId = this.directionId0;
