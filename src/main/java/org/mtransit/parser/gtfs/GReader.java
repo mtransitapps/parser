@@ -233,9 +233,10 @@ public class GReader {
 					continue;
 				}
 				for (int i = 0; i < lineColumns.length; i++) {
+					final String lineColumn = i >= recordColumns.size() ? Constants.EMPTY : recordColumns.get(i);
 					lineColumns[i] = withQuotes ?
-							recordColumns.get(i) :
-							QUOTE_.matcher(recordColumns.get(i)).replaceAll(Constants.EMPTY);
+							lineColumn :
+							QUOTE_.matcher(lineColumn).replaceAll(Constants.EMPTY);
 				}
 				map.clear();
 				for (int ci = 0; ci < recordColumnsSize; ++ci) {
