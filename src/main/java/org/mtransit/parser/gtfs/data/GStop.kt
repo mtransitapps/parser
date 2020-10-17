@@ -32,6 +32,12 @@ data class GStop(
             return GIDs.getString(stopIdInt)
         }
 
+    @Suppress("unused")
+    fun toStringPlus(): String {
+        return toString() +
+                "+(stopId:$_stopId)"
+    }
+
     companion object {
         const val FILENAME = "stops.txt"
 
