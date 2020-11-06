@@ -173,7 +173,7 @@ public class SplitUtils {
 		MTLog.log("%s: afterStopIds: %s", mRoute.getId(), GIDs.toStringPlus(afterStopIds));
 		MTLog.log("%s: afterStopSequence: %s", mRoute.getId(), afterStopSequence);
 		MTLog.log("%s: max sequence: %s", mRoute.getId(), gStopMaxSequence);
-		MTLog.log("%s: gTripStop: %s", mRoute.getId(), gTripStop);
+		MTLog.log("%s: gTripStop: %s", mRoute.getId(), gTripStop.toStringPlus());
 		MTLog.log("%s: stopIdsTowards0: %s", mRoute.getId(), stopIdsTowards0);
 		MTLog.log("%s: stopIdsTowards1: %s", mRoute.getId(), stopIdsTowards1);
 		MTLog.log("%s: stopIdsTowardsBoth10: %s", mRoute.getId(), stopIdsTowardsBoth10);
@@ -196,7 +196,7 @@ public class SplitUtils {
 
 	public static void listRouteTripStops(@Nullable GAgencyTools agencyTools, long mRouteId, @NotNull GSpec routeGTFS) { // DEBUG
 		HashSet<ArrayList<Pair<Integer, Integer>>> gTripStopsS2 = new HashSet<>();
-		HashMap<Integer, String> firstLastStopIdsName = new HashMap<>();
+		HashMap<Integer, String> firstLastStopIdIntsName = new HashMap<>();
 		for (GRoute gRoute : routeGTFS.getRoutes(mRouteId)) {
 			for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteIdInt())) {
 				ArrayList<Pair<Integer, Integer>> gTripStops = new ArrayList<>();
@@ -216,8 +216,8 @@ public class SplitUtils {
 				}
 				sortGTripStopsBySequence(gTripStops);
 				setGTripStopSequence(gTripStops);
-				addFistLastStopIdName(routeGTFS, firstLastStopIdsName, gTripStops, 0);
-				addFistLastStopIdName(routeGTFS, firstLastStopIdsName, gTripStops, gTripStops.size() - 1);
+				addFistLastStopIdName(routeGTFS, firstLastStopIdIntsName, gTripStops, 0);
+				addFistLastStopIdName(routeGTFS, firstLastStopIdIntsName, gTripStops, gTripStops.size() - 1);
 				gTripStopsS2.add(gTripStops);
 			}
 		}
@@ -231,7 +231,7 @@ public class SplitUtils {
 			for (int i = 0; i < size; i++) {
 				Pair<Integer, Integer> gTripStop = gTripStops.get(i);
 				Integer stopIdInt = gTripStop.first;
-				boolean isFirstLastStop = firstLastStopIdsName.containsKey(stopIdInt);
+				boolean isFirstLastStop = firstLastStopIdIntsName.containsKey(stopIdInt);
 				if (i + 1 == size) {
 					addNewLineIfNecessary(sb, newline);
 				} else if (isFirstLastStop) {
@@ -239,9 +239,13 @@ public class SplitUtils {
 				}
 				sb.append("[");
 				sb.append(String.format(Locale.ENGLISH, indexFormat, gTripStop.second));
-				sb.append("] ").append(GIDs.getString(stopIdInt)).append(", ");
+				sb.append("] ");
+				String stopId = GIDs.getString(stopIdInt);
+				sb.append("\"").append(agencyTools.cleanStopOriginalId(stopId)).append("\"");
+				sb.append(", ");
 				if (isFirstLastStop) {
-					sb.append(" ").append(firstLastStopIdsName.get(stopIdInt)).append(" ");
+					sb.append(firstLastStopIdIntsName.get(stopIdInt)).append(" ");
+					sb.append("(").append(stopId).append(") ");
 				}
 				newline = false;
 				if (isFirstLastStop) {
@@ -254,24 +258,23 @@ public class SplitUtils {
 			sb.append("]");
 			MTLog.log("%s: - %s", mRouteId, sb.toString());
 		}
-		MTLog.log("%s: all first/last stop IDs: %s", mRouteId, firstLastStopIdsName.keySet());
+		MTLog.log("%s: all first/last stop IDs: %s", mRouteId, firstLastStopIdIntsName.keySet());
 	}
 
 	private static void addFistLastStopIdName(GSpec routeGTFS,
-											  HashMap<Integer, String> firstLastStopIdsName,
+											  HashMap<Integer, String> firstLastStopIdIntsName,
 											  ArrayList<Pair<Integer, Integer>> gTripStops,
 											  int firstStopIndex) {
 		if (firstStopIndex < 0 || firstStopIndex >= gTripStops.size()) {
 			return;
 		}
 		Integer stopIdInt = gTripStops.get(firstStopIndex).first;
-		String stopId = GIDs.getString(stopIdInt);
-		if (!firstLastStopIdsName.containsKey(stopIdInt)) {
+		if (!firstLastStopIdIntsName.containsKey(stopIdInt)) {
 			GStop gStop = routeGTFS.getStop(stopIdInt);
 			//noinspection ConstantConditions
-			firstLastStopIdsName.put( //
+			firstLastStopIdIntsName.put( //
 					stopIdInt,
-					"\"" + gStop.getStopCode() + "\", // " + gStop.getStopName() + //
+					"Stops.getALL_STOPS().get(\"" + gStop.getStopCode() + "\"), // " + gStop.getStopName() + //
 						" {" + gStop.getStopLat() + "," + gStop.getStopLong() + "}"
 			);
 		}
