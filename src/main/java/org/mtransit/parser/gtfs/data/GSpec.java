@@ -35,7 +35,7 @@ public class GSpec {
 	private final HashSet<Integer> allServiceIds = new HashSet<>();
 
 	@NotNull
-	private final HashMap<Integer, GStop> stopIdStops = new HashMap<>();
+	private final HashMap<Integer, GStop> stopIdIntStops = new HashMap<>();
 	private int routesCount = 0;
 	@NotNull
 	private final HashMap<Integer, GRoute> routeIdIntRoutes = new HashMap<>();
@@ -131,12 +131,17 @@ public class GSpec {
 	}
 
 	public void addStop(@NotNull GStop gStop) {
-		this.stopIdStops.put(gStop.getStopIdInt(), gStop);
+		this.stopIdIntStops.put(gStop.getStopIdInt(), gStop);
 	}
 
 	@Nullable
-	public GStop getStop(@NotNull Integer gStopId) {
-		return this.stopIdStops.get(gStopId);
+	public GStop getStop(@NotNull String gStopId) {
+		return getStop(GIDs.getInt(gStopId));
+	}
+
+	@Nullable
+	public GStop getStop(@NotNull Integer gStopIdInt) {
+		return this.stopIdIntStops.get(gStopIdInt);
 	}
 
 	public void addTrip(@NotNull GTrip gTrip) {
@@ -255,7 +260,7 @@ public class GSpec {
 				CALENDAR_DATES + this.calendarDates.size() + Constants.COLUMN_SEPARATOR + //
 				ROUTES + this.routesCount + Constants.COLUMN_SEPARATOR + //
 				TRIPS + this.tripsCount + Constants.COLUMN_SEPARATOR + //
-				STOPS + this.stopIdStops.size() + Constants.COLUMN_SEPARATOR + //
+				STOPS + this.stopIdIntStops.size() + Constants.COLUMN_SEPARATOR + //
 				STOP_TIMES + readStopTimesCount() + Constants.COLUMN_SEPARATOR + //
 				FREQUENCIES + this.frequenciesCount + Constants.COLUMN_SEPARATOR + //
 				TRIP_STOPS + readTripStopsCount() + Constants.COLUMN_SEPARATOR + //
@@ -274,7 +279,7 @@ public class GSpec {
 			MTLog.log("- CalendarDates: %d", this.calendarDates.size());
 			MTLog.log("- Routes: %d", this.routesCount);
 			MTLog.log("- Trips: %d", this.tripsCount);
-			MTLog.log("- Stops: %d", this.stopIdStops.size());
+			MTLog.log("- Stops: %d", this.stopIdIntStops.size());
 			MTLog.log("- StopTimes: %d", readStopTimesCount());
 			MTLog.log("- Frequencies: %d", this.frequenciesCount);
 			MTLog.log("- IDs: %d", GIDs.count());
