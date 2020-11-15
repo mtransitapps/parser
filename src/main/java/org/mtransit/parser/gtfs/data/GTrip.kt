@@ -4,7 +4,7 @@ import org.mtransit.parser.StringUtils
 import org.mtransit.parser.gtfs.GAgencyTools
 
 // https://developers.google.com/transit/gtfs/reference#tripstxt
-// http://gtfs.org/reference/static/#tripstxt
+// https://gtfs.org/reference/static/#tripstxt
 data class GTrip(
     val routeIdInt: Int,
     val serviceIdInt: Int,

@@ -1,7 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
 // https://developers.google.com/transit/gtfs/reference#stop_timestxt
-// http://gtfs.org/reference/static#stop_timestxt
+// https://gtfs.org/reference/static#stop_timestxt
 // -_trip_id field
 // - stop_id field
 data class GTripStop(

@@ -3,7 +3,7 @@ package org.mtransit.parser.gtfs.data
 import org.mtransit.parser.MTLog
 import java.util.Date
 
-// http://gtfs.org/reference/static#stop_timestxt
+// https://gtfs.org/reference/static#stop_timestxt
 // https://developers.google.com/transit/gtfs/reference#stop_times_fields
 data class GStopTime(
     val tripIdInt: Int,

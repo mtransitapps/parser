@@ -7,7 +7,7 @@ import java.util.Calendar
 import java.util.Locale
 
 // https://developers.google.com/transit/gtfs/reference#calendar_fields
-// http://gtfs.org/reference/static/#calendartxt
+// https://gtfs.org/reference/static/#calendartxt
 data class GCalendar(
     val serviceIdInt: Int,
     private val monday: Boolean,

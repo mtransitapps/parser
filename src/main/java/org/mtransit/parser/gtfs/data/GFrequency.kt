@@ -4,7 +4,7 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 
 // https://developers.google.com/transit/gtfs/reference#frequenciestxt
-// http://gtfs.org/reference/static/#frequenciestxt
+// https://gtfs.org/reference/static/#frequenciestxt
 data class GFrequency(
     val tripIdInt: Int,
     private val _startTime: Int,

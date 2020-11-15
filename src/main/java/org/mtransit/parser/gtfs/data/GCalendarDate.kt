@@ -3,7 +3,7 @@ package org.mtransit.parser.gtfs.data
 import org.mtransit.parser.gtfs.GAgencyTools
 
 // https://developers.google.com/transit/gtfs/reference#calendar_dates_fields
-// http://gtfs.org/reference/static/#calendar_datestxt
+// https://gtfs.org/reference/static/#calendar_datestxt
 data class GCalendarDate(
     val serviceIdInt: Int,
     val date: Int, // YYYYMMDD

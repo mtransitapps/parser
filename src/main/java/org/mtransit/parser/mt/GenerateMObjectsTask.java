@@ -1043,11 +1043,11 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return results[0];
 	}
 
-	private HashMap<Integer, GStop> gStopsCache = new HashMap<>();
+	private final HashMap<Integer, GStop> gStopsCache = new HashMap<>();
 
 	// https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/location/java/android/location/Location.java
 	private static void computeDistanceAndBearing(double lat1, double lon1, double lat2, double lon2, float[] results) {
-		// Based on http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
+		// Based on https://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
 		// using the "Inverse Formula" (section 4)
 
 		int MAXITERS = 20;

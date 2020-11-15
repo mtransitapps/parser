@@ -3,7 +3,7 @@ package org.mtransit.parser.gtfs.data
 import org.mtransit.parser.Constants
 
 // https://developers.google.com/transit/gtfs/reference#routestxt
-// http://gtfs.org/reference/static/#routestxt
+// https://gtfs.org/reference/static/#routestxt
 data class GRoute(
     val agencyIdInt: Int?, // Optional
     val routeIdInt: Int,
