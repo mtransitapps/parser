@@ -425,9 +425,11 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Integer tripServiceIdInt;
 		HashMap<Long, String> splitTripStopTimesHeadsign;
 		final List<GTrip> gRouteTrips = routeGTFS.getTrips(gRoute.getRouteIdInt());
-		final Map<Integer, String> gDirectionHeadSigns = !this.agencyTools.directionFinderEnabled() ? null :
-				MDirectionHeadSignFinder.findDirectionHeadSigns(mRoute.getId(), gRoute, gRouteTrips, routeGTFS);
-		MTLog.log("%s: Found GTFS direction head sign: %s.", this.routeId, gDirectionHeadSigns);
+		Map<Integer, String> gDirectionHeadSigns = null;
+		if (this.agencyTools.directionFinderEnabled()) {
+			gDirectionHeadSigns = MDirectionHeadSignFinder.findDirectionHeadSigns(mRoute.getId(), gRoute, gRouteTrips, routeGTFS);
+			MTLog.log("%s: Found GTFS direction head sign: %s.", this.routeId, gDirectionHeadSigns);
+		}
 		int g = 0;
 		for (GTrip gTrip : gRouteTrips) {
 			if (gTrip.getRouteIdInt() != gRoute.getRouteIdInt()) {
@@ -446,6 +448,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					mergeSuccessful = false;
 					if (mTrip.equalsExceptHeadsignValue(currentTrip)) {
 						if (splitTrips.size() == 1 // not split-ed // TODO ?
+								&& gDirectionHeadSigns != null
 								&& mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
 							final String headsignString = gDirectionHeadSigns.get(gTrip.getDirectionIdOrDefault());
 							if (headsignString != null && !headsignString.isEmpty()) {
