@@ -258,7 +258,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		try {
 			mTrip.setHeadsignString(
 					cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
-					gTrip.getDirectionId()
+					gTrip.getDirectionIdOrDefault()
 			);
 		} catch (NumberFormatException nfe) {
 			throw new MTLog.Fatal(nfe, "Default agency implementation not possible!");
@@ -269,6 +269,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
 		return tripHeadsign;
+	}
+
+	@Override
+	public boolean directionFinderEnabled() {
+		return false; // OPT-IN feature // WIP
 	}
 
 	@Override

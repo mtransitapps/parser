@@ -68,6 +68,8 @@ public interface GAgencyTools {
 	@NotNull
 	String cleanTripHeadsign(@NotNull String tripHeadsign);
 
+	boolean directionFinderEnabled();
+
 	boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge);
 
 	boolean excludeTripNullable(@Nullable GTrip gTrip);

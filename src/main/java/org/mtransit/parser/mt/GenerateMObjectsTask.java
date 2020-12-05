@@ -414,6 +414,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 							HashMap<Long, ArrayList<MTripStop>> tripIdToMTripStops,
 							GRoute gRoute,
 							GSpec routeGTFS) {
+		MTLog.log("%s: parsing trips...", this.routeId);
 		boolean mergeSuccessful;
 		HashMap<Long, HashSet<String>> mergedTripIdToMTripStops = new HashMap<>();
 		HashMap<Long, Pair<Integer, String>> originalTripHeadsign;
@@ -423,10 +424,14 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		ArrayList<MTripStop> mTripStopsList;
 		Integer tripServiceIdInt;
 		HashMap<Long, String> splitTripStopTimesHeadsign;
+		final List<GTrip> gRouteTrips = routeGTFS.getTrips(gRoute.getRouteIdInt());
+		final Map<Integer, String> gDirectionHeadSigns = !this.agencyTools.directionFinderEnabled() ? null :
+				MDirectionHeadSignFinder.findDirectionHeadSigns(mRoute.getId(), gRoute, gRouteTrips, routeGTFS);
+		MTLog.log("%s: Found GTFS direction head sign: %s.", this.routeId, gDirectionHeadSigns);
 		int g = 0;
-		for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteIdInt())) {
+		for (GTrip gTrip : gRouteTrips) {
 			if (gTrip.getRouteIdInt() != gRoute.getRouteIdInt()) {
-				continue;
+				throw new MTLog.Fatal("%s: Should not happen!", this.routeId); // continue; // SKIP
 			}
 			splitTrips = this.agencyTools.splitTrip(mRoute, gTrip, routeGTFS);
 			originalTripHeadsign = new HashMap<>();
@@ -436,13 +441,24 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						new Pair<>(mTrip.getHeadsignType(), mTrip.getHeadsignValue()));
 			}
 			for (MTrip mTrip : splitTrips) {
-				if (mTrips.containsKey(mTrip.getId()) && !mTrips.get(mTrip.getId()).equals(mTrip)) {
+				final MTrip currentTrip = mTrips.get(mTrip.getId());
+				if (currentTrip != null && !currentTrip.equals(mTrip)) {
 					mergeSuccessful = false;
-					if (mTrip.equalsExceptHeadsignValue(mTrips.get(mTrip.getId()))) {
-						mergeSuccessful = this.agencyTools.mergeHeadsign(mTrip, mTrips.get(mTrip.getId()));
+					if (mTrip.equalsExceptHeadsignValue(currentTrip)) {
+						if (splitTrips.size() == 1 // not split-ed // TODO ?
+								&& mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
+							final String headsignString = gDirectionHeadSigns.get(gTrip.getDirectionIdOrDefault());
+							if (headsignString != null && !headsignString.isEmpty()) {
+								mTrip.setHeadsignString(this.agencyTools.cleanTripHeadsign(headsignString), mTrip.getHeadsignId());
+								mergeSuccessful = true;
+							}
+						}
+						if (!mergeSuccessful) {
+							mergeSuccessful = this.agencyTools.mergeHeadsign(mTrip, currentTrip);
+						}
 					}
 					if (!mergeSuccessful) {
-						throw new MTLog.Fatal("%s: Different trip %s already in list (%s != %s)", this.routeId, mTrip.getId(), mTrip, mTrips.get(mTrip.getId()));
+						throw new MTLog.Fatal("%s: Different trip %s already in list (%s != %s)", this.routeId, mTrip.getId(), mTrip, currentTrip);
 					}
 				}
 			}
@@ -469,7 +485,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				Collections.sort(mTripStopsList);
 				setMTripStopSequence(mTripStopsList);
 				String mTripStopListString = mTripStopsList.toString();
-				if (mergedTripIdToMTripStops.containsKey(mTrip.getId()) && mergedTripIdToMTripStops.get(mTrip.getId()).contains(mTripStopListString)) {
+				if (mergedTripIdToMTripStops.containsKey(mTrip.getId())
+						&& mergedTripIdToMTripStops.get(mTrip.getId()).contains(mTripStopListString)) {
 					continue;
 				}
 				if (tripIdToMTripStops.containsKey(mTrip.getId())) {
