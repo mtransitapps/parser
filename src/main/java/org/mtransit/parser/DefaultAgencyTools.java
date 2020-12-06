@@ -85,7 +85,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		} else {
 			THREAD_POOL_SIZE = 4;
 		}
-		MTLog.log("Thread pool size: $d.", THREAD_POOL_SIZE);
+		MTLog.log("Thread pool size: %d.", THREAD_POOL_SIZE);
 	}
 
 	private static final Integer OVERRIDE_DATE;
