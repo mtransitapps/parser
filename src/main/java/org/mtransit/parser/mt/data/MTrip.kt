@@ -7,7 +7,7 @@ import org.mtransit.parser.MTLog
 
 data class MTrip(
     val routeId: Long,
-    var headsignId: Int = 0,
+    var headsignId: Int = 0, // >= 0
     var headsignType: Int = HEADSIGN_TYPE_STRING, // 0=string, 1=direction, 2=inbound, 3=stopId, 4=descent-only
     var headsignValue: String = Constants.EMPTY
 ) : Comparable<MTrip> {
@@ -77,6 +77,9 @@ data class MTrip(
     ): MTrip {
         headsignType = HEADSIGN_TYPE_STRING
         headsignValue = headsignString
+        if (headsignId < 0) {
+            throw MTLog.Fatal("Invalid trip head-sign for '$headsignId'!")
+        }
         this.headsignId = headsignId
         _id = -1 // reset
         return this
@@ -103,6 +106,9 @@ data class MTrip(
     fun setHeadsignStop(stop: MStop): MTrip {
         headsignType = HEADSIGN_TYPE_STOP_ID
         headsignValue = stop.id.toString()
+        if (stop.id < 0) {
+            throw MTLog.Fatal("Invalid trip head-sign for '$stop'!")
+        }
         headsignId = stop.id
         _id = -1 // reset
         return this

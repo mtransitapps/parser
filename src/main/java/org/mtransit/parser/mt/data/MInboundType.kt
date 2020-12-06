@@ -14,9 +14,9 @@ enum class MInboundType(val id: String) {
 
     @Suppress("unused")
     fun intValue(): Int {
-        return when (id) {
-            INBOUND.id -> 1
-            OUTBOUND.id -> 0
+        return when (this) {
+            INBOUND -> 1
+            OUTBOUND -> 0
             else -> throw MTLog.Fatal("Unknown inbound type '%s'!", id)
         }
     }
@@ -24,9 +24,9 @@ enum class MInboundType(val id: String) {
     companion object {
         @JvmStatic
         fun parse(id: String?): MInboundType {
-            return when {
-                INBOUND.id == id -> INBOUND
-                OUTBOUND.id == id -> OUTBOUND
+            return when(id) {
+                INBOUND.id -> INBOUND
+                OUTBOUND.id -> OUTBOUND
                 else -> NONE   // default
             }
         }
