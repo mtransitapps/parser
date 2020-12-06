@@ -4,7 +4,7 @@ import org.mtransit.parser.MTLog
 
 // https://developers.google.com/transit/gtfs/reference#tripstxt
 // https://gtfs.org/reference/static/#tripstxt
-enum class GDirectionId(private val id: Int) {
+enum class GDirectionId(val id: Int) {
 
     OUTBOUND(0),
     INBOUND(1),

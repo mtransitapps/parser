@@ -6,6 +6,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnitRunner
+import org.mtransit.parser.gtfs.data.GDirectionId
 import org.mtransit.parser.gtfs.data.GDropOffType
 import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GPickupType
@@ -39,8 +40,8 @@ class MDirectionHeadSignFinderTest {
     @Test
     fun testFindDirectionHeadSign_directionIdNotPresent() {
         // Arrange
-        val directionId = -1
-        val otherDirectionId = 99
+        val directionId = GDirectionId.NONE.id
+        val otherDirectionId = GDirectionId.INBOUND.id
         val gRouteTrips = listOf(
             GTrip(gRouteId, "service_id", "trip_id", otherDirectionId, "trip head-sign", "trip short name")
         )
@@ -53,7 +54,7 @@ class MDirectionHeadSignFinderTest {
     @Test
     fun testFindDirectionHeadSign_SameHeadSign() {
         // Arrange
-        val directionId = -1
+        val directionId = GDirectionId.NONE.id
         val sameHeadSign = "same trip head-sign"
         val gRouteTrips = listOf(
             GTrip(gRouteId, "service_id1", "trip_id", directionId, sameHeadSign, "trip short name"),
@@ -69,7 +70,7 @@ class MDirectionHeadSignFinderTest {
     @Test
     fun testFindDirectionHeadSign_Simple() {
         // Arrange
-        val directionId = -1
+        val directionId = GDirectionId.NONE.id
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(

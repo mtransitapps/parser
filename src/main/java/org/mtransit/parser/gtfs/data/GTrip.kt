@@ -29,10 +29,10 @@ data class GTrip(
         tripShortName
     )
 
-    val directionId : Int? = directionIdE.originalId()
+    val directionId : Int? = directionIdE.originalId() // optional
 
     @Suppress("unused")
-    val directionIdOrDefault: Int = directionIdE.ordinal
+    val directionIdOrDefault: Int = directionIdE.id
 
     @Suppress("unused")
     val tripHeadsignOrDefault: String = tripHeadsign ?: StringUtils.EMPTY
