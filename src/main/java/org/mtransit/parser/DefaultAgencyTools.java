@@ -75,13 +75,17 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final Integer THREAD_POOL_SIZE;
 
 	static {
-		// //noinspection ConstantConditions // DEBUG
-		if (IS_CI) {
+		final String envMTThreadPoolSize = System.getenv("MT_THREAD_POOL_SIZE");
+		if (envMTThreadPoolSize != null
+				&& !envMTThreadPoolSize.isEmpty()
+				&& Utils.isDigitsOnly(envMTThreadPoolSize)) {
+			THREAD_POOL_SIZE = Integer.parseInt(envMTThreadPoolSize);
+		} else if (IS_CI) {
 			THREAD_POOL_SIZE = 1;
 		} else {
 			THREAD_POOL_SIZE = 4;
-			// THREAD_POOL_SIZE = 1; // DEBUG
 		}
+		MTLog.log("Thread pool size: $d.", THREAD_POOL_SIZE);
 	}
 
 	private static final Integer OVERRIDE_DATE;
