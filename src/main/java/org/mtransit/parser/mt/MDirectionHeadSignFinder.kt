@@ -7,6 +7,7 @@ import org.mtransit.parser.gtfs.data.GPickupType
 import org.mtransit.parser.gtfs.data.GSpec
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTrip
+import org.mtransit.parser.mt.data.MTrip
 
 object MDirectionHeadSignFinder {
 
@@ -220,6 +221,13 @@ object MDirectionHeadSignFinder {
                     }
                     if (shortestTripHeadSignCounts > longestTripHeadSignCounts) {
                         current = Pair(shortestStopTimesHeadSign, shortestStopTimesList)
+                        continue
+                    }
+                    if (shortestTripHeadSignCounts == longestTripHeadSignCounts) {
+                        current = Pair(
+                            MTrip.mergeHeadsignValue(shortestStopTimesHeadSign, longestStopTimesHeadSign),
+                            shortestStopTimesList
+                        )
                         continue
                     }
                 }
