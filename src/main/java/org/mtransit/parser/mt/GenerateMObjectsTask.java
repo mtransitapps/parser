@@ -312,7 +312,17 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		HashSet<String> mTripHeadsignStrings;
 		boolean headsignTypeString;
 		boolean tripKeptNonDescriptiveHeadsign;
-		for (GRoute gRoute : routeGTFS.getRoutes(this.routeId)) {
+		final ArrayList<GRoute> gRoutes = routeGTFS.getRoutes(this.routeId);
+		Map<Integer, String> gDirectionHeadSigns = null; // TODO compute in surrounding method to have all routeSSS trips
+		if (this.agencyTools.directionFinderEnabled()) {
+			List<GTrip> gRouteTrips = new ArrayList<>();
+			for (GRoute gRoute : gRoutes) {
+				gRouteTrips.addAll(routeGTFS.getTrips(gRoute.getRouteIdInt()));
+			}
+			gDirectionHeadSigns = MDirectionHeadSignFinder.findDirectionHeadSigns(this.routeId, gRouteTrips, routeGTFS, this.agencyTools);
+			MTLog.log("%s: Found GTFS direction head sign: %s.", this.routeId, gDirectionHeadSigns);
+		}
+		for (GRoute gRoute : gRoutes) {
 			if (this.agencyTools.getRouteId(gRoute) != this.routeId) {
 				continue;
 			}
@@ -345,6 +355,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					mTripStopTimesHeadsign,
 					tripIdToMTripStops,
 					gRoute,
+					gDirectionHeadSigns,
 					routeGTFS
 			);
 			mTripHeadsignStrings = new HashSet<>();
@@ -413,8 +424,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 							HashMap<Long, String> mTripStopTimesHeadsign,
 							HashMap<Long, ArrayList<MTripStop>> tripIdToMTripStops,
 							GRoute gRoute,
+							Map<Integer, String> gDirectionHeadSigns,
 							GSpec routeGTFS) {
-		MTLog.log("%s: parsing trips...", this.routeId);
 		boolean mergeSuccessful;
 		HashMap<Long, HashSet<String>> mergedTripIdToMTripStops = new HashMap<>();
 		HashMap<Long, Pair<Integer, String>> originalTripHeadsign;
@@ -425,11 +436,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Integer tripServiceIdInt;
 		HashMap<Long, String> splitTripStopTimesHeadsign;
 		final List<GTrip> gRouteTrips = routeGTFS.getTrips(gRoute.getRouteIdInt());
-		Map<Integer, String> gDirectionHeadSigns = null;
-		if (this.agencyTools.directionFinderEnabled()) {
-			gDirectionHeadSigns = MDirectionHeadSignFinder.findDirectionHeadSigns(mRoute.getId(), gRoute, gRouteTrips, routeGTFS);
-			MTLog.log("%s: Found GTFS direction head sign: %s.", this.routeId, gDirectionHeadSigns);
-		}
+		//noinspection deprecation
+		final String routeId = gRoute.getRouteId();
+		MTLog.log("%s: parsing %d trips for route '%s'... ", this.routeId, gRouteTrips.size(), routeId);
 		int g = 0;
 		for (GTrip gTrip : gRouteTrips) {
 			if (gTrip.getRouteIdInt() != gRoute.getRouteIdInt()) {
@@ -452,7 +461,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								&& mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
 							final String headsignString = gDirectionHeadSigns.get(gTrip.getDirectionIdOrDefault());
 							if (headsignString != null && !headsignString.isEmpty()) {
-								mTrip.setHeadsignString(this.agencyTools.cleanTripHeadsign(headsignString), mTrip.getHeadsignId());
+								mTrip.setHeadsignString(headsignString, mTrip.getHeadsignId());
 								mergeSuccessful = true;
 							}
 						}
@@ -540,7 +549,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				MTLog.logPOINT(); // LOG
 			} // LOG
 		}
-		MTLog.log("%s: parsing trips... DONE", this.routeId);
+		MTLog.log("%s: parsing %d trips for route '%s'... DONE", this.routeId, gRouteTrips.size(), routeId);
 	}
 
 	private HashMap<Long, String> parseTripStops(HashMap<String, MSchedule> mSchedules,

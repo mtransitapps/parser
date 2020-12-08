@@ -275,6 +275,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return tripHeadsign;
 	}
 
+	@NotNull
+	@Override
+	public String cleanDirectionHeadsign(@NotNull String directionHeadSign) {
+		return cleanTripHeadsign(directionHeadSign);
+	}
+
 	@Override
 	public boolean directionFinderEnabled() {
 		return false; // OPT-IN feature // WIP

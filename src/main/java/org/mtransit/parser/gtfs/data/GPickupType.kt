@@ -3,7 +3,7 @@ package org.mtransit.parser.gtfs.data
 import org.mtransit.parser.MTLog
 
 // https://developers.google.com/transit/gtfs/reference#stop_times_pickup_type_field
-enum class GPickupType(private val id: Int) {
+enum class GPickupType(val id: Int) {
 
     REGULAR(0),
     NO_PICKUP(1),
