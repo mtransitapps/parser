@@ -172,6 +172,7 @@ object MDirectionHeadSignFinder {
                 ) {
                     if (shortestStopTimesHeadSign.isNullOrBlank()) {
                         current = Pair(longestStopTimesHeadSign, longestStopTimesList)
+                        continue
                     }
                     if (longestStopTimesHeadSign.isNullOrBlank()) {
                         current = Pair(shortestStopTimesHeadSign, shortestStopTimesList)
