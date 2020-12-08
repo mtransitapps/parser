@@ -390,6 +390,38 @@ class MDirectionHeadSignFinderTest {
         Assert.assertEquals("trip head-sign", result)
     }
 
+    @Test
+    fun testFindDirectionHeadSign_SimilarExceptLastNoClearWinner() {
+        // Arrange
+        val directionId = GDirectionId.NONE.id
+        val tripId1 = "trip_id_1"
+        val tripId2 = "trip_id_2"
+        val gRouteTrips = listOf(
+            GTrip(gRouteId, "service_id", tripId1, directionId, "foo foo", "trip short name"),
+            GTrip(gRouteId, "service_id", tripId2, directionId, "trip head-sign", "trip short name")
+        )
+        `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId1), null, null))
+            .thenReturn(
+                makeStopTimeList(tripId1, 1, 5, lastPickupTypeInt = 0) // common
+                    .toMutableList()
+                    .apply {
+                        add(makeStopTime(tripId1, 7, pickupType = NO_PICKUP.id)) // distinct
+                    }
+            )
+        `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId2), null, null))
+            .thenReturn(
+                makeStopTimeList(tripId2, 1, 5, lastPickupTypeInt = 0) // common
+                    .toMutableList()
+                    .apply {
+                        add(makeStopTime(tripId2, 9, pickupType = NO_PICKUP.id)) // distinct
+                    }
+            )
+        // Act
+        val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
+        // Assert
+        Assert.assertEquals("foo foo / trip head-sign", result)
+    }
+
     private fun makeStopTimeList(
         tripId: String, fromStopIdx: Int = 1, toStopIdx: Int,
         lastPickupTypeInt: Int = NO_PICKUP.id,
