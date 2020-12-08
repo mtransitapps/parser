@@ -313,7 +313,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		boolean headsignTypeString;
 		boolean tripKeptNonDescriptiveHeadsign;
 		final ArrayList<GRoute> gRoutes = routeGTFS.getRoutes(this.routeId);
-		Map<Integer, String> gDirectionHeadSigns = null; // TODO compute in surrounding method to have all routeSSS trips
+		Map<Integer, String> gDirectionHeadSigns = null;
 		if (this.agencyTools.directionFinderEnabled()) {
 			List<GTrip> gRouteTrips = new ArrayList<>();
 			for (GRoute gRoute : gRoutes) {
@@ -450,21 +450,20 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				this.agencyTools.setTripHeadsign(mRoute, mTrip, gTrip, routeGTFS);
 				originalTripHeadsign.put(mTrip.getId(),
 						new Pair<>(mTrip.getHeadsignType(), mTrip.getHeadsignValue()));
+				if (splitTrips.size() == 1 // not split-ed
+						&& gDirectionHeadSigns != null
+						&& mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
+					final String directionHeadSign = gDirectionHeadSigns.get(gTrip.getDirectionIdOrDefault());
+					if (directionHeadSign != null && !directionHeadSign.isEmpty()) {
+						mTrip.setHeadsignString(directionHeadSign, mTrip.getHeadsignId());
+					}
+				}
 			}
 			for (MTrip mTrip : splitTrips) {
 				final MTrip currentTrip = mTrips.get(mTrip.getId());
 				if (currentTrip != null && !currentTrip.equals(mTrip)) {
 					mergeSuccessful = false;
 					if (mTrip.equalsExceptHeadsignValue(currentTrip)) {
-						if (splitTrips.size() == 1 // not split-ed // TODO ?
-								&& gDirectionHeadSigns != null
-								&& mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
-							final String headsignString = gDirectionHeadSigns.get(gTrip.getDirectionIdOrDefault());
-							if (headsignString != null && !headsignString.isEmpty()) {
-								mTrip.setHeadsignString(headsignString, mTrip.getHeadsignId());
-								mergeSuccessful = true;
-							}
-						}
 						if (!mergeSuccessful) {
 							mergeSuccessful = this.agencyTools.mergeHeadsign(mTrip, currentTrip);
 						}
