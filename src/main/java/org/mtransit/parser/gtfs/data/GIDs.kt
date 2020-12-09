@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
 
@@ -31,6 +32,12 @@ object GIDs {
     @JvmStatic
     fun count(): Int {
         return increment
+    }
+
+    @Suppress("unused")
+    @JvmStatic
+    fun toStringPlus(integer: Int?): String {
+        return integer?.let { getString(it) } ?: Constants.EMPTY
     }
 
     @Suppress("unused")

@@ -312,6 +312,54 @@ class MDirectionHeadSignFinderTest {
     }
 
     @Test
+    fun testFindDirectionHeadSign_TripsWithMoreStopsMultipleHeadSignInclShorterTrips() { // should be same head-sign for same last stop, probably wrong data, use most popular / last stops
+        // Arrange
+        val directionId = GDirectionId.NONE.id
+        val tripId1 = "trip_id_1"
+        val tripId2 = "trip_id_2"
+        val tripId3 = "trip_id_3"
+        val tripId4 = "trip_id_4"
+        val tripId5 = "trip_id_5"
+        val tripId6 = "trip_id_6"
+        val gRouteTrips = listOf(
+            GTrip(gRouteId, "service_id", tripId1, directionId, "trip head-sign", "trip short name"), // GOOD: longest
+            GTrip(gRouteId, "service_id", tripId2, directionId, "trip head-sign", "trip short name"), // GOOD: longest
+            GTrip(gRouteId, "service_id", tripId3, directionId, "foo foo", "trip short name"), // WRONG
+            GTrip(gRouteId, "service_id", tripId4, directionId, "foo foo", "trip short name"), // WRONG
+            GTrip(gRouteId, "service_id", tripId5, directionId, "foo foo", "trip short name"), // GOOD: shortest
+            GTrip(gRouteId, "service_id", tripId6, directionId, "foo foo", "trip short name") // GOOD: shortest
+        )
+        `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId1), null, null))
+            .thenReturn(
+                makeStopTimeList(tripId5, 1, 7) // GOOD: longest
+            )
+        `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId2), null, null))
+            .thenReturn(
+                makeStopTimeList(tripId5, 1, 7) // GOOD: longest
+            )
+        `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId3), null, null))
+            .thenReturn(
+                makeStopTimeList(tripId3, 1, 7)  // WRONG data: should be 5 stops OR other "trip head-sign",
+            )
+        `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId4), null, null))
+            .thenReturn(
+                makeStopTimeList(tripId4, 1, 7)  // WRONG data: should be 5 stops OR other "trip head-sign",
+            )
+        `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId5), null, null))
+            .thenReturn(
+                makeStopTimeList(tripId2, 1, 5) // GOOD: shortest
+            )
+        `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId6), null, null))
+            .thenReturn(
+                makeStopTimeList(tripId2, 1, 5) // GOOD: shortest
+            )
+        // Act
+        val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
+        // Assert
+        Assert.assertEquals("trip head-sign", result)
+    }
+
+    @Test
     fun testFindDirectionHeadSign_DistinctLastStopUseLeastCommonHeadSignWithWayMoreAfterStops() {
         // Arrange
         val directionId = GDirectionId.NONE.id

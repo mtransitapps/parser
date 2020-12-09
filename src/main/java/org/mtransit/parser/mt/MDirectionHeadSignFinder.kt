@@ -3,6 +3,7 @@ package org.mtransit.parser.mt
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GDropOffType
+import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GPickupType
 import org.mtransit.parser.gtfs.data.GSpec
 import org.mtransit.parser.gtfs.data.GStopTime
@@ -36,19 +37,21 @@ object MDirectionHeadSignFinder {
         directionId: Int,
         agencyTools: GAgencyTools
     ): String? {
-        val directionTrips = gRouteTrips
+        val gTripsAndStopTimes = gRouteTrips
             .filter { gTrip ->
                 gTrip.directionIdOrDefault == directionId
-            }.sortedByDescending { gTrip -> // longest first to avoid no intersect between trips
-                routeGTFS.getStopTimes(routeId, gTrip.tripIdInt, null, null).size
+            }.map { gTrip ->
+                Pair(gTrip, routeGTFS.getStopTimes(routeId, gTrip.tripIdInt, null, null))
+            }.sortedByDescending { gTripsAndStopTime -> // longest first to avoid no intersect between trips
+                gTripsAndStopTime.second.size
             }
-        if (directionTrips.isEmpty()) {
+        if (gTripsAndStopTimes.isEmpty()) {
             return null
         }
-        val tripHeadsignList = directionTrips
-            .mapNotNull { gTrip ->
-                gTrip.tripHeadsign
-                    ?.let { agencyTools.cleanDirectionHeadsign(gTrip.tripHeadsign) }
+        val tripHeadsignList = gTripsAndStopTimes
+            .mapNotNull { gTripAndStopTime ->
+                gTripAndStopTime.first.tripHeadsign
+                    ?.let { agencyTools.cleanDirectionHeadsign(it) }
             }
         val distinctTripHeadSigns = tripHeadsignList
             .filterNot { headSign -> headSign.isBlank() }
@@ -56,14 +59,24 @@ object MDirectionHeadSignFinder {
         if (distinctTripHeadSigns.size == 1) {
             return distinctTripHeadSigns.first()
         }
-        val tripHeadsignCounts = tripHeadsignList.groupingBy { it }.eachCount()
+        val tripHeadsignByStopCounts = gTripsAndStopTimes
+            .map { gTripAndStopTime ->
+                Pair(
+                    gTripAndStopTime.second.last().stopIdInt,
+                    gTripAndStopTime.first.tripHeadsign
+                        ?.let { agencyTools.cleanDirectionHeadsign(it) }
+                )
+            }
+            .groupingBy { it }
+            .eachCount()
         var current: Pair<String?, List<GStopTime>>? = null
-        for (gTrip in directionTrips) {
+        for (gTripAndStopTime in gTripsAndStopTimes) {
+            val gTrip = gTripAndStopTime.first
             val tripHeadSign = gTrip.tripHeadsign
                 ?.let {
                     agencyTools.cleanDirectionHeadsign(gTrip.tripHeadsign)
                 }
-            val tripStopTimes = routeGTFS.getStopTimes(routeId, gTrip.tripIdInt, null, null)
+            val tripStopTimes = gTripAndStopTime.second
             if (current == null) {
                 current = Pair(tripHeadSign, tripStopTimes)
                 continue
@@ -91,8 +104,8 @@ object MDirectionHeadSignFinder {
                 current.second
             }
             val shortestStopIdInts = shortestStopTimesList.map { gStopTime -> gStopTime.stopIdInt }
-            val intersect = longestStopIdInts.intersect(shortestStopIdInts)
-            val firstCommonStopIdInt = if (intersect.isEmpty()) null else intersect.first()
+            val stopIdsIntersect = longestStopIdInts.intersect(shortestStopIdInts)
+            val firstCommonStopIdInt = if (stopIdsIntersect.isEmpty()) null else stopIdsIntersect.first()
             val shortestStopIdIntsBeforeCommon =
                 firstCommonStopIdInt
                     ?.let { shortestStopIdInts.subList(0, shortestStopIdInts.indexOf(firstCommonStopIdInt)) }
@@ -100,7 +113,7 @@ object MDirectionHeadSignFinder {
             val longestStopIdIntsBeforeCommon = firstCommonStopIdInt
                 ?.let { longestStopIdInts.subList(0, longestStopIdInts.indexOf(firstCommonStopIdInt)) }
                 ?: emptyList()
-            val lastCommonStopIdInt = if (intersect.isEmpty()) null else intersect.last()
+            val lastCommonStopIdInt = if (stopIdsIntersect.isEmpty()) null else stopIdsIntersect.last()
             val shortestStopIdIntsAfterCommon = lastCommonStopIdInt
                 ?.let { shortestStopIdInts.subList(shortestStopIdInts.lastIndexOf(lastCommonStopIdInt) + 1, shortestStopIdInts.size) }
                 ?: emptyList()
@@ -213,14 +226,42 @@ object MDirectionHeadSignFinder {
                         current = Pair(shortestStopTimesHeadSign, shortestStopTimesList)
                         continue
                     }
-                    val shortestTripHeadSignCounts = tripHeadsignCounts[shortestStopTimesHeadSign] ?: 0
-                    val longestTripHeadSignCounts = tripHeadsignCounts[longestStopTimesHeadSign] ?: 0
+                    val shortestLastStopIdInt = shortestStopTimesList.last().stopIdInt
+                    val shortestTripHeadSignCounts = tripHeadsignByStopCounts[Pair(shortestLastStopIdInt, shortestStopTimesHeadSign)] ?: 0
+                    val longestLastStopIdInt = longestStopTimesList.last().stopIdInt
+                    val longestTripHeadSignCounts = tripHeadsignByStopCounts[Pair(longestLastStopIdInt, longestStopTimesHeadSign)] ?: 0
                     if (longestTripHeadSignCounts > shortestTripHeadSignCounts) {
                         current = Pair(longestStopTimesHeadSign, longestStopTimesList)
                         continue
                     }
                     if (shortestTripHeadSignCounts > longestTripHeadSignCounts) {
                         current = Pair(shortestStopTimesHeadSign, shortestStopTimesList)
+                        continue
+                    }
+                    val shortestOtherStopsUsingSameHeadSignCounts = tripHeadsignByStopCounts.filter { lastStopIdIntTripHeadSignAndCount ->
+                        val lastStopIdIntTripHeadSign = lastStopIdIntTripHeadSignAndCount.key
+                        lastStopIdIntTripHeadSign.first != shortestLastStopIdInt // other stops
+                                && lastStopIdIntTripHeadSign.second == shortestStopTimesHeadSign // same head-sign
+                    }.map { lastStopIdIntTripHeadSignAndCount ->
+                        lastStopIdIntTripHeadSignAndCount.value
+                    }.sum()
+                    val longestOtherStopsUsingSameHeadSignCounts = tripHeadsignByStopCounts.filter { lastStopIdIntTripHeadSignAndCount ->
+                        val lastStopIdIntTripHeadSign = lastStopIdIntTripHeadSignAndCount.key
+                        lastStopIdIntTripHeadSign.first != longestLastStopIdInt // other stops
+                                && lastStopIdIntTripHeadSign.second == longestStopTimesHeadSign // same head-sign
+                    }.map { lastStopIdIntTripHeadSignAndCount ->
+                        lastStopIdIntTripHeadSignAndCount.value
+                    }.sum()
+                    if (shortestOtherStopsUsingSameHeadSignCounts == 0 // shortest not used for other trips
+                        && longestOtherStopsUsingSameHeadSignCounts > 0 // longest used for other trips
+                    ) {
+                        current = Pair(shortestStopTimesHeadSign, shortestStopTimesList)
+                        continue
+                    }
+                    if (longestOtherStopsUsingSameHeadSignCounts == 0 // longest not used for other trips
+                        && shortestOtherStopsUsingSameHeadSignCounts > 0 // shortest  used for other trips
+                    ) {
+                        current = Pair(longestStopTimesHeadSign, longestStopTimesList)
                         continue
                     }
                     if (shortestTripHeadSignCounts == longestTripHeadSignCounts) {
