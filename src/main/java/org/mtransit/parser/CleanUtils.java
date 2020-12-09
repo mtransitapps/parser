@@ -4,6 +4,7 @@ import org.apache.commons.text.WordUtils;
 import org.apache.commons.text.translate.CharSequenceTranslator;
 import org.apache.commons.text.translate.LookupTranslator;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -312,7 +313,8 @@ public final class CleanUtils {
 		return string;
 	}
 
-	public static String toLowerCaseUpperCaseWords(Locale locale, String string, String... ignoreWords) {
+	@NotNull
+	public static String toLowerCaseUpperCaseWords(@NotNull Locale locale, @NotNull String string, @NotNull String... ignoreWords) {
 		if (string.isEmpty()) {
 			return string;
 		}
@@ -335,7 +337,7 @@ public final class CleanUtils {
 		return sb.toString();
 	}
 
-	private static boolean containsIgnoreCase(String string, String... strings) {
+	private static boolean containsIgnoreCase(@Nullable String string, @NotNull String... strings) {
 		if (strings.length > 0) {
 			for (String s : strings) {
 				if (s.equalsIgnoreCase(string)) {
@@ -366,7 +368,8 @@ public final class CleanUtils {
 	private static final Pattern NINTH = cleanWords("ninth");
 	private static final String NINTH_REPLACEMENT = cleanWordsReplacement("9th");
 
-	public static String cleanNumbers(String string) {
+	@NotNull
+	public static String cleanNumbers(@NotNull String string) {
 		string = FIRST.matcher(string).replaceAll(FIRST_REPLACEMENT);
 		string = SECOND.matcher(string).replaceAll(SECOND_REPLACEMENT);
 		string = THIRD.matcher(string).replaceAll(THIRD_REPLACEMENT);
