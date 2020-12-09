@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -31,7 +32,7 @@ public final class CleanUtils {
 
 	static {
 		Map<CharSequence, CharSequence> map = new HashMap<>();
-		map.put("\'", "\'\'");
+		map.put("'", "''");
 		map.put("_", Constants.EMPTY);
 		ESCAPE = new LookupTranslator(map);
 	}
@@ -43,7 +44,7 @@ public final class CleanUtils {
 
 	@NotNull
 	public static String quotes(@NotNull String string) {
-		return "\'" + string + "\'";
+		return "'" + string + "'";
 	}
 
 	private static final Pattern CLEAN_SPACES = Pattern.compile("\\s+");
@@ -294,6 +295,20 @@ public final class CleanUtils {
 	public static String keepToAndRemoveVia(String string) {
 		string = keepTo(string);
 		string = removeVia(string);
+		return string;
+	}
+
+	private static final Pattern MC_ = Pattern.compile("(((mc)([a-z]))([a-z]+))", Pattern.CASE_INSENSITIVE);
+
+	@NotNull
+	public static String fixMcXCase(@NotNull String string) { // Mccowan -> McCowan
+		final Matcher matcher = MC_.matcher(string);
+		while (matcher.find()) {
+			string = string.replaceAll(
+					matcher.group(2),
+					matcher.group(3) + matcher.group(4).toUpperCase()
+			);
+		}
 		return string;
 	}
 
