@@ -347,7 +347,6 @@ object MDirectionHeadSignFinder {
             .apply {
                 addAll(0, stopTimesListPrepend.subList(0, stopIdIntsBeforeCommonPrepend.size))
             }
-            }
     }
 
     private fun removeNonRegularStopsAfterCommon(
