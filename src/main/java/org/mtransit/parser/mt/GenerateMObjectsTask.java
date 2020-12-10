@@ -504,7 +504,11 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					cTripStopsList = tripIdToMTripStops.get(mTrip.getId());
 					if (!equalsMyTripStopLists(mTripStopsList, cTripStopsList)) {
 						MTLog.log("%s: Need to merge trip ID '%s'.", this.routeId, mTrip.getId());
-						tripIdToMTripStops.put(mTrip.getId(), setMTripStopSequence(mergeMyTripStopLists(mTripStopsList, cTripStopsList)));
+						tripIdToMTripStops.put(mTrip.getId(),
+								setMTripStopSequence(
+										mergeMyTripStopLists(mTripStopsList, cTripStopsList)
+								)
+						);
 					}
 				} else { // just use it
 					tripIdToMTripStops.put(mTrip.getId(), mTripStopsList);
@@ -637,7 +641,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return splitTripStopTimesHeadSign;
 	}
 
-	private SimpleDateFormat M_TIME_FORMAT = MSpec.getNewTimeFormatInstance(); // not static - not sharable between threads!
+	private final SimpleDateFormat M_TIME_FORMAT = MSpec.getNewTimeFormatInstance(); // not static - not sharable between threads!
 
 	private String parseStopTimes(HashMap<String, MSchedule> mSchedules,
 								  long mTripId,
@@ -859,12 +863,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			ts1 = list1.get(i1);
 			ts2 = list2.get(i2);
 			if (newListStopIds.contains(ts1.getStopId())) {
-				MTLog.log("%s: Skipped %s because already in the merged list (1).", this.routeId, ts1.toString());
+				MTLog.logDebug("%s: Skipped %s because already in the merged list (1).", this.routeId, ts1.toString());
 				i1++; // skip this stop because already in the merged list
 				continue;
 			}
 			if (newListStopIds.contains(ts2.getStopId())) {
-				MTLog.log("%s: Skipped %s because already in the merged list (2).", this.routeId, ts2.toString());
+				MTLog.logDebug("%s: Skipped %s because already in the merged list (2).", this.routeId, ts2.toString());
 				i2++; // skip this stop because already in the merged list
 				continue;
 			}

@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt
 
+import org.mtransit.parser.LocationUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.StringUtils
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -92,6 +93,7 @@ object MDirectionHeadSignFinder {
                     distinctTripStopTimes,
                     tripHeadSign,
                     tripStopTimes,
+                    routeGTFS,
                     dataLossAuthorized = false
                 )
                 if (merged != null) {
@@ -109,12 +111,21 @@ object MDirectionHeadSignFinder {
                 distinctTripHeadSignAndStopTimes.add(merged)
             }
         }
+        MTLog.log("$routeId: $directionId: merged ${gRouteTrips.size} trips into ${distinctTripHeadSignAndStopTimes.size}.")
         // look for simple merge wins
         if (distinctTripHeadSignAndStopTimes.isEmpty()) {
             return null // no trips!
         }
         if (distinctTripHeadSignAndStopTimes.size == 1) {
             return distinctTripHeadSignAndStopTimes.first().first // just 1 merged trip
+        }
+        // starting complex merge
+        MTLog.log("$routeId: $directionId: COMPLEX merge required for: ")
+        distinctTripHeadSignAndStopTimes.forEach { (headSign, stopTimes) ->
+            MTLog.log(
+                "$routeId: $directionId: '$headSign':"
+                        + "\n  Stops: ${stopTimes.map { gStopTime -> "\n    - ${gStopTime.toStringPlus()}" }}"
+            )
         }
         var candidateHeadSignAndStopTimes: Pair<String, List<GStopTime>>? = null
         for ((tripHeadSign, tripStopTimes) in distinctTripHeadSignAndStopTimes) {
@@ -130,6 +141,7 @@ object MDirectionHeadSignFinder {
                 candidateHeadSignAndStopTimes.second,
                 tripHeadSign,
                 tripStopTimes,
+                routeGTFS,
                 dataLossAuthorized = true
             )
         }
@@ -144,6 +156,7 @@ object MDirectionHeadSignFinder {
         stopTimesList1: List<GStopTime>,
         stopTimesHeadSign2: String,
         stopTimesList2: List<GStopTime>,
+        routeGTFS: GSpec,
         dataLossAuthorized: Boolean = false
     ): Pair<String, List<GStopTime>>? {
         val stopIdInts1 = stopTimesList1.map { gStopTime -> gStopTime.stopIdInt }
@@ -488,6 +501,47 @@ object MDirectionHeadSignFinder {
                         )
                     )
                 }
+
+                val lastCommonStop = routeGTFS.getStop(lastCommonStopIdInt)
+                val lastStop1 = routeGTFS.getStop(stopIdIntsAfterCommon1.last())
+                val lastStop2 = routeGTFS.getStop(stopIdIntsAfterCommon2.last())
+                if (lastCommonStop != null && lastStop1 != null && lastStop2 != null) {
+                    val distanceToStop1 = LocationUtils.findDistance(
+                        lastCommonStop.stopLat, lastCommonStop.stopLong,
+                        lastStop1.stopLat, lastStop1.stopLong
+                    )
+                    val distanceToStop2 = LocationUtils.findDistance(
+                        lastCommonStop.stopLat, lastCommonStop.stopLong,
+                        lastStop2.stopLat, lastStop2.stopLong
+                    )
+                    if (distanceToStop1 > distanceToStop2) {
+                        return Pair( // keep #1
+                            stopTimesHeadSign1,
+                            mergeBeforeFirstCommonStop(
+                                routeId,
+                                directionId,
+                                firstCommonStopIdInt,
+                                stopTimesList1,
+                                stopIdIntsBeforeCommon1,
+                                stopTimesList2,
+                                stopIdIntsBeforeCommon2
+                            )
+                        )
+                    } else {
+                        return Pair( // keep #2
+                            stopTimesHeadSign2,
+                            mergeBeforeFirstCommonStop(
+                                routeId,
+                                directionId,
+                                firstCommonStopIdInt,
+                                stopTimesList2,
+                                stopIdIntsBeforeCommon2,
+                                stopTimesList1,
+                                stopIdIntsBeforeCommon1
+                            )
+                        )
+                    }
+                }
             }
         }
         if (dataLossAuthorized) {
@@ -563,20 +617,20 @@ object MDirectionHeadSignFinder {
         stopIdInts: List<Int>,
         stopIdIntsAfterCommon: List<Int>
     ): Int {
-        var stopIdIntsAfterCommonCount1 = stopIdIntsAfterCommon.size
+        var stopIdIntsAfterCommonCount = stopIdIntsAfterCommon.size
         var s = stopTimesList.size - 1  // reverse order (from last)
         val sMinIndex: Int = (stopIdInts.lastIndexOf(lastCommonStopIdInt) + 1).coerceAtLeast(0)
-        while (stopIdIntsAfterCommonCount1 > 0
+        while (stopIdIntsAfterCommonCount > 0
             && s >= sMinIndex
         ) {
             val gStopTime = stopTimesList[s]
             if (gStopTime.dropOffType != GDropOffType.REGULAR.id
                 && gStopTime.pickupType != GPickupType.REGULAR.id
             ) {
-                stopIdIntsAfterCommonCount1--
+                stopIdIntsAfterCommonCount--
             }
             s--
         }
-        return stopIdIntsAfterCommonCount1
+        return stopIdIntsAfterCommonCount
     }
 }
