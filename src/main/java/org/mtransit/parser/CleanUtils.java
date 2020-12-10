@@ -313,17 +313,18 @@ public final class CleanUtils {
 		return string;
 	}
 
+	private static final Pattern WORD_NON_WORDS = Pattern.compile("(\\W*)(\\w+)(\\W*)");
+
 	@NotNull
 	public static String toLowerCaseUpperCaseWords(@NotNull Locale locale, @NotNull String string, @NotNull String... ignoreWords) {
 		if (string.isEmpty()) {
 			return string;
 		}
 		StringBuilder sb = new StringBuilder();
-		String[] words = string.split(SPACE);
-		for (String word : words) {
-			if (sb.length() > 0) {
-				sb.append(SPACE);
-			}
+		Matcher matcher = WORD_NON_WORDS.matcher(string);
+		while (matcher.find()) {
+			sb.append(matcher.group(1)); // before
+			String word = matcher.group(2);
 			if (Utils.isUppercaseOnly(word, false, true)) {
 				if (containsIgnoreCase(word, ignoreWords)) {
 					sb.append(word);
@@ -333,14 +334,15 @@ public final class CleanUtils {
 			} else {
 				sb.append(word);
 			}
+			sb.append(matcher.group(3)); // after
 		}
 		return sb.toString();
 	}
 
-	private static boolean containsIgnoreCase(@Nullable String string, @NotNull String... strings) {
-		if (strings.length > 0) {
-			for (String s : strings) {
-				if (s.equalsIgnoreCase(string)) {
+	private static boolean containsIgnoreCase(@Nullable String string, @NotNull String... ignoreWords) {
+		if (ignoreWords.length > 0) {
+			for (String ignoreWord : ignoreWords) {
+				if (ignoreWord.equalsIgnoreCase(string)) {
 					return true;
 				}
 			}
