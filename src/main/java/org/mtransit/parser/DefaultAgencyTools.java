@@ -228,6 +228,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		//noinspection RedundantIfStatement
 		if (!GRouteType.isSameType(getAgencyRouteType(), gRoute.getRouteType())) {
+			MTLog.logDebug("Route excluded because of different type: %s != %s", getAgencyRouteType(), gRoute.toStringPlus());
 			return true; // exclude
 		}
 		return false; // keep

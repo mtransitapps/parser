@@ -130,7 +130,7 @@ public class GReader {
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				File frequencyFile = new File(gtfsDir, GFrequency.FILENAME);
 				if (!frequencyFile.exists()) {
-					MTLog.log("Skipping non-existing file '%s'.", calendarDateFile);
+					MTLog.log("Skipping non-existing file '%s'.", frequencyFile);
 				} else {
 					fr = new FileReader(frequencyFile);
 					reader = new BufferedReader(fr);
@@ -157,7 +157,7 @@ public class GReader {
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				File stopTimeFile = new File(gtfsDir, GStopTime.FILENAME);
 				if (!stopTimeFile.exists()) {
-					MTLog.log("Skipping non-existing file '%s'.", calendarDateFile);
+					MTLog.log("Skipping non-existing file '%s'.", stopTimeFile);
 				} else {
 					fr = new FileReader(stopTimeFile);
 					reader = new BufferedReader(fr);
@@ -375,9 +375,11 @@ public class GReader {
 					line.get(GTrip.TRIP_SHORT_NAME)
 			);
 			if (agencyTools.excludeTrip(gTrip)) {
+				MTLog.logDebug("Exclude trip: %s.", gTrip.toStringPlus());
 				return;
 			}
 			if (agencyTools.excludeRouteNullable(gSpec.getRoute(gTrip.getRouteIdInt()))) {
+				MTLog.logDebug("Exclude trip (!agency): %s.", gTrip.toStringPlus());
 				return;
 			}
 			gSpec.addTrip(gTrip);
@@ -427,11 +429,13 @@ public class GReader {
 					routeColor == null ? null : routeColor.trim()
 			);
 			if (agencyTools.excludeRoute(gRoute)) {
+				MTLog.logDebug("Exclude route: %s.", gRoute.toStringPlus());
 				return;
 			}
 			final Integer routeAgencyIdInt = gRoute.getAgencyIdInt();
 			if (routeAgencyIdInt != null
 					&& agencyTools.excludeAgencyNullable(gSpec.getAgency(routeAgencyIdInt))) {
+				MTLog.logDebug("Exclude route (!agency): %s.", gRoute.toStringPlus());
 				return;
 			}
 			gSpec.addRoute(gRoute);

@@ -437,8 +437,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		HashMap<Long, String> splitTripStopTimesHeadsign;
 		final List<GTrip> gRouteTrips = routeGTFS.getTrips(gRoute.getRouteIdInt());
 		//noinspection deprecation
-		final String routeId = gRoute.getRouteId();
-		MTLog.log("%s: parsing %d trips for route '%s'... ", this.routeId, gRouteTrips.size(), routeId);
+		final String gRouteId = gRoute.getRouteId();
+		MTLog.log("%s: parsing %d trips for route ID '%s'... ", this.routeId, gRouteTrips.size(), gRouteId);
 		int g = 0;
 		for (GTrip gTrip : gRouteTrips) {
 			if (gTrip.getRouteIdInt() != gRoute.getRouteIdInt()) {
@@ -464,9 +464,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (currentTrip != null && !currentTrip.equals(mTrip)) {
 					mergeSuccessful = false;
 					if (mTrip.equalsExceptHeadsignValue(currentTrip)) {
-						if (!mergeSuccessful) {
-							mergeSuccessful = this.agencyTools.mergeHeadsign(mTrip, currentTrip);
-						}
+						mergeSuccessful = this.agencyTools.mergeHeadsign(mTrip, currentTrip);
 					}
 					if (!mergeSuccessful) {
 						throw new MTLog.Fatal("%s: Different trip %s already in list (%s != %s)", this.routeId, mTrip.getId(), mTrip, currentTrip);
@@ -552,7 +550,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				MTLog.logPOINT(); // LOG
 			} // LOG
 		}
-		MTLog.log("%s: parsing %d trips for route '%s'... DONE", this.routeId, gRouteTrips.size(), routeId);
+		MTLog.log("%s: parsing %d trips for route ID '%s'... DONE", this.routeId, gRouteTrips.size(), gRouteId);
 	}
 
 	private HashMap<Long, String> parseTripStops(HashMap<String, MSchedule> mSchedules,
@@ -859,6 +857,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		MTripStop[] commonStopAndPrevious;
 		int i1 = 0, i2 = 0;
 		MTripStop last = null;
+		//noinspection ForLoopReplaceableByWhile
 		for (; i1 < list1.size() && i2 < list2.size(); ) {
 			ts1 = list1.get(i1);
 			ts2 = list2.get(i2);
@@ -1023,9 +1022,11 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 		}
 		// add remaining stops
+		//noinspection ForLoopReplaceableByWhile
 		for (; i1 < list1.size(); ) {
 			newList.add(list1.get(i1++));
 		}
+		//noinspection ForLoopReplaceableByWhile
 		for (; i2 < list2.size(); ) {
 			newList.add(list2.get(i2++));
 		}
