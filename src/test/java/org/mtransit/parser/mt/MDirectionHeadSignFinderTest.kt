@@ -4,7 +4,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnitRunner
@@ -36,7 +36,7 @@ class MDirectionHeadSignFinderTest {
 
     @Before
     fun setUp() {
-        `when`(agencyTools.cleanDirectionHeadsign(ArgumentMatchers.anyString()))
+        `when`(agencyTools.cleanDirectionHeadsign(anyString()))
             .then {
                 it.arguments[0]
             }
@@ -60,16 +60,31 @@ class MDirectionHeadSignFinderTest {
     fun testFindDirectionHeadSign_SameHeadSign() {
         // Arrange
         val directionId = GDirectionId.NONE.id
+        val tripId1 = "trip_id_1"
+        val tripId2 = "trip_id_2"
+        val tripId3 = "trip_id_3"
         val sameHeadSign = "same trip head-sign"
         val gRouteTrips = listOf(
-            GTrip(gRouteId, "service_id1", "trip_id", directionId, sameHeadSign, "trip short name"),
-            GTrip(gRouteId, "service_id2", "trip_id", directionId, sameHeadSign, "trip short name"),
-            GTrip(gRouteId, "service_id3", "trip_id2", directionId, sameHeadSign, "trip short name")
+            GTrip(gRouteId, "service_id1", tripId1, directionId, sameHeadSign, "trip short name"),
+            GTrip(gRouteId, "service_id2", tripId2, directionId, sameHeadSign, "trip short name"),
+            GTrip(gRouteId, "service_id3", tripId3, directionId, sameHeadSign, "trip short name")
         )
+        `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId1), null, null))
+            .thenReturn(
+                makeStopTimeList(tripId1, 1, 3)
+            )
+        `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId2), null, null))
+            .thenReturn(
+                makeStopTimeList(tripId2, 1, 3)
+            )
+        `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId3), null, null))
+            .thenReturn(
+                makeStopTimeList(tripId3, 1, 3)
+            )
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals(sameHeadSign, result)
+        Assert.assertEquals(sameHeadSign, result?.first)
     }
 
     @Test
@@ -93,7 +108,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("trip head-sign 2", result)
+        Assert.assertEquals("trip head-sign 2", result?.first)
     }
 
     @Test
@@ -117,7 +132,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("trip head-sign", result)
+        Assert.assertEquals("trip head-sign", result?.first)
     }
 
     @Test
@@ -141,7 +156,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("trip head-sign", result)
+        Assert.assertEquals("trip head-sign", result?.first)
     }
 
     @Test
@@ -165,7 +180,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("trip head-sign", result)
+        Assert.assertEquals("trip head-sign", result?.first)
     }
 
     @Test
@@ -195,7 +210,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("trip head-sign", result)
+        Assert.assertEquals("trip head-sign", result?.first)
     }
 
     @Test
@@ -225,7 +240,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("trip head-sign S", result)
+        Assert.assertEquals("trip head-sign S", result?.first)
     }
 
     @Test
@@ -263,7 +278,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("trip head-sign", result)
+        Assert.assertEquals("trip head-sign", result?.first)
     }
 
     @Test
@@ -308,7 +323,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("trip head-sign", result)
+        Assert.assertEquals("trip head-sign", result?.first)
     }
 
     @Test
@@ -408,7 +423,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("foo foo / trip head-sign", result)
+        Assert.assertEquals("foo foo / trip head-sign", result?.first)
     }
 
     @Test
@@ -456,7 +471,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("trip head-sign", result)
+        Assert.assertEquals("trip head-sign", result?.first)
     }
 
     @Test
@@ -501,7 +516,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("trip head-sign", result)
+        Assert.assertEquals("trip head-sign", result?.first)
     }
 
     @Test
@@ -535,7 +550,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("trip head-sign", result)
+        Assert.assertEquals("trip head-sign", result?.first)
     }
 
     @Test
@@ -567,7 +582,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        Assert.assertEquals("foo foo / trip head-sign", result)
+        Assert.assertEquals("foo foo / trip head-sign", result?.first)
     }
 
     private fun makeStopTimeList(

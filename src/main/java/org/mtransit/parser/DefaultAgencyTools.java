@@ -32,6 +32,8 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("WeakerAccess")
@@ -288,14 +290,33 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public boolean directionHeadSignsDescriptive(@NotNull Map<Integer, String> directionHeadSigns) {
+		return directionHeadSignsDescriptiveS(directionHeadSigns);
+	}
+
+	static boolean directionHeadSignsDescriptiveS(@NotNull Map<Integer, String> directionHeadSigns) {
+		if (directionHeadSigns.size() <= 1) {
+			return true;
+		}
+		Set<String> distinctHeadSigns = new HashSet<>();
+		for (String headSign : directionHeadSigns.values()) {
+			if (StringUtils.isBlank(headSign)) {
+				return false; // empty/blank head-sign is NOT descriptive
+			}
+			distinctHeadSigns.add(headSign);
+		}
+		return distinctHeadSigns.size() == directionHeadSigns.size(); // must have the same number of distinct items
+	}
+
+	@Override
 	public boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge) {
 		return mTrip.mergeHeadsignValue(mTripToMerge);
 	}
 
 	@Override
 	public boolean excludeStopTime(@NotNull GStopTime gStopTime) {
-		return GPickupType.NO_PICKUP.ordinal() == gStopTime.getPickupType() //
-				&& GDropOffType.NO_DROP_OFF.ordinal() == gStopTime.getDropOffType();
+		return GPickupType.NO_PICKUP.getId() == gStopTime.getPickupType() //
+				&& GDropOffType.NO_DROP_OFF.getId() == gStopTime.getDropOffType();
 	}
 
 	@Override

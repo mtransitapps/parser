@@ -20,6 +20,7 @@ import org.mtransit.parser.mt.data.MTripStop;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 public interface GAgencyTools {
@@ -72,6 +73,8 @@ public interface GAgencyTools {
 	String cleanDirectionHeadsign(@NotNull String directionHeadSign);
 
 	boolean directionFinderEnabled();
+
+	boolean directionHeadSignsDescriptive(@NotNull Map<Integer, String> directionHeadSigns);
 
 	boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge);
 

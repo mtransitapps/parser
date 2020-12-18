@@ -7,12 +7,16 @@ import org.mtransit.parser.gtfs.data.GCalendar;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class DefaultAgencyToolsTest {
 
@@ -184,12 +188,47 @@ public class DefaultAgencyToolsTest {
 		p.todayStringInt = 20191222;
 		boolean keepToday = true;
 		// Act
-		//noinspection ConstantConditions
 		DefaultAgencyTools.parseCalendars(gCalendars, DATE_FORMAT, c, p, keepToday);
 		// Assert
 		assertNotNull(p.startDate);
 		assertEquals(20191222, p.startDate.intValue());
 		assertNotNull(p.endDate);
 		assertEquals(20200412, p.endDate.intValue());
+	}
+
+	@Test
+	public void testDirectionHeadSignsDescriptive_Distinct() {
+		// Arrange
+		Map<Integer, String> directionHeadSigns = new HashMap<>();
+		directionHeadSigns.put(0, "head-sign 0");
+		directionHeadSigns.put(1, "head-sign 1");
+		// Act
+		boolean result = DefaultAgencyTools.directionHeadSignsDescriptiveS(directionHeadSigns);
+		// Assert
+		assertTrue(result);
+	}
+
+	@Test
+	public void testDirectionHeadSignsDescriptive_HasBlank() {
+		// Arrange
+		Map<Integer, String> directionHeadSigns = new HashMap<>();
+		directionHeadSigns.put(0, " ");
+		directionHeadSigns.put(1, "head-sign");
+		// Act
+		boolean result = DefaultAgencyTools.directionHeadSignsDescriptiveS(directionHeadSigns);
+		// Assert
+		assertFalse(result);
+	}
+
+	@Test
+	public void testDirectionHeadSignsDescriptive_Same() {
+		// Arrange
+		Map<Integer, String> directionHeadSigns = new HashMap<>();
+		directionHeadSigns.put(0, "head-sign");
+		directionHeadSigns.put(1, "head-sign");
+		// Act
+		boolean result = DefaultAgencyTools.directionHeadSignsDescriptiveS(directionHeadSigns);
+		// Assert
+		assertFalse(result);
 	}
 }

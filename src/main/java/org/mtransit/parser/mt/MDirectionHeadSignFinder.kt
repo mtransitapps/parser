@@ -2,7 +2,7 @@ package org.mtransit.parser.mt
 
 import org.mtransit.parser.LocationUtils
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.StringUtils
+import org.mtransit.parser.StringUtils.EMPTY
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GDropOffType
 import org.mtransit.parser.gtfs.data.GIDs
@@ -19,17 +19,40 @@ object MDirectionHeadSignFinder {
     @JvmStatic
     fun findDirectionHeadSigns(routeId: Long, gRouteTrips: List<GTrip>, routeGTFS: GSpec, agencyTools: GAgencyTools): Map<Int, String> {
         val directionHeadSigns = mutableMapOf<Int, String>()
+        val directionStopIdInts = mutableMapOf<Int, Int>()
         var directionIdOrDefault: Int = -1
-        findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { headSign ->
+        findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { (headSign, stopIdInt) ->
             directionHeadSigns.put(directionIdOrDefault, headSign)
+            directionStopIdInts.put(directionIdOrDefault, stopIdInt)
         }
         directionIdOrDefault = 0
-        findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { headSign ->
+        findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { (headSign, stopIdInt) ->
             directionHeadSigns.put(directionIdOrDefault, headSign)
+            directionStopIdInts.put(directionIdOrDefault, stopIdInt)
         }
         directionIdOrDefault = 1
-        findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { headSign ->
+        findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { (headSign, stopIdInt) ->
             directionHeadSigns.put(directionIdOrDefault, headSign)
+            directionStopIdInts.put(directionIdOrDefault, stopIdInt)
+        }
+        var descriptive = agencyTools.directionHeadSignsDescriptive(directionHeadSigns)
+        if (!descriptive) {
+            for ((directionId, _) in directionHeadSigns) {
+                val stopIdInt = directionStopIdInts[directionId] ?: continue
+                val stop = routeGTFS.getStop(stopIdInt) ?: continue
+                directionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
+                    agencyTools.cleanStopName(stop.stopName)
+                )
+                descriptive = true
+            }
+        }
+        if (!descriptive) {
+            throw MTLog.Fatal(
+                "$routeId: Could NOT fix non-descriptive direction head-signs!" +
+                        "\n - directions: ${directionHeadSigns.keys}" +
+                        "\n - head-signs: ${directionHeadSigns.values}" +
+                        "\n - stop IDs: ${GIDs.toStringPlus(directionStopIdInts.values)}"
+            )
         }
         return directionHeadSigns
     }
@@ -40,14 +63,14 @@ object MDirectionHeadSignFinder {
         routeGTFS: GSpec,
         directionId: Int,
         agencyTools: GAgencyTools
-    ): String? {
+    ): Pair<String, Int>? {
         val gTripsHeadSignAndStopTimes = gRouteTrips
             .filter { gTrip ->
                 gTrip.directionIdOrDefault == directionId
             }.map { gTrip ->
                 Pair(
                     gTrip.tripHeadsign
-                        ?.let { agencyTools.cleanDirectionHeadsign(it) } ?: StringUtils.EMPTY,
+                        ?.let { agencyTools.cleanDirectionHeadsign(it) } ?: EMPTY,
                     routeGTFS.getStopTimes(routeId, gTrip.tripIdInt, null, null)
                 )
             }.sortedByDescending { (_, stopTimes) -> // longest first to avoid no intersect between trips
@@ -57,20 +80,20 @@ object MDirectionHeadSignFinder {
         if (gTripsHeadSignAndStopTimes.isEmpty()) {
             return null
         }
-        val distinctTripHeadSigns = gTripsHeadSignAndStopTimes
-            .map { (headSign, _) -> headSign }
-            .filterNot { headSign -> headSign.isBlank() }
-            .distinct()
+        val tripHeadSignAndLastStopIdInt = gTripsHeadSignAndStopTimes
+            .map { (headSign, stopTimes) ->
+                Pair(
+                    headSign,
+                    stopTimes.last().stopIdInt
+                )
+            }
+        val distinctTripHeadSigns = tripHeadSignAndLastStopIdInt
+            .filterNot { (headSign, _) -> headSign.isBlank() }
+            .distinctBy { (headSign, _) -> headSign }
         if (distinctTripHeadSigns.size == 1) {
             return distinctTripHeadSigns.first()
         }
-        val tripHeadsignByStopCounts = gTripsHeadSignAndStopTimes
-            .map { (headSign, stopTimes) ->
-                Pair(
-                    stopTimes.last().stopIdInt,
-                    headSign
-                )
-            }
+        val tripHeadSignAndLastStopCounts = tripHeadSignAndLastStopIdInt
             .groupingBy { it }
             .eachCount()
         // 1- first round of easy merging of trips not branching
@@ -88,7 +111,7 @@ object MDirectionHeadSignFinder {
                 merged = mergeTrips(
                     routeId,
                     directionId,
-                    tripHeadsignByStopCounts,
+                    tripHeadSignAndLastStopCounts,
                     distinctTripHeadSign,
                     distinctTripStopTimes,
                     tripHeadSign,
@@ -117,7 +140,9 @@ object MDirectionHeadSignFinder {
             return null // no trips!
         }
         if (distinctTripHeadSignAndStopTimes.size == 1) {
-            return distinctTripHeadSignAndStopTimes.first().first // just 1 merged trip
+            distinctTripHeadSignAndStopTimes.first().let { (tripHeadSign, tripStopTimes) ->
+                return Pair(tripHeadSign, tripStopTimes.last().stopIdInt)
+            }
         }
         // starting complex merge
         MTLog.log("$routeId: $directionId: COMPLEX merge required for: ")
@@ -136,7 +161,7 @@ object MDirectionHeadSignFinder {
             candidateHeadSignAndStopTimes = mergeTrips(
                 routeId,
                 directionId,
-                tripHeadsignByStopCounts,
+                tripHeadSignAndLastStopCounts,
                 candidateHeadSignAndStopTimes.first,
                 candidateHeadSignAndStopTimes.second,
                 tripHeadSign,
@@ -145,13 +170,15 @@ object MDirectionHeadSignFinder {
                 dataLossAuthorized = true
             )
         }
-        return candidateHeadSignAndStopTimes?.first
+        return candidateHeadSignAndStopTimes?.let { (tripHeadSign, tripStopTimes) ->
+            Pair(tripHeadSign, tripStopTimes.last().stopIdInt)
+        }
     }
 
     private fun mergeTrips(
         routeId: Long,
         directionId: Int,
-        tripHeadsignByStopCounts: Map<Pair<Int, String>, Int>,
+        tripHeadSignAndLastStopCounts: Map<Pair<String, Int>, Int>,
         stopTimesHeadSign1: String,
         stopTimesList1: List<GStopTime>,
         stopTimesHeadSign2: String,
@@ -178,12 +205,12 @@ object MDirectionHeadSignFinder {
             ?: emptyList()
         // IGNORE NON-REGULAR STOPS AFTER COMMON
         val stopIdIntsAfterCommonCount1 =
-            removeNonRegularStopsAfterCommon(routeId, directionId, lastCommonStopIdInt, stopTimesList1, stopIdInts1, stopIdIntsAfterCommon1)
+            removeNonRegularStopsAfterCommon(lastCommonStopIdInt, stopTimesList1, stopIdInts1, stopIdIntsAfterCommon1)
         val stopIdIntsAfterCommon2 = lastCommonStopIdInt
             ?.let { stopIdInts2.subList(stopIdInts2.lastIndexOf(lastCommonStopIdInt) + 1, stopIdInts2.size) }
             ?: emptyList()
         val stopIdIntsAfterCommonCount2 =
-            removeNonRegularStopsAfterCommon(routeId, directionId, lastCommonStopIdInt, stopTimesList2, stopIdInts2, stopIdIntsAfterCommon2)
+            removeNonRegularStopsAfterCommon(lastCommonStopIdInt, stopTimesList2, stopIdInts2, stopIdIntsAfterCommon2)
         if (lastCommonStopIdInt == null) {
             return null // NO COMMON STOP -> CAN'T BE MERGED
         }
@@ -193,8 +220,6 @@ object MDirectionHeadSignFinder {
             return Pair(
                 stopTimesHeadSign2,
                 mergeBeforeFirstCommonStop(
-                    routeId,
-                    directionId,
                     firstCommonStopIdInt,
                     stopTimesList2,
                     stopIdIntsBeforeCommon2,
@@ -209,8 +234,6 @@ object MDirectionHeadSignFinder {
             return Pair(
                 stopTimesHeadSign1,
                 mergeBeforeFirstCommonStop(
-                    routeId,
-                    directionId,
                     firstCommonStopIdInt,
                     stopTimesList1,
                     stopIdIntsBeforeCommon1,
@@ -226,8 +249,6 @@ object MDirectionHeadSignFinder {
                 return Pair(
                     stopTimesHeadSign2,
                     mergeBeforeFirstCommonStop(
-                        routeId,
-                        directionId,
                         firstCommonStopIdInt,
                         stopTimesList2,
                         stopIdIntsBeforeCommon2,
@@ -240,8 +261,6 @@ object MDirectionHeadSignFinder {
                 return Pair(
                     stopTimesHeadSign1,
                     mergeBeforeFirstCommonStop(
-                        routeId,
-                        directionId,
                         firstCommonStopIdInt,
                         stopTimesList1,
                         stopIdIntsBeforeCommon1,
@@ -256,8 +275,6 @@ object MDirectionHeadSignFinder {
                     pickAndMergeLongestTripStopTimes(
                         stopTimesList1,
                         stopTimesList2,
-                        routeId,
-                        directionId,
                         firstCommonStopIdInt,
                         stopIdIntsBeforeCommon1,
                         stopIdIntsBeforeCommon2
@@ -277,8 +294,6 @@ object MDirectionHeadSignFinder {
                         pickAndMergeLongestTripStopTimes(
                             stopTimesList1,
                             stopTimesList2,
-                            routeId,
-                            directionId,
                             firstCommonStopIdInt,
                             stopIdIntsBeforeCommon1,
                             stopIdIntsBeforeCommon2
@@ -293,8 +308,6 @@ object MDirectionHeadSignFinder {
                         pickAndMergeLongestTripStopTimes(
                             stopTimesList1,
                             stopTimesList2,
-                            routeId,
-                            directionId,
                             firstCommonStopIdInt,
                             stopIdIntsBeforeCommon1,
                             stopIdIntsBeforeCommon2
@@ -307,8 +320,6 @@ object MDirectionHeadSignFinder {
                     return Pair(
                         stopTimesHeadSign2,
                         mergeBeforeFirstCommonStop(
-                            routeId,
-                            directionId,
                             firstCommonStopIdInt,
                             stopTimesList2,
                             stopIdIntsBeforeCommon2,
@@ -323,8 +334,6 @@ object MDirectionHeadSignFinder {
                     return Pair(
                         stopTimesHeadSign1,
                         mergeBeforeFirstCommonStop(
-                            routeId,
-                            directionId,
                             firstCommonStopIdInt,
                             stopTimesList1,
                             stopIdIntsBeforeCommon1,
@@ -335,9 +344,9 @@ object MDirectionHeadSignFinder {
                 }
             }
             val lastStopIdInt1 = stopTimesList1.last().stopIdInt
-            val tripHeadSignCounts1 = tripHeadsignByStopCounts[Pair(lastStopIdInt1, stopTimesHeadSign1)] ?: 0
+            val tripHeadSignCounts1 = tripHeadSignAndLastStopCounts[Pair(stopTimesHeadSign1, lastStopIdInt1)] ?: 0
             val lastStopIdInt2 = stopTimesList2.last().stopIdInt
-            val tripHeadSignCounts2 = tripHeadsignByStopCounts[Pair(lastStopIdInt2, stopTimesHeadSign2)] ?: 0
+            val tripHeadSignCounts2 = tripHeadSignAndLastStopCounts[Pair(stopTimesHeadSign2, lastStopIdInt2)] ?: 0
             val headSignCountsDiff: Int = (.15f * (tripHeadSignCounts2 + tripHeadSignCounts1)).toInt()
             if (tripHeadSignCounts1 != 0 // merged head-sign
                 && (tripHeadSignCounts2 - tripHeadSignCounts1) > headSignCountsDiff
@@ -345,8 +354,6 @@ object MDirectionHeadSignFinder {
                 return Pair(
                     stopTimesHeadSign2,
                     mergeBeforeFirstCommonStop(
-                        routeId,
-                        directionId,
                         firstCommonStopIdInt,
                         stopTimesList2,
                         stopIdIntsBeforeCommon2,
@@ -361,8 +368,6 @@ object MDirectionHeadSignFinder {
                 return Pair(
                     stopTimesHeadSign1,
                     mergeBeforeFirstCommonStop(
-                        routeId,
-                        directionId,
                         firstCommonStopIdInt,
                         stopTimesList1,
                         stopIdIntsBeforeCommon1,
@@ -373,17 +378,17 @@ object MDirectionHeadSignFinder {
             }
 
             if (dataLossAuthorized) {
-                val otherStopsUsingSameHeadSignCounts1 = tripHeadsignByStopCounts.filter { lastStopIdIntTripHeadSignAndCount ->
+                val otherStopsUsingSameHeadSignCounts1 = tripHeadSignAndLastStopCounts.filter { lastStopIdIntTripHeadSignAndCount ->
                     val lastStopIdIntTripHeadSign = lastStopIdIntTripHeadSignAndCount.key
-                    lastStopIdIntTripHeadSign.first != lastStopIdInt1 // other stops
-                            && lastStopIdIntTripHeadSign.second == stopTimesHeadSign1 // same head-sign
+                    lastStopIdIntTripHeadSign.first == stopTimesHeadSign1 // same head-sign
+                            && lastStopIdIntTripHeadSign.second != lastStopIdInt1 // other stops
                 }.map { lastStopIdIntTripHeadSignAndCount ->
                     lastStopIdIntTripHeadSignAndCount.value
                 }.sum()
-                val otherStopsUsingSameHeadSignCounts2 = tripHeadsignByStopCounts.filter { lastStopIdIntTripHeadSignAndCount ->
+                val otherStopsUsingSameHeadSignCounts2 = tripHeadSignAndLastStopCounts.filter { lastStopIdIntTripHeadSignAndCount ->
                     val lastStopIdIntTripHeadSign = lastStopIdIntTripHeadSignAndCount.key
-                    lastStopIdIntTripHeadSign.first != lastStopIdInt2 // other stops
-                            && lastStopIdIntTripHeadSign.second == stopTimesHeadSign2 // same head-sign
+                    lastStopIdIntTripHeadSign.first == stopTimesHeadSign2 // same head-sign
+                            && lastStopIdIntTripHeadSign.second != lastStopIdInt2 // other stops
                 }.map { lastStopIdIntTripHeadSignAndCount ->
                     lastStopIdIntTripHeadSignAndCount.value
                 }.sum()
@@ -393,8 +398,6 @@ object MDirectionHeadSignFinder {
                     return Pair(
                         stopTimesHeadSign1,
                         mergeBeforeFirstCommonStop(
-                            routeId,
-                            directionId,
                             firstCommonStopIdInt,
                             stopTimesList1,
                             stopIdIntsBeforeCommon1,
@@ -409,8 +412,6 @@ object MDirectionHeadSignFinder {
                     return Pair(
                         stopTimesHeadSign2,
                         mergeBeforeFirstCommonStop(
-                            routeId,
-                            directionId,
                             firstCommonStopIdInt,
                             stopTimesList2,
                             stopIdIntsBeforeCommon2,
@@ -424,12 +425,10 @@ object MDirectionHeadSignFinder {
                     && abs(tripHeadSignCounts2 - tripHeadSignCounts1) <= headSignCountsDiff
                 ) {
                     return Pair(
-                        MTrip.mergeHeadsignValue(stopTimesHeadSign1, stopTimesHeadSign2) ?: StringUtils.EMPTY,
+                        MTrip.mergeHeadsignValue(stopTimesHeadSign1, stopTimesHeadSign2) ?: EMPTY,
                         pickAndMergeLongestTripStopTimes(
                             stopTimesList1,
                             stopTimesList2,
-                            routeId,
-                            directionId,
                             firstCommonStopIdInt,
                             stopIdIntsBeforeCommon1,
                             stopIdIntsBeforeCommon2
@@ -443,8 +442,6 @@ object MDirectionHeadSignFinder {
                     return Pair(
                         stopTimesHeadSign2,
                         mergeBeforeFirstCommonStop(
-                            routeId,
-                            directionId,
                             firstCommonStopIdInt,
                             stopTimesList2,
                             stopIdIntsBeforeCommon2,
@@ -459,8 +456,6 @@ object MDirectionHeadSignFinder {
                     return Pair(
                         stopTimesHeadSign1,
                         mergeBeforeFirstCommonStop(
-                            routeId,
-                            directionId,
                             firstCommonStopIdInt,
                             stopTimesList1,
                             stopIdIntsBeforeCommon1,
@@ -475,8 +470,6 @@ object MDirectionHeadSignFinder {
                     return Pair( // keep #1
                         stopTimesHeadSign1,
                         mergeBeforeFirstCommonStop(
-                            routeId,
-                            directionId,
                             firstCommonStopIdInt,
                             stopTimesList1,
                             stopIdIntsBeforeCommon1,
@@ -491,8 +484,6 @@ object MDirectionHeadSignFinder {
                     return Pair( // keep #2
                         stopTimesHeadSign2,
                         mergeBeforeFirstCommonStop(
-                            routeId,
-                            directionId,
                             firstCommonStopIdInt,
                             stopTimesList2,
                             stopIdIntsBeforeCommon2,
@@ -518,8 +509,6 @@ object MDirectionHeadSignFinder {
                         return Pair( // keep #1
                             stopTimesHeadSign1,
                             mergeBeforeFirstCommonStop(
-                                routeId,
-                                directionId,
                                 firstCommonStopIdInt,
                                 stopTimesList1,
                                 stopIdIntsBeforeCommon1,
@@ -531,8 +520,6 @@ object MDirectionHeadSignFinder {
                         return Pair( // keep #2
                             stopTimesHeadSign2,
                             mergeBeforeFirstCommonStop(
-                                routeId,
-                                directionId,
                                 firstCommonStopIdInt,
                                 stopTimesList2,
                                 stopIdIntsBeforeCommon2,
@@ -560,15 +547,11 @@ object MDirectionHeadSignFinder {
     private fun pickAndMergeLongestTripStopTimes(
         stopTimesList1: List<GStopTime>,
         stopTimesList2: List<GStopTime>,
-        routeId: Long,
-        directionId: Int,
         firstCommonStopIdInt: Int?,
         stopIdIntsBeforeCommon1: List<Int>,
         stopIdIntsBeforeCommon2: List<Int>
     ) = if (stopTimesList1.size > stopTimesList2.size) {
         mergeBeforeFirstCommonStop(
-            routeId,
-            directionId,
             firstCommonStopIdInt,
             stopTimesList1,
             stopIdIntsBeforeCommon1,
@@ -577,8 +560,6 @@ object MDirectionHeadSignFinder {
         )
     } else {
         mergeBeforeFirstCommonStop(
-            routeId,
-            directionId,
             firstCommonStopIdInt,
             stopTimesList2,
             stopIdIntsBeforeCommon2,
@@ -588,8 +569,6 @@ object MDirectionHeadSignFinder {
     }
 
     private fun mergeBeforeFirstCommonStop(
-        routeId: Long,
-        directionId: Int,
         firstCommonStopIdInt: Int?,
         stopTimesList: List<GStopTime>,
         stopIdIntsBeforeCommon: List<Int>,
@@ -610,8 +589,6 @@ object MDirectionHeadSignFinder {
     }
 
     private fun removeNonRegularStopsAfterCommon(
-        routeId: Long,
-        directionId: Int,
         lastCommonStopIdInt: Int?,
         stopTimesList: List<GStopTime>,
         stopIdInts: List<Int>,
