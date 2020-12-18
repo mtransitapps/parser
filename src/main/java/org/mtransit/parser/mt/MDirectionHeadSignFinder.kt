@@ -72,6 +72,8 @@ object MDirectionHeadSignFinder {
                         ?.let { agencyTools.cleanDirectionHeadsign(it) } ?: EMPTY,
                     routeGTFS.getStopTimes(routeId, gTrip.tripIdInt, null, null)
                 )
+            }.filterNot { (_, stopTimes) ->
+                stopTimes.isEmpty() // exclude trips w/o stop times
             }.sortedByDescending { (_, stopTimes) -> // longest first to avoid no intersect between trips
                 stopTimes.size
             }
