@@ -22,31 +22,30 @@ object MDirectionHeadSignFinder {
         val directionStopIdInts = mutableMapOf<Int, Int>()
         var directionIdOrDefault: Int = -1
         findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { (headSign, stopIdInt) ->
-            directionHeadSigns.put(directionIdOrDefault, headSign)
+            directionHeadSigns[directionIdOrDefault] = headSign
             directionStopIdInts.put(directionIdOrDefault, stopIdInt)
         }
         directionIdOrDefault = 0
         findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { (headSign, stopIdInt) ->
-            directionHeadSigns.put(directionIdOrDefault, headSign)
+            directionHeadSigns[directionIdOrDefault] = headSign
             directionStopIdInts.put(directionIdOrDefault, stopIdInt)
         }
         directionIdOrDefault = 1
         findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { (headSign, stopIdInt) ->
-            directionHeadSigns.put(directionIdOrDefault, headSign)
+            directionHeadSigns[directionIdOrDefault] = headSign
             directionStopIdInts.put(directionIdOrDefault, stopIdInt)
         }
-        var descriptive = agencyTools.directionHeadSignsDescriptive(directionHeadSigns)
-        if (!descriptive) {
+        if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
+            MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, trying last stop name...")
             for ((directionId, _) in directionHeadSigns) {
                 val stopIdInt = directionStopIdInts[directionId] ?: continue
                 val stop = routeGTFS.getStop(stopIdInt) ?: continue
                 directionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
                     agencyTools.cleanStopName(stop.stopName)
                 )
-                descriptive = true
             }
         }
-        if (!descriptive) {
+        if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
             throw MTLog.Fatal(
                 "$routeId: Could NOT fix non-descriptive direction head-signs!" +
                         "\n - directions: ${directionHeadSigns.keys}" +
