@@ -313,7 +313,11 @@ public final class CleanUtils {
 		return string;
 	}
 
-	private static final Pattern WORD_NON_WORDS = Pattern.compile("(\\W*)(\\w+)(\\W*)");
+	private static final String WORD_REGEX = "a-zA-ZÀ-ÿ";
+
+	private static final Pattern WORD_NON_WORDS = Pattern.compile(
+			"([^" + WORD_REGEX + "]*)([" + WORD_REGEX + "]+)([^" + WORD_REGEX + "]*)",
+			Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.CANON_EQ);
 
 	@NotNull
 	public static String toLowerCaseUpperCaseWords(@NotNull Locale locale, @NotNull String string, @NotNull String... ignoreWords) {
