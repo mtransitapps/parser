@@ -105,13 +105,14 @@ object MDirectionHeadSignFinder {
                 )
             }
         val distinctTripHeadSigns = tripHeadSignAndLastStopIdInt
-            .distinctBy { (headSign, _) -> headSign }
+            .distinct()
         if (distinctTripHeadSigns.size == 1) {
             MTLog.log("$routeId: $directionId: 1 distinct trip head-sign: '${distinctTripHeadSigns.first().first}'.")
             return distinctTripHeadSigns.first()
         }
         val distinctTripHeadSignsNotBlank = distinctTripHeadSigns
             .filterNot { (headSign, _) -> headSign.isBlank() }
+            .distinctBy { (headSign, _) -> headSign }
         if (distinctTripHeadSignsNotBlank.size == 1) {
             MTLog.log("$routeId: $directionId: 1 distinct trip head-sign not blank: '${distinctTripHeadSignsNotBlank.first().first}'.")
             return distinctTripHeadSignsNotBlank.first()
