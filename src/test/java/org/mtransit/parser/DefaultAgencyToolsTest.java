@@ -197,6 +197,27 @@ public class DefaultAgencyToolsTest {
 	}
 
 	@Test
+	public void testDirectionHeadSignsDescriptive_None() {
+		// Arrange
+		Map<Integer, String> directionHeadSigns = new HashMap<>();
+		// Act
+		boolean result = DefaultAgencyTools.directionHeadSignsDescriptiveS(directionHeadSigns);
+		// Assert
+		assertTrue(result);
+	}
+
+	@Test
+	public void testDirectionHeadSignsDescriptive_OneBlank() {
+		// Arrange
+		Map<Integer, String> directionHeadSigns = new HashMap<>();
+		directionHeadSigns.put(0, " ");
+		// Act
+		boolean result = DefaultAgencyTools.directionHeadSignsDescriptiveS(directionHeadSigns);
+		// Assert
+		assertFalse(result);
+	}
+
+	@Test
 	public void testDirectionHeadSignsDescriptive_Distinct() {
 		// Arrange
 		Map<Integer, String> directionHeadSigns = new HashMap<>();

@@ -61,6 +61,14 @@ public final class MTLog {
 		System.out.print(string);
 	}
 
+	public static void log(boolean debug, @NotNull String format, @Nullable Object... args) {
+		if (debug) {
+			logDebug(format, args);
+		} else {
+			log(format, args);
+		}
+	}
+
 	public static void log(@NotNull String format, @Nullable Object... args) {
 		System.out.printf("\n" + format, args);
 	}

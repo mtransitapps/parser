@@ -295,17 +295,26 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	static boolean directionHeadSignsDescriptiveS(@NotNull Map<Integer, String> directionHeadSigns) {
-		if (directionHeadSigns.size() <= 1) {
-			return true;
+		if (directionHeadSigns.isEmpty()) {
+			return true; // nothing is not not descriptive
 		}
 		Set<String> distinctHeadSigns = new HashSet<>();
-		for (String headSign : directionHeadSigns.values()) {
-			if (StringUtils.isBlank(headSign)) {
-				return false; // empty/blank head-sign is NOT descriptive
+		for (String directionHeadSign : directionHeadSigns.values()) {
+			if (!directionHeadSignDescriptiveS(directionHeadSign)) {
+				return false;
 			}
-			distinctHeadSigns.add(headSign);
+			distinctHeadSigns.add(directionHeadSign);
 		}
 		return distinctHeadSigns.size() == directionHeadSigns.size(); // must have the same number of distinct items
+	}
+
+	@Override
+	public boolean directionHeadSignDescriptive(@NotNull String directionHeadSign) {
+		return directionHeadSignDescriptiveS(directionHeadSign);
+	}
+
+	static boolean directionHeadSignDescriptiveS(@NotNull String directionHeadSign) {
+		return !StringUtils.isBlank(directionHeadSign); // empty/blank head-sign is NOT descriptive
 	}
 
 	@Override

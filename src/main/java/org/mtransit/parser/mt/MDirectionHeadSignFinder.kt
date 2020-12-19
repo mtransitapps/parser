@@ -36,7 +36,20 @@ object MDirectionHeadSignFinder {
             directionStopIdInts.put(directionIdOrDefault, stopIdInt)
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
-            MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, trying last stop name...")
+            MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, try using last stop name...")
+            for ((directionId, headSign) in directionHeadSigns) {
+                if (agencyTools.directionHeadSignDescriptive(headSign)) {
+                    continue // keep descriptive trip head-sign
+                }
+                val stopIdInt = directionStopIdInts[directionId] ?: continue
+                val stop = routeGTFS.getStop(stopIdInt) ?: continue
+                directionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
+                    agencyTools.cleanStopName(stop.stopName)
+                )
+            }
+        }
+        if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
+            MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, using last stop name...")
             for ((directionId, _) in directionHeadSigns) {
                 val stopIdInt = directionStopIdInts[directionId] ?: continue
                 val stop = routeGTFS.getStop(stopIdInt) ?: continue
@@ -64,6 +77,7 @@ object MDirectionHeadSignFinder {
         agencyTools: GAgencyTools
     ): Pair<String, Int>? {
         val gTripsHeadSignAndStopTimes = gRouteTrips
+            .asSequence()
             .filter { gTrip ->
                 gTrip.directionIdOrDefault == directionId
             }.map { gTrip ->
@@ -76,9 +90,11 @@ object MDirectionHeadSignFinder {
                 stopTimes.isEmpty() // exclude trips w/o stop times
             }.sortedByDescending { (_, stopTimes) -> // longest first to avoid no intersect between trips
                 stopTimes.size
-            }
+            }.distinct()
+            .toList()
         // 0 - check if merge necessary at all
         if (gTripsHeadSignAndStopTimes.isEmpty()) {
+            MTLog.log("$routeId: $directionId: no trips -> no head-sign.")
             return null
         }
         val tripHeadSignAndLastStopIdInt = gTripsHeadSignAndStopTimes
@@ -89,10 +105,16 @@ object MDirectionHeadSignFinder {
                 )
             }
         val distinctTripHeadSigns = tripHeadSignAndLastStopIdInt
-            .filterNot { (headSign, _) -> headSign.isBlank() }
             .distinctBy { (headSign, _) -> headSign }
         if (distinctTripHeadSigns.size == 1) {
+            MTLog.log("$routeId: $directionId: 1 distinct trip head-sign: '${distinctTripHeadSigns.first().first}'.")
             return distinctTripHeadSigns.first()
+        }
+        val distinctTripHeadSignsNotBlank = distinctTripHeadSigns
+            .filterNot { (headSign, _) -> headSign.isBlank() }
+        if (distinctTripHeadSignsNotBlank.size == 1) {
+            MTLog.log("$routeId: $directionId: 1 distinct trip head-sign not blank: '${distinctTripHeadSignsNotBlank.first().first}'.")
+            return distinctTripHeadSignsNotBlank.first()
         }
         val tripHeadSignAndLastStopCounts = tripHeadSignAndLastStopIdInt
             .groupingBy { it }
@@ -138,10 +160,12 @@ object MDirectionHeadSignFinder {
         MTLog.log("$routeId: $directionId: merged ${gRouteTrips.size} trips into ${distinctTripHeadSignAndStopTimes.size}.")
         // look for simple merge wins
         if (distinctTripHeadSignAndStopTimes.isEmpty()) {
+            MTLog.log("$routeId: $directionId: no distinct trips -> no head-sign.")
             return null // no trips!
         }
         if (distinctTripHeadSignAndStopTimes.size == 1) {
             distinctTripHeadSignAndStopTimes.first().let { (tripHeadSign, tripStopTimes) ->
+                MTLog.log("$routeId: $directionId: 1 distinct trip: '$tripHeadSign'.")
                 return Pair(tripHeadSign, tripStopTimes.last().stopIdInt)
             }
         }
@@ -150,7 +174,7 @@ object MDirectionHeadSignFinder {
         distinctTripHeadSignAndStopTimes.forEach { (headSign, stopTimes) ->
             MTLog.log(
                 "$routeId: $directionId: '$headSign':"
-                        + "\n  Stops: ${stopTimes.map { gStopTime -> "\n    - ${gStopTime.toStringPlus()}" }}"
+                        + "\n ${stopTimes.size} stops: ${stopTimes.map { gStopTime -> "\n    - ${gStopTime.toStringPlus()}" }}"
             )
         }
         var candidateHeadSignAndStopTimes: Pair<String, List<GStopTime>>? = null
@@ -172,6 +196,7 @@ object MDirectionHeadSignFinder {
             )
         }
         return candidateHeadSignAndStopTimes?.let { (tripHeadSign, tripStopTimes) ->
+            MTLog.log("$routeId: $directionId: complex merge candidate found: '$tripHeadSign'.")
             Pair(tripHeadSign, tripStopTimes.last().stopIdInt)
         }
     }
@@ -192,6 +217,7 @@ object MDirectionHeadSignFinder {
         val stopIdsIntersect = stopIdInts1.intersect(stopIdInts2)
         // 1ST COMMON STOP
         val firstCommonStopIdInt = if (stopIdsIntersect.isEmpty()) null else stopIdsIntersect.first()
+        MTLog.log(!dataLossAuthorized, "$routeId: $directionId: 1st common stop: '${GIDs.toStringPlus(firstCommonStopIdInt)}'")
         val stopIdIntsBeforeCommon1 =
             firstCommonStopIdInt
                 ?.let { stopIdInts1.subList(0, stopIdInts1.indexOf(firstCommonStopIdInt)) }
@@ -201,6 +227,7 @@ object MDirectionHeadSignFinder {
             ?: emptyList()
         // LAST COMMON STOP
         val lastCommonStopIdInt = if (stopIdsIntersect.isEmpty()) null else stopIdsIntersect.last()
+        MTLog.log(!dataLossAuthorized, "$routeId: $directionId: last common stop: '${GIDs.toStringPlus(lastCommonStopIdInt)}'")
         val stopIdIntsAfterCommon1 = lastCommonStopIdInt
             ?.let { stopIdInts1.subList(stopIdInts1.lastIndexOf(lastCommonStopIdInt) + 1, stopIdInts1.size) }
             ?: emptyList()
@@ -213,11 +240,13 @@ object MDirectionHeadSignFinder {
         val stopIdIntsAfterCommonCount2 =
             removeNonRegularStopsAfterCommon(lastCommonStopIdInt, stopTimesList2, stopIdInts2, stopIdIntsAfterCommon2)
         if (lastCommonStopIdInt == null) {
+            MTLog.log(!dataLossAuthorized, "$routeId: $directionId: no common stop -> can NOT be merged")
             return null // NO COMMON STOP -> CAN'T BE MERGED
         }
         if (stopIdIntsAfterCommonCount1 == 0 // #1 stops
             && stopIdIntsAfterCommonCount2 > 0 // #2 goes further
         ) {
+            MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #1 stops but #2 goes further")
             return Pair(
                 stopTimesHeadSign2,
                 mergeBeforeFirstCommonStop(
@@ -232,6 +261,7 @@ object MDirectionHeadSignFinder {
         if (stopIdIntsAfterCommonCount2 == 0 // #2 stops
             && stopIdIntsAfterCommonCount1 > 0 // #1 goes further
         ) {
+            MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #2 stops but #1 goes further")
             return Pair(
                 stopTimesHeadSign1,
                 mergeBeforeFirstCommonStop(
@@ -247,6 +277,7 @@ object MDirectionHeadSignFinder {
             || (dataLossAuthorized && (stopIdIntsAfterCommonCount2 > 0 && stopIdIntsAfterCommonCount1 > 0)) // distinct last stops (branching)
         ) {
             if (stopTimesHeadSign1.isBlank()) {
+                MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #1 head-sign is blank, use #2")
                 return Pair(
                     stopTimesHeadSign2,
                     mergeBeforeFirstCommonStop(
@@ -259,6 +290,7 @@ object MDirectionHeadSignFinder {
                 )
             }
             if (stopTimesHeadSign2.isBlank()) {
+                MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #2 head-sign is blank, use #1")
                 return Pair(
                     stopTimesHeadSign1,
                     mergeBeforeFirstCommonStop(
@@ -271,6 +303,7 @@ object MDirectionHeadSignFinder {
                 )
             }
             if (stopTimesHeadSign1 == stopTimesHeadSign2) {
+                MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #1 & #2 have same head-sign")
                 return Pair(
                     stopTimesHeadSign1,
                     pickAndMergeLongestTripStopTimes(
@@ -290,6 +323,7 @@ object MDirectionHeadSignFinder {
                 if (prefix.length > minFixLength
                     && prefix.length > suffix.length
                 ) {
+                    MTLog.log(!dataLossAuthorized, "$routeId: $directionId: use prefix '$prefix'")
                     return Pair(
                         prefix.trim(),
                         pickAndMergeLongestTripStopTimes(
@@ -304,6 +338,7 @@ object MDirectionHeadSignFinder {
                 if (suffix.length > minFixLength
                     && suffix.length > prefix.length
                 ) {
+                    MTLog.log(!dataLossAuthorized, "$routeId: $directionId: use suffix '$suffix'")
                     return Pair(
                         suffix.trim(),
                         pickAndMergeLongestTripStopTimes(
@@ -318,6 +353,10 @@ object MDirectionHeadSignFinder {
                 if (stopIdIntsAfterCommonCount1 > 0 // not ending at last common stop
                     && stopIdIntsAfterCommonCount2 > stopIdIntsAfterCommonCount1 * 2 // #2 goes for WAY more stops
                 ) {
+                    MTLog.log(
+                        !dataLossAuthorized,
+                        "$routeId: $directionId: #2 goes for WAY more stops ($stopIdIntsAfterCommonCount2) than # ($stopIdIntsAfterCommonCount1)1"
+                    )
                     return Pair(
                         stopTimesHeadSign2,
                         mergeBeforeFirstCommonStop(
@@ -332,6 +371,10 @@ object MDirectionHeadSignFinder {
                 if (stopIdIntsAfterCommonCount2 > 0 // not ending at last common stop
                     && stopIdIntsAfterCommonCount1 > stopIdIntsAfterCommonCount2 * 2 // #1 goes for WAY more stops
                 ) {
+                    MTLog.log(
+                        !dataLossAuthorized,
+                        "$routeId: $directionId: #1 goes for WAY more stops ($stopIdIntsAfterCommonCount1) than #2 ($stopIdIntsAfterCommonCount2)"
+                    )
                     return Pair(
                         stopTimesHeadSign1,
                         mergeBeforeFirstCommonStop(
@@ -349,9 +392,10 @@ object MDirectionHeadSignFinder {
             val lastStopIdInt2 = stopTimesList2.last().stopIdInt
             val tripHeadSignCounts2 = tripHeadSignAndLastStopCounts[Pair(stopTimesHeadSign2, lastStopIdInt2)] ?: 0
             val headSignCountsDiff: Int = (.15f * (tripHeadSignCounts2 + tripHeadSignCounts1)).toInt()
-            if (tripHeadSignCounts1 != 0 // merged head-sign
+            if (tripHeadSignCounts1 != 0 // NOT merged head-sign
                 && (tripHeadSignCounts2 - tripHeadSignCounts1) > headSignCountsDiff
             ) {
+                MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #2 head-sign more used than #1")
                 return Pair(
                     stopTimesHeadSign2,
                     mergeBeforeFirstCommonStop(
@@ -363,9 +407,10 @@ object MDirectionHeadSignFinder {
                     )
                 )
             }
-            if (tripHeadSignCounts2 != 0 // merged head-sign
+            if (tripHeadSignCounts2 != 0 // NOT merged head-sign
                 && (tripHeadSignCounts1 - tripHeadSignCounts2) > headSignCountsDiff
             ) {
+                MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #1 head-sign more used than #2")
                 return Pair(
                     stopTimesHeadSign1,
                     mergeBeforeFirstCommonStop(
@@ -396,6 +441,7 @@ object MDirectionHeadSignFinder {
                 if (otherStopsUsingSameHeadSignCounts1 == 0 // #1 not used for other trips
                     && otherStopsUsingSameHeadSignCounts2 > 0 // #2 used for other trips
                 ) {
+                    MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #1 unique to this trip while #2 used for others")
                     return Pair(
                         stopTimesHeadSign1,
                         mergeBeforeFirstCommonStop(
@@ -410,6 +456,7 @@ object MDirectionHeadSignFinder {
                 if (otherStopsUsingSameHeadSignCounts2 == 0 // #2 not used for other trips
                     && otherStopsUsingSameHeadSignCounts1 > 0 // #1  used for other trips
                 ) {
+                    MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #2 unique to this trip while #1 used for others")
                     return Pair(
                         stopTimesHeadSign2,
                         mergeBeforeFirstCommonStop(
@@ -425,6 +472,7 @@ object MDirectionHeadSignFinder {
                     && tripHeadSignCounts2 != 0 // not-merged
                     && abs(tripHeadSignCounts2 - tripHeadSignCounts1) <= headSignCountsDiff
                 ) {
+                    MTLog.log(!dataLossAuthorized, "$routeId: $directionId: merge #1 / #2 head-signs")
                     return Pair(
                         MTrip.mergeHeadsignValue(stopTimesHeadSign1, stopTimesHeadSign2) ?: EMPTY,
                         pickAndMergeLongestTripStopTimes(
@@ -440,6 +488,7 @@ object MDirectionHeadSignFinder {
                 if (tripHeadSignCounts1 != 0 // not-merged
                     && stopTimesHeadSign1.contains(stopTimesHeadSign2)
                 ) {
+                    MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #2 head-sign included in #1")
                     return Pair(
                         stopTimesHeadSign2,
                         mergeBeforeFirstCommonStop(
@@ -454,6 +503,7 @@ object MDirectionHeadSignFinder {
                 if (tripHeadSignCounts2 != 0  // not-merged
                     && stopTimesHeadSign2.contains(stopTimesHeadSign1)
                 ) {
+                    MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #1 head-sign included in #2")
                     return Pair(
                         stopTimesHeadSign1,
                         mergeBeforeFirstCommonStop(
@@ -468,6 +518,7 @@ object MDirectionHeadSignFinder {
                 if (tripHeadSignCounts1 == 0 // was merged
                     && stopTimesHeadSign1.contains(stopTimesHeadSign2)
                 ) {
+                    MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #2 head-sign included in #1 (merged)")
                     return Pair( // keep #1
                         stopTimesHeadSign1,
                         mergeBeforeFirstCommonStop(
@@ -482,6 +533,7 @@ object MDirectionHeadSignFinder {
                 if (tripHeadSignCounts2 == 0  // was merged
                     && stopTimesHeadSign2.contains(stopTimesHeadSign1)
                 ) {
+                    MTLog.log(!dataLossAuthorized, "$routeId: $directionId: #1 head-sign included in #2 (merged)")
                     return Pair( // keep #2
                         stopTimesHeadSign2,
                         mergeBeforeFirstCommonStop(
@@ -507,6 +559,7 @@ object MDirectionHeadSignFinder {
                         lastStop2.stopLat, lastStop2.stopLong
                     )
                     if (distanceToStop1 > distanceToStop2) {
+                        MTLog.log(!dataLossAuthorized, "$routeId: $directionId: distance from last common to #1 last > #2")
                         return Pair( // keep #1
                             stopTimesHeadSign1,
                             mergeBeforeFirstCommonStop(
@@ -518,6 +571,7 @@ object MDirectionHeadSignFinder {
                             )
                         )
                     } else {
+                        MTLog.log(!dataLossAuthorized, "$routeId: $directionId: distance from last common to #2 last > #1")
                         return Pair( // keep #2
                             stopTimesHeadSign2,
                             mergeBeforeFirstCommonStop(
@@ -542,6 +596,7 @@ object MDirectionHeadSignFinder {
                         "!"
             )
         }
+        MTLog.log(!dataLossAuthorized, "$routeId: $directionId: unresolved situation > no head-sign.")
         return null
     }
 

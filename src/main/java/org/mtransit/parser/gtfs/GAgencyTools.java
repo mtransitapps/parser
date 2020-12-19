@@ -76,6 +76,8 @@ public interface GAgencyTools {
 
 	boolean directionHeadSignsDescriptive(@NotNull Map<Integer, String> directionHeadSigns);
 
+	boolean directionHeadSignDescriptive(@NotNull String directionHeadSign);
+
 	boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge);
 
 	boolean excludeTripNullable(@Nullable GTrip gTrip);
