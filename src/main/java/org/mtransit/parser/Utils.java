@@ -120,21 +120,23 @@ public final class Utils {
 
 	public static boolean isUppercaseOnly(@NotNull CharSequence str, boolean allowWhitespace, boolean checkAZOnly) {
 		final int len = str.length();
+		char aChar;
 		for (int i = 0; i < len; i++) {
-			if (checkAZOnly && !Character.isAlphabetic(str.charAt(i))) {
+			aChar = str.charAt(i);
+			if (checkAZOnly && !Character.isAlphabetic(aChar)) {
 				continue;
 			}
-			if (Character.isWhitespace(str.charAt(i))) {
+			if (Character.isWhitespace(aChar)) {
 				if (allowWhitespace) {
 					continue;
 				} else {
 					return false;
 				}
 			}
-			if (checkAZOnly && !Character.isAlphabetic(str.charAt(i))) {
+			if (checkAZOnly && !Character.isAlphabetic(aChar)) {
 				continue;
 			}
-			if (!Character.isUpperCase(str.charAt(i))) {
+			if (!Character.isUpperCase(aChar)) {
 				// MTLog.logDebug(" > Non-upper-case character found '%s' at %d in '%s'.", str.charAt(i), i, str);
 				return false;
 			}

@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"WeakerAccess", "unused", "RedundantSuppression"})
 public final class CleanUtils {
 
 	private CleanUtils() {
@@ -60,6 +60,7 @@ public final class CleanUtils {
 		label = CLEAN_P1.matcher(label).replaceAll(CLEAN_P1_REPLACEMENT);
 		label = CLEAN_P2.matcher(label).replaceAll(CLEAN_P2_REPLACEMENT);
 		label = WordUtils.capitalize(label, SPACE_CHAR, '-', '–', '/', '(', '.');
+		label = removePoints(label);
 		return label.trim();
 	}
 
@@ -171,7 +172,8 @@ public final class CleanUtils {
 			Pattern.compile("(/ " + PLACE_CHAR_TSSE + ")", Pattern.CASE_INSENSITIVE) //
 	};
 
-	public static Pattern cleanWords(String... words) {
+	@NotNull
+	public static Pattern cleanWords(@Nullable String... words) {
 		if (words == null || words.length <= 0) {
 			throw new RuntimeException("Cannot clean empty list of words!");
 		}
@@ -188,14 +190,16 @@ public final class CleanUtils {
 		return Pattern.compile(sb.toString(), Pattern.CASE_INSENSITIVE);
 	}
 
-	public static String cleanWordsReplacement(String replacement) {
+	@NotNull
+	public static String cleanWordsReplacement(@Nullable String replacement) {
 		if (replacement == null || replacement.length() <= 0) {
 			return Constants.EMPTY;
 		}
 		return "$2" + replacement + "$4";
 	}
 
-	public static Pattern cleanWordsPlural(String... words) {
+	@NotNull
+	public static Pattern cleanWordsPlural(@Nullable String... words) {
 		if (words == null || words.length <= 0) {
 			throw new RuntimeException("Cannot clean empty list of words!");
 		}
@@ -212,7 +216,8 @@ public final class CleanUtils {
 		return Pattern.compile(sb.toString(), Pattern.CASE_INSENSITIVE);
 	}
 
-	public static String cleanWordsReplacementPlural(String replacement) {
+	@NotNull
+	public static String cleanWordsReplacementPlural(@Nullable String replacement) {
 		if (replacement == null || replacement.length() <= 0) {
 			return Constants.EMPTY;
 		}
@@ -236,7 +241,8 @@ public final class CleanUtils {
 
 	public static final String SLASH_SPACE = "/ ";
 
-	public static String cleanLabelFR(String label) {
+	@NotNull
+	public static String cleanLabelFR(@NotNull String label) {
 		label = cleanSlashes(label);
 		label = CLEAN_PARENTHESE1.matcher(label).replaceAll(CLEAN_PARENTHESE1_REPLACEMENT);
 		label = CLEAN_PARENTHESE2.matcher(label).replaceAll(CLEAN_PARENTHESE2_REPLACEMENT);
@@ -251,7 +257,8 @@ public final class CleanUtils {
 	private static final Pattern CLEAN_SLASH = Pattern.compile("(\\S)[\\s]*[/][\\s]*(\\S)");
 	private static final String CLEAN_SLASH_REPLACEMENT = "$1" + " / " + "$2";
 
-	public static String cleanSlashes(String string) {
+	@NotNull
+	public static String cleanSlashes(@NotNull String string) {
 		return CLEAN_SLASH.matcher(string).replaceAll(CLEAN_SLASH_REPLACEMENT);
 	}
 
@@ -261,7 +268,8 @@ public final class CleanUtils {
 	private static final Pattern POINTS = Pattern.compile("((^|\\W)([\\w]+)\\.(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String POINTS_REPLACEMENT = "$2" + "$3" + "$4";
 
-	public static String removePoints(String string) {
+	@NotNull
+	public static String removePoints(@NotNull String string) {
 		string = POINT1.matcher(string).replaceAll(POINT1_REPLACEMENT);
 		string = POINTS.matcher(string).replaceAll(POINTS_REPLACEMENT);
 		return string;
@@ -269,31 +277,36 @@ public final class CleanUtils {
 
 	private static final Pattern STARTS_WITH_VERS = Pattern.compile("((^|^.* )vers )", Pattern.CASE_INSENSITIVE);
 
-	public static String keepToFR(String string) {
+	@NotNull
+	public static String keepToFR(@NotNull String string) {
 		string = STARTS_WITH_VERS.matcher(string).replaceAll(Constants.EMPTY);
 		return string;
 	}
 
 	private static final Pattern STARTS_WITH_TO = Pattern.compile("((^|^.* )to )", Pattern.CASE_INSENSITIVE);
 
-	public static String keepTo(String string) {
+	@NotNull
+	public static String keepTo(@NotNull String string) {
 		string = STARTS_WITH_TO.matcher(string).replaceAll(Constants.EMPTY);
 		return string;
 	}
 
 	private static final Pattern ENDS_WITH_VIA = Pattern.compile("( via .*$)", Pattern.CASE_INSENSITIVE);
 
-	public static String removeVia(String string) {
+	@NotNull
+	public static String removeVia(@NotNull String string) {
 		string = ENDS_WITH_VIA.matcher(string).replaceAll(Constants.EMPTY);
 		return string;
 	}
 
 	@Deprecated
-	public static String keepToAndRevoveVia(String string) {
+	@NotNull
+	public static String keepToAndRevoveVia(@NotNull String string) {
 		return keepToAndRemoveVia(string);
 	}
 
-	public static String keepToAndRemoveVia(String string) {
+	@NotNull
+	public static String keepToAndRemoveVia(@NotNull String string) {
 		string = keepTo(string);
 		string = removeVia(string);
 		return string;
@@ -397,7 +410,8 @@ public final class CleanUtils {
 	private static final Pattern NORTHBOUND_ = cleanWords("northbound", "nb");
 	private static final String NORTHBOUND_REPLACEMENT = cleanWordsReplacement("NB");
 
-	public static String cleanBounds(String string) {
+	@NotNull
+	public static String cleanBounds(@NotNull String string) {
 		string = EASTBOUND_.matcher(string).replaceAll(EASTBOUND_REPLACEMENT);
 		string = WESTBOUND_.matcher(string).replaceAll(WESTBOUND_REPLACEMENT);
 		string = SOUTHBOUND_.matcher(string).replaceAll(SOUTHBOUND_REPLACEMENT);
@@ -408,7 +422,8 @@ public final class CleanUtils {
 	private static final Pattern ID_MERGED = Pattern.compile("(([0-9]*)_merged_([0-9]*))", Pattern.CASE_INSENSITIVE);
 	private static final String ID_MERGED_REPLACEMENT = "$2";
 
-	public static String cleanMergedID(String mergedId) {
+	@NotNull
+	public static String cleanMergedID(@NotNull String mergedId) {
 		return ID_MERGED.matcher(mergedId).replaceAll(ID_MERGED_REPLACEMENT);
 	}
 
@@ -520,7 +535,8 @@ public final class CleanUtils {
 	private static final Pattern OPPOSITE_ = cleanWords("opposite");
 	private static final String OPPOSITE_REPLACEMENT = cleanWordsReplacement("Opp"); // not official
 
-	public static String cleanStreetTypes(String string) {
+	@NotNull
+	public static String cleanStreetTypes(@NotNull String string) {
 		string = LANE.matcher(string).replaceAll(LANE_REPLACEMENT);
 		string = PLACE.matcher(string).replaceAll(PLACE_REPLACEMENT);
 		string = PLAZA.matcher(string).replaceAll(PLAZA_REPLACEMENT);
@@ -607,7 +623,8 @@ public final class CleanUtils {
 	private static final Pattern FR_CA_TERRASSES = cleanWords("terrasses");
 	private static final String FR_CA_TERRASSES_REPLACEMENT = cleanWordsReplacement("Tsses");
 
-	public static String cleanStreetTypesFRCA(String string) {
+	@NotNull
+	public static String cleanStreetTypesFRCA(@NotNull String string) {
 		string = FR_CA_AVENUE.matcher(string).replaceAll(FR_CA_AVENUE_REPLACEMENT);
 		string = FR_CA_AUTOROUTE.matcher(string).replaceAll(FR_CA_AUTOROUTE_REPLACEMENT);
 		string = FR_CA_BOULEVARD.matcher(string).replaceAll(FR_CA_BOULEVARD_REPLACEMENT);

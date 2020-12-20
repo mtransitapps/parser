@@ -101,4 +101,14 @@ public class CleanUtilsTest {
 		// Assert
 		assertEquals("UdeS", result);
 	}
+
+	@Test
+	public void testRemovePointsSimple() {
+		// Arrange
+		String string = "Mt. Paul";
+		// Act
+		String result = CleanUtils.removePoints(string);
+		// Assert
+		assertEquals("Mt Paul", result);
+	}
 }
