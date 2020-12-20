@@ -342,7 +342,7 @@ public final class CleanUtils {
 		while (matcher.find()) {
 			sb.append(matcher.group(1)); // before
 			String word = matcher.group(2);
-			if (Utils.isUppercaseOnly(word, false, true)) {
+			if (word.length() > 1 && Utils.isUppercaseOnly(word, false, true)) {
 				if (containsIgnoreCase(word, ignoreWords)) {
 					sb.append(word);
 				} else {
