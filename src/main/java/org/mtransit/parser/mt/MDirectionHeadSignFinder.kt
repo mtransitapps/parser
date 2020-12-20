@@ -120,7 +120,8 @@ object MDirectionHeadSignFinder {
             .eachCount()
         // 1- first round of easy merging of trips not branching
         val distinctTripHeadSignAndStopTimes = mutableListOf<Pair<String, List<GStopTime>>>()
-        for ((tripHeadSign, tripStopTimes) in gTripsHeadSignAndStopTimes) {
+        val distinctTripsHeadSignAndStopTimes = gTripsHeadSignAndStopTimes.distinct()
+        for ((tripHeadSign, tripStopTimes) in distinctTripsHeadSignAndStopTimes) {
             if (distinctTripHeadSignAndStopTimes.isEmpty()) {
                 distinctTripHeadSignAndStopTimes.add(Pair(tripHeadSign, tripStopTimes))
                 continue // 1st trip
