@@ -77,7 +77,6 @@ object MDirectionHeadSignFinder {
         agencyTools: GAgencyTools
     ): Pair<String, Int>? {
         val gTripsHeadSignAndStopTimes = gRouteTrips
-            .asSequence()
             .filter { gTrip ->
                 gTrip.directionIdOrDefault == directionId
             }.map { gTrip ->
@@ -90,8 +89,7 @@ object MDirectionHeadSignFinder {
                 stopTimes.isEmpty() // exclude trips w/o stop times
             }.sortedByDescending { (_, stopTimes) -> // longest first to avoid no intersect between trips
                 stopTimes.size
-            }.distinct()
-            .toList()
+            }
         // 0 - check if merge necessary at all
         if (gTripsHeadSignAndStopTimes.isEmpty()) {
             MTLog.log("$routeId: $directionId: no trips -> no head-sign.")
@@ -104,13 +102,13 @@ object MDirectionHeadSignFinder {
                     stopTimes.last().stopIdInt
                 )
             }
-        val distinctTripHeadSigns = tripHeadSignAndLastStopIdInt
+        val distinctTripHeadSignAndLastStopIdInt = tripHeadSignAndLastStopIdInt
             .distinct()
-        if (distinctTripHeadSigns.size == 1) {
-            MTLog.log("$routeId: $directionId: 1 distinct trip head-sign: '${distinctTripHeadSigns.first().first}'.")
-            return distinctTripHeadSigns.first()
+        if (distinctTripHeadSignAndLastStopIdInt.size == 1) {
+            MTLog.log("$routeId: $directionId: 1 distinct trip head-sign: '${distinctTripHeadSignAndLastStopIdInt.first().first}'.")
+            return distinctTripHeadSignAndLastStopIdInt.first()
         }
-        val distinctTripHeadSignsNotBlank = distinctTripHeadSigns
+        val distinctTripHeadSignsNotBlank = distinctTripHeadSignAndLastStopIdInt
             .filterNot { (headSign, _) -> headSign.isBlank() }
             .distinctBy { (headSign, _) -> headSign }
         if (distinctTripHeadSignsNotBlank.size == 1) {
