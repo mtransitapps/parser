@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.StringUtils;
@@ -37,6 +38,9 @@ import java.util.regex.Pattern;
 public class GReader {
 
 	public static final Charset UTF_8 = StandardCharsets.UTF_8;
+
+	private static final boolean LOG_EXCLUDE = false;
+	// private static final boolean LOG_EXCLUDE = true; // DEBUG
 
 	@NotNull
 	public static GSpec readGtfsZipFile(@NotNull String gtfsFile,
@@ -375,11 +379,11 @@ public class GReader {
 					line.get(GTrip.TRIP_SHORT_NAME)
 			);
 			if (agencyTools.excludeTrip(gTrip)) {
-				MTLog.logDebug("Exclude trip: %s.", gTrip.toStringPlus());
+				logExclude("Exclude trip: %s.", gTrip.toStringPlus());
 				return;
 			}
 			if (agencyTools.excludeRouteNullable(gSpec.getRoute(gTrip.getRouteIdInt()))) {
-				MTLog.logDebug("Exclude trip (!agency): %s.", gTrip.toStringPlus());
+				logExclude("Exclude trip (!route): %s.", gTrip.toStringPlus());
 				return;
 			}
 			gSpec.addTrip(gTrip);
@@ -429,19 +433,26 @@ public class GReader {
 					routeColor == null ? null : routeColor.trim()
 			);
 			if (agencyTools.excludeRoute(gRoute)) {
-				MTLog.logDebug("Exclude route: %s.", gRoute.toStringPlus());
+				logExclude("Exclude route: %s.", gRoute.toStringPlus());
 				return;
 			}
 			final Integer routeAgencyIdInt = gRoute.getAgencyIdInt();
 			if (routeAgencyIdInt != null
 					&& agencyTools.excludeAgencyNullable(gSpec.getAgency(routeAgencyIdInt))) {
-				MTLog.logDebug("Exclude route (!agency): %s.", gRoute.toStringPlus());
+				logExclude("Exclude route (!agency): %s.", gRoute.toStringPlus());
 				return;
 			}
 			gSpec.addRoute(gRoute);
 		} catch (Exception e) {
 			MTLog.logFatal(e, "Error while parsing route line %s!\n", line);
 		}
+	}
+
+	private static void logExclude(@NotNull String format, @Nullable Object... args) {
+		if (!LOG_EXCLUDE) {
+			return;
+		}
+		MTLog.logDebug(format, args);
 	}
 
 	private GReader() {

@@ -3,6 +3,7 @@ package org.mtransit.parser.mt.data
 import org.mtransit.parser.CleanUtils
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
+import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
@@ -61,6 +62,9 @@ data class MSchedule(
     }
 
     fun setHeadsign(headsignType: Int, headsignValue: String?) {
+        if (headsignValue.isNullOrBlank()) {
+            MTLog.log("Setting '$headsignValue' head-sign! (type:$headsignType)")
+        }
         this.headsignType = headsignType
         this.headsignValue = headsignValue
     }

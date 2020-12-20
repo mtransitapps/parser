@@ -645,7 +645,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								  long mTripId,
 								  Integer tripServiceIdInt,
 								  int originalTripHeadsignType,
-								  String originalTripHeadsignValue,
+								  @Nullable String originalTripHeadsignValue,
 								  String tripStopTimesHeadsign,
 								  GTripStop gTripStop,
 								  int mStopId,
@@ -718,7 +718,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_STRING, stopHeadsign);
 				tripStopTimesHeadsign = setTripStopTimesHeadsign(tripStopTimesHeadsign, stopHeadsign);
 			} else {
-				mSchedule.setHeadsign(originalTripHeadsignType, originalTripHeadsignValue);
+				if (!StringUtils.isBlank(originalTripHeadsignValue)) {
+					mSchedule.setHeadsign(originalTripHeadsignType, originalTripHeadsignValue);
+				}
 			}
 			mSchedules.put(mSchedule.getUID(), mSchedule);
 			addedMTripIdAndGStopIds.put(tripIdStopId, gStopTime.getStopSequence());
@@ -944,24 +946,29 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				ts1Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts1GStop.getStopLat(), ts1GStop.getStopLong());
 				ts2Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts2GStop.getStopLat(), ts2GStop.getStopLong());
 				if (ts1Distance < ts2Distance) {
-					MTLog.log("" + this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
-							+ "|stopID2:" + ts2.getStopId() + "] (lastStopID:" + last.getStopId() + "|distance1:" + ts1Distance + "|distance2:" + ts2Distance
-							+ ") > insert: " + ts1 + " instead of " + ts2);
+					//noinspection deprecation
+					MTLog.log("" + this.routeId + ": trip ID '" + ts1.getTripId() + "': resolved using distance with stop #1"
+							+ "\n - last stop ID: " + lastGStop.getStopId() + " (" + lastGStop.getStopLat() + "," + lastGStop.getStopLong() + ")"
+							+ "\n - next stop ID #1: " + ts1GStop.getStopId() + " (" + ts1GStop.getStopLat() + "," + ts1GStop.getStopLong() + ")" + " > distance: " + ts1Distance + "."
+							+ "\n - next stop ID #2: " + ts2GStop.getStopId() + " (" + ts2GStop.getStopLat() + "," + ts2GStop.getStopLong() + ")" + " > distance: " + ts2Distance + "."
+					);
 					newList.add(ts1);
 					newListStopIds.add(ts1.getStopId());
 					last = ts1;
 					i1++;
-					continue;
 				} else {
-					MTLog.log("" + this.routeId + ": Resolved using last distance [tripID: " + ts1.getTripId() + "|stopID1:" + ts1.getStopId()
-							+ "|stopID2:" + ts2.getStopId() + "] (lastStopID:" + last.getStopId() + "|distance1:" + ts1Distance + "|distance2:" + ts2Distance
-							+ ") > insert: " + ts2 + " instead of " + ts1);
+					//noinspection deprecation
+					MTLog.log("" + this.routeId + ": trip ID '" + ts1.getTripId() + "': resolved using distance with stop #2"
+							+ "\n - last stop ID: " + lastGStop.getStopId() + " (" + lastGStop.getStopLat() + "," + lastGStop.getStopLong() + ")"
+							+ "\n - next stop ID #1: " + ts1GStop.getStopId() + " (" + ts1GStop.getStopLat() + "," + ts1GStop.getStopLong() + ")" + " > distance: " + ts1Distance + "."
+							+ "\n - next stop ID #2: " + ts2GStop.getStopId() + " (" + ts2GStop.getStopLat() + "," + ts2GStop.getStopLong() + ")" + " > distance: " + ts2Distance + "."
+					);
 					newList.add(ts2);
 					newListStopIds.add(ts2.getStopId());
 					last = ts2;
 					i2++;
-					continue;
 				}
+				continue;
 			}
 			// try to find 1rst common stop
 			commonStopAndPrevious = findFirstCommonStop(list1, list2);
