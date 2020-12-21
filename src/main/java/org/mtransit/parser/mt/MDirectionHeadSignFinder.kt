@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt
 
+import org.mtransit.parser.Constants
 import org.mtransit.parser.LocationUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.StringUtils.EMPTY
@@ -176,8 +177,20 @@ object MDirectionHeadSignFinder {
         MTLog.log("$routeId: $directionId: COMPLEX merge required for: ")
         distinctTripHeadSignAndStopTimes.forEach { (headSign, stopTimes) ->
             MTLog.log(
-                "$routeId: $directionId: '$headSign':"
-                        + "\n ${stopTimes.size} stops: ${stopTimes.map { gStopTime -> "\n    - ${gStopTime.toStringPlus()}" }}"
+                "$routeId: $directionId: '$headSign':" +
+                        if (Constants.DEBUG) {
+                            "\n"
+                        } else {
+                            ""
+                        } + " ${stopTimes.size} stops: ${
+                    stopTimes.map { gStopTime ->
+                        if (Constants.DEBUG) {
+                            "\n    - "
+                        } else {
+                            ""
+                        } + gStopTime.toStringPlus()
+                    }
+                }"
             )
         }
         var candidateHeadSignAndStopTimes: Pair<String, List<GStopTime>>? = null
@@ -358,7 +371,7 @@ object MDirectionHeadSignFinder {
                 ) {
                     MTLog.log(
                         !dataLossAuthorized,
-                        "$routeId: $directionId: #2 goes for WAY more stops ($stopIdIntsAfterCommonCount2) than # ($stopIdIntsAfterCommonCount1)1"
+                        "$routeId: $directionId: #2 goes for WAY more stops ($stopIdIntsAfterCommonCount2) than #1 ($stopIdIntsAfterCommonCount1)"
                     )
                     return Pair(
                         stopTimesHeadSign2,

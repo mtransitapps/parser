@@ -684,7 +684,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
 						// TODO later, when UI can display multiple times same stop/POI & schedules are affected to a specific sequence, keep both
 					} else {
-						MTLog.log("%s: parseStopTimes() > SKIP same stop & descent only %s.", this.routeId, gStopTime);
+						MTLog.log("%s: parseStopTimes() > SKIP same stop & descent only %s.", this.routeId, gStopTime.toStringPlus());
 						continue;
 					}
 				}
@@ -905,12 +905,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				lastInL1 = list1StopIds.contains(last.getStopId());
 				lastInL2 = list2StopIds.contains(last.getStopId());
 				if (lastInL1 && !lastInL2) {
-					MTLog.log("" + this.routeId + ": trip ID '" + ts1.getTripId() + "': resolved using last with stop #1 ("
-							+ "last: " + last.getStopId()
-							+ ", #1: " + ts1.getStopId()
-							+ ", #2: " + ts2.getStopId()
-							+ ")"
-					);
+					MTLog.log("" + this.routeId
+							+ ": pick t:" + ts1.getTripId() + ">s:" + ts1.getStopId()
+							+ " in same list w/ s:" + last.getStopId()
+							+ " instead of t:" + ts2.getTripId() + ">s:" + ts2.getStopId());
 					newList.add(ts1);
 					newListStopIds.add(ts1.getStopId());
 					last = ts1;
@@ -918,12 +916,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					continue;
 				}
 				if (!lastInL1 && lastInL2) {
-					MTLog.log("" + this.routeId + ": trip ID '" + ts1.getTripId() + "': resolved using last with stop #2 ("
-							+ "last: " + last.getStopId()
-							+ ", #1: " + ts1.getStopId()
-							+ ", #2: " + ts2.getStopId()
-							+ ")"
-					);
+					MTLog.log("" + this.routeId
+							+ ": pick t:" + ts2.getTripId() + ">s:" + ts2.getStopId()
+							+ " in same list w/ s:" + last.getStopId()
+							+ " instead of t:" + ts1.getTripId() + ">s:" + ts1.getStopId());
 					newList.add(ts2);
 					newListStopIds.add(ts2.getStopId());
 					last = ts2;
@@ -954,23 +950,19 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				ts1Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts1GStop.getStopLat(), ts1GStop.getStopLong());
 				ts2Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts2GStop.getStopLat(), ts2GStop.getStopLong());
 				if (ts1Distance < ts2Distance) {
-					//noinspection deprecation
-					MTLog.log("" + this.routeId + ": trip ID '" + ts1.getTripId() + "': resolved using distance with stop #1"
-							+ "\n - last stop ID: " + lastGStop.getStopId() + " (" + lastGStop.getStopLat() + "," + lastGStop.getStopLong() + ")"
-							+ "\n - next stop ID #1: " + ts1GStop.getStopId() + " (" + ts1GStop.getStopLat() + "," + ts1GStop.getStopLong() + ")" + " > distance: " + ts1Distance + "."
-							+ "\n - next stop ID #2: " + ts2GStop.getStopId() + " (" + ts2GStop.getStopLat() + "," + ts2GStop.getStopLong() + ")" + " > distance: " + ts2Distance + "."
-					);
+					MTLog.log("" + this.routeId
+							+ ": pick t:" + ts1.getTripId() + ">" + ts1GStop.toStringPlus()
+							+ " closest (" + (ts2Distance - ts1Distance) + ") to " + lastGStop.toStringPlus()
+							+ " instead of t:" + ts2.getTripId() + ">" + ts2GStop.toStringPlus());
 					newList.add(ts1);
 					newListStopIds.add(ts1.getStopId());
 					last = ts1;
 					i1++;
 				} else {
-					//noinspection deprecation
-					MTLog.log("" + this.routeId + ": trip ID '" + ts1.getTripId() + "': resolved using distance with stop #2"
-							+ "\n - last stop ID: " + lastGStop.getStopId() + " (" + lastGStop.getStopLat() + "," + lastGStop.getStopLong() + ")"
-							+ "\n - next stop ID #1: " + ts1GStop.getStopId() + " (" + ts1GStop.getStopLat() + "," + ts1GStop.getStopLong() + ")" + " > distance: " + ts1Distance + "."
-							+ "\n - next stop ID #2: " + ts2GStop.getStopId() + " (" + ts2GStop.getStopLat() + "," + ts2GStop.getStopLong() + ")" + " > distance: " + ts2Distance + "."
-					);
+					MTLog.log("" + this.routeId
+							+ ": pick t:" + ts2.getTripId() + ">" + ts2GStop.toStringPlus()
+							+ " closest (" + (ts1Distance - ts2Distance) + ") to " + lastGStop.toStringPlus()
+							+ " instead of t:" + ts1.getTripId() + ">" + ts1GStop.toStringPlus());
 					newList.add(ts2);
 					newListStopIds.add(ts2.getStopId());
 					last = ts2;

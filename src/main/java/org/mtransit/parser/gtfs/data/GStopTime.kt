@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 import java.util.Date
 
@@ -122,11 +123,16 @@ data class GStopTime(
         throw MTLog.Fatal("Unexpected stop times to compare: '$this' & '$other'!")
     }
 
+    @JvmOverloads
     @Suppress("unused")
-    fun toStringPlus(): String {
-        return toString() +
-                "+(tripId:$_tripId)" +
-                "+(stopId:$_stopId)"
+    fun toStringPlus(debug: Boolean = Constants.DEBUG): String {
+        return if (debug) { // longer
+            return toString() +
+                    "+(tripId:$_tripId)" +
+                    "+(stopId:$_stopId)"
+        } else { // shorter #CI
+            "{t:$_tripId,s:$_stopId,#:$stopSequence}"
+        }
     }
 
     companion object {

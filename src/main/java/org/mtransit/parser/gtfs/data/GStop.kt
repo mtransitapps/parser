@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.parser.Constants
+
 // https://developers.google.com/transit/gtfs/reference#stops_fields
 data class GStop(
     val stopIdInt: Int,
@@ -32,10 +34,21 @@ data class GStop(
             return GIDs.getString(stopIdInt)
         }
 
+    @JvmOverloads
     @Suppress("unused")
-    fun toStringPlus(): String {
-        return toString() +
-                "+(stopId:$_stopId)"
+    fun toStringPlus(debug: Boolean = Constants.DEBUG): String {
+        return if (debug) { // longer
+            return toString() +
+                    "+(stopId:$_stopId)"
+        } else { // shorter #CI
+            "{s:$_stopId${
+                if (stopCode.isNotBlank() && stopCode != _stopId) {
+                    ",c:$stopCode"
+                } else {
+                    ""
+                }
+            }}"
+        }
     }
 
     companion object {
