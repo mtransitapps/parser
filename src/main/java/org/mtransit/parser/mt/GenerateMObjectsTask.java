@@ -905,8 +905,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				lastInL1 = list1StopIds.contains(last.getStopId());
 				lastInL2 = list2StopIds.contains(last.getStopId());
 				if (lastInL1 && !lastInL2) {
-					MTLog.log("%s: Resolved using last [tripID:%s|ts1.stopID:%s|ts2.stopID:%s] (last.stopID:%s) > insert: %s instead of %s.",
-							this.routeId, ts1.getTripId(), ts1.getStopId(), ts2.getStopId(), last.getStopId(), ts1, ts2);
+					MTLog.log("" + this.routeId + ": trip ID '" + ts1.getTripId() + "': resolved using last with stop #1 ("
+							+ "last: " + last.getStopId()
+							+ ", #1: " + ts1.getStopId()
+							+ ", #2: " + ts2.getStopId()
+							+ ")"
+					);
 					newList.add(ts1);
 					newListStopIds.add(ts1.getStopId());
 					last = ts1;
@@ -914,8 +918,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					continue;
 				}
 				if (!lastInL1 && lastInL2) {
-					MTLog.log("%s: Resolved using last [tripID:%s|ts1.stopID:%s|ts2.stopID:%s] (last.stopID:%s) > insert: %s instead of %s.",
-							this.routeId, ts1.getTripId(), ts1.getStopId(), ts2.getStopId(), last.getStopId(), ts2, ts1);
+					MTLog.log("" + this.routeId + ": trip ID '" + ts1.getTripId() + "': resolved using last with stop #2 ("
+							+ "last: " + last.getStopId()
+							+ ", #1: " + ts1.getStopId()
+							+ ", #2: " + ts2.getStopId()
+							+ ")"
+					);
 					newList.add(ts2);
 					newListStopIds.add(ts2.getStopId());
 					last = ts2;
