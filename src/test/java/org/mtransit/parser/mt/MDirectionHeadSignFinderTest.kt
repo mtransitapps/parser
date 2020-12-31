@@ -4,6 +4,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -36,9 +37,9 @@ class MDirectionHeadSignFinderTest {
 
     @Before
     fun setUp() {
-        `when`(agencyTools.cleanDirectionHeadsign(anyString()))
+        `when`(agencyTools.cleanDirectionHeadsign(anyBoolean(), anyString()))
             .then {
-                it.arguments[0]
+                it.arguments[1]
             }
     }
 

@@ -278,9 +278,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return tripHeadsign;
 	}
 
+	@Deprecated
 	@NotNull
 	@Override
 	public String cleanDirectionHeadsign(@NotNull String directionHeadSign) {
+		return cleanDirectionHeadsign(false, directionHeadSign);
+	}
+
+	@NotNull
+	@Override
+	public String cleanDirectionHeadsign(boolean fromStopName, @NotNull String directionHeadSign) {
 		return cleanTripHeadsign(directionHeadSign);
 	}
 
@@ -292,6 +299,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean directionHeadSignsDescriptive(@NotNull Map<Integer, String> directionHeadSigns) {
 		return directionHeadSignsDescriptiveS(directionHeadSigns);
+	}
+
+	@Nullable
+	@Override
+	public String selectDirectionHeadSign(@Nullable String headSign1, @Nullable String headSign2) {
+		return null; // optimize direction finder by selecting based on head-sign only
 	}
 
 	static boolean directionHeadSignsDescriptiveS(@NotNull Map<Integer, String> directionHeadSigns) {

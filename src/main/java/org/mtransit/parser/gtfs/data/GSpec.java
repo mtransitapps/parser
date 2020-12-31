@@ -25,6 +25,9 @@ import java.util.concurrent.TimeUnit;
 // https://developers.google.com/transit/gtfs/reference#FeedFiles
 public class GSpec {
 
+	private static final boolean LOG_REMOVED = false;
+	// private static final boolean LOG_REMOVED = true; // DEBUG
+
 	@NotNull
 	private final HashMap<Integer, GAgency> agencies = new HashMap<>();
 	@NotNull
@@ -514,7 +517,7 @@ public class GSpec {
 				GCalendar gCalendar = itGCalendar.next();
 				if (!routeTripServiceIdInts.contains(gCalendar.getServiceIdInt())) {
 					itGCalendar.remove();
-					MTLog.logDebug("Removed calendar: %s.", gCalendar.toStringPlus());
+					logRemoved("Removed calendar: %s.", gCalendar.toStringPlus());
 					r++;
 					MTLog.logPOINT();
 				}
@@ -524,7 +527,7 @@ public class GSpec {
 				GCalendarDate gCalendarDate = itGCalendarDate.next();
 				if (!routeTripServiceIdInts.contains(gCalendarDate.getServiceIdInt())) {
 					itGCalendarDate.remove();
-					MTLog.logDebug("Removed calendar date: %s.", gCalendarDate.toStringPlus());
+					logRemoved("Removed calendar date: %s.", gCalendarDate.toStringPlus());
 					r++;
 					MTLog.logPOINT();
 				}
@@ -595,5 +598,12 @@ public class GSpec {
 			this.mRouteWithTripIds.add(mRouteId);
 		}
 		MTLog.log("Splitting GTFS by route ID... DONE");
+	}
+
+	private void logRemoved(@NotNull String format, @NotNull Object... args) {
+		if (!LOG_REMOVED) {
+			return;
+		}
+		MTLog.log(format, args);
 	}
 }

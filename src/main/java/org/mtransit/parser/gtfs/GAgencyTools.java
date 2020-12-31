@@ -69,12 +69,19 @@ public interface GAgencyTools {
 	@NotNull
 	String cleanTripHeadsign(@NotNull String tripHeadsign);
 
+	@Deprecated
 	@NotNull
 	String cleanDirectionHeadsign(@NotNull String directionHeadSign);
+
+	@NotNull
+	String cleanDirectionHeadsign(boolean fromStopName, @NotNull String directionHeadSign);
 
 	boolean directionFinderEnabled();
 
 	boolean directionHeadSignsDescriptive(@NotNull Map<Integer, String> directionHeadSigns);
+
+	@Nullable
+	String selectDirectionHeadSign(@Nullable String headSign1, @Nullable String headSign2);
 
 	boolean directionHeadSignDescriptive(@NotNull String directionHeadSign);
 
