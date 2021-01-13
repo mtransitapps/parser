@@ -110,6 +110,17 @@ data class GStopTime(
 
     fun hasStopHeadsign() = !this.stopHeadsign.isNullOrEmpty()
 
+    fun isRegular(minSequence: Int = 0, maxSequence: Int = Int.MAX_VALUE): Boolean {
+        if (this.stopSequence == minSequence && dropOffType == GDropOffType.NO_DROP_OFF.id) {
+            return pickupType == GPickupType.REGULAR.id // 1st stop = NO DROP OFF = regular
+        }
+        if (this.stopSequence == maxSequence && pickupType == GPickupType.NO_PICKUP.id) {
+            return dropOffType == GDropOffType.REGULAR.id // last stop = NO PICKUP = regular
+        }
+        return pickupType == GPickupType.REGULAR.id
+                && dropOffType == GDropOffType.REGULAR.id
+    }
+
     override fun compareTo(other: GStopTime): Int {
         if (this.tripIdInt != other.tripIdInt) {
             return this._tripId.compareTo(other._tripId)
@@ -153,5 +164,13 @@ data class GStopTime(
             stopIdInt: Int,
             stopSequence: Int
         ) = "${tripIdInt}0${stopIdInt}0${stopSequence}".toLong()
+
+        fun Iterable<GStopTime>.minStopSequence(): Int {
+            return this.map { it.stopSequence }.minOrNull() ?: 0
+        }
+
+        fun Iterable<GStopTime>.maxStopSequence(): Int {
+            return this.map { it.stopSequence }.maxOrNull() ?: Int.MAX_VALUE
+        }
     }
 }

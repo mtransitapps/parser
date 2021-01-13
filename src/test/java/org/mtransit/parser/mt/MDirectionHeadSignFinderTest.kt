@@ -124,11 +124,11 @@ class MDirectionHeadSignFinderTest {
         )
         `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId1), null, null))
             .thenReturn(
-                makeStopTimeList(tripId1, 3, 5)
+                makeStopTimeList(tripId1, 1, 5)
             )
         `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId2), null, null))
             .thenReturn(
-                makeStopTimeList(tripId2, 1, 5)
+                makeStopTimeList(tripId2, 3, 5)
             )
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionId, agencyTools)
@@ -148,7 +148,7 @@ class MDirectionHeadSignFinderTest {
         )
         `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId1), null, null))
             .thenReturn(
-                makeStopTimeList(tripId1, 3, 5)
+                makeStopTimeList(tripId1, 1, 5)
             )
         `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId2), null, null))
             .thenReturn(
@@ -172,7 +172,7 @@ class MDirectionHeadSignFinderTest {
         )
         `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId1), null, null))
             .thenReturn(
-                makeStopTimeList(tripId1, 3, 5)
+                makeStopTimeList(tripId1, 1, 5)
             )
         `when`(routeGTFS.getStopTimes(routeId, GIDs.getInt(tripId2), null, null))
             .thenReturn(
@@ -587,7 +587,9 @@ class MDirectionHeadSignFinderTest {
     }
 
     private fun makeStopTimeList(
-        tripId: String, fromStopIdx: Int = 1, toStopIdx: Int,
+        tripId: String,
+        fromStopIdx: Int = 1,
+        toStopIdx: Int,
         lastPickupTypeInt: Int = NO_PICKUP.id,
         firstDropOffTypeInt: Int = NO_DROP_OFF.id
     ): List<GStopTime> {
@@ -610,6 +612,11 @@ class MDirectionHeadSignFinderTest {
     }
 
     private fun makeStopTime(tripId: String, stopIdx: Int, pickupType: Int = GPickupType.REGULAR.id, dropOffTypeInt: Int = GDropOffType.REGULAR.id): GStopTime {
-        return GStopTime(tripId, "00:0$stopIdx:00", "00:0$stopIdx:00", "stop_$stopIdx", stopIdx, "stop head-sign", pickupType, dropOffTypeInt)
+        return GStopTime(
+            tripId,
+            "99:9$stopIdx:99", "99:9$stopIdx:99",
+            "stop_$stopIdx", stopIdx, "stop head-sign",
+            pickupType, dropOffTypeInt
+        )
     }
 }

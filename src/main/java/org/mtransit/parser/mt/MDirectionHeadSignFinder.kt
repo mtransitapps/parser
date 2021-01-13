@@ -8,12 +8,12 @@ import org.mtransit.parser.LocationUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.StringUtils.EMPTY
 import org.mtransit.parser.gtfs.GAgencyTools
-import org.mtransit.parser.gtfs.data.GDropOffType
 import org.mtransit.parser.gtfs.data.GIDs
-import org.mtransit.parser.gtfs.data.GPickupType
 import org.mtransit.parser.gtfs.data.GSpec
 import org.mtransit.parser.gtfs.data.GStop
 import org.mtransit.parser.gtfs.data.GStopTime
+import org.mtransit.parser.gtfs.data.GStopTime.Companion.maxStopSequence
+import org.mtransit.parser.gtfs.data.GStopTime.Companion.minStopSequence
 import org.mtransit.parser.gtfs.data.GTime
 import org.mtransit.parser.gtfs.data.GTrip
 import org.mtransit.parser.mt.data.MTrip
@@ -296,20 +296,26 @@ object MDirectionHeadSignFinder {
     ): Pair<String, List<GStopTime>>? {
         val stopIdInts1 = stopTimesList1.map { gStopTime -> gStopTime.stopIdInt }
         val stopIdInts2 = stopTimesList2.map { gStopTime -> gStopTime.stopIdInt }
-        if (stopIdInts1 == stopIdInts2
-            && stopTimesHeadSign1 == stopTimesHeadSign2
+        if (stopTimesHeadSign1 == stopTimesHeadSign2
+            && stopIdInts1 == stopIdInts2
         ) {
             logMerge(!dataLossAuthorized, "$routeId: $directionId: same head-sign & stops -> '$stopTimesHeadSign1'")
             return stopTimesHeadSign1 to stopTimesList1
         }
-        if (stopIdInts1.size > stopIdInts2.size
-            && stopIdInts1.containsExactList(stopIdInts2)
+        val minStopSequence1: Int = stopTimesList1.minStopSequence()
+        val maxStopSequence1: Int = stopTimesList1.maxStopSequence()
+        val minStopSequence2: Int = stopTimesList2.minStopSequence()
+        val maxStopSequence2: Int = stopTimesList2.maxStopSequence()
+        val regularStopIdInts1 = stopTimesList1.filter { it.isRegular(minStopSequence1, maxStopSequence1) }.map { it.stopIdInt }
+        val regularStopIdInts2 = stopTimesList2.filter { it.isRegular(minStopSequence2, maxStopSequence2) }.map { it.stopIdInt }
+        if (regularStopIdInts1.size > regularStopIdInts2.size
+            && regularStopIdInts1.containsExactList(regularStopIdInts2)
         ) {
             logMerge(!dataLossAuthorized, "$routeId: $directionId: #1 contains #2 -> '$stopTimesHeadSign1'")
             return stopTimesHeadSign1 to stopTimesList1
         }
-        if (stopIdInts2.size > stopIdInts1.size
-            && stopIdInts2.containsExactList(stopIdInts1)
+        if (regularStopIdInts2.size > regularStopIdInts1.size
+            && regularStopIdInts2.containsExactList(regularStopIdInts1)
         ) {
             logMerge(!dataLossAuthorized, "$routeId: $directionId: #2 contains #1 -> '$stopTimesHeadSign2'")
             return stopTimesHeadSign2 to stopTimesList2
@@ -539,7 +545,6 @@ object MDirectionHeadSignFinder {
                 }
             }
             val lastStopIdInt1 = stopTimesList1.last().stopIdInt
-            val totalTripHeadSignsCount: Int = tripHeadSignAndLastStopCounts.map { it.value }.sum()
             val tripHeadSignCounts1 = tripHeadSignAndLastStopCounts[stopTimesHeadSign1 to lastStopIdInt1] ?: 0
             val lastStopIdInt2 = stopTimesList2.last().stopIdInt
             val tripHeadSignCounts2 = tripHeadSignAndLastStopCounts[stopTimesHeadSign2 to lastStopIdInt2] ?: 0
@@ -792,6 +797,8 @@ object MDirectionHeadSignFinder {
         stopIdInts: List<Int>,
         stopIdIntsAfterCommon: List<Int>
     ): Int {
+        val minStopSequence = stopTimesList.minStopSequence()
+        val maxStopSequence = stopTimesList.maxStopSequence()
         var stopIdIntsAfterCommonCount = stopIdIntsAfterCommon.size
         var s = stopTimesList.size - 1  // reverse order (from last)
         val sMinIndex: Int = (stopIdInts.lastIndexOf(lastCommonStopIdInt) + 1).coerceAtLeast(0)
@@ -799,8 +806,7 @@ object MDirectionHeadSignFinder {
             && s >= sMinIndex
         ) {
             val gStopTime = stopTimesList[s]
-            if (gStopTime.dropOffType != GDropOffType.REGULAR.id
-                && gStopTime.pickupType != GPickupType.REGULAR.id
+            if (!gStopTime.isRegular(minStopSequence, maxStopSequence)
             ) {
                 stopIdIntsAfterCommonCount--
             }
