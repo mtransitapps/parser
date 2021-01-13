@@ -2,6 +2,7 @@ package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.StringUtils
 import java.util.Date
 
 // https://gtfs.org/reference/static#stop_timestxt
@@ -109,6 +110,9 @@ data class GStopTime(
     val uID by lazy { getNewUID(tripIdInt, stopIdInt, stopSequence) }
 
     fun hasStopHeadsign() = !this.stopHeadsign.isNullOrEmpty()
+
+    @Suppress("unused")
+    val stopHeadsignOrDefault: String = stopHeadsign ?: StringUtils.EMPTY
 
     fun isRegular(minSequence: Int = 0, maxSequence: Int = Int.MAX_VALUE): Boolean {
         if (this.stopSequence == minSequence && dropOffType == GDropOffType.NO_DROP_OFF.id) {
