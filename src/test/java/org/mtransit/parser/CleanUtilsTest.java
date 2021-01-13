@@ -111,4 +111,34 @@ public class CleanUtilsTest {
 		// Assert
 		assertEquals("Mt Paul", result);
 	}
+
+	@Test
+	public void testRemovePointsEllipsis() {
+		// Arrange
+		String string = "Mt... Paul...";
+		// Act
+		String result = CleanUtils.removePoints(string);
+		// Assert
+		assertEquals("Mt… Paul…", result);
+	}
+
+	@Test
+	public void testRemovePointsEndsWithPoint() {
+		// Arrange
+		String string = "Mt Paul (A).";
+		// Act
+		String result = CleanUtils.removePoints(string);
+		// Assert
+		assertEquals("Mt Paul (A)", result);
+	}
+
+	@Test
+	public void testRemovePointsEndsWithPoints() {
+		// Arrange
+		String string = "Mt Paul (A).. ";
+		// Act
+		String result = CleanUtils.removePoints(string);
+		// Assert
+		assertEquals("Mt Paul (A)", result);
+	}
 }
