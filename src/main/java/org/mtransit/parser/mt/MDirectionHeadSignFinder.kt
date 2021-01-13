@@ -228,15 +228,6 @@ object MDirectionHeadSignFinder {
                 return Triple(tripHeadSign, tripStopTimes.last().stopIdInt, tripStopTimes.first().arrivalTime to tripStopTimes.last().departureTime)
             }
         }
-        // check for AM/PM before COMPLEX merge
-        val times: List<Int> = distinctTripHeadSignAndStopTimes
-            .flatMap { (_, tripStopTimes) -> listOf(tripStopTimes.first().arrivalTime, tripStopTimes.last().departureTime) }
-        if (GTime.areAM(times) || GTime.arePM(times)) {
-            distinctTripHeadSignAndStopTimes.first().let { (tripHeadSign, tripStopTimes) ->
-                MTLog.log("$routeId: $directionId: AM/PM trip: '$tripHeadSign'.")
-                return Triple(EMPTY, -1, tripStopTimes.first().arrivalTime to tripStopTimes.last().departureTime)
-            }
-        }
         // starting complex merge
         MTLog.log("$routeId: $directionId: COMPLEX merge required for: ")
         distinctTripHeadSignAndStopTimes.forEach { (headSign, stopTimes) ->
