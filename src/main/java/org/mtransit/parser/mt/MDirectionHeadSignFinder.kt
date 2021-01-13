@@ -293,24 +293,6 @@ object MDirectionHeadSignFinder {
             logMerge(!dataLossAuthorized, "$routeId: $directionId: same head-sign & stops -> '$stopTimesHeadSign1'")
             return stopTimesHeadSign1 to stopTimesList1
         }
-        val minStopSequence1: Int = stopTimesList1.minStopSequence()
-        val maxStopSequence1: Int = stopTimesList1.maxStopSequence()
-        val minStopSequence2: Int = stopTimesList2.minStopSequence()
-        val maxStopSequence2: Int = stopTimesList2.maxStopSequence()
-        val regularStopIdInts1 = stopTimesList1.filter { it.isRegular(minStopSequence1, maxStopSequence1) }.map { it.stopIdInt }
-        val regularStopIdInts2 = stopTimesList2.filter { it.isRegular(minStopSequence2, maxStopSequence2) }.map { it.stopIdInt }
-        if (regularStopIdInts1.size > regularStopIdInts2.size
-            && regularStopIdInts1.containsExactList(regularStopIdInts2)
-        ) {
-            logMerge(!dataLossAuthorized, "$routeId: $directionId: #1 contains #2 -> '$stopTimesHeadSign1'")
-            return stopTimesHeadSign1 to stopTimesList1
-        }
-        if (regularStopIdInts2.size > regularStopIdInts1.size
-            && regularStopIdInts2.containsExactList(regularStopIdInts1)
-        ) {
-            logMerge(!dataLossAuthorized, "$routeId: $directionId: #2 contains #1 -> '$stopTimesHeadSign2'")
-            return stopTimesHeadSign2 to stopTimesList2
-        }
         val stopIdsIntersect = stopIdInts1.intersect(stopIdInts2)
         // COMMON STOPs
         var firstCommonStopIdInt: Pair<Int?, Int?>? = if (stopIdsIntersect.isEmpty()) null else stopIdsIntersect.first() to null
@@ -417,6 +399,24 @@ object MDirectionHeadSignFinder {
                     stopIdIntsBeforeCommon1
                 )
             }
+        }
+        val minStopSequence1 = stopTimesList1.minStopSequence()
+        val maxStopSequence1 = stopTimesList1.maxStopSequence()
+        val minStopSequence2 = stopTimesList2.minStopSequence()
+        val maxStopSequence2 = stopTimesList2.maxStopSequence()
+        val regularStopIdInts1 = stopTimesList1.filter { it.isRegular(minStopSequence1, maxStopSequence1) }.map { it.stopIdInt }
+        val regularStopIdInts2 = stopTimesList2.filter { it.isRegular(minStopSequence2, maxStopSequence2) }.map { it.stopIdInt }
+        if (regularStopIdInts1.size > regularStopIdInts2.size
+            && regularStopIdInts1.containsExactList(regularStopIdInts2)
+        ) {
+            logMerge(!dataLossAuthorized, "$routeId: $directionId: #1 contains #2 ('$stopTimesHeadSign2') -> '$stopTimesHeadSign1'")
+            return stopTimesHeadSign1 to stopTimesList1
+        }
+        if (regularStopIdInts2.size > regularStopIdInts1.size
+            && regularStopIdInts2.containsExactList(regularStopIdInts1)
+        ) {
+            logMerge(!dataLossAuthorized, "$routeId: $directionId: #2 contains #1 ('$stopTimesHeadSign1') -> '$stopTimesHeadSign2'")
+            return stopTimesHeadSign2 to stopTimesList2
         }
         if (stopIdIntsAfterCommonCount1 == 0 // #1 stops
             && stopIdIntsAfterCommonCount2 > 0 // #2 goes further
