@@ -65,13 +65,22 @@ public final class Utils {
 
 	@Nullable
 	public static String replaceAll(@Nullable String string, @Nullable Pattern[] patterns, @NotNull String replacement) {
-		if (string == null || string.length() == 0) {
+		if (string == null) {
+			return null;
+		}
+		if (patterns == null) {
 			return string;
 		}
-		if (patterns != null) {
-			for (Pattern pattern : patterns) {
-				string = pattern.matcher(string).replaceAll(replacement);
-			}
+		return replaceAllNN(string, patterns, replacement);
+	}
+
+	@NotNull
+	public static String replaceAllNN(@NotNull String string, @NotNull Pattern[] patterns, @NotNull String replacement) {
+		if (string.length() == 0) {
+			return string;
+		}
+		for (Pattern pattern : patterns) {
+			string = pattern.matcher(string).replaceAll(replacement);
 		}
 		return string;
 	}

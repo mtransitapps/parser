@@ -49,10 +49,10 @@ public final class CleanUtils {
 	}
 
 	private static final Pattern CLEAN_SPACES = Pattern.compile("\\s+");
-	private static final Pattern CLEAN_P1 = Pattern.compile("\\([\\s]+");
-	private static final String CLEAN_P1_REPLACEMENT = "(";
-	private static final Pattern CLEAN_P2 = Pattern.compile("[\\s]+\\)");
-	private static final String CLEAN_P2_REPLACEMENT = ")";
+	private static final Pattern CLEAN_P1 = Pattern.compile("[\\s]*\\([\\s]*");
+	private static final String CLEAN_P1_REPLACEMENT = " ("; // space: guaranty 1 before & 0 after
+	private static final Pattern CLEAN_P2 = Pattern.compile("[\\s]*\\)[\\s]*");
+	private static final String CLEAN_P2_REPLACEMENT = ") "; // space: guaranty 0 before & 1 after
 
 	@NotNull
 	public static String cleanLabel(@NotNull String label) {

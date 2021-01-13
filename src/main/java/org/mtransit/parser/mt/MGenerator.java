@@ -221,6 +221,7 @@ public class MGenerator {
 		try {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
+				//noinspection ConstantConditions
 				if (fw++ % FILE_WRITER_LOG == 0) { // LOG
 					MTLog.logPOINT(); // LOG
 				} // LOG
@@ -312,6 +313,8 @@ public class MGenerator {
 							}
 							if (empty) {
 								FileUtils.delete(file);
+							} else {
+								ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
 							}
 						}
 					} catch (IOException ioe) {

@@ -980,22 +980,22 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						previousTs1GStop.getStopLong());
 				previousTs2Distance = findDistance(commonGStop.getStopLat(), commonGStop.getStopLong(), previousTs2GStop.getStopLat(),
 						previousTs2GStop.getStopLong());
-				MTLog.log("" + this.routeId + ": Resolved using 1st common stop trip ID:" + ts1.getTripId() + ", stop IDs:" + ts1.getStopId() + ","
-						+ ts2.getStopId() + " (" + commonStopAndPrevious[1].getStopId() + " " + previousTs1Distance + ", "
-						+ commonStopAndPrevious[2].getStopId() + " " + previousTs2Distance + ")");
+				MTLog.log("" + this.routeId + ": Resolved using 1st common stop trip ID:" + ts1.getTripId() + ", stop IDs:"
+						+ ts1.getStopId() + "," + ts2.getStopId() + " ("
+						+ commonStopAndPrevious[1].getStopId() + ":" + previousTs1Distance + ", "
+						+ commonStopAndPrevious[2].getStopId() + ":" + previousTs2Distance + ")");
 				if (previousTs1Distance > previousTs2Distance) {
 					newList.add(ts1);
 					newListStopIds.add(ts1.getStopId());
 					last = ts1;
 					i1++;
-					continue;
 				} else {
 					newList.add(ts2);
 					newListStopIds.add(ts2.getStopId());
 					last = ts2;
 					i2++;
-					continue;
 				}
+				continue;
 			}
 
 			int compare = this.agencyTools.compare(this.routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
@@ -1017,16 +1017,14 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				newListStopIds.add(ts1.getStopId());
 				last = ts1;
 				i1++;
-				//noinspection UnnecessaryContinue
-				continue;
 			} else {
 				newList.add(ts2);
 				newListStopIds.add(ts2.getStopId());
 				last = ts2;
 				i2++;
-				//noinspection UnnecessaryContinue
-				continue;
 			}
+			//noinspection UnnecessaryContinue
+			continue;
 		}
 		// add remaining stops
 		//noinspection ForLoopReplaceableByWhile

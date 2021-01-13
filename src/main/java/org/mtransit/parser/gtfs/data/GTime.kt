@@ -1,6 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
-import org.mtransit.parser.Constants
+import org.mtransit.parser.Constants.EMPTY
 import org.mtransit.parser.MTLog
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -19,7 +19,7 @@ object GTime {
         if (timeS.isNullOrEmpty()) {
             return -1
         }
-        return TIME_SEPARATOR_REGEX.matcher(timeS).replaceAll(Constants.EMPTY).toInt()
+        return TIME_SEPARATOR_REGEX.matcher(timeS).replaceAll(EMPTY).toInt()
     }
 
     @JvmStatic
@@ -37,6 +37,22 @@ object GTime {
 
     private fun getNewTimeFormatInstance(): SimpleDateFormat {
         return SimpleDateFormat(TIME_FORMAT, Locale.ENGLISH)
+    }
+
+    @JvmStatic
+    fun toStringPL(times: Iterable<Pair<Int, Int>>): String {
+        return times.joinToString { toStringP(it) }
+    }
+
+    @JvmStatic
+    fun toStringP(times: Pair<Int, Int>): String {
+        return "[" + toString(times.first) + " - " + toString(times.second) + "]"
+    }
+
+    @Suppress("unused")
+    @JvmStatic
+    fun toString(times: Iterable<Int>): String {
+        return times.joinToString { toString(it) ?: EMPTY }
     }
 
     @JvmStatic
@@ -65,5 +81,31 @@ object GTime {
     @JvmStatic
     fun add24Hours(time: Int): Int {
         return time + 24_00_00
+    }
+
+    fun areAM(times: Pair<Int, Int>): Boolean {
+        return isAM(times.first) && isAM(times.second)
+    }
+
+    fun areAM(times: Iterable<Int>): Boolean {
+        return times.all { isAM(it) }
+    }
+
+    @Suppress("MemberVisibilityCanBePrivate")
+    fun isAM(time: Int): Boolean {
+        return time in 0..11_99_99
+    }
+
+    fun arePM(times: Pair<Int, Int>): Boolean {
+        return isPM(times.first) && isPM(times.second)
+    }
+
+    fun arePM(times: Iterable<Int>): Boolean {
+        return times.all { isPM(it) }
+    }
+
+    @Suppress("MemberVisibilityCanBePrivate")
+    fun isPM(time: Int): Boolean {
+        return time in 12_00_00..24_00_00
     }
 }

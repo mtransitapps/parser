@@ -23,3 +23,13 @@ fun <T> Iterable<T>.lastIndexOf(pairT: Pair<T?, T?>?): Int {
     }
     return index
 }
+
+fun <T> Iterable<T>.containsExactList(otherIt: Iterable<T>): Boolean {
+    if (this.count() < otherIt.count()) {
+        return false // smaller list can NOT contain bigger list
+    }
+    return this.joinToString { it.toString() }
+        .contains(
+            otherIt.joinToString { it.toString() }
+        )
+}
