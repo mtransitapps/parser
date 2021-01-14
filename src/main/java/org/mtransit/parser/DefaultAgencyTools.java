@@ -21,6 +21,7 @@ import org.mtransit.parser.gtfs.data.GTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.MGenerator;
+import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MTrip;
@@ -328,6 +329,36 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	static boolean directionHeadSignDescriptiveS(@NotNull String directionHeadSign) {
 		return !StringUtils.isBlank(directionHeadSign); // empty/blank head-sign is NOT descriptive
+	}
+
+	@Override
+	public int getDirectionType() {
+		return -1; // no preferred direction type
+	}
+
+	@Nullable
+	@Override
+	public MDirectionType convertDirection(@Nullable String headSign) {
+		if (headSign != null) {
+			if (getDirectionType() == MTrip.HEADSIGN_TYPE_DIRECTION) {
+				final String tripHeadsignLC = headSign.toLowerCase(Locale.ENGLISH);
+				switch (tripHeadsignLC) {
+				case "east":
+				case "est":
+					return MDirectionType.EAST;
+				case "west":
+				case "ouest":
+					return MDirectionType.WEST;
+				case "north":
+				case "nord":
+					return MDirectionType.NORTH;
+				case "south":
+				case "sud":
+					return MDirectionType.SOUTH;
+				}
+			}
+		}
+		return null; // no direction conversion by default
 	}
 
 	@Override

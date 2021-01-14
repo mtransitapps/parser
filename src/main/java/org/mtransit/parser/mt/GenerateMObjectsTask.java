@@ -21,6 +21,7 @@ import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MAgency;
+import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSchedule;
@@ -448,16 +449,26 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			originalTripHeadsign = new HashMap<>();
 			for (MTrip mTrip : splitTrips) {
 				this.agencyTools.setTripHeadsign(mRoute, mTrip, gTrip, routeGTFS);
-				originalTripHeadsign.put(mTrip.getId(),
-						new Pair<>(mTrip.getHeadsignType(), mTrip.getHeadsignValue()));
+				final Pair<Integer, String> originalTripHeadSignTypeAndValue = new Pair<>(mTrip.getHeadsignType(), mTrip.getHeadsignValue());
+				long originalTripHeadSignId = mTrip.getId();
 				if (splitTrips.size() == 1 // not split-ed
-						&& gDirectionHeadSigns != null
-						&& mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
+						&& gDirectionHeadSigns != null) {
 					final String directionHeadSign = gDirectionHeadSigns.get(gTrip.getDirectionIdOrDefault());
-					if (directionHeadSign != null && !directionHeadSign.isEmpty()) {
-						mTrip.setHeadsignString(directionHeadSign, mTrip.getHeadsignId());
+					if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
+						if (directionHeadSign != null && !directionHeadSign.isEmpty()) {
+							mTrip.setHeadsignString(directionHeadSign, mTrip.getHeadsignId());
+							originalTripHeadSignId = mTrip.getId();
+						}
+					}
+					if (this.agencyTools.getDirectionType() == MTrip.HEADSIGN_TYPE_DIRECTION) {
+						final MDirectionType direction = this.agencyTools.convertDirection(directionHeadSign);
+						if (direction != null) {
+							mTrip.setHeadsignDirection(direction);
+							originalTripHeadSignId = mTrip.getId();
+						}
 					}
 				}
+				originalTripHeadsign.put(originalTripHeadSignId, originalTripHeadSignTypeAndValue);
 			}
 			for (MTrip mTrip : splitTrips) {
 				final MTrip currentTrip = mTrips.get(mTrip.getId());

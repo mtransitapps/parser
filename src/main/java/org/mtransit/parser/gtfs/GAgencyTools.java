@@ -13,6 +13,7 @@ import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
+import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
@@ -84,6 +85,11 @@ public interface GAgencyTools {
 	String selectDirectionHeadSign(@Nullable String headSign1, @Nullable String headSign2);
 
 	boolean directionHeadSignDescriptive(@NotNull String directionHeadSign);
+
+	int getDirectionType();
+
+	@Nullable
+	MDirectionType convertDirection(@Nullable String headSign);
 
 	boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge);
 
