@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.mtransit.parser.Constants.EMPTY;
+
 @SuppressWarnings({"WeakerAccess", "unused", "RedundantSuppression"})
 public final class CleanUtils {
 
@@ -34,7 +36,7 @@ public final class CleanUtils {
 	static {
 		Map<CharSequence, CharSequence> map = new HashMap<>();
 		map.put("'", "''");
-		map.put("_", Constants.EMPTY);
+		map.put("_", EMPTY);
 		ESCAPE = new LookupTranslator(map);
 	}
 
@@ -60,7 +62,7 @@ public final class CleanUtils {
 		label = CLEAN_P1.matcher(label).replaceAll(CLEAN_P1_REPLACEMENT);
 		label = CLEAN_P2.matcher(label).replaceAll(CLEAN_P2_REPLACEMENT);
 		label = WordUtils.capitalize(label, SPACE_CHAR, '-', '–', '/', '(', '.');
-		label = removePoints(label);
+		label = removePoints(label); // after capitalize
 		return label.trim();
 	}
 
@@ -193,7 +195,7 @@ public final class CleanUtils {
 	@NotNull
 	public static String cleanWordsReplacement(@Nullable String replacement) {
 		if (replacement == null || replacement.length() <= 0) {
-			return Constants.EMPTY;
+			return EMPTY;
 		}
 		return "$2" + replacement + "$4";
 	}
@@ -219,7 +221,7 @@ public final class CleanUtils {
 	@NotNull
 	public static String cleanWordsReplacementPlural(@Nullable String replacement) {
 		if (replacement == null || replacement.length() <= 0) {
-			return Constants.EMPTY;
+			return EMPTY;
 		}
 		return "$2" + replacement + "$5" + "$6";
 	}
@@ -262,32 +264,32 @@ public final class CleanUtils {
 		return CLEAN_SLASH.matcher(string).replaceAll(CLEAN_SLASH_REPLACEMENT);
 	}
 
-	private static final Pattern _3_POINTS = Pattern.compile("(\\.\\.\\.)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern _3_POINTS = Pattern.compile("(\\.\\.\\.)");
 	private static final String _3_POINTS_REPLACEMENT = "…";
 
-	private static final Pattern POINT1 = Pattern.compile("((^|\\W)([\\w])\\.(?=(\\w\\.|\\W|$)))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern POINT1 = Pattern.compile("((^|\\W||[A-Z]{2,})([\\w])\\.(?=(\\w\\.|\\W|$)))");
 	private static final String POINT1_REPLACEMENT = "$2" + "$3";
 
-	private static final Pattern POINTS = Pattern.compile("((^|\\W)([\\w]+)\\.(?=(\\w+\\.|\\W|$)))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern POINTS = Pattern.compile("((^|\\W)([\\w]+)\\.(?=(\\w+\\.|\\W|$)))");
 	private static final String POINTS_REPLACEMENT = "$2" + "$3";
 
-	private static final Pattern ENDS_WITH_POINTS = Pattern.compile("((\\.+)(\\W*)$)", Pattern.CASE_INSENSITIVE);
-	private static final String ENDS_WITH_POINTS_REPLACEMENT = Constants.EMPTY;
+	private static final Pattern ENDS_WITH_POINTS = Pattern.compile("((\\.+)(\\W*)$)");
+	private static final String ENDS_WITH_POINTS_REPLACEMENT = EMPTY;
 
 	@NotNull
-	public static String removePoints(@NotNull String string) {
-		string = _3_POINTS.matcher(string).replaceAll(_3_POINTS_REPLACEMENT);
-		string = POINT1.matcher(string).replaceAll(POINT1_REPLACEMENT);
-		string = POINTS.matcher(string).replaceAll(POINTS_REPLACEMENT);
-		string = ENDS_WITH_POINTS.matcher(string).replaceAll(ENDS_WITH_POINTS_REPLACEMENT);
-		return string;
+	public static String removePoints(@NotNull String capitalizedString) {
+		capitalizedString = _3_POINTS.matcher(capitalizedString).replaceAll(_3_POINTS_REPLACEMENT);
+		capitalizedString = POINT1.matcher(capitalizedString).replaceAll(POINT1_REPLACEMENT);
+		capitalizedString = POINTS.matcher(capitalizedString).replaceAll(POINTS_REPLACEMENT);
+		capitalizedString = ENDS_WITH_POINTS.matcher(capitalizedString).replaceAll(ENDS_WITH_POINTS_REPLACEMENT);
+		return capitalizedString;
 	}
 
 	private static final Pattern STARTS_WITH_VERS = Pattern.compile("((^|^.* )vers )", Pattern.CASE_INSENSITIVE);
 
 	@NotNull
 	public static String keepToFR(@NotNull String string) {
-		string = STARTS_WITH_VERS.matcher(string).replaceAll(Constants.EMPTY);
+		string = STARTS_WITH_VERS.matcher(string).replaceAll(EMPTY);
 		return string;
 	}
 
@@ -295,7 +297,7 @@ public final class CleanUtils {
 
 	@NotNull
 	public static String keepTo(@NotNull String string) {
-		string = STARTS_WITH_TO.matcher(string).replaceAll(Constants.EMPTY);
+		string = STARTS_WITH_TO.matcher(string).replaceAll(EMPTY);
 		return string;
 	}
 
@@ -303,7 +305,7 @@ public final class CleanUtils {
 
 	@NotNull
 	public static String removeVia(@NotNull String string) {
-		string = ENDS_WITH_VIA.matcher(string).replaceAll(Constants.EMPTY);
+		string = ENDS_WITH_VIA.matcher(string).replaceAll(EMPTY);
 		return string;
 	}
 

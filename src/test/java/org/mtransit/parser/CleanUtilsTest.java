@@ -173,12 +173,22 @@ public class CleanUtilsTest {
 	}
 
 	@Test
-	public void testRemovePointsSingleLettersOnly() {
+	public void testRemovePoints4SingleLettersOnly() {
 		// Arrange
 		String string = "U.Q.A.M.";
 		// Act
 		String result = CleanUtils.removePoints(string);
 		// Assert
 		assertEquals("UQAM", result);
+	}
+
+	@Test
+	public void testRemovePoints3SingleLettersOnly() {
+		// Arrange
+		String string = "R.T.L.";
+		// Act
+		String result = CleanUtils.removePoints(string);
+		// Assert
+		assertEquals("RTL", result);
 	}
 }
