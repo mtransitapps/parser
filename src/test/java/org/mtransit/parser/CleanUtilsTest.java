@@ -141,4 +141,14 @@ public class CleanUtilsTest {
 		// Assert
 		assertEquals("Mt Paul (A)", result);
 	}
+
+	@Test
+	public void testRemovePointsOverlap() {
+		// Arrange
+		String string = "Ft. Wm. Rd. & Intercity";
+		// Act
+		String result = CleanUtils.removePoints(string);
+		// Assert
+		assertEquals("Ft Wm Rd & Intercity", result);
+	}
 }
