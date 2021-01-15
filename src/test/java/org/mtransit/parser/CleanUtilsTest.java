@@ -193,6 +193,16 @@ public class CleanUtilsTest {
 	}
 
 	@Test
+	public void testRemovePoints3SingleLetters() {
+		// Arrange
+		String string = "VICTORIA PARK AV / I.B.M.";
+		// Act
+		String result = CleanUtils.removePointsI(string);
+		// Assert
+		assertEquals("VICTORIA PARK AV / IBM", result);
+	}
+
+	@Test
 	public void testRemovePointsPoints() {
 		// Arrange
 		String string = "Prés.-Kennedy / Florent";
