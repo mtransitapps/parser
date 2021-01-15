@@ -14,6 +14,7 @@ internal object RegexScratch {
         var string: String
         string = ""
         println("string: '$string'.")
+        println("-------")
 
         val matcher = pattern.matcher(string)
         while (matcher.find()) {
@@ -26,6 +27,7 @@ internal object RegexScratch {
             println("-------")
         }
 
+        println("-------")
         var replaceAll: String
         replaceAll = ""
         println("replaceAll: '$replaceAll'.")

@@ -62,7 +62,7 @@ public final class CleanUtils {
 		label = CLEAN_P1.matcher(label).replaceAll(CLEAN_P1_REPLACEMENT);
 		label = CLEAN_P2.matcher(label).replaceAll(CLEAN_P2_REPLACEMENT);
 		label = WordUtils.capitalize(label, SPACE_CHAR, '-', '–', '/', '(', '.');
-		label = removePoints(label); // after capitalize
+		label = removePointsI(label); // after capitalize
 		return label.trim();
 	}
 
@@ -267,17 +267,23 @@ public final class CleanUtils {
 	private static final Pattern _3_POINTS = Pattern.compile("(\\.\\.\\.)");
 	private static final String _3_POINTS_REPLACEMENT = "…";
 
-	private static final Pattern POINT1 = Pattern.compile("((^|\\W||[A-Z]{2,})([\\w])\\.(?=(\\w\\.|\\W|$)))");
-	private static final String POINT1_REPLACEMENT = "$2" + "$3";
+	private static final Pattern POINT1 = Pattern.compile("((?=(^|\\s|[A-Z]+))([\\w])\\.(?=(\\w\\.|\\W|$)))");
+	private static final String POINT1_REPLACEMENT = "$3";
 
-	private static final Pattern POINTS = Pattern.compile("((^|\\W)([\\w]+)\\.(?=(\\w+\\.|\\W|$)))");
-	private static final String POINTS_REPLACEMENT = "$2" + "$3";
+	private static final Pattern POINTS = Pattern.compile("((?=(^|\\s|[A-Z]+))([\\w]+)\\.(?=(\\w+\\.|\\W|$)))");
+	private static final String POINTS_REPLACEMENT = "$3";
 
 	private static final Pattern ENDS_WITH_POINTS = Pattern.compile("((\\.+)(\\W*)$)");
 	private static final String ENDS_WITH_POINTS_REPLACEMENT = EMPTY;
 
+	@Deprecated
 	@NotNull
 	public static String removePoints(@NotNull String capitalizedString) {
+		return removePointsI(capitalizedString);
+	}
+
+	@NotNull
+	protected static String removePointsI(@NotNull String capitalizedString) {
 		capitalizedString = _3_POINTS.matcher(capitalizedString).replaceAll(_3_POINTS_REPLACEMENT);
 		capitalizedString = POINT1.matcher(capitalizedString).replaceAll(POINT1_REPLACEMENT);
 		capitalizedString = POINTS.matcher(capitalizedString).replaceAll(POINTS_REPLACEMENT);
@@ -397,6 +403,9 @@ public final class CleanUtils {
 	private static final Pattern NINTH = cleanWords("ninth");
 	private static final String NINTH_REPLACEMENT = cleanWordsReplacement("9th");
 
+	private static final Pattern NO_DIGITS = Pattern.compile("((^|\\W)(no\\.? (\\d+))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final String NO_DIGITS_REPLACEMENT = "$2#$4$5"; // #0
+
 	@NotNull
 	public static String cleanNumbers(@NotNull String string) {
 		string = FIRST.matcher(string).replaceAll(FIRST_REPLACEMENT);
@@ -408,6 +417,7 @@ public final class CleanUtils {
 		string = SEVENTH.matcher(string).replaceAll(SEVENTH_REPLACEMENT);
 		string = EIGHTH.matcher(string).replaceAll(EIGHTH_REPLACEMENT);
 		string = NINTH.matcher(string).replaceAll(NINTH_REPLACEMENT);
+		string = NO_DIGITS.matcher(string).replaceAll(NO_DIGITS_REPLACEMENT);
 		return string;
 	}
 
@@ -420,12 +430,25 @@ public final class CleanUtils {
 	private static final Pattern NORTHBOUND_ = cleanWords("northbound", "nb");
 	private static final String NORTHBOUND_REPLACEMENT = cleanWordsReplacement("NB");
 
+	private static final Pattern EAST_ = cleanWords("east");
+	private static final String EAST_REPLACEMENT = cleanWordsReplacement("E");
+	private static final Pattern WEST_ = cleanWords("west");
+	private static final String WEST_REPLACEMENT = cleanWordsReplacement("W");
+	private static final Pattern SOUTH_ = cleanWords("south");
+	private static final String SOUTH_REPLACEMENT = cleanWordsReplacement("S");
+	private static final Pattern NORTH_ = cleanWords("north");
+	private static final String NORTH_REPLACEMENT = cleanWordsReplacement("N");
+
 	@NotNull
 	public static String cleanBounds(@NotNull String string) {
 		string = EASTBOUND_.matcher(string).replaceAll(EASTBOUND_REPLACEMENT);
 		string = WESTBOUND_.matcher(string).replaceAll(WESTBOUND_REPLACEMENT);
 		string = SOUTHBOUND_.matcher(string).replaceAll(SOUTHBOUND_REPLACEMENT);
 		string = NORTHBOUND_.matcher(string).replaceAll(NORTHBOUND_REPLACEMENT);
+		string = EAST_.matcher(string).replaceAll(EAST_REPLACEMENT);
+		string = WEST_.matcher(string).replaceAll(WEST_REPLACEMENT);
+		string = SOUTH_.matcher(string).replaceAll(SOUTH_REPLACEMENT);
+		string = NORTH_.matcher(string).replaceAll(NORTH_REPLACEMENT);
 		return string;
 	}
 
@@ -534,6 +557,10 @@ public final class CleanUtils {
 	private static final String PARKWAY_REPLACEMENT = cleanWordsReplacement("Pkwy");
 	private static final Pattern ISLAND = cleanWordsPlural("island");
 	private static final String ISLAND_REPLACEMENT = cleanWordsReplacementPlural("Isl");
+	// https://public.oed.com/how-to-use-the-oed/abbreviations/
+	private static final Pattern NEIGHBOURHOOD_ = cleanWordsPlural("neighbourhood", "neighbour");
+	private static final String NEIGHBOURHOOD_REPLACEMENT = cleanWordsReplacementPlural("Neighb");
+	// not official
 	private static final Pattern PARK = cleanWords("park");
 	private static final String PARK_REPLACEMENT = cleanWordsReplacement("Pk"); // not official
 	private static final Pattern GATE = cleanWordsPlural("gate");
@@ -544,6 +571,12 @@ public final class CleanUtils {
 	private static final String HOSPITAL_REPLACEMENT = cleanWordsReplacement("Hosp"); // not official
 	private static final Pattern OPPOSITE_ = cleanWords("opposite");
 	private static final String OPPOSITE_REPLACEMENT = cleanWordsReplacement("Opp"); // not official
+	private static final Pattern INDUSTRIAL_ = cleanWords("industrial");
+	private static final String INDUSTRIAL_REPLACEMENT = cleanWordsReplacement("Ind"); // not official
+	private static final Pattern COUNTER_CLOCKWISE_ = Pattern.compile("((^|\\W)counter(-|\\s)?clockwise(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final String COUNTER_CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CCW"); // not official
+	private static final Pattern CLOCKWISE_ = cleanWords("clockwise");
+	private static final String CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CW"); // not official
 
 	@NotNull
 	public static String cleanStreetTypes(@NotNull String string) {
@@ -592,6 +625,7 @@ public final class CleanUtils {
 		string = MOUNT.matcher(string).replaceAll(MOUNT_REPLACEMENT);
 		string = MOUNTAIN.matcher(string).replaceAll(MOUNTAIN_REPLACEMENT);
 		string = PARK.matcher(string).replaceAll(PARK_REPLACEMENT);
+		string = NEIGHBOURHOOD_.matcher(string).replaceAll(NEIGHBOURHOOD_REPLACEMENT);
 		string = GATE.matcher(string).replaceAll(GATE_REPLACEMENT);
 		string = HOSPITAL.matcher(string).replaceAll(HOSPITAL_REPLACEMENT);
 		string = MARKET.matcher(string).replaceAll(MARKET_REPLACEMENT);
@@ -600,6 +634,9 @@ public final class CleanUtils {
 		string = PARKWAY.matcher(string).replaceAll(PARKWAY_REPLACEMENT);
 		string = ISLAND.matcher(string).replaceAll(ISLAND_REPLACEMENT);
 		string = OPPOSITE_.matcher(string).replaceAll(OPPOSITE_REPLACEMENT);
+		string = INDUSTRIAL_.matcher(string).replaceAll(INDUSTRIAL_REPLACEMENT);
+		string = COUNTER_CLOCKWISE_.matcher(string).replaceAll(COUNTER_CLOCKWISE_REPLACEMENT); // before clockwise
+		string = CLOCKWISE_.matcher(string).replaceAll(CLOCKWISE_REPLACEMENT);
 		return string;
 	}
 

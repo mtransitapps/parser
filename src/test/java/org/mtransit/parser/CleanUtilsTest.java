@@ -107,7 +107,7 @@ public class CleanUtilsTest {
 		// Arrange
 		String string = "Mt. Paul";
 		// Act
-		String result = CleanUtils.removePoints(string);
+		String result = CleanUtils.removePointsI(string);
 		// Assert
 		assertEquals("Mt Paul", result);
 	}
@@ -117,7 +117,7 @@ public class CleanUtilsTest {
 		// Arrange
 		String string = "Mt... Paul...";
 		// Act
-		String result = CleanUtils.removePoints(string);
+		String result = CleanUtils.removePointsI(string);
 		// Assert
 		assertEquals("Mt… Paul…", result);
 	}
@@ -127,7 +127,7 @@ public class CleanUtilsTest {
 		// Arrange
 		String string = "Mt Paul (A).";
 		// Act
-		String result = CleanUtils.removePoints(string);
+		String result = CleanUtils.removePointsI(string);
 		// Assert
 		assertEquals("Mt Paul (A)", result);
 	}
@@ -137,7 +137,7 @@ public class CleanUtilsTest {
 		// Arrange
 		String string = "Mt Paul (A).. ";
 		// Act
-		String result = CleanUtils.removePoints(string);
+		String result = CleanUtils.removePointsI(string);
 		// Assert
 		assertEquals("Mt Paul (A)", result);
 	}
@@ -147,7 +147,7 @@ public class CleanUtilsTest {
 		// Arrange
 		String string = "Ft. Wm. Rd. & Intercity";
 		// Act
-		String result = CleanUtils.removePoints(string);
+		String result = CleanUtils.removePointsI(string);
 		// Assert
 		assertEquals("Ft Wm Rd & Intercity", result);
 	}
@@ -157,7 +157,7 @@ public class CleanUtilsTest {
 		// Arrange
 		String string = "T C-Montmorency - Terminus La Cimenterie";
 		// Act
-		String result = CleanUtils.removePoints(string);
+		String result = CleanUtils.removePointsI(string);
 		// Assert
 		assertEquals("T C-Montmorency - Terminus La Cimenterie", result);
 	}
@@ -167,7 +167,7 @@ public class CleanUtilsTest {
 		// Arrange
 		String string = "Cundles at J.C. Massie Way";
 		// Act
-		String result = CleanUtils.removePoints(string);
+		String result = CleanUtils.removePointsI(string);
 		// Assert
 		assertEquals("Cundles at JC Massie Way", result);
 	}
@@ -177,7 +177,7 @@ public class CleanUtilsTest {
 		// Arrange
 		String string = "U.Q.A.M.";
 		// Act
-		String result = CleanUtils.removePoints(string);
+		String result = CleanUtils.removePointsI(string);
 		// Assert
 		assertEquals("UQAM", result);
 	}
@@ -187,8 +187,28 @@ public class CleanUtilsTest {
 		// Arrange
 		String string = "R.T.L.";
 		// Act
-		String result = CleanUtils.removePoints(string);
+		String result = CleanUtils.removePointsI(string);
 		// Assert
 		assertEquals("RTL", result);
+	}
+
+	@Test
+	public void testCleanNumbersNo() {
+		// Arrange
+		String string = "RR 25 & No 5 Side Rd Ind (CW)";
+		// Act
+		String result = CleanUtils.cleanNumbers(string);
+		// Assert
+		assertEquals("RR 25 & #5 Side Rd Ind (CW)", result);
+	}
+
+	@Test
+	public void testCleanNumbersNoPoint() {
+		// Arrange
+		String string = "RR 25 & No. 5 Side Rd Ind (CW)";
+		// Act
+		String result = CleanUtils.cleanNumbers(string);
+		// Assert
+		assertEquals("RR 25 & #5 Side Rd Ind (CW)", result);
 	}
 }
