@@ -161,4 +161,24 @@ public class CleanUtilsTest {
 		// Assert
 		assertEquals("T C-Montmorency - Terminus La Cimenterie", result);
 	}
+
+	@Test
+	public void testRemovePointsSingleLetters() {
+		// Arrange
+		String string = "Cundles at J.C. Massie Way";
+		// Act
+		String result = CleanUtils.removePoints(string);
+		// Assert
+		assertEquals("Cundles at JC Massie Way", result);
+	}
+
+	@Test
+	public void testRemovePointsSingleLettersOnly() {
+		// Arrange
+		String string = "U.Q.A.M.";
+		// Act
+		String result = CleanUtils.removePoints(string);
+		// Assert
+		assertEquals("UQAM", result);
+	}
 }

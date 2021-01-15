@@ -265,10 +265,10 @@ public final class CleanUtils {
 	private static final Pattern _3_POINTS = Pattern.compile("(\\.\\.\\.)", Pattern.CASE_INSENSITIVE);
 	private static final String _3_POINTS_REPLACEMENT = "…";
 
-	private static final Pattern POINT1 = Pattern.compile("((^|\\s)([\\w])\\.(?=(\\W|$)))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern POINT1 = Pattern.compile("((^|\\W)([\\w])\\.(?=(\\w\\.|\\W|$)))", Pattern.CASE_INSENSITIVE);
 	private static final String POINT1_REPLACEMENT = "$2" + "$3";
 
-	private static final Pattern POINTS = Pattern.compile("((^|\\s)([\\w]+)\\.(?=(\\W|$)))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern POINTS = Pattern.compile("((^|\\W)([\\w]+)\\.(?=(\\w+\\.|\\W|$)))", Pattern.CASE_INSENSITIVE);
 	private static final String POINTS_REPLACEMENT = "$2" + "$3";
 
 	private static final Pattern ENDS_WITH_POINTS = Pattern.compile("((\\.+)(\\W*)$)", Pattern.CASE_INSENSITIVE);
