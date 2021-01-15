@@ -14,4 +14,7 @@ object StringUtils {
 
     @JvmStatic
     fun equals(string1: String?, string2: String?) = string1.equals(string2)
+
+    @JvmStatic
+    fun isNumeric(string: String) = Utils.isDigitsOnly(string)
 }

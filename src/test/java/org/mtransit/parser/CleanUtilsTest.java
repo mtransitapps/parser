@@ -193,6 +193,16 @@ public class CleanUtilsTest {
 	}
 
 	@Test
+	public void testRemovePointsPoints() {
+		// Arrange
+		String string = "Prés.-Kennedy / Florent";
+		// Act
+		String result = CleanUtils.removePointsI(string);
+		// Assert
+		assertEquals("Prés-Kennedy / Florent", result);
+	}
+
+	@Test
 	public void testCleanNumbersNo() {
 		// Arrange
 		String string = "RR 25 & No 5 Side Rd Ind (CW)";

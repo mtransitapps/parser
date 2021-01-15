@@ -270,7 +270,7 @@ public final class CleanUtils {
 	private static final Pattern POINT1 = Pattern.compile("((?=(^|\\s|[A-Z]+))([\\w])\\.(?=(\\w\\.|\\W|$)))");
 	private static final String POINT1_REPLACEMENT = "$3";
 
-	private static final Pattern POINTS = Pattern.compile("((?=(^|\\s|[A-Z]+))([\\w]+)\\.(?=(\\w+\\.|\\W|$)))");
+	private static final Pattern POINTS = Pattern.compile("((?=(^|\\s|[\\w]+))([\\w]+)\\.(?=(\\w{2,}\\.|\\W|$)))");
 	private static final String POINTS_REPLACEMENT = "$3";
 
 	private static final Pattern ENDS_WITH_POINTS = Pattern.compile("((\\.+)(\\W*)$)");
