@@ -151,4 +151,14 @@ public class CleanUtilsTest {
 		// Assert
 		assertEquals("Ft Wm Rd & Intercity", result);
 	}
+
+	@Test
+	public void testRemovePointsBeforeDash() {
+		// Arrange
+		String string = "T C-Montmorency - Terminus La Cimenterie";
+		// Act
+		String result = CleanUtils.removePoints(string);
+		// Assert
+		assertEquals("T C-Montmorency - Terminus La Cimenterie", result);
+	}
 }
