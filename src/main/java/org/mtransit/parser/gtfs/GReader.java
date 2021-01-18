@@ -53,8 +53,7 @@ public class GReader {
 		String gtfsDir = gtfsFile.substring(0, gtfsFile.length() - 4);
 		File gtfsDirF = new File(gtfsDir);
 		if (!gtfsDirF.exists()) {
-			MTLog.logFatal("'%s' GTFS directory does not exist!", gtfsDirF);
-			return gSpec;
+			throw new MTLog.Fatal("'%s' GTFS directory does not exist!", gtfsDirF);
 		}
 		FileReader fr = null;
 		BufferedReader reader = null;
@@ -63,8 +62,7 @@ public class GReader {
 			if (!calendarsOnly) {
 				File agencyFile = new File(gtfsDir, GAgency.FILENAME);
 				if (!agencyFile.exists()) {
-					MTLog.logFatal("'%s' agency file does not exist!", agencyFile);
-					return gSpec;
+					throw new MTLog.Fatal("'%s' agency file does not exist!", agencyFile);
 				} else {
 					fr = new FileReader(agencyFile);
 					reader = new BufferedReader(fr);
@@ -99,15 +97,13 @@ public class GReader {
 				);
 			}
 			if (!hasCalendar) {
-				MTLog.logFatal("'%s' & '%s' file do not exist!", GCalendar.FILENAME, GCalendarDate.FILENAME);
-				return gSpec;
+				throw new MTLog.Fatal("'%s' & '%s' file do not exist!", GCalendar.FILENAME, GCalendarDate.FILENAME);
 			}
 			// ROUTES
 			if (!calendarsOnly) {
 				File routeFile = new File(gtfsDir, GRoute.FILENAME);
 				if (!routeFile.exists()) {
-					MTLog.logFatal("'%s' route file does not exist!", routeFile);
-					return gSpec;
+					throw new MTLog.Fatal("'%s' route file does not exist!", routeFile);
 				} else {
 					fr = new FileReader(routeFile);
 					reader = new BufferedReader(fr);
@@ -120,8 +116,7 @@ public class GReader {
 			if (!calendarsOnly) {
 				File tripFile = new File(gtfsDir, GTrip.FILENAME);
 				if (!tripFile.exists()) {
-					MTLog.logFatal("'%s' trip file does not exist!", tripFile);
-					return gSpec;
+					throw new MTLog.Fatal("'%s' trip file does not exist!", tripFile);
 				} else {
 					fr = new FileReader(tripFile);
 					reader = new BufferedReader(fr);
@@ -147,8 +142,7 @@ public class GReader {
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				File stopFile = new File(gtfsDir, GStop.FILENAME);
 				if (!stopFile.exists()) {
-					MTLog.logFatal("'%s' stop file does not exist!", stopFile);
-					return gSpec;
+					throw new MTLog.Fatal("'%s' stop file does not exist!", stopFile);
 				} else {
 					fr = new FileReader(stopFile);
 					reader = new BufferedReader(fr);
@@ -174,7 +168,7 @@ public class GReader {
 			}
 			// TODO OTHER FILE TYPE
 		} catch (IOException ioe) {
-			MTLog.logFatal(ioe, "I/O Error while reading GTFS file!");
+			throw new MTLog.Fatal(ioe, "I/O Error while reading GTFS file!");
 		} finally {
 			IOUtils.closeQuietly(reader);
 			IOUtils.closeQuietly(fr);
@@ -250,7 +244,7 @@ public class GReader {
 					lineProcessor.processLine(map);
 				}
 			} catch (Exception e) {
-				MTLog.logFatal(e, "Error while processing line: [%s],", line);
+				throw new MTLog.Fatal(e, "Error while processing line: [%s],", line);
 			}
 			if (l++ % 10_000 == 0) { // LOG
 				MTLog.logPOINT(); // LOG
@@ -285,7 +279,7 @@ public class GReader {
 			}
 			gSpec.addStopTime(gStopTime);
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while parsing: '%s'!\n", line);
+			throw new MTLog.Fatal(e, "Error while parsing: '%s'!\n", line);
 		}
 	}
 
@@ -304,7 +298,7 @@ public class GReader {
 			}
 			gSpec.addFrequency(gFrequency);
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while parsing: '%s'!\n", line);
+			throw new MTLog.Fatal(e, "Error while parsing: '%s'!\n", line);
 		}
 	}
 
@@ -319,7 +313,7 @@ public class GReader {
 					)
 			);
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while processing: '%s'!\n", line);
+			throw new MTLog.Fatal(e, "Error while processing: '%s'!\n", line);
 		}
 	}
 
@@ -338,7 +332,7 @@ public class GReader {
 			}
 			gSpec.addCalendarDate(gCalendarDate);
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while processing: '%s'!\n", line);
+			throw new MTLog.Fatal(e, "Error while processing: '%s'!\n", line);
 		}
 	}
 
@@ -363,7 +357,7 @@ public class GReader {
 			}
 			gSpec.addCalendar(gCalendar);
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while processing: %s!\n", line);
+			throw new MTLog.Fatal(e, "Error while processing: %s!\n", line);
 		}
 	}
 
@@ -388,7 +382,7 @@ public class GReader {
 			}
 			gSpec.addTrip(gTrip);
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while processing: %s\n", line);
+			throw new MTLog.Fatal(e, "Error while processing: %s\n", line);
 		}
 	}
 
@@ -416,7 +410,7 @@ public class GReader {
 			}
 			gSpec.addStop(gStop);
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while parsing stop line %s!\n", line);
+			throw new MTLog.Fatal(e, "Error while parsing stop line %s!\n", line);
 		}
 	}
 
@@ -444,7 +438,7 @@ public class GReader {
 			}
 			gSpec.addRoute(gRoute);
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while parsing route line %s!\n", line);
+			throw new MTLog.Fatal(e, "Error while parsing route line %s!\n", line);
 		}
 	}
 

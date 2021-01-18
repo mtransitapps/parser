@@ -169,8 +169,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			//noinspection deprecation
 			return Long.parseLong(gRoute.getRouteId());
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while extracting route ID from %s!", gRoute);
-			return -1;
+			throw new MTLog.Fatal(e, "Error while extracting route ID from %s!", gRoute);
 		}
 	}
 
@@ -222,12 +221,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public boolean excludeRoute(@NotNull GRoute gRoute) {
 		//noinspection ConstantConditions
 		if (getAgencyRouteType() == null) {
-			MTLog.logFatal("ERROR: unspecified agency route type '%s'!", getAgencyRouteType());
-			return false;
+			throw new MTLog.Fatal("ERROR: unspecified agency route type '%s'!", getAgencyRouteType());
 		}
 		if (GRouteType.isUnknown(gRoute.getRouteType())) {
-			MTLog.logFatal("ERROR: unexpected route type '%s'!", gRoute.getRouteType());
-			return false;
+			throw new MTLog.Fatal("ERROR: unexpected route type '%s'!", gRoute.getRouteType());
 		}
 		//noinspection RedundantIfStatement
 		if (!GRouteType.isSameType(getAgencyRouteType(), gRoute.getRouteType())) {
@@ -355,6 +352,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 				case "south":
 				case "sud":
 					return MDirectionType.SOUTH;
+				default:
+					throw new MTLog.Fatal("Unexpected direction for '%s'!", headSign);
 				}
 			}
 		}
@@ -428,8 +427,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			//noinspection deprecation
 			return Integer.parseInt(gStop.getStopId());
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while extracting stop ID from %s!", gStop);
-			return -1;
+			throw new MTLog.Fatal(e, "Error while extracting stop ID from %s!", gStop);
 		}
 	}
 
@@ -1122,8 +1120,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			calendar.add(Calendar.DAY_OF_MONTH, numberOfDays);
 			return Integer.parseInt(dateFormat.format(calendar.getTime()));
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while increasing end date!");
-			return -1;
+			throw new MTLog.Fatal(e, "Error while increasing end date!");
 		}
 	}
 
@@ -1131,8 +1128,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		try {
 			return diffInMs(dateFormat, calendar, startDateInt, endDateInt) < TimeUnit.DAYS.toMillis(diffInDays);
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while checking date difference!");
-			return false;
+			throw new MTLog.Fatal(e, "Error while checking date difference!");
 		}
 	}
 
@@ -1144,8 +1140,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			long endDateInMs = calendar.getTimeInMillis();
 			return endDateInMs - startDateInMs;
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while checking date difference!");
-			return -1L;
+			throw new MTLog.Fatal(e, "Error while checking date difference!");
 		}
 	}
 

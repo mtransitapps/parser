@@ -495,7 +495,7 @@ public class GSpec {
 				}
 			}
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while removing more excluded data!");
+			throw new MTLog.Fatal(e, "Error while removing more excluded data!");
 		}
 		MTLog.log("Removing more excluded data...DONE (%d removed objects)", r);
 	}
@@ -533,7 +533,7 @@ public class GSpec {
 				}
 			}
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while removing more excluded service IDs!");
+			throw new MTLog.Fatal(e, "Error while removing more excluded service IDs!");
 		}
 		MTLog.log("Removing more excluded service IDs... DONE (%d removed objects)", r);
 	}
@@ -558,7 +558,7 @@ public class GSpec {
 				}
 			}
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while removing route %d data!", mRouteId);
+			throw new MTLog.Fatal(e, "Error while removing route %d data!", mRouteId);
 		}
 		MTLog.log("%d: Removing route data...DONE (%d removed objects)", mRouteId, r);
 	}

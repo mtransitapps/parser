@@ -28,7 +28,7 @@ public final class TimeUtils {
 		return String.format(Locale.ENGLISH, CLEAN_TIME_FORMAT, time);
 	}
 
-	public static int cleanTime(Integer time, int extraSeconds) {
+	public static int cleanTime(@NotNull Integer time, int extraSeconds) {
 		try {
 			String timeS = convertTimeToString(time);
 			String newHours = timeS.substring(0, 2);
@@ -58,12 +58,12 @@ public final class TimeUtils {
 			newHours = String.valueOf(Integer.parseInt(newHours) + 1);
 			return Integer.parseInt(newHours + newMinutes + newSeconds);
 		} catch (Exception e) {
-			MTLog.logFatal(e, "Error while cleaning time '%s' '%s' !\n", time, extraSeconds);
-			return -1;
+			throw new MTLog.Fatal(e, "Error while cleaning time '%s' '%s' !\n", time, extraSeconds);
 		}
 	}
 
-	public static String convertTimeToString(Integer time) {
+	@NotNull
+	public static String convertTimeToString(@NotNull Integer time) {
 		StringBuilder sb = new StringBuilder(time.toString());
 		while (sb.length() < 6) {
 			sb.insert(0, CLEAN_TIME_LEADING_ZERO);

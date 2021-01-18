@@ -143,7 +143,6 @@ public class MGenerator {
 				MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
 			} catch (Throwable t) {
 				threadPoolExecutor.shutdownNow();
-				MTLog.logFatal(t, t.getMessage()); // STOP ASAP
 				throw new MTLog.Fatal(t, t.getMessage());
 			}
 		}
@@ -200,8 +199,7 @@ public class MGenerator {
 
 	public static void dumpFiles(@NotNull GAgencyTools gAgencyTools, @Nullable MSpec mSpec, @NotNull String gtfsFile, @NotNull String dumpDir, final @NotNull String fileBase, boolean deleteAll) {
 		if (!deleteAll && (mSpec == null || !mSpec.isValid())) {
-			MTLog.logFatal("Generated data invalid (agencies:%s)!", mSpec);
-			return;
+			throw new MTLog.Fatal("Generated data invalid (agencies:%s)!", mSpec);
 		}
 		long start = System.currentTimeMillis();
 		final File dumpDirF = new File(dumpDir);
@@ -237,7 +235,7 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			MTLog.logFatal(ioe, "I/O Error while writing service dates file!");
+			throw new MTLog.Fatal(ioe, "I/O Error while writing service dates file!");
 		} finally {
 			IOUtils.closeQuietly(ow);
 		}
@@ -318,7 +316,7 @@ public class MGenerator {
 							}
 						}
 					} catch (IOException ioe) {
-						MTLog.logFatal(ioe, "I/O Error while writing schedule file for stop '%s'!", stopId);
+						throw new MTLog.Fatal(ioe, "I/O Error while writing schedule file for stop '%s'!", stopId);
 					} finally {
 						IOUtils.closeQuietly(ow);
 					}
@@ -356,7 +354,7 @@ public class MGenerator {
 						}
 					}
 				} catch (IOException ioe) {
-					MTLog.logFatal(ioe, "I/O Error while writing frequency file!");
+					throw new MTLog.Fatal(ioe, "I/O Error while writing frequency file!");
 				} finally {
 					IOUtils.closeQuietly(ow);
 				}
@@ -376,7 +374,7 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			MTLog.logFatal(ioe, "I/O Error while writing route file!");
+			throw new MTLog.Fatal(ioe, "I/O Error while writing route file!");
 		} finally {
 			IOUtils.closeQuietly(ow);
 		}
@@ -394,7 +392,7 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			MTLog.logFatal(ioe, "I/O Error while writing trip file!");
+			throw new MTLog.Fatal(ioe, "I/O Error while writing trip file!");
 		} finally {
 			IOUtils.closeQuietly(ow);
 		}
@@ -412,7 +410,7 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			MTLog.logFatal(ioe, "I/O Error while writing trip stops file!");
+			throw new MTLog.Fatal(ioe, "I/O Error while writing trip stops file!");
 		} finally {
 			IOUtils.closeQuietly(ow);
 		}
@@ -447,7 +445,7 @@ public class MGenerator {
 				}
 			}
 		} catch (IOException ioe) {
-			MTLog.logFatal(ioe, "I/O Error while writing stop file!");
+			throw new MTLog.Fatal(ioe, "I/O Error while writing stop file!");
 		} finally {
 			IOUtils.closeQuietly(ow);
 		}
@@ -511,7 +509,7 @@ public class MGenerator {
 			ow.write(newContent);
 			MTLog.log("Bumping DB version... DONE (new current DB version '%s')", lastModifiedTimeDateS);
 		} catch (IOException ioe) {
-			MTLog.logFatal(ioe, "I/O Error while bumping DB version!");
+			throw new MTLog.Fatal(ioe, "I/O Error while bumping DB version!");
 		} finally {
 			IOUtils.closeQuietly(ow);
 		}
@@ -573,7 +571,7 @@ public class MGenerator {
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);
 		} catch (IOException ioe) {
-			MTLog.logFatal(ioe, "I/O Error while writing values file!");
+			throw new MTLog.Fatal(ioe, "I/O Error while writing values file!");
 		} finally {
 			IOUtils.closeQuietly(ow);
 		}
@@ -635,7 +633,7 @@ public class MGenerator {
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);
 		} catch (IOException ioe) {
-			MTLog.logFatal(ioe, "I/O Error while writing values file!");
+			throw new MTLog.Fatal(ioe, "I/O Error while writing values file!");
 		} finally {
 			IOUtils.closeQuietly(ow);
 		}
@@ -701,7 +699,7 @@ public class MGenerator {
 				);
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF_8);
 			} catch (Exception ioe) {
-				MTLog.logFatal(ioe, "Error while writing store listing files!");
+				throw new MTLog.Fatal(ioe, "Error while writing store listing files!");
 			}
 		} else {
 			MTLog.log("Do not generate store listing file: %s.", file);
@@ -719,7 +717,7 @@ public class MGenerator {
 								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF_8);
 			} catch (Exception ioe) {
-				MTLog.logFatal(ioe, "Error while writing store listing files!");
+				throw new MTLog.Fatal(ioe, "Error while writing store listing files!");
 			}
 		} else {
 			MTLog.log("Do not generate store listing file: %s.", file);
