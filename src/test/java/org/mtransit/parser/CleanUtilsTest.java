@@ -103,6 +103,17 @@ public class CleanUtilsTest {
 	}
 
 	@Test
+	public void testToLowerCaseUpperCaseWordsQuotes() {
+		// Arrange
+		String string = "FISHER AT ST. MARY'S";
+		Locale locale = Locale.ENGLISH;
+		// Act
+		String result = CleanUtils.toLowerCaseUpperCaseWords(locale, string);
+		// Assert
+		assertEquals("fisher at st. mary's", result);
+	}
+
+	@Test
 	public void testRemovePointsSimple() {
 		// Arrange
 		String string = "Mt. Paul";

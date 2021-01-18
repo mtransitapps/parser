@@ -342,7 +342,7 @@ public final class CleanUtils {
 		return string;
 	}
 
-	private static final String WORD_REGEX = "a-zA-ZÀ-ÿ";
+	private static final String WORD_REGEX = "a-zA-ZÀ-ÿ'";
 
 	private static final Pattern WORD_NON_WORDS = Pattern.compile(
 			"([^" + WORD_REGEX + "]*)([" + WORD_REGEX + "]+)([^" + WORD_REGEX + "]*)",
