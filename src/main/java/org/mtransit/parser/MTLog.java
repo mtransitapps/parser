@@ -82,11 +82,13 @@ public final class MTLog {
 		t.printStackTrace(); // NON-FATAL
 	}
 
+	@Deprecated
 	public static void logFatal(@NotNull String format, @Nullable Object... args) {
 		log("FATAL ERROR: " + format + "\n", args);
 		System.exit(-1);
 	}
 
+	@Deprecated
 	public static void logFatal(@NotNull Throwable t, @NotNull String format, @Nullable Object... args) {
 		log("FATAL ERROR: " + format + "\n", args);
 		t.printStackTrace();
