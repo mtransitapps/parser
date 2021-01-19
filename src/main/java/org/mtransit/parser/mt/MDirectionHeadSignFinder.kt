@@ -51,6 +51,23 @@ object MDirectionHeadSignFinder {
             directionAmPm[directionIdOrDefault] = firstAndLast
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
+            MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, using AM/PM...")
+            for ((directionId, _) in directionHeadSigns) {
+                val firstAndLastTime = directionAmPm[directionId] ?: continue
+                if (GTime.areAM(firstAndLastTime)) {
+                    directionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
+                        true,
+                        "AM"
+                    )
+                } else if (GTime.arePM(firstAndLastTime)) {
+                    directionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
+                        true,
+                        "PM"
+                    )
+                }
+            }
+        }
+        if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
             MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, try using last stop name...")
             for ((directionId, headSign) in directionHeadSigns) {
                 if (agencyTools.directionHeadSignDescriptive(headSign)) {
@@ -73,23 +90,6 @@ object MDirectionHeadSignFinder {
                     true,
                     agencyTools.cleanStopName(stop.stopName)
                 )
-            }
-        }
-        if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
-            MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, using AM/PM...")
-            for ((directionId, _) in directionHeadSigns) {
-                val firstAndLastTime = directionAmPm[directionId] ?: continue
-                if (GTime.areAM(firstAndLastTime)) {
-                    directionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
-                        true,
-                        "AM"
-                    )
-                } else if (GTime.arePM(firstAndLastTime)) {
-                    directionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
-                        true,
-                        "PM"
-                    )
-                }
             }
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
@@ -130,10 +130,23 @@ object MDirectionHeadSignFinder {
         }
         val tripHeadSignAndLastStopIdInt = gTripsHeadSignAndStopTimes
             .map { (headSign, stopTimes) ->
-                Triple(headSign, stopTimes.last().stopIdInt, stopTimes.first().arrivalTime to stopTimes.last().departureTime)
+                Triple(headSign, stopTimes.last().stopIdInt, stopTimes.first().departureTime to stopTimes.last().arrivalTime)
             }
         val distinctTripHeadSignAndLastStopIdInt = tripHeadSignAndLastStopIdInt
-            .distinctBy { it.first to it.second }
+            .groupBy { it.first to it.second }
+            .mapValues { (_, values) ->
+                val listOfTimes = values
+                    .flatMap {
+                        listOf(it.third.first, it.third.second)
+                    }
+                Pair(
+                    listOfTimes.minOrNull() ?: 990000,
+                    listOfTimes.maxOrNull() ?: 0
+                )
+            }
+            .map {
+                Triple(it.key.first, it.key.second, it.value)
+            }
         if (distinctTripHeadSignAndLastStopIdInt.size == 1) {
             MTLog.log("$routeId: $directionId: 1 distinct trip head-sign: '${distinctTripHeadSignAndLastStopIdInt.first().first}'.")
             return distinctTripHeadSignAndLastStopIdInt.first()
@@ -225,7 +238,11 @@ object MDirectionHeadSignFinder {
         if (distinctTripHeadSignAndStopTimes.size == 1) {
             distinctTripHeadSignAndStopTimes.first().let { (tripHeadSign, tripStopTimes) ->
                 MTLog.log("$routeId: $directionId: 1 distinct merged trip: '$tripHeadSign'.")
-                return Triple(tripHeadSign, tripStopTimes.last().stopIdInt, tripStopTimes.first().arrivalTime to tripStopTimes.last().departureTime)
+                return Triple(
+                    tripHeadSign,
+                    tripStopTimes.last().stopIdInt,
+                    tripStopTimes.first().departureTime to tripStopTimes.last().arrivalTime
+                )
             }
         }
         // starting complex merge
@@ -269,7 +286,7 @@ object MDirectionHeadSignFinder {
         }
         return candidateHeadSignAndStopTimes?.let { (tripHeadSign, tripStopTimes) ->
             MTLog.log("$routeId: $directionId: complex merge candidate found: '$tripHeadSign'.")
-            Triple(tripHeadSign, tripStopTimes.last().stopIdInt, tripStopTimes.first().arrivalTime to tripStopTimes.last().departureTime)
+            Triple(tripHeadSign, tripStopTimes.last().stopIdInt, tripStopTimes.first().departureTime to tripStopTimes.last().arrivalTime)
         }
     }
 
@@ -291,7 +308,7 @@ object MDirectionHeadSignFinder {
             && stopIdInts1 == stopIdInts2
         ) {
             logMerge(!dataLossAuthorized, "$routeId: $directionId: same head-sign & stops -> '$stopTimesHeadSign1'")
-            return stopTimesHeadSign1 to stopTimesList1
+            return stopTimesHeadSign1 to mergeStopTimesCopy(stopTimesList1, stopTimesList2)
         }
         val stopIdsIntersect = stopIdInts1.intersect(stopIdInts2)
         // COMMON STOPs
@@ -410,13 +427,13 @@ object MDirectionHeadSignFinder {
             && regularStopIdInts1.containsExactList(regularStopIdInts2)
         ) {
             logMerge(!dataLossAuthorized, "$routeId: $directionId: #1 contains #2 ('$stopTimesHeadSign2') -> '$stopTimesHeadSign1'")
-            return stopTimesHeadSign1 to stopTimesList1
+            return stopTimesHeadSign1 to mergeStopTimesCopy(stopTimesList1, stopTimesList2)
         }
         if (regularStopIdInts2.size > regularStopIdInts1.size
             && regularStopIdInts2.containsExactList(regularStopIdInts1)
         ) {
             logMerge(!dataLossAuthorized, "$routeId: $directionId: #2 contains #1 ('$stopTimesHeadSign1') -> '$stopTimesHeadSign2'")
-            return stopTimesHeadSign2 to stopTimesList2
+            return stopTimesHeadSign2 to mergeStopTimesCopy(stopTimesList2, stopTimesList1)
         }
         if (stopIdIntsAfterCommonCount1 == 0 // #1 stops
             && stopIdIntsAfterCommonCount2 > 0 // #2 goes further
@@ -728,6 +745,26 @@ object MDirectionHeadSignFinder {
         return null
     }
 
+    private fun mergeStopTimesCopy(mainStopTimesList: List<GStopTime>, otherStopTimesList: List<GStopTime>): List<GStopTime> {
+        return mergeStopTimes(
+            mainStopTimesList.toMutableList(),
+            otherStopTimesList
+        )
+    }
+
+    private fun mergeStopTimes(mergedStopTimes: MutableList<GStopTime>, otherStopTimesList: List<GStopTime>): List<GStopTime> {
+        // cheating, just changing first arrival time / last departure time for AM/PM
+        val firstIdx = 0
+        if (mergedStopTimes[firstIdx].departureTime < otherStopTimesList.first().departureTime) {
+            mergedStopTimes[firstIdx] = mergedStopTimes[firstIdx].copy(_departureTime = otherStopTimesList.first().departureTime)
+        }
+        val lastIdx = mergedStopTimes.size - 1
+        if (mergedStopTimes[lastIdx].arrivalTime > otherStopTimesList.last().arrivalTime) {
+            mergedStopTimes[lastIdx] = mergedStopTimes[lastIdx].copy(_arrivalTime = otherStopTimesList.last().arrivalTime)
+        }
+        return mergedStopTimes
+    }
+
     private fun mergeHeadSigns(
         headSign: String,
         otherHeadSign: String
@@ -773,12 +810,13 @@ object MDirectionHeadSignFinder {
             || stopIdIntsBeforeCommon.isNotEmpty()
             || stopIdIntsBeforeCommonPrepend.isEmpty()
         ) {
-            return stopTimesList
+            return mergeStopTimesCopy(stopTimesList, stopTimesListPrepend)
         }
         return stopTimesList
             .toMutableList()
             .apply {
                 addAll(0, stopTimesListPrepend.subList(0, stopIdIntsBeforeCommonPrepend.size))
+                mergeStopTimes(this, stopTimesListPrepend)
             }
     }
 

@@ -318,7 +318,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		if (this.agencyTools.directionFinderEnabled()) {
 			List<GTrip> gRouteTrips = new ArrayList<>();
 			for (GRoute gRoute : gRoutes) {
-				gRouteTrips.addAll(routeGTFS.getTrips(gRoute.getRouteIdInt()));
+				if (this.agencyTools.directionFinderEnabled(this.routeId, gRoute)) {
+					gRouteTrips.addAll(routeGTFS.getTrips(gRoute.getRouteIdInt()));
+				}
 			}
 			gDirectionHeadSigns = MDirectionHeadSignFinder.findDirectionHeadSigns(this.routeId, gRouteTrips, routeGTFS, this.agencyTools);
 			MTLog.log("%s: Found GTFS direction head sign: %s.", this.routeId, gDirectionHeadSigns);

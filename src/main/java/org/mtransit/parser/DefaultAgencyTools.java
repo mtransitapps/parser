@@ -295,6 +295,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public boolean directionFinderEnabled(long routeId, @NotNull GRoute gRoute) {
+		return directionFinderEnabled();
+	}
+
+	@Override
 	public boolean directionHeadSignsDescriptive(@NotNull Map<Integer, String> directionHeadSigns) {
 		return directionHeadSignsDescriptiveS(directionHeadSigns);
 	}

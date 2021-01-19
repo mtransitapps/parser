@@ -79,6 +79,8 @@ public interface GAgencyTools {
 
 	boolean directionFinderEnabled();
 
+	boolean directionFinderEnabled(long routeId, @NotNull GRoute gRoute);
+
 	boolean directionHeadSignsDescriptive(@NotNull Map<Integer, String> directionHeadSigns);
 
 	@Nullable
