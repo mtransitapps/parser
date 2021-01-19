@@ -307,6 +307,14 @@ public final class CleanUtils {
 		return string;
 	}
 
+	private static final Pattern STARTS_WITH_VIA = Pattern.compile("((^|^.* )via )", Pattern.CASE_INSENSITIVE);
+
+	@NotNull
+	public static String keepVia(@NotNull String string) {
+		string = STARTS_WITH_VIA.matcher(string).replaceAll(EMPTY);
+		return string;
+	}
+
 	private static final Pattern ENDS_WITH_VIA = Pattern.compile("( via .*$)", Pattern.CASE_INSENSITIVE);
 
 	@NotNull
