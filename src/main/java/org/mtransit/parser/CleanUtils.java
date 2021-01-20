@@ -573,6 +573,10 @@ public final class CleanUtils {
 	private static final String APARTMENT_REPLACEMENT = cleanWordsReplacement("Apt"); // not official
 	private static final Pattern PARK = cleanWords("park");
 	private static final String PARK_REPLACEMENT = cleanWordsReplacement("Pk"); // not official
+	private static final Pattern EXCHANGE_ = cleanWordsPlural("exchange");
+	private static final String EXCHANGE_REPLACEMENT = cleanWordsReplacement("Exch"); // not official
+	private static final Pattern TERMINAL_ = cleanWordsPlural("terminal");
+	private static final String TERMINAL_REPLACEMENT = cleanWordsReplacement("Term"); // not official
 	private static final Pattern GATE = cleanWordsPlural("gate");
 	private static final String GATE_REPLACEMENT = cleanWordsReplacementPlural("Gt"); // not official
 	private static final Pattern PARKING = cleanWords("parking");
@@ -637,6 +641,8 @@ public final class CleanUtils {
 		string = APARTMENT_.matcher(string).replaceAll(APARTMENT_REPLACEMENT);
 		string = PARK.matcher(string).replaceAll(PARK_REPLACEMENT);
 		string = NEIGHBOURHOOD_.matcher(string).replaceAll(NEIGHBOURHOOD_REPLACEMENT);
+		string = EXCHANGE_.matcher(string).replaceAll(EXCHANGE_REPLACEMENT);
+		string = TERMINAL_.matcher(string).replaceAll(TERMINAL_REPLACEMENT);
 		string = GATE.matcher(string).replaceAll(GATE_REPLACEMENT);
 		string = HOSPITAL.matcher(string).replaceAll(HOSPITAL_REPLACEMENT);
 		string = MARKET.matcher(string).replaceAll(MARKET_REPLACEMENT);
