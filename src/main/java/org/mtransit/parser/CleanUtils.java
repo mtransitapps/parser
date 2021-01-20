@@ -569,6 +569,8 @@ public final class CleanUtils {
 	private static final Pattern NEIGHBOURHOOD_ = cleanWordsPlural("neighbourhood", "neighbour");
 	private static final String NEIGHBOURHOOD_REPLACEMENT = cleanWordsReplacementPlural("Neighb");
 	// not official
+	private static final Pattern APARTMENT_ = cleanWords("apartment");
+	private static final String APARTMENT_REPLACEMENT = cleanWordsReplacement("Apt"); // not official
 	private static final Pattern PARK = cleanWords("park");
 	private static final String PARK_REPLACEMENT = cleanWordsReplacement("Pk"); // not official
 	private static final Pattern GATE = cleanWordsPlural("gate");
@@ -632,6 +634,7 @@ public final class CleanUtils {
 		string = PARKING.matcher(string).replaceAll(PARKING_REPLACEMENT);
 		string = MOUNT.matcher(string).replaceAll(MOUNT_REPLACEMENT);
 		string = MOUNTAIN.matcher(string).replaceAll(MOUNTAIN_REPLACEMENT);
+		string = APARTMENT_.matcher(string).replaceAll(APARTMENT_REPLACEMENT);
 		string = PARK.matcher(string).replaceAll(PARK_REPLACEMENT);
 		string = NEIGHBOURHOOD_.matcher(string).replaceAll(NEIGHBOURHOOD_REPLACEMENT);
 		string = GATE.matcher(string).replaceAll(GATE_REPLACEMENT);
