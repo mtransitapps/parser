@@ -573,9 +573,9 @@ public final class CleanUtils {
 	private static final String APARTMENT_REPLACEMENT = cleanWordsReplacement("Apt"); // not official
 	private static final Pattern PARK = cleanWords("park");
 	private static final String PARK_REPLACEMENT = cleanWordsReplacement("Pk"); // not official
-	private static final Pattern EXCHANGE_ = cleanWordsPlural("exchange");
+	private static final Pattern EXCHANGE_ = cleanWords("exchange");
 	private static final String EXCHANGE_REPLACEMENT = cleanWordsReplacement("Exch"); // not official
-	private static final Pattern TERMINAL_ = cleanWordsPlural("terminal");
+	private static final Pattern TERMINAL_ = cleanWords("terminal");
 	private static final String TERMINAL_REPLACEMENT = cleanWordsReplacement("Term"); // not official
 	private static final Pattern GATE = cleanWordsPlural("gate");
 	private static final String GATE_REPLACEMENT = cleanWordsReplacementPlural("Gt"); // not official
