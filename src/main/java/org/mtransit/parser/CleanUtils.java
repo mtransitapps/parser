@@ -637,7 +637,7 @@ public final class CleanUtils {
 	private static final String OPPOSITE_REPLACEMENT = cleanWordsReplacement("Opp"); // not official
 	private static final Pattern INDUSTRIAL_ = cleanWords("industrial");
 	private static final String INDUSTRIAL_REPLACEMENT = cleanWordsReplacement("Ind"); // not official
-	private static final Pattern COUNTER_CLOCKWISE_ = Pattern.compile("((^|\\W)counter(-|\\s)?clockwise(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern COUNTER_CLOCKWISE_ = Pattern.compile("((^|\\W)counter( - |-|\\s)?clockwise(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String COUNTER_CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CCW"); // not official
 	private static final Pattern CLOCKWISE_ = cleanWords("clockwise");
 	private static final String CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CW"); // not official
