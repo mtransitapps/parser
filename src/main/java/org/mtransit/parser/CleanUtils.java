@@ -24,12 +24,26 @@ public final class CleanUtils {
 	public static final String CLEAN_EN_DASHES_REPLACEMENT = "$1–$2";
 	public static final Pattern CLEAN_DASHES = Pattern.compile("(\\w)[\\s]*[\\-][\\s]*(\\w)");
 	public static final String CLEAN_DASHES_REPLACEMENT = "$1-$2";
-	private static final String PARENTHESE1 = "\\(";
-	private static final String PARENTHESE2 = "\\)";
-	public static final Pattern CLEAN_PARENTHESE1 = Pattern.compile("[" + PARENTHESE1 + "][\\s]*(\\w)");
-	public static final String CLEAN_PARENTHESE1_REPLACEMENT = PARENTHESE1 + "$1";
-	public static final Pattern CLEAN_PARENTHESE2 = Pattern.compile("(\\w)[\\s]*[" + PARENTHESE2 + "]");
-	public static final String CLEAN_PARENTHESE2_REPLACEMENT = "$1" + PARENTHESE2;
+
+	private static final String PARENTHESIS1 = "\\(";
+	public static final Pattern CLEAN_PARENTHESIS1 = Pattern.compile("[" + PARENTHESIS1 + "][\\s]*(\\w)");
+	public static final String CLEAN_PARENTHESIS1_REPLACEMENT = PARENTHESIS1 + "$1";
+	@Deprecated
+	private static final String PARENTHESE1 = PARENTHESIS1;
+	@Deprecated
+	public static final Pattern CLEAN_PARENTHESE1 = CLEAN_PARENTHESIS1;
+	@Deprecated
+	public static final String CLEAN_PARENTHESE1_REPLACEMENT = CLEAN_PARENTHESIS1_REPLACEMENT;
+
+	private static final String PARENTHESIS2 = "\\)";
+	public static final Pattern CLEAN_PARENTHESIS2 = Pattern.compile("(\\w)[\\s]*[" + PARENTHESIS2 + "]");
+	public static final String CLEAN_PARENTHESIS2_REPLACEMENT = "$1" + PARENTHESIS2;
+	@Deprecated
+	private static final String PARENTHESE2 = PARENTHESIS2;
+	@Deprecated
+	public static final Pattern CLEAN_PARENTHESE2 = CLEAN_PARENTHESIS2;
+	@Deprecated
+	public static final String CLEAN_PARENTHESE2_REPLACEMENT = CLEAN_PARENTHESIS2_REPLACEMENT;
 
 	private static final CharSequenceTranslator ESCAPE;
 
@@ -58,10 +72,19 @@ public final class CleanUtils {
 
 	@NotNull
 	public static String cleanLabel(@NotNull String label) {
+		return cleanLabel(Locale.ENGLISH, label);
+	}
+
+	@NotNull
+	private static String cleanLabel(@NotNull Locale locale, @NotNull String label) {
 		label = CLEAN_SPACES.matcher(label).replaceAll(SPACE);
 		label = CLEAN_P1.matcher(label).replaceAll(CLEAN_P1_REPLACEMENT);
 		label = CLEAN_P2.matcher(label).replaceAll(CLEAN_P2_REPLACEMENT);
-		label = WordUtils.capitalize(label, SPACE_CHAR, '-', '–', '/', '(', '.');
+		if (locale == Locale.FRENCH) {
+			label = WordUtils.capitalize(label, SPACE_CHAR, '-', '–', '/', '(', '.', '\'', '`');
+		} else {
+			label = WordUtils.capitalize(label, SPACE_CHAR, '-', '–', '/', '(', '.');
+		}
 		label = removePointsI(label); // after capitalize
 		return label.trim();
 	}
@@ -246,14 +269,14 @@ public final class CleanUtils {
 	@NotNull
 	public static String cleanLabelFR(@NotNull String label) {
 		label = cleanSlashes(label);
-		label = CLEAN_PARENTHESE1.matcher(label).replaceAll(CLEAN_PARENTHESE1_REPLACEMENT);
-		label = CLEAN_PARENTHESE2.matcher(label).replaceAll(CLEAN_PARENTHESE2_REPLACEMENT);
+		label = CLEAN_PARENTHESIS1.matcher(label).replaceAll(CLEAN_PARENTHESIS1_REPLACEMENT);
+		label = CLEAN_PARENTHESIS2.matcher(label).replaceAll(CLEAN_PARENTHESIS2_REPLACEMENT);
 		label = SAINT.matcher(label).replaceAll(SAINT_REPLACEMENT);
 		label = Utils.replaceAll(label.trim(), START_WITH_ST, SPACE); // Constants.EMPTY); // SPACE);
 		label = Utils.replaceAll(label, SLASH_ST, SLASH_SPACE);
 		label = Utils.replaceAll(label.trim(), START_WITH_CHARS, SPACE); // , Constants.EMPTY); //
 		label = Utils.replaceAll(label, SLASH_CHARS, SLASH_SPACE);
-		return cleanLabel(label);
+		return cleanLabel(Locale.FRENCH, label);
 	}
 
 	private static final Pattern CLEAN_SLASH = Pattern.compile("(\\S)[\\s]*[/][\\s]*(\\S)");
@@ -350,10 +373,16 @@ public final class CleanUtils {
 		return string;
 	}
 
-	private static final String WORD_REGEX = "a-zA-ZÀ-ÿ'";
+	private static final String WORD_REGEX = "a-zA-ZÀ-ÿ'"; // MARY'S
 
 	private static final Pattern WORD_NON_WORDS = Pattern.compile(
 			"([^" + WORD_REGEX + "]*)([" + WORD_REGEX + "]+)([^" + WORD_REGEX + "]*)",
+			Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.CANON_EQ);
+
+	private static final String WORD_REGEX_FR = "a-zA-ZÀ-ÿ"; // d'AYLMER
+
+	private static final Pattern WORD_NON_WORDS_FR = Pattern.compile(
+			"([^" + WORD_REGEX_FR + "]*)([" + WORD_REGEX_FR + "]+)([^" + WORD_REGEX_FR + "]*)",
 			Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.CANON_EQ);
 
 	@NotNull
@@ -362,16 +391,16 @@ public final class CleanUtils {
 			return string;
 		}
 		StringBuilder sb = new StringBuilder();
-		Matcher matcher = WORD_NON_WORDS.matcher(string);
+		Pattern pattern = locale == Locale.FRENCH ? WORD_NON_WORDS_FR : WORD_NON_WORDS;
+		Matcher matcher = pattern.matcher(string);
 		while (matcher.find()) {
 			sb.append(matcher.group(1)); // before
 			String word = matcher.group(2);
-			if (word.length() > 1 && Utils.isUppercaseOnly(word, false, true)) {
-				if (containsIgnoreCase(word, ignoreWords)) {
-					sb.append(word);
-				} else {
-					sb.append(word.toLowerCase(locale));
-				}
+			if (word.length() > 1
+					&& Utils.isUppercaseOnly(word, false, true)
+					&& !Utils.isRomanDigits(word)
+					&& !containsIgnoreCase(word, ignoreWords)) {
+				sb.append(word.toLowerCase(locale));
 			} else {
 				sb.append(word);
 			}
@@ -447,16 +476,37 @@ public final class CleanUtils {
 	private static final Pattern NORTH_ = cleanWords("north");
 	private static final String NORTH_REPLACEMENT = cleanWordsReplacement("N");
 
+	private static final Pattern EAST_FR_ = cleanWords("est");
+	private static final String EAST_FR_REPLACEMENT = cleanWordsReplacement("E");
+	private static final Pattern WEST_FR_ = cleanWords("ouest");
+	private static final String WEST_FR_REPLACEMENT = cleanWordsReplacement("O");
+	private static final Pattern SOUTH_FR_ = cleanWords("sud");
+	private static final String SOUTH_FR_REPLACEMENT = cleanWordsReplacement("S");
+	private static final Pattern NORTH_FR_ = cleanWords("nord");
+	private static final String NORTH_FR_REPLACEMENT = cleanWordsReplacement("N");
+
 	@NotNull
 	public static String cleanBounds(@NotNull String string) {
-		string = EASTBOUND_.matcher(string).replaceAll(EASTBOUND_REPLACEMENT);
-		string = WESTBOUND_.matcher(string).replaceAll(WESTBOUND_REPLACEMENT);
-		string = SOUTHBOUND_.matcher(string).replaceAll(SOUTHBOUND_REPLACEMENT);
-		string = NORTHBOUND_.matcher(string).replaceAll(NORTHBOUND_REPLACEMENT);
-		string = EAST_.matcher(string).replaceAll(EAST_REPLACEMENT);
-		string = WEST_.matcher(string).replaceAll(WEST_REPLACEMENT);
-		string = SOUTH_.matcher(string).replaceAll(SOUTH_REPLACEMENT);
-		string = NORTH_.matcher(string).replaceAll(NORTH_REPLACEMENT);
+		return cleanBounds(Locale.ENGLISH, string);
+	}
+
+	@NotNull
+	public static String cleanBounds(@NotNull Locale locale, @NotNull String string) {
+		if (locale == Locale.FRENCH) {
+			string = EAST_FR_.matcher(string).replaceAll(EAST_FR_REPLACEMENT);
+			string = WEST_FR_.matcher(string).replaceAll(WEST_FR_REPLACEMENT);
+			string = SOUTH_FR_.matcher(string).replaceAll(SOUTH_FR_REPLACEMENT);
+			string = NORTH_FR_.matcher(string).replaceAll(NORTH_FR_REPLACEMENT);
+		} else {
+			string = EASTBOUND_.matcher(string).replaceAll(EASTBOUND_REPLACEMENT);
+			string = WESTBOUND_.matcher(string).replaceAll(WESTBOUND_REPLACEMENT);
+			string = SOUTHBOUND_.matcher(string).replaceAll(SOUTHBOUND_REPLACEMENT);
+			string = NORTHBOUND_.matcher(string).replaceAll(NORTHBOUND_REPLACEMENT);
+			string = EAST_.matcher(string).replaceAll(EAST_REPLACEMENT);
+			string = WEST_.matcher(string).replaceAll(WEST_REPLACEMENT);
+			string = SOUTH_.matcher(string).replaceAll(SOUTH_REPLACEMENT);
+			string = NORTH_.matcher(string).replaceAll(NORTH_REPLACEMENT);
+		}
 		return string;
 	}
 
@@ -659,25 +709,25 @@ public final class CleanUtils {
 
 	// FR-CA : http://www.toponymie.gouv.qc.ca/ct/normes-procedures/terminologie-geographique/liste-termes-geographiques.html
 	private static final Pattern FR_CA_AVENUE = cleanWords("avenue");
-	private static final String FR_CA_AVENUE_REPLACEMENT = cleanWordsReplacement("Av.");
+	private static final String FR_CA_AVENUE_REPLACEMENT = cleanWordsReplacement("Av");
 	private static final Pattern FR_CA_AUTOROUTE = cleanWords("autoroute");
-	private static final String FR_CA_AUTOROUTE_REPLACEMENT = cleanWordsReplacement("Aut.");
+	private static final String FR_CA_AUTOROUTE_REPLACEMENT = cleanWordsReplacement("Aut");
 	private static final Pattern FR_CA_BOULEVARD = cleanWords("boulevard");
-	private static final String FR_CA_BOULEVARD_REPLACEMENT = cleanWordsReplacement("Boul.");
+	private static final String FR_CA_BOULEVARD_REPLACEMENT = cleanWordsReplacement("Boul");
 	private static final Pattern FR_CA_CARREFOUR = cleanWords("carrefour");
-	private static final String FR_CA_CARREFOUR_REPLACEMENT = cleanWordsReplacement("Carref.");
+	private static final String FR_CA_CARREFOUR_REPLACEMENT = cleanWordsReplacement("Carref");
 	private static final Pattern FR_CA_MONTAGNE = cleanWords("montagne");
 	private static final String FR_CA_MONTAGNE_REPLACEMENT = cleanWordsReplacement("Mgne");
 	private static final Pattern FR_CA_MONTEE = cleanWords("mont[é|e]e");
 	private static final String FR_CA_MONTEE_REPLACEMENT = cleanWordsReplacement("Mtée");
 	private static final Pattern FR_CA_PARC_INDUSTRIEL = cleanWords("parc industriel");
-	private static final String FR_CA_PARC_INDUSTRIEL_REPLACEMENT = cleanWordsReplacement("Parc Ind.");
+	private static final String FR_CA_PARC_INDUSTRIEL_REPLACEMENT = cleanWordsReplacement("Parc Ind");
 	private static final Pattern FR_CA_RIVIERE = cleanWords("rivi[e|è]re");
-	private static final String FR_CA_RIVIERE_REPLACEMENT = cleanWordsReplacement("Riv.");
+	private static final String FR_CA_RIVIERE_REPLACEMENT = cleanWordsReplacement("Riv");
 	private static final Pattern FR_CA_SECTEUR = cleanWords("secteur");
-	private static final String FR_CA_SECTEUR_REPLACEMENT = cleanWordsReplacement("Sect.");
+	private static final String FR_CA_SECTEUR_REPLACEMENT = cleanWordsReplacement("Sect");
 	private static final Pattern FR_CA_STATION_DE_METRO = cleanWords("Station de m[é|e]tro");
-	private static final String FR_CA_STATION_DE_METRO_REPLACEMENT = cleanWordsReplacement("Ston mét.");
+	private static final String FR_CA_STATION_DE_METRO_REPLACEMENT = cleanWordsReplacement("Ston mét");
 	private static final Pattern FR_CA_STATION = cleanWords("station");
 	private static final String FR_CA_STATION_REPLACEMENT = cleanWordsReplacement("Ston");
 	private static final Pattern FR_CA_STATIONNEMENT = cleanWords("stationnement");

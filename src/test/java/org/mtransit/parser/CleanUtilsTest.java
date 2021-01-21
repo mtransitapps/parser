@@ -103,7 +103,7 @@ public class CleanUtilsTest {
 	}
 
 	@Test
-	public void testToLowerCaseUpperCaseWordsQuotes() {
+	public void testToLowerCaseUpperCaseWordsQuotesUC() {
 		// Arrange
 		String string = "FISHER AT ST. MARY'S";
 		Locale locale = Locale.ENGLISH;
@@ -111,6 +111,28 @@ public class CleanUtilsTest {
 		String result = CleanUtils.toLowerCaseUpperCaseWords(locale, string);
 		// Assert
 		assertEquals("fisher at st. mary's", result);
+	}
+
+	@Test
+	public void testToLowerCaseUpperCaseWordsQuotesMixed() {
+		// Arrange
+		String string = "chemin d'AYLMER/de la COLLINE";
+		Locale locale = Locale.FRENCH;
+		// Act
+		String result = CleanUtils.toLowerCaseUpperCaseWords(locale, string);
+		// Assert
+		assertEquals("chemin d'aylmer/de la colline", result);
+	}
+
+	@Test
+	public void testToLowerCaseUpperCaseWordsRomanDigits() {
+		// Arrange
+		String string = "JEAN-XXIII/des PINS";
+		Locale locale = Locale.FRENCH;
+		// Act
+		String result = CleanUtils.toLowerCaseUpperCaseWords(locale, string);
+		// Assert
+		assertEquals("jean-XXIII/des pins", result);
 	}
 
 	@Test

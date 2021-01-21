@@ -3,6 +3,8 @@ package org.mtransit.parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -147,6 +149,21 @@ public final class Utils {
 			}
 			if (!Character.isUpperCase(aChar)) {
 				// MTLog.logDebug(" > Non-upper-case character found '%s' at %d in '%s'.", str.charAt(i), i, str);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@NotNull
+	private static final List<Character> ROMAN_DIGITS = Arrays.asList('I', 'V', 'X'); // , 'L', 'C', 'D', 'M'
+
+	public static boolean isRomanDigits(@NotNull CharSequence str) {
+		final int len = str.length();
+		char aChar;
+		for (int i = 0; i < len; i++) {
+			aChar = str.charAt(i);
+			if (!ROMAN_DIGITS.contains(aChar)) {
 				return false;
 			}
 		}
