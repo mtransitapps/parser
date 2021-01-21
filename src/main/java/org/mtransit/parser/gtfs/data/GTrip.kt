@@ -29,7 +29,7 @@ data class GTrip(
         tripShortName
     )
 
-    val directionId : Int? = directionIdE.originalId() // optional
+    val directionId: Int? = directionIdE.originalId() // optional
 
     @Suppress("unused")
     val directionIdOrDefault: Int = directionIdE.id
@@ -122,5 +122,12 @@ data class GTrip(
             routeIdInt: Int,
             tripIdInt: Int
         ) = "${routeIdInt}-${tripIdInt}"
+
+        @JvmStatic
+        fun longestFirst(tripList: List<GTrip>, tripStopListGetter: (Int) -> List<GTripStop>): List<GTrip> {
+            return tripList.sortedByDescending { trip ->
+                tripStopListGetter(trip.tripIdInt).size
+            }
+        }
     }
 }

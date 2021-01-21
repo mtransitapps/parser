@@ -345,15 +345,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (getDirectionType() == MTrip.HEADSIGN_TYPE_DIRECTION) {
 				final String tripHeadsignLC = headSign.toLowerCase(Locale.ENGLISH);
 				switch (tripHeadsignLC) {
+				case "eastbound":
 				case "east":
 				case "est":
 					return MDirectionType.EAST;
+				case "westbound":
 				case "west":
 				case "ouest":
 					return MDirectionType.WEST;
+				case "northbound":
 				case "north":
 				case "nord":
 					return MDirectionType.NORTH;
+				case "southbound":
 				case "south":
 				case "sud":
 					return MDirectionType.SOUTH;

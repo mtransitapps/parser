@@ -49,6 +49,13 @@ public final class MTLog {
 		System.out.print("\n" + "----------" + methodName + "()");
 	}
 
+	public static void logDebugMethodEnd(@NotNull String methodName, @Nullable Object result) {
+		if (!Constants.DEBUG) {
+			return;
+		}
+		System.out.printf("\n" + "----------" + methodName + "() > %s.", result);
+	}
+
 	public static void logPOINT() {
 		logChar(POINT);
 	}

@@ -438,7 +438,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		ArrayList<MTripStop> mTripStopsList;
 		Integer tripServiceIdInt;
 		HashMap<Long, String> splitTripStopTimesHeadsign;
-		final List<GTrip> gRouteTrips = routeGTFS.getTrips(gRoute.getRouteIdInt());
+		final List<GTrip> gRouteTrips = GTrip.longestFirst(
+				routeGTFS.getTrips(gRoute.getRouteIdInt()),
+				this.routeTripIdTripStops::get
+		);
 		//noinspection deprecation
 		final String gRouteId = gRoute.getRouteId();
 		MTLog.log("%s: parsing %d trips for route ID '%s'... ", this.routeId, gRouteTrips.size(), gRouteId);
