@@ -226,6 +226,16 @@ public class CleanUtilsTest {
 	}
 
 	@Test
+	public void testRemovePoints3SingleLettersOnlyExceptEnd() {
+		// Arrange
+		String string = "R.T.L";
+		// Act
+		String result = CleanUtils.removePointsI(string);
+		// Assert
+		assertEquals("RTL", result);
+	}
+
+	@Test
 	public void testRemovePoints3SingleLetters() {
 		// Arrange
 		String string = "VICTORIA PARK AV / I.B.M.";
