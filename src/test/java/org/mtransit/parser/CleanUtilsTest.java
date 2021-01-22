@@ -236,6 +236,26 @@ public class CleanUtilsTest {
 	}
 
 	@Test
+	public void testRemovePoints3SingleLettersOnlyExceptEndNot() {
+		// Arrange
+		String string = "EB Auburn Bay DR @ S.leg Auburn Glen HT SE";
+		// Act
+		String result = CleanUtils.removePointsI(string);
+		// Assert
+		assertEquals("EB Auburn Bay DR @ S.leg Auburn Glen HT SE", result);
+	}
+
+	@Test
+	public void testRemovePoints3SingleLettersOnlyExceptEndNot2() {
+		// Arrange
+		String string = "EB Auburn Bay DR @ S.leg";
+		// Act
+		String result = CleanUtils.removePointsI(string);
+		// Assert
+		assertEquals("EB Auburn Bay DR @ S.leg", result);
+	}
+
+	@Test
 	public void testRemovePoints3SingleLetters() {
 		// Arrange
 		String string = "VICTORIA PARK AV / I.B.M.";
