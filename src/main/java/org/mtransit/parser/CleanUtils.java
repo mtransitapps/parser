@@ -755,6 +755,8 @@ public final class CleanUtils {
 	//
 	private static final Pattern FR_CA_QUAI_ = Pattern.compile("( (quai (\\w+)))", Pattern.CASE_INSENSITIVE);
 	private static final String FR_CA_QUAI_REPLACEMENT = " Q:$3";
+	private static final Pattern FR_CA_PORTE_ = Pattern.compile("( (porte (\\w+)))", Pattern.CASE_INSENSITIVE);
+	private static final String FR_CA_PORTE_REPLACEMENT = " P:$3";
 
 	@NotNull
 	public static String cleanStreetTypesFRCA(@NotNull String string) {
@@ -777,6 +779,7 @@ public final class CleanUtils {
 		string = FR_CA_TEMPORAIRE.matcher(string).replaceAll(FR_CA_TEMPORAIRE_REPLACEMENT);
 		//
 		string = FR_CA_QUAI_.matcher(string).replaceAll(FR_CA_QUAI_REPLACEMENT);
+		string = FR_CA_PORTE_.matcher(string).replaceAll(FR_CA_PORTE_REPLACEMENT);
 		return string;
 	}
 }
