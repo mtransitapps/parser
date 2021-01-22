@@ -714,7 +714,7 @@ public final class CleanUtils {
 		string = COUNTER_CLOCKWISE_.matcher(string).replaceAll(COUNTER_CLOCKWISE_REPLACEMENT); // before clockwise
 		string = CLOCKWISE_.matcher(string).replaceAll(CLOCKWISE_REPLACEMENT);
 		//
-		string = PLATFORM_.matcher(string).replaceAll(PLACE_REPLACEMENT);
+		string = PLATFORM_.matcher(string).replaceAll(PLATFORM_REPLACEMENT);
 		return string;
 	}
 
