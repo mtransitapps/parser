@@ -199,6 +199,11 @@ public final class CleanUtils {
 
 	@NotNull
 	public static Pattern cleanWords(@Nullable String... words) {
+		return cleanWords(Pattern.CASE_INSENSITIVE, words);
+	}
+
+	@NotNull
+	public static Pattern cleanWords(int flags, @Nullable String... words) {
 		if (words == null || words.length <= 0) {
 			throw new RuntimeException("Cannot clean empty list of words!");
 		}
@@ -212,7 +217,7 @@ public final class CleanUtils {
 			firstWorld = false;
 		}
 		sb.append(")(\\W|$))");
-		return Pattern.compile(sb.toString(), Pattern.CASE_INSENSITIVE);
+		return Pattern.compile(sb.toString(), flags);
 	}
 
 	@NotNull
@@ -642,6 +647,9 @@ public final class CleanUtils {
 	private static final String COUNTER_CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CCW"); // not official
 	private static final Pattern CLOCKWISE_ = cleanWords("clockwise");
 	private static final String CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CW"); // not official
+	//
+	private static final Pattern PLATFORM_ = Pattern.compile("( (platform (\\w+)))", Pattern.CASE_INSENSITIVE);
+	private static final String PLATFORM_REPLACEMENT = " P:$3";
 
 	@NotNull
 	public static String cleanStreetTypes(@NotNull String string) {
@@ -705,6 +713,8 @@ public final class CleanUtils {
 		string = INDUSTRIAL_.matcher(string).replaceAll(INDUSTRIAL_REPLACEMENT);
 		string = COUNTER_CLOCKWISE_.matcher(string).replaceAll(COUNTER_CLOCKWISE_REPLACEMENT); // before clockwise
 		string = CLOCKWISE_.matcher(string).replaceAll(CLOCKWISE_REPLACEMENT);
+		//
+		string = PLATFORM_.matcher(string).replaceAll(PLACE_REPLACEMENT);
 		return string;
 	}
 
@@ -737,6 +747,14 @@ public final class CleanUtils {
 	private static final String FR_CA_TERRASSE_REPLACEMENT = cleanWordsReplacement("Tsse");
 	private static final Pattern FR_CA_TERRASSES = cleanWords("terrasses");
 	private static final String FR_CA_TERRASSES_REPLACEMENT = cleanWordsReplacement("Tsses");
+	// not official
+	private static final Pattern FR_CA_TERMINUS = cleanWords("terminus");
+	private static final String FR_CA_TERMINUS_REPLACEMENT = cleanWordsReplacement("Term");
+	private static final Pattern FR_CA_TEMPORAIRE = cleanWords("temporaire");
+	private static final String FR_CA_TEMPORAIRE_REPLACEMENT = cleanWordsReplacement("Temp");
+	//
+	private static final Pattern FR_CA_QUAI_ = Pattern.compile("( (quai (\\w+)))", Pattern.CASE_INSENSITIVE);
+	private static final String FR_CA_QUAI_REPLACEMENT = " Q:$3";
 
 	@NotNull
 	public static String cleanStreetTypesFRCA(@NotNull String string) {
@@ -754,6 +772,11 @@ public final class CleanUtils {
 		string = FR_CA_STATIONNEMENT.matcher(string).replaceAll(FR_CA_STATIONNEMENT_REPLACEMENT);
 		string = FR_CA_TERRASSE.matcher(string).replaceAll(FR_CA_TERRASSE_REPLACEMENT);
 		string = FR_CA_TERRASSES.matcher(string).replaceAll(FR_CA_TERRASSES_REPLACEMENT);
+		// not official
+		string = FR_CA_TERMINUS.matcher(string).replaceAll(FR_CA_TERMINUS_REPLACEMENT);
+		string = FR_CA_TEMPORAIRE.matcher(string).replaceAll(FR_CA_TEMPORAIRE_REPLACEMENT);
+		//
+		string = FR_CA_QUAI_.matcher(string).replaceAll(FR_CA_QUAI_REPLACEMENT);
 		return string;
 	}
 }
