@@ -124,9 +124,9 @@ data class GTrip(
         ) = "${routeIdInt}-${tripIdInt}"
 
         @JvmStatic
-        fun longestFirst(tripList: List<GTrip>, tripStopListGetter: (Int) -> List<GTripStop>): List<GTrip> {
+        fun longestFirst(tripList: List<GTrip>, tripStopListGetter: (Int) -> List<GTripStop>?): List<GTrip> {
             return tripList.sortedByDescending { trip ->
-                tripStopListGetter(trip.tripIdInt).size
+                tripStopListGetter(trip.tripIdInt)?.size ?: 0
             }
         }
     }
