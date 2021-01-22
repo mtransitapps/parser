@@ -140,13 +140,13 @@ public final class CleanUtils {
 	};
 
 	private static final String PLACE_CHAR_ARRONDISSEMENT = "arrondissement ";
-	private static final String PLACE_CHAR_AV = "av. ";
+	private static final String PLACE_CHAR_AV = "av ";
 	private static final String PLACE_CHAR_AVENUE = "avenue ";
-	private static final String PLACE_CHAR_BOUL = "boul. ";
+	private static final String PLACE_CHAR_BOUL = "boul ";
 	private static final String PLACE_CHAR_BOULEVARD = "boulevard ";
-	private static final String PLACE_CHAR_CH = "ch. ";
+	private static final String PLACE_CHAR_CH = "ch ";
 	private static final String PLACE_CHAR_CIVIQUE = "civique ";
-	private static final String PLACE_CHAR_CROISS = "croiss. ";
+	private static final String PLACE_CHAR_CROISS = "croiss ";
 	private static final String PLACE_CHAR_QUARTIER = "quartier ";
 	private static final String PLACE_CHAR_RTE = "rte ";
 	private static final String PLACE_CHAR_RUE = "rue ";
@@ -272,6 +272,7 @@ public final class CleanUtils {
 		label = CLEAN_PARENTHESIS1.matcher(label).replaceAll(CLEAN_PARENTHESIS1_REPLACEMENT);
 		label = CLEAN_PARENTHESIS2.matcher(label).replaceAll(CLEAN_PARENTHESIS2_REPLACEMENT);
 		label = SAINT.matcher(label).replaceAll(SAINT_REPLACEMENT);
+		label = removePointsI(label); // after capitalize
 		label = Utils.replaceAll(label.trim(), START_WITH_ST, SPACE); // Constants.EMPTY); // SPACE);
 		label = Utils.replaceAll(label, SLASH_ST, SLASH_SPACE);
 		label = Utils.replaceAll(label.trim(), START_WITH_CHARS, SPACE); // , Constants.EMPTY); //
