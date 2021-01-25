@@ -651,7 +651,7 @@ public final class CleanUtils {
 	private static final Pattern CLOCKWISE_ = cleanWords("clockwise");
 	private static final String CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CW"); // not official
 	//
-	private static final Pattern PLATFORM_ = Pattern.compile("((^|\\W)(platform (\\w+))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern PLATFORM_ = Pattern.compile("((^|\\W)(platform (\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String PLATFORM_REPLACEMENT = "$2P:$4$5";
 
 	@NotNull
@@ -750,16 +750,18 @@ public final class CleanUtils {
 	private static final String FR_CA_TERRASSE_REPLACEMENT = cleanWordsReplacement("Tsse");
 	private static final Pattern FR_CA_TERRASSES = cleanWords("terrasses");
 	private static final String FR_CA_TERRASSES_REPLACEMENT = cleanWordsReplacement("Tsses");
+	private static final Pattern FR_CA_POINTE = cleanWords("pointe");
+	private static final String FR_CA_POINTE_REPLACEMENT = cleanWordsReplacement("Pte");
 	// not official
 	private static final Pattern FR_CA_TERMINUS = cleanWords("terminus");
 	private static final String FR_CA_TERMINUS_REPLACEMENT = cleanWordsReplacement("Term");
 	private static final Pattern FR_CA_TEMPORAIRE = cleanWords("temporaire");
 	private static final String FR_CA_TEMPORAIRE_REPLACEMENT = cleanWordsReplacement("Temp");
 	//
-	private static final Pattern FR_CA_QUAI_ = Pattern.compile("((^|\\W)(quai (\\w+))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern FR_CA_QUAI_ = Pattern.compile("((^|\\W)(quai (\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String FR_CA_QUAI_REPLACEMENT = "$2Q:$4$5";
 
-	private static final Pattern FR_CA_PORTE_ = Pattern.compile("((^|\\W)(porte (\\w+))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern FR_CA_PORTE_ = Pattern.compile("((^|\\W)(porte (\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String FR_CA_PORTE_REPLACEMENT = "$2P:$4$5";
 
 	@NotNull
@@ -778,6 +780,7 @@ public final class CleanUtils {
 		string = FR_CA_STATIONNEMENT.matcher(string).replaceAll(FR_CA_STATIONNEMENT_REPLACEMENT);
 		string = FR_CA_TERRASSE.matcher(string).replaceAll(FR_CA_TERRASSE_REPLACEMENT);
 		string = FR_CA_TERRASSES.matcher(string).replaceAll(FR_CA_TERRASSES_REPLACEMENT);
+		string = FR_CA_POINTE.matcher(string).replaceAll(FR_CA_POINTE_REPLACEMENT);
 		// not official
 		string = FR_CA_TERMINUS.matcher(string).replaceAll(FR_CA_TERMINUS_REPLACEMENT);
 		string = FR_CA_TEMPORAIRE.matcher(string).replaceAll(FR_CA_TEMPORAIRE_REPLACEMENT);
