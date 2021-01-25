@@ -648,8 +648,8 @@ public final class CleanUtils {
 	private static final Pattern CLOCKWISE_ = cleanWords("clockwise");
 	private static final String CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CW"); // not official
 	//
-	private static final Pattern PLATFORM_ = Pattern.compile("( (platform (\\w+)))", Pattern.CASE_INSENSITIVE);
-	private static final String PLATFORM_REPLACEMENT = " P:$3";
+	private static final Pattern PLATFORM_ = Pattern.compile("((^|\\W)(platform (\\w+))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final String PLATFORM_REPLACEMENT = "$2P:$4$5";
 
 	@NotNull
 	public static String cleanStreetTypes(@NotNull String string) {
@@ -753,10 +753,11 @@ public final class CleanUtils {
 	private static final Pattern FR_CA_TEMPORAIRE = cleanWords("temporaire");
 	private static final String FR_CA_TEMPORAIRE_REPLACEMENT = cleanWordsReplacement("Temp");
 	//
-	private static final Pattern FR_CA_QUAI_ = Pattern.compile("( (quai (\\w+)))", Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_QUAI_REPLACEMENT = " Q:$3";
-	private static final Pattern FR_CA_PORTE_ = Pattern.compile("( (porte (\\w+)))", Pattern.CASE_INSENSITIVE);
-	private static final String FR_CA_PORTE_REPLACEMENT = " P:$3";
+	private static final Pattern FR_CA_QUAI_ = Pattern.compile("((^|\\W)(quai (\\w+))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final String FR_CA_QUAI_REPLACEMENT = "$2Q:$4$5";
+
+	private static final Pattern FR_CA_PORTE_ = Pattern.compile("((^|\\W)(porte (\\w+))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final String FR_CA_PORTE_REPLACEMENT = "$2P:$4$5";
 
 	@NotNull
 	public static String cleanStreetTypesFRCA(@NotNull String string) {
