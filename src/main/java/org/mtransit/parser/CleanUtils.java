@@ -365,15 +365,18 @@ public final class CleanUtils {
 		return string;
 	}
 
-	private static final Pattern MC_ = Pattern.compile("(((mc)([a-z]))([a-z]+))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern MC_ = Pattern.compile("((((m)(c|ac))([a-z]))([a-z]+))", Pattern.CASE_INSENSITIVE);
 
 	@NotNull
 	public static String fixMcXCase(@NotNull String string) { // Mccowan -> McCowan
 		final Matcher matcher = MC_.matcher(string);
 		while (matcher.find()) {
 			string = string.replaceAll(
-					matcher.group(2),
-					matcher.group(3) + matcher.group(4).toUpperCase()
+					matcher.group(1),
+					matcher.group(4).toUpperCase(Locale.ENGLISH) +
+							matcher.group(5).toLowerCase(Locale.ENGLISH) +
+							matcher.group(6).toUpperCase(Locale.ENGLISH) +
+							matcher.group(7).toLowerCase(Locale.ENGLISH)
 			);
 		}
 		return string;
@@ -575,8 +578,8 @@ public final class CleanUtils {
 	private static final String RIDGE_REPLACEMENT = cleanWordsReplacementPlural("Rdg");
 	private static final Pattern GARDEN = cleanWordsPlural("garden");
 	private static final String GARDEN_REPLACEMENT = cleanWordsReplacementPlural("Gdn");
-	private static final Pattern CENTER = cleanWords("center", "centre");
-	private static final String CENTER_REPLACEMENT = cleanWordsReplacement("Ctr");
+	private static final Pattern CENTER = cleanWordsPlural("center", "centre");
+	private static final String CENTER_REPLACEMENT = cleanWordsReplacementPlural("Ctr");
 	private static final Pattern ESTATE = cleanWordsPlural("estate");
 	private static final String ESTATE_REPLACEMENT = cleanWordsReplacementPlural("Est");
 	private static final Pattern LANDING = cleanWords("landing");

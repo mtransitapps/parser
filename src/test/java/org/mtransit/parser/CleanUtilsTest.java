@@ -294,4 +294,44 @@ public class CleanUtilsTest {
 		// Assert
 		assertEquals("RR 25 & #5 Side Rd Ind (CW)", result);
 	}
+
+	@Test
+	public void testFixMcXCaseAllLC() {
+		// Arrange
+		String string = "abc mcgill xyz";
+		// Act
+		String result = CleanUtils.fixMcXCase(string);
+		// Assert
+		assertEquals("abc McGill xyz", result);
+	}
+
+	@Test
+	public void testFixMcXCaseAllUC() {
+		// Arrange
+		String string = "abc MCGILL xyz";
+		// Act
+		String result = CleanUtils.fixMcXCase(string);
+		// Assert
+		assertEquals("abc McGill xyz", result);
+	}
+
+	@Test
+	public void testFixMcXCaseCapitalized() {
+		// Arrange
+		String string = "abc Mcgill xyz";
+		// Act
+		String result = CleanUtils.fixMcXCase(string);
+		// Assert
+		assertEquals("abc McGill xyz", result);
+	}
+
+	@Test
+	public void testFixMcXCaseNotCapitalized() {
+		// Arrange
+		String string = "abc McGILL xyz";
+		// Act
+		String result = CleanUtils.fixMcXCase(string);
+		// Assert
+		assertEquals("abc McGill xyz", result);
+	}
 }

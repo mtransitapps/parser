@@ -38,6 +38,8 @@ data class GRoute(
 
     val routeLongNameOrDefault: String = routeLongName ?: Constants.EMPTY
 
+    val routeDescOrDefault: String = routeDesc ?: Constants.EMPTY
+
     @Suppress("unused")
     fun hasAgencyId(): Boolean = agencyIdInt != null
 
