@@ -176,5 +176,11 @@ data class GStopTime(
         fun Iterable<GStopTime>.maxStopSequence(): Int {
             return this.map { it.stopSequence }.maxOrNull() ?: Int.MAX_VALUE
         }
+
+        @Suppress("unused")
+        @JvmStatic
+        fun toStringPlus(gStopTimes: Iterable<GStopTime>, debug: Boolean = Constants.DEBUG): String {
+            return gStopTimes.joinToString { gStopTime -> gStopTime.toStringPlus(debug) }
+        }
     }
 }

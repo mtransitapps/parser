@@ -287,7 +287,7 @@ object MDirectionHeadSignFinder {
         return candidateHeadSignAndStopTimes?.let { (tripHeadSign, tripStopTimes) ->
             MTLog.log("$routeId: $directionId: complex merge candidate found: '$tripHeadSign'.")
             Triple(tripHeadSign, tripStopTimes.last().stopIdInt, tripStopTimes.first().departureTime to tripStopTimes.last().arrivalTime)
-        }
+        } ?: throw MTLog.Fatal("$routeId: $directionId: no candidate after complex merge!")
     }
 
     private fun mergeTrips(
@@ -787,7 +787,8 @@ object MDirectionHeadSignFinder {
             stopTimesList1,
             stopIdIntsBeforeCommon1,
             stopTimesList2,
-            stopIdIntsBeforeCommon2
+            stopIdIntsBeforeCommon2,
+            forceMerge = true
         )
     } else {
         mergeBeforeFirstCommonStop(
@@ -795,7 +796,8 @@ object MDirectionHeadSignFinder {
             stopTimesList2,
             stopIdIntsBeforeCommon2,
             stopTimesList1,
-            stopIdIntsBeforeCommon1
+            stopIdIntsBeforeCommon1,
+            forceMerge = true
         )
     }
 
@@ -804,20 +806,23 @@ object MDirectionHeadSignFinder {
         stopTimesList: List<GStopTime>,
         stopIdIntsBeforeCommon: List<Int>,
         stopTimesListPrepend: List<GStopTime>,
-        stopIdIntsBeforeCommonPrepend: List<Int>
+        stopIdIntsBeforeCommonPrepend: List<Int>,
+        forceMerge: Boolean = true
     ): List<GStopTime> {
-        if (firstCommonStopIdInt == null
-            || stopIdIntsBeforeCommon.isNotEmpty()
-            || stopIdIntsBeforeCommonPrepend.isEmpty()
+        return if (firstCommonStopIdInt != null // has a common stop
+            && (forceMerge // force merge
+                    || (stopIdIntsBeforeCommon.isEmpty() // has stops before common
+                    && stopIdIntsBeforeCommonPrepend.isNotEmpty())) // prepend do NOT have stops before common
         ) {
-            return mergeStopTimesCopy(stopTimesList, stopTimesListPrepend)
+            stopTimesList
+                .toMutableList()
+                .apply {
+                    addAll(0, stopTimesListPrepend.subList(0, stopIdIntsBeforeCommonPrepend.size))
+                    mergeStopTimes(this, stopTimesListPrepend)
+                }
+        } else {
+            mergeStopTimesCopy(stopTimesList, stopTimesListPrepend)
         }
-        return stopTimesList
-            .toMutableList()
-            .apply {
-                addAll(0, stopTimesListPrepend.subList(0, stopIdIntsBeforeCommonPrepend.size))
-                mergeStopTimes(this, stopTimesListPrepend)
-            }
     }
 
     private fun removeNonRegularStopsAfterCommon(
