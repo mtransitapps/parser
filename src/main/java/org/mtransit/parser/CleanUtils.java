@@ -399,6 +399,12 @@ public final class CleanUtils {
 		if (string.isEmpty()) {
 			return string;
 		}
+		final float charCount = string.length();
+		final float upperCaseCount = CharUtils.countUpperCase(string);
+		final float percent = upperCaseCount / charCount;
+		if (percent < .25f) { // 25%
+			return string;
+		}
 		StringBuilder sb = new StringBuilder();
 		Pattern pattern = locale == Locale.FRENCH ? WORD_NON_WORDS_FR : WORD_NON_WORDS;
 		Matcher matcher = pattern.matcher(string);
