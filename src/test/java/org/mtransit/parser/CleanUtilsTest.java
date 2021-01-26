@@ -188,7 +188,7 @@ public class CleanUtilsTest {
 	@Test
 	public void testRemovePointsBeforeDash() {
 		// Arrange
-		String string = "T C-Montmorency - Terminus La Cimenterie";
+		String string = "T C.-Montmorency - Terminus La Cimenterie";
 		// Act
 		String result = CleanUtils.removePointsI(string);
 		// Assert
@@ -233,6 +233,16 @@ public class CleanUtilsTest {
 		String result = CleanUtils.removePointsI(string);
 		// Assert
 		assertEquals("RTL", result);
+	}
+
+	@Test
+	public void testRemovePointsWithSpace() {
+		// Arrange
+		String string = "Louis-Pasteur et GROUPE V. A. INC";
+		// Act
+		String result = CleanUtils.removePointsI(string);
+		// Assert
+		assertEquals("Louis-Pasteur et GROUPE VA INC", result);
 	}
 
 	@Test

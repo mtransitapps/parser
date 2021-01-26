@@ -296,6 +296,13 @@ public final class CleanUtils {
 	private static final Pattern _3_POINTS = Pattern.compile("(\\.\\.\\.)");
 	private static final String _3_POINTS_REPLACEMENT = "…";
 
+	private static final Pattern POINT1_SPACE = Pattern.compile("(" +
+			"(?=(^|\\s|[A-Z]+))" +
+			"([\\w])\\.\\s" +
+			"(?=(\\w(\\.\\s|$)|\\W|$))" +
+			")");
+	private static final String POINT1_SPACE_REPLACEMENT = "$3";
+
 	private static final Pattern POINT1 = Pattern.compile("((?=(^|\\s|[A-Z]+))([\\w])\\.(?=(\\w(\\.|\\s|$)|\\W|$)))");
 	private static final String POINT1_REPLACEMENT = "$3";
 
@@ -314,6 +321,7 @@ public final class CleanUtils {
 	@NotNull
 	protected static String removePointsI(@NotNull String capitalizedString) {
 		capitalizedString = _3_POINTS.matcher(capitalizedString).replaceAll(_3_POINTS_REPLACEMENT);
+		capitalizedString = POINT1_SPACE.matcher(capitalizedString).replaceAll(POINT1_SPACE_REPLACEMENT);
 		capitalizedString = POINT1.matcher(capitalizedString).replaceAll(POINT1_REPLACEMENT);
 		capitalizedString = POINTS.matcher(capitalizedString).replaceAll(POINTS_REPLACEMENT);
 		capitalizedString = ENDS_WITH_POINTS.matcher(capitalizedString).replaceAll(ENDS_WITH_POINTS_REPLACEMENT);
@@ -744,8 +752,8 @@ public final class CleanUtils {
 	private static final String FR_CA_PARC_INDUSTRIEL_REPLACEMENT = cleanWordsReplacement("Parc Ind");
 	private static final Pattern FR_CA_RIVIERE = cleanWords("rivi[e|è]re");
 	private static final String FR_CA_RIVIERE_REPLACEMENT = cleanWordsReplacement("Riv");
-	private static final Pattern FR_CA_SECTEUR = cleanWords("secteur");
-	private static final String FR_CA_SECTEUR_REPLACEMENT = cleanWordsReplacement("Sect");
+	private static final Pattern FR_CA_SECTEURS_ = cleanWordsPlural("secteur");
+	private static final String FR_CA_SECTEURS_REPLACEMENT = cleanWordsReplacementPlural("Sect");
 	private static final Pattern FR_CA_STATION_DE_METRO = cleanWords("Station de m[é|e]tro");
 	private static final String FR_CA_STATION_DE_METRO_REPLACEMENT = cleanWordsReplacement("Ston mét");
 	private static final Pattern FR_CA_STATION = cleanWords("station");
@@ -758,7 +766,11 @@ public final class CleanUtils {
 	private static final String FR_CA_TERRASSES_REPLACEMENT = cleanWordsReplacement("Tsses");
 	private static final Pattern FR_CA_POINTE = cleanWords("pointe");
 	private static final String FR_CA_POINTE_REPLACEMENT = cleanWordsReplacement("Pte");
+	private static final Pattern FR_CA_PLACE = cleanWords("place");
+	private static final String FR_CA_PLACE_REPLACEMENT = cleanWordsReplacement("Pl");
 	// not official
+	private static final Pattern FR_CA_CENTRE_ = cleanWordsPlural("centre");
+	private static final String FR_CA_CENTRE_REPLACEMENT = cleanWordsReplacementPlural("Ctr");
 	private static final Pattern FR_CA_TERMINUS = cleanWords("terminus");
 	private static final String FR_CA_TERMINUS_REPLACEMENT = cleanWordsReplacement("Term");
 	private static final Pattern FR_CA_TEMPORAIRE = cleanWords("temporaire");
@@ -780,14 +792,16 @@ public final class CleanUtils {
 		string = FR_CA_MONTEE.matcher(string).replaceAll(FR_CA_MONTEE_REPLACEMENT);
 		string = FR_CA_PARC_INDUSTRIEL.matcher(string).replaceAll(FR_CA_PARC_INDUSTRIEL_REPLACEMENT);
 		string = FR_CA_RIVIERE.matcher(string).replaceAll(FR_CA_RIVIERE_REPLACEMENT);
-		string = FR_CA_SECTEUR.matcher(string).replaceAll(FR_CA_SECTEUR_REPLACEMENT);
+		string = FR_CA_SECTEURS_.matcher(string).replaceAll(FR_CA_SECTEURS_REPLACEMENT);
 		string = FR_CA_STATION_DE_METRO.matcher(string).replaceAll(FR_CA_STATION_DE_METRO_REPLACEMENT);
 		string = FR_CA_STATION.matcher(string).replaceAll(FR_CA_STATION_REPLACEMENT);
 		string = FR_CA_STATIONNEMENT.matcher(string).replaceAll(FR_CA_STATIONNEMENT_REPLACEMENT);
 		string = FR_CA_TERRASSE.matcher(string).replaceAll(FR_CA_TERRASSE_REPLACEMENT);
 		string = FR_CA_TERRASSES.matcher(string).replaceAll(FR_CA_TERRASSES_REPLACEMENT);
 		string = FR_CA_POINTE.matcher(string).replaceAll(FR_CA_POINTE_REPLACEMENT);
+		string = FR_CA_PLACE.matcher(string).replaceAll(FR_CA_PLACE_REPLACEMENT);
 		// not official
+		string = FR_CA_CENTRE_.matcher(string).replaceAll(FR_CA_CENTRE_REPLACEMENT);
 		string = FR_CA_TERMINUS.matcher(string).replaceAll(FR_CA_TERMINUS_REPLACEMENT);
 		string = FR_CA_TEMPORAIRE.matcher(string).replaceAll(FR_CA_TEMPORAIRE_REPLACEMENT);
 		//

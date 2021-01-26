@@ -164,26 +164,6 @@ object MDirectionHeadSignFinder {
                 }
             }
         }
-        val distinctTripHeadSignsNotBlank = distinctTripHeadSignAndLastStopIdInt
-            .filterNot { (headSign, _) -> headSign.isBlank() }
-            .distinctBy { (headSign, _) -> headSign }
-        if (distinctTripHeadSignsNotBlank.size == 1) {
-            MTLog.log("$routeId: $directionId: 1 distinct trip not blank head-sign: '${distinctTripHeadSignsNotBlank.first().first}'.")
-            return distinctTripHeadSignsNotBlank.first()
-        } else if (distinctTripHeadSignsNotBlank.size == 2) {
-            val stopTimesHeadSignAndLastStopId1 = tripHeadSignAndLastStopIdInt.first { it.first == distinctTripHeadSignsNotBlank[0].first }
-            val stopTimesHeadSignAndLastStopId2 = tripHeadSignAndLastStopIdInt.first { it.first == distinctTripHeadSignsNotBlank[1].first }
-            val selectedHeadSign = agencyTools.selectDirectionHeadSign(stopTimesHeadSignAndLastStopId1.first, stopTimesHeadSignAndLastStopId2.first)
-            selectedHeadSign?.let { selectedHeadSignNN ->
-                if (selectedHeadSignNN == stopTimesHeadSignAndLastStopId1.first) {
-                    MTLog.log("$routeId: $directionId: merge w/ not blank head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId1.first}'")
-                    return stopTimesHeadSignAndLastStopId1
-                } else if (selectedHeadSignNN == stopTimesHeadSignAndLastStopId2.first) {
-                    MTLog.log("$routeId: $directionId: merge w/ not blank head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId2.first}'")
-                    return stopTimesHeadSignAndLastStopId2
-                }
-            }
-        }
         val tripHeadSignAndLastStopCounts = tripHeadSignAndLastStopIdInt
             .map { it.first to it.second }
             .groupingBy { it }
