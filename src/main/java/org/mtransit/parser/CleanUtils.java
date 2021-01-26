@@ -336,7 +336,7 @@ public final class CleanUtils {
 		return string;
 	}
 
-	private static final Pattern STARTS_WITH_TO = Pattern.compile("((^|^.* )to )", Pattern.CASE_INSENSITIVE);
+	private static final Pattern STARTS_WITH_TO = Pattern.compile("((^|^.* )(towards|to) )", Pattern.CASE_INSENSITIVE);
 
 	@NotNull
 	public static String keepTo(@NotNull String string) {
@@ -654,8 +654,8 @@ public final class CleanUtils {
 	private static final String GATE_REPLACEMENT = cleanWordsReplacementPlural("Gt"); // not official
 	private static final Pattern PARKING = cleanWords("parking");
 	private static final String PARKING_REPLACEMENT = cleanWordsReplacement("Pkng"); // not official
-	private static final Pattern HOSPITAL = cleanWords("hospital");
-	private static final String HOSPITAL_REPLACEMENT = cleanWordsReplacement("Hosp"); // not official
+	private static final Pattern HOSPITAL = cleanWordsPlural("hospital");
+	private static final String HOSPITAL_REPLACEMENT = cleanWordsReplacementPlural("Hosp"); // not official
 	private static final Pattern OPPOSITE_ = cleanWords("opposite");
 	private static final String OPPOSITE_REPLACEMENT = cleanWordsReplacement("Opp"); // not official
 	private static final Pattern INDUSTRIAL_ = cleanWords("industrial");
