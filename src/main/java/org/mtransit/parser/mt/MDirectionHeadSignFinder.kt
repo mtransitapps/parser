@@ -50,7 +50,9 @@ object MDirectionHeadSignFinder {
             directionStopIdInts[directionIdOrDefault] = stopIdInt
             directionAmPm[directionIdOrDefault] = firstAndLast
         }
-        if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
+        if (directionHeadSigns.size == 2 // AM/PM only if 2 directions
+            && !agencyTools.directionHeadSignsDescriptive(directionHeadSigns)
+        ) {
             MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, using AM/PM...")
             for ((directionId, _) in directionHeadSigns) {
                 val firstAndLastTime = directionAmPm[directionId] ?: continue
