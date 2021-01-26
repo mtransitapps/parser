@@ -123,6 +123,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		gtfs.splitByRouteId(this);
 		gtfs.clearRawData();
 		MSpec mSpec = MGenerator.generateMSpec(gtfs, this);
+		if (Constants.SKIP_FILE_DUMP) {
+			return; // DEBUG
+		}
 		MGenerator.dumpFiles(this, mSpec, args[0], args[1], args[2]);
 		MTLog.log("Generating agency data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
@@ -347,18 +350,23 @@ public class DefaultAgencyTools implements GAgencyTools {
 				case "eastbound":
 				case "east":
 				case "est":
+				case "e":
 					return MDirectionType.EAST;
 				case "westbound":
 				case "west":
 				case "ouest":
+				case "w":
+				case "o":
 					return MDirectionType.WEST;
 				case "northbound":
 				case "north":
 				case "nord":
+				case "n":
 					return MDirectionType.NORTH;
 				case "southbound":
 				case "south":
 				case "sud":
+				case "s":
 					return MDirectionType.SOUTH;
 				default:
 					throw new MTLog.Fatal("Unexpected direction for '%s'!", headSign);

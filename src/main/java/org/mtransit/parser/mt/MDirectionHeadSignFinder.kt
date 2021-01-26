@@ -309,45 +309,83 @@ object MDirectionHeadSignFinder {
             ) {
 
                 val stopNameList1First = stopTimesList1FirstStop.stopName
+                val stopNameList1Last = stopTimesList1LastStop.stopName
+                val stopNameList2First = stopTimesList2FirstStop.stopName
                 val stopNameList2Last = stopTimesList2LastStop.stopName
+
+                // compare 1 first W/ 2 first
+                val prefix1First2First = stopNameList1First.commonPrefixWith(stopNameList2First, true)
+                val suffix1First2First = stopNameList1First.commonSuffixWith(stopNameList2First, true)
+                val minFixLength1First2First = (.75f * max(stopNameList1First.length, stopNameList2First.length)).toInt()
+                val distance1First2First = LocationUtils.findDistance(
+                    stopTimesList1FirstStop.stopLat, stopTimesList1FirstStop.stopLong,
+                    stopTimesList2FirstStop.stopLat, stopTimesList2FirstStop.stopLong
+                )
+
+                // compare 1 last W/ 2 last
+                val prefix1Last2Last = stopNameList1Last.commonPrefixWith(stopNameList2Last, true)
+                val suffix1Last2Last = stopNameList1Last.commonSuffixWith(stopNameList2Last, true)
+                val minFixLength1Last2Last = (.75f * max(stopNameList1Last.length, stopNameList2Last.length)).toInt()
+                val distance1Last2Last = LocationUtils.findDistance(
+                    stopTimesList1LastStop.stopLat, stopTimesList1LastStop.stopLong,
+                    stopTimesList2LastStop.stopLat, stopTimesList2LastStop.stopLong
+                )
+
+                // compare 1 first W/ 2 last
                 val prefix1First2Last = stopNameList1First.commonPrefixWith(stopNameList2Last, true)
                 val suffix1First2Last = stopNameList1First.commonSuffixWith(stopNameList2Last, true)
                 val minFixLength1First2Last = (.75f * max(stopNameList1First.length, stopNameList2Last.length)).toInt()
-
-                val stopNameList2First = stopTimesList2FirstStop.stopName
-                val stopNameList1Last = stopTimesList1LastStop.stopName
-                val prefix2First1Last = stopNameList2First.commonPrefixWith(stopNameList1Last, true)
-                val suffix2First1Last = stopNameList2First.commonSuffixWith(stopNameList1Last, true)
-                val minFixLength2First1Last = (.75f * max(stopNameList2First.length, stopNameList1Last.length)).toInt()
-
                 val distance1First2Last = LocationUtils.findDistance(
                     stopTimesList1FirstStop.stopLat, stopTimesList1FirstStop.stopLong,
                     stopTimesList2LastStop.stopLat, stopTimesList2LastStop.stopLong
                 )
 
+                // compare 1 last W/ 2 first
+                val prefix2First1Last = stopNameList2First.commonPrefixWith(stopNameList1Last, true)
+                val suffix2First1Last = stopNameList2First.commonSuffixWith(stopNameList1Last, true)
+                val minFixLength2First1Last = (.75f * max(stopNameList2First.length, stopNameList1Last.length)).toInt()
                 val distance2First1Last = LocationUtils.findDistance(
                     stopTimesList2FirstStop.stopLat, stopTimesList2FirstStop.stopLong,
                     stopTimesList1LastStop.stopLat, stopTimesList1LastStop.stopLong
                 )
 
-                if ((prefix1First2Last.length > minFixLength1First2Last
-                            && prefix1First2Last.length > suffix1First2Last.length)
-                    || (suffix1First2Last.length > minFixLength1First2Last
-                            && suffix1First2Last.length > prefix1First2Last.length)
+                if ((stopNameList1First == stopNameList2First
+                            || (prefix1First2First.length >= minFixLength1First2First && prefix1First2First.length > suffix1First2First.length)
+                            || (suffix1First2First.length >= minFixLength1First2First && suffix1First2First.length > prefix1First2First.length))
+                    &&
+                    (stopNameList1Last == stopNameList2Last
+                            || (prefix1Last2Last.length >= minFixLength1Last2Last && prefix1Last2Last.length > suffix1First2Last.length)
+                            || (suffix1Last2Last.length >= minFixLength1Last2Last && suffix1Last2Last.length > prefix1First2Last.length))
                 ) {
+                    // almost same 1st & last stops (prefix/suffix)
+                    firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2FirstStop.stopIdInt
+                    lastCommonStopIdInt = stopTimesList1LastStop.stopIdInt to stopTimesList2LastStop.stopIdInt
+                } else if (distance1First2First < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS
+                    && distance1Last2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS
+                ) {
+                    // almost same 1st & last stops (distance)
+                    firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2FirstStop.stopIdInt
+                    lastCommonStopIdInt = stopTimesList1LastStop.stopIdInt to stopTimesList2LastStop.stopIdInt
+                } else if (stopNameList1First == stopNameList2Last
+                    || (prefix1First2Last.length >= minFixLength1First2Last && prefix1First2Last.length > suffix1First2Last.length)
+                    || (suffix1First2Last.length >= minFixLength1First2Last && suffix1First2Last.length > prefix1First2Last.length)
+                ) {
+                    // almost 1 common stop (first & last) is #1 first & #2 last (prefix/suffix)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
-                } else if ((prefix2First1Last.length > minFixLength2First1Last
-                            && prefix2First1Last.length > suffix2First1Last.length)
-                    || (suffix2First1Last.length > minFixLength2First1Last
-                            && suffix2First1Last.length > prefix2First1Last.length)
+                } else if (stopNameList1Last == stopNameList2First
+                    || (prefix2First1Last.length >= minFixLength2First1Last && prefix2First1Last.length > suffix2First1Last.length)
+                    || (suffix2First1Last.length >= minFixLength2First1Last && suffix2First1Last.length > prefix2First1Last.length)
                 ) {
+                    // almost 1 common stop (first & last) is #1 last & #2 first (prefix/suffix)
                     firstCommonStopIdInt = stopTimesList2FirstStop.stopIdInt to stopTimesList1LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
                 } else if (distance1First2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS) {
+                    // almost 1 common stop (first & last) is #1 first & #2 last (distance)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
                 } else if (distance2First1Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS) {
+                    // almost 1 common stop (first & last) is #1 last & #2 first (distance)
                     firstCommonStopIdInt = stopTimesList2FirstStop.stopIdInt to stopTimesList1LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
                 }

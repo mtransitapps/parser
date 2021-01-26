@@ -38,6 +38,7 @@ data class GRoute(
 
     val routeLongNameOrDefault: String = routeLongName ?: Constants.EMPTY
 
+    @Suppress("unused")
     val routeDescOrDefault: String = routeDesc ?: Constants.EMPTY
 
     @Suppress("unused")
