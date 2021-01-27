@@ -207,7 +207,10 @@ public final class CleanUtils {
 		if (words == null || words.length <= 0) {
 			throw new RuntimeException("Cannot clean empty list of words!");
 		}
-		StringBuilder sb = new StringBuilder("((^|\\W)(");
+		StringBuilder sb = new StringBuilder();
+		sb.append("(");
+		sb.append("(?<=(^|\\W))");
+		sb.append("(");
 		boolean firstWorld = true;
 		for (String word : words) {
 			if (!firstWorld) {
@@ -216,7 +219,9 @@ public final class CleanUtils {
 			sb.append(word);
 			firstWorld = false;
 		}
-		sb.append(")(\\W|$))");
+		sb.append(")");
+		sb.append("(?=(\\W|$))");
+		sb.append(")");
 		return Pattern.compile(sb.toString(), flags);
 	}
 
@@ -225,7 +230,7 @@ public final class CleanUtils {
 		if (replacement == null || replacement.length() <= 0) {
 			return EMPTY;
 		}
-		return "$2" + replacement + "$4";
+		return replacement;
 	}
 
 	@NotNull
@@ -233,7 +238,11 @@ public final class CleanUtils {
 		if (words == null || words.length <= 0) {
 			throw new RuntimeException("Cannot clean empty list of words!");
 		}
-		StringBuilder sb = new StringBuilder("((^|\\W)((");
+		StringBuilder sb = new StringBuilder();
+		sb.append("(");
+		sb.append("(?<=(^|\\W))");
+		sb.append("(");
+		sb.append("(");
 		boolean firstWorld = true;
 		for (String word : words) {
 			if (!firstWorld) {
@@ -242,7 +251,11 @@ public final class CleanUtils {
 			sb.append(word);
 			firstWorld = false;
 		}
-		sb.append(")([s]?))(\\W|$))");
+		sb.append(")");
+		sb.append("(s)?");
+		sb.append(")");
+		sb.append("(?=(\\W|$))");
+		sb.append(")");
 		return Pattern.compile(sb.toString(), Pattern.CASE_INSENSITIVE);
 	}
 
@@ -251,7 +264,7 @@ public final class CleanUtils {
 		if (replacement == null || replacement.length() <= 0) {
 			return EMPTY;
 		}
-		return "$2" + replacement + "$5" + "$6";
+		return replacement + "$5";
 	}
 
 	public static final Pattern SAINT = Pattern.compile("(saint)", Pattern.CASE_INSENSITIVE);
