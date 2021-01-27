@@ -203,6 +203,11 @@ public final class CleanUtils {
 	}
 
 	@NotNull
+	public static Pattern cleanWordsFR(@Nullable String... words) {
+		return cleanWords(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS | Pattern.CANON_EQ, words);
+	}
+
+	@NotNull
 	public static Pattern cleanWords(int flags, @Nullable String... words) {
 		if (words == null || words.length <= 0) {
 			throw new RuntimeException("Cannot clean empty list of words!");
@@ -235,6 +240,16 @@ public final class CleanUtils {
 
 	@NotNull
 	public static Pattern cleanWordsPlural(@Nullable String... words) {
+		return cleanWordsPlural(Pattern.CASE_INSENSITIVE, words);
+	}
+
+	@NotNull
+	public static Pattern cleanWordsPluralFR(@Nullable String... words) {
+		return cleanWordsPlural(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.CANON_EQ, words);
+	}
+
+	@NotNull
+	public static Pattern cleanWordsPlural(int flags, @Nullable String... words) {
 		if (words == null || words.length <= 0) {
 			throw new RuntimeException("Cannot clean empty list of words!");
 		}
@@ -256,7 +271,7 @@ public final class CleanUtils {
 		sb.append(")");
 		sb.append("(?=(\\W|$))");
 		sb.append(")");
-		return Pattern.compile(sb.toString(), Pattern.CASE_INSENSITIVE);
+		return Pattern.compile(sb.toString(), flags);
 	}
 
 	@NotNull
@@ -512,13 +527,13 @@ public final class CleanUtils {
 	private static final Pattern NORTH_ = cleanWords("north");
 	private static final String NORTH_REPLACEMENT = cleanWordsReplacement("N");
 
-	private static final Pattern EAST_FR_ = cleanWords("est");
+	private static final Pattern EAST_FR_ = cleanWordsFR("est");
 	private static final String EAST_FR_REPLACEMENT = cleanWordsReplacement("E");
-	private static final Pattern WEST_FR_ = cleanWords("ouest");
+	private static final Pattern WEST_FR_ = cleanWordsFR("ouest");
 	private static final String WEST_FR_REPLACEMENT = cleanWordsReplacement("O");
-	private static final Pattern SOUTH_FR_ = cleanWords("sud");
+	private static final Pattern SOUTH_FR_ = cleanWordsFR("sud");
 	private static final String SOUTH_FR_REPLACEMENT = cleanWordsReplacement("S");
-	private static final Pattern NORTH_FR_ = cleanWords("nord");
+	private static final Pattern NORTH_FR_ = cleanWordsFR("nord");
 	private static final String NORTH_FR_REPLACEMENT = cleanWordsReplacement("N");
 
 	@NotNull
@@ -756,44 +771,44 @@ public final class CleanUtils {
 	}
 
 	// FR-CA : http://www.toponymie.gouv.qc.ca/ct/normes-procedures/terminologie-geographique/liste-termes-geographiques.html
-	private static final Pattern FR_CA_AVENUE = cleanWords("avenue");
+	private static final Pattern FR_CA_AVENUE = cleanWordsFR("avenue");
 	private static final String FR_CA_AVENUE_REPLACEMENT = cleanWordsReplacement("Av");
-	private static final Pattern FR_CA_AUTOROUTE = cleanWords("autoroute");
+	private static final Pattern FR_CA_AUTOROUTE = cleanWordsFR("autoroute");
 	private static final String FR_CA_AUTOROUTE_REPLACEMENT = cleanWordsReplacement("Aut");
-	private static final Pattern FR_CA_BOULEVARD = cleanWords("boulevard");
+	private static final Pattern FR_CA_BOULEVARD = cleanWordsFR("boulevard");
 	private static final String FR_CA_BOULEVARD_REPLACEMENT = cleanWordsReplacement("Boul");
-	private static final Pattern FR_CA_CARREFOUR = cleanWords("carrefour");
+	private static final Pattern FR_CA_CARREFOUR = cleanWordsFR("carrefour");
 	private static final String FR_CA_CARREFOUR_REPLACEMENT = cleanWordsReplacement("Carref");
-	private static final Pattern FR_CA_MONTAGNE = cleanWords("montagne");
+	private static final Pattern FR_CA_MONTAGNE = cleanWordsFR("montagne");
 	private static final String FR_CA_MONTAGNE_REPLACEMENT = cleanWordsReplacement("Mgne");
-	private static final Pattern FR_CA_MONTEE = cleanWords("mont[é|e]e");
+	private static final Pattern FR_CA_MONTEE = cleanWordsFR("mont[é|e]e");
 	private static final String FR_CA_MONTEE_REPLACEMENT = cleanWordsReplacement("Mtée");
-	private static final Pattern FR_CA_PARC_INDUSTRIEL = cleanWords("parc industriel");
+	private static final Pattern FR_CA_PARC_INDUSTRIEL = cleanWordsFR("parc industriel");
 	private static final String FR_CA_PARC_INDUSTRIEL_REPLACEMENT = cleanWordsReplacement("Parc Ind");
-	private static final Pattern FR_CA_RIVIERE = cleanWords("rivi[e|è]re");
+	private static final Pattern FR_CA_RIVIERE = cleanWordsFR("rivi[e|è]re");
 	private static final String FR_CA_RIVIERE_REPLACEMENT = cleanWordsReplacement("Riv");
-	private static final Pattern FR_CA_SECTEURS_ = cleanWordsPlural("secteur");
+	private static final Pattern FR_CA_SECTEURS_ = cleanWordsPluralFR("secteur");
 	private static final String FR_CA_SECTEURS_REPLACEMENT = cleanWordsReplacementPlural("Sect");
-	private static final Pattern FR_CA_STATION_DE_METRO = cleanWords("Station de m[é|e]tro");
+	private static final Pattern FR_CA_STATION_DE_METRO = cleanWordsFR("Station de m[é|e]tro");
 	private static final String FR_CA_STATION_DE_METRO_REPLACEMENT = cleanWordsReplacement("Ston mét");
-	private static final Pattern FR_CA_STATION = cleanWords("station");
+	private static final Pattern FR_CA_STATION = cleanWordsFR("station");
 	private static final String FR_CA_STATION_REPLACEMENT = cleanWordsReplacement("Ston");
-	private static final Pattern FR_CA_STATIONNEMENT = cleanWords("stationnement");
+	private static final Pattern FR_CA_STATIONNEMENT = cleanWordsFR("stationnement");
 	private static final String FR_CA_STATIONNEMENT_REPLACEMENT = cleanWordsReplacement("Stat");
-	private static final Pattern FR_CA_TERRASSE = cleanWords("terrasse");
+	private static final Pattern FR_CA_TERRASSE = cleanWordsFR("terrasse");
 	private static final String FR_CA_TERRASSE_REPLACEMENT = cleanWordsReplacement("Tsse");
-	private static final Pattern FR_CA_TERRASSES = cleanWords("terrasses");
+	private static final Pattern FR_CA_TERRASSES = cleanWordsFR("terrasses");
 	private static final String FR_CA_TERRASSES_REPLACEMENT = cleanWordsReplacement("Tsses");
-	private static final Pattern FR_CA_POINTE = cleanWords("pointe");
+	private static final Pattern FR_CA_POINTE = cleanWordsFR("pointe");
 	private static final String FR_CA_POINTE_REPLACEMENT = cleanWordsReplacement("Pte");
-	private static final Pattern FR_CA_PLACE = cleanWords("place");
+	private static final Pattern FR_CA_PLACE = cleanWordsFR("place");
 	private static final String FR_CA_PLACE_REPLACEMENT = cleanWordsReplacement("Pl");
 	// not official
-	private static final Pattern FR_CA_CENTRE_ = cleanWordsPlural("centre");
+	private static final Pattern FR_CA_CENTRE_ = cleanWordsPluralFR("centre");
 	private static final String FR_CA_CENTRE_REPLACEMENT = cleanWordsReplacementPlural("Ctr");
-	private static final Pattern FR_CA_TERMINUS = cleanWords("terminus");
+	private static final Pattern FR_CA_TERMINUS = cleanWordsFR("terminus");
 	private static final String FR_CA_TERMINUS_REPLACEMENT = cleanWordsReplacement("Term");
-	private static final Pattern FR_CA_TEMPORAIRE = cleanWords("temporaire");
+	private static final Pattern FR_CA_TEMPORAIRE = cleanWordsFR("temporaire");
 	private static final String FR_CA_TEMPORAIRE_REPLACEMENT = cleanWordsReplacement("Temp");
 	//
 	private static final Pattern FR_CA_QUAI_ = Pattern.compile("((^|\\W)(quai (\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
