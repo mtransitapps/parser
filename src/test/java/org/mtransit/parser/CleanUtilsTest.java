@@ -34,7 +34,7 @@ public class CleanUtilsTest {
 		Pattern result = CleanUtils.cleanWords("word");
 		// Assert
 		assertNotNull(result);
-		assertEquals("((^|\\W)(word)(\\W|$))", result.pattern());
+		assertEquals("((?<=(^|\\W))(word)(?=(\\W|$)))", result.pattern());
 	}
 
 	@Test
@@ -44,7 +44,7 @@ public class CleanUtilsTest {
 		Pattern result = CleanUtils.cleanWords("word1", "word2");
 		// Assert
 		assertNotNull(result);
-		assertEquals("((^|\\W)(word1|word2)(\\W|$))", result.pattern());
+		assertEquals("((?<=(^|\\W))(word1|word2)(?=(\\W|$)))", result.pattern());
 	}
 
 	@Test
@@ -54,7 +54,7 @@ public class CleanUtilsTest {
 		Pattern result = CleanUtils.cleanWordsPlural("word1", "word2");
 		// Assert
 		assertNotNull(result);
-		assertEquals("((^|\\W)((word1|word2)([s]?))(\\W|$))", result.pattern());
+		assertEquals("((?<=(^|\\W))((word1|word2)(s)?)(?=(\\W|$)))", result.pattern());
 	}
 
 	@Test
