@@ -206,6 +206,16 @@ public class CleanUtilsTest {
 	}
 
 	@Test
+	public void testRemovePointsSingleLettersAndAt() {
+		// Arrange
+		String string = "Montrose Rd S.E. & Greendale St";
+		// Act
+		String result = CleanUtils.removePointsI(string);
+		// Assert
+		assertEquals("Montrose Rd SE & Greendale St", result);
+	}
+
+	@Test
 	public void testRemovePoints4SingleLettersOnly() {
 		// Arrange
 		String string = "U.Q.A.M.";

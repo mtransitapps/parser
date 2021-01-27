@@ -299,7 +299,7 @@ public final class CleanUtils {
 	private static final Pattern POINT1_SPACE = Pattern.compile("(" +
 			"(?=(^|\\s|[A-Z]+))" +
 			"([\\w])\\.\\s" +
-			"(?=(\\w(\\.\\s|$)|\\W|$))" +
+			"(?=(\\w(\\.\\s|$)|$))" +
 			")");
 	private static final String POINT1_SPACE_REPLACEMENT = "$3";
 

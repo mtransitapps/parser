@@ -313,7 +313,7 @@ object MDirectionHeadSignFinder {
                 val stopNameList2First = stopTimesList2FirstStop.stopName
                 val stopNameList2Last = stopTimesList2LastStop.stopName
 
-                // compare 1 first W/ 2 first
+                // compare #1 first w/ #2 first
                 val prefix1First2First = stopNameList1First.commonPrefixWith(stopNameList2First, true)
                 val suffix1First2First = stopNameList1First.commonSuffixWith(stopNameList2First, true)
                 val minFixLength1First2First = (.75f * max(stopNameList1First.length, stopNameList2First.length)).toInt()
@@ -322,7 +322,7 @@ object MDirectionHeadSignFinder {
                     stopTimesList2FirstStop.stopLat, stopTimesList2FirstStop.stopLong
                 )
 
-                // compare 1 last W/ 2 last
+                // compare #1 last w/ #2 last
                 val prefix1Last2Last = stopNameList1Last.commonPrefixWith(stopNameList2Last, true)
                 val suffix1Last2Last = stopNameList1Last.commonSuffixWith(stopNameList2Last, true)
                 val minFixLength1Last2Last = (.75f * max(stopNameList1Last.length, stopNameList2Last.length)).toInt()
@@ -331,7 +331,7 @@ object MDirectionHeadSignFinder {
                     stopTimesList2LastStop.stopLat, stopTimesList2LastStop.stopLong
                 )
 
-                // compare 1 first W/ 2 last
+                // compare #1 first w/ #2 last
                 val prefix1First2Last = stopNameList1First.commonPrefixWith(stopNameList2Last, true)
                 val suffix1First2Last = stopNameList1First.commonSuffixWith(stopNameList2Last, true)
                 val minFixLength1First2Last = (.75f * max(stopNameList1First.length, stopNameList2Last.length)).toInt()
@@ -340,7 +340,7 @@ object MDirectionHeadSignFinder {
                     stopTimesList2LastStop.stopLat, stopTimesList2LastStop.stopLong
                 )
 
-                // compare 1 last W/ 2 first
+                // compare #1 last w/ #2 first
                 val prefix2First1Last = stopNameList2First.commonPrefixWith(stopNameList1Last, true)
                 val suffix2First1Last = stopNameList2First.commonSuffixWith(stopNameList1Last, true)
                 val minFixLength2First1Last = (.75f * max(stopNameList2First.length, stopNameList1Last.length)).toInt()
@@ -380,11 +380,17 @@ object MDirectionHeadSignFinder {
                     // almost 1 common stop (first & last) is #1 last & #2 first (prefix/suffix)
                     firstCommonStopIdInt = stopTimesList2FirstStop.stopIdInt to stopTimesList1LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
-                } else if (distance1First2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS) {
+                } else if (distance1First2Last < distance2First1Last
+                    && (distance1First2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS
+                            || (dataLossAuthorized && distance1First2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS * 2f))
+                ) {
                     // almost 1 common stop (first & last) is #1 first & #2 last (distance)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
-                } else if (distance2First1Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS) {
+                } else if (distance2First1Last < distance1First2Last
+                    && (distance2First1Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS
+                            || (dataLossAuthorized && distance2First1Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS * 2f))
+                ) {
                     // almost 1 common stop (first & last) is #1 last & #2 first (distance)
                     firstCommonStopIdInt = stopTimesList2FirstStop.stopIdInt to stopTimesList1LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
@@ -411,7 +417,9 @@ object MDirectionHeadSignFinder {
             ?: emptyList()
         val stopIdIntsAfterCommonCount2 =
             removeNonRegularStopsAfterCommon(lastCommonStopIdInt, stopTimesList2, stopIdInts2, stopIdIntsAfterCommon2)
-        if (lastCommonStopIdInt == null) {
+        if (lastCommonStopIdInt == null
+            && !dataLossAuthorized // can do w/o common stop
+        ) {
             logMerge(!dataLossAuthorized, "$routeId: $directionId: no common stop -> can NOT be merged")
             return null // NO COMMON STOP -> CAN'T BE MERGED
         }
@@ -607,7 +615,6 @@ object MDirectionHeadSignFinder {
                     stopIdIntsBeforeCommon2
                 )
             }
-
             if (dataLossAuthorized) {
                 val otherStopsUsingSameHeadSignCounts1 = tripHeadSignAndLastStopCounts.filter { lastStopIdIntTripHeadSignAndCount ->
                     val lastStopIdIntTripHeadSign = lastStopIdIntTripHeadSignAndCount.key
