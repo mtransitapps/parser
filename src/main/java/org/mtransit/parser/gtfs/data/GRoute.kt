@@ -1,6 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
-import org.mtransit.parser.Constants
+import org.mtransit.parser.Constants.EMPTY
 
 // https://developers.google.com/transit/gtfs/reference#routestxt
 // https://gtfs.org/reference/static/#routestxt
@@ -36,10 +36,10 @@ data class GRoute(
         routeColor
     )
 
-    val routeLongNameOrDefault: String = routeLongName ?: Constants.EMPTY
+    val routeLongNameOrDefault: String = routeLongName ?: EMPTY
 
     @Suppress("unused")
-    val routeDescOrDefault: String = routeDesc ?: Constants.EMPTY
+    val routeDescOrDefault: String = routeDesc ?: EMPTY
 
     @Suppress("unused")
     fun hasAgencyId(): Boolean = agencyIdInt != null
@@ -50,6 +50,10 @@ data class GRoute(
     @Deprecated(message = "Not memory efficient")
     @Suppress("unused")
     fun isDifferentAgency(otherAgencyId: String): Boolean = isDifferentAgency(GIDs.getInt(otherAgencyId))
+
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val agencyIdOrDefault: String = _agencyId ?: EMPTY
 
     @Deprecated(message = "Not memory efficient")
     @Suppress("unused")

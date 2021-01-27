@@ -644,6 +644,8 @@ public final class CleanUtils {
 	// not official
 	private static final Pattern APARTMENT_ = cleanWords("apartment");
 	private static final String APARTMENT_REPLACEMENT = cleanWordsReplacement("Apt"); // not official
+	private static final Pattern BED_AND_BREAKFAST_ = cleanWords("bed and breakfast", "bed & breakfast", "b & b");
+	private static final String BED_AND_BREAKFAST_REPLACEMENT = cleanWordsReplacement("B&B"); // not official
 	private static final Pattern PARK = cleanWords("park");
 	private static final String PARK_REPLACEMENT = cleanWordsReplacement("Pk"); // not official
 	private static final Pattern EXCHANGE_ = cleanWords("exchange");
@@ -714,7 +716,9 @@ public final class CleanUtils {
 		string = PARKING.matcher(string).replaceAll(PARKING_REPLACEMENT);
 		string = MOUNT.matcher(string).replaceAll(MOUNT_REPLACEMENT);
 		string = MOUNTAIN.matcher(string).replaceAll(MOUNTAIN_REPLACEMENT);
+		//
 		string = APARTMENT_.matcher(string).replaceAll(APARTMENT_REPLACEMENT);
+		string = BED_AND_BREAKFAST_.matcher(string).replaceAll(BED_AND_BREAKFAST_REPLACEMENT);
 		string = PARK.matcher(string).replaceAll(PARK_REPLACEMENT);
 		string = NEIGHBOURHOOD_.matcher(string).replaceAll(NEIGHBOURHOOD_REPLACEMENT);
 		string = EXCHANGE_.matcher(string).replaceAll(EXCHANGE_REPLACEMENT);
