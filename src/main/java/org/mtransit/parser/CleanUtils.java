@@ -291,7 +291,7 @@ public final class CleanUtils {
 	public static final Pattern CLEAN_AND = cleanWords("and");
 	public static final String CLEAN_AND_REPLACEMENT = cleanWordsReplacement("&");
 
-	public static final Pattern CLEAN_ET = cleanWords("et");
+	public static final Pattern CLEAN_ET = cleanWordsFR("et");
 	public static final String CLEAN_ET_REPLACEMENT = CLEAN_AND_REPLACEMENT;
 
 	public static final String SPACE = " ";
