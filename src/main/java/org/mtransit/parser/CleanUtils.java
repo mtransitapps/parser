@@ -80,6 +80,7 @@ public final class CleanUtils {
 	private static final Pattern CLEAN_P2 = Pattern.compile("[\\s]*\\)[\\s]*");
 	private static final String CLEAN_P2_REPLACEMENT = ") "; // space: guaranty 0 before & 1 after
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static String cleanLabel(@NotNull String label) {
 		return cleanLabel(Locale.ENGLISH, label);
@@ -91,7 +92,7 @@ public final class CleanUtils {
 		label = CLEAN_P1.matcher(label).replaceAll(CLEAN_P1_REPLACEMENT);
 		label = CLEAN_P2.matcher(label).replaceAll(CLEAN_P2_REPLACEMENT);
 		if (locale == Locale.FRENCH) {
-			label = WordUtils.capitalize(label, SPACE_CHAR, '-', '–', '/', '(', '.', '\'', '`');
+			label = WordUtils.capitalize(label, SPACE_CHAR, '-', '–', '/', '(', '.', '\'', '`', ':');
 		} else {
 			label = WordUtils.capitalize(label, SPACE_CHAR, '-', '–', '/', '(', '.');
 		}
@@ -245,6 +246,7 @@ public final class CleanUtils {
 		return Pattern.compile(sb.toString(), flags);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static String cleanWordsReplacement(@Nullable String replacement) {
 		if (replacement == null || replacement.length() <= 0) {
@@ -304,10 +306,14 @@ public final class CleanUtils {
 	public static final Pattern SAINT = Pattern.compile("(saint)", Pattern.CASE_INSENSITIVE);
 	public static final String SAINT_REPLACEMENT = "St";
 
+	@SuppressWarnings("unused")
 	public static final Pattern CLEAN_AT = cleanWords("at");
+	@SuppressWarnings("unused")
 	public static final String CLEAN_AT_REPLACEMENT = cleanWordsReplacement("@");
 
+	@SuppressWarnings("unused")
 	public static final Pattern CLEAN_AND = cleanWords("and");
+	@SuppressWarnings("WeakerAccess")
 	public static final String CLEAN_AND_REPLACEMENT = cleanWordsReplacement("&");
 
 	@SuppressWarnings("unused")
@@ -341,6 +347,7 @@ public final class CleanUtils {
 	private static final Pattern CLEAN_SLASH = Pattern.compile("(\\S)[\\s]*[/][\\s]*(\\S)");
 	private static final String CLEAN_SLASH_REPLACEMENT = "$1" + " / " + "$2";
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static String cleanSlashes(@NotNull String string) {
 		return CLEAN_SLASH.matcher(string).replaceAll(CLEAN_SLASH_REPLACEMENT);
@@ -424,6 +431,7 @@ public final class CleanUtils {
 		return keepToAndRemoveVia(string);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static String keepToAndRemoveVia(@NotNull String string) {
 		string = keepTo(string);
@@ -461,6 +469,7 @@ public final class CleanUtils {
 			"([^" + WORD_REGEX_FR + "]*)([" + WORD_REGEX_FR + "]+)([^" + WORD_REGEX_FR + "]*)",
 			Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.CANON_EQ);
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static String toLowerCaseUpperCaseWords(@NotNull Locale locale, @NotNull String string, @NotNull String... ignoreWords) {
 		if (string.isEmpty()) {
@@ -525,6 +534,7 @@ public final class CleanUtils {
 	private static final Pattern NO_DIGITS = Pattern.compile("((^|\\W)(no\\.? (\\d+))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String NO_DIGITS_REPLACEMENT = "$2#$4$5"; // #0
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static String cleanNumbers(@NotNull String string) {
 		string = FIRST.matcher(string).replaceAll(FIRST_REPLACEMENT);
@@ -567,6 +577,7 @@ public final class CleanUtils {
 	private static final Pattern NORTH_FR_ = cleanWordsFR("nord");
 	private static final String NORTH_FR_REPLACEMENT = cleanWordsReplacement("N");
 
+	@SuppressWarnings("unused")
 	@NotNull
 	public static String cleanBounds(@NotNull String string) {
 		return cleanBounds(Locale.ENGLISH, string);
@@ -745,6 +756,7 @@ public final class CleanUtils {
 	private static final Pattern TRANSIT_CENTER_ = Pattern.compile("((\\w+) (transit center|transit ctr))", Pattern.CASE_INSENSITIVE);
 	private static final String TRANSIT_CENTER_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 TC");
 
+	@SuppressWarnings("unused")
 	@NotNull
 	public static String cleanStreetTypes(@NotNull String string) {
 		string = LANE.matcher(string).replaceAll(LANE_REPLACEMENT);
@@ -865,10 +877,10 @@ public final class CleanUtils {
 	private static final Pattern FR_CA_INFO_ = cleanWordsPluralFR("information");
 	private static final String FR_CA_INFO_REPLACEMENT = cleanWordsReplacementPlural("Into");
 	//
-	private static final Pattern FR_CA_QUAI_ = Pattern.compile("((^|\\W)(quai #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern FR_CA_QUAI_ = Pattern.compile("((^|\\W)(quai #?(\\w{1,4}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String FR_CA_QUAI_REPLACEMENT = "$2Q:$4$5";
 
-	private static final Pattern FR_CA_PORTE_ = Pattern.compile("((^|\\W)(porte #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern FR_CA_PORTE_ = Pattern.compile("((^|\\W)(porte #?(\\w{1,4}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String FR_CA_PORTE_REPLACEMENT = "$2P:$4$5";
 
 	@SuppressWarnings("unused")
