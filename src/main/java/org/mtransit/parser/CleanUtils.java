@@ -697,7 +697,7 @@ public final class CleanUtils {
 	private static final Pattern CLOCKWISE_ = cleanWords("clockwise");
 	private static final String CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CW"); // not official
 	//
-	private static final Pattern PLATFORM_ = Pattern.compile("((^|\\W)(platform (\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern PLATFORM_ = Pattern.compile("((^|\\W)(platform #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String PLATFORM_REPLACEMENT = "$2P:$4$5";
 
 	@NotNull
@@ -810,11 +810,13 @@ public final class CleanUtils {
 	private static final String FR_CA_TERMINUS_REPLACEMENT = cleanWordsReplacement("Term");
 	private static final Pattern FR_CA_TEMPORAIRE = cleanWordsFR("temporaire");
 	private static final String FR_CA_TEMPORAIRE_REPLACEMENT = cleanWordsReplacement("Temp");
+	private static final Pattern FR_CA_PRO_ = cleanWordsFR("professionelle", "professionel");
+	private static final String FR_CA_PRO_REPLACEMENT = cleanWordsReplacement("Pro");
 	//
-	private static final Pattern FR_CA_QUAI_ = Pattern.compile("((^|\\W)(quai (\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern FR_CA_QUAI_ = Pattern.compile("((^|\\W)(quai #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String FR_CA_QUAI_REPLACEMENT = "$2Q:$4$5";
 
-	private static final Pattern FR_CA_PORTE_ = Pattern.compile("((^|\\W)(porte (\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern FR_CA_PORTE_ = Pattern.compile("((^|\\W)(porte #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String FR_CA_PORTE_REPLACEMENT = "$2P:$4$5";
 
 	@NotNull
@@ -838,6 +840,7 @@ public final class CleanUtils {
 		// not official
 		string = FR_CA_CENTRE_.matcher(string).replaceAll(FR_CA_CENTRE_REPLACEMENT);
 		string = FR_CA_TERMINUS.matcher(string).replaceAll(FR_CA_TERMINUS_REPLACEMENT);
+		string = FR_CA_PRO_.matcher(string).replaceAll(FR_CA_PRO_REPLACEMENT);
 		string = FR_CA_TEMPORAIRE.matcher(string).replaceAll(FR_CA_TEMPORAIRE_REPLACEMENT);
 		//
 		string = FR_CA_QUAI_.matcher(string).replaceAll(FR_CA_QUAI_REPLACEMENT);
