@@ -303,7 +303,9 @@ public final class CleanUtils {
 		return replacement + "$5";
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	public static final Pattern SAINT = Pattern.compile("(saint)", Pattern.CASE_INSENSITIVE);
+	@SuppressWarnings("WeakerAccess")
 	public static final String SAINT_REPLACEMENT = "St";
 
 	@SuppressWarnings("unused")
@@ -716,8 +718,8 @@ public final class CleanUtils {
 	private static final Pattern NEIGHBOURHOOD_ = cleanWordsPlural("neighbourhood", "neighbour");
 	private static final String NEIGHBOURHOOD_REPLACEMENT = cleanWordsReplacementPlural("Neighb");
 	// not official
-	private static final Pattern APARTMENT_ = cleanWords("apartment");
-	private static final String APARTMENT_REPLACEMENT = cleanWordsReplacement("Apt"); // not official
+	private static final Pattern APARTMENT_ = cleanWordsPlural("apartment");
+	private static final String APARTMENT_REPLACEMENT = cleanWordsReplacementPlural("Apt"); // not official
 	private static final Pattern BED_AND_BREAKFAST_ = cleanWords("bed and breakfast", "bed & breakfast", "b & b");
 	private static final String BED_AND_BREAKFAST_REPLACEMENT = cleanWordsReplacement("B&B"); // not official
 	private static final Pattern PARK_AND_RIDE_ = cleanWords("park and ride", "park & ride", "p & r");
@@ -730,6 +732,8 @@ public final class CleanUtils {
 	private static final String TERMINAL_REPLACEMENT = cleanWordsReplacement("Term"); // not official
 	private static final Pattern GATE = cleanWordsPlural("gate");
 	private static final String GATE_REPLACEMENT = cleanWordsReplacementPlural("Gt"); // not official
+	private static final Pattern DEPT_ = cleanWordsPlural("department");
+	private static final String DEPT_REPLACEMENT = cleanWordsReplacementPlural("Dept"); // not official
 	private static final Pattern PARKING = cleanWords("parking");
 	private static final String PARKING_REPLACEMENT = cleanWordsReplacement("Pkng"); // not official
 	private static final Pattern HOSPITAL = cleanWordsPlural("hospital");
@@ -811,6 +815,7 @@ public final class CleanUtils {
 		string = NEIGHBOURHOOD_.matcher(string).replaceAll(NEIGHBOURHOOD_REPLACEMENT);
 		string = EXCHANGE_.matcher(string).replaceAll(EXCHANGE_REPLACEMENT);
 		string = TERMINAL_.matcher(string).replaceAll(TERMINAL_REPLACEMENT);
+		string = DEPT_.matcher(string).replaceAll(DEPT_REPLACEMENT);
 		string = GATE.matcher(string).replaceAll(GATE_REPLACEMENT);
 		string = HOSPITAL.matcher(string).replaceAll(HOSPITAL_REPLACEMENT);
 		string = GOVERNMENT_.matcher(string).replaceAll(GOVERNMENT_REPLACEMENT);
