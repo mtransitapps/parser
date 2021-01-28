@@ -690,6 +690,8 @@ public final class CleanUtils {
 	private static final String HOSPITAL_REPLACEMENT = cleanWordsReplacementPlural("Hosp"); // not official
 	private static final Pattern OPPOSITE_ = cleanWords("opposite");
 	private static final String OPPOSITE_REPLACEMENT = cleanWordsReplacement("Opp"); // not official
+	private static final Pattern OPERATION_ = cleanWordsPlural("operation");
+	private static final String OPERATION_REPLACEMENT = cleanWordsReplacement("Op"); // not official
 	private static final Pattern INDUSTRIAL_ = cleanWords("industrial");
 	private static final String INDUSTRIAL_REPLACEMENT = cleanWordsReplacement("Ind"); // not official
 	private static final Pattern COUNTER_CLOCKWISE_ = Pattern.compile("((^|\\W)counter( - |-|\\s)?clockwise(\\W|$))", Pattern.CASE_INSENSITIVE);
@@ -762,6 +764,7 @@ public final class CleanUtils {
 		string = PARKWAY.matcher(string).replaceAll(PARKWAY_REPLACEMENT);
 		string = ISLAND.matcher(string).replaceAll(ISLAND_REPLACEMENT);
 		string = OPPOSITE_.matcher(string).replaceAll(OPPOSITE_REPLACEMENT);
+		string = OPERATION_.matcher(string).replaceAll(OPERATION_REPLACEMENT);
 		string = INDUSTRIAL_.matcher(string).replaceAll(INDUSTRIAL_REPLACEMENT);
 		string = COUNTER_CLOCKWISE_.matcher(string).replaceAll(COUNTER_CLOCKWISE_REPLACEMENT); // before clockwise
 		string = CLOCKWISE_.matcher(string).replaceAll(CLOCKWISE_REPLACEMENT);
