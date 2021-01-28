@@ -14,20 +14,27 @@ import java.util.regex.Pattern;
 
 import static org.mtransit.parser.Constants.EMPTY;
 
-@SuppressWarnings({"WeakerAccess", "unused", "RedundantSuppression"})
+@SuppressWarnings("RedundantSuppression")
 public final class CleanUtils {
 
 	private CleanUtils() {
 	}
 
+	@SuppressWarnings("unused")
 	public static final Pattern CLEAN_EN_DASHES = Pattern.compile("(\\w)[\\s]*[–][\\s]*(\\w)");
+	@SuppressWarnings("unused")
 	public static final String CLEAN_EN_DASHES_REPLACEMENT = "$1–$2";
+	@SuppressWarnings("unused")
 	public static final Pattern CLEAN_DASHES = Pattern.compile("(\\w)[\\s]*[\\-][\\s]*(\\w)");
+	@SuppressWarnings("unused")
 	public static final String CLEAN_DASHES_REPLACEMENT = "$1-$2";
 
 	private static final String PARENTHESIS1 = "\\(";
+	@SuppressWarnings("WeakerAccess")
 	public static final Pattern CLEAN_PARENTHESIS1 = Pattern.compile("[" + PARENTHESIS1 + "][\\s]*(\\w)");
+	@SuppressWarnings("WeakerAccess")
 	public static final String CLEAN_PARENTHESIS1_REPLACEMENT = PARENTHESIS1 + "$1";
+	@SuppressWarnings("unused")
 	@Deprecated
 	private static final String PARENTHESE1 = PARENTHESIS1;
 	@Deprecated
@@ -36,8 +43,11 @@ public final class CleanUtils {
 	public static final String CLEAN_PARENTHESE1_REPLACEMENT = CLEAN_PARENTHESIS1_REPLACEMENT;
 
 	private static final String PARENTHESIS2 = "\\)";
+	@SuppressWarnings("WeakerAccess")
 	public static final Pattern CLEAN_PARENTHESIS2 = Pattern.compile("(\\w)[\\s]*[" + PARENTHESIS2 + "]");
+	@SuppressWarnings("WeakerAccess")
 	public static final String CLEAN_PARENTHESIS2_REPLACEMENT = "$1" + PARENTHESIS2;
+	@SuppressWarnings("unused")
 	@Deprecated
 	private static final String PARENTHESE2 = PARENTHESIS2;
 	@Deprecated
@@ -113,6 +123,7 @@ public final class CleanUtils {
 			Pattern.compile("^(" + PLACE_CHAR_L + ")", Pattern.CASE_INSENSITIVE) //
 	};
 
+	@SuppressWarnings("unused")
 	public static final Pattern[] SPACE_CHARS = new Pattern[]{ //
 			Pattern.compile("( " + PLACE_CHAR_DE_L + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("( " + PLACE_CHAR_DE_LA + ")", Pattern.CASE_INSENSITIVE), //
@@ -167,6 +178,7 @@ public final class CleanUtils {
 			Pattern.compile("^(" + PLACE_CHAR_TSSE + ")", Pattern.CASE_INSENSITIVE) //
 	};
 
+	@SuppressWarnings("unused")
 	public static final Pattern[] SPACE_ST = new Pattern[]{ //
 			Pattern.compile("( " + PLACE_CHAR_ARRONDISSEMENT + ")", Pattern.CASE_INSENSITIVE), //
 			Pattern.compile("( " + PLACE_CHAR_AV + ")", Pattern.CASE_INSENSITIVE), //
@@ -197,16 +209,19 @@ public final class CleanUtils {
 			Pattern.compile("(/ " + PLACE_CHAR_TSSE + ")", Pattern.CASE_INSENSITIVE) //
 	};
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static Pattern cleanWords(@Nullable String... words) {
 		return cleanWords(Pattern.CASE_INSENSITIVE, words);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static Pattern cleanWordsFR(@Nullable String... words) {
 		return cleanWords(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS | Pattern.CANON_EQ, words);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static Pattern cleanWords(int flags, @Nullable String... words) {
 		if (words == null || words.length <= 0) {
@@ -238,16 +253,19 @@ public final class CleanUtils {
 		return replacement;
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static Pattern cleanWordsPlural(@Nullable String... words) {
 		return cleanWordsPlural(Pattern.CASE_INSENSITIVE, words);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static Pattern cleanWordsPluralFR(@Nullable String... words) {
 		return cleanWordsPlural(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.CANON_EQ, words);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static Pattern cleanWordsPlural(int flags, @Nullable String... words) {
 		if (words == null || words.length <= 0) {
@@ -274,6 +292,7 @@ public final class CleanUtils {
 		return Pattern.compile(sb.toString(), flags);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static String cleanWordsReplacementPlural(@Nullable String replacement) {
 		if (replacement == null || replacement.length() <= 0) {
@@ -291,14 +310,20 @@ public final class CleanUtils {
 	public static final Pattern CLEAN_AND = cleanWords("and");
 	public static final String CLEAN_AND_REPLACEMENT = cleanWordsReplacement("&");
 
+	@SuppressWarnings("unused")
 	public static final Pattern CLEAN_ET = cleanWordsFR("et");
+	@SuppressWarnings("unused")
 	public static final String CLEAN_ET_REPLACEMENT = CLEAN_AND_REPLACEMENT;
 
+	@SuppressWarnings("WeakerAccess")
 	public static final String SPACE = " ";
+	@SuppressWarnings("WeakerAccess")
 	public static final char SPACE_CHAR = ' ';
 
+	@SuppressWarnings("WeakerAccess")
 	public static final String SLASH_SPACE = "/ ";
 
+	@SuppressWarnings("unused")
 	@NotNull
 	public static String cleanLabelFR(@NotNull String label) {
 		label = cleanSlashes(label);
@@ -346,6 +371,7 @@ public final class CleanUtils {
 		return removePointsI(capitalizedString);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	protected static String removePointsI(@NotNull String capitalizedString) {
 		capitalizedString = _3_POINTS.matcher(capitalizedString).replaceAll(_3_POINTS_REPLACEMENT);
@@ -358,6 +384,7 @@ public final class CleanUtils {
 
 	private static final Pattern STARTS_WITH_VERS = Pattern.compile("((^|^.* )vers )", Pattern.CASE_INSENSITIVE);
 
+	@SuppressWarnings("unused")
 	@NotNull
 	public static String keepToFR(@NotNull String string) {
 		string = STARTS_WITH_VERS.matcher(string).replaceAll(EMPTY);
@@ -366,6 +393,7 @@ public final class CleanUtils {
 
 	private static final Pattern STARTS_WITH_TO = Pattern.compile("((^|^.* )(towards|to) )", Pattern.CASE_INSENSITIVE);
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static String keepTo(@NotNull String string) {
 		string = STARTS_WITH_TO.matcher(string).replaceAll(EMPTY);
@@ -374,6 +402,7 @@ public final class CleanUtils {
 
 	private static final Pattern STARTS_WITH_VIA = Pattern.compile("((^|^.* )via )", Pattern.CASE_INSENSITIVE);
 
+	@SuppressWarnings("unused")
 	@NotNull
 	public static String keepVia(@NotNull String string) {
 		string = STARTS_WITH_VIA.matcher(string).replaceAll(EMPTY);
@@ -382,6 +411,7 @@ public final class CleanUtils {
 
 	private static final Pattern ENDS_WITH_VIA = Pattern.compile("( via .*$)", Pattern.CASE_INSENSITIVE);
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static String removeVia(@NotNull String string) {
 		string = ENDS_WITH_VIA.matcher(string).replaceAll(EMPTY);
@@ -403,6 +433,7 @@ public final class CleanUtils {
 
 	private static final Pattern MC_ = Pattern.compile("((((m)(c|ac))([a-z]))([a-z]+))", Pattern.CASE_INSENSITIVE);
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static String fixMcXCase(@NotNull String string) { // Mccowan -> McCowan
 		final Matcher matcher = MC_.matcher(string);
@@ -541,6 +572,7 @@ public final class CleanUtils {
 		return cleanBounds(Locale.ENGLISH, string);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static String cleanBounds(@NotNull Locale locale, @NotNull String string) {
 		if (locale == Locale.FRENCH) {
@@ -564,6 +596,7 @@ public final class CleanUtils {
 	private static final Pattern ID_MERGED = Pattern.compile("(([0-9]*)_merged_([0-9]*))", Pattern.CASE_INSENSITIVE);
 	private static final String ID_MERGED_REPLACEMENT = "$2";
 
+	@SuppressWarnings("unused")
 	@NotNull
 	public static String cleanMergedID(@NotNull String mergedId) {
 		return ID_MERGED.matcher(mergedId).replaceAll(ID_MERGED_REPLACEMENT);
@@ -594,7 +627,9 @@ public final class CleanUtils {
 	private static final String HEIGHTS_REPLACEMENT = cleanWordsReplacement("Hts");
 	private static final Pattern GROVE = cleanWords("grove");
 	private static final String GROVE_REPLACEMENT = cleanWordsReplacement("Grv");
+	@SuppressWarnings("WeakerAccess")
 	public static final Pattern POINT = cleanWords("point");
+	@SuppressWarnings("WeakerAccess")
 	public static final String POINT_REPLACEMENT = cleanWordsReplacement("Pt");
 	private static final Pattern POINTE = cleanWords("pointe");
 	private static final String POINTE_REPLACEMENT = cleanWordsReplacement("Pte");
@@ -688,6 +723,8 @@ public final class CleanUtils {
 	private static final String PARKING_REPLACEMENT = cleanWordsReplacement("Pkng"); // not official
 	private static final Pattern HOSPITAL = cleanWordsPlural("hospital");
 	private static final String HOSPITAL_REPLACEMENT = cleanWordsReplacementPlural("Hosp"); // not official
+	private static final Pattern GOVERNMENT_ = cleanWords("government");
+	private static final String GOVERNMENT_REPLACEMENT = cleanWordsReplacement("Gov"); // not official
 	private static final Pattern OPPOSITE_ = cleanWords("opposite");
 	private static final String OPPOSITE_REPLACEMENT = cleanWordsReplacement("Opp"); // not official
 	private static final Pattern OPERATION_ = cleanWordsPlural("operation");
@@ -699,10 +736,14 @@ public final class CleanUtils {
 	private static final Pattern CLOCKWISE_ = cleanWords("clockwise");
 	private static final String CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CW"); // not official
 	//
+	private static final Pattern BAY_ = Pattern.compile("((^|\\W)(bay #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final String BAY_REPLACEMENT = "$2B:$4$5";
 	private static final Pattern PLATFORM_ = Pattern.compile("((^|\\W)(platform #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String PLATFORM_REPLACEMENT = "$2P:$4$5";
 	private static final Pattern UNIVERSITY_ = Pattern.compile("((\\w+) university)", Pattern.CASE_INSENSITIVE);
 	private static final String UNIVERSITY_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 U");
+	private static final Pattern TRANSIT_CENTER_ = Pattern.compile("((\\w+) (transit center|transit ctr))", Pattern.CASE_INSENSITIVE);
+	private static final String TRANSIT_CENTER_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 TC");
 
 	@NotNull
 	public static String cleanStreetTypes(@NotNull String string) {
@@ -760,6 +801,7 @@ public final class CleanUtils {
 		string = TERMINAL_.matcher(string).replaceAll(TERMINAL_REPLACEMENT);
 		string = GATE.matcher(string).replaceAll(GATE_REPLACEMENT);
 		string = HOSPITAL.matcher(string).replaceAll(HOSPITAL_REPLACEMENT);
+		string = GOVERNMENT_.matcher(string).replaceAll(GOVERNMENT_REPLACEMENT);
 		string = MARKET.matcher(string).replaceAll(MARKET_REPLACEMENT);
 		string = BUILDING.matcher(string).replaceAll(BUILDING_REPLACEMENT);
 		string = GREENS.matcher(string).replaceAll(GREENS_REPLACEMENT);
@@ -771,8 +813,10 @@ public final class CleanUtils {
 		string = COUNTER_CLOCKWISE_.matcher(string).replaceAll(COUNTER_CLOCKWISE_REPLACEMENT); // before clockwise
 		string = CLOCKWISE_.matcher(string).replaceAll(CLOCKWISE_REPLACEMENT);
 		//
+		string = BAY_.matcher(string).replaceAll(BAY_REPLACEMENT);
 		string = PLATFORM_.matcher(string).replaceAll(PLATFORM_REPLACEMENT);
 		string = UNIVERSITY_.matcher(string).replaceAll(UNIVERSITY_REPLACEMENT);
+		string = TRANSIT_CENTER_.matcher(string).replaceAll(TRANSIT_CENTER_REPLACEMENT);
 		return string;
 	}
 
@@ -827,6 +871,7 @@ public final class CleanUtils {
 	private static final Pattern FR_CA_PORTE_ = Pattern.compile("((^|\\W)(porte #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String FR_CA_PORTE_REPLACEMENT = "$2P:$4$5";
 
+	@SuppressWarnings("unused")
 	@NotNull
 	public static String cleanStreetTypesFRCA(@NotNull String string) {
 		string = FR_CA_AVENUE.matcher(string).replaceAll(FR_CA_AVENUE_REPLACEMENT);
