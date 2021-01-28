@@ -759,6 +759,8 @@ public final class CleanUtils {
 	private static final String UNIVERSITY_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 U");
 	private static final Pattern TRANSIT_CENTER_ = Pattern.compile("((\\w+) (transit center|transit ctr))", Pattern.CASE_INSENSITIVE);
 	private static final String TRANSIT_CENTER_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 TC");
+	private static final Pattern TRANSIT_TERM_ = Pattern.compile("((\\w+) (transit terminal|transit term))", Pattern.CASE_INSENSITIVE);
+	private static final String TRANSIT_TERM_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 TT");
 
 	@SuppressWarnings("unused")
 	@NotNull
@@ -834,6 +836,7 @@ public final class CleanUtils {
 		string = PLATFORM_.matcher(string).replaceAll(PLATFORM_REPLACEMENT);
 		string = UNIVERSITY_.matcher(string).replaceAll(UNIVERSITY_REPLACEMENT);
 		string = TRANSIT_CENTER_.matcher(string).replaceAll(TRANSIT_CENTER_REPLACEMENT);
+		string = TRANSIT_TERM_.matcher(string).replaceAll(TRANSIT_TERM_REPLACEMENT);
 		return string;
 	}
 
