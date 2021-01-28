@@ -701,6 +701,8 @@ public final class CleanUtils {
 	//
 	private static final Pattern PLATFORM_ = Pattern.compile("((^|\\W)(platform #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String PLATFORM_REPLACEMENT = "$2P:$4$5";
+	private static final Pattern UNIVERSITY_ = Pattern.compile("((\\w+) university)", Pattern.CASE_INSENSITIVE);
+	private static final String UNIVERSITY_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 U");
 
 	@NotNull
 	public static String cleanStreetTypes(@NotNull String string) {
@@ -770,6 +772,7 @@ public final class CleanUtils {
 		string = CLOCKWISE_.matcher(string).replaceAll(CLOCKWISE_REPLACEMENT);
 		//
 		string = PLATFORM_.matcher(string).replaceAll(PLATFORM_REPLACEMENT);
+		string = UNIVERSITY_.matcher(string).replaceAll(UNIVERSITY_REPLACEMENT);
 		return string;
 	}
 
