@@ -321,6 +321,10 @@ object MDirectionHeadSignFinder {
                     stopTimesList1FirstStop.stopLat, stopTimesList1FirstStop.stopLong,
                     stopTimesList2FirstStop.stopLat, stopTimesList2FirstStop.stopLong
                 )
+                logMerge(
+                    !dataLossAuthorized,
+                    "$routeId: $directionId: #1 First & #2 First > p:'$prefix1First2First'(${prefix1First2First.length}), s:'$suffix1First2First'(${suffix1First2First.length})(m:$minFixLength1First2First), d:'$distance1First2First'."
+                )
 
                 // compare #1 last w/ #2 last
                 val prefix1Last2Last = stopNameList1Last.commonPrefixWith(stopNameList2Last, true)
@@ -329,6 +333,10 @@ object MDirectionHeadSignFinder {
                 val distance1Last2Last = LocationUtils.findDistance(
                     stopTimesList1LastStop.stopLat, stopTimesList1LastStop.stopLong,
                     stopTimesList2LastStop.stopLat, stopTimesList2LastStop.stopLong
+                )
+                logMerge(
+                    !dataLossAuthorized,
+                    "$routeId: $directionId: #1 Last & #2 Last > p:'$prefix1Last2Last'(${prefix1Last2Last.length}), s:'$suffix1Last2Last'(${suffix1Last2Last.length})(m:$minFixLength1Last2Last), d:'$distance1Last2Last'."
                 )
 
                 // compare #1 first w/ #2 last
@@ -339,6 +347,10 @@ object MDirectionHeadSignFinder {
                     stopTimesList1FirstStop.stopLat, stopTimesList1FirstStop.stopLong,
                     stopTimesList2LastStop.stopLat, stopTimesList2LastStop.stopLong
                 )
+                logMerge(
+                    !dataLossAuthorized,
+                    "$routeId: $directionId: #1 First & #2 Last > p:'$prefix1First2Last'(${prefix1First2Last.length}), s:'$suffix1First2Last'(${suffix1First2Last.length})(m:$minFixLength1First2Last), d:'$distance1First2Last'."
+                )
 
                 // compare #1 last w/ #2 first
                 val prefix2First1Last = stopNameList2First.commonPrefixWith(stopNameList1Last, true)
@@ -347,6 +359,10 @@ object MDirectionHeadSignFinder {
                 val distance2First1Last = LocationUtils.findDistance(
                     stopTimesList2FirstStop.stopLat, stopTimesList2FirstStop.stopLong,
                     stopTimesList1LastStop.stopLat, stopTimesList1LastStop.stopLong
+                )
+                logMerge(
+                    !dataLossAuthorized,
+                    "$routeId: $directionId: #1 Last & #2 First > p:'$prefix2First1Last'(${prefix2First1Last.length}), s:'$suffix2First1Last'(${suffix2First1Last.length})(m:$minFixLength2First1Last), d:'$distance2First1Last'."
                 )
 
                 if ((stopNameList1First == stopNameList2First
@@ -366,32 +382,56 @@ object MDirectionHeadSignFinder {
                     // almost same 1st & last stops (distance)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2FirstStop.stopIdInt
                     lastCommonStopIdInt = stopTimesList1LastStop.stopIdInt to stopTimesList2LastStop.stopIdInt
+                } else if ((stopNameList1First == stopNameList2First
+                            || (prefix1First2First.length >= minFixLength1First2First && prefix1First2First.length > suffix1First2First.length)
+                            || (suffix1First2First.length >= minFixLength1First2First && suffix1First2First.length > prefix1First2First.length))
+                ) {
+                    // almost 1 common stop is #1 first & #2 first (prefix/suffix)
+                    firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2FirstStop.stopIdInt
+                    lastCommonStopIdInt = firstCommonStopIdInt
+                } else if (
+                    (stopNameList1Last == stopNameList2Last
+                            || (prefix1Last2Last.length >= minFixLength1Last2Last && prefix1Last2Last.length > suffix1First2Last.length)
+                            || (suffix1Last2Last.length >= minFixLength1Last2Last && suffix1Last2Last.length > prefix1First2Last.length))
+                ) {
+                    // almost 1 common stop is #1 last & #2 last (prefix/suffix)
+                    lastCommonStopIdInt = stopTimesList1LastStop.stopIdInt to stopTimesList2LastStop.stopIdInt
+                    firstCommonStopIdInt = lastCommonStopIdInt
+
+                } else if (distance1First2First < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS) {
+                    // almost 1 common stop is #1 first & #2 first (distance)
+                    firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2FirstStop.stopIdInt
+                    lastCommonStopIdInt = firstCommonStopIdInt
+                } else if (distance1Last2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS) {
+                    // almost 1 common stop is #1 last & #2 last (distance)
+                    lastCommonStopIdInt = stopTimesList1LastStop.stopIdInt to stopTimesList2LastStop.stopIdInt
+                    firstCommonStopIdInt = lastCommonStopIdInt
                 } else if (stopNameList1First == stopNameList2Last
                     || (prefix1First2Last.length >= minFixLength1First2Last && prefix1First2Last.length > suffix1First2Last.length)
                     || (suffix1First2Last.length >= minFixLength1First2Last && suffix1First2Last.length > prefix1First2Last.length)
                 ) {
-                    // almost 1 common stop (first & last) is #1 first & #2 last (prefix/suffix)
+                    // almost 1 common stop is #1 first & #2 last (prefix/suffix)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
                 } else if (stopNameList1Last == stopNameList2First
                     || (prefix2First1Last.length >= minFixLength2First1Last && prefix2First1Last.length > suffix2First1Last.length)
                     || (suffix2First1Last.length >= minFixLength2First1Last && suffix2First1Last.length > prefix2First1Last.length)
                 ) {
-                    // almost 1 common stop (first & last) is #1 last & #2 first (prefix/suffix)
+                    // almost 1 common stop is #1 last & #2 first (prefix/suffix)
                     firstCommonStopIdInt = stopTimesList2FirstStop.stopIdInt to stopTimesList1LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
                 } else if (distance1First2Last < distance2First1Last
                     && (distance1First2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS
                             || (dataLossAuthorized && distance1First2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS * 2f))
                 ) {
-                    // almost 1 common stop (first & last) is #1 first & #2 last (distance)
+                    // almost 1 common stop is #1 first & #2 last (distance)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
                 } else if (distance2First1Last < distance1First2Last
                     && (distance2First1Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS
                             || (dataLossAuthorized && distance2First1Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS * 2f))
                 ) {
-                    // almost 1 common stop (first & last) is #1 last & #2 first (distance)
+                    // almost 1 common stop is #1 last & #2 first (distance)
                     firstCommonStopIdInt = stopTimesList2FirstStop.stopIdInt to stopTimesList1LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
                 }
@@ -719,8 +759,8 @@ object MDirectionHeadSignFinder {
                 }
 
                 val lastCommonStop = getStop(routeGTFS, lastCommonStopIdInt)
-                val lastStop1 = routeGTFS.getStop(stopIdIntsAfterCommon1.last())
-                val lastStop2 = routeGTFS.getStop(stopIdIntsAfterCommon2.last())
+                val lastStop1 = stopIdIntsAfterCommon1.lastOrNull()?.let { routeGTFS.getStop(it) }
+                val lastStop2 = stopIdIntsAfterCommon2.lastOrNull()?.let { routeGTFS.getStop(it) }
                 if (lastCommonStop != null && lastStop1 != null && lastStop2 != null) {
                     val distanceToStop1 = LocationUtils.findDistance(
                         lastCommonStop.stopLat, lastCommonStop.stopLong,
