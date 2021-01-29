@@ -441,7 +441,7 @@ public final class CleanUtils {
 		return string;
 	}
 
-	private static final Pattern MC_ = Pattern.compile("((((m)(c|ac))([a-z]))([a-z]+))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern MC_ = Pattern.compile("((^|\\W)(((m)(c|ac))([a-z]))([a-z]+)(\\W|$))", Pattern.CASE_INSENSITIVE);
 
 	@SuppressWarnings("WeakerAccess")
 	@NotNull
@@ -450,10 +450,12 @@ public final class CleanUtils {
 		while (matcher.find()) {
 			string = string.replaceAll(
 					matcher.group(1),
-					matcher.group(4).toUpperCase(Locale.ENGLISH) +
-							matcher.group(5).toLowerCase(Locale.ENGLISH) +
-							matcher.group(6).toUpperCase(Locale.ENGLISH) +
-							matcher.group(7).toLowerCase(Locale.ENGLISH)
+					matcher.group(2) + // space
+							matcher.group(5).toUpperCase(Locale.ENGLISH) +
+							matcher.group(6).toLowerCase(Locale.ENGLISH) +
+							matcher.group(7).toUpperCase(Locale.ENGLISH) +
+							matcher.group(8).toLowerCase(Locale.ENGLISH) +
+							matcher.group(9) // space
 			);
 		}
 		return string;
@@ -722,7 +724,7 @@ public final class CleanUtils {
 	private static final String APARTMENT_REPLACEMENT = cleanWordsReplacementPlural("Apt"); // not official
 	private static final Pattern BED_AND_BREAKFAST_ = cleanWords("bed and breakfast", "bed & breakfast", "b & b");
 	private static final String BED_AND_BREAKFAST_REPLACEMENT = cleanWordsReplacement("B&B"); // not official
-	private static final Pattern PARK_AND_RIDE_ = cleanWords("park and ride", "park & ride", "p & r");
+	private static final Pattern PARK_AND_RIDE_ = cleanWords("park and ride", "park & ride", "p & r", "park 'n' ride");
 	private static final String PARK_AND_RIDE_REPLACEMENT = cleanWordsReplacement("P&R"); // not official
 	private static final Pattern PARK = cleanWords("park");
 	private static final String PARK_REPLACEMENT = cleanWordsReplacement("Pk"); // not official

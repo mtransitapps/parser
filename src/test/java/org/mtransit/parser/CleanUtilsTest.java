@@ -364,4 +364,14 @@ public class CleanUtilsTest {
 		// Assert
 		assertEquals("abc McGill xyz", result);
 	}
+
+	@Test
+	public void testFixMcXCaseNotNotStart() {
+		// Arrange
+		String string = "JAMES opposite SIMCOE";
+		// Act
+		String result = CleanUtils.fixMcXCase(string);
+		// Assert
+		assertEquals("JAMES opposite SIMCOE", result);
+	}
 }
