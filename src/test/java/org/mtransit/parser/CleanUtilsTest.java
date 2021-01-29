@@ -256,6 +256,16 @@ public class CleanUtilsTest {
 	}
 
 	@Test
+	public void testRemovePointsWithSpaceEnd() {
+		// Arrange
+		String string = "University Ave. / Resurrection C. S. S.";
+		// Act
+		String result = CleanUtils.removePointsI(string);
+		// Assert
+		assertEquals("University Ave / Resurrection CSS", result);
+	}
+
+	@Test
 	public void testRemovePoints3SingleLettersOnlyExceptEndNot() {
 		// Arrange
 		String string = "EB Auburn Bay DR @ S.leg Auburn Glen HT SE";
