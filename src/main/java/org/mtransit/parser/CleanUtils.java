@@ -751,7 +751,7 @@ public final class CleanUtils {
 	private static final Pattern CLOCKWISE_ = cleanWords("clockwise");
 	private static final String CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CW"); // not official
 	//
-	private static final Pattern BAY_ = Pattern.compile("((^|\\W)(bay #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern BAY_ = Pattern.compile("((^|\\W)(bay #?(\\w{1}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String BAY_REPLACEMENT = "$2B:$4$5";
 	private static final Pattern PLATFORM_ = Pattern.compile("((^|\\W)(platform #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String PLATFORM_REPLACEMENT = "$2P:$4$5";
