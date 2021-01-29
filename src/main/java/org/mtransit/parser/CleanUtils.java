@@ -755,7 +755,7 @@ public final class CleanUtils {
 	private static final String BAY_REPLACEMENT = "$2B:$4$5";
 	private static final Pattern PLATFORM_ = Pattern.compile("((^|\\W)(platform #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String PLATFORM_REPLACEMENT = "$2P:$4$5";
-	private static final Pattern UNIVERSITY_ = Pattern.compile("((\\w{3,}) university)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern UNIVERSITY_ = Pattern.compile("((\\w{4,}) university)", Pattern.CASE_INSENSITIVE);
 	private static final String UNIVERSITY_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 U");
 	private static final Pattern UNIVERSITY_OF_ = Pattern.compile("(university of (\\w+))", Pattern.CASE_INSENSITIVE);
 	private static final String UNIVERSITY_OF_REPLACEMENT = CleanUtils.cleanWordsReplacement("U of $2");
