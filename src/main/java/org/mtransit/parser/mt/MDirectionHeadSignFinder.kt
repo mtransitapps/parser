@@ -54,18 +54,24 @@ object MDirectionHeadSignFinder {
             && !agencyTools.directionHeadSignsDescriptive(directionHeadSigns)
         ) {
             MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, using AM/PM...")
+            val amPmDirectionHeadSigns = mutableMapOf<Int, String>()
             for ((directionId, _) in directionHeadSigns) {
                 val firstAndLastTime = directionAmPm[directionId] ?: continue
                 if (GTime.areAM(firstAndLastTime)) {
-                    directionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
-                        true,
+                    amPmDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
+                        false,
                         "AM"
                     )
                 } else if (GTime.arePM(firstAndLastTime)) {
-                    directionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
-                        true,
+                    amPmDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
+                        false,
                         "PM"
                     )
+                }
+            }
+            if (amPmDirectionHeadSigns.size == 2) { // all AM/PM or nothing
+                for (amPmDirectionHeadSign in amPmDirectionHeadSigns) {
+                    directionHeadSigns[amPmDirectionHeadSign.key] = amPmDirectionHeadSign.value
                 }
             }
         }
