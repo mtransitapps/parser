@@ -373,22 +373,26 @@ public class DefaultAgencyTools implements GAgencyTools {
 				case "eastbound":
 				case "east":
 				case "est":
+				case "eb":
 				case "e":
 					return MDirectionType.EAST;
 				case "westbound":
 				case "west":
 				case "ouest":
+				case "wb":
 				case "w":
 				case "o":
 					return MDirectionType.WEST;
 				case "northbound":
 				case "north":
 				case "nord":
+				case "nb":
 				case "n":
 					return MDirectionType.NORTH;
 				case "southbound":
 				case "south":
 				case "sud":
+				case "sb":
 				case "s":
 					return MDirectionType.SOUTH;
 				}
