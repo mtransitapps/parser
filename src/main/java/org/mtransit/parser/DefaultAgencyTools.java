@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"RedundantSuppression"})
 public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final int MAX_NEXT_LOOKUP_IN_DAYS = 60;
@@ -60,6 +60,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		EXPORT_DESCENT_ONLY = false;
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	public static final boolean GOOD_ENOUGH_ACCEPTED;
 
 	static {
@@ -94,7 +95,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final Integer OVERRIDE_DATE;
 
 	static {
-		OVERRIDE_DATE = null;
+		OVERRIDE_DATE = null; // yyyyMMdd
 	}
 
 	private static final boolean TOMORROW;
@@ -331,6 +332,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return directionHeadSignDescriptiveS(directionHeadSign);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	static boolean directionHeadSignDescriptiveS(@NotNull String directionHeadSign) {
 		return !StringUtils.isBlank(directionHeadSign); // empty/blank head-sign is NOT descriptive
 	}
@@ -674,6 +676,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	private static Period usefulPeriod = null;
 
+	@SuppressWarnings("WeakerAccess")
 	@NotNull
 	public static HashSet<Integer> extractUsefulServiceIdInts(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools, boolean agencyFilter) {
 		MTLog.log("Extracting useful service IDs...");
