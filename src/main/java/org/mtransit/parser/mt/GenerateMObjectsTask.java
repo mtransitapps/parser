@@ -465,7 +465,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 							originalTripHeadSignId = mTrip.getId();
 						}
 					}
-					if (this.agencyTools.getDirectionType() == MTrip.HEADSIGN_TYPE_DIRECTION) {
+					if (this.agencyTools.getDirectionTypes().contains(MTrip.HEADSIGN_TYPE_DIRECTION)) {
 						final MDirectionType direction = this.agencyTools.convertDirection(directionHeadSign);
 						if (direction != null) {
 							mTrip.setHeadsignDirection(direction);

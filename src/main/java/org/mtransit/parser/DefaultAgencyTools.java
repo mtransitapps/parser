@@ -29,7 +29,9 @@ import org.mtransit.parser.mt.data.MTripStop;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -337,16 +339,35 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return !StringUtils.isBlank(directionHeadSign); // empty/blank head-sign is NOT descriptive
 	}
 
+	@SuppressWarnings("DeprecatedIsStillUsed")
+	@Deprecated
 	@Override
 	public int getDirectionType() {
 		return -1; // no preferred direction type
+	}
+
+	@NotNull
+	@Override
+	public List<Integer> getDirectionTypes() {
+		//noinspection deprecation
+		final int deprecatedDirectionType = getDirectionType();
+		if (deprecatedDirectionType != -1
+				&& deprecatedDirectionType != MTrip.HEADSIGN_TYPE_STRING) {
+			return Arrays.asList(
+					deprecatedDirectionType,
+					MTrip.HEADSIGN_TYPE_STRING
+			);
+		}
+		return Collections.singletonList(
+				MTrip.HEADSIGN_TYPE_STRING // default = string
+		);
 	}
 
 	@Nullable
 	@Override
 	public MDirectionType convertDirection(@Nullable String headSign) {
 		if (headSign != null) {
-			if (getDirectionType() == MTrip.HEADSIGN_TYPE_DIRECTION) {
+			if (getDirectionTypes().contains(MTrip.HEADSIGN_TYPE_DIRECTION)) {
 				final String tripHeadsignLC = headSign.toLowerCase(Locale.ENGLISH);
 				switch (tripHeadsignLC) {
 				case "eastbound":
@@ -370,7 +391,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 				case "sud":
 				case "s":
 					return MDirectionType.SOUTH;
-				default:
+				}
+				if (getDirectionTypes().size() == 1) { // only DIRECTION!
 					throw new MTLog.Fatal("Unexpected direction for '%s'!", headSign);
 				}
 			}

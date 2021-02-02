@@ -23,10 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("unused")
+@SuppressWarnings("RedundantSuppression")
 public interface GAgencyTools {
 
+	@SuppressWarnings("unused")
 	boolean EXCLUDE = true;
+	@SuppressWarnings("unused")
 	boolean KEEP = false;
 
 	int getThreadPoolSize();
@@ -88,7 +90,11 @@ public interface GAgencyTools {
 
 	boolean directionHeadSignDescriptive(@NotNull String directionHeadSign);
 
+	@Deprecated
 	int getDirectionType();
+
+	@NotNull
+	List<Integer> getDirectionTypes();
 
 	@Nullable
 	MDirectionType convertDirection(@Nullable String headSign);
