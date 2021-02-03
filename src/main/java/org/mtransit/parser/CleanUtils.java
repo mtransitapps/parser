@@ -753,14 +753,22 @@ public final class CleanUtils {
 	private static final Pattern CLOCKWISE_ = cleanWords("clockwise");
 	private static final String CLOCKWISE_REPLACEMENT = cleanWordsReplacement("CW"); // not official
 	//
-	private static final Pattern BAY_ = Pattern.compile("((^|\\W)(bay #?(\\w{1}))(\\W|$))", Pattern.CASE_INSENSITIVE);
+	private static final Pattern BAY_ = Pattern.compile("((^|\\W)(bay #?(\\w))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String BAY_REPLACEMENT = "$2B:$4$5";
 	private static final Pattern PLATFORM_ = Pattern.compile("((^|\\W)(platform #?(\\w{1,3}))(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String PLATFORM_REPLACEMENT = "$2P:$4$5";
-	private static final Pattern UNIVERSITY_ = Pattern.compile("((\\w{4,}) university)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern SECONDARY_SCHOOL_ = Pattern.compile("((\\w+) secondary school)", Pattern.CASE_INSENSITIVE);
+	private static final String SECONDARY_SCHOOL_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 SS");
+	private static final Pattern HIGH_SCHOOL_ = Pattern.compile("((\\w+) high school)", Pattern.CASE_INSENSITIVE);
+	private static final String HIGH_SCHOOL_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 HS");
+	private static final Pattern SCHOOL_ = Pattern.compile("((\\w+) school)", Pattern.CASE_INSENSITIVE);
+	private static final String SCHOOL_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 S");
+	private static final Pattern UNIVERSITY_ = Pattern.compile("((\\w{4,}) university)", Pattern.CASE_INSENSITIVE); // used for street names
 	private static final String UNIVERSITY_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 U");
 	private static final Pattern UNIVERSITY_OF_ = Pattern.compile("(university of (\\w+))", Pattern.CASE_INSENSITIVE);
 	private static final String UNIVERSITY_OF_REPLACEMENT = CleanUtils.cleanWordsReplacement("U of $2");
+	private static final Pattern COMMUNITY_CENTER_ = Pattern.compile("((\\w+) (community centre|community ctr))", Pattern.CASE_INSENSITIVE);
+	private static final String COMMUNITY_CENTER_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 CC");
 	private static final Pattern TRANSIT_CENTER_ = Pattern.compile("((\\w+) (transit center|transit ctr))", Pattern.CASE_INSENSITIVE);
 	private static final String TRANSIT_CENTER_REPLACEMENT = CleanUtils.cleanWordsReplacement("$2 TC");
 	private static final Pattern TRANSIT_TERM_ = Pattern.compile("((\\w+) (transit terminal|transit term))", Pattern.CASE_INSENSITIVE);
@@ -838,8 +846,12 @@ public final class CleanUtils {
 		//
 		string = BAY_.matcher(string).replaceAll(BAY_REPLACEMENT);
 		string = PLATFORM_.matcher(string).replaceAll(PLATFORM_REPLACEMENT);
+		string = SECONDARY_SCHOOL_.matcher(string).replaceAll(SECONDARY_SCHOOL_REPLACEMENT);
+		string = HIGH_SCHOOL_.matcher(string).replaceAll(HIGH_SCHOOL_REPLACEMENT);
+		string = SCHOOL_.matcher(string).replaceAll(SCHOOL_REPLACEMENT);
 		string = UNIVERSITY_.matcher(string).replaceAll(UNIVERSITY_REPLACEMENT);
 		string = UNIVERSITY_OF_.matcher(string).replaceAll(UNIVERSITY_OF_REPLACEMENT);
+		string = COMMUNITY_CENTER_.matcher(string).replaceAll(COMMUNITY_CENTER_REPLACEMENT);
 		string = TRANSIT_CENTER_.matcher(string).replaceAll(TRANSIT_CENTER_REPLACEMENT);
 		string = TRANSIT_TERM_.matcher(string).replaceAll(TRANSIT_TERM_REPLACEMENT);
 		return string;
