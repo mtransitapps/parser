@@ -2,13 +2,16 @@
 
 package org.mtransit.parser
 
+import org.mtransit.commons.CharUtils
+
+@Deprecated(message = "Use commons-java instead!")
 object CharUtils {
 
-    const val EMPTY = Constants.EMPTY
+    const val EMPTY = CharUtils.EMPTY
 
     @JvmStatic
-    fun countUpperCase(string: String?) = countUpperCase(string?.toCharArray())
+    fun countUpperCase(string: String?) = CharUtils.countUpperCase(string)
 
     @JvmStatic
-    fun countUpperCase(charArray: CharArray?) = charArray?.count { it.isUpperCase() } ?: 0
+    fun countUpperCase(charArray: CharArray?) = CharUtils.countUpperCase(charArray)
 }

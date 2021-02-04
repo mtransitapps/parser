@@ -2,12 +2,12 @@ package org.mtransit.parser;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.CharUtils;
+import org.mtransit.commons.RegexUtils;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Pattern;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"WeakerAccess", "unused", "RedundantSuppression"})
 public final class Utils {
 
 	private Utils() {
@@ -65,37 +65,20 @@ public final class Utils {
 		return sb.toString();
 	}
 
+	@Deprecated
 	@Nullable
 	public static String replaceAll(@Nullable String string, @Nullable Pattern[] patterns, @NotNull String replacement) {
-		if (string == null) {
-			return null;
-		}
-		if (patterns == null) {
-			return string;
-		}
-		return replaceAllNN(string, patterns, replacement);
+		return RegexUtils.replaceAll(string, patterns, replacement);
 	}
 
 	@NotNull
 	public static String replaceAllNN(@NotNull String string, @NotNull Pattern[] patterns, @NotNull String replacement) {
-		if (string.length() == 0) {
-			return string;
-		}
-		for (Pattern pattern : patterns) {
-			string = pattern.matcher(string).replaceAll(replacement);
-		}
-		return string;
+		return RegexUtils.replaceAllNN(string, patterns, replacement);
 	}
 
-	// from the Android Open Source Project by Google
+	@Deprecated
 	public static boolean isDigitsOnly(@NotNull CharSequence str) {
-		final int len = str.length();
-		for (int i = 0; i < len; i++) {
-			if (!Character.isDigit(str.charAt(i))) {
-				return false;
-			}
-		}
-		return true;
+		return CharUtils.isDigitsOnly(str);
 	}
 
 	public static boolean isLettersOnly(@NotNull CharSequence str) {
@@ -120,53 +103,23 @@ public final class Utils {
 		return true;
 	}
 
+	@Deprecated
 	public static boolean isUppercaseOnly(@NotNull String str, boolean allowWhitespace, boolean checkAZOnly, @NotNull String... excludedWords) {
 		return isUppercaseOnly(
-				CleanUtils.cleanWords(excludedWords)
+				org.mtransit.commons.CleanUtils.cleanWords(excludedWords)
 						.matcher(str).replaceAll(
-						CleanUtils.cleanWordsReplacement(Constants.EMPTY)
+						org.mtransit.commons.CleanUtils.cleanWordsReplacement(Constants.EMPTY)
 				),
 				allowWhitespace, checkAZOnly);
 	}
 
+	@Deprecated
 	public static boolean isUppercaseOnly(@NotNull CharSequence str, boolean allowWhitespace, boolean checkAZOnly) {
-		final int len = str.length();
-		char aChar;
-		for (int i = 0; i < len; i++) {
-			aChar = str.charAt(i);
-			if (checkAZOnly && !Character.isAlphabetic(aChar)) {
-				continue;
-			}
-			if (Character.isWhitespace(aChar)) {
-				if (allowWhitespace) {
-					continue;
-				} else {
-					return false;
-				}
-			}
-			if (checkAZOnly && !Character.isAlphabetic(aChar)) {
-				continue;
-			}
-			if (!Character.isUpperCase(aChar)) {
-				// MTLog.logDebug(" > Non-upper-case character found '%s' at %d in '%s'.", str.charAt(i), i, str);
-				return false;
-			}
-		}
-		return true;
+		return CharUtils.isUppercaseOnly(str, allowWhitespace, checkAZOnly);
 	}
 
-	@NotNull
-	private static final List<Character> ROMAN_DIGITS = Arrays.asList('I', 'V', 'X'); // , 'L', 'C', 'D', 'M'
-
+	@Deprecated
 	public static boolean isRomanDigits(@NotNull CharSequence str) {
-		final int len = str.length();
-		char aChar;
-		for (int i = 0; i < len; i++) {
-			aChar = str.charAt(i);
-			if (!ROMAN_DIGITS.contains(aChar)) {
-				return false;
-			}
-		}
-		return true;
+		return CharUtils.isRomanDigits(str);
 	}
 }

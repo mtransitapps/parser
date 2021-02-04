@@ -1,6 +1,5 @@
 package org.mtransit.parser.db
 
-import org.mtransit.parser.CleanUtils
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
@@ -126,7 +125,7 @@ object DBUtils {
                     "${gStopTime.stopSequence}," +
                     "${gStopTime.arrivalTime}," +
                     "${gStopTime.departureTime}," +
-                    "${gStopTime.stopHeadsign?.let { CleanUtils.quotes(CleanUtils.escape(it)) }}," +
+                    "${gStopTime.stopHeadsign?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}," +
                     "${gStopTime.pickupType}," +
                     "${gStopTime.dropOffType}" +
                     ")"
@@ -165,7 +164,7 @@ object DBUtils {
                     "${mSchedule.departure}," +
                     "${mSchedule.pathIdInt}," +
                     "${mSchedule.headsignType}," +
-                    "${mSchedule.headsignValue?.let { CleanUtils.quotes(CleanUtils.escape(it)) }}" +
+                    "${mSchedule.headsignValue?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}" +
                     ")"
         )
         insertRowCount++
@@ -185,13 +184,15 @@ object DBUtils {
             query += " WHERE ${GStopTime.TRIP_ID} = $tripId"
         }
         tripIds?.let {
-            query += " WHERE ${GStopTime.TRIP_ID} IN ${tripIds
-                .distinct()
-                .joinToString(
-                    separator = ",",
-                    prefix = "(",
-                    postfix = ")"
-                ) { "$it" }}"
+            query += " WHERE ${GStopTime.TRIP_ID} IN ${
+                tripIds
+                    .distinct()
+                    .joinToString(
+                        separator = ",",
+                        prefix = "(",
+                        postfix = ")"
+                    ) { "$it" }
+            }"
         }
         query += " ORDER BY " +
                 "${GStopTime.TRIP_ID} ASC, " +
@@ -240,13 +241,15 @@ object DBUtils {
             query += " WHERE ${GTripStop.TRIP_ID} = $tripIdInt"
         }
         tripIdInts?.let {
-            query += " WHERE ${GTripStop.TRIP_ID} IN ${tripIdInts
-                .distinct()
-                .joinToString(
-                    separator = ",",
-                    prefix = "(",
-                    postfix = ")"
-                ) { "$it" }}"
+            query += " WHERE ${GTripStop.TRIP_ID} IN ${
+                tripIdInts
+                    .distinct()
+                    .joinToString(
+                        separator = ",",
+                        prefix = "(",
+                        postfix = ")"
+                    ) { "$it" }
+            }"
         }
         limitMaxNbRow?.let {
             query += " LIMIT $limitMaxNbRow"
@@ -303,13 +306,15 @@ object DBUtils {
                 " WHERE"
             }
             whereAdded = true
-            query += " ${MSchedule.SERVICE_ID} IN ${serviceIdInts
-                .distinct()
-                .joinToString(
-                    separator = ",",
-                    prefix = "(",
-                    postfix = ")"
-                ) { "$it" }}"
+            query += " ${MSchedule.SERVICE_ID} IN ${
+                serviceIdInts
+                    .distinct()
+                    .joinToString(
+                        separator = ",",
+                        prefix = "(",
+                        postfix = ")"
+                    ) { "$it" }
+            }"
             whereAdded = true
         }
         // TRIP ID
@@ -330,13 +335,15 @@ object DBUtils {
                 " WHERE"
             }
             whereAdded = true
-            query += " ${MSchedule.TRIP_ID} IN ${tripIds
-                .distinct()
-                .joinToString(
-                    separator = ",",
-                    prefix = "(",
-                    postfix = ")"
-                ) { "$it" }}"
+            query += " ${MSchedule.TRIP_ID} IN ${
+                tripIds
+                    .distinct()
+                    .joinToString(
+                        separator = ",",
+                        prefix = "(",
+                        postfix = ")"
+                    ) { "$it" }
+            }"
             whereAdded = true
         }
         // STOP ID
@@ -357,13 +364,15 @@ object DBUtils {
                 " WHERE"
             }
             whereAdded = true
-            query += " ${MSchedule.STOP_ID} IN ${stopIdInts
-                .distinct()
-                .joinToString(
-                    separator = ",",
-                    prefix = "(",
-                    postfix = ")"
-                ) { "$it" }}"
+            query += " ${MSchedule.STOP_ID} IN ${
+                stopIdInts
+                    .distinct()
+                    .joinToString(
+                        separator = ",",
+                        prefix = "(",
+                        postfix = ")"
+                    ) { "$it" }
+            }"
             whereAdded = true
         }
         // ARRIVAL & DEPARTURE

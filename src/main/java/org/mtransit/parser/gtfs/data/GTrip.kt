@@ -1,6 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
-import org.mtransit.parser.StringUtils
+import org.mtransit.commons.StringUtils
 import org.mtransit.parser.gtfs.GAgencyTools
 
 // https://developers.google.com/transit/gtfs/reference#tripstxt

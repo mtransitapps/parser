@@ -1,8 +1,8 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.commons.StringUtils
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.StringUtils
 import java.util.Date
 
 // https://gtfs.org/reference/static#stop_timestxt

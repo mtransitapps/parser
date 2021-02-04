@@ -1,9 +1,9 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.parser.CleanUtils
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.db.SQLUtils
 
 data class MTrip(
     val routeId: Long,
@@ -175,18 +175,18 @@ data class MTrip(
         if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
             sb.append(headsignType) // HEADSIGN TYPE
             sb.append(Constants.COLUMN_SEPARATOR) //
-            sb.append(CleanUtils.quotes(CleanUtils.escape(headsignValue))) // HEADSIGN STRING
+            sb.append(SQLUtils.quotes(SQLUtils.escape(headsignValue))) // HEADSIGN STRING
             sb.append(Constants.COLUMN_SEPARATOR) //
         } else {
             if (headsignType == HEADSIGN_TYPE_DESCENT_ONLY) {
                 sb.append(HEADSIGN_TYPE_STRING) // HEADSIGN TYPE
                 sb.append(Constants.COLUMN_SEPARATOR) //
-                sb.append(CleanUtils.quotes(CleanUtils.escape("Drop Off Only"))) // HEADSIGN STRING
+                sb.append(SQLUtils.quotes(SQLUtils.escape("Drop Off Only"))) // HEADSIGN STRING
                 sb.append(Constants.COLUMN_SEPARATOR) //
             } else {
                 sb.append(headsignType) // HEADSIGN TYPE
                 sb.append(Constants.COLUMN_SEPARATOR) //
-                sb.append(CleanUtils.quotes(CleanUtils.escape(headsignValue))) // HEADSIGN STRING
+                sb.append(SQLUtils.quotes(SQLUtils.escape(headsignValue))) // HEADSIGN STRING
                 sb.append(Constants.COLUMN_SEPARATOR) //
             }
         }

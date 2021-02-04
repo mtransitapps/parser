@@ -1,7 +1,7 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.parser.CleanUtils
 import org.mtransit.parser.Constants
+import org.mtransit.parser.db.SQLUtils
 
 data class MRoute(
     val id: Long,
@@ -16,12 +16,12 @@ data class MRoute(
         return id.toString() +  // ID
                 Constants.COLUMN_SEPARATOR +  //
                 // (this.shortName == null ? Constants.EMPTY : CleanUtils.escape(this.shortName)) + // short name
-                CleanUtils.quotes(CleanUtils.escape(shortName ?: Constants.EMPTY)) +  // short name
+                SQLUtils.quotes(SQLUtils.escape(shortName ?: Constants.EMPTY)) +  // short name
                 Constants.COLUMN_SEPARATOR +  //
                 // (this.longName == null ? Constants.EMPTY : CleanUtils.escape(this.longName)) + // long name
-                CleanUtils.quotes(CleanUtils.escape(longName)) +  // long name
+                SQLUtils.quotes(SQLUtils.escape(longName)) +  // long name
                 Constants.COLUMN_SEPARATOR +  //
-                CleanUtils.quotes(color ?: Constants.EMPTY)  // color
+                SQLUtils.quotes(color ?: Constants.EMPTY)  // color
     }
 
     override fun compareTo(other: MRoute): Int {

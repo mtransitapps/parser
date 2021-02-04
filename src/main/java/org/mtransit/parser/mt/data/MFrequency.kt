@@ -1,7 +1,7 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.parser.CleanUtils
 import org.mtransit.parser.Constants
+import org.mtransit.parser.db.SQLUtils
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 
@@ -29,7 +29,7 @@ data class MFrequency(
     val uID by lazy { getNewUID(serviceIdInt, tripId, startTime, endTime) }
 
     fun toFile(agencyTools: GAgencyTools): String {
-        return CleanUtils.quotes(CleanUtils.escape(getCleanServiceId(agencyTools))) + // service ID
+        return SQLUtils.quotes(SQLUtils.escape(getCleanServiceId(agencyTools))) + // service ID
                 Constants.COLUMN_SEPARATOR +  //
                 tripId +  // trip ID
                 Constants.COLUMN_SEPARATOR +  //

@@ -1,10 +1,10 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.parser.CleanUtils
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
+import org.mtransit.parser.db.SQLUtils
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 
@@ -97,7 +97,7 @@ data class MSchedule(
 
     fun toFileNewServiceIdAndTripId(agencyTools: GAgencyTools): String {
         val sb = StringBuilder() //
-        sb.append(CleanUtils.quotes(CleanUtils.escape(getCleanServiceId(agencyTools)))) // service ID
+        sb.append(SQLUtils.quotes(SQLUtils.escape(getCleanServiceId(agencyTools)))) // service ID
         sb.append(Constants.COLUMN_SEPARATOR) //
         // no route ID, just for file split
         sb.append(tripId) // trip ID
@@ -113,12 +113,12 @@ data class MSchedule(
             sb.append(Constants.COLUMN_SEPARATOR) //
         }
         if (DefaultAgencyTools.EXPORT_PATH_ID) {
-            sb.append(CleanUtils.quotes(_pathId)) // original trip ID
+            sb.append(SQLUtils.quotes(_pathId)) // original trip ID
             sb.append(Constants.COLUMN_SEPARATOR) //
         }
         sb.append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
         sb.append(Constants.COLUMN_SEPARATOR) //
-        sb.append(CleanUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
+        sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
         return sb.toString()
     }
 
@@ -146,21 +146,21 @@ data class MSchedule(
             if (headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
                 sb.append(MTrip.HEADSIGN_TYPE_DESCENT_ONLY) // HEADSIGN TYPE
                 sb.append(Constants.COLUMN_SEPARATOR) //
-                sb.append(CleanUtils.quotes(Constants.EMPTY)) // HEADSIGN STRING
+                sb.append(SQLUtils.quotes(Constants.EMPTY)) // HEADSIGN STRING
             } else {
                 sb.append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
                 sb.append(Constants.COLUMN_SEPARATOR) //
-                sb.append(CleanUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
+                sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
             }
         } else {
             if (headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
                 sb.append(MTrip.HEADSIGN_TYPE_STRING) // HEADSIGN TYPE
                 sb.append(Constants.COLUMN_SEPARATOR) //
-                sb.append(CleanUtils.quotes("Drop Off Only")) // HEADSIGN STRING
+                sb.append(SQLUtils.quotes("Drop Off Only")) // HEADSIGN STRING
             } else {
                 sb.append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
                 sb.append(Constants.COLUMN_SEPARATOR) //
-                sb.append(CleanUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
+                sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
             }
         }
         return sb.toString()

@@ -1,12 +1,12 @@
 package org.mtransit.parser.mt
 
+import org.mtransit.commons.StringUtils.EMPTY
 import org.mtransit.commons.containsExactList
 import org.mtransit.commons.indexOf
 import org.mtransit.commons.lastIndexOf
 import org.mtransit.parser.Constants
 import org.mtransit.parser.LocationUtils
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.StringUtils.EMPTY
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GSpec

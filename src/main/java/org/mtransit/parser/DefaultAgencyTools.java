@@ -2,6 +2,7 @@ package org.mtransit.parser;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.CharUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -84,7 +85,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		final String envMTThreadPoolSize = System.getenv("MT_THREAD_POOL_SIZE");
 		if (envMTThreadPoolSize != null
 				&& !envMTThreadPoolSize.isEmpty()
-				&& Utils.isDigitsOnly(envMTThreadPoolSize)) {
+				&& CharUtils.isDigitsOnly(envMTThreadPoolSize)) {
 			THREAD_POOL_SIZE = Integer.parseInt(envMTThreadPoolSize);
 		} else if (IS_CI) {
 			THREAD_POOL_SIZE = 1;
@@ -182,7 +183,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public String getRouteShortName(@NotNull GRoute gRoute) {
-		if (StringUtils.isEmpty(gRoute.getRouteShortName())) {
+		if (org.mtransit.commons.StringUtils.isEmpty(gRoute.getRouteShortName())) {
 			throw new MTLog.Fatal("No default route short name for %s!", gRoute);
 		}
 		return gRoute.getRouteShortName();
@@ -191,10 +192,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String getRouteLongName(@NotNull GRoute gRoute) {
-		if (StringUtils.isEmpty(gRoute.getRouteLongName())) {
+		if (org.mtransit.commons.StringUtils.isEmpty(gRoute.getRouteLongName())) {
 			throw new MTLog.Fatal("No default route long name for %s!", gRoute);
 		}
-		return CleanUtils.cleanLabel(gRoute.getRouteLongNameOrDefault());
+		return org.mtransit.commons.CleanUtils.cleanLabel(gRoute.getRouteLongNameOrDefault());
 	}
 
 	@Override
@@ -336,7 +337,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@SuppressWarnings("WeakerAccess")
 	static boolean directionHeadSignDescriptiveS(@NotNull String directionHeadSign) {
-		return !StringUtils.isBlank(directionHeadSign); // empty/blank head-sign is NOT descriptive
+		return !org.mtransit.commons.StringUtils.isBlank(directionHeadSign); // empty/blank head-sign is NOT descriptive
 	}
 
 	@SuppressWarnings("DeprecatedIsStillUsed")
@@ -441,7 +442,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopName(@NotNull String gStopName) {
-		return CleanUtils.cleanLabel(gStopName);
+		return org.mtransit.commons.CleanUtils.cleanLabel(gStopName);
 	}
 
 	@Nullable
