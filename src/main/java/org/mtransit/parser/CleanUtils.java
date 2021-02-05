@@ -48,6 +48,8 @@ public final class CleanUtils {
 		return org.mtransit.commons.CleanUtils.cleanLabel(label);
 	}
 
+	public static final Pattern[] SPACE_CHARS = org.mtransit.commons.CleanUtils.SPACE_CHARS;
+
 	public static final Pattern[] SPACE_ST = org.mtransit.commons.CleanUtils.SPACE_ST;
 
 	@NotNull
