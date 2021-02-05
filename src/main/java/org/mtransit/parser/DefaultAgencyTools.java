@@ -3,6 +3,7 @@ package org.mtransit.parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CharUtils;
+import org.mtransit.commons.CommonsApp;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -42,6 +43,10 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"RedundantSuppression"})
 public class DefaultAgencyTools implements GAgencyTools {
+
+	static {
+		CommonsApp.setup(false);
+	}
 
 	private static final int MAX_NEXT_LOOKUP_IN_DAYS = 60;
 
