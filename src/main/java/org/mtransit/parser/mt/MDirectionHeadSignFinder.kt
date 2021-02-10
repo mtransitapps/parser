@@ -8,6 +8,7 @@ import org.mtransit.parser.Constants
 import org.mtransit.parser.LocationUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
+import org.mtransit.parser.gtfs.data.GDirectionId
 import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GSpec
 import org.mtransit.parser.gtfs.data.GStop
@@ -34,23 +35,13 @@ object MDirectionHeadSignFinder {
         val directionHeadSigns = mutableMapOf<Int, String>()
         val directionStopIdInts = mutableMapOf<Int, Int>()
         val directionAmPm = mutableMapOf<Int, Pair<Int, Int>?>()
-        var directionIdOrDefault: Int = -1
-        findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { (headSign, stopIdInt, firstAndLast) ->
-            directionHeadSigns[directionIdOrDefault] = headSign
-            directionStopIdInts[directionIdOrDefault] = stopIdInt
-            directionAmPm[directionIdOrDefault] = firstAndLast
-        }
-        directionIdOrDefault = 0
-        findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { (headSign, stopIdInt, firstAndLast) ->
-            directionHeadSigns[directionIdOrDefault] = headSign
-            directionStopIdInts[directionIdOrDefault] = stopIdInt
-            directionAmPm[directionIdOrDefault] = firstAndLast
-        }
-        directionIdOrDefault = 1
-        findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, directionIdOrDefault, agencyTools)?.let { (headSign, stopIdInt, firstAndLast) ->
-            directionHeadSigns[directionIdOrDefault] = headSign
-            directionStopIdInts[directionIdOrDefault] = stopIdInt
-            directionAmPm[directionIdOrDefault] = firstAndLast
+        GDirectionId.values().forEach { gDirectionId ->
+            val directionId = gDirectionId.id
+            findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, gDirectionId.id, agencyTools)?.let { (headSign, stopIdInt, firstAndLast) ->
+                directionHeadSigns[directionId] = headSign
+                directionStopIdInts[directionId] = stopIdInt
+                directionAmPm[directionId] = firstAndLast
+            }
         }
         if (directionHeadSigns.size == 2 // AM/PM only if 2 directions
             && !agencyTools.directionHeadSignsDescriptive(directionHeadSigns)

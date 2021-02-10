@@ -91,13 +91,13 @@ public final class MTLog {
 
 	@Deprecated
 	public static void logFatal(@NotNull String format, @Nullable Object... args) {
-		log("FATAL ERROR: " + format + "\n", args);
+		log("FATAL ERROR: \n" + format + "\n", args);
 		System.exit(-1);
 	}
 
 	@Deprecated
 	public static void logFatal(@NotNull Throwable t, @NotNull String format, @Nullable Object... args) {
-		log("FATAL ERROR: " + format + "\n", args);
+		log("FATAL ERROR: \n" + format + "\n", args);
 		t.printStackTrace();
 		System.exit(-1);
 	}
@@ -105,13 +105,13 @@ public final class MTLog {
 	public static class Fatal extends RuntimeException {
 		public Fatal(@NotNull String format, @Nullable Object... args) {
 			super();
-			log("FATAL ERROR: " + format + "\n", args);
+			log("FATAL ERROR: \n" + format + "\n", args);
 			System.exit(-1);
 		}
 
 		public Fatal(@NotNull Throwable t, @NotNull String format, @Nullable Object... args) {
 			super();
-			log("FATAL ERROR: " + format + "\n", args);
+			log("FATAL ERROR: \n" + format + "\n", args);
 			t.printStackTrace();
 			System.exit(-1);
 		}

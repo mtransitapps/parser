@@ -48,6 +48,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		CommonsApp.setup(false);
 	}
 
+	protected static final boolean EXCLUDE = true;
+	private static final boolean KEEP = false;
+
 	private static final int MAX_NEXT_LOOKUP_IN_DAYS = 60;
 
 	private static final int MAX_LOOK_BACKWARD_IN_DAYS = 7;
@@ -159,14 +162,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean excludeAgencyNullable(@Nullable GAgency gAgency) {
 		if (gAgency == null) {
-			return true; // exclude
+			return EXCLUDE;
 		}
 		return excludeAgency(gAgency);
 	}
 
 	@Override
 	public boolean excludeAgency(@NotNull GAgency gAgency) {
-		return false; // keep
+		return KEEP;
 	}
 
 	@NotNull
@@ -224,7 +227,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean excludeRouteNullable(@Nullable GRoute gRoute) {
 		if (gRoute == null) {
-			return true; // exclude
+			return EXCLUDE;
 		}
 		return excludeRoute(gRoute);
 	}
@@ -240,9 +243,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		if (!GRouteType.isSameType(getAgencyRouteType(), gRoute.getRouteType())) {
 			MTLog.logDebug("Route excluded because of different type: %s != %s", getAgencyRouteType(), gRoute.toStringPlus());
-			return true; // exclude
+			return EXCLUDE;
 		}
-		return false; // keep
+		return KEEP;
 	}
 
 	@NotNull
@@ -287,6 +290,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return tripHeadsign;
 	}
 
+	@Override
+	public boolean directionSplitterEnabled() {
+		return false; // OPT-IN feature // WIP
+	}
+
 	@Deprecated
 	@NotNull
 	@Override
@@ -302,7 +310,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean directionFinderEnabled() {
-		return false; // OPT-IN feature // WIP
+		return false; // OPT-IN feature
 	}
 
 	@Override
@@ -428,14 +436,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean excludeTripNullable(@Nullable GTrip gTrip) {
 		if (gTrip == null) {
-			return true; // exclude
+			return EXCLUDE;
 		}
 		return excludeTrip(gTrip);
 	}
 
 	@Override
 	public boolean excludeTrip(@NotNull GTrip gTrip) {
-		return false; // keep
+		return KEEP;
 	}
 
 	@Override
@@ -510,14 +518,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean excludeStopNullable(@Nullable GStop gStop) {
 		if (gStop == null) {
-			return true; // exclude
+			return EXCLUDE;
 		}
 		return excludeStop(gStop);
 	}
 
 	@Override
 	public boolean excludeStop(@NotNull GStop gStop) {
-		return false; // keep
+		return KEEP;
 	}
 
 	@SuppressWarnings("unused")
@@ -1216,10 +1224,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 			boolean knownServiceId = gCalendar.isServiceIdInts(serviceIds);
 			//noinspection RedundantIfStatement
 			if (!knownServiceId) {
-				return true; // exclude
+				return EXCLUDE;
 			}
 		}
-		return false; // keep
+		return KEEP;
 	}
 
 	@Deprecated
@@ -1238,7 +1246,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (serviceIds != null) {
 			boolean knownServiceId = gCalendarDate.isServiceIdInts(serviceIds);
 			if (!knownServiceId) {
-				return true; // exclude
+				return EXCLUDE;
 			}
 		}
 		if (usefulPeriod != null) {
@@ -1247,11 +1255,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 						|| gCalendarDate.isAfter(usefulPeriod.endDate)) {
 					MTLog.log("Exclude calendar date \"%s\" because it's out of the useful period (start:%s|end:%s).", gCalendarDate,
 							usefulPeriod.startDate, usefulPeriod.endDate);
-					return true; // exclude
+					return EXCLUDE;
 				}
 			}
 		}
-		return false; // keep
+		return KEEP;
 	}
 
 	@Deprecated
@@ -1273,9 +1281,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 			boolean knownServiceId = gTrip.isServiceIdInts(serviceIds);
 			//noinspection RedundantIfStatement
 			if (!knownServiceId) {
-				return true; // exclude
+				return EXCLUDE;
 			}
 		}
-		return false; // keep
+		return KEEP;
 	}
 }

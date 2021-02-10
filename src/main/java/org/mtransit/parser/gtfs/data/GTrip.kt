@@ -9,7 +9,7 @@ data class GTrip(
     val routeIdInt: Int,
     val serviceIdInt: Int,
     val tripIdInt: Int,
-    val directionIdE: GDirectionId,
+    var directionIdE: GDirectionId,
     val tripHeadsign: String?, // Optional
     val tripShortName: String? // Optional
 ) {
@@ -29,10 +29,20 @@ data class GTrip(
         tripShortName
     )
 
-    val directionId: Int? = directionIdE.originalId() // optional
+    val directionId: Int?
+        get() = directionIdE.originalId() // optional
 
     @Suppress("unused")
-    val directionIdOrDefault: Int = directionIdE.id
+    val directionIdOrDefault: Int
+        get() = directionIdE.id
+
+    @Suppress("unused")
+    val directionIdOrOriginal: Int?
+        get() = directionIdE.originalId()
+
+    fun setDirectionId(newDirectionId: Int?) {
+        this.directionIdE = GDirectionId.parse(newDirectionId)
+    }
 
     @Suppress("unused")
     val tripHeadsignOrDefault: String = tripHeadsign ?: StringUtils.EMPTY

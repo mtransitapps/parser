@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 // https://developers.google.com/transit/gtfs/reference#FeedFiles
+@SuppressWarnings("RedundantSuppression")
 public class GSpec {
 
 	private static final boolean LOG_REMOVED = false;
@@ -137,6 +138,7 @@ public class GSpec {
 		this.stopIdIntStops.put(gStop.getStopIdInt(), gStop);
 	}
 
+	@SuppressWarnings("unused")
 	@Nullable
 	public GStop getStop(@NotNull String gStopId) {
 		return getStop(GIDs.getInt(gStopId));
@@ -157,9 +159,37 @@ public class GSpec {
 		this.tripsCount++;
 	}
 
+	public void updateTripDirectionId(@NotNull GDirectionId gDirectionId, @Nullable Collection<Integer> tripIdInts) {
+		updateTripDirectionId(gDirectionId.getId(), tripIdInts);
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	public void updateTripDirectionId(int directionId, @Nullable Collection<Integer> tripIdInts) {
+		if (tripIdInts == null) {
+			return;
+		}
+		List<Integer> routeIdInts = new ArrayList<>();
+		for (Integer tripIdInt : tripIdInts) {
+			routeIdInts.add(
+					getTripRouteId(tripIdInt)
+			);
+		}
+		for (Integer routeIdInt : routeIdInts) {
+			final ArrayList<GTrip> routeTrips = this.routeIdIntTrips.get(routeIdInt);
+			if (routeTrips != null) {
+				for (GTrip trip : routeTrips) {
+					if (tripIdInts.contains(trip.getTripIdInt())) {
+						trip.setDirectionId(directionId);
+					}
+				}
+			}
+		}
+	}
+
 	@Nullable
 	public GTrip getTrip(@NotNull Integer tripIdInt) {
-		ArrayList<GTrip> routeTrips = this.routeIdIntTrips.get(getTripRouteId(tripIdInt));
+		final Integer routeIdInt = getTripRouteId(tripIdInt);
+		final ArrayList<GTrip> routeTrips = this.routeIdIntTrips.get(routeIdInt);
 		if (routeTrips != null) {
 			for (GTrip trip : routeTrips) {
 				if (tripIdInt.equals(trip.getTripIdInt())) {
@@ -170,16 +200,23 @@ public class GSpec {
 		return null;
 	}
 
+	@Nullable
 	private Integer getTripRouteId(Integer tripIdInt) {
 		return this.tripIdIntRouteId.get(tripIdInt);
 	}
 
+	@Deprecated
 	@NotNull
 	public List<GTrip> getTrips(@Nullable Integer optRouteId) {
-		if (optRouteId != null) {
-			return this.routeIdIntTrips.get(optRouteId);
+		if (optRouteId == null) {
+			throw new MTLog.Fatal("getTrips() > trying to use ALL trips!");
 		}
-		throw new MTLog.Fatal("getTrips() > trying to use ALL trips!");
+		return getRouteTrips(optRouteId);
+	}
+
+	@NotNull
+	public List<GTrip> getRouteTrips(@NotNull Integer routeId) {
+		return this.routeIdIntTrips.get(routeId);
 	}
 
 	public void add(long mRouteId, @NotNull GenerateMObjectsTask routeGenerator) {
@@ -188,6 +225,12 @@ public class GSpec {
 
 	public void remove(long mRouteId) {
 		this.routeGenerators.remove(mRouteId);
+	}
+
+	@NotNull
+	public List<GStopTime> getStopTimes(@NotNull Long mRouteId,
+										@NotNull Integer gTripIdInt) {
+		return getStopTimes(mRouteId, gTripIdInt, null, null);
 	}
 
 	@NotNull

@@ -47,8 +47,8 @@ object GIDs {
 
     @Suppress("unused")
     @JvmStatic
-    fun toStringPlus(integers: Iterable<Int>): String {
-        return integers.joinToString { toStringPlus(it) }
+    fun toStringPlus(integers: Iterable<Int?>?): String {
+        return integers?.joinToString { toStringPlus(it) } ?: EMPTY
     }
 
     @Suppress("unused")

@@ -9,6 +9,9 @@ enum class GDirectionId(val id: Int) {
     OUTBOUND(0),
     INBOUND(1),
 
+    NEW_1(19),
+    NEW_2(29),
+
     NONE(9);
 
     fun originalId(): Int? {
@@ -24,6 +27,8 @@ enum class GDirectionId(val id: Int) {
             return when (id) {
                 OUTBOUND.id -> OUTBOUND
                 INBOUND.id -> INBOUND
+                NEW_1.id -> NEW_1
+                NEW_2.id -> NEW_2
                 NONE.id -> NONE // default
                 else -> throw MTLog.Fatal("Unexpected direction ID '$id' to parse!")
             }

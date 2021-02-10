@@ -95,7 +95,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		final GSpec routeGTFS = this.globalGTFS.getRouteGTFS(this.routeId);
 		List<Integer> routeTripsIntIds = new ArrayList<>();
 		for (GRoute gRoute : routeGTFS.getRoutes(this.routeId)) {
-			List<GTrip> routeTrips = routeGTFS.getTrips(gRoute.getRouteIdInt());
+			List<GTrip> routeTrips = routeGTFS.getRouteTrips(gRoute.getRouteIdInt());
 			for (GTrip gTrip : routeTrips) {
 				routeTripsIntIds.add(gTrip.getTripIdInt());
 			}
@@ -315,11 +315,14 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		boolean tripKeptNonDescriptiveHeadsign;
 		final ArrayList<GRoute> gRoutes = routeGTFS.getRoutes(this.routeId);
 		Map<Integer, String> gDirectionHeadSigns = null;
+		if (this.agencyTools.directionSplitterEnabled()) {
+			MDirectionSplitter.splitDirection(this.routeId, gRoutes, routeGTFS);
+		}
 		if (this.agencyTools.directionFinderEnabled()) {
 			List<GTrip> gRouteTrips = new ArrayList<>();
 			for (GRoute gRoute : gRoutes) {
 				if (this.agencyTools.directionFinderEnabled(this.routeId, gRoute)) {
-					gRouteTrips.addAll(routeGTFS.getTrips(gRoute.getRouteIdInt()));
+					gRouteTrips.addAll(routeGTFS.getRouteTrips(gRoute.getRouteIdInt()));
 				}
 			}
 			gDirectionHeadSigns = MDirectionHeadSignFinder.findDirectionHeadSigns(this.routeId, gRouteTrips, routeGTFS, this.agencyTools);
@@ -369,8 +372,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					headsignTypeString = true;
 				}
 			}
-			//noinspection unused,MismatchedQueryAndUpdateOfCollection
-			HashSet<String> mTripStopHeadsignStrings = new HashSet<>(mTripStopTimesHeadsign.values());
+			// HashSet<String> mTripStopHeadsignStrings = new HashSet<>(mTripStopTimesHeadsign.values());
 			tripKeptNonDescriptiveHeadsign = false; // 1 trip can keep the same non descriptive head sign
 			if (headsignTypeString && mTripHeadsignStrings.size() != mTrips.size()) {
 				MTLog.log("%s: Non descriptive trip headsigns (%s different headsign(s) for %s trips)", this.routeId, mTripHeadsignStrings.size(), mTrips.size());
@@ -439,7 +441,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Integer tripServiceIdInt;
 		HashMap<Long, String> splitTripStopTimesHeadsign;
 		final List<GTrip> gRouteTrips = GTrip.longestFirst(
-				routeGTFS.getTrips(gRoute.getRouteIdInt()),
+				routeGTFS.getRouteTrips(gRoute.getRouteIdInt()),
 				this.routeTripIdTripStops::get
 		);
 		//noinspection deprecation

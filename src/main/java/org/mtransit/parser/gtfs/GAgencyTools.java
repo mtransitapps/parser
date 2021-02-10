@@ -72,6 +72,8 @@ public interface GAgencyTools {
 	@NotNull
 	String cleanTripHeadsign(@NotNull String tripHeadsign);
 
+	boolean directionSplitterEnabled();
+
 	@Deprecated
 	@NotNull
 	String cleanDirectionHeadsign(@NotNull String directionHeadSign);

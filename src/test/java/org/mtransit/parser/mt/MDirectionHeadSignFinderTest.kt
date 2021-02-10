@@ -22,13 +22,16 @@ import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTime
 import org.mtransit.parser.gtfs.data.GTrip
 
-const val RID = 1L
-const val RIDS = "route_id"
-
-const val TSN = "trip short name"
 
 @RunWith(MockitoJUnitRunner::class)
 class MDirectionHeadSignFinderTest {
+
+    companion object {
+        const val RID = 1L
+        const val RIDS = "route_id"
+
+        const val TSN = "trip short name"
+    }
 
     @Mock
     private lateinit var routeGTFS: GSpec

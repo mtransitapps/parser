@@ -198,7 +198,7 @@ public class SplitUtils {
 		HashSet<ArrayList<Pair<Integer, Integer>>> gTripStopsS2 = new HashSet<>();
 		HashMap<Integer, String> firstLastStopIdIntsName = new HashMap<>();
 		for (GRoute gRoute : routeGTFS.getRoutes(mRouteId)) {
-			for (GTrip gTrip : routeGTFS.getTrips(gRoute.getRouteIdInt())) {
+			for (GTrip gTrip : routeGTFS.getRouteTrips(gRoute.getRouteIdInt())) {
 				ArrayList<Pair<Integer, Integer>> gTripStops = new ArrayList<>();
 				try {
 					List<GStopTime> stopTimes = routeGTFS.getStopTimes(mRouteId, gTrip.getTripIdInt(), null, null);
