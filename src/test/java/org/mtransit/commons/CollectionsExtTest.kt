@@ -11,7 +11,7 @@ class CollectionsExtTest {
         val mainList = listOf("00", "01", "02", "03", "04", "05", "06", "07", "08", "09")
         val otherList = listOf("00", "01", "02", "03", "04", "05", "06", "07", "08", "99")
         // Act
-        val result = mainList.matchList(otherList) > 0.9f
+        val result = mainList.matchList(otherList) >= 0.9f
         // Assert
         assertEquals(true, result)
     }
@@ -22,7 +22,7 @@ class CollectionsExtTest {
         val mainList = listOf("00", "01", "02", "03", "04", "05", "06", "07", "08", "09")
         val otherList = listOf("00", "01", "02", "03", "04", "05", "06", "07", "08", "999999999999999999999")
         // Act
-        val result = mainList.matchList(otherList) > 0.9f
+        val result = mainList.matchList(otherList) >= 0.9f
         // Assert
         assertEquals(true, result)
     }
@@ -33,7 +33,7 @@ class CollectionsExtTest {
         val mainList = listOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
         val otherList = listOf(0, 1, 2, 3, 4, 5, 6)
         // Act
-        val result = mainList.matchList(otherList) > 0.9f
+        val result = mainList.matchList(otherList) >= 0.9f
         // Assert
         assertEquals(true, result)
     }
@@ -44,7 +44,7 @@ class CollectionsExtTest {
         val mainList = listOf(0, 1, 2, 3, 4, 5, 6)
         val otherList = listOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
         // Act
-        val result = mainList.matchList(otherList) > 0.9f
+        val result = mainList.matchList(otherList) >= 0.9f
         // Assert
         assertEquals(false, result)
     }
@@ -55,7 +55,7 @@ class CollectionsExtTest {
         val mainList = listOf("00", "01", "02", "03", "04", "05", "06", "07", "08", "09")
         val otherList = listOf("03", "04", "05", "06", "77")
         // Act
-        val result = mainList.matchList(otherList) > 0.80f
+        val result = mainList.matchList(otherList) >= 0.80f
         // Assert
         assertEquals(true, result)
     }
@@ -66,7 +66,7 @@ class CollectionsExtTest {
         val mainList = listOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
         val otherList = listOf(3, 4, 5, 6, 77).reversed()
         // Act
-        val result = mainList.matchList(otherList) > 0.80f
+        val result = mainList.matchList(otherList) >= 0.80f
         // Assert
         assertEquals(false, result)
     }
