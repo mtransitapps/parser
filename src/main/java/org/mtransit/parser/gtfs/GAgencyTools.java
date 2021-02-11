@@ -33,7 +33,12 @@ public interface GAgencyTools {
 
 	int getThreadPoolSize();
 
+	boolean defaultExcludeEnabled();
+
 	boolean excludingAll();
+
+	@NotNull
+	String getAgencyName();
 
 	@NotNull
 	String getAgencyColor();
@@ -57,6 +62,9 @@ public interface GAgencyTools {
 	@NotNull
 	String getRouteLongName(@NotNull GRoute gRoute);
 
+	@NotNull
+	String cleanRouteLongName(@NotNull String routeLongName);
+
 	boolean mergeRouteLongName(@NotNull MRoute mRoute, @NotNull MRoute mRouteToMerge);
 
 	@Nullable
@@ -73,6 +81,8 @@ public interface GAgencyTools {
 	String cleanTripHeadsign(@NotNull String tripHeadsign);
 
 	boolean directionSplitterEnabled();
+
+	boolean directionSplitterEnabled(long routeId);
 
 	@Deprecated
 	@NotNull

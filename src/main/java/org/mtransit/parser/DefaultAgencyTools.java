@@ -23,6 +23,7 @@ import org.mtransit.parser.gtfs.data.GTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.MGenerator;
+import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSpec;
@@ -48,8 +49,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 		CommonsApp.setup(false);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	protected static final boolean EXCLUDE = true;
-	private static final boolean KEEP = false;
+	@SuppressWarnings("WeakerAccess")
+	protected static final boolean KEEP = false;
 
 	private static final int MAX_NEXT_LOOKUP_IN_DAYS = 60;
 
@@ -116,15 +119,21 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	public static void main(@NotNull String[] args) {
-		new DefaultAgencyTools().start(args);
+		throw new MTLog.Fatal("NEED TO IMPLEMENT MAIN METHOD"); // UNTIL WE HAVE JSON CONFIG FILE
 	}
 
+	@Nullable
+	private HashSet<Integer> serviceIdInts;
+
 	public void start(@NotNull String[] args) {
+		MTLog.log("Generating %s data...", getAgencyLabel());
+		if (defaultExcludeEnabled()) {
+			this.serviceIdInts = extractUsefulServiceIdInts(args, this, true);
+		}
 		if (excludingAll()) {
 			MGenerator.dumpFiles(this, null, args[0], args[1], args[2], true);
 			return;
 		}
-		MTLog.log("Generating agency data...");
 		long start = System.currentTimeMillis();
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false, false);
 		gtfs.cleanupExcludedData();
@@ -139,11 +148,47 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return; // DEBUG
 		}
 		MGenerator.dumpFiles(this, mSpec, args[0], args[1], args[2]);
-		MTLog.log("Generating agency data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		MTLog.log("Generating %s data... DONE in %s.", getAgencyLabel(), Utils.getPrettyDuration(System.currentTimeMillis() - start));
+	}
+
+	@NotNull
+	private String getAgencyLabel() {
+		return getAgencyName() + " " + getAgencyType();
+	}
+
+	@NotNull
+	public String getAgencyName() {
+		return "Agency Name";
+	}
+
+	@NotNull
+	private String getAgencyType() {
+		final int type = getAgencyRouteType();
+		if (type == MAgency.ROUTE_TYPE_LIGHT_RAIL) {
+			return "light rail";
+		} else if (type == MAgency.ROUTE_TYPE_SUBWAY) {
+			return "subway";
+		} else if (type == MAgency.ROUTE_TYPE_TRAIN) {
+			return "train";
+		} else if (type == MAgency.ROUTE_TYPE_BUS) {
+			return "bus";
+		} else if (type == MAgency.ROUTE_TYPE_FERRY) {
+			return "ferry";
+		}
+		MTLog.log("Unexpected route type '%s'!", type);
+		return "type";
+	}
+
+	@Override
+	public boolean defaultExcludeEnabled() {
+		return false; // OPT-IN feature
 	}
 
 	@Override
 	public boolean excludingAll() {
+		if (defaultExcludeEnabled()) {
+			return this.serviceIdInts != null && this.serviceIdInts.isEmpty();
+		}
 		throw new MTLog.Fatal("NEED TO IMPLEMENT EXCLUDE ALL");
 	}
 
@@ -200,10 +245,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String getRouteLongName(@NotNull GRoute gRoute) {
-		if (org.mtransit.commons.StringUtils.isEmpty(gRoute.getRouteLongName())) {
-			throw new MTLog.Fatal("No default route long name for %s!", gRoute);
+		return cleanRouteLongName(gRoute.getRouteLongNameOrDefault());
+	}
+
+	@NotNull
+	@Override
+	public String cleanRouteLongName(@NotNull String routeLongName) {
+		if (org.mtransit.commons.StringUtils.isEmpty(routeLongName)) {
+			throw new MTLog.Fatal("No default route long name for %s!", routeLongName);
 		}
-		return org.mtransit.commons.CleanUtils.cleanLabel(gRoute.getRouteLongNameOrDefault());
+		return org.mtransit.commons.CleanUtils.cleanLabel(routeLongName);
 	}
 
 	@Override
@@ -271,6 +322,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
+		if (directionFinderEnabled()) {
+			mTrip.setHeadsignString(
+					cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
+					gTrip.getDirectionIdOrDefault()
+			);
+			return;
+		}
 		if (gTrip.getDirectionId() == null || gTrip.getDirectionId() < 0 || gTrip.getDirectionId() > 1) {
 			throw new MTLog.Fatal("Default agency implementation required 'direction_id' field in 'trips.txt'!");
 		}
@@ -293,6 +351,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean directionSplitterEnabled() {
 		return false; // OPT-IN feature // WIP
+	}
+
+	@Override
+	public boolean directionSplitterEnabled(long routeId) {
+		return directionSplitterEnabled();
 	}
 
 	@Deprecated
@@ -424,6 +487,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge) {
+		if (directionFinderEnabled()) {
+			throw new MTLog.Fatal("Unexpected trips to merge: %s & %s!", mTrip, mTripToMerge);
+		}
 		return mTrip.mergeHeadsignValue(mTripToMerge);
 	}
 
@@ -443,16 +509,31 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeTrip(@NotNull GTrip gTrip) {
+		if (defaultExcludeEnabled()) {
+			if (this.serviceIdInts != null) {
+				return excludeUselessTripInt(gTrip, this.serviceIdInts);
+			}
+		}
 		return KEEP;
 	}
 
 	@Override
 	public boolean excludeCalendarDate(@NotNull GCalendarDate gCalendarDate) {
+		if (defaultExcludeEnabled()) {
+			if (this.serviceIdInts != null) {
+				return excludeUselessCalendarDateInt(gCalendarDate, this.serviceIdInts);
+			}
+		}
 		return false;
 	}
 
 	@Override
 	public boolean excludeCalendar(@NotNull GCalendar gCalendar) {
+		if (defaultExcludeEnabled()) {
+			if (this.serviceIdInts != null) {
+				return excludeUselessCalendarInt(gCalendar, this.serviceIdInts);
+			}
+		}
 		return false;
 	}
 
@@ -1219,6 +1300,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return excludeUselessCalendarInt(gCalendar, serviceIds);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	protected static boolean excludeUselessCalendarInt(@NotNull GCalendar gCalendar, @Nullable HashSet<Integer> serviceIds) {
 		if (serviceIds != null) {
 			boolean knownServiceId = gCalendar.isServiceIdInts(serviceIds);
@@ -1242,6 +1324,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return excludeUselessCalendarDateInt(gCalendarDate, serviceIds);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	protected static boolean excludeUselessCalendarDateInt(@NotNull GCalendarDate gCalendarDate, @Nullable HashSet<Integer> serviceIds) {
 		if (serviceIds != null) {
 			boolean knownServiceId = gCalendarDate.isServiceIdInts(serviceIds);
@@ -1275,6 +1358,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return excludeUselessTripInt(gTrip, serviceIds);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	protected static boolean excludeUselessTripInt(@NotNull GTrip gTrip,
 												   @Nullable HashSet<Integer> serviceIds) {
 		if (serviceIds != null) {

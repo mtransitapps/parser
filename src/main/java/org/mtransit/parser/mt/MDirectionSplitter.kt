@@ -3,7 +3,6 @@ package org.mtransit.parser.mt
 import org.mtransit.commons.containsExactList
 import org.mtransit.commons.intersectWithOrder
 import org.mtransit.commons.matchList
-import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.data.GDirectionId
 import org.mtransit.parser.gtfs.data.GIDs
@@ -154,15 +153,15 @@ object MDirectionSplitter {
             }
             throw MTLog.Fatal(
                 "$routeId: Unresolved situation! \n" +
-                        "- ?: ${GIDs.toStringPlus(gTripIdInt)}: \n" +
-                        "${GIDs.toStringPlus(gStopIdInts)} \n" +
-                        " - ${directionsCandidates.size} RESULT: \n" +
+                        "- ?: Trips: ${GIDs.toStringPlus(gTripIdInt)}: \n" +
+                        "Stops: ${GIDs.toStringPlus(gStopIdInts)} \n" +
+                        " - ${directionsCandidates.size} candidates: \n" +
                         "---------- \n" +
-                        "- 0: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.first)}: \n" +
-                        "${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.second)} \n" +
+                        "- 0: Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.first)}: \n" +
+                        "Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.second)} \n" +
                         "---------- \n" +
-                        "- 1: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.first)}: \n" +
-                        "${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.second)}: \n" +
+                        "- 1 Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.first)}: \n" +
+                        "Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.second)}: \n" +
                         "---------- \n" +
                         "!"
             )

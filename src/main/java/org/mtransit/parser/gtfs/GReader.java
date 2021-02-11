@@ -416,7 +416,7 @@ public class GReader {
 
 	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			String routeColor = line.get(GRoute.ROUTE_COLOR);
+			final String routeColor = line.get(GRoute.ROUTE_COLOR);
 			GRoute gRoute = new GRoute(
 					line.get(GRoute.AGENCY_ID),
 					line.get(GRoute.ROUTE_ID),
