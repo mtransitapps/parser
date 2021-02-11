@@ -37,10 +37,10 @@ object MDirectionHeadSignFinder {
         val directionAmPm = mutableMapOf<Int, Pair<Int, Int>?>()
         GDirectionId.values().forEach { gDirectionId ->
             val directionId = gDirectionId.id
-            findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, gDirectionId.id, agencyTools)?.let { (headSign, stopIdInt, firstAndLast) ->
+            findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, gDirectionId.id, agencyTools)?.let { (headSign, stopIdInt, first, last) ->
                 directionHeadSigns[directionId] = headSign
                 directionStopIdInts[directionId] = stopIdInt
-                directionAmPm[directionId] = firstAndLast
+                directionAmPm[directionId] = first to last
             }
         }
         if (directionHeadSigns.size == 2 // AM/PM only if 2 directions
@@ -111,7 +111,7 @@ object MDirectionHeadSignFinder {
         routeGTFS: GSpec,
         directionId: Int,
         agencyTools: GAgencyTools
-    ): Triple<String, Int, Pair<Int, Int>?>? {
+    ): DirectionResult? {
         val gTripsHeadSignAndStopTimes = gRouteTrips
             .filter { gTrip ->
                 gTrip.directionIdOrDefault == directionId
@@ -132,14 +132,14 @@ object MDirectionHeadSignFinder {
         }
         val tripHeadSignAndLastStopIdInt = gTripsHeadSignAndStopTimes
             .map { (headSign, stopTimes) ->
-                Triple(headSign, stopTimes.last().stopIdInt, stopTimes.first().departureTime to stopTimes.last().arrivalTime)
+                DirectionResult(headSign, stopTimes)
             }
         val distinctTripHeadSignAndLastStopIdInt = tripHeadSignAndLastStopIdInt
-            .groupBy { it.first to it.second }
+            .groupBy { it.headSign to it.lastStopIdInt }
             .mapValues { (_, values) ->
                 val listOfTimes = values
                     .flatMap {
-                        listOf(it.third.first, it.third.second)
+                        listOf(it.firstTime, it.lastTime)
                     }
                 Pair(
                     listOfTimes.minOrNull() ?: 990000,
@@ -147,27 +147,27 @@ object MDirectionHeadSignFinder {
                 )
             }
             .map {
-                Triple(it.key.first, it.key.second, it.value)
+                DirectionResult(it.key.first, it.key.second, it.value.first, it.value.second)
             }
         if (distinctTripHeadSignAndLastStopIdInt.size == 1) {
-            MTLog.log("$routeId: $directionId: 1 distinct trip head-sign: '${distinctTripHeadSignAndLastStopIdInt.first().first}'.")
+            MTLog.log("$routeId: $directionId: 1 distinct trip head-sign: '${distinctTripHeadSignAndLastStopIdInt.first().headSign}'.")
             return distinctTripHeadSignAndLastStopIdInt.first()
         } else if (distinctTripHeadSignAndLastStopIdInt.size == 2) {
-            val stopTimesHeadSignAndLastStopId1 = tripHeadSignAndLastStopIdInt.first { it.first == distinctTripHeadSignAndLastStopIdInt[0].first }
-            val stopTimesHeadSignAndLastStopId2 = tripHeadSignAndLastStopIdInt.first { it.first == distinctTripHeadSignAndLastStopIdInt[1].first }
-            val selectedHeadSign = agencyTools.selectDirectionHeadSign(stopTimesHeadSignAndLastStopId1.first, stopTimesHeadSignAndLastStopId2.first)
+            val stopTimesHeadSignAndLastStopId1 = tripHeadSignAndLastStopIdInt.first { it.headSign == distinctTripHeadSignAndLastStopIdInt[0].headSign }
+            val stopTimesHeadSignAndLastStopId2 = tripHeadSignAndLastStopIdInt.first { it.headSign == distinctTripHeadSignAndLastStopIdInt[1].headSign }
+            val selectedHeadSign = agencyTools.selectDirectionHeadSign(stopTimesHeadSignAndLastStopId1.headSign, stopTimesHeadSignAndLastStopId2.headSign)
             selectedHeadSign?.let { selectedHeadSignNN ->
-                if (selectedHeadSignNN == stopTimesHeadSignAndLastStopId1.first) {
-                    MTLog.log("$routeId: $directionId: merge w/ head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId1.first}'")
+                if (selectedHeadSignNN == stopTimesHeadSignAndLastStopId1.headSign) {
+                    MTLog.log("$routeId: $directionId: merge w/ head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId1.headSign}'")
                     return stopTimesHeadSignAndLastStopId1
-                } else if (selectedHeadSignNN == stopTimesHeadSignAndLastStopId2.first) {
-                    MTLog.log("$routeId: $directionId: merge w/ head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId2.first}'")
+                } else if (selectedHeadSignNN == stopTimesHeadSignAndLastStopId2.headSign) {
+                    MTLog.log("$routeId: $directionId: merge w/ head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId2.headSign}'")
                     return stopTimesHeadSignAndLastStopId2
                 }
             }
         }
         val tripHeadSignAndLastStopCounts = tripHeadSignAndLastStopIdInt
-            .map { it.first to it.second }
+            .map { it.headSign to it.lastStopIdInt }
             .groupingBy { it }
             .eachCount()
         // 1- first round of easy merging of trips not branching
@@ -220,11 +220,7 @@ object MDirectionHeadSignFinder {
         if (distinctTripHeadSignAndStopTimes.size == 1) {
             distinctTripHeadSignAndStopTimes.first().let { (tripHeadSign, tripStopTimes) ->
                 MTLog.log("$routeId: $directionId: 1 distinct merged trip: '$tripHeadSign'.")
-                return Triple(
-                    tripHeadSign,
-                    tripStopTimes.last().stopIdInt,
-                    tripStopTimes.first().departureTime to tripStopTimes.last().arrivalTime
-                )
+                return DirectionResult(tripHeadSign, tripStopTimes)
             }
         }
         // starting complex merge
@@ -268,7 +264,7 @@ object MDirectionHeadSignFinder {
         }
         return candidateHeadSignAndStopTimes?.let { (tripHeadSign, tripStopTimes) ->
             MTLog.log("$routeId: $directionId: complex merge candidate found: '$tripHeadSign'.")
-            Triple(tripHeadSign, tripStopTimes.last().stopIdInt, tripStopTimes.first().departureTime to tripStopTimes.last().arrivalTime)
+            DirectionResult(tripHeadSign, tripStopTimes)
         } ?: throw MTLog.Fatal("$routeId: $directionId: no candidate after complex merge!")
     }
 

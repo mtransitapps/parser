@@ -89,7 +89,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals(sameHeadSign, result?.first)
+        assertEquals(sameHeadSign, result?.headSign)
     }
 
     @Test
@@ -113,7 +113,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("trip head-sign 2", result?.first)
+        assertEquals("trip head-sign 2", result?.headSign)
     }
 
     @Test
@@ -137,7 +137,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("trip head-sign", result?.first)
+        assertEquals("trip head-sign", result?.headSign)
     }
 
     @Test
@@ -161,7 +161,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("trip head-sign", result?.first)
+        assertEquals("trip head-sign", result?.headSign)
     }
 
     @Test
@@ -185,7 +185,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("trip head-sign", result?.first)
+        assertEquals("trip head-sign", result?.headSign)
     }
 
     @Test
@@ -215,7 +215,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("trip head-sign", result?.first)
+        assertEquals("trip head-sign", result?.headSign)
     }
 
     @Test
@@ -245,7 +245,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("trip head-sign S", result?.first)
+        assertEquals("trip head-sign S", result?.headSign)
     }
 
     @Test
@@ -283,7 +283,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("trip head-sign", result?.first)
+        assertEquals("trip head-sign", result?.headSign)
     }
 
     @Test
@@ -328,7 +328,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("trip head-sign", result?.first)
+        assertEquals("trip head-sign", result?.headSign)
     }
 
     @Test
@@ -428,7 +428,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("foo foo / trip head-sign", result?.first)
+        assertEquals("foo foo / trip head-sign", result?.headSign)
     }
 
     @Test
@@ -479,7 +479,7 @@ class MDirectionHeadSignFinderTest {
         if (true) {
             return // TODO ? other stops can be same transit hub, does NOT mean anything if not checking distance/*fix
         }
-        assertEquals("trip head-sign", result?.first)
+        assertEquals("trip head-sign", result?.headSign)
     }
 
     @Test
@@ -534,7 +534,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("trip head-sign", result?.first)
+        assertEquals("trip head-sign", result?.headSign)
     }
 
     @Test
@@ -568,7 +568,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("trip head-sign", result?.first)
+        assertEquals("trip head-sign", result?.headSign)
     }
 
     @Test
@@ -600,7 +600,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("foo foo / trip head-sign", result?.first)
+        assertEquals("foo foo / trip head-sign", result?.headSign)
     }
 
     @Test
@@ -632,7 +632,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals(true, result?.third?.let { GTime.areAM(it) } ?: false)
+        assertEquals(true, result?.firstAndLast?.let { GTime.areAM(it) } ?: false)
     }
 
     @Test
@@ -664,7 +664,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals(true, result?.third?.let { GTime.arePM(it) } ?: false)
+        assertEquals(true, result?.firstAndLast?.let { GTime.arePM(it) } ?: false)
     }
 
     @Test
@@ -696,8 +696,8 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals(false, result?.third?.let { GTime.areAM(it) } ?: false)
-        assertEquals(false, result?.third?.let { GTime.arePM(it) } ?: false)
+        assertEquals(false, result?.firstAndLast?.let { GTime.areAM(it) } ?: false)
+        assertEquals(false, result?.firstAndLast?.let { GTime.arePM(it) } ?: false)
     }
 
     @Test
@@ -729,8 +729,8 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals(false, result?.third?.let { GTime.areAM(it) } ?: false)
-        assertEquals(false, result?.third?.let { GTime.arePM(it) } ?: false)
+        assertEquals(false, result?.firstAndLast?.let { GTime.areAM(it) } ?: false)
+        assertEquals(false, result?.firstAndLast?.let { GTime.arePM(it) } ?: false)
     }
 
     @Test
@@ -762,8 +762,8 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals(false, result?.third?.let { GTime.areAM(it) } ?: false)
-        assertEquals(false, result?.third?.let { GTime.arePM(it) } ?: false)
+        assertEquals(false, result?.firstAndLast?.let { GTime.areAM(it) } ?: false)
+        assertEquals(false, result?.firstAndLast?.let { GTime.arePM(it) } ?: false)
     }
 
     @Test
@@ -795,8 +795,8 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals(false, result?.third?.let { GTime.areAM(it) } ?: false)
-        assertEquals(false, result?.third?.let { GTime.arePM(it) } ?: false)
+        assertEquals(false, result?.firstAndLast?.let { GTime.areAM(it) } ?: false)
+        assertEquals(false, result?.firstAndLast?.let { GTime.arePM(it) } ?: false)
     }
 
     private fun makeStopTimeList(
