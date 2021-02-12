@@ -49,6 +49,69 @@ fun <T> Iterable<T>.containsExactList(otherIt: Iterable<T>): Boolean {
         )
 }
 
+fun <T> Iterable<T>.overlap(otherIt: Iterable<T>): Boolean {
+    if (this.count() == 0 || otherIt.count() == 0) {
+        return false
+    }
+    val intersect = this.intersect(otherIt)
+    if (intersect.isEmpty()) {
+        return false
+    }
+    val startE = intersect.first()
+    var thisIdx = this.indexOf(startE)
+    if (thisIdx == -1) {
+        return false // no overlap
+    }
+    val thisSize = this.count()
+    var otherIdx = otherIt.indexOf(startE)
+    if (otherIdx == -1) {
+        return false // no overlap
+    }
+    val startOtherIdx = otherIdx
+    val otherSize = otherIt.count()
+    var thisCheckCount = 0
+    var otherCheckCount = 0
+    var thisLastItem: T? = null
+    var otherLastItem: T? = null
+    while (thisCheckCount < thisSize && otherCheckCount < otherSize) {
+        val thisItem = this.elementAt(thisIdx)
+        if (thisLastItem == thisItem) {
+            thisCheckCount++
+            thisIdx = thisIdx.inc().coerceAtMostTo(thisSize - 1, 0)
+            continue // looking for different value
+        }
+        val otherItem = otherIt.elementAt(otherIdx)
+        if (otherLastItem == otherItem) {
+            otherCheckCount++
+            otherIdx = otherIdx.inc().coerceAtMostTo(otherSize - 1, 0)
+            continue // looking for different value
+        }
+        thisLastItem = thisItem // this item used
+        if (otherIdx == 0
+            && thisItem != otherItem
+        ) {
+            thisCheckCount++
+            thisIdx = thisIdx.inc().coerceAtMostTo(thisSize - 1, 0)
+            continue // looking for next match in this
+        }
+        otherLastItem = otherItem // other item used
+        if (thisItem != otherItem) {
+            return false
+        }
+        thisCheckCount++
+        thisIdx = thisIdx.inc().coerceAtMostTo(thisSize - 1, 0)
+        otherCheckCount++
+        otherIdx = otherIdx.inc().coerceAtMostTo(otherSize - 1, 0)
+        if (otherIdx == startOtherIdx) {
+            break // finish traversing other, incomplete loop overlap
+        }
+    }
+    if (otherSize != otherCheckCount) {
+        return false
+    }
+    return true
+}
+
 fun <T> Iterable<T>.matchList(otherIt: Iterable<T>): Float {
     val stringLength: Int = this.union(otherIt).maxOf { it.toString().length }
     val intersect = this.intersect(otherIt)

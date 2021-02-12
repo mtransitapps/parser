@@ -6,6 +6,17 @@ import org.junit.Test
 class CollectionsExtTest {
 
     @Test
+    fun testContainsExactList() {
+        // Arrange
+        val mainList = listOf("00", "01", "022222222222", "03", "04", "05", "06", "07", "08", "09")
+        val otherList = listOf("00", "01", "022222222222", "03", "04", "05")
+        // Act
+        val result = mainList.containsExactList(otherList)
+        // Assert
+        assertEquals(true, result)
+    }
+
+    @Test
     fun testIterableContainsListMatchPt_90() {
         // Arrange
         val mainList = listOf("00", "01", "02", "03", "04", "05", "06", "07", "08", "09")
@@ -115,4 +126,49 @@ class CollectionsExtTest {
         assertEquals(0, result.size)
     }
 
+    @Test
+    fun testIterable_Overlap_CompleteLoops() {
+        // Arrange
+        val mainList = listOf("00", "01", "02", "03", "04", "05", "06", "07", "08", "09")
+        val otherList = listOf("05", "06", "07", "08", "09", "00", "01", "02", "03", "04")
+        // Act
+        val result = mainList.overlap(otherList)
+        // Assert
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun testIterable_Overlap_From_Middle() {
+        // Arrange
+        val mainList = listOf("00", "01", "02", "03", "04", "05", "06", "07", "08", "09")
+        val otherList = listOf("05", "06", "07", "08", "09")
+        // Act
+        val result = mainList.overlap(otherList)
+        // Assert
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun testIterable_Overlap_From_Middle_And_ReStartPartially() {
+        // Arrange
+        val mainList = listOf("00", "01", "02", "03", "04", "05", "06", "07", "08", "09")
+        val otherList = listOf("05", "06", "07", "08", "09", "00", "01", "02")
+        // Act
+        val result = mainList.overlap(otherList)
+        // Assert
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun testIterable_Overlap_CompleteLoops_First_Middle_Last_Repeat() {
+        // Arrange
+        val ones = "11"
+        val twos = "22"
+        val mainList = listOf(ones, "00", "01", "02", "03", "04", twos, "05", "06", "07", "08", "09", ones)
+        val otherList = listOf(twos, "05", "06", "07", "08", "09", ones, "00", "01", "02", "03", "04", twos)
+        // Act
+        val result = mainList.overlap(otherList)
+        // Assert
+        assertEquals(true, result)
+    }
 }

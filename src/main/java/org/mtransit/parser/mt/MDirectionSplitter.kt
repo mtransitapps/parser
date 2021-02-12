@@ -3,6 +3,7 @@ package org.mtransit.parser.mt
 import org.mtransit.commons.containsExactList
 import org.mtransit.commons.intersectWithOrder
 import org.mtransit.commons.matchList
+import org.mtransit.commons.overlap
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.data.GDirectionId
 import org.mtransit.parser.gtfs.data.GIDs
@@ -34,16 +35,16 @@ object MDirectionSplitter {
         MTLog.log("$routeId: Inferred ${directionsCandidates.size} trip direction(s)")
         when (directionsCandidates.size) {
             1 -> {
-                routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, directionsCandidates[0].first)
+                routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, directionsCandidates[0].tripIdInts)
             }
             2 -> {
-                val (direction0, direction1) = if (directionsCandidates[0].second.sum() > directionsCandidates[1].second.sum()) {
+                val (direction0, direction1) = if (directionsCandidates[0].stopIdInts.sum() > directionsCandidates[1].stopIdInts.sum()) {
                     GDirectionId.NEW_2 to GDirectionId.NEW_1
                 } else {
                     GDirectionId.NEW_1 to GDirectionId.NEW_2
                 }
-                routeGTFS.updateTripDirectionId(direction0, directionsCandidates[0].first)
-                routeGTFS.updateTripDirectionId(direction1, directionsCandidates[1].first)
+                routeGTFS.updateTripDirectionId(direction0, directionsCandidates[0].tripIdInts)
+                routeGTFS.updateTripDirectionId(direction1, directionsCandidates[1].tripIdInts)
             }
             else -> {
                 throw MTLog.Fatal("$routeId: Unexpected number (${directionsCandidates.size}) of results !")
@@ -55,8 +56,8 @@ object MDirectionSplitter {
     fun splitDirections(
         routeId: Long,
         gTripIdIntStopIdInts: List<Pair<Int, List<Int>>>
-    ): MutableList<Pair<MutableList<Int>, MutableList<Int>>> {
-        val directionsCandidates = mutableListOf<Pair<MutableList<Int>, MutableList<Int>>>()
+    ): MutableList<DirectionTripsStops> {
+        val directionsCandidates = mutableListOf<DirectionTripsStops>()
 
         for ((gTripIdInt, gStopIdInts) in gTripIdIntStopIdInts) {
             // LOOK FOR PERFECT EXACT MATCH
@@ -81,15 +82,15 @@ object MDirectionSplitter {
             }
             // LOOK FOR SIGNIFICANTLY BIGGER MATCH
             if (directionsCandidates.size >= 2) { // only if 2 directions already found
-                val match0 = directionsCandidates[0].second.matchList(gStopIdInts)
-                val match1 = directionsCandidates[1].second.matchList(gStopIdInts)
+                val match0 = directionsCandidates[0].stopIdInts.matchList(gStopIdInts)
+                val match1 = directionsCandidates[1].stopIdInts.matchList(gStopIdInts)
                 if (match0 > match1 && match0 > 0.75f) {
                     MTLog.logDebug("$routeId: matches $match0 for: ${GIDs.toStringPlus(gTripIdInt)}: \n${GIDs.toStringPlus(gStopIdInts)}")
-                    directionsCandidates[0].first.add(gTripIdInt)
+                    directionsCandidates[0].tripIdInts.add(gTripIdInt)
                     continue
                 } else if (match1 > match0 && match1 > 0.75f) {
                     MTLog.logDebug("$routeId: matches $match1 for: ${GIDs.toStringPlus(gTripIdInt)}: \n${GIDs.toStringPlus(gStopIdInts)}")
-                    directionsCandidates[1].first.add(gTripIdInt)
+                    directionsCandidates[1].tripIdInts.add(gTripIdInt)
                     continue
                 }
             }
@@ -126,28 +127,39 @@ object MDirectionSplitter {
                 continue
             }
             // LOOK FOR SIGNIFICANTLY BIGGER INTERSECT
-            val intersect0 = directionsCandidates.getOrNull(0)?.second?.intersectWithOrder(gStopIdInts)?.size ?: -1
-            val intersect1 = directionsCandidates.getOrNull(1)?.second?.intersectWithOrder(gStopIdInts)?.size ?: -1
+            val intersect0 = directionsCandidates.getOrNull(0)?.stopIdInts?.intersectWithOrder(gStopIdInts)?.size ?: -1
+            val intersect1 = directionsCandidates.getOrNull(1)?.stopIdInts?.intersectWithOrder(gStopIdInts)?.size ?: -1
             val minIntersect = (gStopIdInts.size * .75f).toInt()
             if (intersect0 == gStopIdInts.size) {
                 MTLog.logDebug("$routeId: all stops contained in candidate for: ${GIDs.toStringPlus(gTripIdInt)}: \n${GIDs.toStringPlus(gStopIdInts)}")
-                directionsCandidates[0].first.add(gTripIdInt)
+                directionsCandidates[0].tripIdInts.add(gTripIdInt)
                 continue
             } else if (intersect1 == gStopIdInts.size) {
                 MTLog.logDebug("$routeId: all stops contained in candidate for: ${GIDs.toStringPlus(gTripIdInt)}: \n${GIDs.toStringPlus(gStopIdInts)}")
-                directionsCandidates[1].first.add(gTripIdInt)
+                directionsCandidates[1].tripIdInts.add(gTripIdInt)
                 continue
             } else if (intersect0 - intersect1 > minIntersect) {
                 MTLog.logDebug("$routeId: more stops contained in candidate for: ${GIDs.toStringPlus(gTripIdInt)}: \n${GIDs.toStringPlus(gStopIdInts)}")
-                directionsCandidates[0].first.add(gTripIdInt)
+                directionsCandidates[0].tripIdInts.add(gTripIdInt)
                 continue
             } else if (intersect1 - intersect0 > minIntersect) {
                 MTLog.logDebug("$routeId: more stops contained in candidate for: ${GIDs.toStringPlus(gTripIdInt)}: \n${GIDs.toStringPlus(gStopIdInts)}")
-                directionsCandidates[1].first.add(gTripIdInt)
+                directionsCandidates[1].tripIdInts.add(gTripIdInt)
                 continue
             }
+            // LOOP FOR OVERLAPPING LOOPS
+            if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
+                    rStopIdInts.overlap(gStopIdInts)
+                }?.let { (rTripIdInts, _) ->
+                    MTLog.logDebug("$routeId: overlap for: ${GIDs.toStringPlus(gTripIdInt)}: \n${GIDs.toStringPlus(gStopIdInts)}")
+                    rTripIdInts.add(gTripIdInt)
+                    true
+                } == true) {
+                continue
+            }
+
             if (directionsCandidates.size < 2) {
-                directionsCandidates.add(mutableListOf(gTripIdInt) to gStopIdInts.toMutableList())
+                directionsCandidates.add(DirectionTripsStops(gTripIdInt, gStopIdInts.toMutableList()))
                 MTLog.logDebug("$routeId: new candidate: ${GIDs.toStringPlus(gTripIdInt)}: \n${GIDs.toStringPlus(gStopIdInts)}")
                 continue
             }
@@ -157,11 +169,11 @@ object MDirectionSplitter {
                         "Stops: ${GIDs.toStringPlus(gStopIdInts)} \n" +
                         " - ${directionsCandidates.size} candidates: \n" +
                         "---------- \n" +
-                        "- 0: Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.first)}: \n" +
-                        "Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.second)} \n" +
+                        "- 0: Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.tripIdInts)}: \n" +
+                        "Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.stopIdInts)} \n" +
                         "---------- \n" +
-                        "- 1 Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.first)}: \n" +
-                        "Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.second)}: \n" +
+                        "- 1 Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.tripIdInts)}: \n" +
+                        "Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.stopIdInts)}: \n" +
                         "---------- \n" +
                         "!"
             )

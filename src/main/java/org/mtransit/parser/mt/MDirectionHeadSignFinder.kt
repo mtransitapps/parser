@@ -109,7 +109,7 @@ object MDirectionHeadSignFinder {
                     agencyTools.cleanRouteLongName(route.routeLongNameOrDefault)
                 )
             }
-            if (routeDirectionHeadSigns.size == 2) { // all route long name or nothing
+            if (routeDirectionHeadSigns.size == directionHeadSigns.size) { // all route long name or nothing
                 for (routeDirectionHeadSign in routeDirectionHeadSigns) {
                     directionHeadSigns[routeDirectionHeadSign.key] = routeDirectionHeadSign.value
                 }

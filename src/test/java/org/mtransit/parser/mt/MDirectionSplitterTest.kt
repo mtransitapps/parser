@@ -7,7 +7,6 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mtransit.parser.gtfs.data.GIDs
 
 
-@Suppress("unused")
 @RunWith(MockitoJUnitRunner::class)
 class MDirectionSplitterTest {
 
@@ -190,5 +189,57 @@ class MDirectionSplitterTest {
         val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
         // Assert
         assertEquals(2, result.size)
+    }
+
+    @Test
+    fun testSplitDirections_Complex_Loops_Overlap() {
+        // Arrange
+        val gTripIdIntStopIdInts = listOf(
+            t1 to listOf(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9),
+            t2 to listOf(s5, s6, s7, s8, s9, s0, s1, s2, s3, s4),
+        )
+        // Act
+        val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
+        // Assert
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testSplitDirections_Complex_Loops_Overlap_From_Middle() {
+        // Arrange
+        val gTripIdIntStopIdInts = listOf(
+            t1 to listOf(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9),
+            t2 to listOf(s5, s6, s7, s8, s9),
+        )
+        // Act
+        val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
+        // Assert
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testSplitDirections_Complex_Loops_Overlap_Incomplete() {
+        // Arrange
+        val gTripIdIntStopIdInts = listOf(
+            t1 to listOf(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9),
+            t2 to listOf(s5, s6, s7, s8, s9, s0, s1),
+        )
+        // Act
+        val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
+        // Assert
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testSplitDirections_Complex_Loops_Overlap_First_Middle_Last_Repeat() {
+        // Arrange
+        val gTripIdIntStopIdInts = listOf(
+            t1 to listOf(s11, s0, s1, s2, s3, s4, s22, s5, s6, s7, s8, s9, s11),
+            t2 to listOf(s22, s5, s6, s7, s8, s9, s11, s0, s1, s2, s3, s4, s22),
+        )
+        // Act
+        val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
+        // Assert
+        assertEquals(1, result.size)
     }
 }
