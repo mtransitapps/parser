@@ -10,7 +10,7 @@ data class GTrip(
     val serviceIdInt: Int,
     val tripIdInt: Int,
     var directionIdE: GDirectionId,
-    val tripHeadsign: String?, // Optional
+    var tripHeadsign: String?, // Optional
     val tripShortName: String? // Optional
 ) {
     constructor(

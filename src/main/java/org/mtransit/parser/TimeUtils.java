@@ -58,7 +58,7 @@ public final class TimeUtils {
 			newHours = String.valueOf(Integer.parseInt(newHours) + 1);
 			return Integer.parseInt(newHours + newMinutes + newSeconds);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while cleaning time '%s' '%s' !\n", time, extraSeconds);
+			throw new MTLog.Fatal(e, "Error while cleaning time '%s' '%s' !", time, extraSeconds);
 		}
 	}
 

@@ -82,7 +82,7 @@ public class SplitUtils {
 		MTLog.log("%s: stopIdsTowards1: %s", mRoute.getId(), stopIdsTowards1);
 		MTLog.log("%s: stopIdsTowardsBoth10: %s", mRoute.getId(), stopIdsTowardsBoth10);
 		MTLog.log("%s: stopIdsTowardsBoth01: %s", mRoute.getId(), stopIdsTowardsBoth01);
-		throw new MTLog.Fatal("%s: Unexpected trip stop to split %s.\n", mRoute.getId(), gTripStop.toStringPlus());
+		throw new MTLog.Fatal("%s: Unexpected trip stop to split %s.", mRoute.getId(), gTripStop.toStringPlus());
 	}
 
 	private static RouteTripSpec.BeforeAfter getBeforeAfterStopId(GSpec routeGTFS,
@@ -179,7 +179,7 @@ public class SplitUtils {
 		MTLog.log("%s: stopIdsTowardsBoth10: %s", mRoute.getId(), stopIdsTowardsBoth10);
 		MTLog.log("%s: stopIdsTowardsBoth01: %s", mRoute.getId(), stopIdsTowardsBoth01);
 		listRouteTripStops(agencyTools, mRoute.getId(), routeGTFS);
-		throw new MTLog.Fatal("%s: Unexpected trip (before:%s|after:%s) %s.\n", mRoute.getId(), GIDs.toStringPlus(beforeStopIds), GIDs.toStringPlus(afterStopIds), gTrip.toStringPlus());
+		throw new MTLog.Fatal("%s: Unexpected trip (before:%s|after:%s) %s.", mRoute.getId(), GIDs.toStringPlus(beforeStopIds), GIDs.toStringPlus(afterStopIds), gTrip.toStringPlus());
 	}
 
 	public static void sortGTripStopsBySequence(@NotNull List<Pair<Integer, Integer>> gTripStops) {
@@ -403,7 +403,7 @@ public class SplitUtils {
 					GIDs.getInt(agencyTools.cleanStopOriginalId(GIDs.getString(gStopTime.getStopIdInt())));
 		}
 		if (gStopId == null) {
-			throw new MTLog.Fatal("%s: Unexpected trip (no 1st stop) %s.\n", mRoute.getId(), gTrip);
+			throw new MTLog.Fatal("%s: Unexpected trip (no 1st stop) %s.", mRoute.getId(), gTrip);
 		}
 		return gStopId;
 	}
@@ -430,7 +430,7 @@ public class SplitUtils {
 					GIDs.getInt(agencyTools.cleanStopOriginalId(GIDs.getString(gStopTime.getStopIdInt())));
 		}
 		if (gStopId == null) {
-			throw new MTLog.Fatal("%s: Unexpected trip (no last stop) %s.\n", mRoute.getId(), gTrip);
+			throw new MTLog.Fatal("%s: Unexpected trip (no last stop) %s.", mRoute.getId(), gTrip);
 		}
 		return gStopId;
 	}
@@ -491,7 +491,7 @@ public class SplitUtils {
 			case 1:
 				return MTrip.getNewId(this.routeId, this.directionId1);
 			default:
-				throw new MTLog.Fatal("%s: getTripId() > Unexpected direction index: %s.\n", this.routeId, directionIndex);
+				throw new MTLog.Fatal("%s: getTripId() > Unexpected direction index: %s.", this.routeId, directionIndex);
 			}
 		}
 
@@ -512,7 +512,7 @@ public class SplitUtils {
 				}
 				return this.beforeAfterStopIds.get(this.directionId1);
 			default:
-				throw new MTLog.Fatal("%s: getBeforeAfterStopIds() > Unexpected direction index: %s.\n", this.routeId, directionIndex);
+				throw new MTLog.Fatal("%s: getBeforeAfterStopIds() > Unexpected direction index: %s.", this.routeId, directionIndex);
 			}
 		}
 
@@ -533,7 +533,7 @@ public class SplitUtils {
 				}
 				return this.beforeAfterBothStopIds.get(this.directionId1);
 			default:
-				throw new MTLog.Fatal("%s: getBeforeAfterBothStopIds() > Unexpected direction index: %s.\n", this.routeId, directionIndex);
+				throw new MTLog.Fatal("%s: getBeforeAfterBothStopIds() > Unexpected direction index: %s.", this.routeId, directionIndex);
 			}
 		}
 
@@ -557,7 +557,7 @@ public class SplitUtils {
 			} else if (this.headsignType0 == MTrip.HEADSIGN_TYPE_INBOUND) {
 				this.allTrips.add(new MTrip(this.routeId, MInboundType.parse(this.headsignString0)));
 			} else {
-				throw new MTLog.Fatal("%s: Unexpected trip type %s for %s.\n", this.routeId, this.headsignType0, this.routeId);
+				throw new MTLog.Fatal("%s: Unexpected trip type %s for %s.", this.routeId, this.headsignType0, this.routeId);
 			}
 			if (this.headsignType1 == MTrip.HEADSIGN_TYPE_STRING) {
 				this.allTrips.add(new MTrip(this.routeId, this.headsignString1, this.directionId1));

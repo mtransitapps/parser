@@ -118,6 +118,9 @@ public interface GAgencyTools {
 	boolean excludeTrip(@NotNull GTrip gTrip);
 
 	@NotNull
+	String provideMissingTripHeadSign(@NotNull GTrip gTrip);
+
+	@NotNull
 	ArrayList<MTrip> splitTrip(@NotNull MRoute mRoute, @Nullable GTrip gTrip, @NotNull GSpec gtfs);
 
 	@NotNull

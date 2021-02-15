@@ -301,6 +301,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@NotNull
 	@Override
+	public String provideMissingTripHeadSign(@NotNull GTrip gTrip) {
+		return org.mtransit.commons.StringUtils.EMPTY;
+	}
+
+	@NotNull
+	@Override
 	public ArrayList<MTrip> splitTrip(@NotNull MRoute mRoute, @Nullable GTrip gTrip, @NotNull GSpec gtfs) {
 		ArrayList<MTrip> mTrips = new ArrayList<>();
 		mTrips.add(new MTrip(mRoute.getId()));

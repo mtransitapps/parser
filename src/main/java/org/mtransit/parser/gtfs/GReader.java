@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("RedundantSuppression")
 public class GReader {
 
 	public static final Charset UTF_8 = StandardCharsets.UTF_8;
@@ -279,7 +280,7 @@ public class GReader {
 			}
 			gSpec.addStopTime(gStopTime);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while parsing: '%s'!\n", line);
+			throw new MTLog.Fatal(e, "Error while parsing: '%s'!", line);
 		}
 	}
 
@@ -298,7 +299,7 @@ public class GReader {
 			}
 			gSpec.addFrequency(gFrequency);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while parsing: '%s'!\n", line);
+			throw new MTLog.Fatal(e, "Error while parsing: '%s'!", line);
 		}
 	}
 
@@ -313,7 +314,7 @@ public class GReader {
 					)
 			);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: '%s'!\n", line);
+			throw new MTLog.Fatal(e, "Error while processing: '%s'!", line);
 		}
 	}
 
@@ -332,7 +333,7 @@ public class GReader {
 			}
 			gSpec.addCalendarDate(gCalendarDate);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: '%s'!\n", line);
+			throw new MTLog.Fatal(e, "Error while processing: '%s'!", line);
 		}
 	}
 
@@ -357,19 +358,20 @@ public class GReader {
 			}
 			gSpec.addCalendar(gCalendar);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: %s!\n", line);
+			throw new MTLog.Fatal(e, "Error while processing: %s!", line);
 		}
 	}
 
 	private static void processTrip(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			String directionId = line.get(GTrip.DIRECTION_ID);
+			final String directionId = line.get(GTrip.DIRECTION_ID);
+			final String tripHeadsign = line.get(GTrip.TRIP_HEADSIGN);
 			GTrip gTrip = new GTrip(
 					line.get(GTrip.ROUTE_ID),
 					line.get(GTrip.SERVICE_ID),
 					line.get(GTrip.TRIP_ID),
 					StringUtils.isEmpty(directionId) ? null : Integer.valueOf(directionId),
-					line.get(GTrip.TRIP_HEADSIGN),
+					tripHeadsign,
 					line.get(GTrip.TRIP_SHORT_NAME)
 			);
 			if (agencyTools.excludeTrip(gTrip)) {
@@ -380,9 +382,12 @@ public class GReader {
 				logExclude("Exclude trip (!route): %s.", gTrip.toStringPlus());
 				return;
 			}
+			if (StringUtils.isEmpty(gTrip.getTripHeadsign())) {
+				gTrip.setTripHeadsign(agencyTools.provideMissingTripHeadSign(gTrip));
+			}
 			gSpec.addTrip(gTrip);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: %s\n", line);
+			throw new MTLog.Fatal(e, "Error while processing: %s", line);
 		}
 	}
 
@@ -410,7 +415,7 @@ public class GReader {
 			}
 			gSpec.addStop(gStop);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while parsing stop line %s!\n", line);
+			throw new MTLog.Fatal(e, "Error while parsing stop line %s!", line);
 		}
 	}
 
@@ -438,7 +443,7 @@ public class GReader {
 			}
 			gSpec.addRoute(gRoute);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while parsing route line %s!\n", line);
+			throw new MTLog.Fatal(e, "Error while parsing route line %s!", line);
 		}
 	}
 
