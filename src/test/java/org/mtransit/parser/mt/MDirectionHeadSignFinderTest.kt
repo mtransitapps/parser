@@ -4,7 +4,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -17,6 +19,8 @@ import org.mtransit.parser.gtfs.data.GDropOffType.NO_DROP_OFF
 import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GPickupType
 import org.mtransit.parser.gtfs.data.GPickupType.NO_PICKUP
+import org.mtransit.parser.gtfs.data.GRoute
+import org.mtransit.parser.gtfs.data.GRouteType
 import org.mtransit.parser.gtfs.data.GSpec
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTime
@@ -44,6 +48,20 @@ class MDirectionHeadSignFinderTest {
         `when`(agencyTools.cleanDirectionHeadsign(anyBoolean(), anyString()))
             .then {
                 it.arguments[1]
+            }
+        `when`(agencyTools.cleanStopHeadSign(any(), any(), any(), anyString()))
+            .then {
+                it.arguments[3]
+            }
+        `when`(routeGTFS.getTrip(anyInt()))
+            .then {
+                val tripIdInt: Int = it.arguments[0] as Int? ?: 1
+                GTrip(GIDs.getInt(RIDS), GIDs.getInt("service_id"), tripIdInt, GDirectionId.NONE, "trip head-sign", TSN)
+            }
+        `when`(routeGTFS.getRoute(anyInt()))
+            .then {
+                val routeIdInt: Int = it.arguments[0] as Int? ?: 1
+                GRoute(null, routeIdInt, "RSN", "RLN", null, GRouteType.BUS.id, null)
             }
     }
 
