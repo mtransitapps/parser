@@ -21,34 +21,42 @@ import org.mtransit.parser.mt.data.MTrip
 import kotlin.math.abs
 import kotlin.math.max
 
-private const val LOG_MERGE = false
-// private const val LOG_MERGE = true // DEBUG
-
-private const val MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS = 25.0f
-
-private const val MIN_HEAD_SIGN_COUNT_PERCENT = .67f
-
 object MDirectionHeadSignFinder {
+
+    private const val LOG_MERGE = false
+    // private const val LOG_MERGE = true // DEBUG
+
+    private const val MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS = 25.0f
+
+    private const val MIN_HEAD_SIGN_COUNT_PERCENT = .67f
 
     @JvmStatic
     fun findDirectionHeadSigns(routeId: Long, gRouteTrips: List<GTrip>, routeGTFS: GSpec, agencyTools: GAgencyTools): Map<Int, String> {
         val directionHeadSigns = mutableMapOf<Int, String>()
         val directionStopIdInts = mutableMapOf<Int, Int>()
         val directionAmPm = mutableMapOf<Int, Pair<Int, Int>?>()
+        val directionStopTimeHeadSigns = mutableMapOf<Int, List<String>>()
         val directionRouteIdInts = mutableMapOf<Int, List<Int>>()
         GDirectionId.values().forEach { gDirectionId ->
             val directionId = gDirectionId.id
-            findDirectionHeadSign(routeId, gRouteTrips, routeGTFS, gDirectionId.id, agencyTools)?.let { (headSign, stopIdInt, first, last, routeIdInts) ->
+            findDirectionHeadSign(
+                routeId,
+                gRouteTrips,
+                routeGTFS,
+                gDirectionId.id,
+                agencyTools
+            )?.let { (headSign, stopIdInt, first, last, stopTimeHeadSigns, routeIdInts) ->
                 directionHeadSigns[directionId] = headSign
                 directionStopIdInts[directionId] = stopIdInt
                 directionAmPm[directionId] = first to last
+                directionStopTimeHeadSigns[directionId] = stopTimeHeadSigns
                 directionRouteIdInts[directionId] = routeIdInts
             }
         }
         if (directionHeadSigns.size == 2 // AM/PM only if 2 directions
             && !agencyTools.directionHeadSignsDescriptive(directionHeadSigns)
         ) {
-            MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, using AM/PM...")
+            MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, using AM/PM...")
             val amPmDirectionHeadSigns = mutableMapOf<Int, String>()
             for ((directionId, _) in directionHeadSigns) {
                 val firstAndLastTime = directionAmPm[directionId] ?: continue
@@ -71,7 +79,7 @@ object MDirectionHeadSignFinder {
             }
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
-            MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, try using last stop name...")
+            MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, try using last stop name...")
             for ((directionId, headSign) in directionHeadSigns) {
                 if (agencyTools.directionHeadSignDescriptive(headSign)) {
                     continue // keep descriptive trip head-sign
@@ -85,7 +93,7 @@ object MDirectionHeadSignFinder {
             }
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
-            MTLog.log("$routeId: Direction from trip head-sign '$directionHeadSigns' not descriptive, using last stop name...")
+            MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, using last stop name...")
             for ((directionId, _) in directionHeadSigns) {
                 val stopIdInt = directionStopIdInts[directionId] ?: continue
                 val stop = routeGTFS.getStop(stopIdInt) ?: continue
@@ -96,7 +104,7 @@ object MDirectionHeadSignFinder {
             }
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
-            MTLog.log("$routeId: Direction from route long name '$directionHeadSigns' not descriptive, using route long name...")
+            MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, using route long name...")
             val routeDirectionHeadSigns = mutableMapOf<Int, String>()
             for ((directionId, _) in directionHeadSigns) {
                 val routeIdInts = directionRouteIdInts[directionId] ?: continue
@@ -113,6 +121,35 @@ object MDirectionHeadSignFinder {
                 for (routeDirectionHeadSign in routeDirectionHeadSigns) {
                     directionHeadSigns[routeDirectionHeadSign.key] = routeDirectionHeadSign.value
                 }
+            }
+        }
+        if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
+            MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, using stop times head-sign...")
+            val distinctDirectionStopTimeHeadSigns = mutableMapOf<Int, List<String>>()
+            for ((directionId, stopTimeHeadSigns) in directionStopTimeHeadSigns) {
+                val distinctDirectionStopTimeHeadSign = mutableListOf<String>()
+                val otherDirectionStopTimesHeadSigns = directionStopTimeHeadSigns.filterNot { it.key == directionId }.flatMap { it.value }.distinct()
+                for (stopTimeHeadSign in stopTimeHeadSigns) {
+                    if (otherDirectionStopTimesHeadSigns.contains(stopTimeHeadSign)) {
+                        continue // skip duplicate
+                    }
+                    distinctDirectionStopTimeHeadSign.add(stopTimeHeadSign)
+                }
+                distinctDirectionStopTimeHeadSigns[directionId] = distinctDirectionStopTimeHeadSign
+            }
+            for ((directionId, _) in directionHeadSigns) {
+                val stopTimeHeadSigns = distinctDirectionStopTimeHeadSigns[directionId] ?: continue
+                var cleanDirectionHeadsign: String? = null
+                for (stopTimeHeadSign in stopTimeHeadSigns) {
+                    cleanDirectionHeadsign = agencyTools.cleanDirectionHeadsign(
+                        false,
+                        stopTimeHeadSign // already cleaned
+                    )
+                    if (!cleanDirectionHeadsign.isNullOrBlank()) {
+                        break
+                    }
+                }
+                directionHeadSigns[directionId] = cleanDirectionHeadsign ?: EMPTY
             }
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
@@ -155,23 +192,27 @@ object MDirectionHeadSignFinder {
         }
         val tripHeadSignAndLastStopIdInt = gTripsHeadSignAndStopTimes
             .map { (routeIdInt, headSign, stopTimes) ->
-                DirectionResult(headSign, stopTimes, routeIdInt)
+                DirectionResult(headSign, stopTimes, routeIdInt, routeGTFS, agencyTools)
             }
         val distinctTripHeadSignAndLastStopIdInt = tripHeadSignAndLastStopIdInt
             .groupBy { it.headSign to it.lastStopIdInt }
-            .mapValues { (_, values) ->
-                val listOfTimes = values
-                    .flatMap {
-                        listOf(it.firstTime, it.lastTime)
+            .map { (headSignAndLastStopIdInts, directionsResults) ->
+                val listOfTimes = directionsResults
+                    .flatMap { directionResult ->
+                        listOf(directionResult.firstTime, directionResult.lastTime)
                     }
-                Triple(
-                    listOfTimes.minOrNull() ?: 990000,
-                    listOfTimes.maxOrNull() ?: 0,
-                    values.flatMap { it.routeIdInts }.distinct()
+                val firstTime = listOfTimes.minOrNull() ?: 990000
+                val lastTime = listOfTimes.maxOrNull() ?: 0
+                val routeIdInts = directionsResults.flatMap { it.routeIdInts }.distinct()
+                val stopHeadSigns: List<String> = directionsResults.flatMap { it.stopHeadSigns }.distinct()
+                DirectionResult(
+                    headSignAndLastStopIdInts.first,
+                    headSignAndLastStopIdInts.second,
+                    firstTime,
+                    lastTime,
+                    stopHeadSigns,
+                    routeIdInts
                 )
-            }
-            .map {
-                DirectionResult(it.key.first, it.key.second, it.value.first, it.value.second, it.value.third)
             }
         if (distinctTripHeadSignAndLastStopIdInt.size == 1) {
             MTLog.log("$routeId: $directionId: 1 distinct trip head-sign: '${distinctTripHeadSignAndLastStopIdInt.first().headSign}'.")
@@ -246,7 +287,7 @@ object MDirectionHeadSignFinder {
         if (distinctTripHeadSignAndStopTimes.size == 1) {
             distinctTripHeadSignAndStopTimes.first().let { (routeIdInts, tripHeadSign, tripStopTimes) ->
                 MTLog.log("$routeId: $directionId: 1 distinct merged trip: '$tripHeadSign'.")
-                return DirectionResult(tripHeadSign, tripStopTimes, routeIdInts)
+                return DirectionResult(tripHeadSign, tripStopTimes, routeIdInts, routeGTFS, agencyTools)
             }
         }
         // starting complex merge
@@ -292,7 +333,7 @@ object MDirectionHeadSignFinder {
         }
         return candidateHeadSignAndStopTimes?.let { (routeIdInts, tripHeadSign, tripStopTimes) ->
             MTLog.log("$routeId: $directionId: complex merge candidate found: '$tripHeadSign'.")
-            DirectionResult(tripHeadSign, tripStopTimes, routeIdInts)
+            DirectionResult(tripHeadSign, tripStopTimes, routeIdInts, routeGTFS, agencyTools)
         } ?: throw MTLog.Fatal("$routeId: $directionId: no candidate after complex merge!")
     }
 

@@ -549,12 +549,25 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return org.mtransit.commons.CleanUtils.cleanLabel(gStopName);
 	}
 
+	@NotNull
+	@Override
+	public String cleanStopHeadSign(@NotNull GRoute gRoute, @NotNull GTrip gTrip, @NotNull GStopTime gStopTime, @NotNull String stopHeadsign) {
+		return cleanStopHeadSign(stopHeadsign);
+	}
+
+	@Deprecated
 	@Nullable
 	@Override
 	public String cleanStopHeadsign(@Nullable String stopHeadsign) {
 		if (stopHeadsign == null) {
 			return null;
 		}
+		return cleanStopHeadSign(stopHeadsign);
+	}
+
+	@NotNull
+	@Override
+	public String cleanStopHeadSign(@NotNull String stopHeadsign) {
 		return cleanTripHeadsign(stopHeadsign);
 	}
 

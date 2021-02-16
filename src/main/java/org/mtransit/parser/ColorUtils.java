@@ -1,18 +1,22 @@
 package org.mtransit.parser;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.mtransit.parser.ColorUtils.AColorUtils.AColor;
 
-@SuppressWarnings({"WeakerAccess", "unused", "SameParameterValue"})
+@SuppressWarnings({"WeakerAccess", "unused", "SameParameterValue", "RedundantSuppression"})
 public final class ColorUtils {
 
+	public static final String BLACK = "000000";
 	public static final String WHITE = "FFFFFF";
 
 	private static final Map<String, String> colorMap = new HashMap<>();
 
-	public static String darkenIfTooLight(String color) {
+	@NotNull
+	public static String darkenIfTooLight(@NotNull String color) {
 		String darkColor = colorMap.get(color);
 		if (darkColor == null) {
 			int colorInt = AColor.parseColor(color);
@@ -26,7 +30,7 @@ public final class ColorUtils {
 		return darkColor;
 	}
 
-	public static boolean isTooLight(String color) {
+	public static boolean isTooLight(@NotNull String color) {
 		return isTooLight(AColor.parseColor(color));
 	}
 
@@ -34,14 +38,17 @@ public final class ColorUtils {
 		return AColorUtils.calculateLuminance(colorInt) > 0.7d;
 	}
 
-	public static String darkerColor(String color) {
+	@NotNull
+	public static String darkerColor(@NotNull String color) {
 		return darkerColor(AColor.parseColor(color));
 	}
 
+	@NotNull
 	public static String darkerColor(int colorInt) {
 		return convertToHEX(manipulateColor(colorInt, 0.7F));
 	}
 
+	@NotNull
 	public static String convertToHEX(int color) {
 		return String.format("%06X", (0xFFFFFF & color));
 	}
@@ -58,6 +65,7 @@ public final class ColorUtils {
 	}
 
 	// https://developer.android.com/reference/androidx/core/graphics/ColorUtils
+	@SuppressWarnings("UnknownNullness")
 	public static class AColorUtils {
 
 		private static final ThreadLocal<double[]> TEMP_ARRAY = new ThreadLocal<>();
@@ -182,10 +190,12 @@ public final class ColorUtils {
 		}
 
 		private static float constrain(float amount, float low, float high) {
+			//noinspection ManualMinMaxCalculation
 			return amount < low ? low : (amount > high ? high : amount);
 		}
 
 		private static int constrain(int amount, int low, int high) {
+			//noinspection ManualMinMaxCalculation
 			return amount < low ? low : (amount > high ? high : amount);
 		}
 

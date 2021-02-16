@@ -134,6 +134,13 @@ public interface GAgencyTools {
 	@NotNull
 	String cleanStopName(@NotNull String gStopName);
 
+	@NotNull
+	String cleanStopHeadSign(@NotNull GRoute gRoute, @NotNull GTrip gTrip, @NotNull GStopTime gStopTime, @NotNull String stopHeadsign);
+
+	@NotNull
+	String cleanStopHeadSign(@NotNull String stopHeadsign);
+
+	@Deprecated
 	@Nullable
 	String cleanStopHeadsign(@Nullable String stopHeadsign);
 

@@ -499,6 +499,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					serviceIdInts,
 					mRoute,
 					mStops,
+					gRoute,
 					gTrip,
 					originalTripHeadsign,
 					splitTrips,
@@ -577,6 +578,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 												 HashSet<Integer> serviceIdInts,
 												 MRoute mRoute,
 												 HashMap<Integer, MStop> mStops,
+												 GRoute gRoute,
 												 GTrip gTrip,
 												 HashMap<Long, Pair<Integer, String>> originalTripHeadsign,
 												 ArrayList<MTrip> splitTrips,
@@ -636,6 +638,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 							originalTripHeadsign.get(mTripId).first,
 							originalTripHeadsign.get(mTripId).second,
 							tripStopTimesHeadsign,
+							gRoute,
+							gTrip,
 							gTripStop,
 							mStopId,
 							addedMTripIdAndGStopIds
@@ -667,7 +671,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								  int originalTripHeadsignType,
 								  @Nullable String originalTripHeadsignValue,
 								  String tripStopTimesHeadsign,
-								  GTripStop gTripStop,
+								  @NotNull GRoute gRoute,
+								  @NotNull GTrip gTrip,
+								  @NotNull GTripStop gTripStop,
 								  int mStopId,
 								  HashMap<String, Integer> addedMTripIdAndGStopIds) {
 		MSchedule mSchedule;
@@ -734,7 +740,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					&& descentOnly) {
 				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_DESCENT_ONLY, null);
 			} else if (gStopTime.hasStopHeadsign()) {
-				stopHeadsign = this.agencyTools.cleanStopHeadsign(gStopTime.getStopHeadsign());
+				stopHeadsign = this.agencyTools.cleanStopHeadSign(gRoute, gTrip, gStopTime, gStopTime.getStopHeadsignOrDefault());
 				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_STRING, stopHeadsign);
 				tripStopTimesHeadsign = setTripStopTimesHeadsign(tripStopTimesHeadsign, stopHeadsign);
 			} else {
