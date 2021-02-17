@@ -147,7 +147,7 @@ object MDirectionSplitter {
                 directionsCandidates[1].tripIdInts.add(gTripIdInt)
                 continue
             }
-            // LOOP FOR OVERLAPPING LOOPS
+            // LOOP FOR OVERLAPPING LOOPS // FIXME later, split in to 2 trips (w/o loosing trips.txt#trip_id to link w/ other data)
             if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
                     rStopIdInts.overlap(gStopIdInts)
                 }?.let { (rTripIdInts, _) ->

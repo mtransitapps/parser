@@ -79,6 +79,26 @@ object MDirectionHeadSignFinder {
             }
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
+            MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, using route long name...")
+            val routeDirectionHeadSigns = mutableMapOf<Int, String>()
+            for ((directionId, _) in directionHeadSigns) {
+                val routeIdInts = directionRouteIdInts[directionId] ?: continue
+                if (routeIdInts.size != 1) {
+                    continue
+                }
+                val route = routeGTFS.getRoute(routeIdInts[0]) ?: continue
+                routeDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
+                    false,
+                    agencyTools.cleanRouteLongName(route.routeLongNameOrDefault)
+                )
+            }
+            if (routeDirectionHeadSigns.size == directionHeadSigns.size) { // all route long name or nothing
+                for (routeDirectionHeadSign in routeDirectionHeadSigns) {
+                    directionHeadSigns[routeDirectionHeadSign.key] = routeDirectionHeadSign.value
+                }
+            }
+        }
+        if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
             MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, try using last stop name...")
             for ((directionId, headSign) in directionHeadSigns) {
                 if (agencyTools.directionHeadSignDescriptive(headSign)) {
@@ -101,26 +121,6 @@ object MDirectionHeadSignFinder {
                     true,
                     agencyTools.cleanStopName(stop.stopName)
                 )
-            }
-        }
-        if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
-            MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, using route long name...")
-            val routeDirectionHeadSigns = mutableMapOf<Int, String>()
-            for ((directionId, _) in directionHeadSigns) {
-                val routeIdInts = directionRouteIdInts[directionId] ?: continue
-                if (routeIdInts.size != 1) {
-                    continue
-                }
-                val route = routeGTFS.getRoute(routeIdInts[0]) ?: continue
-                routeDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
-                    false,
-                    agencyTools.cleanRouteLongName(route.routeLongNameOrDefault)
-                )
-            }
-            if (routeDirectionHeadSigns.size == directionHeadSigns.size) { // all route long name or nothing
-                for (routeDirectionHeadSign in routeDirectionHeadSigns) {
-                    directionHeadSigns[routeDirectionHeadSign.key] = routeDirectionHeadSign.value
-                }
             }
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {

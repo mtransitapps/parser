@@ -240,6 +240,7 @@ class MDirectionSplitterTest {
         // Act
         val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
         // Assert
+        // FIXME later, split in to 2 trips (w/o loosing trips.txt#trip_id to link w/ other data)
         assertEquals(1, result.size)
     }
 }
