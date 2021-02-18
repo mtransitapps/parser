@@ -94,7 +94,24 @@ class CollectionsExtTest {
             "08", "09" // !=
         )
         // Act
-        val result = mainList.matchList(otherList, ignoreRepeat = true) >= 0.75f
+        val result = mainList.matchList(otherList, ignoreRepeat = true) == 0.80f
+        // Assert
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun testIterableContainsListMatchLoopsDiffStartEnd_DistinctRepeat() {
+        // Arrange
+        val mainList = listOf(
+            "00", "01",  // !=
+            "111", "02", "03", "04", "05", "06", "07", "111", // ==
+        )
+        val otherList = listOf(
+            "222", "02", "03", "04", "05", "06", "07", "222", // ==
+            "08", "09" // !=
+        )
+        // Act
+        val result = mainList.matchList(otherList, ignoreRepeat = true) == 0.60f
         // Assert
         assertEquals(true, result)
     }

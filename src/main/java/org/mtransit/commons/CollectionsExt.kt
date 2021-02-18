@@ -27,9 +27,11 @@ fun <T> Iterable<T>.lastIndexOf(pairT: Pair<T?, T?>?): Int {
 fun <T> Iterable<T>.filter(removeRepeat: Boolean = false, removeFirstAndLast: Boolean = false): Iterable<T> {
     return if (removeFirstAndLast) {
         if (removeRepeat) {
-            val first = this.first()
-            val last = this.last()
-            this.groupBy { it }.filterNot { it.value.size >= 2 }.flatMap { it.value }.dropWhile { it == first }.dropLastWhile { it == last }
+            val count = this.count()
+            val first = if (count <= 2) null else this.first()
+            val last = if (count <= 2) null else this.last()
+            this.groupBy { it }.filterNot { it.value.size >= 2 }.flatMap { it.value }
+                .dropWhile { it == first }.dropLastWhile { it == last }
         } else {
             this.drop(1).dropLast(1)
         }
@@ -132,10 +134,32 @@ fun <T> Iterable<T>.overlap(otherIt: Iterable<T>): Boolean {
     return true
 }
 
+fun <T> Iterable<T>.toComparableString(stringLength: Int): String {
+    return this.joinToString(separator = ",", postfix = ",") { it.toString().padStart(stringLength, '_') }
+}
+
 fun <T> Iterable<T>.matchList(otherIt: Iterable<T>, ignoreRepeat: Boolean = false, ignoreFirstAndLast: Boolean = false): Float {
     val stringLength: Int = this.union(otherIt).maxOf { it.toString().length }
     val thisToCompare = this.filter(ignoreRepeat, ignoreFirstAndLast)
     val otherToCompare = otherIt.filter(ignoreRepeat, ignoreFirstAndLast)
+    var ignoredMatch = 0
+    if (ignoreRepeat) {
+        val thisRepeat: Map<T, List<T>> = this.groupBy { it }.filter { it.value.size >= 2 }
+        val otherRepeat: Map<T, List<T>> = otherIt.groupBy { it }.filter { it.value.size >= 2 }
+        for (oRepeat in otherRepeat) {
+            if (thisRepeat.containsKey(oRepeat.key)) {
+                ignoredMatch += oRepeat.value.size
+            }
+        }
+    }
+    if (ignoreFirstAndLast) {
+        val thisFirst = this.first()
+        val thisLast = this.last()
+        val otherFirst = otherIt.first()
+        val otherLast = otherIt.last()
+        ignoredMatch += listOf(thisFirst, thisLast).intersect(listOf(otherFirst, otherLast)).count()
+    }
+    val ignoredMatchPt: Float = ignoredMatch.toFloat().div(otherIt.count())
     val intersect = thisToCompare.intersect(otherToCompare)
     val firstCommonItem = intersect.firstOrNull()
     val lastCommonItem = intersect.lastOrNull()
@@ -145,16 +169,16 @@ fun <T> Iterable<T>.matchList(otherIt: Iterable<T>, ignoreRepeat: Boolean = fals
     val thisCommon: Iterable<T> = thisToCompare
         .drop(thisToCompare.indexOf(firstCommonItem))
         .dropLast(thisToCompare.count() - 1 - thisToCompare.indexOf(lastCommonItem))
-    val thisString = thisCommon.joinToString(separator = ",", postfix = ",") { it.toString().padStart(stringLength, '_') }
-    val otherString = otherToCompare.joinToString(separator = ",", postfix = ",") { it.toString().padStart(stringLength, '_') }
+    val thisString = thisCommon.toComparableString(stringLength)
+    val otherString = otherToCompare.toComparableString(stringLength)
     val prefix = thisString.commonPrefixWith(otherString)
-    val prefixLength = prefix.length.toFloat()
+    val prefixLength = prefix.length
     val suffix = thisString.commonSuffixWith(otherString)
-    val suffixLength = suffix.length.toFloat()
-    val otherLength = otherString.length.toFloat()
+    val suffixLength = suffix.length
+    val otherLength = otherIt.toComparableString(stringLength).length
     return if (prefixLength > suffixLength) {
-        prefixLength / otherLength
+        prefixLength.toFloat().div(otherLength) + ignoredMatchPt
     } else {
-        suffixLength / otherLength
+        suffixLength.toFloat().div(otherLength) + ignoredMatchPt
     }
 }

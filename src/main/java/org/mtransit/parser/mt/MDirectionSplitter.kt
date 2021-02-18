@@ -72,7 +72,7 @@ object MDirectionSplitter {
             }
             // LOOK FOR ALMOST A MATCH
             if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
-                    rStopIdInts.matchList(gStopIdInts, ignoreRepeat = true, ignoreFirstAndLast = true) >= 0.90f
+                    rStopIdInts.matchList(gStopIdInts, ignoreRepeat = true, ignoreFirstAndLast = true) >= 0.85f
                 }?.let { (rTripIdInts, _) ->
                     MTLog.logDebug("$routeId: 90 pt match for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)

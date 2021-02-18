@@ -109,7 +109,7 @@ class MDirectionSplitterTest {
         // Arrange
         val gTripIdIntStopIdInts = listOf(
             t1 to listOf(s0, s1, s2, s3, s4, s5),
-            t2 to listOf(s5, s3, s0)
+            t2 to listOf(s5, s3, s1, s0)
         )
         // Act
         val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
@@ -121,15 +121,15 @@ class MDirectionSplitterTest {
     fun testSplitDirections_Complex2Directions() {
         // Arrange
         val gTripIdIntStopIdInts = listOf(
-            t1 to listOf(s0, s1, s2, s3, s4, s5),
-            t2 to listOf(s0, s1, s2, s3, s4, s5),
-            t3 to listOf(s5, s6, s7, s8, s9),
-            t4 to listOf(s5, s6, s7, s8, s9),
-            t5 to listOf(s0, s1, s3, s4, s5),
-            t6 to listOf(s0, s1),
-            t7 to listOf(s6, s7, s8, s9),
-            t8 to listOf(s8, s9, s11),
-            t9 to listOf(s6, s7, s8, s9),
+            t1 to listOf(s0, s1, s2, s3, s4, s5), // new
+            t2 to listOf(s0, s1, s2, s3, s4, s5), // exact match
+            t3 to listOf(s5, s6, s7, s8, s9/**/), // new
+            t4 to listOf(s5, s6, s7, s8, s9/**/), // exact match
+            t5 to listOf(s0, s1, /**/s3, s4, s5),
+            t6 to listOf(s0, s1 /**/),
+            t7 to listOf(/**/ s6, s7, s8, s9),
+            t8 to listOf(/**/s8, s9, s11),
+            t9 to listOf(/**/s6, s7, s8, s9/**/),
         )
         // Act
         val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
