@@ -24,15 +24,35 @@ fun <T> Iterable<T>.lastIndexOf(pairT: Pair<T?, T?>?): Int {
     return index
 }
 
-fun <T> Iterable<T>.intersectWithOrder(otherIt: Iterable<T>): Set<T> {
-    val intersect = this.intersect(otherIt)
+fun <T> Iterable<T>.filter(removeRepeat: Boolean = false, removeFirstAndLast: Boolean = false): Iterable<T> {
+    return if (removeFirstAndLast) {
+        if (removeRepeat) {
+            val first = this.first()
+            val last = this.last()
+            this.groupBy { it }.filterNot { it.value.size >= 2 }.flatMap { it.value }.dropWhile { it == first }.dropLastWhile { it == last }
+        } else {
+            this.drop(1).dropLast(1)
+        }
+    } else {
+        if (removeRepeat) {
+            this.groupBy { it }.filterNot { it.value.size >= 2 }.flatMap { it.value }
+        } else {
+            this
+        }
+    }
+}
+
+fun <T> Iterable<T>.intersectWithOrder(otherIt: Iterable<T>, ignoreRepeat: Boolean = false, ignoreFirstAndLast: Boolean = false): Set<T> {
+    val thisToCompare = this.filter(ignoreRepeat, ignoreFirstAndLast)
+    val otherToCompare = otherIt.filter(ignoreRepeat, ignoreFirstAndLast)
+    val intersect = thisToCompare.intersect(otherToCompare)
     val firstCommonT = intersect.firstOrNull()
     val lastCommonT = intersect.lastOrNull()
     if (firstCommonT == null || lastCommonT == null) {
         return emptySet()
     }
-    val firstCommonTIdx = otherIt.indexOf(firstCommonT)
-    val lastCommonTIdx = otherIt.indexOf(lastCommonT)
+    val firstCommonTIdx = otherToCompare.indexOf(firstCommonT)
+    val lastCommonTIdx = otherToCompare.indexOf(lastCommonT)
     if (firstCommonTIdx > lastCommonTIdx) {
         return emptySet()
     }
@@ -112,19 +132,21 @@ fun <T> Iterable<T>.overlap(otherIt: Iterable<T>): Boolean {
     return true
 }
 
-fun <T> Iterable<T>.matchList(otherIt: Iterable<T>): Float {
+fun <T> Iterable<T>.matchList(otherIt: Iterable<T>, ignoreRepeat: Boolean = false, ignoreFirstAndLast: Boolean = false): Float {
     val stringLength: Int = this.union(otherIt).maxOf { it.toString().length }
-    val intersect = this.intersect(otherIt)
-    val firstCommonChar = intersect.firstOrNull()
-    val lastCommonChar = intersect.lastOrNull()
-    if (firstCommonChar == null || lastCommonChar == null) {
+    val thisToCompare = this.filter(ignoreRepeat, ignoreFirstAndLast)
+    val otherToCompare = otherIt.filter(ignoreRepeat, ignoreFirstAndLast)
+    val intersect = thisToCompare.intersect(otherToCompare)
+    val firstCommonItem = intersect.firstOrNull()
+    val lastCommonItem = intersect.lastOrNull()
+    if (firstCommonItem == null || lastCommonItem == null) {
         return 0.0f
     }
-    val thisCommon: Iterable<T> = this
-        .drop(this.indexOf(firstCommonChar))
-        .dropLast(this.count() - 1 - this.indexOf(lastCommonChar))
+    val thisCommon: Iterable<T> = thisToCompare
+        .drop(thisToCompare.indexOf(firstCommonItem))
+        .dropLast(thisToCompare.count() - 1 - thisToCompare.indexOf(lastCommonItem))
     val thisString = thisCommon.joinToString(separator = ",", postfix = ",") { it.toString().padStart(stringLength, '_') }
-    val otherString = otherIt.joinToString(separator = ",", postfix = ",") { it.toString().padStart(stringLength, '_') }
+    val otherString = otherToCompare.joinToString(separator = ",", postfix = ",") { it.toString().padStart(stringLength, '_') }
     val prefix = thisString.commonPrefixWith(otherString)
     val prefixLength = prefix.length.toFloat()
     val suffix = thisString.commonSuffixWith(otherString)

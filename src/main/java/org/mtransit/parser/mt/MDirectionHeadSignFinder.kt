@@ -734,7 +734,11 @@ object MDirectionHeadSignFinder {
             val lastStopIdInt2 = stopTimesList2.last().stopIdInt
             val tripHeadSignCounts2 = tripHeadSignAndLastStopCounts[stopTimesHeadSign2 to lastStopIdInt2] ?: 0
             val totalHeadSignCounts: Int = tripHeadSignAndLastStopCounts.map { it.value }.sum()
-            val minHeadSignCountsDiff: Int = ((1.0f - MIN_HEAD_SIGN_COUNT_PERCENT) * totalHeadSignCounts).toInt()
+            val minHeadSignCountsDiff: Int = if (stopIdInts1 == stopIdInts2) {
+                1 // exact same trip, pick 1 head-sign
+            } else {
+                ((1.0f - MIN_HEAD_SIGN_COUNT_PERCENT) * totalHeadSignCounts).toInt()
+            }
             if (tripHeadSignCounts1 != 0 // NOT merged head-sign
                 && (tripHeadSignCounts2 - tripHeadSignCounts1) > minHeadSignCountsDiff
             ) {

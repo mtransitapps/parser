@@ -72,7 +72,7 @@ object MDirectionSplitter {
             }
             // LOOK FOR ALMOST A MATCH
             if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
-                    rStopIdInts.matchList(gStopIdInts) >= 0.90f
+                    rStopIdInts.matchList(gStopIdInts, ignoreRepeat = true, ignoreFirstAndLast = true) >= 0.90f
                 }?.let { (rTripIdInts, _) ->
                     MTLog.logDebug("$routeId: 90 pt match for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)
@@ -127,8 +127,12 @@ object MDirectionSplitter {
                 continue
             }
             // LOOK FOR SIGNIFICANTLY BIGGER INTERSECT
-            val intersect0 = directionsCandidates.getOrNull(0)?.stopIdInts?.intersectWithOrder(gStopIdInts)?.size ?: -1
-            val intersect1 = directionsCandidates.getOrNull(1)?.stopIdInts?.intersectWithOrder(gStopIdInts)?.size ?: -1
+            val intersect0 = directionsCandidates.getOrNull(0)?.stopIdInts
+                ?.intersectWithOrder(gStopIdInts, ignoreRepeat = true, ignoreFirstAndLast = true)
+                ?.size ?: -1
+            val intersect1 = directionsCandidates.getOrNull(1)?.stopIdInts
+                ?.intersectWithOrder(gStopIdInts, ignoreRepeat = true, ignoreFirstAndLast = true)
+                ?.size ?: -1
             val minIntersect = (gStopIdInts.size * .75f).toInt()
             if (intersect0 == gStopIdInts.size) {
                 MTLog.logDebug("$routeId: all stops contained in candidate for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
