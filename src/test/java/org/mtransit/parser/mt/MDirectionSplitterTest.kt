@@ -96,7 +96,20 @@ class MDirectionSplitterTest {
         // Arrange
         val gTripIdIntStopIdInts = listOf(
             t1 to listOf(s0, s1, s2, s3, s4, s5),
-            t2 to listOf(s1, s4)
+            t2 to listOf(/**/s1, /**/ /**/s4/**/)
+        )
+        // Act
+        val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
+        // Assert
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testSplitDirections_OtherTripWith3StopsRightOrder() {
+        // Arrange
+        val gTripIdIntStopIdInts = listOf(
+            t1 to listOf(s0, s1, s2, s3, s4, s5),
+            t2 to listOf(s0, s1, /**/s3, /**/s5)
         )
         // Act
         val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
