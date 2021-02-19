@@ -131,6 +131,19 @@ class MDirectionSplitterTest {
     }
 
     @Test
+    fun testSplitDirections_OtherTripWith2StopsWrongOrderShort() {
+        // Arrange
+        val gTripIdIntStopIdInts = listOf(
+            t1 to listOf(s0, s1, s2),
+            t2 to listOf(s2, s1, s0)
+        )
+        // Act
+        val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
+        // Assert
+        assertEquals(2, result.size)
+    }
+
+    @Test
     fun testSplitDirections_Complex2Directions() {
         // Arrange
         val gTripIdIntStopIdInts = listOf(

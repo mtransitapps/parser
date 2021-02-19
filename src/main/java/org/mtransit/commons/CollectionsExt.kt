@@ -157,7 +157,12 @@ fun <T> Iterable<T>.matchList(otherIt: Iterable<T>, ignoreRepeat: Boolean = fals
         val thisLast = this.last()
         val otherFirst = otherIt.first()
         val otherLast = otherIt.last()
-        ignoredMatch += listOf(thisFirst, thisLast).intersect(listOf(otherFirst, otherLast)).count()
+        if (thisFirst == otherFirst) {
+            ignoredMatch++
+        }
+        if (thisLast == otherLast) {
+            ignoredMatch++
+        }
     }
     val ignoredMatchPt: Float = ignoredMatch.toFloat().div(otherIt.count())
     val intersect = thisToCompare.intersect(otherToCompare)
