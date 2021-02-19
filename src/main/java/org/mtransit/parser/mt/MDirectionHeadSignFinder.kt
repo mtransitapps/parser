@@ -87,9 +87,13 @@ object MDirectionHeadSignFinder {
                     continue
                 }
                 val route = routeGTFS.getRoute(routeIdInts[0]) ?: continue
+                val rln = route.routeLongNameOrDefault
+                if (rln.isBlank()) {
+                    continue
+                }
                 routeDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
                     false,
-                    agencyTools.cleanRouteLongName(route.routeLongNameOrDefault)
+                    agencyTools.cleanRouteLongName(rln)
                 )
             }
             if (routeDirectionHeadSigns.size == directionHeadSigns.size) { // all route long name or nothing
