@@ -107,28 +107,6 @@ object MDirectionHeadSignFinder {
             }
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
-            MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, try using last stop name...")
-            val lastStopDirectionHeadSigns = mutableMapOf<Int, String>()
-            for ((directionId, headSign) in directionHeadSigns) {
-                if (agencyTools.directionHeadSignDescriptive(headSign)) {
-                    continue // keep descriptive trip head-sign
-                }
-                val stopIdInt = directionStopIdInts[directionId] ?: continue
-                val stop = routeGTFS.getStop(stopIdInt) ?: continue
-                lastStopDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
-                    true,
-                    agencyTools.cleanStopName(stop.stopName)
-                )
-            }
-            if (lastStopDirectionHeadSigns.size == directionHeadSigns.size
-                && agencyTools.directionHeadSignsDescriptive(lastStopDirectionHeadSigns)
-            ) {
-                for (routeDirectionHeadSign in lastStopDirectionHeadSigns) {
-                    directionHeadSigns[routeDirectionHeadSign.key] = routeDirectionHeadSign.value
-                }
-            }
-        }
-        if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
             MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, using last stop name...")
             val lastStopDirectionHeadSigns = mutableMapOf<Int, String>()
             for ((directionId, _) in directionHeadSigns) {
@@ -139,8 +117,11 @@ object MDirectionHeadSignFinder {
                     agencyTools.cleanStopName(stop.stopName)
                 )
             }
+            val allDirectionHeadSignsEmpty: Boolean = directionHeadSigns
+                .map { (_, headSign) -> headSign }
+                .all { headSign -> headSign.isEmpty() }
             if (lastStopDirectionHeadSigns.size == directionHeadSigns.size
-                && agencyTools.directionHeadSignsDescriptive(lastStopDirectionHeadSigns)
+                && (allDirectionHeadSignsEmpty || agencyTools.directionHeadSignsDescriptive(lastStopDirectionHeadSigns))
             ) {
                 for (routeDirectionHeadSign in lastStopDirectionHeadSigns) {
                     directionHeadSigns[routeDirectionHeadSign.key] = routeDirectionHeadSign.value
