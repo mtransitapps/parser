@@ -97,6 +97,8 @@ public interface GAgencyTools {
 
 	boolean directionHeadSignsDescriptive(@NotNull Map<Integer, String> directionHeadSigns);
 
+	boolean allowNonDescriptiveHeadSigns(long routeId);
+
 	@Nullable
 	String selectDirectionHeadSign(@Nullable String headSign1, @Nullable String headSign2);
 

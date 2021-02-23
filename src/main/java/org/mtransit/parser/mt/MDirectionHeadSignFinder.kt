@@ -72,7 +72,9 @@ object MDirectionHeadSignFinder {
                     )
                 }
             }
-            if (amPmDirectionHeadSigns.size == 2) { // all AM/PM or nothing
+            if (amPmDirectionHeadSigns.size == 2  // all AM/PM or nothing
+                && agencyTools.directionHeadSignsDescriptive(amPmDirectionHeadSigns)
+            ) {
                 for (amPmDirectionHeadSign in amPmDirectionHeadSigns) {
                     directionHeadSigns[amPmDirectionHeadSign.key] = amPmDirectionHeadSign.value
                 }
@@ -96,7 +98,9 @@ object MDirectionHeadSignFinder {
                     agencyTools.cleanRouteLongName(rln)
                 )
             }
-            if (routeDirectionHeadSigns.size == directionHeadSigns.size) { // all route long name or nothing
+            if (routeDirectionHeadSigns.size == directionHeadSigns.size // all route long name or nothing
+                && agencyTools.directionHeadSignsDescriptive(routeDirectionHeadSigns)
+            ) {
                 for (routeDirectionHeadSign in routeDirectionHeadSigns) {
                     directionHeadSigns[routeDirectionHeadSign.key] = routeDirectionHeadSign.value
                 }
@@ -104,27 +108,43 @@ object MDirectionHeadSignFinder {
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
             MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, try using last stop name...")
+            val lastStopDirectionHeadSigns = mutableMapOf<Int, String>()
             for ((directionId, headSign) in directionHeadSigns) {
                 if (agencyTools.directionHeadSignDescriptive(headSign)) {
                     continue // keep descriptive trip head-sign
                 }
                 val stopIdInt = directionStopIdInts[directionId] ?: continue
                 val stop = routeGTFS.getStop(stopIdInt) ?: continue
-                directionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
+                lastStopDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
                     true,
                     agencyTools.cleanStopName(stop.stopName)
                 )
             }
+            if (lastStopDirectionHeadSigns.size == directionHeadSigns.size
+                && agencyTools.directionHeadSignsDescriptive(lastStopDirectionHeadSigns)
+            ) {
+                for (routeDirectionHeadSign in lastStopDirectionHeadSigns) {
+                    directionHeadSigns[routeDirectionHeadSign.key] = routeDirectionHeadSign.value
+                }
+            }
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
             MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, using last stop name...")
+            val lastStopDirectionHeadSigns = mutableMapOf<Int, String>()
             for ((directionId, _) in directionHeadSigns) {
                 val stopIdInt = directionStopIdInts[directionId] ?: continue
                 val stop = routeGTFS.getStop(stopIdInt) ?: continue
-                directionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
+                lastStopDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
                     true,
                     agencyTools.cleanStopName(stop.stopName)
                 )
+            }
+            if (lastStopDirectionHeadSigns.size == directionHeadSigns.size
+                && agencyTools.directionHeadSignsDescriptive(lastStopDirectionHeadSigns)
+            ) {
+                for (routeDirectionHeadSign in lastStopDirectionHeadSigns) {
+                    directionHeadSigns[routeDirectionHeadSign.key] = routeDirectionHeadSign.value
+                }
             }
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
@@ -141,6 +161,7 @@ object MDirectionHeadSignFinder {
                 }
                 distinctDirectionStopTimeHeadSigns[directionId] = distinctDirectionStopTimeHeadSign
             }
+            val stopTimesDirectionHeadSigns = mutableMapOf<Int, String>()
             for ((directionId, _) in directionHeadSigns) {
                 val stopTimeHeadSigns = distinctDirectionStopTimeHeadSigns[directionId] ?: continue
                 var cleanDirectionHeadsign: String? = null
@@ -153,8 +174,18 @@ object MDirectionHeadSignFinder {
                         break
                     }
                 }
-                directionHeadSigns[directionId] = cleanDirectionHeadsign ?: EMPTY
+                stopTimesDirectionHeadSigns[directionId] = cleanDirectionHeadsign ?: EMPTY
             }
+            if (stopTimesDirectionHeadSigns.size == directionHeadSigns.size
+                && agencyTools.directionHeadSignsDescriptive(stopTimesDirectionHeadSigns)
+            ) {
+                for (routeDirectionHeadSign in stopTimesDirectionHeadSigns) {
+                    directionHeadSigns[routeDirectionHeadSign.key] = routeDirectionHeadSign.value
+                }
+            }
+        }
+        if (agencyTools.allowNonDescriptiveHeadSigns(routeId)) {
+            return directionHeadSigns
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
             throw MTLog.Fatal(

@@ -386,7 +386,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								mTripStopTimesHeadsign.get(mTrip.getId()), mTrip);
 						mTrip.setHeadsignString(mTripStopTimesHeadsign.get(mTrip.getId()), mTrip.getHeadsignId());
 					} else {
-						if (tripKeptNonDescriptiveHeadsign) {
+						if (tripKeptNonDescriptiveHeadsign
+								&& !agencyTools.allowNonDescriptiveHeadSigns(this.routeId)) {
 							MTLog.log("%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
 							MTLog.log("%s: trip headsigns: %s", this.routeId, mTripHeadsignStrings);
 							MTLog.log("%s: trips: %s", this.routeId, mTrips);
