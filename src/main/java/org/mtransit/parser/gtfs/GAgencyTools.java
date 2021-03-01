@@ -12,14 +12,11 @@ import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
-import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
-import org.mtransit.parser.mt.data.MTripStop;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -120,12 +117,6 @@ public interface GAgencyTools {
 	@NotNull
 	String provideMissingTripHeadSign(@NotNull GTrip gTrip);
 
-	@NotNull
-	ArrayList<MTrip> splitTrip(@NotNull MRoute mRoute, @Nullable GTrip gTrip, @NotNull GSpec gtfs);
-
-	@NotNull
-	Pair<Long[], Integer[]> splitTripStop(@NotNull MRoute mRoute, @NotNull GTrip gTrip, @NotNull GTripStop gTripStop, @NotNull ArrayList<MTrip> splitTrips, @NotNull GSpec routeGTFS);
-
 	boolean excludeStopTime(@NotNull GStopTime gStopTime);
 
 	// STOP
@@ -169,15 +160,4 @@ public interface GAgencyTools {
 	int getStartTime(@NotNull GFrequency gFrequency);
 
 	int getEndTime(@NotNull GFrequency gFrequency);
-
-	// DEPARTURE TIME
-	int compareEarly(long routeId,
-					 @NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2,
-					 @NotNull MTripStop ts1, @NotNull MTripStop ts2,
-					 @NotNull GStop ts1GStop, @NotNull GStop ts2GStop);
-
-	int compare(long routeId,
-				@NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2,
-				@NotNull MTripStop ts1, @NotNull MTripStop ts2,
-				@NotNull GStop ts1GStop, @NotNull GStop ts2GStop);
 }

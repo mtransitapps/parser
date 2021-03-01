@@ -21,17 +21,14 @@ import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTime;
 import org.mtransit.parser.gtfs.data.GTrip;
-import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.MGenerator;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MTrip;
-import org.mtransit.parser.mt.data.MTripStop;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -305,27 +302,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return org.mtransit.commons.StringUtils.EMPTY;
 	}
 
-	@NotNull
-	@Override
-	public ArrayList<MTrip> splitTrip(@NotNull MRoute mRoute, @Nullable GTrip gTrip, @NotNull GSpec gtfs) {
-		ArrayList<MTrip> mTrips = new ArrayList<>();
-		mTrips.add(new MTrip(mRoute.getId()));
-		return mTrips;
-	}
-
-	@NotNull
-	@Override
-	public Pair<Long[], Integer[]> splitTripStop(@NotNull MRoute mRoute,
-												 @NotNull GTrip gTrip,
-												 @NotNull GTripStop gTripStop,
-												 @NotNull ArrayList<MTrip> splitTrips,
-												 @NotNull GSpec routeGTFS) {
-		return new Pair<>(
-				new Long[]{splitTrips.get(0).getId()},
-				new Integer[]{gTripStop.getStopSequence()}
-		);
-	}
-
 	@Override
 	public void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
 		if (directionFinderEnabled()) {
@@ -593,24 +569,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String cleanStopOriginalId(@NotNull String gStopId) {
 		return gStopId;
-	}
-
-	@Deprecated // TODO remove from ca-whitehorse-transit-bus
-	@Override
-	public int compareEarly(long routeId,
-							@NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2,
-							@NotNull MTripStop ts1, @NotNull MTripStop ts2,
-							@NotNull GStop ts1GStop, @NotNull GStop ts2GStop) {
-		return 0; // nothing
-	}
-
-	@Deprecated // TODO remove from ca-whitehorse-transit-bus
-	@Override
-	public int compare(long routeId,
-					   @NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2,
-					   @NotNull MTripStop ts1, @NotNull MTripStop ts2,
-					   @NotNull GStop ts1GStop, @NotNull GStop ts2GStop) {
-		return 0; // nothing
 	}
 
 	@Override
