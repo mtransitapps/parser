@@ -364,6 +364,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return directionSplitterEnabled();
 	}
 
+	@SuppressWarnings("DeprecatedIsStillUsed")
 	@Deprecated
 	@NotNull
 	@Override
@@ -560,7 +561,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return cleanStopHeadSign(stopHeadsign);
 	}
 
-	@Deprecated
+	@Deprecated // TODO remove from ca-milton-transit-bus
 	@Nullable
 	@Override
 	public String cleanStopHeadsign(@Nullable String stopHeadsign) {
@@ -641,16 +642,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public int getThreadPoolSize() {
 		return THREAD_POOL_SIZE;
-	}
-
-	@Deprecated
-	@NotNull
-	@Override
-	public Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime,
-										   @NotNull List<GStopTime> tripStopTimes,
-										   @Nullable SimpleDateFormat gDateFormat,
-										   @NotNull SimpleDateFormat mDateFormat) {
-		return getTimes(gStopTime, tripStopTimes, mDateFormat);
 	}
 
 	@NotNull
@@ -796,30 +787,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 					+ "endDate: " + endDate + ", " //
 					+ "}";
 		}
-	}
-
-	@Deprecated
-	@NotNull
-	public static HashSet<String> extractUsefulServiceIds(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools) {
-		return extractUsefulServiceIds(args, agencyTools, false);
-	}
-
-	@Deprecated
-	@NotNull
-	public static HashSet<Integer> extractUsefulServiceIdInts(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools) {
-		return extractUsefulServiceIdInts(args, agencyTools, false);
-	}
-
-	@Deprecated
-	@NotNull
-	public static HashSet<String> extractUsefulServiceIds(@NotNull String[] args, @NotNull DefaultAgencyTools agencyTools, boolean agencyFilter) {
-		HashSet<Integer> serviceIds = extractUsefulServiceIdInts(args, agencyTools, agencyFilter);
-
-		HashSet<String> serviceIdsS = new HashSet<>();
-		for (Integer serviceId : serviceIds) {
-			serviceIdsS.add(serviceId.toString());
-		}
-		return serviceIdsS;
 	}
 
 	@Nullable
@@ -1312,18 +1279,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	@Deprecated
-	protected static boolean excludeUselessCalendar(@NotNull GCalendar gCalendar, @Nullable HashSet<String> serviceIdsS) {
-		HashSet<Integer> serviceIds = null;
-		if (serviceIdsS != null) {
-			serviceIds = new HashSet<>();
-			for (String serviceIdS : serviceIdsS) {
-				serviceIds.add(Integer.valueOf(serviceIdS));
-			}
-		}
-		return excludeUselessCalendarInt(gCalendar, serviceIds);
-	}
-
 	@SuppressWarnings("WeakerAccess")
 	protected static boolean excludeUselessCalendarInt(@NotNull GCalendar gCalendar, @Nullable HashSet<Integer> serviceIds) {
 		if (serviceIds != null) {
@@ -1334,18 +1289,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 		}
 		return KEEP;
-	}
-
-	@Deprecated
-	protected static boolean excludeUselessCalendarDate(@NotNull GCalendarDate gCalendarDate, @Nullable HashSet<String> serviceIdsS) {
-		HashSet<Integer> serviceIds = null;
-		if (serviceIdsS != null) {
-			serviceIds = new HashSet<>();
-			for (String serviceIdS : serviceIdsS) {
-				serviceIds.add(Integer.valueOf(serviceIdS));
-			}
-		}
-		return excludeUselessCalendarDateInt(gCalendarDate, serviceIds);
 	}
 
 	@SuppressWarnings("WeakerAccess")
@@ -1367,19 +1310,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 		}
 		return KEEP;
-	}
-
-	@Deprecated
-	protected static boolean excludeUselessTrip(@NotNull GTrip gTrip,
-												@Nullable HashSet<String> serviceIdsS) {
-		HashSet<Integer> serviceIds = null;
-		if (serviceIdsS != null) {
-			serviceIds = new HashSet<>();
-			for (String serviceIdS : serviceIdsS) {
-				serviceIds.add(Integer.valueOf(serviceIdS));
-			}
-		}
-		return excludeUselessTripInt(gTrip, serviceIds);
 	}
 
 	@SuppressWarnings("WeakerAccess")

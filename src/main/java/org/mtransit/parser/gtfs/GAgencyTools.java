@@ -171,13 +171,6 @@ public interface GAgencyTools {
 									@NotNull List<GStopTime> tripStopTimes,
 									@NotNull SimpleDateFormat mDateFormat);
 
-	@Deprecated
-	@NotNull
-	Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime,
-									@NotNull List<GStopTime> tripStopTimes,
-									@Nullable SimpleDateFormat gDateFormat,
-									@NotNull SimpleDateFormat mDateFormat);
-
 	// FREQUENCY
 	int getStartTime(@NotNull GFrequency gFrequency);
 

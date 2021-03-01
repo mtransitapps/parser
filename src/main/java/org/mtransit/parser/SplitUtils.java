@@ -17,13 +17,13 @@ import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
+@Deprecated // TODO remove from ca-whitehorse-transit-bus
+@SuppressWarnings({"WeakerAccess", "unused", "RedundantSuppression"})
 public class SplitUtils {
 
 	public static final String DASH = "-";
@@ -85,6 +85,7 @@ public class SplitUtils {
 		throw new MTLog.Fatal("%s: Unexpected trip stop to split %s.", mRoute.getId(), gTripStop.toStringPlus());
 	}
 
+	@SuppressWarnings("RedundantSuppression")
 	private static RouteTripSpec.BeforeAfter getBeforeAfterStopId(GSpec routeGTFS,
 																  MRoute mRoute,
 																  GTrip gTrip,
@@ -183,7 +184,7 @@ public class SplitUtils {
 	}
 
 	public static void sortGTripStopsBySequence(@NotNull List<Pair<Integer, Integer>> gTripStops) {
-		Collections.sort(gTripStops, (o1, o2) ->
+		gTripStops.sort((o1, o2) ->
 				o1.second - o2.second
 		);
 	}
@@ -275,7 +276,7 @@ public class SplitUtils {
 			firstLastStopIdIntsName.put( //
 					stopIdInt,
 					"Stops.getALL_STOPS().get(\"" + gStop.getStopCode() + "\"), // " + gStop.getStopName() + //
-						" {" + gStop.getStopLat() + "," + gStop.getStopLong() + "}"
+							" {" + gStop.getStopLat() + "," + gStop.getStopLong() + "}"
 			);
 		}
 	}
