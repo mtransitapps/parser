@@ -23,12 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("RedundantSuppression")
+@SuppressWarnings({"RedundantSuppression", "unused"})
 public interface GAgencyTools {
 
-	@SuppressWarnings("unused")
 	boolean EXCLUDE = true;
-	@SuppressWarnings("unused")
 	boolean KEEP = false;
 
 	int getThreadPoolSize();
@@ -141,10 +139,6 @@ public interface GAgencyTools {
 
 	@NotNull
 	String cleanStopHeadSign(@NotNull String stopHeadsign);
-
-	@Deprecated
-	@Nullable
-	String cleanStopHeadsign(@Nullable String stopHeadsign);
 
 	@NotNull
 	String getStopCode(@NotNull GStop gStop);

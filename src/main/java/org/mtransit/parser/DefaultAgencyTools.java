@@ -561,16 +561,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return cleanStopHeadSign(stopHeadsign);
 	}
 
-	@Deprecated // TODO remove from ca-milton-transit-bus
-	@Nullable
-	@Override
-	public String cleanStopHeadsign(@Nullable String stopHeadsign) {
-		if (stopHeadsign == null) {
-			return null;
-		}
-		return cleanStopHeadSign(stopHeadsign);
-	}
-
 	@NotNull
 	@Override
 	public String cleanStopHeadSign(@NotNull String stopHeadsign) {
@@ -605,6 +595,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return gStopId;
 	}
 
+	@Deprecated // TODO remove from ca-whitehorse-transit-bus
 	@Override
 	public int compareEarly(long routeId,
 							@NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2,
@@ -613,6 +604,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return 0; // nothing
 	}
 
+	@Deprecated // TODO remove from ca-whitehorse-transit-bus
 	@Override
 	public int compare(long routeId,
 					   @NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2,
