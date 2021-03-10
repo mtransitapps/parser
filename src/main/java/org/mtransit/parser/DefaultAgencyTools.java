@@ -144,7 +144,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (Constants.SKIP_FILE_DUMP) {
 			return; // DEBUG
 		}
-		MGenerator.dumpFiles(this, mSpec, args[0], args[1], args[2]);
+		MGenerator.dumpFiles(this, mSpec, args[0], args[1], args[2], false);
 		MTLog.log("Generating %s data... DONE in %s.", getAgencyLabel(), Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 

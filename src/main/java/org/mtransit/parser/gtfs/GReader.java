@@ -3,9 +3,9 @@ package org.mtransit.parser.gtfs;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.CloseableUtils;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.MTLog;
@@ -171,8 +171,8 @@ public class GReader {
 		} catch (IOException ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while reading GTFS file!");
 		} finally {
-			IOUtils.closeQuietly(reader);
-			IOUtils.closeQuietly(fr);
+			CloseableUtils.closeQuietly(reader);
+			CloseableUtils.closeQuietly(fr);
 		}
 		MTLog.log("Reading GTFS file '%1$s'... DONE in %2$s.", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
 		gSpec.print(calendarsOnly, false);

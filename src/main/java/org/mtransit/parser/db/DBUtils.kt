@@ -1,24 +1,20 @@
 package org.mtransit.parser.db
 
-import org.mtransit.parser.Constants
+import org.mtransit.commons.sql.SQLCreateBuilder
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTripStop
 import org.mtransit.parser.mt.data.MSchedule
-import org.sqlite.SQLiteException
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
-import java.sql.ResultSet
-import java.sql.Statement
+import org.mtransit.commons.sql.SQLUtils as SQLUtilsCommons
 
 object DBUtils {
 
-    private const val IN_MEMORY_CONNECTION_STRING = "jdbc:sqlite::memory:" // faster
     private const val FILE_PATH = "input/db_file"
-    private const val FILE_CONNECTION_STRING = "jdbc:sqlite:$FILE_PATH" // less RAM
 
     private const val STOP_TIMES_TABLE_NAME = "g_stop_times"
     private const val TRIP_STOPS_TABLE_NAME = "g_trip_stops"
@@ -31,9 +27,9 @@ object DBUtils {
         FileUtils.deleteIfExist(File(FILE_PATH)) // delete previous
         DriverManager.getConnection(
             if (DefaultAgencyTools.IS_CI) {
-                FILE_CONNECTION_STRING
+                SQLUtils.getJDBCSQLiteFile(FILE_PATH)
             } else {
-                IN_MEMORY_CONNECTION_STRING
+                SQLUtils.JDBC_SQLITE_MEMORY // faster
             }
         )
     }
@@ -48,78 +44,70 @@ object DBUtils {
     init {
         val statement = connection.createStatement()
 
-        execute(statement, "PRAGMA synchronous = OFF")
-        execute(statement, "PRAGMA journal_mode = MEMORY")
-        execute(statement, "PRAGMA auto_vacuum = NONE")
-        executeUpdate(statement, "DROP TABLE IF EXISTS $STOP_TIMES_TABLE_NAME")
-        executeUpdate(statement, "DROP TABLE IF EXISTS $TRIP_STOPS_TABLE_NAME")
-        executeUpdate(statement, "DROP TABLE IF EXISTS $SCHEDULES_TABLE_NAME")
-        executeUpdate(
+        SQLUtils.execute(statement, "PRAGMA synchronous = OFF")
+        SQLUtils.execute(statement, "PRAGMA journal_mode = MEMORY")
+        SQLUtils.execute(statement, SQLUtilsCommons.PRAGMA_AUTO_VACUUM_NONE)
+        SQLUtils.executeUpdate(statement, SQLUtilsCommons.getSQLDropIfExistsQuery(STOP_TIMES_TABLE_NAME))
+        SQLUtils.executeUpdate(statement, SQLUtilsCommons.getSQLDropIfExistsQuery(TRIP_STOPS_TABLE_NAME))
+        SQLUtils.executeUpdate(statement, SQLUtilsCommons.getSQLDropIfExistsQuery(SCHEDULES_TABLE_NAME))
+        SQLUtils.executeUpdate(
             statement,
-            "CREATE TABLE $STOP_TIMES_TABLE_NAME (" +
-                    "${GStopTime.TRIP_ID} integer, " +
-                    "${GStopTime.STOP_ID} integer, " +
-                    "${GStopTime.STOP_SEQUENCE} integer, " +
-                    "${GStopTime.ARRIVAL_TIME} integer, " +
-                    "${GStopTime.DEPARTURE_TIME} integer, " +
-                    "${GStopTime.STOP_HEADSIGN} string, " +
-                    "${GStopTime.PICKUP_TYPE} integer, " +
-                    "${GStopTime.DROP_OFF_TYPE} integer" +
-                    ")"
+            SQLCreateBuilder.getNew(STOP_TIMES_TABLE_NAME)
+                .appendColumn(GStopTime.TRIP_ID, SQLUtilsCommons.INT)
+                .appendColumn(GStopTime.STOP_ID, SQLUtilsCommons.INT)
+                .appendColumn(GStopTime.STOP_SEQUENCE, SQLUtilsCommons.INT)
+                .appendColumn(GStopTime.ARRIVAL_TIME, SQLUtilsCommons.INT)
+                .appendColumn(GStopTime.DEPARTURE_TIME, SQLUtilsCommons.INT)
+                .appendColumn(GStopTime.STOP_HEADSIGN, SQLUtilsCommons.TXT) // string ??
+                .appendColumn(GStopTime.PICKUP_TYPE, SQLUtilsCommons.INT)
+                .appendColumn(GStopTime.DROP_OFF_TYPE, SQLUtilsCommons.INT)
+                .build()
         )
-        executeUpdate(
+        SQLUtils.executeUpdate(
             statement,
-            "CREATE TABLE $TRIP_STOPS_TABLE_NAME (" +
-                    "${GTripStop.ROUTE_ID} integer, " +
-                    "${GTripStop.TRIP_ID} integer, " +
-                    "${GTripStop.STOP_ID} integer, " +
-                    "${GTripStop.STOP_SEQUENCE} integer" +
-                    ")"
+            SQLCreateBuilder.getNew(TRIP_STOPS_TABLE_NAME)
+                .appendColumn(GTripStop.ROUTE_ID, SQLUtilsCommons.INT)
+                .appendColumn(GTripStop.TRIP_ID, SQLUtilsCommons.INT)
+                .appendColumn(GTripStop.STOP_ID, SQLUtilsCommons.INT)
+                .appendColumn(GTripStop.STOP_SEQUENCE, SQLUtilsCommons.INT)
+                .build()
         )
-        executeUpdate(
+        SQLUtils.executeUpdate(
             statement,
-            "CREATE TABLE $SCHEDULES_TABLE_NAME (" +
-                    "${MSchedule.ROUTE_ID} integer, " +
-                    "${MSchedule.SERVICE_ID} integer, " +
-                    "${MSchedule.TRIP_ID} integer, " +
-                    "${MSchedule.STOP_ID} integer, " +
-                    "${MSchedule.ARRIVAL} integer, " +
-                    "${MSchedule.DEPARTURE} integer, " +
-                    "${MSchedule.PATH_ID} integer, " +
-                    "${MSchedule.HEADSIGN_TYPE} integer, " +
-                    "${MSchedule.HEADSIGN_VALUE} string" +
-                    ")"
+            SQLCreateBuilder.getNew(SCHEDULES_TABLE_NAME)
+                .appendColumn(MSchedule.ROUTE_ID, SQLUtilsCommons.INT)
+                .appendColumn(MSchedule.SERVICE_ID, SQLUtilsCommons.INT)
+                .appendColumn(MSchedule.TRIP_ID, SQLUtilsCommons.INT)
+                .appendColumn(MSchedule.STOP_ID, SQLUtilsCommons.INT)
+                .appendColumn(MSchedule.ARRIVAL, SQLUtilsCommons.INT)
+                .appendColumn(MSchedule.DEPARTURE, SQLUtilsCommons.INT)
+                .appendColumn(MSchedule.PATH_ID, SQLUtilsCommons.INT)
+                .appendColumn(MSchedule.HEADSIGN_TYPE, SQLUtilsCommons.INT)
+                .appendColumn(MSchedule.HEADSIGN_VALUE, SQLUtilsCommons.TXT) // string ??
+                .build()
         )
-    }
-
-    @Suppress("unused")
-    fun beginTransaction() {
-        val statement = connection.createStatement()
-        executeQuery(statement, "BEGIN TRANSACTION")
-    }
-
-    @Suppress("unused")
-    fun endTransaction() {
-        val statement = connection.createStatement()
-        executeQuery(statement, "END TRANSACTION")
-    }
-
-    @JvmStatic
-    fun setAutoCommit(autoCommit: Boolean) {
-        connection.autoCommit = autoCommit
     }
 
     @Suppress("unused")
     @JvmStatic
-    fun commit() {
-        connection.commit()
-    }
+    fun beginTransaction() = SQLUtils.beginTransaction(this.connection)
+
+    @Suppress("unused")
+    @JvmStatic
+    fun endTransaction() = SQLUtils.endTransaction(this.connection)
+
+    @JvmStatic
+    fun setAutoCommit(autoCommit: Boolean) = SQLUtils.setAutoCommit(this.connection, autoCommit)
+
+    @Suppress("unused")
+    @JvmStatic
+    fun commit() = SQLUtils.commit(this.connection)
 
     @JvmStatic
     fun insertStopTime(gStopTime: GStopTime): Boolean {
-        val rs = executeUpdate(
+        val rs = SQLUtils.executeUpdate(
             connection.createStatement(),
-            "INSERT INTO $STOP_TIMES_TABLE_NAME VALUES(" +
+            SQLUtilsCommons.INSERT_INTO + STOP_TIMES_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
                     "${gStopTime.tripIdInt}," +
                     "${gStopTime.stopIdInt}," +
                     "${gStopTime.stopSequence}," +
@@ -128,7 +116,7 @@ object DBUtils {
                     "${gStopTime.stopHeadsign?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}," +
                     "${gStopTime.pickupType}," +
                     "${gStopTime.dropOffType}" +
-                    ")"
+                    SQLUtilsCommons.P2
         )
         insertRowCount++
         insertCount++
@@ -137,14 +125,14 @@ object DBUtils {
 
     @JvmStatic
     fun insertTripStop(gTripStop: GTripStop): Boolean {
-        val rs = executeUpdate(
+        val rs = SQLUtils.executeUpdate(
             connection.createStatement(),
-            "INSERT INTO $TRIP_STOPS_TABLE_NAME VALUES(" +
+            SQLUtilsCommons.INSERT_INTO + TRIP_STOPS_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
                     "${gTripStop.routeIdInt}," +
                     "${gTripStop.tripIdInt}," +
                     "${gTripStop.stopIdInt}," +
                     "${gTripStop.stopSequence}" +
-                    ")"
+                    SQLUtilsCommons.P2
         )
         insertRowCount++
         insertCount++
@@ -153,9 +141,9 @@ object DBUtils {
 
     @JvmStatic
     fun insertSchedule(mSchedule: MSchedule): Boolean {
-        val rs = executeUpdate(
+        val rs = SQLUtils.executeUpdate(
             connection.createStatement(),
-            "INSERT INTO $SCHEDULES_TABLE_NAME VALUES(" +
+            SQLUtilsCommons.INSERT_INTO + SCHEDULES_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
                     "${mSchedule.routeId}," +
                     "${mSchedule.serviceIdInt}," +
                     "${mSchedule.tripId}," +
@@ -165,7 +153,7 @@ object DBUtils {
                     "${mSchedule.pathIdInt}," +
                     "${mSchedule.headsignType}," +
                     "${mSchedule.headsignValue?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}" +
-                    ")"
+                    SQLUtilsCommons.P2
         )
         insertRowCount++
         insertCount++
@@ -205,7 +193,7 @@ object DBUtils {
             }
         }
         val result = ArrayList<GStopTime>()
-        val rs = executeQuery(connection.createStatement(), query)
+        val rs = SQLUtils.executeQuery(connection.createStatement(), query)
         while (rs.next()) {
             var stopHeadSign: String? = rs.getString(GStopTime.STOP_HEADSIGN)
             if (stopHeadSign == SQL_NULL) {
@@ -258,7 +246,7 @@ object DBUtils {
             }
         }
         val result = ArrayList<GTripStop>()
-        val rs = executeQuery(connection.createStatement(), query)
+        val rs = SQLUtils.executeQuery(connection.createStatement(), query)
         while (rs.next()) {
             result.add(
                 GTripStop(
@@ -407,7 +395,7 @@ object DBUtils {
             }
         }
         val result = ArrayList<MSchedule>()
-        val rs = executeQuery(connection.createStatement(), query)
+        val rs = SQLUtils.executeQuery(connection.createStatement(), query)
         while (rs.next()) {
             var headsignValue: String? = rs.getString(MSchedule.HEADSIGN_VALUE)
             if (headsignValue == SQL_NULL) {
@@ -442,7 +430,7 @@ object DBUtils {
                 "${GStopTime.STOP_ID} = ${gStopTime.stopIdInt}" +
                 " AND " +
                 "${GStopTime.STOP_SEQUENCE} = ${gStopTime.stopSequence}"
-        val rs = executeUpdate(connection.createStatement(), query)
+        val rs = SQLUtils.executeUpdate(connection.createStatement(), query)
         deletedRowCount += rs
         if (rs > 1) {
             throw MTLog.Fatal("Deleted too many stop times!")
@@ -459,7 +447,7 @@ object DBUtils {
                     "${GStopTime.TRIP_ID} = $tripId"
         }
         deleteCount++
-        val rs = executeUpdate(connection.createStatement(), query)
+        val rs = SQLUtils.executeUpdate(connection.createStatement(), query)
         deletedRowCount += rs
         return rs
     }
@@ -525,14 +513,14 @@ object DBUtils {
             query += " ${MSchedule.DEPARTURE} = $departure"
         }
         deleteCount++
-        val rs = executeUpdate(connection.createStatement(), query)
+        val rs = SQLUtils.executeUpdate(connection.createStatement(), query)
         deletedRowCount += rs
         return rs
     }
 
     @JvmStatic
     fun countStopTimes(): Int {
-        val rs = executeQuery(
+        val rs = SQLUtils.executeQuery(
             connection.createStatement(),
             "SELECT COUNT(*) AS $SQL_RESULT_ALIAS FROM $STOP_TIMES_TABLE_NAME"
         )
@@ -546,7 +534,7 @@ object DBUtils {
 
     @JvmStatic
     fun countTripStops(): Int {
-        val rs = executeQuery(
+        val rs = SQLUtils.executeQuery(
             connection.createStatement(),
             "SELECT COUNT(*) AS $SQL_RESULT_ALIAS FROM $TRIP_STOPS_TABLE_NAME"
         )
@@ -560,7 +548,7 @@ object DBUtils {
 
     @JvmStatic
     fun countSchedule(): Int {
-        val rs = executeQuery(
+        val rs = SQLUtils.executeQuery(
             connection.createStatement(),
             "SELECT COUNT(*) AS $SQL_RESULT_ALIAS FROM $SCHEDULES_TABLE_NAME"
         )
@@ -575,38 +563,5 @@ object DBUtils {
     @JvmStatic
     fun printStats() {
         MTLog.log("SQL: insert [$insertCount|$insertRowCount], select [$selectCount|$selectRowCount], delete [$deleteCount|$deletedRowCount].")
-    }
-
-    private fun execute(statement: Statement, query: String): Boolean {
-        if (Constants.LOG_SQL) {
-            MTLog.logDebug("SQL > $query.")
-        }
-        try {
-            return statement.execute(query)
-        } catch (e: SQLiteException) {
-            throw MTLog.Fatal(e, "SQL error while executing '$query'!")
-        }
-    }
-
-    private fun executeQuery(statement: Statement, query: String): ResultSet {
-        if (Constants.LOG_SQL_QUERY) {
-            MTLog.logDebug("SQL > $query.")
-        }
-        try {
-            return statement.executeQuery(query)
-        } catch (e: SQLiteException) {
-            throw MTLog.Fatal(e, "SQL error while executing '$query'!")
-        }
-    }
-
-    private fun executeUpdate(statement: Statement, query: String): Int {
-        if (Constants.LOG_SQL_UPDATE) {
-            MTLog.logDebug("SQL > $query.")
-        }
-        try {
-            return statement.executeUpdate(query)
-        } catch (e: SQLiteException) {
-            throw MTLog.Fatal(e, "SQL error while executing '$query'!")
-        }
     }
 }

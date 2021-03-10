@@ -3,13 +3,18 @@ package org.mtransit.parser.mt;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.CloseableUtils;
+import org.mtransit.commons.GTFSCommons;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.FileUtils;
 import org.mtransit.parser.MTLog;
+import org.mtransit.parser.Pair;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.db.DBUtils;
+import org.mtransit.parser.db.DumpDbUtils;
+import org.mtransit.parser.db.SQLUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GSpec;
@@ -34,6 +39,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -51,11 +58,13 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.mtransit.commons.FeatureFlags.F_PRE_FILLED_DB;
+
 public class MGenerator {
 
 	@NotNull
 	public static MSpec generateMSpec(@NotNull GSpec gtfs, @NotNull GAgencyTools agencyTools) {
-		MTLog.log("\nGenerating routes, trips, trip stops & stops objects... ");
+		MTLog.log("Generating routes, trips, trip stops & stops objects... ");
 		HashSet<MAgency> mAgencies = new HashSet<>(); // use set to avoid duplicates
 		HashSet<MRoute> mRoutes = new HashSet<>(); // use set to avoid duplicates
 		HashSet<MTrip> mTrips = new HashSet<>(); // use set to avoid duplicates
@@ -183,48 +192,357 @@ public class MGenerator {
 		);
 	}
 
-	private static final String GTFS_SCHEDULE_SERVICE_DATES = "gtfs_schedule_service_dates";
-	private static final String GTFS_SCHEDULE_STOP = "gtfs_schedule_stop_";
-	private static final String GTFS_FREQUENCY_ROUTE = "gtfs_frequency_route_";
-	private static final String GTFS_RTS_ROUTES = "gtfs_rts_routes";
-	private static final String GTFS_RTS_TRIPS = "gtfs_rts_trips";
-	private static final String GTFS_RTS_TRIP_STOPS = "gtfs_rts_trip_stops";
-	private static final String GTFS_RTS_STOPS = "gtfs_rts_stops";
-
-	public static void dumpFiles(@NotNull GAgencyTools gAgencyTools, @Nullable MSpec mSpec, @NotNull String gtfsFile, @NotNull String dumpDir, final @NotNull String fileBase) {
-		dumpFiles(gAgencyTools, mSpec, gtfsFile, dumpDir, fileBase, false);
-	}
+	private static final String GTFS_SCHEDULE = "gtfs_schedule";
+	private static final String GTFS_SCHEDULE_SERVICE_DATES = GTFS_SCHEDULE + "_service_dates"; // DB
+	private static final String GTFS_SCHEDULE_STOP = GTFS_SCHEDULE + "_stop_"; // file
+	private static final String GTFS_FREQUENCY = "gtfs_frequency";
+	private static final String GTFS_FREQUENCY_ROUTE = GTFS_FREQUENCY + "_route_"; // file
+	private static final String GTFS_RTS = "gtfs_rts";
+	private static final String GTFS_RTS_ROUTES = GTFS_RTS + "_routes"; // DB
+	private static final String GTFS_RTS_TRIPS = GTFS_RTS + "_trips"; // DB
+	private static final String GTFS_RTS_TRIP_STOPS = GTFS_RTS + "_trip_stops"; // DB
+	private static final String GTFS_RTS_STOPS = GTFS_RTS + "_stops"; // DB
 
 	private static final int FILE_WRITER_LOG = 10;
 
-	public static void dumpFiles(@NotNull GAgencyTools gAgencyTools, @Nullable MSpec mSpec, @NotNull String gtfsFile, @NotNull String dumpDir, final @NotNull String fileBase, boolean deleteAll) {
+	public static void dumpFiles(@NotNull GAgencyTools gAgencyTools,
+								 @Nullable MSpec mSpec,
+								 @NotNull String gtfsFile,
+								 @SuppressWarnings("unused") @NotNull String unused,
+								 final @NotNull String fileBase,
+								 boolean deleteAll) {
 		if (!deleteAll && (mSpec == null || !mSpec.isValid())) {
 			throw new MTLog.Fatal("Generated data invalid (agencies:%s)!", mSpec);
 		}
+		String rootDir = "../app-android/";
+		String mainSourceSetDir = rootDir + "src/main/";
+		String resDirName;
+		if ("current_".equalsIgnoreCase(fileBase)) {
+			resDirName = RES + "-current";
+		} else if ("next_".equalsIgnoreCase(fileBase)) {
+			resDirName = RES + "-next";
+		} else {
+			resDirName = RES;
+		}
+		String rawDir = mainSourceSetDir + resDirName + "/" + RAW;
 		long start = System.currentTimeMillis();
-		final File dumpDirF = new File(dumpDir);
-		if (!dumpDirF.getParentFile().exists()) {
-			FileUtils.mkdir(dumpDirF.getParentFile());
+		final File rawDirF = new File(rawDir);
+		if (!rawDirF.getParentFile().exists()) {
+			FileUtils.mkdir(rawDirF.getParentFile());
 		}
-		if (!dumpDirF.exists()) {
-			FileUtils.mkdir(dumpDirF);
+		if (!rawDirF.exists()) {
+			FileUtils.mkdir(rawDirF);
 		}
-		MTLog.log("Writing MT files (%s)...", dumpDirF.toURI());
+		String dataDir = rootDir + "data" + "/" + resDirName;
+		final File dataDirF = new File(dataDir);
+		if (F_PRE_FILLED_DB) {
+			if (!dataDirF.getParentFile().exists()) {
+				FileUtils.mkdir(dataDirF.getParentFile());
+			}
+			if (!dataDirF.exists()) {
+				FileUtils.mkdir(dataDirF);
+			}
+		}
+		MTLog.log("Writing MT files (%s)...", rawDirF.toURI());
+		String dbFilePath = rawDir + "/" + GTFSCommons.getDBFileName(fileBase);
+		Connection dbConnection;
+		if (deleteAll || !F_PRE_FILLED_DB) {
+			DumpDbUtils.delete(dbFilePath);
+			dbConnection = null;
+		} else {
+			dbConnection = DumpDbUtils.getConnection(dbFilePath);
+			DumpDbUtils.init(dbConnection); // create tables (clean)
+		}
+		// ROUTES
+		dumpRTSRoutes(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		// TRIPS
+		dumpRTSTrips(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		// TRIP STOPS
+		dumpRTSTripStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		// STOPS
+		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng =
+				dumpRTSStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		// SCHEDULE SERVICE DATES
+		Pair<Integer, Integer> minMaxDates =
+				dumpScheduleServiceDates(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		// SCHEDULE STOPS
+		dumpScheduleStops(gAgencyTools, mSpec, fileBase, deleteAll, rawDirF);
+		// FREQUENCY ROUTES
+		dumpFrequencyRoutes(gAgencyTools, mSpec, fileBase, deleteAll, rawDirF);
+		if (deleteAll) {
+			dumpValues(rawDirF, fileBase, null, null, null, null, null, -1, -1, true);
+		} else {
+			dumpCommonValues(rawDirF, mSpec);
+			dumpValues(rawDirF, fileBase, mSpec, minMaxLatLng.first.first, minMaxLatLng.second.first, minMaxLatLng.first.second, minMaxLatLng.second.second, mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds(), false);
+			dumpStoreListing(rawDirF, fileBase, minMaxDates.first, minMaxDates.second);
+			bumpDBVersion(rawDirF, gtfsFile);
+		}
+		MTLog.log("Writing files (%s)... DONE in %s.",
+				rawDirF.toURI(),
+				Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		DBUtils.printStats();
+	}
+
+	private static void dumpRTSRoutes(@Nullable MSpec mSpec,
+									  @NotNull String fileBase,
+									  boolean deleteAll,
+									  @NotNull File dataDirF,
+									  @NotNull File rawDirF,
+									  @Nullable Connection dbConnection) {
+		if (!deleteAll
+				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
+		}
 		File file;
-		int fw = 0;
 		BufferedWriter ow = null;
-		Integer minDate = null, maxDate = null;
-		file = new File(dumpDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
+		if (F_PRE_FILLED_DB) {
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RTS_ROUTES)); // migration from src/main/res/raw to data
+		}
+		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RTS_ROUTES);
 		FileUtils.deleteIfExist(file); // delete previous
 		try {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
-				//noinspection ConstantConditions
-				if (fw++ % FILE_WRITER_LOG == 0) { // LOG
-					MTLog.logPOINT(); // LOG
-				} // LOG
+				MTLog.logPOINT(); // LOG
+				Statement dbStatement = null;
+				String sqlInsert = null;
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
+					dbStatement = dbConnection.createStatement();
+					sqlInsert = GTFSCommons.getT_ROUTE_SQL_INSERT();
+				}
+				for (MRoute mRoute : mSpec.getRoutes()) {
+					final String routeInsert = mRoute.toFile();
+					if (F_PRE_FILLED_DB) {
+						SQLUtils.executeUpdate(
+								dbStatement,
+								String.format(sqlInsert, routeInsert)
+						);
+					}
+					ow.write(routeInsert);
+					ow.write(Constants.NEW_LINE);
+				}
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
+				}
+			}
+		} catch (Exception ioe) {
+			throw new MTLog.Fatal(ioe, "I/O Error while writing route file!");
+		} finally {
+			CloseableUtils.closeQuietly(ow);
+		}
+	}
+
+	private static void dumpRTSTrips(@Nullable MSpec mSpec,
+									 @NotNull String fileBase,
+									 boolean deleteAll,
+									 @NotNull File dataDirF,
+									 @NotNull File rawDirF,
+									 @Nullable Connection dbConnection) {
+		if (!deleteAll
+				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
+		}
+		File file;
+		BufferedWriter ow = null;
+		if (F_PRE_FILLED_DB) {
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RTS_TRIPS)); // migration from src/main/res/raw to data
+		}
+		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RTS_TRIPS);
+		FileUtils.deleteIfExist(file); // delete previous
+		try {
+			if (!deleteAll) {
+				ow = new BufferedWriter(new FileWriter(file));
+				MTLog.logPOINT(); // LOG
+				Statement dbStatement = null;
+				String sqlInsert = null;
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
+					dbStatement = dbConnection.createStatement();
+					sqlInsert = GTFSCommons.getT_TRIP_SQL_INSERT();
+				}
+				for (MTrip mTrip : mSpec.getTrips()) {
+					final String tripInsert = mTrip.toFile();
+					if (F_PRE_FILLED_DB) {
+						SQLUtils.executeUpdate(
+								dbStatement,
+								String.format(sqlInsert, tripInsert)
+						);
+					}
+					ow.write(tripInsert);
+					ow.write(Constants.NEW_LINE);
+				}
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
+				}
+			}
+		} catch (Exception ioe) {
+			throw new MTLog.Fatal(ioe, "I/O Error while writing trip file!");
+		} finally {
+			CloseableUtils.closeQuietly(ow);
+		}
+	}
+
+	private static void dumpRTSTripStops(@Nullable MSpec mSpec,
+										 @NotNull String fileBase,
+										 boolean deleteAll,
+										 @NotNull File dataDirF,
+										 @NotNull File rawDirF,
+										 @Nullable Connection dbConnection) {
+		if (!deleteAll
+				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
+		}
+		File file;
+		BufferedWriter ow = null;
+		if (F_PRE_FILLED_DB) {
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RTS_TRIP_STOPS)); // migration from src/main/res/raw to data
+		}
+		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RTS_TRIP_STOPS);
+		FileUtils.deleteIfExist(file); // delete previous
+		try {
+			if (!deleteAll) {
+				ow = new BufferedWriter(new FileWriter(file));
+				MTLog.logPOINT(); // LOG
+				Statement dbStatement = null;
+				String sqlInsert = null;
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
+					dbStatement = dbConnection.createStatement();
+					sqlInsert = GTFSCommons.getT_TRIP_STOPS_SQL_INSERT();
+				}
+				for (MTripStop mTripStop : mSpec.getTripStops()) {
+					final String tripStopInsert = mTripStop.toFile();
+					if (F_PRE_FILLED_DB) {
+						SQLUtils.executeUpdate(
+								dbStatement,
+								String.format(sqlInsert, tripStopInsert)
+						);
+					}
+					ow.write(tripStopInsert);
+					ow.write(Constants.NEW_LINE);
+				}
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
+				}
+			}
+		} catch (Exception ioe) {
+			throw new MTLog.Fatal(ioe, "I/O Error while writing trip stops file!");
+		} finally {
+			CloseableUtils.closeQuietly(ow);
+		}
+	}
+
+	@NotNull
+	private static Pair<Pair<Double, Double>, Pair<Double, Double>> dumpRTSStops(@Nullable MSpec mSpec,
+																				 @NotNull String fileBase,
+																				 boolean deleteAll,
+																				 @NotNull File dataDirF,
+																				 @NotNull File rawDirF,
+																				 Connection dbConnection) {
+		if (!deleteAll && (mSpec == null || !mSpec.isValid())) {
+			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
+		}
+		File file;
+		BufferedWriter ow = null;
+		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng = new Pair<>(new Pair<>(null, null), new Pair<>(null, null));
+		if (F_PRE_FILLED_DB) {
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RTS_STOPS)); // migration from src/main/res/raw to data
+		}
+		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RTS_STOPS);
+		FileUtils.deleteIfExist(file); // delete previous
+		try {
+			if (!deleteAll) {
+				ow = new BufferedWriter(new FileWriter(file));
+				MTLog.logPOINT(); // LOG
+				Double minLat = null, maxLat = null, minLng = null, maxLng = null;
+				Statement dbStatement = null;
+				String sqlInsert = null;
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
+					dbStatement = dbConnection.createStatement();
+					sqlInsert = GTFSCommons.getT_STOP_SQL_INSERT();
+				}
+				for (MStop mStop : mSpec.getStops()) {
+					final String stopInsert = mStop.toFile();
+					if (F_PRE_FILLED_DB) {
+						SQLUtils.executeUpdate(
+								dbStatement,
+								String.format(sqlInsert, stopInsert)
+						);
+					}
+					ow.write(stopInsert);
+					ow.write(Constants.NEW_LINE);
+					if (mStop.hasLat()) {
+						if (minLat == null || minLat > mStop.getLat()) {
+							minLat = mStop.getLat();
+						}
+						if (maxLat == null || maxLat < mStop.getLat()) {
+							maxLat = mStop.getLat();
+						}
+					}
+					if (mStop.hasLng()) {
+						if (minLng == null || minLng > mStop.getLng()) {
+							minLng = mStop.getLng();
+						}
+						if (maxLng == null || maxLng < mStop.getLng()) {
+							maxLng = mStop.getLng();
+						}
+					}
+				}
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
+				}
+				minMaxLatLng = new Pair<>(new Pair<>(minLat, minLng), new Pair<>(maxLat, maxLng));
+			}
+		} catch (Exception ioe) {
+			throw new MTLog.Fatal(ioe, "I/O Error while writing stop file!");
+		} finally {
+			CloseableUtils.closeQuietly(ow);
+		}
+		return minMaxLatLng;
+	}
+
+	@NotNull
+	private static Pair<Integer, Integer> dumpScheduleServiceDates(@NotNull GAgencyTools gAgencyTools,
+																   @Nullable MSpec mSpec,
+																   @NotNull String fileBase,
+																   boolean deleteAll,
+																   @NotNull File dataDirF,
+																   @NotNull File rawDirF,
+																   @Nullable Connection dbConnection) {
+		if (!deleteAll
+				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
+		}
+		Pair<Integer, Integer> minMaxDates = new Pair<>(null, null);
+		if (F_PRE_FILLED_DB) {
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES)); // migration from src/main/res/raw to data
+		}
+		File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
+		FileUtils.deleteIfExist(file); // delete previous
+		BufferedWriter ow = null;
+		try {
+			if (!deleteAll) {
+				ow = new BufferedWriter(new FileWriter(file));
+				MTLog.logPOINT(); // LOG
+				Integer minDate = null, maxDate = null;
+				Statement dbStatement = null;
+				String sqlInsert = null;
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
+					dbStatement = dbConnection.createStatement();
+					sqlInsert = GTFSCommons.getT_SERVICE_DATES_SQL_INSERT();
+				}
 				for (MServiceDate mServiceDate : mSpec.getServiceDates()) {
-					ow.write(mServiceDate.toFile(gAgencyTools));
+					final String serviceDatesInsert = mServiceDate.toFile(gAgencyTools);
+					if (F_PRE_FILLED_DB) {
+						SQLUtils.executeUpdate(
+								dbStatement,
+								String.format(sqlInsert, serviceDatesInsert)
+						);
+					}
+					ow.write(serviceDatesInsert);
 					ow.write(Constants.NEW_LINE);
 					if (minDate == null || minDate > mServiceDate.getCalendarDate()) {
 						minDate = mServiceDate.getCalendarDate();
@@ -233,15 +551,30 @@ public class MGenerator {
 						maxDate = mServiceDate.getCalendarDate();
 					}
 				}
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
+				}
+				minMaxDates = new Pair<>(minDate, maxDate);
 			}
-		} catch (IOException ioe) {
+		} catch (Exception ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while writing service dates file!");
 		} finally {
-			IOUtils.closeQuietly(ow);
+			CloseableUtils.closeQuietly(ow);
 		}
-		// delete all "...schedules_stop_*"
+		return minMaxDates;
+	}
+
+	private static void dumpScheduleStops(@NotNull GAgencyTools gAgencyTools,
+										  @Nullable MSpec mSpec,
+										  @NotNull String fileBase,
+										  boolean deleteAll,
+										  @NotNull File rawDirF) {
+		if (!deleteAll && (mSpec == null || !mSpec.isValid())) {
+			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
+		}
+		File file;// delete all "...schedules_stop_*"
 		final String fileBaseScheduleStop = fileBase + GTFS_SCHEDULE_STOP;
-		final File[] scheduleStopFiles = dumpDirF.listFiles((dir, name) ->
+		final File[] scheduleStopFiles = rawDirF.listFiles((dir, name) ->
 				name.startsWith(fileBaseScheduleStop)
 		);
 		if (scheduleStopFiles != null) {
@@ -283,13 +616,15 @@ public class MGenerator {
 					}
 					mStopScheduleMap.get(schedule.getStopId()).add(schedule);
 				}
+				BufferedWriter ow = null;
+				int fw = 0;
 				for (Integer stopId : mStopScheduleMap.keySet()) {
 					try {
 						mStopSchedules = mStopScheduleMap.get(stopId);
 						Collections.sort(mStopSchedules); // DB sort uses IntId instead of id string
 						if (mStopSchedules.size() > 0) {
 							fileName = fileBaseScheduleStop + stopId;
-							file = new File(dumpDirF, fileName);
+							file = new File(rawDirF, fileName);
 							empty = true;
 							ow = new BufferedWriter(new FileWriter(file));
 							if (fw++ % FILE_WRITER_LOG == 0) { // LOG
@@ -318,14 +653,29 @@ public class MGenerator {
 					} catch (IOException ioe) {
 						throw new MTLog.Fatal(ioe, "I/O Error while writing schedule file for stop '%s'!", stopId);
 					} finally {
-						IOUtils.closeQuietly(ow);
+						CloseableUtils.closeQuietly(ow);
 					}
 				}
 			}
 		}
+	}
+
+	private static void dumpFrequencyRoutes(@NotNull GAgencyTools gAgencyTools,
+											@Nullable MSpec mSpec,
+											@NotNull String fileBase,
+											boolean deleteAll,
+											@NotNull File rawDirF) {
+		if (!deleteAll && (mSpec == null || !mSpec.isValid())) {
+			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
+		}
+		File file;
+		String fileName;
+		boolean empty;
 		// delete all "...frequencies_route_*"
 		final String fileBaseRouteFrequency = fileBase + GTFS_FREQUENCY_ROUTE;
-		File[] frequencyRouteFiles = dumpDirF.listFiles((dir, name) -> name.startsWith(fileBaseRouteFrequency));
+		File[] frequencyRouteFiles = rawDirF.listFiles((dir, name) ->
+				name.startsWith(fileBaseRouteFrequency)
+		);
 		if (frequencyRouteFiles != null) {
 			for (File f : frequencyRouteFiles) {
 				FileUtils.delete(f);
@@ -333,12 +683,14 @@ public class MGenerator {
 		}
 		ArrayList<MFrequency> mRouteFrequencies;
 		if (!deleteAll) {
+			BufferedWriter ow = null;
+			int fw = 0;
 			for (Long routeId : mSpec.getRouteFrequencies().keySet()) {
 				try {
 					mRouteFrequencies = mSpec.getRouteFrequencies().get(routeId);
 					if (mRouteFrequencies != null && mRouteFrequencies.size() > 0) {
 						fileName = fileBaseRouteFrequency + routeId;
-						file = new File(dumpDirF, fileName);
+						file = new File(rawDirF, fileName);
 						empty = true;
 						ow = new BufferedWriter(new FileWriter(file));
 						if (fw++ % FILE_WRITER_LOG == 0) { // LOG
@@ -356,112 +708,10 @@ public class MGenerator {
 				} catch (IOException ioe) {
 					throw new MTLog.Fatal(ioe, "I/O Error while writing frequency file!");
 				} finally {
-					IOUtils.closeQuietly(ow);
+					CloseableUtils.closeQuietly(ow);
 				}
 			}
 		}
-		file = new File(dumpDirF, fileBase + GTFS_RTS_ROUTES);
-		FileUtils.deleteIfExist(file); // delete previous
-		try {
-			if (!deleteAll) {
-				ow = new BufferedWriter(new FileWriter(file));
-				if (fw++ % FILE_WRITER_LOG == 0) { // LOG
-					MTLog.logPOINT(); // LOG
-				} // LOG
-				for (MRoute mRoute : mSpec.getRoutes()) {
-					ow.write(mRoute.toFile());
-					ow.write(Constants.NEW_LINE);
-				}
-			}
-		} catch (IOException ioe) {
-			throw new MTLog.Fatal(ioe, "I/O Error while writing route file!");
-		} finally {
-			IOUtils.closeQuietly(ow);
-		}
-		file = new File(dumpDirF, fileBase + GTFS_RTS_TRIPS);
-		FileUtils.deleteIfExist(file); // delete previous
-		try {
-			if (!deleteAll) {
-				ow = new BufferedWriter(new FileWriter(file));
-				if (fw++ % FILE_WRITER_LOG == 0) { // LOG
-					MTLog.logPOINT(); // LOG
-				} // LOG
-				for (MTrip mTrip : mSpec.getTrips()) {
-					ow.write(mTrip.toFile());
-					ow.write(Constants.NEW_LINE);
-				}
-			}
-		} catch (IOException ioe) {
-			throw new MTLog.Fatal(ioe, "I/O Error while writing trip file!");
-		} finally {
-			IOUtils.closeQuietly(ow);
-		}
-		file = new File(dumpDirF, fileBase + GTFS_RTS_TRIP_STOPS);
-		FileUtils.deleteIfExist(file); // delete previous
-		try {
-			if (!deleteAll) {
-				ow = new BufferedWriter(new FileWriter(file));
-				if (fw++ % FILE_WRITER_LOG == 0) { // LOG
-					MTLog.logPOINT(); // LOG
-				} // LOG
-				for (MTripStop mTripStop : mSpec.getTripStops()) {
-					ow.write(mTripStop.toFile());
-					ow.write(Constants.NEW_LINE);
-				}
-			}
-		} catch (IOException ioe) {
-			throw new MTLog.Fatal(ioe, "I/O Error while writing trip stops file!");
-		} finally {
-			IOUtils.closeQuietly(ow);
-		}
-		Double minLat = null, maxLat = null, minLng = null, maxLng = null;
-		file = new File(dumpDirF, fileBase + GTFS_RTS_STOPS);
-		FileUtils.deleteIfExist(file); // delete previous
-		try {
-			if (!deleteAll) {
-				ow = new BufferedWriter(new FileWriter(file));
-				if (fw++ % FILE_WRITER_LOG == 0) { // LOG
-					MTLog.logPOINT(); // LOG
-				} // LOG
-				for (MStop mStop : mSpec.getStops()) {
-					ow.write(mStop.toFile());
-					ow.write(Constants.NEW_LINE);
-					if (mStop.hasLat()) {
-						if (minLat == null || minLat > mStop.getLat()) {
-							minLat = mStop.getLat();
-						}
-						if (maxLat == null || maxLat < mStop.getLat()) {
-							maxLat = mStop.getLat();
-						}
-					}
-					if (mStop.hasLng()) {
-						if (minLng == null || minLng > mStop.getLng()) {
-							minLng = mStop.getLng();
-						}
-						if (maxLng == null || maxLng < mStop.getLng()) {
-							maxLng = mStop.getLng();
-						}
-					}
-				}
-			}
-		} catch (IOException ioe) {
-			throw new MTLog.Fatal(ioe, "I/O Error while writing stop file!");
-		} finally {
-			IOUtils.closeQuietly(ow);
-		}
-		if (deleteAll) {
-			dumpValues(dumpDirF, fileBase, null, null, null, null, null, -1, -1, true);
-		} else {
-			dumpCommonValues(dumpDirF, mSpec);
-			dumpValues(dumpDirF, fileBase, mSpec, minLat, maxLat, minLng, maxLng, mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds(), false);
-			dumpStoreListing(dumpDirF, fileBase, minDate, maxDate);
-			bumpDBVersion(dumpDirF, gtfsFile);
-		}
-		MTLog.log("Writing files (%s)... DONE in %s (%d files written).",
-				dumpDirF.toURI(),
-				Utils.getPrettyDuration(System.currentTimeMillis() - start),
-				fw);
-		DBUtils.printStats();
 	}
 
 	private static final String GTFS_RTS_VALUES_XML = "gtfs_rts_values.xml";
@@ -511,7 +761,7 @@ public class MGenerator {
 		} catch (IOException ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while bumping DB version!");
 		} finally {
-			IOUtils.closeQuietly(ow);
+			CloseableUtils.closeQuietly(ow);
 		}
 	}
 
@@ -531,6 +781,7 @@ public class MGenerator {
 	}
 
 	private static final String RES = "res";
+	private static final String RAW = "raw";
 	private static final String VALUES = "values";
 	private static final String GTFS_RTS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml";
 
@@ -573,7 +824,7 @@ public class MGenerator {
 		} catch (IOException ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while writing values file!");
 		} finally {
-			IOUtils.closeQuietly(ow);
+			CloseableUtils.closeQuietly(ow);
 		}
 	}
 
@@ -635,7 +886,7 @@ public class MGenerator {
 		} catch (IOException ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while writing values file!");
 		} finally {
-			IOUtils.closeQuietly(ow);
+			CloseableUtils.closeQuietly(ow);
 		}
 	}
 
