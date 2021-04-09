@@ -59,6 +59,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 5;
 	private static final int MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS = 14;
 
+	private static final long MAX_CALENDAR_DATE_COVERAGE_RATIO = 10;
+
 	private static final int MIN_PREVIOUS_NEXT_ADDED_DAYS = 2;
 
 	public static final boolean EXPORT_PATH_ID;
@@ -920,6 +922,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 				continue;
 			}
 			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS)) {
+				long currentPeriodCoverageInMs = p.startDate == null || p.endDate == null ? 0L :
+						diffInMs(DATE_FORMAT, c,
+								p.startDate, // morning
+								p.endDate + 1 // midnight ≈ tomorrow
+						);
 				long nextPeriodCoverageInMs = pNext.startDate == null || pNext.endDate == null ? 0L :
 						diffInMs(DATE_FORMAT, c,
 								pNext.startDate, // morning
@@ -930,14 +937,21 @@ public class DefaultAgencyTools implements GAgencyTools {
 								pPrevious.startDate, // morning
 								pPrevious.endDate + 1 // midnight ≈ tomorrow
 						);
+				long previousToCurrent = previousPeriodCoverageInMs / currentPeriodCoverageInMs;
+				long nextToCurrent = nextPeriodCoverageInMs / currentPeriodCoverageInMs;
 				if (lookForward // NOT next schedule, only current schedule can look behind
 						&& previousPeriodCoverageInMs > 0L
-						&& (nextPeriodCoverageInMs <= 0L || previousPeriodCoverageInMs < nextPeriodCoverageInMs)) {
+						&& (nextPeriodCoverageInMs <= 0L || previousPeriodCoverageInMs < nextPeriodCoverageInMs)
+						&& previousToCurrent < MAX_CALENDAR_DATE_COVERAGE_RATIO) {
 					p.startDate = incDateDays(DATE_FORMAT, c, p.startDate, -1); // start--
 					MTLog.log("new start date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.startDate);
-				} else {
+				} else if (nextToCurrent < MAX_CALENDAR_DATE_COVERAGE_RATIO) {
 					p.endDate = incDateDays(DATE_FORMAT, c, p.endDate, 1); // end++
 					MTLog.log("new end date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.endDate);
+				} else {
+					MTLog.log("coverage lower than %s days but would add too many days (p: %sx, n: %sx)", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS,
+							nextToCurrent, previousToCurrent);
+					break;
 				}
 				continue;
 			}
