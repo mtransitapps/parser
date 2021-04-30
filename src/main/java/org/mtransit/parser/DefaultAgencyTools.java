@@ -384,7 +384,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	static boolean directionHeadSignsDescriptiveS(@NotNull Map<Integer, String> directionHeadSigns) {
 		if (directionHeadSigns.isEmpty()) {
-			return true; // nothing is not not descriptive
+			return true; // nothing is descriptive
 		}
 		Set<String> distinctHeadSigns = new HashSet<>();
 		for (String directionHeadSign : directionHeadSigns.values()) {

@@ -76,7 +76,7 @@ public class GReader {
 			boolean hasCalendar = false;
 			File calendarDateFile = new File(gtfsDir, GCalendarDate.FILENAME);
 			if (!calendarDateFile.exists()) {
-				MTLog.log("Skipping non-existing file '%s'.", calendarDateFile);
+				MTLog.log("Reading file '%s'... SKIP (non-existing).", calendarDateFile.getName());
 			} else {
 				hasCalendar = true;
 				fr = new FileReader(calendarDateFile);
@@ -88,7 +88,7 @@ public class GReader {
 			// CALENDAR
 			File calendarFile = new File(gtfsDir, GCalendar.FILENAME);
 			if (!calendarFile.exists()) {
-				MTLog.log("Skipping non-existing file '%s'.", calendarFile);
+				MTLog.log("Reading file '%s'... SKIP (non-existing).", calendarFile.getName());
 			} else {
 				hasCalendar = true;
 				fr = new FileReader(calendarFile);
@@ -130,7 +130,7 @@ public class GReader {
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				File frequencyFile = new File(gtfsDir, GFrequency.FILENAME);
 				if (!frequencyFile.exists()) {
-					MTLog.log("Skipping non-existing file '%s'.", frequencyFile);
+					MTLog.log("Reading file '%s'... SKIP (non-existing).", frequencyFile.getName());
 				} else {
 					fr = new FileReader(frequencyFile);
 					reader = new BufferedReader(fr);
@@ -156,7 +156,7 @@ public class GReader {
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				File stopTimeFile = new File(gtfsDir, GStopTime.FILENAME);
 				if (!stopTimeFile.exists()) {
-					MTLog.log("Skipping non-existing file '%s'.", stopTimeFile);
+					MTLog.log("Reading file '%s'... SKIP (non-existing).", stopTimeFile.getName());
 				} else {
 					fr = new FileReader(stopTimeFile);
 					reader = new BufferedReader(fr);
