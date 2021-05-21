@@ -458,6 +458,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 				case "nb":
 				case "n":
 				case "nb / north":
+				case "north / nord": // i18b
+				case "n / nord": // i18b
 					return MDirectionType.NORTH;
 				case "southbound":
 				case "south":
@@ -465,6 +467,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 				case "sb":
 				case "s":
 				case "sb / south":
+				case "south / sud": // i18n
+				case "s / sud": // i18n
 					return MDirectionType.SOUTH;
 				}
 				if (getDirectionTypes().size() == 1) { // only DIRECTION!
