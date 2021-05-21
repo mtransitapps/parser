@@ -163,18 +163,18 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	private String getAgencyType() {
 		final int type = getAgencyRouteType();
-		if (type == MAgency.ROUTE_TYPE_LIGHT_RAIL) {
+		if (GRouteType.isSameType(type, MAgency.ROUTE_TYPE_LIGHT_RAIL)) {
 			return "light rail";
-		} else if (type == MAgency.ROUTE_TYPE_SUBWAY) {
+		} else if (GRouteType.isSameType(type, MAgency.ROUTE_TYPE_SUBWAY)) {
 			return "subway";
-		} else if (type == MAgency.ROUTE_TYPE_TRAIN) {
+		} else if (GRouteType.isSameType(type, MAgency.ROUTE_TYPE_TRAIN)) {
 			return "train";
-		} else if (type == MAgency.ROUTE_TYPE_BUS) {
+		} else if (GRouteType.isSameType(type, MAgency.ROUTE_TYPE_BUS)) {
 			return "bus";
-		} else if (type == MAgency.ROUTE_TYPE_FERRY) {
+		} else if (GRouteType.isSameType(type, MAgency.ROUTE_TYPE_FERRY)) {
 			return "ferry";
 		}
-		MTLog.log("Unexpected route type '%s'!", type);
+		MTLog.log("getAgencyType() > Unexpected agency route type '%s'!", type);
 		return "type";
 	}
 

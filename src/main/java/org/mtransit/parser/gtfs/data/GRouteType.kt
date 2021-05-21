@@ -17,6 +17,7 @@ enum class GRouteType( // Communal Taxi Service (Please use 717)
     // 7: Funicular. Used for any rail system that moves on steep inclines with a cable traction system.
     // EXTENDED:
     EX_BUS_SERVICE(700),  // Bus Service
+    EX_DEMAND_AND_RESPONSE_BUS_SERVICE(715),  // Demand and Response Bus Service
     EX_SHARE_TAXI_SERVICE(717),  // Share Taxi Service
     EX_COMMUNAL_TAXI_SERVICE(1501);
 
@@ -33,8 +34,9 @@ enum class GRouteType( // Communal Taxi Service (Please use 717)
                 return true
             }
             if (agencyRouteType == BUS.id) {
-                if (routeType == EX_BUS_SERVICE.id //
-                    || routeType == EX_SHARE_TAXI_SERVICE.id //
+                if (routeType == EX_BUS_SERVICE.id
+                    || routeType == EX_DEMAND_AND_RESPONSE_BUS_SERVICE.id
+                    || routeType == EX_SHARE_TAXI_SERVICE.id
                     || routeType == EX_COMMUNAL_TAXI_SERVICE.id
                 ) {
                     return true
