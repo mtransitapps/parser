@@ -1015,7 +1015,9 @@ object MDirectionHeadSignFinder {
         headSign: String,
         otherHeadSign: String
     ): String {
-        if (otherHeadSign.contains(headSign)) {
+        if (otherHeadSign.contains(headSign)
+            && headSign.length / otherHeadSign.length > 0.5f // head-sign is at least 50% of other head-sign
+        ) {
             return otherHeadSign
         }
         return headSign
