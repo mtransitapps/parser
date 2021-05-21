@@ -54,7 +54,8 @@ object MDirectionHeadSignFinder {
             }
         }
         if (directionHeadSigns.size == 2 // AM/PM only if 2 directions
-            && !agencyTools.directionHeadSignsDescriptive(directionHeadSigns)
+            && (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)
+                    || directionHeadSigns.filterValues { it == "AM" || it == "PM" }.isNotEmpty())
         ) {
             MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, using AM/PM...")
             val amPmDirectionHeadSigns = mutableMapOf<Int, String>()
