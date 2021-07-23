@@ -385,6 +385,10 @@ public class GReader {
 			if (StringUtils.isEmpty(gTrip.getTripHeadsign())) {
 				gTrip.setTripHeadsign(agencyTools.provideMissingTripHeadSign(gTrip));
 			}
+			if (agencyTools.getDirectionTypes().size() == 1
+				&& agencyTools.getDirectionTypes().get(0) == org.mtransit.parser.mt.data.MTrip.HEADSIGN_TYPE_DIRECTION) {
+				gTrip.setTripHeadsign(agencyTools.provideMissingTripHeadSign(gTrip));
+			}
 			gSpec.addTrip(gTrip);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while processing: %s", line);

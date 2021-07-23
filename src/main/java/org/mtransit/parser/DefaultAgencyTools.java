@@ -301,7 +301,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String provideMissingTripHeadSign(@NotNull GTrip gTrip) {
-		return org.mtransit.commons.StringUtils.EMPTY;
+		return gTrip.getTripHeadsignOrDefault();
 	}
 
 	@Override
