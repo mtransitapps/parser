@@ -326,11 +326,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			if (this.agencyTools.getRouteId(gRoute) != this.routeId) {
 				continue;
 			}
+			final MAgency agency = mAgencies.get(gRoute.getAgencyIdInt());
 			mRoute = new MRoute(
 					this.routeId,
 					this.agencyTools.getRouteShortName(gRoute),
 					this.agencyTools.getRouteLongName(gRoute),
-					this.agencyTools.getRouteColor(gRoute)
+					this.agencyTools.getRouteColor(gRoute, agency)
 			);
 			if (mRoutes.containsKey(mRoute.getId()) && !mRoute.equals(mRoutes.get(mRoute.getId()))) {
 				mergeSuccessful = false;
