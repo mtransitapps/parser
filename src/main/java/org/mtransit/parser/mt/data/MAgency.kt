@@ -102,6 +102,7 @@ data class MAgency(
             val allRoutes = agencyRoutes + otherAgencyRoutes
             allRoutes
                 .mapNotNull { it.routeColor?.uppercase() }
+                .filter { it.isNotBlank() }
                 .groupingBy { it }
                 .eachCount()
                 .toList()

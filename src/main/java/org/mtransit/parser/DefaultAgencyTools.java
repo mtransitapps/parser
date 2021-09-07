@@ -278,6 +278,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return mRoute.mergeLongName(mRouteToMerge);
 	}
 
+	@Deprecated
 	@Nullable
 	@Override
 	public String getRouteColor(@NotNull GRoute gRoute) {
@@ -286,7 +287,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return null; // use agency color
 		}
 		if (getAgencyColor().equalsIgnoreCase(routeColor)) {
-			return null;
+			return null; // use agency color
 		}
 		return ColorUtils.darkenIfTooLight(routeColor);
 	}
@@ -300,10 +301,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 				return null; // use agency color
 			}
 			if (agency.getColor().equalsIgnoreCase(routeColor)) {
-				return null;
+				return null; // use agency color
 			}
 			return ColorUtils.darkenIfTooLight(routeColor);
 		}
+		//noinspection deprecation
 		return getRouteColor(gRoute);
 	}
 
