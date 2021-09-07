@@ -326,7 +326,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			if (this.agencyTools.getRouteId(gRoute) != this.routeId) {
 				continue;
 			}
-			final MAgency agency = mAgencies.get(gRoute.getAgencyIdInt());
+			final MAgency agency = gRoute.hasAgencyId() ? mAgencies.get(gRoute.getAgencyIdInt())
+					: mAgencies.size() == 1 ? mAgencies.values().iterator().next()
+					: mAgencies.values().iterator().next();
 			mRoute = new MRoute(
 					this.routeId,
 					this.agencyTools.getRouteShortName(gRoute),
