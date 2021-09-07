@@ -42,6 +42,8 @@ public class GSpec {
 	private final HashMap<Integer, GStop> stopIdIntStops = new HashMap<>();
 	private int routesCount = 0;
 	@NotNull
+	private final HashMap<Integer, ArrayList<GRoute>> agencyIdIntOtherRoutes = new HashMap<>();
+	@NotNull
 	private final HashMap<Integer, GRoute> routeIdIntRoutes = new HashMap<>();
 	private int tripsCount = 0;
 	@NotNull
@@ -105,6 +107,20 @@ public class GSpec {
 		return this.calendarDates;
 	}
 
+	public void addOtherRoute(@NotNull GRoute gRoute) {
+		ArrayList<GRoute> agencyOtherRoutes = this.agencyIdIntOtherRoutes.get(gRoute.getAgencyIdInt());
+		if (agencyOtherRoutes == null) {
+			agencyOtherRoutes = new ArrayList<>();
+		}
+		agencyOtherRoutes.add(gRoute);
+		this.agencyIdIntOtherRoutes.put(gRoute.getAgencyIdInt(), agencyOtherRoutes);
+	}
+
+	@Nullable
+	public Collection<GRoute> getOtherRoutes(int agencyIdInt) {
+		return this.agencyIdIntOtherRoutes.get(agencyIdInt);
+	}
+
 	public void addRoute(@NotNull GRoute gRoute) {
 		this.routeIdIntRoutes.put(gRoute.getRouteIdInt(), gRoute);
 		this.routesCount++;
@@ -132,6 +148,11 @@ public class GSpec {
 	@Nullable
 	public GRoute getRoute(@NotNull Integer routeIdInt) {
 		return this.routeIdIntRoutes.get(routeIdInt);
+	}
+
+	@Nullable
+	public Collection<GRoute> getAllRoutes() {
+		return this.routeIdIntRoutes.values();
 	}
 
 	public void addStop(@NotNull GStop gStop) {

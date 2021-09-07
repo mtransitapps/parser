@@ -5,6 +5,7 @@ import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GAgency
 import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GRouteType
+import org.mtransit.parser.gtfs.data.GSpec
 
 data class MAgency(
     val idInt: Int,
@@ -15,11 +16,12 @@ data class MAgency(
 
     constructor(
         gAgency: GAgency,
-        agencyTools: GAgencyTools
+        agencyTools: GAgencyTools,
+        gSpec: GSpec,
     ) : this(
         gAgency.agencyIdInt,
         gAgency.agencyTimezone,
-        agencyTools.agencyColor,
+        agencyTools.getAgencyColor(gAgency, gSpec),
         agencyTools.agencyRouteType
     )
 
@@ -90,5 +92,26 @@ data class MAgency(
         @Suppress("unused")
         @JvmField
         val ROUTE_TYPE_FERRY = GRouteType.FERRY.id
+
+        private const val ROUTE_COLOR_IS_AGENCY_COLOR_MIN_PCT = 0.50f
+
+        @JvmStatic
+        fun pickColorFromRoutes(gAgency: GAgency, gSpec: GSpec): String? {
+            val agencyRoutes = gSpec.allRoutes?.filter { route -> route.agencyIdInt == gAgency.agencyIdInt } ?: return null
+            val otherAgencyRoutes = gSpec.getOtherRoutes(gAgency.agencyIdInt) ?: emptyList() // same agency, different type
+            val allRoutes = agencyRoutes + otherAgencyRoutes
+            allRoutes
+                .mapNotNull { it.routeColor?.uppercase() }
+                .groupingBy { it }
+                .eachCount()
+                .toList()
+                .maxByOrNull { it.second }
+                ?.let { (color, count) ->
+                    if (count > (allRoutes.size * ROUTE_COLOR_IS_AGENCY_COLOR_MIN_PCT)) {
+                        return color
+                    }
+                }
+            return null
+        }
     }
 }

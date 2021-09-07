@@ -118,17 +118,19 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 		MAgency mAgency;
 		for (GAgency gAgency : routeGTFS.getAllAgencies()) {
-			mAgency = new MAgency(gAgency, this.agencyTools);
-			if (mAgencies.containsKey(mAgency.getIdInt()) && !mAgencies.get(mAgency.getIdInt()).equals(mAgency)) {
+			mAgency = new MAgency(gAgency, this.agencyTools, routeGTFS);
+			final MAgency agencyWithSameID = mAgencies.get(mAgency.getIdInt());
+			if (agencyWithSameID != null && !agencyWithSameID.equals(mAgency)) {
 				MTLog.log("%s: Agency %s already in list!", this.routeId, mAgency.toStringPlus());
 				MTLog.log("%s: %s", this.routeId, mAgency.toString());
-				throw new MTLog.Fatal("%s: %s", this.routeId, mAgencies.get(mAgency.getIdInt()).toString());
+				throw new MTLog.Fatal("%s: %s", this.routeId, agencyWithSameID.toString());
 			}
 			mAgencies.put(mAgency.getIdInt(), mAgency);
 		}
 		parseRTS(
 				mSchedules,
 				mFrequencies,
+				mAgencies,
 				mRoutes,
 				mTrips,
 				mStops,
@@ -288,6 +290,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 
 	private void parseRTS(HashMap<String, MSchedule> mSchedules,
 						  HashMap<String, MFrequency> mFrequencies,
+						  HashMap<Integer, MAgency> mAgencies,
 						  HashMap<Long, MRoute> mRoutes,
 						  HashMap<Long, MTrip> mTrips,
 						  HashMap<Integer, MStop> mStops,

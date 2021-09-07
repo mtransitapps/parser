@@ -303,16 +303,18 @@ public class GReader {
 		}
 	}
 
-	private static void processAgency(@SuppressWarnings("unused") GAgencyTools agencyTools,
+	private static void processAgency(GAgencyTools agencyTools,
 									  GSpec gSpec,
 									  HashMap<String, String> line) {
 		try {
-			gSpec.addAgency(
-					new GAgency(
-							line.get(GAgency.AGENCY_ID),
-							line.get(GAgency.AGENCY_TIMEZONE)
-					)
+			final GAgency gAgency = new GAgency(
+					line.get(GAgency.AGENCY_ID),
+					line.get(GAgency.AGENCY_TIMEZONE)
 			);
+			if (agencyTools.excludeAgency(gAgency)) {
+				return;
+			}
+			gSpec.addAgency(gAgency);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while processing: '%s'!", line);
 		}
@@ -386,7 +388,7 @@ public class GReader {
 				gTrip.setTripHeadsign(agencyTools.provideMissingTripHeadSign(gTrip));
 			}
 			if (agencyTools.getDirectionTypes().size() == 1
-				&& agencyTools.getDirectionTypes().get(0) == org.mtransit.parser.mt.data.MTrip.HEADSIGN_TYPE_DIRECTION) {
+					&& agencyTools.getDirectionTypes().get(0) == org.mtransit.parser.mt.data.MTrip.HEADSIGN_TYPE_DIRECTION) {
 				gTrip.setTripHeadsign(agencyTools.provideMissingTripHeadSign(gTrip));
 			}
 			gSpec.addTrip(gTrip);
@@ -435,14 +437,20 @@ public class GReader {
 					Integer.parseInt(line.get(GRoute.ROUTE_TYPE)),
 					routeColor == null ? null : routeColor.trim()
 			);
+			final Integer routeAgencyIdInt = gRoute.getAgencyIdInt();
+			final GAgency routeAgency = routeAgencyIdInt == null ? null : gSpec.getAgency(routeAgencyIdInt);
 			if (agencyTools.excludeRoute(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute.toStringPlus());
+				if (routeAgency != null) {
+					gSpec.addOtherRoute(gRoute);
+				}
 				return;
 			}
-			final Integer routeAgencyIdInt = gRoute.getAgencyIdInt();
-			if (routeAgencyIdInt != null
-					&& agencyTools.excludeAgencyNullable(gSpec.getAgency(routeAgencyIdInt))) {
+			if (agencyTools.excludeAgencyNullable(routeAgency)) {
 				logExclude("Exclude route (!agency): %s.", gRoute.toStringPlus());
+				if (routeAgency != null) {
+					gSpec.addOtherRoute(gRoute);
+				}
 				return;
 			}
 			gSpec.addRoute(gRoute);

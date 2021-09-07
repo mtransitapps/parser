@@ -12,6 +12,7 @@ import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
+import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
@@ -37,6 +38,11 @@ public interface GAgencyTools {
 
 	@NotNull
 	String getAgencyColor();
+
+	boolean defaultAgencyColorEnabled();
+
+	@NotNull
+	String getAgencyColor(@NotNull GAgency gAgency, @NotNull GSpec gSpec);
 
 	@NotNull
 	Integer getAgencyRouteType();
@@ -64,6 +70,9 @@ public interface GAgencyTools {
 
 	@Nullable
 	String getRouteColor(@NotNull GRoute gRoute);
+
+	@Nullable
+	String getRouteColor(@NotNull GRoute gRoute, @NotNull MAgency agency);
 
 	boolean excludeRouteNullable(@Nullable GRoute gRoute);
 

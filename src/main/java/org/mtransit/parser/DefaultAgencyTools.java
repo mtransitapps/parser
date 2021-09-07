@@ -191,10 +191,27 @@ public class DefaultAgencyTools implements GAgencyTools {
 		throw new MTLog.Fatal("NEED TO IMPLEMENT EXCLUDE ALL");
 	}
 
+	@Override
+	public boolean defaultAgencyColorEnabled() {
+		return false; // OPT-IN feature
+	}
+
 	@NotNull
 	@Override
 	public String getAgencyColor() {
 		throw new MTLog.Fatal("AGENCY COLOR NOT PROVIDED");
+	}
+
+	@NotNull
+	@Override
+	public String getAgencyColor(@NotNull GAgency gAgency, @NotNull GSpec gSpec) {
+		if (defaultAgencyColorEnabled()) {
+			final String pickFromRoutes = MAgency.pickColorFromRoutes(gAgency, gSpec);
+			if (pickFromRoutes != null) {
+				return pickFromRoutes;
+			}
+		}
+		return getAgencyColor();
 	}
 
 	@NotNull
@@ -264,14 +281,30 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public String getRouteColor(@NotNull GRoute gRoute) {
-		if (gRoute.getRouteColor() == null || gRoute.getRouteColor().isEmpty()) {
+		final String routeColor = gRoute.getRouteColor();
+		if (routeColor == null || routeColor.isEmpty()) {
 			return null; // use agency color
 		}
-		//noinspection ConstantConditions
-		if (getAgencyColor() != null && getAgencyColor().equalsIgnoreCase(gRoute.getRouteColor())) {
+		if (getAgencyColor().equalsIgnoreCase(routeColor)) {
 			return null;
 		}
-		return ColorUtils.darkenIfTooLight(gRoute.getRouteColor());
+		return ColorUtils.darkenIfTooLight(routeColor);
+	}
+
+	@Nullable
+	@Override
+	public String getRouteColor(@NotNull GRoute gRoute, @NotNull MAgency agency) {
+		if (defaultAgencyColorEnabled()) {
+			final String routeColor = gRoute.getRouteColor();
+			if (routeColor == null || routeColor.isEmpty()) {
+				return null; // use agency color
+			}
+			if (agency.getColor().equalsIgnoreCase(routeColor)) {
+				return null;
+			}
+			return ColorUtils.darkenIfTooLight(routeColor);
+		}
+		return getRouteColor(gRoute);
 	}
 
 	@Override
