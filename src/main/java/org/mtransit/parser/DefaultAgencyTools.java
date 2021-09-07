@@ -278,6 +278,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return mRoute.mergeLongName(mRouteToMerge);
 	}
 
+	@SuppressWarnings("DeprecatedIsStillUsed")
 	@Deprecated
 	@Nullable
 	@Override
