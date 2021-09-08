@@ -196,6 +196,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return false; // OPT-IN feature
 	}
 
+	@Nullable
+	@Override
+	public String fixColor(@Nullable String color) {
+		if (color == null || color.trim().isEmpty()) {
+			return null;
+		}
+		return ColorUtils.darkenIfTooLight(color);
+	}
+
 	@NotNull
 	@Override
 	public String getAgencyColor() {
@@ -206,9 +215,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String getAgencyColor(@NotNull GAgency gAgency, @NotNull GSpec gSpec) {
 		if (defaultAgencyColorEnabled()) {
-			final String pickFromRoutes = MAgency.pickColorFromRoutes(gAgency, gSpec);
-			if (pickFromRoutes != null) {
-				return pickFromRoutes;
+			final String pickFromRoutesFixed = fixColor(MAgency.pickColorFromRoutes(gAgency, gSpec));
+			if (pickFromRoutesFixed != null) {
+				return pickFromRoutesFixed;
 			}
 		}
 		return getAgencyColor();
@@ -283,28 +292,28 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public String getRouteColor(@NotNull GRoute gRoute) {
-		final String routeColor = gRoute.getRouteColor();
-		if (routeColor == null || routeColor.isEmpty()) {
+		final String routeColorFixed = fixColor(gRoute.getRouteColor());
+		if (routeColorFixed == null) {
 			return null; // use agency color
 		}
-		if (getAgencyColor().equalsIgnoreCase(routeColor)) {
+		if (getAgencyColor().equalsIgnoreCase(routeColorFixed)) {
 			return null; // use agency color
 		}
-		return ColorUtils.darkenIfTooLight(routeColor);
+		return routeColorFixed;
 	}
 
 	@Nullable
 	@Override
 	public String getRouteColor(@NotNull GRoute gRoute, @NotNull MAgency agency) {
 		if (defaultAgencyColorEnabled()) {
-			final String routeColor = gRoute.getRouteColor();
-			if (routeColor == null || routeColor.isEmpty()) {
+			final String routeColorFixed = fixColor(gRoute.getRouteColor());
+			if (routeColorFixed == null) {
 				return null; // use agency color
 			}
-			if (agency.getColor().equalsIgnoreCase(routeColor)) {
+			if (agency.getColor().equalsIgnoreCase(routeColorFixed)) {
 				return null; // use agency color
 			}
-			return ColorUtils.darkenIfTooLight(routeColor);
+			return routeColorFixed;
 		}
 		//noinspection deprecation
 		return getRouteColor(gRoute);

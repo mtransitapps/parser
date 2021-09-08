@@ -41,6 +41,9 @@ public interface GAgencyTools {
 
 	boolean defaultAgencyColorEnabled();
 
+	@Nullable
+	String fixColor(@Nullable String color);
+
 	@NotNull
 	String getAgencyColor(@NotNull GAgency gAgency, @NotNull GSpec gSpec);
 
