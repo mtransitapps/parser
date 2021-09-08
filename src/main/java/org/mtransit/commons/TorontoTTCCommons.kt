@@ -16,12 +16,16 @@ object TorontoTTCCommons {
     const val TTC_BUS_EXPRESS_GREEN = "00A651"
     const val TTC_BUS_NIGHT_BLUE = "0756A5"
 
+    @JvmOverloads
     @JvmStatic
-    fun fixColor(color: String?) : String? {
+    fun fixColor(color: String?, subway: Boolean = false) : String? {
         return when (color) {
             "FF0000" -> TTC_RED
-            "008000" -> TTC_BUS_EXPRESS_GREEN
+            "008000" -> if (subway) TTC_LINE_2_GREEN else TTC_BUS_EXPRESS_GREEN
             "0000FF" -> TTC_BUS_NIGHT_BLUE
+            "D5C82B" -> TTC_LINE_1_YELLOW
+            "108BEF" -> TTC_LINE_3_BLUE
+            "B300B3" -> TTC_LINE_4_PURPLE
             else -> null // not fixed
         }
     }
