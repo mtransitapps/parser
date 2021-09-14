@@ -387,14 +387,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return directionSplitterEnabled();
 	}
 
-	@SuppressWarnings("DeprecatedIsStillUsed")
-	@Deprecated
-	@NotNull
-	@Override
-	public String cleanDirectionHeadsign(@NotNull String directionHeadSign) {
-		return cleanDirectionHeadsign(false, directionHeadSign);
-	}
-
 	@NotNull
 	@Override
 	public String cleanDirectionHeadsign(boolean fromStopName, @NotNull String directionHeadSign) {

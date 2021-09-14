@@ -91,10 +91,6 @@ public interface GAgencyTools {
 
 	boolean directionSplitterEnabled(long routeId);
 
-	@Deprecated
-	@NotNull
-	String cleanDirectionHeadsign(@NotNull String directionHeadSign);
-
 	@NotNull
 	String cleanDirectionHeadsign(boolean fromStopName, @NotNull String directionHeadSign);
 
