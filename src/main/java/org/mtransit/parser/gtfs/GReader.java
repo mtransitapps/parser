@@ -1,5 +1,7 @@
 package org.mtransit.parser.gtfs;
 
+import static org.mtransit.commons.Constants.EMPTY;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -7,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CloseableUtils;
 import org.mtransit.commons.StringUtils;
-import org.mtransit.parser.Constants;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.db.DBUtils;
@@ -179,9 +180,9 @@ public class GReader {
 		return gSpec;
 	}
 
-	private static final CSVFormat CSV_FORMAT = CSVFormat.RFC4180.withIgnoreSurroundingSpaces();
+	private static final CSVFormat CSV_FORMAT = CSVFormat.RFC4180.builder().setIgnoreSurroundingSpaces(true).build();
 
-	private static final CSVFormat CSV_FORMAT_NO_QUOTE = CSV_FORMAT.withQuote(null);
+	private static final CSVFormat CSV_FORMAT_NO_QUOTE = CSV_FORMAT.builder().setQuote(null).build();
 
 	private static final Pattern QUOTE_ = Pattern.compile("\"");
 
@@ -232,10 +233,10 @@ public class GReader {
 					continue;
 				}
 				for (int i = 0; i < lineColumns.length; i++) {
-					final String lineColumn = i >= recordColumns.size() ? Constants.EMPTY : recordColumns.get(i);
+					final String lineColumn = i >= recordColumns.size() ? EMPTY : recordColumns.get(i);
 					lineColumns[i] = withQuotes ?
 							lineColumn :
-							QUOTE_.matcher(lineColumn).replaceAll(Constants.EMPTY);
+							QUOTE_.matcher(lineColumn).replaceAll(EMPTY);
 				}
 				map.clear();
 				for (int ci = 0; ci < recordColumnsSize; ++ci) {
@@ -414,7 +415,7 @@ public class GReader {
 					line.get(GStop.STOP_NAME),
 					Double.parseDouble(line.get(GStop.STOP_LAT)),
 					Double.parseDouble(line.get(GStop.STOP_LON)),
-					code == null ? Constants.EMPTY : code.trim()
+					code == null ? EMPTY : code.trim()
 			);
 			if (agencyTools.excludeStop(gStop)) {
 				return;
@@ -428,16 +429,17 @@ public class GReader {
 	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
 			final String routeColor = line.get(GRoute.ROUTE_COLOR);
+			final String rsn = line.get(GRoute.ROUTE_SHORT_NAME);
 			GRoute gRoute = new GRoute(
 					line.get(GRoute.AGENCY_ID),
 					line.get(GRoute.ROUTE_ID),
-					line.get(GRoute.ROUTE_SHORT_NAME),
+					rsn == null ? EMPTY : rsn.trim(),
 					line.get(GRoute.ROUTE_LONG_NAME),
 					line.get(GRoute.ROUTE_DESC),
 					Integer.parseInt(line.get(GRoute.ROUTE_TYPE)),
 					routeColor == null ? null : routeColor.trim()
 			);
-			final GAgency routeAgency = !gRoute.hasAgencyId() ? null : gSpec.getAgency(gRoute.getAgencyIdInt());
+			final GAgency routeAgency = gRoute.getAgencyIdInt() == null ? null : gSpec.getAgency(gRoute.getAgencyIdInt());
 			if (agencyTools.excludeRoute(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute.toStringPlus());
 				if (gRoute.hasAgencyId() && routeAgency != null) {
@@ -446,7 +448,7 @@ public class GReader {
 				return;
 			}
 			if (gRoute.hasAgencyId()
-				&& agencyTools.excludeAgencyNullable(routeAgency)) {
+					&& agencyTools.excludeAgencyNullable(routeAgency)) {
 				logExclude("Exclude route (!agency): %s.", gRoute.toStringPlus());
 				if (gRoute.hasAgencyId() && routeAgency != null) {
 					gSpec.addOtherRoute(gRoute);

@@ -60,6 +60,10 @@ public interface GAgencyTools {
 	// ROUTE
 	long getRouteId(@NotNull GRoute gRoute);
 
+	boolean defaultRouteIdEnabled();
+
+	boolean useRouteShortNameForRouteId();
+
 	@Nullable
 	String getRouteShortName(@NotNull GRoute gRoute);
 

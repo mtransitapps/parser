@@ -25,6 +25,7 @@ import org.mtransit.parser.mt.MGenerator;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MRoute;
+import org.mtransit.parser.mt.data.MRouteSNToIDConverter;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MTrip;
 
@@ -252,10 +253,25 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public long getRouteId(@NotNull GRoute gRoute) {
 		try {
 			//noinspection deprecation
-			return Long.parseLong(gRoute.getRouteId());
+			final String routeIdS = useRouteShortNameForRouteId() ? gRoute.getRouteShortName() : gRoute.getRouteId();
+			if (defaultRouteIdEnabled()
+					&& !CharUtils.isDigitsOnly(routeIdS)) {
+				return MRouteSNToIDConverter.convert(routeIdS);
+			}
+			return Long.parseLong(routeIdS);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while extracting route ID from %s!", gRoute);
 		}
+	}
+
+	@Override
+	public boolean defaultRouteIdEnabled() {
+		return false; // OPT-IN feature
+	}
+
+	@Override
+	public boolean useRouteShortNameForRouteId() {
+		return false; // OPT-IN feature
 	}
 
 	@Nullable
