@@ -43,6 +43,7 @@ object MRouteSNToIDConverter {
             "F" -> 6L * NEXT
             "N" -> 14L * NEXT
             "T" -> 20L * NEXT
+            "X" -> 24L * NEXT
             else -> {
                 nextCharsToLong?.invoke(nextChars)
                     ?: throw MTLog.Fatal("Unexpected next characters '$nextChars' in short name '$rsn'!")
@@ -53,6 +54,7 @@ object MRouteSNToIDConverter {
             "A" -> 1L * PREVIOUS
             "N" -> 14L * PREVIOUS
             "T" -> 20L * PREVIOUS
+            "X" -> 24L * PREVIOUS
             "Z" -> 26L * PREVIOUS
             else -> {
                 previousCharsToLong?.invoke(previousChars)

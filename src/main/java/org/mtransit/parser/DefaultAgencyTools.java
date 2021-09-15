@@ -241,15 +241,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (gAgency == null) {
 			return EXCLUDE;
 		}
-		//noinspection deprecation
-		if (getAgencyId() != null && gAgency.isDifferentAgency(getAgencyId())) {
-			return EXCLUDE;
-		}
 		return excludeAgency(gAgency);
 	}
 
 	@Override
 	public boolean excludeAgency(@NotNull GAgency gAgency) {
+		//noinspection deprecation
+		if (getAgencyId() != null && gAgency.isDifferentAgency(getAgencyId())) {
+			return EXCLUDE;
+		}
 		return KEEP;
 	}
 
