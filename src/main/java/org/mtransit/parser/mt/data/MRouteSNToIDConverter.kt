@@ -26,29 +26,31 @@ object MRouteSNToIDConverter {
         if (!matcher.find()) {
             throw MTLog.Fatal("Unexpected route short name '$rsn' can not be parsed by regex!")
         }
-        val previousChars: String = matcher.group(2)
+        val previousChars: String = matcher.group(2).uppercase()
         val digits: Long = matcher.group(3).toLong()
-        val nextChars: String = matcher.group(4)
+        val nextChars: String = matcher.group(4).uppercase()
         if (digits !in 0..1000L) {
             throw MTLog.Fatal("Unexpected route short name digits '$digits' in short name '$rsn' to convert to route ID!")
         }
         var routeId: Long = digits
         routeId += when (nextChars) {
-            "" -> 0L
+            "" -> 0L * NEXT
             "A" -> 1L * NEXT
             "B" -> 2L * NEXT
             "C" -> 3L * NEXT
             "D" -> 4L * NEXT
             "E" -> 5L * NEXT
             "F" -> 6L * NEXT
+            "T" -> 20L * NEXT
             else -> {
                 nextCharsToLong?.invoke(nextChars)
                     ?: throw MTLog.Fatal("Unexpected next characters '$nextChars' in short name '$rsn'!")
             }
         }
         routeId += when (previousChars) {
-            "" -> 0L
+            "" -> 0L * PREVIOUS
             "A" -> 1L * PREVIOUS
+            "T" -> 20L * PREVIOUS
             "Z" -> 26L * PREVIOUS
             else -> {
                 previousCharsToLong?.invoke(previousChars)
