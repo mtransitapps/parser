@@ -224,6 +224,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return getAgencyColor();
 	}
 
+	@Nullable
+	@Override
+	public String getAgencyId() {
+		return null; // no filter
+	}
+
 	@NotNull
 	@Override
 	public Integer getAgencyRouteType() {
@@ -233,6 +239,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean excludeAgencyNullable(@Nullable GAgency gAgency) {
 		if (gAgency == null) {
+			return EXCLUDE;
+		}
+		//noinspection deprecation
+		if (getAgencyId() != null && gAgency.isDifferentAgency(getAgencyId())) {
 			return EXCLUDE;
 		}
 		return excludeAgency(gAgency);
@@ -354,6 +364,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		if (!GRouteType.isSameType(getAgencyRouteType(), gRoute.getRouteType())) {
 			MTLog.logDebug("Route excluded because of different type: %s != %s", getAgencyRouteType(), gRoute.toStringPlus());
+			return EXCLUDE;
+		}
+		//noinspection deprecation
+		if (getAgencyId() != null && gRoute.isDifferentAgency(getAgencyId())) {
 			return EXCLUDE;
 		}
 		return KEEP;

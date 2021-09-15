@@ -25,6 +25,13 @@ data class GAgency(
             return GIDs.getString(agencyIdInt)
         }
 
+    @Suppress("unused")
+    fun isDifferentAgency(otherAgencyIdInt: Int): Boolean = agencyIdInt != otherAgencyIdInt
+
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    fun isDifferentAgency(otherAgencyId: String): Boolean = isDifferentAgency(GIDs.getInt(otherAgencyId))
+
     companion object {
         const val FILENAME = "agency.txt"
 

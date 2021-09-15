@@ -47,6 +47,9 @@ public interface GAgencyTools {
 	@NotNull
 	String getAgencyColor(@NotNull GAgency gAgency, @NotNull GSpec gSpec);
 
+	@Nullable
+	String getAgencyId();
+
 	@NotNull
 	Integer getAgencyRouteType();
 
