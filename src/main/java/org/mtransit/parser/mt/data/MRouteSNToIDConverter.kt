@@ -16,21 +16,25 @@ object MRouteSNToIDConverter {
     @JvmStatic
     fun convert(
         rsn: String,
-        nextCharsToLong: ((String) -> Long?)? = null,
-        previousCharsToLong: ((String) -> Long?)? = null,
+        notSupportedToRouteId: ((rsn: String) -> Long?)? = null,
+        nextCharsToLong: ((nextChars: String) -> Long?)? = null,
+        previousCharsToLong: ((previousChars: String) -> Long?)? = null,
     ): Long {
         if (rsn.isBlank()) {
-            throw MTLog.Fatal("Unexpected route short name '$rsn' to convert to route ID!")
+            return notSupportedToRouteId?.invoke(rsn)
+                ?: throw MTLog.Fatal("Unexpected route short name '$rsn' to convert to route ID!")
         }
         val matcher: Matcher = RSN.matcher(rsn)
         if (!matcher.find()) {
-            throw MTLog.Fatal("Unexpected route short name '$rsn' can not be parsed by regex!")
+            return notSupportedToRouteId?.invoke(rsn)
+                ?: throw MTLog.Fatal("Unexpected route short name '$rsn' can not be parsed by regex!")
         }
         val previousChars: String = matcher.group(2).uppercase()
         val digits: Long = matcher.group(3).toLong()
         val nextChars: String = matcher.group(4).uppercase()
         if (digits !in 0..1000L) {
-            throw MTLog.Fatal("Unexpected route short name digits '$digits' in short name '$rsn' to convert to route ID!")
+            return notSupportedToRouteId?.invoke(rsn)
+                ?: throw MTLog.Fatal("Unexpected route short name digits '$digits' in short name '$rsn' to convert to route ID!")
         }
         var routeId: Long = digits
         routeId += when (nextChars) {

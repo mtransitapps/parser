@@ -67,8 +67,11 @@ public interface GAgencyTools {
 
 	boolean useRouteShortNameForRouteId();
 
-	@Nullable
+	@NotNull
 	String getRouteShortName(@NotNull GRoute gRoute);
+
+	@NotNull
+	String cleanRouteShortName(@NotNull String routeLongName);
 
 	@NotNull
 	String getRouteLongName(@NotNull GRoute gRoute);

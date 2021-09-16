@@ -104,4 +104,34 @@ class MRouteSNToIDConverterTest {
         // Assert
         assertEquals(11_990_100L, result)
     }
+
+    @Test
+    fun testConvert_complex_not_supported_alphabetic() {
+        // Arrange
+        val rsn = "ABCDEF"
+        val notSupportedToRouteId: (String) -> Long? = { previous ->
+            if (rsn == previous) {
+                123456789L
+            } else null
+        }
+        // Act
+        val result = MRouteSNToIDConverter.convert(rsn, notSupportedToRouteId = notSupportedToRouteId)
+        // Assert
+        assertEquals(123456789L, result)
+    }
+
+    @Test
+    fun testConvert_complex_not_supported_empty() {
+        // Arrange
+        val rsn = ""
+        val notSupportedToRouteId: (String) -> Long? = { previous ->
+            if (rsn == previous) {
+                -1L
+            } else null
+        }
+        // Act
+        val result = MRouteSNToIDConverter.convert(rsn, notSupportedToRouteId = notSupportedToRouteId)
+        // Assert
+        assertEquals(-1L, result)
+    }
 }

@@ -263,7 +263,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public long getRouteId(@NotNull GRoute gRoute) {
 		try {
 			//noinspection deprecation
-			final String routeIdS = useRouteShortNameForRouteId() ? gRoute.getRouteShortName() : gRoute.getRouteId();
+			final String routeIdS = useRouteShortNameForRouteId() ? cleanRouteShortName(gRoute.getRouteShortName()) : gRoute.getRouteId();
 			if (defaultRouteIdEnabled()
 					&& !CharUtils.isDigitsOnly(routeIdS)) {
 				return MRouteSNToIDConverter.convert(routeIdS);
@@ -284,13 +284,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return false; // OPT-IN feature
 	}
 
-	@Nullable
+	@NotNull
 	@Override
 	public String getRouteShortName(@NotNull GRoute gRoute) {
-		if (org.mtransit.commons.StringUtils.isEmpty(gRoute.getRouteShortName())) {
-			throw new MTLog.Fatal("No default route short name for %s!", gRoute.toStringPlus());
+		return cleanRouteShortName(gRoute.getRouteShortName());
+	}
+
+	@NotNull
+	@Override
+	public String cleanRouteShortName(@NotNull String routeShortName) {
+		if (org.mtransit.commons.StringUtils.isEmpty(routeShortName)) {
+			throw new MTLog.Fatal("No default route short name for %s!", routeShortName);
 		}
-		return gRoute.getRouteShortName();
+		return routeShortName.trim();
 	}
 
 	@NotNull
