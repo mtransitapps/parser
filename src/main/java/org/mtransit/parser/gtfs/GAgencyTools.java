@@ -112,6 +112,9 @@ public interface GAgencyTools {
 	@Nullable
 	String getRouteColor(@NotNull GRoute gRoute, @NotNull MAgency agency);
 
+	@Nullable
+	String provideMissingRouteColor(@NotNull GRoute gRoute);
+
 	boolean excludeRouteNullable(@Nullable GRoute gRoute);
 
 	boolean excludeRoute(@NotNull GRoute gRoute);

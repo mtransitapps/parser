@@ -365,10 +365,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public String getRouteColor(@NotNull GRoute gRoute) {
 		final String routeColorFixed = fixColor(gRoute.getRouteColor());
 		if (routeColorFixed == null) {
-			return null; // use agency color
+			return provideMissingRouteColor(gRoute); // use agency color
 		}
 		if (getAgencyColor().equalsIgnoreCase(routeColorFixed)) {
-			return null; // use agency color
+			return provideMissingRouteColor(gRoute); // use agency color
 		}
 		return routeColorFixed;
 	}
@@ -379,15 +379,21 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (defaultAgencyColorEnabled()) {
 			final String routeColorFixed = fixColor(gRoute.getRouteColor());
 			if (routeColorFixed == null) {
-				return null; // use agency color
+				return provideMissingRouteColor(gRoute); // use agency color
 			}
 			if (agency.getColor().equalsIgnoreCase(routeColorFixed)) {
-				return null; // use agency color
+				return provideMissingRouteColor(gRoute); // use agency color
 			}
 			return routeColorFixed;
 		}
 		//noinspection deprecation
 		return getRouteColor(gRoute);
+	}
+
+	@Nullable
+	@Override
+	public String provideMissingRouteColor(@NotNull GRoute gRoute) {
+		return null;  // use agency color
 	}
 
 	@Override
