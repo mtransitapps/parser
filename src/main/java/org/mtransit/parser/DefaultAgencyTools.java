@@ -156,6 +156,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return getAgencyName() + " " + getAgencyType();
 	}
 
+	@Nullable
+	@Override
+	public List<Locale> getSupportedLanguages() {
+		return null; // no-op
+	}
+
 	@NotNull
 	public String getAgencyName() {
 		return "Agency Name";
@@ -322,10 +328,20 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return routeShortName.trim();
 	}
 
+	@Override
+	public boolean defaultRouteLongNameEnabled() {
+		return false; // OPT-IN feature
+	}
+
 	@NotNull
 	@Override
 	public String getRouteLongName(@NotNull GRoute gRoute) {
-		return cleanRouteLongName(gRoute.getRouteLongNameOrDefault());
+		final String routeLongName = gRoute.getRouteLongNameOrDefault();
+		if (defaultRouteLongNameEnabled()
+				&& org.mtransit.commons.StringUtils.isEmpty(routeLongName)) {
+			return routeLongName; // empty route long name OK
+		}
+		return cleanRouteLongName(routeLongName);
 	}
 
 	@NotNull

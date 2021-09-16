@@ -18,7 +18,10 @@ import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @SuppressWarnings({"RedundantSuppression", "unused"})
@@ -27,11 +30,22 @@ public interface GAgencyTools {
 	boolean EXCLUDE = true;
 	boolean KEEP = false;
 
+	List<Locale> LANG_EN = Collections.singletonList(Locale.ENGLISH);
+	List<Locale> LANG_FR = Collections.singletonList(Locale.FRENCH);
+	List<Locale> LANG_EN_FR = Arrays.asList(Locale.ENGLISH, Locale.FRENCH);
+	List<Locale> LANG_FR_EN = Arrays.asList(Locale.FRENCH, Locale.ENGLISH);
+
 	int getThreadPoolSize();
 
 	boolean defaultExcludeEnabled();
 
 	boolean excludingAll();
+
+	/**
+	 * @return sorted supported languages (1st = primary language)
+	 */
+	@Nullable
+	List<Locale> getSupportedLanguages();
 
 	@NotNull
 	String getAgencyName();
@@ -81,6 +95,8 @@ public interface GAgencyTools {
 
 	@NotNull
 	String cleanRouteShortName(@NotNull String routeLongName);
+
+	boolean defaultRouteLongNameEnabled();
 
 	@NotNull
 	String getRouteLongName(@NotNull GRoute gRoute);

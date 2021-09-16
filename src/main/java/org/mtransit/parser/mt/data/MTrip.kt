@@ -5,6 +5,7 @@ import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils
 
+@Suppress("unused")
 data class MTrip(
     val routeId: Long,
     var headsignId: Int = 0, // >= 0
@@ -43,7 +44,6 @@ data class MTrip(
         setHeadsignInbound(inbound)
     }
 
-    @Suppress("unused")
     constructor(
         routeId: Long,
         stop: MStop
@@ -60,7 +60,6 @@ data class MTrip(
             return _id
         }
 
-    @Suppress("unused")
     fun setHeadsignStringNotEmpty(
         headsignString: String,
         headsignId: Int
@@ -114,7 +113,6 @@ data class MTrip(
         return this
     }
 
-    @Suppress("unused")
     fun setHeadsignDescentOnly(): MTrip {
         headsignType = HEADSIGN_TYPE_DESCENT_ONLY
         headsignValue = Constants.EMPTY // null;
@@ -218,7 +216,6 @@ data class MTrip(
             return "$routeId$ZERO$headsignId".toLong()
         }
 
-        @Suppress("unused")
         @JvmStatic
         fun mergeEmpty(
             mTrip: MTrip,

@@ -298,7 +298,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						  HashSet<Integer> tripStopIds,
 						  HashSet<Integer> serviceIdInts,
 						  GSpec routeGTFS) {
-		MRoute mRoute;
 		boolean mergeSuccessful;
 		HashMap<Long, String> mTripStopTimesHeadsign;
 		HashMap<Long, ArrayList<MTripStop>> tripIdToMTripStops = new HashMap<>();
@@ -329,21 +328,22 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			final MAgency agency = gRoute.hasAgencyId() ? mAgencies.get(gRoute.getAgencyIdInt())
 					: mAgencies.size() == 1 ? mAgencies.values().iterator().next()
 					: mAgencies.values().iterator().next();
-			mRoute = new MRoute(
+			final MRoute mRoute = new MRoute(
 					this.routeId,
 					this.agencyTools.getRouteShortName(gRoute),
 					this.agencyTools.getRouteLongName(gRoute),
 					this.agencyTools.getRouteColor(gRoute, agency)
 			);
-			if (mRoutes.containsKey(mRoute.getId()) && !mRoute.equals(mRoutes.get(mRoute.getId()))) {
+			final MRoute otherRoute = mRoutes.get(mRoute.getId());
+			if (otherRoute != null && !mRoute.equals(otherRoute)) {
 				mergeSuccessful = false;
-				if (mRoute.equalsExceptLongName(mRoutes.get(mRoute.getId()))) {
-					mergeSuccessful = this.agencyTools.mergeRouteLongName(mRoute, mRoutes.get(mRoute.getId()));
+				if (mRoute.equalsExceptLongName(otherRoute)) {
+					mergeSuccessful = this.agencyTools.mergeRouteLongName(mRoute, otherRoute);
 				}
 				if (!mergeSuccessful) {
 					MTLog.log("%s: Route %s already in list!", this.routeId, mRoute.getId());
 					MTLog.log("%s: %s", this.routeId, mRoute.toString());
-					throw new MTLog.Fatal("%s: %s.", this.routeId, mRoutes.get(mRoute.getId()).toString());
+					throw new MTLog.Fatal("%s: %s.", this.routeId, otherRoute.toString());
 				}
 			}
 			mRoutes.put(mRoute.getId(), mRoute);
@@ -415,6 +415,47 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				allMTripStops.put(mTripStop.getUID(), mTripStop);
 				tripStopIds.add(mTripStop.getStopId());
 			}
+		}
+		fixRouteLongName(mRoutes, mTrips);
+	}
+
+	private void fixRouteLongName(HashMap<Long, MRoute> mRoutes, HashMap<Long, MTrip> mTrips) {
+		if (!this.agencyTools.defaultRouteLongNameEnabled()) {
+			return;
+		}
+		for (MRoute mRoute : mRoutes.values()) {
+			if (!mRoute.getLongName().isEmpty()) {
+				continue;
+			}
+			StringBuilder sb = new StringBuilder();
+			for (MTrip mTrip : mTrips.values()) {
+				if (mTrip.getRouteId() == mRoute.getId()) {
+					if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
+						if (sb.length() > 0) {
+							sb.append(" <> ");
+						}
+						sb.append(mTrip.getHeadsignValue());
+					}
+				}
+			}
+			if (sb.length() == 0) {
+				final List<Locale> supportedLanguages = this.agencyTools.getSupportedLanguages();
+				if (supportedLanguages != null && supportedLanguages.size() == 1) {
+					final Locale supportedLanguage = supportedLanguages.get(0);
+					if (Locale.ENGLISH.equals(supportedLanguage)) {
+						sb.append("Route ").append(mRoute.getShortNameOrDefault());
+					} else if (Locale.FRENCH.equals(supportedLanguage)) {
+						sb.append("Ligne ").append(mRoute.getShortNameOrDefault());
+					} else {
+						throw new MTLog.Fatal("%s: Unsupported language '%s'!", this.routeId, supportedLanguage);
+					}
+				}
+			}
+			if (sb.length() == 0) {
+				throw new MTLog.Fatal("%s: Unsupported default route long name for route '%s'!", this.routeId, mRoute);
+			}
+			mRoute.setLongName(sb.toString());
+			mRoutes.put(mRoute.getId(), mRoute);
 		}
 	}
 
