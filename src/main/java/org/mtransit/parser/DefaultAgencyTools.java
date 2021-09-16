@@ -266,12 +266,35 @@ public class DefaultAgencyTools implements GAgencyTools {
 			final String routeIdS = useRouteShortNameForRouteId() ? cleanRouteShortName(gRoute.getRouteShortName()) : gRoute.getRouteId();
 			if (defaultRouteIdEnabled()
 					&& !CharUtils.isDigitsOnly(routeIdS)) {
-				return MRouteSNToIDConverter.convert(routeIdS);
+				return MRouteSNToIDConverter.convert(
+						routeIdS,
+						this::convertRouteIdFromShortNameNotSupported,
+						this::convertRouteIdNextChars,
+						this::convertRouteIdPreviousChars
+				);
 			}
 			return Long.parseLong(routeIdS);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while extracting route ID from %s!", gRoute);
 		}
+	}
+
+	@Nullable
+	@Override
+	public Long convertRouteIdFromShortNameNotSupported(@NotNull String routeShortName) {
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public Long convertRouteIdNextChars(@NotNull String nextChars) {
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public Long convertRouteIdPreviousChars(@NotNull String previousChars) {
+		return null;
 	}
 
 	@Override
