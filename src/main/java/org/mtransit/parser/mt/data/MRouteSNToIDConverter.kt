@@ -48,6 +48,7 @@ object MRouteSNToIDConverter {
             "N" -> 14L * NEXT
             "R" -> 18L * NEXT
             "T" -> 20L * NEXT
+            "U" -> 21L * NEXT
             "X" -> 24L * NEXT
             else -> {
                 nextCharsToLong?.invoke(nextChars)
@@ -60,6 +61,7 @@ object MRouteSNToIDConverter {
             "N" -> 14L * PREVIOUS
             "R" -> 18L * PREVIOUS
             "T" -> 20L * PREVIOUS
+            "U" -> 21L * PREVIOUS
             "X" -> 24L * PREVIOUS
             "Z" -> 26L * PREVIOUS
             else -> {
