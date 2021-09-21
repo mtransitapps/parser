@@ -48,6 +48,7 @@ object MRouteSNToIDConverter {
             "G" -> 7L * NEXT
             "N" -> 14L * NEXT
             "R" -> 18L * NEXT
+            "S" -> 19L * NEXT
             "T" -> 20L * NEXT
             "U" -> 21L * NEXT
             "X" -> 24L * NEXT
@@ -68,6 +69,7 @@ object MRouteSNToIDConverter {
             "G" -> 7L * PREVIOUS
             "N" -> 14L * PREVIOUS
             "R" -> 18L * PREVIOUS
+            "S" -> 19L * PREVIOUS
             "T" -> 20L * PREVIOUS
             "U" -> 21L * PREVIOUS
             "X" -> 24L * PREVIOUS
