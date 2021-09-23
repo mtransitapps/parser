@@ -12,7 +12,7 @@ data class GAgency(
         agencyId: String?,
         agencyTimezone: String
     ) : this(
-        GIDs.getInt(agencyId ?: Constants.EMPTY),
+        GIDs.getInt(agencyId ?: MISSING_AGENCY_ID),
         agencyTimezone
     )
 
@@ -37,5 +37,7 @@ data class GAgency(
 
         const val AGENCY_ID = "agency_id"
         const val AGENCY_TIMEZONE = "agency_timezone"
+
+        const val MISSING_AGENCY_ID = Constants.EMPTY;
     }
 }

@@ -44,10 +44,13 @@ data class GRoute(
     @Suppress("unused")
     fun hasAgencyId(): Boolean = agencyIdInt != null
 
+    val agencyIdIntOrDefault: Int
+        get() = agencyIdInt ?: GIDs.getInt(GAgency.MISSING_AGENCY_ID)
+
     @Suppress("unused")
     fun isDifferentAgency(otherAgencyIdInt: Int): Boolean = agencyIdInt != null && agencyIdInt != otherAgencyIdInt
 
-    @Deprecated(message = "Not memory efficient")
+    @Deprecated(message = "Not memory efficient", replaceWith = ReplaceWith("isDifferentAgency(GIDs.getInt(otherAgencyId))"))
     @Suppress("unused")
     fun isDifferentAgency(otherAgencyId: String): Boolean = isDifferentAgency(GIDs.getInt(otherAgencyId))
 

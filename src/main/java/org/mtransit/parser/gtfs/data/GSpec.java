@@ -108,17 +108,18 @@ public class GSpec {
 	}
 
 	public void addOtherRoute(@NotNull GRoute gRoute) {
-		ArrayList<GRoute> agencyOtherRoutes = this.agencyIdIntOtherRoutes.get(gRoute.getAgencyIdInt());
+		final int agencyIdInt = gRoute.getAgencyIdIntOrDefault();
+		ArrayList<GRoute> agencyOtherRoutes = this.agencyIdIntOtherRoutes.get(agencyIdInt);
 		if (agencyOtherRoutes == null) {
 			agencyOtherRoutes = new ArrayList<>();
 		}
 		agencyOtherRoutes.add(gRoute);
-		this.agencyIdIntOtherRoutes.put(gRoute.getAgencyIdInt(), agencyOtherRoutes);
+		this.agencyIdIntOtherRoutes.put(agencyIdInt, agencyOtherRoutes);
 	}
 
 	@Nullable
-	public Collection<GRoute> getOtherRoutes(int agencyIdInt) {
-		return this.agencyIdIntOtherRoutes.get(agencyIdInt);
+	public Collection<GRoute> getOtherRoutes(int agencyIdIntOrDefault) {
+		return this.agencyIdIntOtherRoutes.get(agencyIdIntOrDefault);
 	}
 
 	public void addRoute(@NotNull GRoute gRoute) {
@@ -296,6 +297,7 @@ public class GSpec {
 		throw new MTLog.Fatal("getFrequencies() > trying to use ALL frequencies!");
 	}
 
+	@SuppressWarnings("unused")
 	@NotNull
 	public List<GTripStop> getTripStops(@Nullable Integer optTripId) {
 		if (optTripId != null) {

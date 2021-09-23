@@ -442,7 +442,8 @@ public class GReader {
 			final GAgency routeAgency = gRoute.getAgencyIdInt() == null ? null : gSpec.getAgency(gRoute.getAgencyIdInt());
 			if (agencyTools.excludeRoute(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute.toStringPlus());
-				if (gRoute.hasAgencyId() && routeAgency != null) {
+				if ((gRoute.hasAgencyId() && routeAgency != null)
+						|| (!gRoute.hasAgencyId() && routeAgency == null)) {
 					gSpec.addOtherRoute(gRoute);
 				}
 				return;
@@ -450,7 +451,8 @@ public class GReader {
 			if (gRoute.hasAgencyId()
 					&& agencyTools.excludeAgencyNullable(routeAgency)) {
 				logExclude("Exclude route (!agency): %s.", gRoute.toStringPlus());
-				if (gRoute.hasAgencyId() && routeAgency != null) {
+				if ((gRoute.hasAgencyId() && routeAgency != null)
+						|| (!gRoute.hasAgencyId() && routeAgency == null)) {
 					gSpec.addOtherRoute(gRoute);
 				}
 				return;
