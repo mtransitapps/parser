@@ -94,7 +94,10 @@ public interface GAgencyTools {
 	String getRouteShortName(@NotNull GRoute gRoute);
 
 	@NotNull
-	String cleanRouteShortName(@NotNull String routeLongName);
+	String cleanRouteShortName(@NotNull String routeShortName);
+
+	@NotNull
+	String provideMissingRouteShortName(@NotNull GRoute gRoute);
 
 	boolean defaultRouteLongNameEnabled();
 

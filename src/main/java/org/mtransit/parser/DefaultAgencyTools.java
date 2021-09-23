@@ -316,7 +316,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String getRouteShortName(@NotNull GRoute gRoute) {
-		return cleanRouteShortName(gRoute.getRouteShortName());
+		final String routeShortName = gRoute.getRouteShortName();
+		if (org.mtransit.commons.StringUtils.isEmpty(routeShortName)) {
+			return provideMissingRouteShortName(gRoute);
+		}
+		return cleanRouteShortName(routeShortName);
 	}
 
 	@NotNull
@@ -326,6 +330,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 			throw new MTLog.Fatal("No default route short name for %s!", routeShortName);
 		}
 		return routeShortName.trim();
+	}
+
+	@NotNull
+	@Override
+	public String provideMissingRouteShortName(@NotNull GRoute gRoute) {
+		throw new MTLog.Fatal("No default route short name for %s!", gRoute.toStringPlus());
 	}
 
 	@Override
