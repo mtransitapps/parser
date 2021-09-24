@@ -93,7 +93,7 @@ data class MAgency(
         @JvmField
         val ROUTE_TYPE_FERRY = GRouteType.FERRY.id
 
-        private const val ROUTE_COLOR_IS_AGENCY_COLOR_MIN_PCT = 0.50f
+        private const val ROUTE_COLOR_IS_AGENCY_COLOR_MIN_PCT = 0.66f
 
         @JvmStatic
         fun pickColorFromRoutes(gAgency: GAgency, gSpec: GSpec): String? {

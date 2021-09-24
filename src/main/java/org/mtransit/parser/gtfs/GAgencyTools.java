@@ -101,6 +101,8 @@ public interface GAgencyTools {
 
 	boolean defaultRouteLongNameEnabled();
 
+	boolean tryRouteDescForMissingLongName();
+
 	@NotNull
 	String getRouteLongName(@NotNull GRoute gRoute);
 

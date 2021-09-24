@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings({"RedundantSuppression"})
+@SuppressWarnings({"RedundantSuppression", "unused", "WeakerAccess"})
 public class DefaultAgencyTools implements GAgencyTools {
 
 	static {
@@ -160,6 +160,21 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public List<Locale> getSupportedLanguages() {
 		return null; // no-op
+	}
+
+	@Nullable
+	public Locale getFirstLanguage() {
+		final List<Locale> supportedLanguages = getSupportedLanguages();
+		return supportedLanguages == null || supportedLanguages.size() < 1 ? null : supportedLanguages.get(0);
+	}
+
+	@NotNull
+	public Locale getFirstLanguageNN() {
+		final Locale firstLanguage = getFirstLanguage();
+		if (firstLanguage == null) {
+			throw new MTLog.Fatal("NEED TO PROVIDE SUPPORTED LANGUAGES");
+		}
+		return firstLanguage;
 	}
 
 	@NotNull
@@ -343,10 +358,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return false; // OPT-IN feature
 	}
 
+	@Override
+	public boolean tryRouteDescForMissingLongName() {
+		return false; // OPT-IN feature
+	}
+
 	@NotNull
 	@Override
 	public String getRouteLongName(@NotNull GRoute gRoute) {
-		final String routeLongName = gRoute.getRouteLongNameOrDefault();
+		String routeLongName = gRoute.getRouteLongNameOrDefault();
+		if (tryRouteDescForMissingLongName()
+				&& org.mtransit.commons.StringUtils.isEmpty(routeLongName)) {
+			routeLongName = gRoute.getRouteDescOrDefault();
+		}
 		if (defaultRouteLongNameEnabled()
 				&& org.mtransit.commons.StringUtils.isEmpty(routeLongName)) {
 			return routeLongName; // empty route long name OK
