@@ -310,6 +310,8 @@ public class GReader {
 		try {
 			final GAgency gAgency = new GAgency(
 					line.get(GAgency.AGENCY_ID),
+					line.get(GAgency.AGENCY_NAME),
+					line.get(GAgency.AGENCY_URL),
 					line.get(GAgency.AGENCY_TIMEZONE)
 			);
 			if (agencyTools.excludeAgency(gAgency)) {

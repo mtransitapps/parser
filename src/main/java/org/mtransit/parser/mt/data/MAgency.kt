@@ -9,6 +9,8 @@ import org.mtransit.parser.gtfs.data.GSpec
 
 data class MAgency(
     val idInt: Int,
+    val name: String,
+    val url: String,
     val timezone: String,
     val color: String,
     val type: Int
@@ -20,6 +22,8 @@ data class MAgency(
         gSpec: GSpec,
     ) : this(
         gAgency.agencyIdInt,
+        gAgency.agencyName,
+        gAgency.agencyUrl,
         gAgency.agencyTimezone,
         agencyTools.getAgencyColor(gAgency, gSpec),
         agencyTools.agencyRouteType
@@ -51,24 +55,14 @@ data class MAgency(
 
     override fun compareTo(other: MAgency?): Int {
         return when {
-            other !is MAgency -> {
-                +1
-            }
-            idInt == other.idInt -> {
-                _id.compareTo(other._id)
-            }
-            timezone == other.timezone -> {
-                timezone.compareTo(other.timezone)
-            }
-            color == other.color -> {
-                color.compareTo(other.color)
-            }
-            type == other.type -> {
-                type.compareTo(other.type)
-            }
-            else -> {
-                0
-            }
+            other !is MAgency -> +1
+            this.idInt != other.idInt -> this._id.compareTo(other._id)
+            this.name != other.name -> this.name.compareTo(other.name)
+            this.url != other.url -> this.url.compareTo(other.url)
+            this.timezone != other.timezone -> this.timezone.compareTo(other.timezone)
+            this.color != other.color -> this.color.compareTo(other.color)
+            this.type != other.type -> this.type.compareTo(other.type)
+            else -> 0
         }
     }
 
