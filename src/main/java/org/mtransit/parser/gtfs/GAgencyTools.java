@@ -67,6 +67,9 @@ public interface GAgencyTools {
 	@NotNull
 	Integer getAgencyRouteType();
 
+	@NotNull
+	Integer getOriginalAgencyRouteType();
+
 	boolean excludeAgencyNullable(@Nullable GAgency gAgency);
 
 	boolean excludeAgency(@NotNull GAgency gAgency);

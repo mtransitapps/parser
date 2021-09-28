@@ -257,6 +257,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		throw new MTLog.Fatal("AGENCY ROUTE TYPE NOT PROVIDED");
 	}
 
+	@NotNull
+	@Override
+	public Integer getOriginalAgencyRouteType() {
+		return getAgencyRouteType();
+	}
+
 	@Override
 	public boolean excludeAgencyNullable(@Nullable GAgency gAgency) {
 		if (gAgency == null) {
@@ -441,14 +447,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean excludeRoute(@NotNull GRoute gRoute) {
 		//noinspection ConstantConditions
-		if (getAgencyRouteType() == null) {
-			throw new MTLog.Fatal("ERROR: unspecified agency route type '%s'!", getAgencyRouteType());
+		if (getOriginalAgencyRouteType() == null) {
+			throw new MTLog.Fatal("ERROR: unspecified agency route type '%s'!", getOriginalAgencyRouteType());
 		}
 		if (GRouteType.isUnknown(gRoute.getRouteType())) {
 			throw new MTLog.Fatal("ERROR: unexpected route type '%s'!", gRoute.getRouteType());
 		}
-		if (!GRouteType.isSameType(getAgencyRouteType(), gRoute.getRouteType())) {
-			MTLog.logDebug("Route excluded because of different type: %s != %s (%s)", getAgencyRouteType(), gRoute.getRouteType(), gRoute.toStringPlus());
+		if (!GRouteType.isSameType(getOriginalAgencyRouteType(), gRoute.getRouteType())) {
+			MTLog.logDebug("Route excluded because of different type: %s != %s (%s)", getOriginalAgencyRouteType(), gRoute.getRouteType(), gRoute.toStringPlus());
 			return EXCLUDE;
 		}
 		//noinspection deprecation
