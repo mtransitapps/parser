@@ -237,7 +237,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String getAgencyColor(@NotNull GAgency gAgency, @NotNull GSpec gSpec) {
 		if (defaultAgencyColorEnabled()) {
-			final String pickFromRoutesFixed = fixColor(MAgency.pickColorFromRoutes(gAgency, gSpec));
+			final String pickFromRoutesFixed = fixColor(
+					MAgency.pickColorFromRoutes(gAgency, gSpec)
+			);
 			if (pickFromRoutesFixed != null) {
 				return pickFromRoutesFixed;
 			}
