@@ -292,7 +292,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public long getRouteId(@NotNull GRoute gRoute) {
 		try {
 			//noinspection deprecation
-			final String routeIdS = useRouteShortNameForRouteId() ? cleanRouteShortName(gRoute.getRouteShortName()) : gRoute.getRouteId();
+			final String routeIdS = useRouteShortNameForRouteId() ? cleanRouteShortName(getRouteShortName(gRoute)) : gRoute.getRouteId();
 			if (defaultRouteIdEnabled()
 					&& !CharUtils.isDigitsOnly(routeIdS)) {
 				return MRouteSNToIDConverter.convert(
