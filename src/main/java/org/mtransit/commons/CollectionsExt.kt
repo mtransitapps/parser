@@ -138,7 +138,12 @@ fun <T> Iterable<T>.toComparableString(stringLength: Int): String {
     return this.joinToString(separator = ",", postfix = ",") { it.toString().padStart(stringLength, '_') }
 }
 
-fun <T> Iterable<T>.matchList(otherIt: Iterable<T>, ignoreRepeat: Boolean = false, ignoreFirstAndLast: Boolean = false): Float {
+fun <T> Iterable<T>.matchList(
+    otherIt: Iterable<T>,
+    ignoreRepeat: Boolean = false,
+    ignoreFirstAndLast: Boolean = false,
+    combineMatch: Boolean = false,
+): Float {
     val stringLength: Int = this.union(otherIt).maxOf { it.toString().length }
     val thisToCompare = this.filter(ignoreRepeat, ignoreFirstAndLast)
     val otherToCompare = otherIt.filter(ignoreRepeat, ignoreFirstAndLast)
@@ -176,14 +181,14 @@ fun <T> Iterable<T>.matchList(otherIt: Iterable<T>, ignoreRepeat: Boolean = fals
         .dropLast(thisToCompare.count() - 1 - thisToCompare.indexOf(lastCommonItem))
     val thisString = thisCommon.toComparableString(stringLength)
     val otherString = otherToCompare.toComparableString(stringLength)
-    val prefix = thisString.commonPrefixWith(otherString)
-    val prefixLength = prefix.length
-    val suffix = thisString.commonSuffixWith(otherString)
-    val suffixLength = suffix.length
+    val thisPrefix = thisString.commonPrefixWith(otherString)
+    val thisPrefixLength = thisPrefix.length
+    val thisSuffix = thisString.commonSuffixWith(otherString)
+    val thisSuffixLength = thisSuffix.length
     val otherLength = otherIt.toComparableString(stringLength).length
-    return if (prefixLength > suffixLength) {
-        prefixLength.toFloat().div(otherLength) + ignoredMatchPt
-    } else {
-        suffixLength.toFloat().div(otherLength) + ignoredMatchPt
-    }
+    return (when {
+        combineMatch -> thisSuffixLength + thisPrefixLength
+        thisPrefixLength > thisSuffixLength -> thisPrefixLength
+        else -> thisSuffixLength
+    }).toFloat().div(otherLength) + ignoredMatchPt
 }

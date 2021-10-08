@@ -16,6 +16,8 @@ object MDirectionSplitter {
     private const val LOG_NUMBERS = false
     // private const val LOG_NUMBERS = true // DEBUG
 
+    private const val ALMOST_A_MATCH = 0.70f
+
     @JvmStatic
     fun splitDirection(
         routeId: Long,
@@ -72,30 +74,21 @@ object MDirectionSplitter {
             if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
                     rStopIdInts.containsExactList(gStopIdInts)
                 }?.let { (rTripIdInts, _) ->
-                    MTLog.logDebug("$routeId: Exact match for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
+                    MTLog.logDebug("$routeId: Exact match for: '${GIDs.toStringPlus(gTripIdInt)}': \n - ${GIDs.toStringPlus(gStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)
                     true
                 } == true) {
                 continue
             }
             // LOOK FOR ALMOST A MATCH
-            if (LOG_NUMBERS) {
-                directionsCandidates.forEach { (_, rStopIdInts) ->
-                    logNumbers(
-                        "$routeId: rStopIdInts.matchList(gStopIdInts): ${
-                            rStopIdInts.matchList(
-                                gStopIdInts,
-                                ignoreRepeat = true,
-                                ignoreFirstAndLast = true
-                            )
-                        }"
-                    )
-                }
-            }
             if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
-                    rStopIdInts.matchList(gStopIdInts, ignoreRepeat = true, ignoreFirstAndLast = true) >= 0.75f
+                    val matchList = rStopIdInts.matchList(gStopIdInts, ignoreRepeat = true, ignoreFirstAndLast = true, combineMatch = true)
+                    if (LOG_NUMBERS) {
+                        logNumbers("$routeId: rStopIdInts.matchList(gStopIdInts): $matchList (rStopIdInts: ${GIDs.toStringPlus(rStopIdInts)})")
+                    }
+                    matchList >= ALMOST_A_MATCH
                 }?.let { (rTripIdInts, _) ->
-                    MTLog.logDebug("$routeId: 75 %% match for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
+                    MTLog.logDebug("$routeId: ${ALMOST_A_MATCH * 100f}%% match for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)
                     true
                 } == true) {
@@ -107,11 +100,11 @@ object MDirectionSplitter {
                 logNumbers("$routeId: match0: $match0")
                 val match1 = directionsCandidates[1].stopIdInts.matchList(gStopIdInts)
                 logNumbers("$routeId: match1: $match1")
-                if (match0 > match1 && match0 > 0.75f) {
+                if (match0 > match1 && match0 > ALMOST_A_MATCH) {
                     MTLog.logDebug("$routeId: matches $match0 for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
                     directionsCandidates[0].tripIdInts.add(gTripIdInt)
                     continue
-                } else if (match1 > match0 && match1 > 0.75f) {
+                } else if (match1 > match0 && match1 > ALMOST_A_MATCH) {
                     MTLog.logDebug("$routeId: matches $match1 for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
                     directionsCandidates[1].tripIdInts.add(gTripIdInt)
                     continue
@@ -158,7 +151,7 @@ object MDirectionSplitter {
                 ?.intersectWithOrder(gStopIdInts, ignoreRepeat = true, ignoreFirstAndLast = true)
                 ?.size ?: -1
             logNumbers("$routeId: intersect1: $intersect1")
-            val minIntersect = (gStopIdInts.size * .75f).toInt()
+            val minIntersect = (gStopIdInts.size * ALMOST_A_MATCH).toInt()
             logNumbers("$routeId: minIntersect: $minIntersect")
             if (intersect0 == gStopIdInts.size) {
                 MTLog.logDebug("$routeId: all stops contained in candidate for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
@@ -200,7 +193,7 @@ object MDirectionSplitter {
             }
             throw MTLog.Fatal(
                 "$routeId: Unresolved situation! \n" +
-                        "- ?: Trips: '${GIDs.toStringPlus(gTripIdInt)}:' \n" +
+                        "- ?: Trips: '${GIDs.toStringPlus(gTripIdInt)}': \n" +
                         "Stops: ${GIDs.toStringPlus(gStopIdInts)} \n" +
                         " - ${directionsCandidates.size} candidates: \n" +
                         "---------- \n" +

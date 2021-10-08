@@ -14,30 +14,30 @@ class MDirectionSplitterTest {
         const val RID = 1L
     }
 
-    private val t1 = GIDs.getInt("t_1")
-    private val t2 = GIDs.getInt("t_2")
-    private val t3 = GIDs.getInt("t_3")
-    private val t4 = GIDs.getInt("t_4")
-    private val t5 = GIDs.getInt("t_5")
-    private val t6 = GIDs.getInt("t_6")
-    private val t7 = GIDs.getInt("t_7")
-    private val t8 = GIDs.getInt("t_8")
-    private val t9 = GIDs.getInt("t_9")
+    private val t1 = GIDs.getInt("trip_1")
+    private val t2 = GIDs.getInt("trip_2")
+    private val t3 = GIDs.getInt("trip_3")
+    private val t4 = GIDs.getInt("trip_4")
+    private val t5 = GIDs.getInt("trip_5")
+    private val t6 = GIDs.getInt("trip_6")
+    private val t7 = GIDs.getInt("trip_7")
+    private val t8 = GIDs.getInt("trip_8")
+    private val t9 = GIDs.getInt("trip_9")
 
 
-    private val s0 = GIDs.getInt("s_0")
-    private val s1 = GIDs.getInt("s_1")
-    private val s2 = GIDs.getInt("s_2")
-    private val s3 = GIDs.getInt("s_3")
-    private val s4 = GIDs.getInt("s_4")
-    private val s5 = GIDs.getInt("s_5")
-    private val s6 = GIDs.getInt("s_6")
-    private val s7 = GIDs.getInt("s_7")
-    private val s8 = GIDs.getInt("s_8")
-    private val s9 = GIDs.getInt("s_9")
+    private val s0 = GIDs.getInt("stop_00")
+    private val s1 = GIDs.getInt("stop_01")
+    private val s2 = GIDs.getInt("stop_02")
+    private val s3 = GIDs.getInt("stop_03")
+    private val s4 = GIDs.getInt("stop_04")
+    private val s5 = GIDs.getInt("stop_05")
+    private val s6 = GIDs.getInt("stop_06")
+    private val s7 = GIDs.getInt("stop_07")
+    private val s8 = GIDs.getInt("stop_08")
+    private val s9 = GIDs.getInt("stop_09")
 
-    private val s11 = GIDs.getInt("s_11")
-    private val s22 = GIDs.getInt("s_22")
+    private val s11 = GIDs.getInt("stop_11")
+    private val s22 = GIDs.getInt("stop_22")
 
     @Test
     fun testSplitDirections_Simple_1() {
@@ -267,6 +267,19 @@ class MDirectionSplitterTest {
         val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
         // Assert
         // FIXME later, split in to 2 trips (w/o loosing trips.txt#trip_id to link w/ other data)
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testSplitDirections_Almost_the_same_expect_1_stop() {
+        // Arrange
+        val gTripIdIntStopIdInts = listOf(
+            t1 to listOf(s0, s1, s2, s3, s4, s11, s6, s7, s8, s9),
+            t2 to listOf(s0, s1, s2, s3, s4, s22, s6, s7, s8, s9),
+        )
+        // Act
+        val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
+        // Assert
         assertEquals(1, result.size)
     }
 }
