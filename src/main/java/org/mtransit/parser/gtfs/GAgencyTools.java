@@ -78,6 +78,9 @@ public interface GAgencyTools {
 	String cleanServiceId(@NotNull String serviceIdString);
 
 	// ROUTE
+	@NotNull
+	String cleanRouteOriginalId(@NotNull String routeId);
+
 	long getRouteId(@NotNull GRoute gRoute);
 
 	@Nullable
