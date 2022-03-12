@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import org.mtransit.commons.toIntTimestampSec
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.DBUtils
 import java.text.SimpleDateFormat
@@ -18,7 +19,7 @@ data class MSpec(
     val serviceDates: ArrayList<MServiceDate>,
     val routeFrequencies: TreeMap<Long, ArrayList<MFrequency>>,
     val firstTimestamp: Long,
-    val lastTimestamp: Long
+    val lastTimestamp: Long,
 ) {
 
     var schedules: Collection<MSchedule>? = null
@@ -75,11 +76,12 @@ data class MSpec(
         return routeFrequencies.size > 0
     }
 
+    // TODO later max integer = 2147483647 = Tuesday, January 19, 2038 3:14:07 AM GMT
     val firstTimestampInSeconds: Int
-        get() = TimeUnit.MILLISECONDS.toSeconds(firstTimestamp).toInt()
+        get() = TimeUnit.MILLISECONDS.toSeconds(firstTimestamp).toIntTimestampSec()
 
     val lastTimestampInSeconds: Int
-        get() = TimeUnit.MILLISECONDS.toSeconds(lastTimestamp).toInt()
+        get() = TimeUnit.MILLISECONDS.toSeconds(lastTimestamp).toIntTimestampSec()
 
     companion object {
         @JvmStatic

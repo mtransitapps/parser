@@ -203,6 +203,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		long lastTimestamp = -1L;
 		if (mServiceDatesList.size() > 0) {
 			MServiceDate firstServiceDate = mServiceDatesList.get(0);
+			final int maxCalendarDate = firstServiceDate.getCalendarDate() + 10 * 10_000; // max 10 years
+			mServiceDatesList.removeIf(serviceDate ->
+					serviceDate.getCalendarDate() > maxCalendarDate
+			);
 			MServiceDate lastServiceDate = mServiceDatesList.get(mServiceDatesList.size() - 1);
 			int firstCalendarDate = firstServiceDate.getCalendarDate();
 			int lastCalendarDate = lastServiceDate.getCalendarDate();

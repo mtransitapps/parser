@@ -273,7 +273,12 @@ public class MGenerator {
 			dumpValues(rawDirF, fileBase, null, null, null, null, null, -1, -1, true);
 		} else {
 			dumpCommonValues(rawDirF, mSpec);
-			dumpValues(rawDirF, fileBase, mSpec, minMaxLatLng.first.first, minMaxLatLng.second.first, minMaxLatLng.first.second, minMaxLatLng.second.second, mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds(), false);
+			dumpValues(
+					rawDirF, fileBase, mSpec,
+					minMaxLatLng.first.first, minMaxLatLng.second.first, minMaxLatLng.first.second, minMaxLatLng.second.second,
+					mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds(),
+					false
+			);
 			dumpStoreListing(rawDirF, fileBase, minMaxDates.first, minMaxDates.second);
 			bumpDBVersion(rawDirF, gtfsFile);
 		}
@@ -797,6 +802,7 @@ public class MGenerator {
 	private static final String GTFS_RTS_AREA_MAX_LNG = "gtfs_rts_area_max_lng";
 	private static final String GTFS_RTS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec";
 	private static final String GTFS_RTS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec";
+	// TODO later max integer = 2147483647 = Tuesday, January 19, 2038 3:14:07 AM GMT
 
 	private static void dumpCommonValues(File dumpDirF, MSpec mSpec) {
 		BufferedWriter ow = null;
