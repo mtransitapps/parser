@@ -1,6 +1,8 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.gtfs.GAgencyTools
+import java.lang.Integer.max
+import java.lang.Integer.min
 
 // https://developers.google.com/transit/gtfs/reference#calendar_dates_fields
 // https://gtfs.org/reference/static/#calendar_datestxt
@@ -77,7 +79,31 @@ data class GCalendarDate(
         @JvmStatic
         fun getNewUID(
             date: Int,
-            serviceIdInt: Int
+            serviceIdInt: Int,
         ) = "${date}0${serviceIdInt}".toLong()
+
+        @JvmStatic
+        fun isServiceEntirelyRemoved(
+            gCalendar: GCalendar,
+            gCalendarDates: List<GCalendarDate>?,
+        ) = isServiceEntirelyRemoved(gCalendar, gCalendarDates, gCalendar.startDate, gCalendar.endDate)
+
+        @JvmStatic
+        fun isServiceEntirelyRemoved(
+            gCalendar: GCalendar,
+            gCalendarDates: List<GCalendarDate>?,
+            startDate: Int,
+            endDate: Int,
+        ): Boolean {
+            val startDateToCheck = max(startDate, gCalendar.startDate)
+            val endDateToCheck = min(endDate, gCalendar.endDate)
+            val gCalendarDateServiceId = gCalendarDates?.filter { it.isServiceIdInt(gCalendar.serviceIdInt) } ?: return false  // NOT entirely removed
+            (startDateToCheck..endDateToCheck).forEach { date ->
+                if (gCalendarDateServiceId.none { it.isDate(date) && it.exceptionType == GCalendarDatesExceptionType.SERVICE_REMOVED }) {
+                    return false // NOT entirely removed
+                }
+            }
+            return true // removed
+        }
     }
 }

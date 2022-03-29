@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings("ConstantConditions")
 public class DefaultAgencyToolsTest {
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
@@ -38,7 +39,7 @@ public class DefaultAgencyToolsTest {
 		Period p = new Period();
 		p.todayStringInt = 2019120;
 		// Act
-		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, p);
+		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, null, p);
 		// Assert
 		assertNull(p.startDate);
 		assertNull(p.endDate);
@@ -58,7 +59,7 @@ public class DefaultAgencyToolsTest {
 		Period p = new Period();
 		p.todayStringInt = 20191221;
 		// Act
-		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, p);
+		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, null, p);
 		// Assert
 		assertNotNull(p.startDate);
 		assertEquals(20191221, p.startDate.intValue());
@@ -85,7 +86,7 @@ public class DefaultAgencyToolsTest {
 		Period p = new Period();
 		p.todayStringInt = 20191216;
 		// Act
-		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, p);
+		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, null, p);
 		// Assert
 		assertNotNull(p.startDate);
 		assertEquals(20191216, p.startDate.intValue());
@@ -112,7 +113,7 @@ public class DefaultAgencyToolsTest {
 		Period p = new Period();
 		p.todayStringInt = 20191217;
 		// Act
-		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, p);
+		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, null, p);
 		// Assert
 		assertNotNull(p.startDate);
 		assertEquals(20191216, p.startDate.intValue());
@@ -145,7 +146,7 @@ public class DefaultAgencyToolsTest {
 		p.todayStringInt = 20191217;
 		boolean keepToday = true;
 		// Act
-		DefaultAgencyTools.parseCalendars(gCalendars, DATE_FORMAT, c, p, keepToday);
+		DefaultAgencyTools.parseCalendars(gCalendars, null, DATE_FORMAT, c, p, keepToday);
 		// Assert
 		assertNotNull(p.startDate);
 		assertEquals(20191216, p.startDate.intValue());
@@ -168,7 +169,7 @@ public class DefaultAgencyToolsTest {
 		Period p = new Period();
 		p.todayStringInt = 20191222;
 		// Act
-		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, p);
+		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, null, p);
 		// Assert
 		assertNotNull(p.startDate);
 		assertEquals(20191222, p.startDate.intValue());
@@ -188,7 +189,7 @@ public class DefaultAgencyToolsTest {
 		p.todayStringInt = 20191222;
 		boolean keepToday = true;
 		// Act
-		DefaultAgencyTools.parseCalendars(gCalendars, DATE_FORMAT, c, p, keepToday);
+		DefaultAgencyTools.parseCalendars(gCalendars, null, DATE_FORMAT, c, p, keepToday);
 		// Assert
 		assertNotNull(p.startDate);
 		assertEquals(20191222, p.startDate.intValue());
