@@ -22,11 +22,20 @@ object MDirectionSplitter {
     fun splitDirection(
         routeId: Long,
         gRoutes: List<GRoute>,
-        routeGTFS: GSpec
+        routeGTFS: GSpec,
     ) {
         MTLog.log("$routeId: Splitting directions...")
         val gRouteTrips: List<GTrip> = gRoutes.flatMap { gRoute ->
             routeGTFS.getRouteTrips(gRoute.routeIdInt)
+        }
+        // check for exactly 2 distinct trip head-sign only (including none or empty)
+        val headSignToGTripIdInts = gRouteTrips
+            .groupBy({ it.tripHeadsignOrDefault }, { it.tripIdInt })
+        if (headSignToGTripIdInts.size == 2) {
+            val sortedHeadSigns = headSignToGTripIdInts.keys.sorted() // ASC
+            routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, headSignToGTripIdInts[sortedHeadSigns[0]])
+            routeGTFS.updateTripDirectionId(GDirectionId.NEW_2, headSignToGTripIdInts[sortedHeadSigns[1]])
+            return
         }
         val gTripIdIntStopIdInts = gRouteTrips.map { gTrip ->
             val stopTimes = routeGTFS.getStopTimes(routeId, gTrip.tripIdInt)
