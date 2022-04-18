@@ -516,6 +516,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return directionSplitterEnabled();
 	}
 
+	@Override
+	public boolean directionOverrideId(long routeId) {
+		return false;
+	}
+
 	@NotNull
 	@Override
 	public String cleanDirectionHeadsign(boolean fromStopName, @NotNull String directionHeadSign) {

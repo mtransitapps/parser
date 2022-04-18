@@ -312,7 +312,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Map<Integer, String> gDirectionHeadSigns = null;
 		if (this.agencyTools.directionSplitterEnabled()) {
 			if (this.agencyTools.directionSplitterEnabled(this.routeId)) {
-				MDirectionSplitter.splitDirection(this.routeId, gRoutes, routeGTFS);
+				MDirectionSplitter.splitDirection(this.routeId, gRoutes, routeGTFS, this.agencyTools);
 			}
 		}
 		if (this.agencyTools.directionFinderEnabled()) {
@@ -752,7 +752,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
 						// TODO later, when UI can display multiple times same stop/POI & schedules are affected to a specific sequence, keep both
 					} else {
-						MTLog.log("%s: parseStopTimes() > SKIP same stop & descent only %s.", this.routeId, gStopTime.toStringPlus());
+						MTLog.logDebug("%s: parseStopTimes() > SKIP same stop & descent only %s.", this.routeId, gStopTime.toStringPlus());
 						continue;
 					}
 				}

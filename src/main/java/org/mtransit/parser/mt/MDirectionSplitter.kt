@@ -5,6 +5,7 @@ import org.mtransit.commons.intersectWithOrder
 import org.mtransit.commons.matchList
 import org.mtransit.commons.overlap
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GDirectionId
 import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GRoute
@@ -23,10 +24,19 @@ object MDirectionSplitter {
         routeId: Long,
         gRoutes: List<GRoute>,
         routeGTFS: GSpec,
+        agencyTools: GAgencyTools,
     ) {
         MTLog.log("$routeId: Splitting directions...")
         val gRouteTrips: List<GTrip> = gRoutes.flatMap { gRoute ->
             routeGTFS.getRouteTrips(gRoute.routeIdInt)
+        }
+        // check for already split-ed directions
+        if (!agencyTools.directionOverrideId(routeId)
+            && gRouteTrips.none { it.directionIdOrOriginal == null }
+            && gRouteTrips.groupBy { it.directionIdOrDefault }.size == 2
+        ) {
+            MTLog.log("$routeId: Splitting directions... SKIP (already split-ed with direction IDs)")
+            return // already split-ed with direction ID
         }
         // check for exactly 2 distinct trip head-sign only (including none or empty)
         val headSignToGTripIdInts = gRouteTrips
@@ -35,6 +45,7 @@ object MDirectionSplitter {
             val sortedHeadSigns = headSignToGTripIdInts.keys.sorted() // ASC
             routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, headSignToGTripIdInts[sortedHeadSigns[0]])
             routeGTFS.updateTripDirectionId(GDirectionId.NEW_2, headSignToGTripIdInts[sortedHeadSigns[1]])
+            MTLog.log("$routeId: Splitting directions... DONE (with trip head-signs)")
             return
         }
         val gTripIdIntStopIdInts = gRouteTrips.map { gTrip ->
@@ -49,7 +60,14 @@ object MDirectionSplitter {
         MTLog.log("$routeId: Inferred ${directionsCandidates.size} trip direction(s)")
         when (directionsCandidates.size) {
             1 -> {
-                routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, directionsCandidates[0].tripIdInts)
+                val tripsByDirectionIDOriginal = gRouteTrips.groupBy { it.directionIdOrOriginal }
+                if (tripsByDirectionIDOriginal.size == 1
+                    && tripsByDirectionIDOriginal.keys.first() != null
+                ) {
+                    MTLog.log("$routeId: Keep original direction ID")
+                } else {
+                    routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, directionsCandidates[0].tripIdInts)
+                }
             }
             2 -> {
                 val (direction0, direction1) = if (directionsCandidates[0].stopIdInts.sum() > directionsCandidates[1].stopIdInts.sum()) {
@@ -64,7 +82,7 @@ object MDirectionSplitter {
                 throw MTLog.Fatal("$routeId: Unexpected number (${directionsCandidates.size}) of results !")
             }
         }
-        MTLog.logDebug("$routeId: Splitting directions... DONE")
+        MTLog.log("$routeId: Splitting directions... DONE")
     }
 
     fun splitDirections(

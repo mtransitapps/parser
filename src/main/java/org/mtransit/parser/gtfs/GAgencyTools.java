@@ -140,6 +140,8 @@ public interface GAgencyTools {
 
 	boolean directionSplitterEnabled(long routeId);
 
+	boolean directionOverrideId(long routeId);
+
 	@NotNull
 	String cleanDirectionHeadsign(boolean fromStopName, @NotNull String directionHeadSign);
 
