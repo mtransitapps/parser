@@ -70,6 +70,7 @@ object MDirectionSplitter {
                 }
             }
             2 -> {
+                // TODO check if directions candidates group match existing split to keep original direction IDs
                 val (direction0, direction1) = if (directionsCandidates[0].stopIdInts.sum() > directionsCandidates[1].stopIdInts.sum()) {
                     GDirectionId.NEW_2 to GDirectionId.NEW_1
                 } else {
