@@ -11,6 +11,7 @@ import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GRoute
 import org.mtransit.parser.gtfs.data.GSpec
 import org.mtransit.parser.gtfs.data.GTrip
+import kotlin.math.min
 
 object MDirectionSplitter {
 
@@ -43,10 +44,15 @@ object MDirectionSplitter {
             .groupBy({ it.tripHeadsignOrDefault }, { it.tripIdInt })
         if (headSignToGTripIdInts.size == 2) {
             val sortedHeadSigns = headSignToGTripIdInts.keys.sorted() // ASC
-            routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, headSignToGTripIdInts[sortedHeadSigns[0]])
-            routeGTFS.updateTripDirectionId(GDirectionId.NEW_2, headSignToGTripIdInts[sortedHeadSigns[1]])
-            MTLog.log("$routeId: Splitting directions... DONE (with trip head-signs)")
-            return
+            val trips0Size = headSignToGTripIdInts[sortedHeadSigns[0]]?.size ?: 0
+            val trips1Size = headSignToGTripIdInts[sortedHeadSigns[1]]?.size ?: 0
+            if (min(trips0Size, trips1Size) / gRouteTrips.size > .33f) {
+                // TODO check if directions candidates group match existing split to keep original direction IDs
+                routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, headSignToGTripIdInts[sortedHeadSigns[0]])
+                routeGTFS.updateTripDirectionId(GDirectionId.NEW_2, headSignToGTripIdInts[sortedHeadSigns[1]])
+                MTLog.log("$routeId: Splitting directions... DONE (with trip head-signs)")
+                return
+            }
         }
         val gTripIdIntStopIdInts = gRouteTrips.map { gTrip ->
             val stopTimes = routeGTFS.getStopTimes(routeId, gTrip.tripIdInt)
