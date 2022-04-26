@@ -4,6 +4,7 @@ import org.mtransit.commons.containsExactList
 import org.mtransit.commons.intersectWithOrder
 import org.mtransit.commons.matchList
 import org.mtransit.commons.overlap
+import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GDirectionId
@@ -32,6 +33,9 @@ object MDirectionSplitter {
             routeGTFS.getRouteTrips(gRoute.routeIdInt)
         }
         // check for already split-ed directions
+        if (Constants.DEBUG) {
+            MTLog.logDebug("$routeId: trip direction IDs: ${gRouteTrips.groupBy { it.directionIdOrDefault }.keys}")
+        }
         if (!agencyTools.directionOverrideId(routeId)
             && gRouteTrips.none { it.directionIdOrOriginal == null }
             && gRouteTrips.groupBy { it.directionIdOrDefault }.size == 2
@@ -40,13 +44,19 @@ object MDirectionSplitter {
             return // already split-ed with direction ID
         }
         // check for exactly 2 distinct trip head-sign only (including none or empty)
+        if (Constants.DEBUG) {
+            MTLog.logDebug("$routeId: trip headsigns: ${gRouteTrips.groupBy { it.tripHeadsignOrDefault }.keys}")
+        }
         val headSignToGTripIdInts = gRouteTrips
             .groupBy({ it.tripHeadsignOrDefault }, { it.tripIdInt })
         if (headSignToGTripIdInts.size == 2) {
             val sortedHeadSigns = headSignToGTripIdInts.keys.sorted() // ASC
             val trips0Size = headSignToGTripIdInts[sortedHeadSigns[0]]?.size ?: 0
             val trips1Size = headSignToGTripIdInts[sortedHeadSigns[1]]?.size ?: 0
-            if (min(trips0Size, trips1Size) / gRouteTrips.size > .33f) {
+            if (Constants.DEBUG) {
+                MTLog.logDebug("$routeId: trip headsigns %%: ${min(trips0Size, trips1Size).toFloat() / gRouteTrips.size}")
+            }
+            if ((min(trips0Size, trips1Size).toFloat() / gRouteTrips.size) > .33f) {
                 // TODO check if directions candidates group match existing split to keep original direction IDs
                 routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, headSignToGTripIdInts[sortedHeadSigns[0]])
                 routeGTFS.updateTripDirectionId(GDirectionId.NEW_2, headSignToGTripIdInts[sortedHeadSigns[1]])
