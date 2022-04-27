@@ -1087,7 +1087,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 					&& pPrevious.startDate != null && pPrevious.endDate != null
 					&& diffLowerThan(DATE_FORMAT, c, pPrevious.startDate, pPrevious.endDate, MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
 				p.startDate = pPrevious.startDate;
-				MTLog.log("> new start date '%s' because previous day has own service ID(s)", p.endDate);
+				MTLog.log("> new start date '%s' because previous day has own service ID(s)", p.startDate);
 				continue;
 			}
 			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS)) {
