@@ -2,24 +2,24 @@ apply plugin: 'java-library'
 apply plugin: 'kotlin'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = rootProject.javaVersion
+    targetCompatibility = rootProject.javaVersion
 }
 compileKotlin {
     kotlinOptions {
-        jvmTarget = rootProject.ext.kotlinOptionsJvmTarget
+        jvmTarget = libs.versions.kotlinOptionsJvmTarget.get()
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = rootProject.ext.kotlinOptionsJvmTarget
+        jvmTarget = libs.versions.kotlinOptionsJvmTarget.get()
     }
 }
 
 dependencies {
     api project(':commons-java')
 
-    implementation rootProject.ext.kotlinLibs.values()
+    implementation libs.bundles.kotlinLibs
 
     api 'commons-io:commons-io:2.11.0'
     api 'org.apache.commons:commons-csv:1.9.0'
@@ -27,8 +27,8 @@ dependencies {
     api 'org.apache.commons:commons-text:1.9'
     api 'org.xerial:sqlite-jdbc:3.36.0.3'
 
-    testImplementation rootProject.ext.jUnitLibs.jUnit
-    testImplementation rootProject.ext.mockitoLibs.mockitoCore
+    testImplementation libs.JUnit
+    testImplementation libs.mockitoCore
 }
 
 test {
