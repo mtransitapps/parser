@@ -25,7 +25,7 @@ data class MStop(
         val sb = StringBuilder() //
         sb.append(id) // ID
         sb.append(Constants.COLUMN_SEPARATOR) //
-        sb.append(SQLUtils.quotes(code)) // code
+        sb.append(SQLUtils.quotes(SQLUtils.escape(code))) // code
         if (DefaultAgencyTools.EXPORT_ORIGINAL_ID) {
             sb.append(Constants.COLUMN_SEPARATOR) //
             sb.append(SQLUtils.quotes(originalId ?: Constants.EMPTY)) //
