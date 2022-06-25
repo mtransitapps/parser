@@ -506,14 +506,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return tripHeadsign;
 	}
 
+	@Deprecated
 	@Override
 	public boolean directionSplitterEnabled() {
-		return false; // OPT-IN feature // WIP
+		return directionSplitterEnabled(-1L);
 	}
 
 	@Override
 	public boolean directionSplitterEnabled(long routeId) {
-		return directionSplitterEnabled();
+		return false; // OPT-IN feature
 	}
 
 	@Override
