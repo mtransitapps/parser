@@ -136,9 +136,6 @@ public interface GAgencyTools {
 	@NotNull
 	String cleanTripHeadsign(@NotNull String tripHeadsign);
 
-	@Deprecated
-	boolean directionSplitterEnabled();
-
 	boolean directionSplitterEnabled(long routeId);
 
 	boolean directionOverrideId(long routeId);
