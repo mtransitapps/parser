@@ -548,6 +548,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return null; // optimize direction finder by selecting based on head-sign only
 	}
 
+	@Nullable
+	@Override
+	public String mergeComplexDirectionHeadSign(@Nullable String headSign1, @Nullable String headSign2) {
+		return null; // pick a direction headsign (OR null)
+	}
+
 	static boolean directionHeadSignsDescriptiveS(@NotNull Map<Integer, String> directionHeadSigns) {
 		if (directionHeadSigns.isEmpty()) {
 			return true; // nothing is descriptive

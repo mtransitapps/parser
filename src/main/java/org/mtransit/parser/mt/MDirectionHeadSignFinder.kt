@@ -239,12 +239,16 @@ object MDirectionHeadSignFinder {
             val stopTimesHeadSignAndLastStopId2 = tripHeadSignAndLastStopIdInt.first { it.headSign == distinctTripHeadSignAndLastStopIdInt[1].headSign }
             val selectedHeadSign = agencyTools.selectDirectionHeadSign(stopTimesHeadSignAndLastStopId1.headSign, stopTimesHeadSignAndLastStopId2.headSign)
             selectedHeadSign?.let { selectedHeadSignNN ->
-                if (selectedHeadSignNN == stopTimesHeadSignAndLastStopId1.headSign) {
-                    MTLog.log("$routeId: $directionId: merge w/ head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId1.headSign}'")
-                    return stopTimesHeadSignAndLastStopId1
-                } else if (selectedHeadSignNN == stopTimesHeadSignAndLastStopId2.headSign) {
-                    MTLog.log("$routeId: $directionId: merge w/ head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId2.headSign}'")
-                    return stopTimesHeadSignAndLastStopId2
+                when (selectedHeadSignNN) {
+                    stopTimesHeadSignAndLastStopId1.headSign -> {
+                        MTLog.log("$routeId: $directionId: merge w/ head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId1.headSign}'")
+                        return stopTimesHeadSignAndLastStopId1
+                    }
+                    stopTimesHeadSignAndLastStopId2.headSign -> {
+                        MTLog.log("$routeId: $directionId: merge w/ head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId2.headSign}'")
+                        return stopTimesHeadSignAndLastStopId2
+                    }
+                    else -> {} // SKIP
                 }
             }
         }
@@ -376,7 +380,7 @@ object MDirectionHeadSignFinder {
             logMerge(!dataLossAuthorized, "$routeId: $directionId: same head-sign & stops -> '$stopTimesHeadSign1'")
             return MergedTrip(routeIdInts1, routeIdInts2, stopTimesHeadSign1 to mergeStopTimesCopy(stopTimesList1, stopTimesList2))
         }
-        val stopIdsIntersect = stopIdInts1.intersect(stopIdInts2)
+        val stopIdsIntersect = stopIdInts1.intersect(stopIdInts2.toSet())
         // COMMON STOPs
         var firstCommonStopIdInt: Pair<Int?, Int?>? = if (stopIdsIntersect.isEmpty()) null else stopIdsIntersect.first() to null
         var lastCommonStopIdInt: Pair<Int?, Int?>? = if (stopIdsIntersect.isEmpty()) null else stopIdsIntersect.last() to null
@@ -676,6 +680,18 @@ object MDirectionHeadSignFinder {
             }
 
             if (dataLossAuthorized) {
+                agencyTools.mergeComplexDirectionHeadSign(stopTimesHeadSign1, stopTimesHeadSign2)?.let { merged ->
+                    logMerge(!dataLossAuthorized, "$routeId: $directionId: merge #1 / #2 head-signs (agency) -> '$merged'")
+                    return MergedTrip(
+                        routeIdInts1, routeIdInts2, merged to pickAndMergeLongestTripStopTimes(
+                            stopTimesList1,
+                            stopTimesList2,
+                            firstCommonStopIdInt,
+                            stopIdIntsBeforeCommon1,
+                            stopIdIntsBeforeCommon2
+                        )
+                    )
+                }
                 val prefix = stopTimesHeadSign1.commonPrefixWith(stopTimesHeadSign2, true)
                 val suffix = stopTimesHeadSign1.commonSuffixWith(stopTimesHeadSign2, true)
                 val minFixLength = (.75f * max(stopTimesHeadSign1.length, stopTimesHeadSign2.length)).toInt()

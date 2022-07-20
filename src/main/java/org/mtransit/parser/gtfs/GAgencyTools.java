@@ -154,6 +154,9 @@ public interface GAgencyTools {
 	@Nullable
 	String selectDirectionHeadSign(@Nullable String headSign1, @Nullable String headSign2);
 
+	@Nullable
+	String mergeComplexDirectionHeadSign(@Nullable String headSign1, @Nullable String headSign2);
+
 	boolean directionHeadSignDescriptive(@NotNull String directionHeadSign);
 
 	@Deprecated
