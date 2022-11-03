@@ -5,7 +5,7 @@ import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 import java.util.Date
 
-// https://gtfs.org/reference/static#stop_timestxt
+// https://gtfs.org/schedule/reference/#stop_timestxt
 // https://developers.google.com/transit/gtfs/reference#stop_times_fields
 data class GStopTime(
     val tripIdInt: Int,
@@ -15,7 +15,8 @@ data class GStopTime(
     val stopSequence: Int,
     val stopHeadsign: String?,
     var pickupType: Int,
-    var dropOffType: Int
+    var dropOffType: Int,
+    val timePoint: Int,
 ) : Comparable<GStopTime> {
 
     constructor(
@@ -26,7 +27,8 @@ data class GStopTime(
         stopSequence: Int,
         stopHeadsign: String?,
         pickupType: Int,
-        dropOffType: Int
+        dropOffType: Int,
+        timePoint: Int,
     ) : this(
         GIDs.getInt(tripId),
         arrivalTime,
@@ -35,7 +37,8 @@ data class GStopTime(
         stopSequence,
         stopHeadsign,
         pickupType,
-        dropOffType
+        dropOffType,
+        timePoint,
     )
 
     constructor(
@@ -46,7 +49,8 @@ data class GStopTime(
         stopSequence: Int,
         stopHeadsign: String?,
         pickupType: Int,
-        dropOffType: Int
+        dropOffType: Int,
+        timePoint: Int,
     ) : this(
         GIDs.getInt(tripId),
         GTime.fromString(arrivalTime),
@@ -55,7 +59,8 @@ data class GStopTime(
         stopSequence,
         stopHeadsign,
         pickupType,
-        dropOffType
+        dropOffType,
+        timePoint,
     )
 
     @Deprecated(message = "Not memory efficient")
@@ -161,6 +166,7 @@ data class GStopTime(
         const val STOP_HEADSIGN = "stop_headsign"
         const val PICKUP_TYPE = "pickup_type"
         const val DROP_OFF_TYPE = "drop_off_type"
+        const val TIME_POINT = "timepoint"
 
         @JvmStatic
         fun getNewUID(
@@ -170,16 +176,17 @@ data class GStopTime(
         ) = "${tripIdInt}0${stopIdInt}0${stopSequence}".toLong()
 
         fun Iterable<GStopTime>.minStopSequence(): Int {
-            return this.map { it.stopSequence }.minOrNull() ?: 0
+            return this.minOfOrNull { it.stopSequence } ?: 0
         }
 
         fun Iterable<GStopTime>.maxStopSequence(): Int {
-            return this.map { it.stopSequence }.maxOrNull() ?: Int.MAX_VALUE
+            return this.maxOfOrNull { it.stopSequence } ?: Int.MAX_VALUE
         }
 
         @Suppress("unused")
+        @JvmOverloads
         @JvmStatic
-        fun toStringPlus(gStopTimes: Iterable<GStopTime>, debug: Boolean = Constants.DEBUG): String {
+        fun toListStringPlus(gStopTimes: Iterable<GStopTime>, debug: Boolean = Constants.DEBUG): String {
             return gStopTimes.joinToString { gStopTime -> gStopTime.toStringPlus(debug) }
         }
     }

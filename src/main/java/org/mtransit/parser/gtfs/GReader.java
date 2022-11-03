@@ -23,6 +23,7 @@ import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
+import org.mtransit.parser.gtfs.data.GTimePoint;
 import org.mtransit.parser.gtfs.data.GTrip;
 
 import java.io.BufferedReader;
@@ -196,7 +197,7 @@ public class GReader {
 			return;
 		}
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
-			MTLog.log("Remove 1st empty car");
+			MTLog.log("Reading file '%s'... > remove 1st empty car", filename);
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
 		CSVRecord recordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
@@ -268,7 +269,8 @@ public class GReader {
 					Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()),
 					line.get(GStopTime.STOP_HEADSIGN), //
 					GPickupType.parse(line.get(GStopTime.PICKUP_TYPE)).ordinal(), //
-					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)).ordinal() //
+					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)).ordinal(), //
+					GTimePoint.parse(line.get(GStopTime.TIME_POINT)).ordinal() //
 			);
 			if (agencyTools.excludeStopTime(gStopTime)) {
 				return;

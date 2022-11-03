@@ -874,8 +874,26 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 			}
 		}
+		if (previousArrivalTime == -1 || previousDepartureTime == -1) {
+			//noinspection deprecation
+			MTLog.log("Trip ID '%s' stops: ", gStopTime.getTripId());
+			for (GStopTime aStopTime : tripStopTimes) {
+				MTLog.log("- %s", aStopTime);
+			}
+			//noinspection deprecation
+			throw new MTLog.Fatal("Invalid stop time trip ID '%s' > no previous stop for %s!", gStopTime.getTripId(), gStopTime);
+		}
 		long previousArrivalTimeInMs = GTime.toMs(previousArrivalTime);
 		long previousDepartureTimeInMs = GTime.toMs(previousDepartureTime);
+		if (nextArrivalTime == -1 || nextDepartureTime == -1) {
+			//noinspection deprecation
+			MTLog.log("Trip ID '%s' stops: ", gStopTime.getTripId());
+			for (GStopTime aStopTime : tripStopTimes) {
+				MTLog.log("- %s", aStopTime);
+			}
+			//noinspection deprecation
+			throw new MTLog.Fatal("Invalid stop time trip ID '%s' > no next stop for %s!", gStopTime.getTripId(), gStopTime);
+		}
 		long nextArrivalTimeInMs = GTime.toMs(nextArrivalTime);
 		long nextDepartureTimeInMs = GTime.toMs(nextDepartureTime);
 		long arrivalTimeDiffInMs = nextArrivalTimeInMs - previousArrivalTimeInMs;

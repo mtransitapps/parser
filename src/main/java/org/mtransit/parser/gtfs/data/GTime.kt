@@ -8,6 +8,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.regex.Pattern
 
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 object GTime {
 
     private const val TIME_FORMAT = "HHmmss"
@@ -91,7 +92,6 @@ object GTime {
         return times.all { isAM(it) }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate")
     fun isAM(time: Int): Boolean {
         return time in 0..11_99_99
     }
@@ -104,7 +104,6 @@ object GTime {
         return times.all { isPM(it) }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate")
     fun isPM(time: Int): Boolean {
         return time in 12_00_00..24_00_00
     }

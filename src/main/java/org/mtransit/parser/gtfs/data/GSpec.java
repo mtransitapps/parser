@@ -474,6 +474,7 @@ public class GSpec {
 									dropOffType = GDropOffType.NO_DROP_OFF.ordinal();
 								}
 							}
+							int timePoint = gStopTime.getTimePoint();
 							GStopTime newGStopTime = new GStopTime(
 									tripIdInt,
 									newDepartureTime,
@@ -482,7 +483,8 @@ public class GSpec {
 									gStopTime.getStopSequence(),
 									gStopTime.getStopHeadsign(),
 									pickupType,
-									dropOffType
+									dropOffType,
+									timePoint
 							);
 							newGStopTimes.add(newGStopTime);
 						}

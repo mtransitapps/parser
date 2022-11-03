@@ -61,6 +61,7 @@ object DBUtils {
                 .appendColumn(GStopTime.STOP_HEADSIGN, SQLUtilsCommons.TXT) // string ??
                 .appendColumn(GStopTime.PICKUP_TYPE, SQLUtilsCommons.INT)
                 .appendColumn(GStopTime.DROP_OFF_TYPE, SQLUtilsCommons.INT)
+                .appendColumn(GStopTime.TIME_POINT, SQLUtilsCommons.INT)
                 .build()
         )
         SQLUtils.executeUpdate(
@@ -115,7 +116,8 @@ object DBUtils {
                     "${gStopTime.departureTime}," +
                     "${gStopTime.stopHeadsign?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}," +
                     "${gStopTime.pickupType}," +
-                    "${gStopTime.dropOffType}" +
+                    "${gStopTime.dropOffType}," +
+                    "${gStopTime.timePoint}" +
                     SQLUtilsCommons.P2
         )
         insertRowCount++
@@ -208,7 +210,8 @@ object DBUtils {
                     rs.getInt(GStopTime.STOP_SEQUENCE),
                     stopHeadSign,
                     rs.getInt(GStopTime.PICKUP_TYPE),
-                    rs.getInt(GStopTime.DROP_OFF_TYPE)
+                    rs.getInt(GStopTime.DROP_OFF_TYPE),
+                    rs.getInt(GStopTime.TIME_POINT),
                 )
             )
             selectRowCount++
@@ -279,6 +282,7 @@ object DBUtils {
         var whereAdded = false
         // SERVICE ID
         serviceIdInt?.let {
+            @Suppress("KotlinConstantConditions")
             query += if (whereAdded) {
                 " AND"
             } else {
@@ -464,6 +468,7 @@ object DBUtils {
         var query = "DELETE FROM $SCHEDULES_TABLE_NAME"
         var whereAdded = false
         serviceIdInt?.let {
+            @Suppress("KotlinConstantConditions")
             query += if (whereAdded) {
                 " AND"
             } else {
