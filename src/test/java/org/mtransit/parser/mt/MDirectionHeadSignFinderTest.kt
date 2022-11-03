@@ -24,6 +24,7 @@ import org.mtransit.parser.gtfs.data.GRouteType
 import org.mtransit.parser.gtfs.data.GSpec
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTime
+import org.mtransit.parser.gtfs.data.GTimePoint
 import org.mtransit.parser.gtfs.data.GTrip
 
 
@@ -848,7 +849,8 @@ class MDirectionHeadSignFinderTest {
         arrivalTime: String = "99:9$stopIdx:99",
         departureTime: String = "99:9$stopIdx:99",
         pickupType: Int = GPickupType.REGULAR.id,
-        dropOffTypeInt: Int = GDropOffType.REGULAR.id
+        dropOffTypeInt: Int = GDropOffType.REGULAR.id,
+        timePoint: Int = GTimePoint.EXACT.id,
     ): GStopTime {
         return GStopTime(
             tripId,
@@ -858,7 +860,8 @@ class MDirectionHeadSignFinderTest {
             stopIdx,
             "stop head-sign",
             pickupType,
-            dropOffTypeInt
+            dropOffTypeInt,
+            timePoint,
         )
     }
 }
