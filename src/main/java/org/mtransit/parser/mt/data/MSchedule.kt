@@ -91,7 +91,7 @@ data class MSchedule(
         if (headsignValue.isNullOrBlank()) {
             if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
                 if (headsignType != MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
-                    return false;
+                    return false
                 }
             } else {
                 return false
