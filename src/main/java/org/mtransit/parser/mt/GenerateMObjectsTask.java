@@ -2,6 +2,7 @@ package org.mtransit.parser.mt;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.FeatureFlags;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
@@ -643,6 +644,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mStopId = this.agencyTools.getStopId(gStop);
 				this.gStopsCache.put(mStopId, gStop);
 				if (mStopId < 0) {
+					//noinspection deprecation
 					throw new MTLog.Fatal("%s: Can't find GTFS stop ID (%s) '%s' from trip ID '%s' (%s)", this.routeId, mStopId, gTripStop.getStopIdInt(),
 							gTripStop.getTripId(), gStop.toStringPlus(true));
 				}
@@ -776,7 +778,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						mSchedule.toStringPlus(),
 						mSchedules.get(mSchedule.getUID()).toStringPlus());
 			}
-			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY //
+			if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY
+					&& descentOnly) {
+				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_DESCENT_ONLY, null);
+			} else if (DefaultAgencyTools.EXPORT_DESCENT_ONLY //
 					&& descentOnly) {
 				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_DESCENT_ONLY, null);
 			} else if (gStopTime.hasStopHeadsign()) {

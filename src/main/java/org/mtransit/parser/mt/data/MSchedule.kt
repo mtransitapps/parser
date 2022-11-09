@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
@@ -61,12 +62,20 @@ data class MSchedule(
         return agencyTools.cleanServiceId(_serviceId)
     }
 
-    fun setHeadsign(headsignType: Int, headsignValue: String?) {
-        if (headsignValue.isNullOrBlank()) {
-            MTLog.log("Setting '$headsignValue' head-sign! (type:$headsignType)")
+    fun setHeadsign(newHeadsignType: Int, newHeadsignValue: String?) {
+        if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
+            if (newHeadsignValue.isNullOrBlank()
+                && newHeadsignType != MTrip.HEADSIGN_TYPE_DESCENT_ONLY
+            ) {
+                MTLog.log("Setting '$newHeadsignValue' head-sign! (type:$newHeadsignType)")
+            }
+        } else {
+            if (newHeadsignValue.isNullOrBlank()) {
+                MTLog.log("Setting '$newHeadsignValue' head-sign! (type:$newHeadsignType)")
+            }
         }
-        this.headsignType = headsignType
-        this.headsignValue = headsignValue
+        this.headsignType = newHeadsignType
+        this.headsignValue = newHeadsignValue
     }
 
     fun clearHeadsign() {
@@ -80,7 +89,13 @@ data class MSchedule(
             return false
         }
         if (headsignValue.isNullOrBlank()) {
-            return false
+            if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
+                if (headsignType != MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
+                    return false;
+                }
+            } else {
+                return false
+            }
         }
         return true
     }
@@ -142,7 +157,17 @@ data class MSchedule(
             sb.append(_pathId) // original trip ID
             sb.append(Constants.COLUMN_SEPARATOR) //
         }
-        if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+        if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
+            if (headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
+                sb.append(MTrip.HEADSIGN_TYPE_DESCENT_ONLY) // HEADSIGN TYPE
+                sb.append(Constants.COLUMN_SEPARATOR) //
+                sb.append(SQLUtils.quotes(Constants.EMPTY)) // HEADSIGN STRING
+            } else {
+                sb.append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
+                sb.append(Constants.COLUMN_SEPARATOR) //
+                sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
+            }
+        } else if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
             if (headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
                 sb.append(MTrip.HEADSIGN_TYPE_DESCENT_ONLY) // HEADSIGN TYPE
                 sb.append(Constants.COLUMN_SEPARATOR) //
