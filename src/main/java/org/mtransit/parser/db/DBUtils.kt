@@ -1,12 +1,9 @@
 package org.mtransit.parser.db
 
 import org.mtransit.commons.sql.SQLCreateBuilder
-import org.mtransit.commons.sql.fromSQL
-import org.mtransit.commons.sql.toSQL
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.gtfs.data.GRoute
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTripStop
 import org.mtransit.parser.mt.data.MSchedule
@@ -65,7 +62,10 @@ object DBUtils {
                 .appendColumn(GStopTime.PICKUP_TYPE, SQLUtilsCommons.INT)
                 .appendColumn(GStopTime.DROP_OFF_TYPE, SQLUtilsCommons.INT)
                 .appendColumn(GStopTime.TIME_POINT, SQLUtilsCommons.INT)
-                .appendColumn(GStopTime.GENERATED, SQLUtilsCommons.INT)
+                .appendPrimaryKeys(
+                    GStopTime.TRIP_ID,
+                    GStopTime.STOP_SEQUENCE,
+                )
                 .build()
         )
         SQLUtils.executeUpdate(
@@ -123,8 +123,7 @@ object DBUtils {
                     "${gStopTime.stopHeadsign?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}," +
                     "${gStopTime.pickupType.id}," +
                     "${gStopTime.dropOffType.id}," +
-                    "${gStopTime.timePoint.id}," +
-                    "${gStopTime.generated.toSQL()}" +
+                    "${gStopTime.timePoint.id}" +
                     SQLUtilsCommons.P2
         )
         insertRowCount++
@@ -219,7 +218,6 @@ object DBUtils {
                     rs.getInt(GStopTime.PICKUP_TYPE),
                     rs.getInt(GStopTime.DROP_OFF_TYPE),
                     rs.getInt(GStopTime.TIME_POINT),
-                    rs.getInt(GStopTime.GENERATED).fromSQL(),
                 )
             )
             selectRowCount++

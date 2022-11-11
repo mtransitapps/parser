@@ -17,7 +17,6 @@ data class GStopTime(
     var pickupType: GPickupType,
     var dropOffType: GDropOffType,
     val timePoint: GTimePoint,
-    val generated: Boolean = false,
 ) : Comparable<GStopTime> {
 
     constructor(
@@ -30,7 +29,6 @@ data class GStopTime(
         pickupTypeInt: Int,
         dropOffTypeInt: Int,
         timePointInt: Int,
-        generated: Boolean = false,
     ) : this(
         tripIdInt,
         arrivalTime,
@@ -41,7 +39,6 @@ data class GStopTime(
         GPickupType.parse(pickupTypeInt),
         GDropOffType.parse(dropOffTypeInt),
         GTimePoint.parse(timePointInt),
-        generated
     )
 
     constructor(
@@ -54,7 +51,6 @@ data class GStopTime(
         pickupType: GPickupType,
         dropOffType: GDropOffType,
         timePoint: GTimePoint,
-        generated: Boolean = false,
     ) : this(
         GIDs.getInt(tripId),
         arrivalTime,
@@ -65,7 +61,6 @@ data class GStopTime(
         pickupType,
         dropOffType,
         timePoint,
-        generated
     )
 
     constructor(
@@ -78,7 +73,6 @@ data class GStopTime(
         pickupType: GPickupType,
         dropOffType: GDropOffType,
         timePoint: GTimePoint,
-        generated: Boolean = false,
     ) : this(
         GIDs.getInt(tripId),
         GTime.fromString(arrivalTime),
@@ -89,7 +83,6 @@ data class GStopTime(
         pickupType,
         dropOffType,
         timePoint,
-        generated
     )
 
     @Deprecated(message = "Not memory efficient")
@@ -196,7 +189,6 @@ data class GStopTime(
         const val PICKUP_TYPE = "pickup_type"
         const val DROP_OFF_TYPE = "drop_off_type"
         const val TIME_POINT = "timepoint"
-        const val GENERATED = "generated"
 
         @JvmStatic
         fun getNewUID(

@@ -270,8 +270,7 @@ public class GReader {
 					line.get(GStopTime.STOP_HEADSIGN), //
 					GPickupType.parse(line.get(GStopTime.PICKUP_TYPE)), //
 					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)), //
-					GTimePoint.parse(line.get(GStopTime.TIME_POINT)), //
-					false // not generated
+					GTimePoint.parse(line.get(GStopTime.TIME_POINT)) //
 			);
 			if (agencyTools.excludeStopTime(gStopTime)) {
 				return;

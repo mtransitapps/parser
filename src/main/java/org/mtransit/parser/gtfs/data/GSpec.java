@@ -454,32 +454,31 @@ public class GSpec {
 			long frequencyEndInMs;
 			long frequencyHeadwayInMs;
 			ArrayList<GFrequency> tripFrequencies = this.tripIdIntFrequencies.get(tripIdInt);
-			int f = 0;
 			for (GFrequency gFrequency : tripFrequencies) {
-				int newGeneratedTripIdInt = tripIdInt;
-				if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-					newGeneratedTripIdInt = GIDs.getInt(GIDs.getString(tripIdInt) + "-" + f);
-					addTrip(new GTrip(
-							gOriginalTrip.getRouteIdInt(),
-							gOriginalTrip.getServiceIdInt(),
-							newGeneratedTripIdInt,
-							gOriginalTrip.getDirectionIdE(),
-							gOriginalTrip.getTripHeadsign(),
-							gOriginalTrip.getTripShortName()
-					));
-					t++;
-				}
 				try {
 					frequencyStartInMs = gFrequency.getStartTimeMs();
 					frequencyEndInMs = gFrequency.getEndTimeMs();
 					frequencyHeadwayInMs = gFrequency.getHeadwayMs();
 					long firstStopTimeInMs = frequencyStartInMs;
+					int f = 0;
 					while (frequencyStartInMs <= firstStopTimeInMs && firstStopTimeInMs <= frequencyEndInMs) {
 						if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) { // TODO WTF?
 							if (lastFirstStopTimeInMs == firstStopTimeInMs) {
 								firstStopTimeInMs += frequencyHeadwayInMs;
 								continue;
 							}
+						}
+						int newGeneratedTripIdInt = GIDs.getInt(GIDs.getString(tripIdInt) + "-" + f);
+						if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
+							addTrip(new GTrip(
+									gOriginalTrip.getRouteIdInt(),
+									gOriginalTrip.getServiceIdInt(),
+									newGeneratedTripIdInt,
+									gOriginalTrip.getDirectionIdE(),
+									gOriginalTrip.getTripHeadsign(),
+									gOriginalTrip.getTripShortName()
+							));
+							t++;
 						}
 						stopTimeCal.setTimeInMillis(firstStopTimeInMs);
 						for (int i = 0; i < tripStopTimes.size(); i++) {
@@ -510,18 +509,17 @@ public class GSpec {
 									gStopTime.getStopHeadsign(),
 									pickupType,
 									dropOffType,
-									timePoint,
-									true
+									timePoint
 							);
 							newGStopTimes.add(newGStopTime);
 						}
 						lastFirstStopTimeInMs = firstStopTimeInMs;
 						firstStopTimeInMs += frequencyHeadwayInMs;
+						f++;
 					}
 				} catch (Exception e) {
 					throw new MTLog.Fatal(e, "Error while generating stop times for frequency '%s'!", gFrequency);
 				}
-				f++;
 			}
 			String tripUID;
 			String uid;
