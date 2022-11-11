@@ -32,6 +32,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -163,9 +164,14 @@ public class GReader {
 					fr = new FileReader(stopTimeFile);
 					reader = new BufferedReader(fr);
 					DBUtils.setAutoCommit(false);
-					readCsv(stopTimeFile.getName(), reader, line ->
-							processStopTime(agencyTools, gSpec, line)
-					);
+					readCsv(stopTimeFile.getName(), reader,
+							line -> processStopTime(agencyTools, gSpec, line),
+							columnNames -> {
+								if (!columnNames.contains(GStopTime.PICKUP_TYPE)
+										&& !columnNames.contains(GStopTime.DROP_OFF_TYPE)) {
+									agencyTools.setForceStopTimeFirstNoDropOffLastNoPickupType(true);
+								}
+							});
 					DBUtils.setAutoCommit(true); // true => commit()
 				}
 			}
@@ -189,6 +195,12 @@ public class GReader {
 
 	private static void readCsv(String filename, BufferedReader reader,
 								LineProcessor lineProcessor) throws IOException {
+		readCsv(filename, reader, lineProcessor, null);
+	}
+
+	private static void readCsv(String filename, BufferedReader reader,
+								LineProcessor lineProcessor,
+								@Nullable OnColumnNamesFound onColumnNamesFoundCallback) throws IOException {
 		MTLog.log("Reading file '%s'...", filename);
 		String line;
 		String[] columnNames;
@@ -204,6 +216,9 @@ public class GReader {
 		columnNames = new String[recordColumns.size()];
 		for (int i = 0; i < recordColumns.size(); i++) {
 			columnNames[i] = recordColumns.get(i);
+		}
+		if (onColumnNamesFoundCallback != null) {
+			onColumnNamesFoundCallback.processColumnNames(Arrays.asList(columnNames));
 		}
 		if (columnNames.length == 0) {
 			return;
@@ -479,5 +494,9 @@ public class GReader {
 
 	private interface LineProcessor {
 		void processLine(HashMap<String, String> line);
+	}
+
+	private interface OnColumnNamesFound {
+		void processColumnNames(List<String> columnNames);
 	}
 }

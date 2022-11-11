@@ -177,6 +177,8 @@ public interface GAgencyTools {
 	@NotNull
 	String provideMissingTripHeadSign(@NotNull GTrip gTrip);
 
+	void setForceStopTimeFirstNoDropOffLastNoPickupType(boolean force);
+
 	boolean forceStopTimeFirstNoDropOffLastNoPickupType();
 
 	boolean excludeStopTime(@NotNull GStopTime gStopTime);

@@ -659,9 +659,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return mTrip.mergeHeadsignValue(mTripToMerge);
 	}
 
+	private boolean forceStopTimeFirstNoDropOffLastNoPickupType = false;  // opt-in feature
+
+	@Override
+	public void setForceStopTimeFirstNoDropOffLastNoPickupType(boolean force) {
+		this.forceStopTimeFirstNoDropOffLastNoPickupType = force;
+	}
+
 	@Override
 	public boolean forceStopTimeFirstNoDropOffLastNoPickupType() {
-		return false; // opt-in feature
+		return this.forceStopTimeFirstNoDropOffLastNoPickupType; // opt-in feature
 	}
 
 	@Override
