@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
@@ -170,7 +171,7 @@ data class MTrip(
         val sb = StringBuilder() //
         sb.append(id) // ID
         sb.append(Constants.COLUMN_SEPARATOR) //
-        if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+        if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
             sb.append(headsignType) // HEADSIGN TYPE
             sb.append(Constants.COLUMN_SEPARATOR) //
             sb.append(SQLUtils.quotes(SQLUtils.escape(headsignValue))) // HEADSIGN STRING

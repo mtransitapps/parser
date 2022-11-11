@@ -660,9 +660,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public boolean forceStopTimeFirstNoDropOffLastNoPickupType() {
+		return false; // opt-in feature
+	}
+
+	@Override
 	public boolean excludeStopTime(@NotNull GStopTime gStopTime) {
-		return GPickupType.NO_PICKUP.getId() == gStopTime.getPickupType() //
-				&& GDropOffType.NO_DROP_OFF.getId() == gStopTime.getDropOffType();
+		return GPickupType.NO_PICKUP == gStopTime.getPickupType() //
+				&& GDropOffType.NO_DROP_OFF == gStopTime.getDropOffType();
 	}
 
 	@Override

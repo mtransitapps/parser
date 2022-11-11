@@ -268,9 +268,10 @@ public class GReader {
 					line.get(GStopTime.STOP_ID).trim(),
 					Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()),
 					line.get(GStopTime.STOP_HEADSIGN), //
-					GPickupType.parse(line.get(GStopTime.PICKUP_TYPE)).ordinal(), //
-					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)).ordinal(), //
-					GTimePoint.parse(line.get(GStopTime.TIME_POINT)).ordinal() //
+					GPickupType.parse(line.get(GStopTime.PICKUP_TYPE)), //
+					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)), //
+					GTimePoint.parse(line.get(GStopTime.TIME_POINT)), //
+					false // not generated
 			);
 			if (agencyTools.excludeStopTime(gStopTime)) {
 				return;
@@ -281,7 +282,7 @@ public class GReader {
 			if (agencyTools.excludeStopNullable(gSpec.getStop(gStopTime.getStopIdInt()))) {
 				return;
 			}
-			gSpec.addStopTime(gStopTime);
+			gSpec.addStopTime(gStopTime, false);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while parsing: '%s'!", line);
 		}

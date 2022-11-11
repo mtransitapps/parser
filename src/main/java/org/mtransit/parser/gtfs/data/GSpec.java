@@ -2,6 +2,7 @@ package org.mtransit.parser.gtfs.data;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.FeatureFlags;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
@@ -267,8 +268,8 @@ public class GSpec {
 		throw new MTLog.Fatal("getStopTimes() > trying to use ALL stop times (route:%s|trip:%s)!", mRouteId, GIDs.getString(gTripIdInt));
 	}
 
-	public void addStopTime(@NotNull GStopTime gStopTime) {
-		DBUtils.insertStopTime(gStopTime);
+	public void addStopTime(@NotNull GStopTime gStopTime, boolean allowUpdate) {
+		DBUtils.insertStopTime(gStopTime, allowUpdate);
 	}
 
 	private int removeTripStopTimes(@NotNull Integer gTripId) {
@@ -401,21 +402,30 @@ public class GSpec {
 	}
 
 	public void generateStopTimesFromFrequencies(@SuppressWarnings("unused") @NotNull GAgencyTools agencyTools) {
-		MTLog.log("Generating GTFS stop times from frequencies...");
+		MTLog.log("Generating GTFS trip stop times from frequencies...");
+		MTLog.log("- Trips: %d (before)", this.tripsCount);
+		MTLog.log("- Trip stops: %d (before)", readTripStopsCount());
 		MTLog.log("- Stop times: %d (before)", readStopTimesCount());
 		DBUtils.setAutoCommit(false);
+		int t = 0;
+		int ts = 0;
 		int st = 0;
 		for (Integer tripIdInt : this.tripIdIntFrequencies.keySet()) {
 			if (!this.tripIdIntsUIDs.containsKey(tripIdInt)) {
 				continue; // excluded service ID
 			}
+			final GTrip gOriginalTrip = getTrip(tripIdInt);
+			if (gOriginalTrip == null) {
+				throw new MTLog.Fatal("Cannot find original trip for ID '%s' (%d)!", GIDs.getString(tripIdInt), tripIdInt);
+			}
 			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripIdInt, null, null, null);
-			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
-				if (!tripStopTimes.isEmpty()) {
+			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
+				if (agencyTools.forceStopTimeFirstNoDropOffLastNoPickupType()
+						&& !tripStopTimes.isEmpty()) {
 					GStopTime firstStopTime = tripStopTimes.get(0);
-					firstStopTime.setDropOffType(GDropOffType.NO_DROP_OFF.ordinal());
+					firstStopTime.setDropOffType(GDropOffType.NO_DROP_OFF);
 					GStopTime lastStopTime = tripStopTimes.get(tripStopTimes.size() - 1);
-					lastStopTime.setPickupType(GPickupType.NO_PICKUP.ordinal());
+					lastStopTime.setPickupType(GPickupType.NO_PICKUP);
 				}
 			}
 			ArrayList<GStopTime> newGStopTimes = new ArrayList<>();
@@ -444,14 +454,28 @@ public class GSpec {
 			long frequencyEndInMs;
 			long frequencyHeadwayInMs;
 			ArrayList<GFrequency> tripFrequencies = this.tripIdIntFrequencies.get(tripIdInt);
+			int f = 0;
 			for (GFrequency gFrequency : tripFrequencies) {
+				int newGeneratedTripIdInt = tripIdInt;
+				if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
+					newGeneratedTripIdInt = GIDs.getInt(GIDs.getString(tripIdInt) + "-" + f);
+					addTrip(new GTrip(
+							gOriginalTrip.getRouteIdInt(),
+							gOriginalTrip.getServiceIdInt(),
+							newGeneratedTripIdInt,
+							gOriginalTrip.getDirectionIdE(),
+							gOriginalTrip.getTripHeadsign(),
+							gOriginalTrip.getTripShortName()
+					));
+					t++;
+				}
 				try {
 					frequencyStartInMs = gFrequency.getStartTimeMs();
 					frequencyEndInMs = gFrequency.getEndTimeMs();
 					frequencyHeadwayInMs = gFrequency.getHeadwayMs();
 					long firstStopTimeInMs = frequencyStartInMs;
 					while (frequencyStartInMs <= firstStopTimeInMs && firstStopTimeInMs <= frequencyEndInMs) {
-						if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+						if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) { // TODO WTF?
 							if (lastFirstStopTimeInMs == firstStopTimeInMs) {
 								firstStopTimeInMs += frequencyHeadwayInMs;
 								continue;
@@ -462,21 +486,23 @@ public class GSpec {
 							GStopTime gStopTime = tripStopTimes.get(i);
 							stopTimeCal.add(Calendar.SECOND, gStopTimeIncInSec.get(gStopTime.getUID()));
 							int newDepartureTime = getNewDepartureTime(stopTimeCal);
-							int pickupType = gStopTime.getPickupType();
-							if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
-								if (i == tripStopTimes.size() - 1) {
-									pickupType = GPickupType.NO_PICKUP.ordinal();
+							GPickupType pickupType = gStopTime.getPickupType();
+							if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
+								if (agencyTools.forceStopTimeFirstNoDropOffLastNoPickupType()
+										&& i == tripStopTimes.size() - 1) {
+									pickupType = GPickupType.NO_PICKUP;
 								}
 							}
-							int dropOffType = gStopTime.getDropOffType();
-							if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
-								if (i == 0) {
-									dropOffType = GDropOffType.NO_DROP_OFF.ordinal();
+							GDropOffType dropOffType = gStopTime.getDropOffType();
+							if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
+								if (agencyTools.forceStopTimeFirstNoDropOffLastNoPickupType()
+										&& i == 0) {
+									dropOffType = GDropOffType.NO_DROP_OFF;
 								}
 							}
-							int timePoint = gStopTime.getTimePoint();
+							GTimePoint timePoint = gStopTime.getTimePoint();
 							GStopTime newGStopTime = new GStopTime(
-									tripIdInt,
+									newGeneratedTripIdInt,
 									newDepartureTime,
 									newDepartureTime,
 									gStopTime.getStopIdInt(),
@@ -484,7 +510,8 @@ public class GSpec {
 									gStopTime.getStopHeadsign(),
 									pickupType,
 									dropOffType,
-									timePoint
+									timePoint,
+									true
 							);
 							newGStopTimes.add(newGStopTime);
 						}
@@ -494,14 +521,36 @@ public class GSpec {
 				} catch (Exception e) {
 					throw new MTLog.Fatal(e, "Error while generating stop times for frequency '%s'!", gFrequency);
 				}
+				f++;
 			}
+			String tripUID;
+			String uid;
 			for (GStopTime newGStopTime : newGStopTimes) {
-				addStopTime(newGStopTime);
+				addStopTime(newGStopTime, true);
 				st++;
+				tripUID = this.tripIdIntsUIDs.get(newGStopTime.getTripIdInt());
+				if (tripUID == null) {
+					MTLog.log("Generating GTFS trip stop from frequencies... > (uid: %s) SKIP %s",
+							GTripStop.getNewUID("?", newGStopTime.getStopIdInt(), newGStopTime.getStopSequence()),
+							newGStopTime
+					);
+					continue;
+				}
+				uid = GTripStop.getNewUID(tripUID, newGStopTime.getStopIdInt(), newGStopTime.getStopSequence());
+				if (this.tripStopsUIDs.contains(uid)) {
+					MTLog.log("Generating GTFS trip stop from frequencies... > (uid: %s) SKIP %s", uid, newGStopTime);
+					continue;
+				}
+				addTripStops(
+						new GTripStop(tripUID, newGStopTime.getTripIdInt(), newGStopTime.getStopIdInt(), newGStopTime.getStopSequence())
+				);
+				ts++;
 			}
 		}
 		DBUtils.setAutoCommit(true); // true => commit()
-		MTLog.log("Generating GTFS stop times from frequencies... DONE");
+		MTLog.log("Generating GTFS trip stop times from frequencies... DONE");
+		MTLog.log("- Trips: %d(after) (new: %d)", this.tripsCount, t);
+		MTLog.log("- Trip stop: %d (after) (new: %d)", readTripStopsCount(), ts);
 		MTLog.log("- Stop times: %d (after) (new: %d)", readStopTimesCount(), st);
 	}
 

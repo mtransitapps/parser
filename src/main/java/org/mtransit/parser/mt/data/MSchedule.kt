@@ -157,17 +157,7 @@ data class MSchedule(
             sb.append(_pathId) // original trip ID
             sb.append(Constants.COLUMN_SEPARATOR) //
         }
-        if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-            if (headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
-                sb.append(MTrip.HEADSIGN_TYPE_DESCENT_ONLY) // HEADSIGN TYPE
-                sb.append(Constants.COLUMN_SEPARATOR) //
-                sb.append(SQLUtils.quotes(Constants.EMPTY)) // HEADSIGN STRING
-            } else {
-                sb.append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
-                sb.append(Constants.COLUMN_SEPARATOR) //
-                sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
-            }
-        } else if (DefaultAgencyTools.EXPORT_DESCENT_ONLY) {
+        if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
             if (headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
                 sb.append(MTrip.HEADSIGN_TYPE_DESCENT_ONLY) // HEADSIGN TYPE
                 sb.append(Constants.COLUMN_SEPARATOR) //

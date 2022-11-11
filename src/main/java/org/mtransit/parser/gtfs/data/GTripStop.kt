@@ -97,8 +97,8 @@ data class GTripStop(
 
         @Suppress("unused")
         @JvmStatic
-        fun toStringPlus(serviceDates: Iterable<GTripStop>): String {
-            return serviceDates.joinToString { it.toStringPlus() }
+        fun toStringPlus(gTripStops: Iterable<GTripStop>): String {
+            return gTripStops.joinToString { it.toStringPlus() }
         }
     }
 }

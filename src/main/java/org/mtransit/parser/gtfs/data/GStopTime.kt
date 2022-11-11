@@ -14,10 +14,35 @@ data class GStopTime(
     val stopIdInt: Int,
     val stopSequence: Int,
     val stopHeadsign: String?,
-    var pickupType: Int,
-    var dropOffType: Int,
-    val timePoint: Int,
+    var pickupType: GPickupType,
+    var dropOffType: GDropOffType,
+    val timePoint: GTimePoint,
+    val generated: Boolean = false,
 ) : Comparable<GStopTime> {
+
+    constructor(
+        tripIdInt: Int,
+        arrivalTime: Int,
+        departureTime: Int,
+        stopIdInt: Int,
+        stopSequence: Int,
+        stopHeadsign: String?,
+        pickupTypeInt: Int,
+        dropOffTypeInt: Int,
+        timePointInt: Int,
+        generated: Boolean = false,
+    ) : this(
+        tripIdInt,
+        arrivalTime,
+        departureTime,
+        stopIdInt,
+        stopSequence,
+        stopHeadsign,
+        GPickupType.parse(pickupTypeInt),
+        GDropOffType.parse(dropOffTypeInt),
+        GTimePoint.parse(timePointInt),
+        generated
+    )
 
     constructor(
         tripId: String,
@@ -26,9 +51,10 @@ data class GStopTime(
         stopIdInt: Int,
         stopSequence: Int,
         stopHeadsign: String?,
-        pickupType: Int,
-        dropOffType: Int,
-        timePoint: Int,
+        pickupType: GPickupType,
+        dropOffType: GDropOffType,
+        timePoint: GTimePoint,
+        generated: Boolean = false,
     ) : this(
         GIDs.getInt(tripId),
         arrivalTime,
@@ -39,6 +65,7 @@ data class GStopTime(
         pickupType,
         dropOffType,
         timePoint,
+        generated
     )
 
     constructor(
@@ -48,9 +75,10 @@ data class GStopTime(
         stopId: String,
         stopSequence: Int,
         stopHeadsign: String?,
-        pickupType: Int,
-        dropOffType: Int,
-        timePoint: Int,
+        pickupType: GPickupType,
+        dropOffType: GDropOffType,
+        timePoint: GTimePoint,
+        generated: Boolean = false,
     ) : this(
         GIDs.getInt(tripId),
         GTime.fromString(arrivalTime),
@@ -61,6 +89,7 @@ data class GStopTime(
         pickupType,
         dropOffType,
         timePoint,
+        generated
     )
 
     @Deprecated(message = "Not memory efficient")
@@ -120,14 +149,14 @@ data class GStopTime(
     val stopHeadsignOrDefault: String = stopHeadsign ?: StringUtils.EMPTY
 
     fun isRegular(minSequence: Int = 0, maxSequence: Int = Int.MAX_VALUE): Boolean {
-        if (this.stopSequence == minSequence && dropOffType == GDropOffType.NO_DROP_OFF.id) {
-            return pickupType == GPickupType.REGULAR.id // 1st stop = NO DROP OFF = regular
+        if (this.stopSequence == minSequence && dropOffType == GDropOffType.NO_DROP_OFF) {
+            return pickupType == GPickupType.REGULAR // 1st stop = NO DROP OFF = regular
         }
-        if (this.stopSequence == maxSequence && pickupType == GPickupType.NO_PICKUP.id) {
-            return dropOffType == GDropOffType.REGULAR.id // last stop = NO PICKUP = regular
+        if (this.stopSequence == maxSequence && pickupType == GPickupType.NO_PICKUP) {
+            return dropOffType == GDropOffType.REGULAR // last stop = NO PICKUP = regular
         }
-        return pickupType == GPickupType.REGULAR.id
-                && dropOffType == GDropOffType.REGULAR.id
+        return pickupType == GPickupType.REGULAR
+                && dropOffType == GDropOffType.REGULAR
     }
 
     override fun compareTo(other: GStopTime): Int {
@@ -167,6 +196,7 @@ data class GStopTime(
         const val PICKUP_TYPE = "pickup_type"
         const val DROP_OFF_TYPE = "drop_off_type"
         const val TIME_POINT = "timepoint"
+        const val GENERATED = "generated"
 
         @JvmStatic
         fun getNewUID(

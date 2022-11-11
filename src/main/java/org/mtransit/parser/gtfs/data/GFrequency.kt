@@ -75,10 +75,10 @@ data class GFrequency(
         const val FILENAME = "frequencies.txt"
 
         @Suppress("unused")
-        val DEFAULT_PICKUP_TYPE = GPickupType.REGULAR.ordinal // Regularly scheduled pickup
+        val DEFAULT_PICKUP_TYPE = GPickupType.REGULAR // Regularly scheduled pickup
 
         @Suppress("unused")
-        val DEFAULT_DROP_OFF_TYPE = GDropOffType.REGULAR.ordinal // Regularly scheduled drop off
+        val DEFAULT_DROP_OFF_TYPE = GDropOffType.REGULAR // Regularly scheduled drop off
         const val TRIP_ID = "trip_id"
         const val START_TIME = "start_time"
         const val END_TIME = "end_time"

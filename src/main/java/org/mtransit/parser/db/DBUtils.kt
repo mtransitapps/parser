@@ -1,9 +1,12 @@
 package org.mtransit.parser.db
 
 import org.mtransit.commons.sql.SQLCreateBuilder
+import org.mtransit.commons.sql.fromSQL
+import org.mtransit.commons.sql.toSQL
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.gtfs.data.GRoute
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTripStop
 import org.mtransit.parser.mt.data.MSchedule
@@ -62,6 +65,7 @@ object DBUtils {
                 .appendColumn(GStopTime.PICKUP_TYPE, SQLUtilsCommons.INT)
                 .appendColumn(GStopTime.DROP_OFF_TYPE, SQLUtilsCommons.INT)
                 .appendColumn(GStopTime.TIME_POINT, SQLUtilsCommons.INT)
+                .appendColumn(GStopTime.GENERATED, SQLUtilsCommons.INT)
                 .build()
         )
         SQLUtils.executeUpdate(
@@ -105,19 +109,22 @@ object DBUtils {
     fun commit() = SQLUtils.commit(this.connection)
 
     @JvmStatic
-    fun insertStopTime(gStopTime: GStopTime): Boolean {
+    @JvmOverloads
+    fun insertStopTime(gStopTime: GStopTime, allowUpdate: Boolean = false): Boolean {
         val rs = SQLUtils.executeUpdate(
             connection.createStatement(),
-            SQLUtilsCommons.INSERT_INTO + STOP_TIMES_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
+            (if (allowUpdate) SQLUtilsCommons.INSERT_OR_REPLACE_INTO else SQLUtilsCommons.INSERT_INTO)
+                    + STOP_TIMES_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
                     "${gStopTime.tripIdInt}," +
                     "${gStopTime.stopIdInt}," +
                     "${gStopTime.stopSequence}," +
                     "${gStopTime.arrivalTime}," +
                     "${gStopTime.departureTime}," +
                     "${gStopTime.stopHeadsign?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}," +
-                    "${gStopTime.pickupType}," +
-                    "${gStopTime.dropOffType}," +
-                    "${gStopTime.timePoint}" +
+                    "${gStopTime.pickupType.id}," +
+                    "${gStopTime.dropOffType.id}," +
+                    "${gStopTime.timePoint.id}," +
+                    "${gStopTime.generated.toSQL()}" +
                     SQLUtilsCommons.P2
         )
         insertRowCount++
@@ -212,6 +219,7 @@ object DBUtils {
                     rs.getInt(GStopTime.PICKUP_TYPE),
                     rs.getInt(GStopTime.DROP_OFF_TYPE),
                     rs.getInt(GStopTime.TIME_POINT),
+                    rs.getInt(GStopTime.GENERATED).fromSQL(),
                 )
             )
             selectRowCount++
