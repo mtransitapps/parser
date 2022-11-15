@@ -848,7 +848,6 @@ class MDirectionHeadSignFinderTest {
         pickupType: GPickupType = GPickupType.REGULAR,
         dropOffType: GDropOffType = GDropOffType.REGULAR,
         timePoint: GTimePoint = GTimePoint.EXACT,
-        generated: Boolean = false,
     ): GStopTime {
         return GStopTime(
             tripId,
@@ -860,7 +859,6 @@ class MDirectionHeadSignFinderTest {
             pickupType,
             dropOffType,
             timePoint,
-            generated,
         )
     }
 }
