@@ -34,6 +34,11 @@ object HtmlSymbols {
     val TRAIN_ = if (FeatureFlags.F_HTML_POI_NAME) TRAIN + SPACE_ else EMPTY
 
     @JvmField // TODO const
+    val AIRPORT = if (FeatureFlags.F_HTML_POI_NAME) C_AIRPLANE else EMPTY
+    @JvmField // TODO const
+    val AIRPORT_ = if (FeatureFlags.F_HTML_POI_NAME) AIRPORT + SPACE_ else EMPTY
+
+    @JvmField // TODO const
     val HOSPITAL = if (FeatureFlags.F_HTML_POI_NAME) C_HOSPITAL else EMPTY
     @JvmField // TODO const
     val HOSPITAL_ = if (FeatureFlags.F_HTML_POI_NAME) HOSPITAL + SPACE_ else EMPTY
