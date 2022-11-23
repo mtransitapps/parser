@@ -742,7 +742,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				continue;
 			}
 			if (gStopTime.getPickupType() == GPickupType.NO_PICKUP //
-					|| (agencyTools.forceStopTimeFirstNoDropOffLastNoPickupType() && i == gTripStopTimes.size() - 1)) { // last stop of the trip
+					|| (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY
+					&& agencyTools.forceStopTimeFirstNoDropOffLastNoPickupType()
+					&& i == gTripStopTimes.size() - 1)) { // last stop of the trip
 				descentOnly = true;
 			}
 			tripIdStopId = String.valueOf(mTripId) + gStopTime.getTripIdInt() + gStopTime.getStopIdInt();
