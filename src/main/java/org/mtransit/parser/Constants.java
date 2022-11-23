@@ -3,7 +3,7 @@ package org.mtransit.parser;
 @SuppressWarnings({"WeakerAccess", "unused", "RedundantSuppression"})
 public final class Constants {
 
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = org.mtransit.commons.Constants.DEBUG;
 	// public static boolean DEBUG = true; // DEBUG
 
 	public static boolean LOG_SQL = false;
