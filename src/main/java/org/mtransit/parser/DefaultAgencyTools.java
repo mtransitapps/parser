@@ -137,6 +137,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		long start = System.currentTimeMillis();
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false, false);
 		gtfs.cleanupExcludedData();
+		gtfs.cleanupStopTimesPickupDropOffTypes(this);
 		gtfs.generateTripStops();
 		if (args.length >= 4 && Boolean.parseBoolean(args[3])) {
 			gtfs.generateStopTimesFromFrequencies(this);

@@ -65,7 +65,7 @@ data class MSchedule(
     fun setHeadsign(newHeadsignType: Int, newHeadsignValue: String?) {
         if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
             if (newHeadsignValue.isNullOrBlank()
-                && newHeadsignType != MTrip.HEADSIGN_TYPE_DESCENT_ONLY
+                && newHeadsignType != MTrip.HEADSIGN_TYPE_NO_PICKUP
             ) {
                 MTLog.log("Setting '$newHeadsignValue' head-sign! (type:$newHeadsignType)")
             }
@@ -90,7 +90,7 @@ data class MSchedule(
         }
         if (headsignValue.isNullOrBlank()) {
             if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-                if (headsignType != MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
+                if (headsignType != MTrip.HEADSIGN_TYPE_NO_PICKUP) {
                     return false
                 }
             } else {
@@ -100,7 +100,7 @@ data class MSchedule(
         return true
     }
 
-    fun isDescentOnly() = headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY
+    fun isNoPickup() = headsignType == MTrip.HEADSIGN_TYPE_NO_PICKUP
 
     val uID by lazy { getNewUID(serviceIdInt, tripId, stopId, departure) }
 
@@ -158,8 +158,8 @@ data class MSchedule(
             sb.append(Constants.COLUMN_SEPARATOR) //
         }
         if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-            if (headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
-                sb.append(MTrip.HEADSIGN_TYPE_DESCENT_ONLY) // HEADSIGN TYPE
+            if (headsignType == MTrip.HEADSIGN_TYPE_NO_PICKUP) {
+                sb.append(MTrip.HEADSIGN_TYPE_NO_PICKUP) // HEADSIGN TYPE
                 sb.append(Constants.COLUMN_SEPARATOR) //
                 sb.append(SQLUtils.quotes(Constants.EMPTY)) // HEADSIGN STRING
             } else {
@@ -168,7 +168,7 @@ data class MSchedule(
                 sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
             }
         } else {
-            if (headsignType == MTrip.HEADSIGN_TYPE_DESCENT_ONLY) {
+            if (headsignType == MTrip.HEADSIGN_TYPE_NO_PICKUP) {
                 sb.append(MTrip.HEADSIGN_TYPE_STRING) // HEADSIGN TYPE
                 sb.append(Constants.COLUMN_SEPARATOR) //
                 sb.append(SQLUtils.quotes("Drop Off Only")) // HEADSIGN STRING

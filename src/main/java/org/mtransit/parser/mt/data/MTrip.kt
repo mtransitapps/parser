@@ -115,7 +115,7 @@ data class MTrip(
     }
 
     fun setHeadsignDescentOnly(): MTrip {
-        headsignType = HEADSIGN_TYPE_DESCENT_ONLY
+        headsignType = HEADSIGN_TYPE_NO_PICKUP
         headsignValue = Constants.EMPTY // null;
         headsignId = 0
         _id = -1 // reset
@@ -177,7 +177,7 @@ data class MTrip(
             sb.append(SQLUtils.quotes(SQLUtils.escape(headsignValue))) // HEADSIGN STRING
             sb.append(Constants.COLUMN_SEPARATOR) //
         } else {
-            if (headsignType == HEADSIGN_TYPE_DESCENT_ONLY) {
+            if (headsignType == HEADSIGN_TYPE_NO_PICKUP) {
                 sb.append(HEADSIGN_TYPE_STRING) // HEADSIGN TYPE
                 sb.append(Constants.COLUMN_SEPARATOR) //
                 sb.append(SQLUtils.quotes(SQLUtils.escape("Drop Off Only"))) // HEADSIGN STRING
@@ -208,7 +208,7 @@ data class MTrip(
         const val HEADSIGN_TYPE_DIRECTION = 1
         const val HEADSIGN_TYPE_INBOUND = 2
         const val HEADSIGN_TYPE_STOP_ID = 3
-        const val HEADSIGN_TYPE_DESCENT_ONLY = 4
+        const val HEADSIGN_TYPE_NO_PICKUP = 4
 
         private const val ZERO = "0"
 

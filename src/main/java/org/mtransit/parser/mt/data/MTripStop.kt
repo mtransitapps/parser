@@ -6,7 +6,7 @@ data class MTripStop(
     val tripId: Long,
     val stopId: Int,
     var stopSequence: Int,
-    var isDescentOnly: Boolean = false
+    var isNoPickup: Boolean = false
 ) : Comparable<MTripStop> {
 
     // JAVA
@@ -40,7 +40,7 @@ data class MTripStop(
                 Constants.COLUMN_SEPARATOR +
                 stopSequence +  // STOP SEQUENCE
                 Constants.COLUMN_SEPARATOR +
-                if (isDescentOnly) 1 else 0 // DESCENT ONLY
+                if (isNoPickup) 1 else 0 // DROP OFF ONLY
     }
 
     override fun compareTo(other: MTripStop): Int {

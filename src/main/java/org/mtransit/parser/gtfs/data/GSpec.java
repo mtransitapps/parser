@@ -419,16 +419,6 @@ public class GSpec {
 				throw new MTLog.Fatal("Cannot find original trip for ID '%s' (%d)!", GIDs.getString(tripIdInt), tripIdInt);
 			}
 			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripIdInt, null, null, null);
-			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-				if (!tripStopTimes.isEmpty()) {
-					if (agencyTools.forceStopTimeLastNoPickupType()) {
-						tripStopTimes.get(tripStopTimes.size() - 1).setPickupType(GPickupType.NO_PICKUP);
-					}
-					if (agencyTools.forceStopTimeFirstNoDropOffType()) {
-						tripStopTimes.get(0).setDropOffType(GDropOffType.NO_DROP_OFF);
-					}
-				}
-			}
 			ArrayList<GStopTime> newGStopTimes = new ArrayList<>();
 			Calendar stopTimeCal = Calendar.getInstance();
 			HashMap<Long, Integer> gStopTimeIncInSec = new HashMap<>();
@@ -487,19 +477,7 @@ public class GSpec {
 							stopTimeCal.add(Calendar.SECOND, gStopTimeIncInSec.get(gStopTime.getUID()));
 							int newDepartureTime = getNewDepartureTime(stopTimeCal);
 							GPickupType pickupType = gStopTime.getPickupType();
-							if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-								if (agencyTools.forceStopTimeLastNoPickupType()
-										&& i == tripStopTimes.size() - 1) {
-									pickupType = GPickupType.NO_PICKUP;
-								}
-							}
 							GDropOffType dropOffType = gStopTime.getDropOffType();
-							if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-								if (agencyTools.forceStopTimeFirstNoDropOffType()
-										&& i == 0) {
-									dropOffType = GDropOffType.NO_DROP_OFF;
-								}
-							}
 							GTimePoint timePoint = gStopTime.getTimePoint();
 							GStopTime newGStopTime = new GStopTime(
 									newGeneratedTripIdInt,
@@ -614,6 +592,42 @@ public class GSpec {
 			throw new MTLog.Fatal(e, "Error while removing more excluded data!");
 		}
 		MTLog.log("Removing more excluded data...DONE (%d removed objects)", r);
+	}
+
+	public void cleanupStopTimesPickupDropOffTypes(@NotNull DefaultAgencyTools agencyTools) {
+		MTLog.log("Cleanup stop times pickup & drop-off types...");
+		int stu = 0;
+		try {
+			if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY
+					&& (agencyTools.forceStopTimeLastNoPickupType() || agencyTools.forceStopTimeFirstNoDropOffType())) {
+				DBUtils.setAutoCommit(false);
+				for (Integer tripIdInt : this.tripIdIntsUIDs.keySet()) {
+					List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripIdInt, null, null, null);
+					if (!tripStopTimes.isEmpty()) {
+						if (agencyTools.forceStopTimeLastNoPickupType()) {
+							GStopTime lastStopTime = tripStopTimes.get(tripStopTimes.size() - 1);
+							if (lastStopTime.getPickupType() != GPickupType.NO_PICKUP) {
+								lastStopTime.setPickupType(GPickupType.NO_PICKUP);
+								addStopTime(lastStopTime, true);
+								stu++;
+							}
+						}
+						if (agencyTools.forceStopTimeFirstNoDropOffType()) {
+							GStopTime firstStopTime = tripStopTimes.get(0);
+							if (firstStopTime.getDropOffType() != GDropOffType.NO_DROP_OFF) {
+								firstStopTime.setDropOffType(GDropOffType.NO_DROP_OFF);
+								addStopTime(firstStopTime, true);
+								stu++;
+							}
+						}
+					}
+				}
+				DBUtils.setAutoCommit(true); // true => commit()
+			}
+		} catch (Exception e) {
+			throw new MTLog.Fatal(e, "Error while doing cleanup of stop times pickup & drop-off types!");
+		}
+		MTLog.log("Cleanup stop times pickup & drop-off types...DONE (%d updated objects)", stu);
 	}
 
 	public void cleanupExcludedServiceIds() {

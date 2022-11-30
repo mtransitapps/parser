@@ -191,7 +191,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Collections.sort(mTripsList);
 		ArrayList<MTripStop> mTripStopsList = new ArrayList<>(allMTripStops.values());
 		Collections.sort(mTripStopsList);
-		setTripStopDescentOnly(mTripStopsList, mSchedules.values());
+		setTripStopNoPickup(mTripStopsList, mSchedules.values());
 		ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
 		Collections.sort(mServiceDatesList);
 		ArrayList<MFrequency> mFrequenciesList = new ArrayList<>(mFrequencies.values());
@@ -720,7 +720,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								  HashMap<String, Integer> addedMTripIdAndGStopIds) {
 		MSchedule mSchedule;
 		String stopHeadsign;
-		boolean descentOnly;
+		boolean noPickup;
 		String tripIdStopId;
 		List<GStopTime> gTripStopTimes = getTripStopTimes(gTripStop.getTripIdInt());
 		int lastStopSequence = -1;
@@ -735,20 +735,20 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			lastStopSequence = gStopTime.getStopSequence();
 			lastStopTime = gStopTime;
-			descentOnly = false;
+			noPickup = false;
 			if (gStopTime.getTripIdInt() != gTripStop.getTripIdInt() //
 					|| gStopTime.getStopIdInt() != gTripStop.getStopIdInt() //
 					|| gStopTime.getStopSequence() != gTripStop.getStopSequence()) {
 				continue;
 			}
 			if (gStopTime.getPickupType() == GPickupType.NO_PICKUP //
-					|| (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY
+					|| ((DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY)
 					&& agencyTools.forceStopTimeLastNoPickupType()
 					&& i == gTripStopTimes.size() - 1)) { // last stop of the trip
-				descentOnly = true;
+				noPickup = true;
 			}
 			tripIdStopId = String.valueOf(mTripId) + gStopTime.getTripIdInt() + gStopTime.getStopIdInt();
-			if (descentOnly) {
+			if (noPickup) {
 				if (addedMTripIdAndGStopIds.containsKey(tripIdStopId) //
 						&& addedMTripIdAndGStopIds.get(tripIdStopId) != gStopTime.getStopSequence()) {
 					if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
@@ -781,8 +781,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						mSchedules.get(mSchedule.getUID()).toStringPlus());
 			}
 			if ((DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY)
-					&& descentOnly) {
-				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_DESCENT_ONLY, null);
+					&& noPickup) {
+				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_NO_PICKUP, null);
 			} else if (gStopTime.hasStopHeadsign()) {
 				stopHeadsign = this.agencyTools.cleanStopHeadSign(gRoute, gTrip, gStopTime, gStopTime.getStopHeadsignOrDefault());
 				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_STRING, stopHeadsign);
@@ -836,8 +836,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 	}
 
-	private void setTripStopDescentOnly(@NotNull ArrayList<MTripStop> mTripStopsList,
-										@NotNull Collection<MSchedule> mSchedules) {
+	private void setTripStopNoPickup(@NotNull ArrayList<MTripStop> mTripStopsList,
+									 @NotNull Collection<MSchedule> mSchedules) {
 		if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
 			for (MTripStop tripStop : mTripStopsList) {
 				boolean isDescentOnly = false;
@@ -848,7 +848,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					if (schedule.getStopId() != tripStop.getStopId()) {
 						continue;
 					}
-					if (schedule.isDescentOnly()) {
+					if (schedule.isNoPickup()) {
 						isDescentOnly = true;
 						//noinspection UnnecessaryContinue
 						continue;
@@ -857,7 +857,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						break;
 					}
 				}
-				tripStop.setDescentOnly(isDescentOnly);
+				tripStop.setNoPickup(isDescentOnly);
 			}
 			return; // SKIP (descent only set on the stop time schedule level
 		}
@@ -870,7 +870,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		do {
 			currentTripStop = mTripStopsList.get(i);
 			if (currentTripStop.getTripId() != currentTripId) {
-				currentTripStop.setDescentOnly(true);
+				currentTripStop.setNoPickup(true);
 			} // ELSE false == default
 			currentTripId = currentTripStop.getTripId();
 			i--; // previous
