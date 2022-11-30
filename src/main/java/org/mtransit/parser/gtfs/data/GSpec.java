@@ -420,12 +420,13 @@ public class GSpec {
 			}
 			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripIdInt, null, null, null);
 			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-				if (agencyTools.forceStopTimeFirstNoDropOffLastNoPickupType()
-						&& !tripStopTimes.isEmpty()) {
-					GStopTime firstStopTime = tripStopTimes.get(0);
-					firstStopTime.setDropOffType(GDropOffType.NO_DROP_OFF);
-					GStopTime lastStopTime = tripStopTimes.get(tripStopTimes.size() - 1);
-					lastStopTime.setPickupType(GPickupType.NO_PICKUP);
+				if (!tripStopTimes.isEmpty()) {
+					if (agencyTools.forceStopTimeLastNoPickupType()) {
+						tripStopTimes.get(tripStopTimes.size() - 1).setPickupType(GPickupType.NO_PICKUP);
+					}
+					if (agencyTools.forceStopTimeFirstNoDropOffType()) {
+						tripStopTimes.get(0).setDropOffType(GDropOffType.NO_DROP_OFF);
+					}
 				}
 			}
 			ArrayList<GStopTime> newGStopTimes = new ArrayList<>();
@@ -487,14 +488,14 @@ public class GSpec {
 							int newDepartureTime = getNewDepartureTime(stopTimeCal);
 							GPickupType pickupType = gStopTime.getPickupType();
 							if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-								if (agencyTools.forceStopTimeFirstNoDropOffLastNoPickupType()
+								if (agencyTools.forceStopTimeLastNoPickupType()
 										&& i == tripStopTimes.size() - 1) {
 									pickupType = GPickupType.NO_PICKUP;
 								}
 							}
 							GDropOffType dropOffType = gStopTime.getDropOffType();
 							if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-								if (agencyTools.forceStopTimeFirstNoDropOffLastNoPickupType()
+								if (agencyTools.forceStopTimeFirstNoDropOffType()
 										&& i == 0) {
 									dropOffType = GDropOffType.NO_DROP_OFF;
 								}

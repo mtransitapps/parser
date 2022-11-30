@@ -659,16 +659,75 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return mTrip.mergeHeadsignValue(mTripToMerge);
 	}
 
-	private boolean forceStopTimeFirstNoDropOffLastNoPickupType = false;  // opt-in feature
+	private boolean stopTimesHasPickupTypeNotRegular = false;  // opt-in feature
 
 	@Override
-	public void setForceStopTimeFirstNoDropOffLastNoPickupType(boolean force) {
-		this.forceStopTimeFirstNoDropOffLastNoPickupType = force;
+	public void setStopTimesHasPickupTypeNotRegular(boolean hasNotRegular) {
+		this.stopTimesHasPickupTypeNotRegular = hasNotRegular;
 	}
 
 	@Override
+	public boolean stopTimesHasPickupTypeNotRegular() {
+		return this.stopTimesHasPickupTypeNotRegular;
+	}
+
+	private boolean stopTimesHasDropOffTypeNotRegular = false;  // opt-in feature
+
+	@Override
+	public void setStopTimesHasDropOffTypeNotRegular(boolean hasNotRegular) {
+		this.stopTimesHasDropOffTypeNotRegular = hasNotRegular;
+	}
+
+	@Override
+	public boolean stopTimesHasDropOffTypeNotRegular() {
+		return this.stopTimesHasDropOffTypeNotRegular;
+	}
+
+	@SuppressWarnings("DeprecatedIsStillUsed") // TODO migrate agencies parser
+	@Deprecated
+	@Override
+	public void setForceStopTimeFirstNoDropOffLastNoPickupType(boolean force) {
+		setForceStopTimeLastNoPickupType(force);
+		setForceStopTimeFirstNoDropOffType(force);
+	}
+
+	@SuppressWarnings("DeprecatedIsStillUsed") // TODO migrate agencies parser
+	@Deprecated
+	@Override
 	public boolean forceStopTimeFirstNoDropOffLastNoPickupType() {
-		return this.forceStopTimeFirstNoDropOffLastNoPickupType; // opt-in feature
+		return false; // opt-in feature
+	}
+
+	private boolean forceStopTimeFirstNoPickupType = false;  // opt-in feature
+
+	@Override
+	public void setForceStopTimeLastNoPickupType(boolean force) {
+		this.forceStopTimeFirstNoPickupType = force;
+	}
+
+	@Override
+	public boolean forceStopTimeLastNoPickupType() {
+		//noinspection deprecation // TODO migrate agencies parser
+		if (forceStopTimeFirstNoDropOffLastNoPickupType()) {
+			return true;
+		}
+		return this.forceStopTimeFirstNoPickupType; // opt-in feature
+	}
+
+	private boolean forceStopTimeFirstNoDropOff = false;  // opt-in feature
+
+	@Override
+	public void setForceStopTimeFirstNoDropOffType(boolean force) {
+		this.forceStopTimeFirstNoDropOff = force;
+	}
+
+	@Override
+	public boolean forceStopTimeFirstNoDropOffType() {
+		//noinspection deprecation // TODO migrate agencies parser
+		if (forceStopTimeFirstNoDropOffLastNoPickupType()) {
+			return true;
+		}
+		return this.forceStopTimeFirstNoDropOff; // opt-in feature
 	}
 
 	@Override

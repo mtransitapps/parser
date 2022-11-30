@@ -743,7 +743,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			if (gStopTime.getPickupType() == GPickupType.NO_PICKUP //
 					|| (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY
-					&& agencyTools.forceStopTimeFirstNoDropOffLastNoPickupType()
+					&& agencyTools.forceStopTimeLastNoPickupType()
 					&& i == gTripStopTimes.size() - 1)) { // last stop of the trip
 				descentOnly = true;
 			}

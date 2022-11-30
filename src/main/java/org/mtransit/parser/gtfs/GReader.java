@@ -167,11 +167,19 @@ public class GReader {
 					readCsv(stopTimeFile.getName(), reader,
 							line -> processStopTime(agencyTools, gSpec, line),
 							columnNames -> {
-								if (!columnNames.contains(GStopTime.PICKUP_TYPE)
-										&& !columnNames.contains(GStopTime.DROP_OFF_TYPE)) {
-									agencyTools.setForceStopTimeFirstNoDropOffLastNoPickupType(true);
+								if (!columnNames.contains(GStopTime.PICKUP_TYPE)) {
+									agencyTools.setForceStopTimeLastNoPickupType(true); // pickup types not provided
+								}
+								if (!columnNames.contains(GStopTime.DROP_OFF_TYPE)) {
+									agencyTools.setForceStopTimeFirstNoDropOffType(true); // drop-off  types not provided
 								}
 							});
+					if (!agencyTools.stopTimesHasPickupTypeNotRegular()) {
+						agencyTools.setForceStopTimeLastNoPickupType(true); // all provided pickup type are REGULAR == not provided
+					}
+					if (!agencyTools.stopTimesHasDropOffTypeNotRegular()) {
+						agencyTools.setForceStopTimeFirstNoDropOffType(true); // all provided drop-off type are REGULAR == not provided
+					}
 					DBUtils.setAutoCommit(true); // true => commit()
 				}
 			}
@@ -295,6 +303,12 @@ public class GReader {
 			}
 			if (agencyTools.excludeStopNullable(gSpec.getStop(gStopTime.getStopIdInt()))) {
 				return;
+			}
+			if (gStopTime.getPickupType() != GPickupType.REGULAR) {
+				agencyTools.setStopTimesHasPickupTypeNotRegular(true);
+			}
+			if (gStopTime.getDropOffType() != GDropOffType.REGULAR) {
+				agencyTools.setStopTimesHasDropOffTypeNotRegular(true);
 			}
 			gSpec.addStopTime(gStopTime, false);
 		} catch (Exception e) {

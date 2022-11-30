@@ -177,9 +177,29 @@ public interface GAgencyTools {
 	@NotNull
 	String provideMissingTripHeadSign(@NotNull GTrip gTrip);
 
+	void setStopTimesHasPickupTypeNotRegular(boolean notRegular);
+
+	boolean stopTimesHasPickupTypeNotRegular();
+
+	void setStopTimesHasDropOffTypeNotRegular(boolean notRegular);
+
+	boolean stopTimesHasDropOffTypeNotRegular();
+
+	@SuppressWarnings("DeprecatedIsStillUsed") // TODO migrate agencies parser
+	@Deprecated
 	void setForceStopTimeFirstNoDropOffLastNoPickupType(boolean force);
 
+	@SuppressWarnings("DeprecatedIsStillUsed") // TODO migrate agencies parser
+	@Deprecated
 	boolean forceStopTimeFirstNoDropOffLastNoPickupType();
+
+	void setForceStopTimeLastNoPickupType(boolean force);
+
+	boolean forceStopTimeLastNoPickupType();
+
+	void setForceStopTimeFirstNoDropOffType(boolean force);
+
+	boolean forceStopTimeFirstNoDropOffType();
 
 	boolean excludeStopTime(@NotNull GStopTime gStopTime);
 
