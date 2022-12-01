@@ -126,7 +126,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private HashSet<Integer> serviceIdInts;
 
 	public void start(@NotNull String[] args) {
+		if (args.length < 3) {
+			throw new MTLog.Fatal("Invalid number(%d) of arguments! (%s)", args.length, Arrays.asList(args));
+		}
 		MTLog.log("Generating %s data...", getAgencyLabel());
+		MTLog.logDebug("Args [%d]: %s.", args.length, Arrays.asList(args));
 		if (defaultExcludeEnabled()) {
 			this.serviceIdInts = extractUsefulServiceIdInts(args, this, true);
 		}
