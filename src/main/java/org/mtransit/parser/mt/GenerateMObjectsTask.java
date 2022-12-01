@@ -741,10 +741,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					|| gStopTime.getStopSequence() != gTripStop.getStopSequence()) {
 				continue;
 			}
-			if (gStopTime.getPickupType() == GPickupType.NO_PICKUP //
-					|| ((DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY)
-					&& agencyTools.forceStopTimeLastNoPickupType()
-					&& i == gTripStopTimes.size() - 1)) { // last stop of the trip
+			if (gStopTime.getPickupType() == GPickupType.NO_PICKUP) { // last stop of the trip
 				noPickup = true;
 			}
 			tripIdStopId = String.valueOf(mTripId) + gStopTime.getTripIdInt() + gStopTime.getStopIdInt();

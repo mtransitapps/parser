@@ -598,13 +598,18 @@ public class GSpec {
 		MTLog.log("Cleanup stop times pickup & drop-off types...");
 		int stu = 0;
 		try {
+			boolean forceStopTimeLastNoPickupType = agencyTools.forceStopTimeLastNoPickupType();
+			if (true) {
+				forceStopTimeLastNoPickupType = true; // we need it for NO PICKUP stops
+			}
+			boolean forceStopTimeFirstNoDropOffType = agencyTools.forceStopTimeFirstNoDropOffType();
 			if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY
-					&& (agencyTools.forceStopTimeLastNoPickupType() || agencyTools.forceStopTimeFirstNoDropOffType())) {
+					&& (forceStopTimeLastNoPickupType || forceStopTimeFirstNoDropOffType)) {
 				DBUtils.setAutoCommit(false);
 				for (Integer tripIdInt : this.tripIdIntsUIDs.keySet()) {
 					List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripIdInt, null, null, null);
 					if (!tripStopTimes.isEmpty()) {
-						if (agencyTools.forceStopTimeLastNoPickupType()) {
+						if (forceStopTimeLastNoPickupType) {
 							GStopTime lastStopTime = tripStopTimes.get(tripStopTimes.size() - 1);
 							if (lastStopTime.getPickupType() != GPickupType.NO_PICKUP) {
 								lastStopTime.setPickupType(GPickupType.NO_PICKUP);
@@ -612,7 +617,7 @@ public class GSpec {
 								stu++;
 							}
 						}
-						if (agencyTools.forceStopTimeFirstNoDropOffType()) {
+						if (forceStopTimeFirstNoDropOffType) {
 							GStopTime firstStopTime = tripStopTimes.get(0);
 							if (firstStopTime.getDropOffType() != GDropOffType.NO_DROP_OFF) {
 								firstStopTime.setDropOffType(GDropOffType.NO_DROP_OFF);
