@@ -682,7 +682,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								mTripStop.toString(),
 								sameUuidTripStop.toString());
 					} else {
-						MTLog.logDebug("%s: Same trip '%s' stop '%s' already in list (stop sequence %s != %s).",
+						MTLog.logDebug("%s: Same trip '%s' stop '%s' already in list (sequence %s != %s).",
 								this.routeId,
 								mTripStop.getTripId(),
 								mTripStop.getStopId(),

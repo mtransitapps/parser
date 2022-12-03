@@ -599,6 +599,7 @@ public class GSpec {
 		int stu = 0;
 		try {
 			boolean forceStopTimeLastNoPickupType = agencyTools.forceStopTimeLastNoPickupType();
+			//noinspection ConstantConditions WIP
 			if (true) {
 				forceStopTimeLastNoPickupType = true; // we need it for NO PICKUP stops
 			}
@@ -609,6 +610,7 @@ public class GSpec {
 				for (Integer tripIdInt : this.tripIdIntsUIDs.keySet()) {
 					List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripIdInt, null, null, null);
 					if (!tripStopTimes.isEmpty()) {
+						//noinspection ConstantConditions WIP
 						if (forceStopTimeLastNoPickupType) {
 							GStopTime lastStopTime = tripStopTimes.get(tripStopTimes.size() - 1);
 							if (lastStopTime.getPickupType() != GPickupType.NO_PICKUP) {
