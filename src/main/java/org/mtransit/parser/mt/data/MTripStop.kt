@@ -50,18 +50,34 @@ data class MTripStop(
         } else stopSequence - other.stopSequence
     }
 
+    @Suppress("unused")
+    fun toStringSimple(): String {
+        return "TS{$tripId>$stopId[$stopSequence](${if (this.isNoPickup) 0 else 1})"
+    }
+
+    @Suppress("unused")
+    fun toStringSameTrip(): String {
+        return "${this.stopSequence}:${this.stopId}";
+    }
+
     companion object {
+
         @Suppress("unused")
         @JvmStatic
-        fun printStops(l: List<MTripStop>): String {
-            val sb = StringBuilder()
-            for (mTripStop in l) {
-                if (sb.isNotEmpty()) {
-                    sb.append(Constants.COLUMN_SEPARATOR)
-                }
-                sb.append(mTripStop.stopId)
-            }
-            return sb.toString()
+        fun containsStopIds(mainList: List<MTripStop>, otherList: List<MTripStop>): Boolean {
+            return toStopIds(mainList).contains(toStopIds(otherList))
+        }
+
+        @Suppress("unused")
+        @JvmStatic
+        fun toStopIds(l: List<MTripStop>): String {
+            return l.joinToString { "${it.stopId}" }
+        }
+
+        @Suppress("unused")
+        @JvmStatic
+        fun printTripStops(l: List<MTripStop>): String {
+            return "[${l.size}] > ${l.joinToString { it.toStringSameTrip() }}"
         }
 
         @JvmStatic

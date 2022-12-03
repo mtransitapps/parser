@@ -2,6 +2,7 @@ package org.mtransit.parser.mt;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.CollectionUtils;
 import org.mtransit.commons.FeatureFlags;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.Constants;
@@ -558,15 +559,25 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						&& mergedTripIdToMTripStops.get(mTrip.getId()).contains(mTripStopListString)) {
 					continue;
 				}
-				if (tripIdToMTripStops.containsKey(mTrip.getId())) {
-					cTripStopsList = tripIdToMTripStops.get(mTrip.getId());
-					if (!equalsMyTripStopLists(mTripStopsList, cTripStopsList)) {
-						MTLog.log("%s: Need to merge trip ID '%s'.", this.routeId, mTrip.getId());
-						tripIdToMTripStops.put(mTrip.getId(),
-								setMTripStopSequence(
-										mergeMyTripStopLists(mTripStopsList, cTripStopsList)
-								)
-						);
+				cTripStopsList = tripIdToMTripStops.get(mTrip.getId());
+				if (cTripStopsList != null) {
+					if (!CollectionUtils.equalsList(mTripStopsList, cTripStopsList)) {
+						if (MTripStop.containsStopIds(cTripStopsList, mTripStopsList)) {
+							MTLog.logDebug("%s: Skip merge because current trip stops list contains other list.", this.routeId, MTripStop.printTripStops(cTripStopsList));
+						} else {
+							MTLog.log("%s: Need to merge trip ID '%s' stops lists (sizes: %d in %d).", this.routeId, mTrip.getId(), mTripStopsList.size(), cTripStopsList.size());
+							if (Constants.DEBUG) {
+								MTLog.logDebug("%s: - current stops list > %s.", this.routeId, MTripStop.printTripStops(cTripStopsList));
+								MTLog.logDebug("%s: - new stops list > %s.", this.routeId, MTripStop.printTripStops(mTripStopsList));
+							}
+							final ArrayList<MTripStop> resultTripStopsList = setMTripStopSequence(
+									mergeMyTripStopLists(mTrip.getId(), mTripStopsList, cTripStopsList)
+							);
+							tripIdToMTripStops.put(mTrip.getId(), resultTripStopsList);
+							if (Constants.DEBUG) {
+								MTLog.logDebug("%s: - result stops list > %s.", this.routeId, MTripStop.printTripStops(resultTripStopsList));
+							}
+						}
 					}
 				} else { // just use it
 					tripIdToMTripStops.put(mTrip.getId(), mTripStopsList);
@@ -632,74 +643,85 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Pair<Long[], Integer[]> mTripsAndStopSequences;
 		HashMap<String, Integer> addedMTripIdAndGStopIds = new HashMap<>();
 		final List<GTripStop> tripStops = this.routeTripIdTripStops.get(gTrip.getTripIdInt());
-		if (tripStops != null) {
-			for (GTripStop gTripStop : tripStops) {
-				if (gTripStop.getTripIdInt() != gTrip.getTripIdInt()) {
-					continue;
+		if (tripStops == null) {
+			return splitTripStopTimesHeadSign;
+		}
+		for (GTripStop gTripStop : tripStops) {
+			if (gTripStop.getTripIdInt() != gTrip.getTripIdInt()) {
+				continue;
+			}
+			gStop = routeGTFS.getStop(gTripStop.getStopIdInt());
+			if (gStop == null) { // was excluded previously
+				continue;
+			}
+			mStopId = this.agencyTools.getStopId(gStop);
+			this.gStopsCache.put(mStopId, gStop);
+			if (mStopId < 0) {
+				//noinspection deprecation
+				throw new MTLog.Fatal("%s: Can't find GTFS stop ID (%s) '%s' from trip ID '%s' (%s)", this.routeId, mStopId, gTripStop.getStopIdInt(),
+						gTripStop.getTripId(), gStop.toStringPlus(true));
+			}
+			mTripsAndStopSequences = new Pair<>(
+					new Long[]{splitTrips.get(0).getId()},
+					new Integer[]{gTripStop.getStopSequence()}
+			);
+			for (int i = 0; i < mTripsAndStopSequences.first.length; i++) {
+				mTripId = mTripsAndStopSequences.first[i];
+				mTripStop = new MTripStop(mTripId, mStopId, mTripsAndStopSequences.second[i]);
+				if (!splitTripStops.containsKey(mTripId)) {
+					splitTripStops.put(mTripId, new HashMap<>());
 				}
-				gStop = routeGTFS.getStop(gTripStop.getStopIdInt());
-				if (gStop == null) { // was excluded previously
-					continue;
-				}
-				mStopId = this.agencyTools.getStopId(gStop);
-				this.gStopsCache.put(mStopId, gStop);
-				if (mStopId < 0) {
-					//noinspection deprecation
-					throw new MTLog.Fatal("%s: Can't find GTFS stop ID (%s) '%s' from trip ID '%s' (%s)", this.routeId, mStopId, gTripStop.getStopIdInt(),
-							gTripStop.getTripId(), gStop.toStringPlus(true));
-				}
-				mTripsAndStopSequences = new Pair<>(
-						new Long[]{splitTrips.get(0).getId()},
-						new Integer[]{gTripStop.getStopSequence()}
-				);
-				for (int i = 0; i < mTripsAndStopSequences.first.length; i++) {
-					mTripId = mTripsAndStopSequences.first[i];
-					mTripStop = new MTripStop(mTripId, mStopId, mTripsAndStopSequences.second[i]);
-					if (!splitTripStops.containsKey(mTripId)) {
-						splitTripStops.put(mTripId, new HashMap<>());
-					}
-					if (splitTripStops.get(mTripId).containsKey(mTripStop.getUID())) {
-						if (!splitTripStops.get(mTripId).get(mTripStop.getUID()).equalsExceptStopSequence(mTripStop)) {
-							throw new MTLog.Fatal("%s: Different slit trip stop '%s' already in list (%s != %s)!",
-									this.routeId,
-									mTripStop.getUID(),
-									mTripStop.toString(),
-									splitTripStops.get(mTripId).get(mTripStop.getUID()).toString());
-						}
+				final HashMap<Long, MTripStop> uuidToTripStops = splitTripStops.get(mTripId);
+				final MTripStop sameUuidTripStop = uuidToTripStops.get(mTripStop.getUID());
+				if (sameUuidTripStop != null) {
+					if (!sameUuidTripStop.equalsExceptStopSequence(mTripStop)) {
+						throw new MTLog.Fatal("%s: Different trip '%s' stop '%s' already in list (%s != %s)!",
+								this.routeId,
+								mTripStop.getTripId(),
+								mTripStop.getStopId(),
+								mTripStop.toString(),
+								sameUuidTripStop.toString());
 					} else {
-						splitTripStops.get(mTripId).put(mTripStop.getUID(), mTripStop);
+						MTLog.logDebug("%s: Same trip '%s' stop '%s' already in list (stop sequence %s != %s).",
+								this.routeId,
+								mTripStop.getTripId(),
+								mTripStop.getStopId(),
+								mTripStop.getStopSequence(),
+								sameUuidTripStop.getStopSequence());
 					}
-					tripStopTimesHeadsign = splitTripStopTimesHeadSign.get(mTripId);
-					if (!originalTripHeadsign.containsKey(mTripId)) {
-						throw new MTLog.Fatal("%s: Unexpected trip head-sign ID '%s'! (%s)", this.routeId, mTripId, originalTripHeadsign);
-					}
-					tripStopTimesHeadsign = parseStopTimes(
-							mSchedules,
-							mTripId,
-							tripServiceIdInt,
-							originalTripHeadsign.get(mTripId).first,
-							originalTripHeadsign.get(mTripId).second,
-							tripStopTimesHeadsign,
-							gRoute,
-							gTrip,
-							gTripStop,
-							mStopId,
-							addedMTripIdAndGStopIds
-					);
-					splitTripStopTimesHeadSign.put(mTripId, tripStopTimesHeadsign);
-					serviceIdInts.add(tripServiceIdInt);
+				} else {
+					uuidToTripStops.put(mTripStop.getUID(), mTripStop);
 				}
-				if (!mStops.containsKey(mStopId)) {
-					mStops.put(
-							mStopId,
-							new MStop(mStopId,
-									this.agencyTools.getStopCode(gStop),
-									this.agencyTools.getStopOriginalId(gStop),
-									this.agencyTools.cleanStopName(gStop.getStopName()),
-									gStop.getStopLat(),
-									gStop.getStopLong()
-							));
+				tripStopTimesHeadsign = splitTripStopTimesHeadSign.get(mTripId);
+				if (!originalTripHeadsign.containsKey(mTripId)) {
+					throw new MTLog.Fatal("%s: Unexpected trip head-sign ID '%s'! (%s)", this.routeId, mTripId, originalTripHeadsign);
 				}
+				tripStopTimesHeadsign = parseStopTimes(
+						mSchedules,
+						mTripId,
+						tripServiceIdInt,
+						originalTripHeadsign.get(mTripId).first,
+						originalTripHeadsign.get(mTripId).second,
+						tripStopTimesHeadsign,
+						gRoute,
+						gTrip,
+						gTripStop,
+						mStopId,
+						addedMTripIdAndGStopIds
+				);
+				splitTripStopTimesHeadSign.put(mTripId, tripStopTimesHeadsign);
+				serviceIdInts.add(tripServiceIdInt);
+			}
+			if (!mStops.containsKey(mStopId)) {
+				mStops.put(
+						mStopId,
+						new MStop(mStopId,
+								this.agencyTools.getStopCode(gStop),
+								this.agencyTools.getStopOriginalId(gStop),
+								this.agencyTools.cleanStopName(gStop.getStopName()),
+								gStop.getStopLat(),
+								gStop.getStopLong()
+						));
 			}
 		}
 		return splitTripStopTimesHeadSign;
@@ -874,24 +896,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		} while (i >= 0);
 	}
 
-	private static boolean equalsMyTripStopLists(ArrayList<MTripStop> l1, ArrayList<MTripStop> l2) {
-		if (l1 == null && l2 == null) {
-			return true;
-		}
-		int s1 = l1 == null ? 0 : l1.size();
-		int s2 = l2 == null ? 0 : l2.size();
-		if (s1 != s2) {
-			return false;
-		}
-		for (int i = 0; i < s1; i++) {
-			if (!l1.get(i).equals(l2.get(i))) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private ArrayList<MTripStop> mergeMyTripStopLists(ArrayList<MTripStop> list1, ArrayList<MTripStop> list2) {
+	@NotNull
+	private ArrayList<MTripStop> mergeMyTripStopLists(long tripId, @NotNull ArrayList<MTripStop> list1, @NotNull ArrayList<MTripStop> list2) {
+		final String logTag = this.routeId + ": " + tripId;
 		ArrayList<MTripStop> newList = new ArrayList<>();
 		HashSet<Integer> newListStopIds = new HashSet<>();
 		HashSet<Integer> list1StopIds = new HashSet<>();
@@ -903,7 +910,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			list2StopIds.add(ts2.getStopId());
 		}
 		MTripStop ts1, ts2;
-		boolean inL1, inL2;
+		boolean s2InL1, s1InL2;
 		boolean lastInL1, lastInL2;
 		GStop lastGStop, ts1GStop, ts2GStop;
 		GStop commonGStop, previousTs1GStop, previousTs2GStop;
@@ -917,17 +924,20 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			ts1 = list1.get(i1);
 			ts2 = list2.get(i2);
 			if (newListStopIds.contains(ts1.getStopId())) {
-				MTLog.logDebug("%s: Skipped %s because already in the merged list (1).", this.routeId, ts1.toString());
+				MTLog.logDebug("%s: Skipped %s because already in the merged list (1).", logTag, ts1.toStringSameTrip());
 				i1++; // skip this stop because already in the merged list
 				continue;
 			}
 			if (newListStopIds.contains(ts2.getStopId())) {
-				MTLog.logDebug("%s: Skipped %s because already in the merged list (2).", this.routeId, ts2.toString());
+				MTLog.logDebug("%s: Skipped %s because already in the merged list (2).", logTag, ts2.toStringSameTrip());
 				i2++; // skip this stop because already in the merged list
 				continue;
 			}
 			if (ts1.getStopId() == ts2.getStopId()) {
-				// TODO merge other parameters such as drop off / pick up ...
+				if (!ts1.equalsExceptStopSequence(ts2)) { // not loosing no pickup info (TODO really? added 2022-12-03)
+					throw new MTLog.Fatal("%s: Trying to merge different trip stop for same stop %s VS %s.", logTag, ts1.toStringSameTrip(), ts2.toStringSameTrip());
+				}
+				// MTLog.logDebug("%s: Merged same stop %s (1=2).", logTag, ts1.toStringSimple());
 				newList.add(ts1);
 				newListStopIds.add(ts1.getStopId());
 				last = ts1;
@@ -937,16 +947,18 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			// find next match
 			// look for stop in other list
-			inL1 = list1StopIds.contains(ts2.getStopId());
-			inL2 = list2StopIds.contains(ts1.getStopId());
-			if (inL1 && !inL2) {
+			s2InL1 = list1StopIds.contains(ts2.getStopId());
+			s1InL2 = list2StopIds.contains(ts1.getStopId());
+			if (s2InL1 && !s1InL2) {
+				MTLog.logDebug("%s: Merged stop %s from 1st list NOT present in 2nd list (1).", logTag, ts1.toStringSameTrip());
 				newList.add(ts1);
 				newListStopIds.add(ts1.getStopId());
 				last = ts1;
 				i1++;
 				continue;
 			}
-			if (!inL1 && inL2) {
+			if (!s2InL1 && s1InL2) {
+				MTLog.logDebug("%s: Merged stop %s from 2nd list NOT present in 1st list (2).", logTag, ts2.toStringSameTrip());
 				newList.add(ts2);
 				newListStopIds.add(ts2.getStopId());
 				last = ts2;
@@ -1038,11 +1050,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 
 			if (ts1GStop.getStopLat() < ts2GStop.getStopLat() || ts1GStop.getStopLong() < ts2GStop.getStopLong()) {
+				MTLog.logDebug("%s: Merged stop %s using arbitrary lat long (1).", logTag, ts1.toStringSameTrip());
 				newList.add(ts1);
 				newListStopIds.add(ts1.getStopId());
 				last = ts1;
 				i1++;
 			} else {
+				MTLog.logDebug("%s: Merged stop %s using arbitrary lat long (2).", logTag, ts2.toStringSameTrip());
 				newList.add(ts2);
 				newListStopIds.add(ts2.getStopId());
 				last = ts2;
@@ -1052,9 +1066,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			continue;
 		}
 		// add remaining stops
+		if (i1 < list1.size()) {
+			MTLog.logDebug("%s: Merged remaining %s stops from (1).", logTag, list1.size());
+		}
 		//noinspection ForLoopReplaceableByWhile
 		for (; i1 < list1.size(); ) {
 			newList.add(list1.get(i1++));
+		}
+		if (i2 < list2.size()) {
+			MTLog.logDebug("%s: Merged remaining %s stops from (2).", logTag, list2.size());
 		}
 		//noinspection ForLoopReplaceableByWhile
 		for (; i2 < list2.size(); ) {
@@ -1063,12 +1083,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return newList;
 	}
 
-	@Nullable
-	private ArrayList<MTripStop> setMTripStopSequence(@Nullable ArrayList<MTripStop> mTripStops) {
-		if (mTripStops != null) {
-			for (int i = 0; i < mTripStops.size(); i++) {
-				mTripStops.get(i).setStopSequence(i + 1);
+	@NotNull
+	private ArrayList<MTripStop> setMTripStopSequence(@NotNull ArrayList<MTripStop> mTripStops) {
+		for (int i = 0; i < mTripStops.size(); i++) {
+			final int newSequence = i + 1;
+			final MTripStop mTripStop = mTripStops.get(i);
+			if (mTripStop.getStopSequence() == newSequence) {
+				continue;
 			}
+			mTripStop.setStopSequence(newSequence);
 		}
 		return mTripStops;
 	}
