@@ -295,9 +295,6 @@ public class GReader {
 					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)), //
 					GTimePoint.parse(line.get(GStopTime.TIME_POINT)) //
 			);
-			if (agencyTools.excludeStopTime(gStopTime)) {
-				return;
-			}
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
 				return;
 			}
@@ -309,6 +306,9 @@ public class GReader {
 			}
 			if (gStopTime.getDropOffType() != GDropOffType.REGULAR) {
 				agencyTools.setStopTimesHasDropOffTypeNotRegular(true);
+			}
+			if (agencyTools.excludeStopTime(gStopTime)) {
+				return;
 			}
 			gSpec.addStopTime(gStopTime, false);
 		} catch (Exception e) {
