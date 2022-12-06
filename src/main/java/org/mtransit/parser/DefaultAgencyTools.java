@@ -854,9 +854,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime,
 										   @NotNull List<GStopTime> tripStopTimes,
-										   @NotNull SimpleDateFormat mDateFormat) {
+										   @NotNull SimpleDateFormat timeFormat) {
 		if (!gStopTime.hasArrivalTime() || !gStopTime.hasDepartureTime()) {
-			return extractTimes(gStopTime, tripStopTimes, mDateFormat);
+			return extractTimes(gStopTime, tripStopTimes, timeFormat);
 		} else {
 			return new Pair<>(
 					TimeUtils.cleanExtraSeconds(gStopTime.getArrivalTime()),
@@ -867,19 +867,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	private static Pair<Integer, Integer> extractTimes(GStopTime gStopTime,
 													   @NotNull List<GStopTime> tripStopTimes,
-													   SimpleDateFormat mDateFormat) {
+													   SimpleDateFormat timeFormat) {
 		try {
 			Pair<Long, Long> timesInMs = extractTimeInMs(gStopTime, tripStopTimes);
 			long arrivalTimeInMs = timesInMs.first;
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTimeInMillis(arrivalTimeInMs);
-			int arrivalTime = Integer.parseInt(mDateFormat.format(calendar.getTime()));
+			int arrivalTime = Integer.parseInt(timeFormat.format(calendar.getTime()));
 			if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
 				arrivalTime += 24_00_00;
 			}
 			long departureTimeInMs = timesInMs.second;
 			calendar.setTimeInMillis(departureTimeInMs);
-			int departureTime = Integer.parseInt(mDateFormat.format(calendar.getTime()));
+			int departureTime = Integer.parseInt(timeFormat.format(calendar.getTime()));
 			if (calendar.get(Calendar.DAY_OF_YEAR) > 1) {
 				departureTime += 24_00_00;
 			}

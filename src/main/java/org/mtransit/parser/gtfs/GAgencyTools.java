@@ -238,7 +238,7 @@ public interface GAgencyTools {
 	@NotNull
 	Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime,
 									@NotNull List<GStopTime> tripStopTimes,
-									@NotNull SimpleDateFormat mDateFormat);
+									@NotNull SimpleDateFormat timeFormat);
 
 	// FREQUENCY
 	int getStartTime(@NotNull GFrequency gFrequency);

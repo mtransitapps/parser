@@ -263,17 +263,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					&& (lastDeparture < -1 || lastDeparture < lastFrequency.getEndTime())) {
 				lastDeparture = lastFrequency.getEndTime();
 			}
-			SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(GFieldTypes.DATE_FORMAT_PATTERN + " HHmmss", Locale.ENGLISH);
-			DATE_FORMAT.setTimeZone(TimeZone.getTimeZone(mAgenciesList.get(0).getTimezone()));
+			final SimpleDateFormat DATE_TIME_FORMAT = GFieldTypes.makeDateAndTimeFormat();
+			DATE_TIME_FORMAT.setTimeZone(TimeZone.getTimeZone(mAgenciesList.get(0).getTimezone()));
 			try {
-				Date firstDate = DATE_FORMAT.parse(firstCalendarDate + " " + String.format(Locale.ENGLISH, "%06d", firstDeparture));
-				firstTimestamp = firstDate.getTime();
+				firstTimestamp = GFieldTypes.toTimeStamp(DATE_TIME_FORMAT, firstCalendarDate, firstDeparture);
 			} catch (Exception e) {
 				throw new MTLog.Fatal(e, "Error while parsing dates '%s %s'!", firstCalendarDate, firstDeparture);
 			}
 			try {
-				Date lastDate = DATE_FORMAT.parse(lastCalendarDate + " " + String.format(Locale.ENGLISH, "%06d", lastDeparture));
-				lastTimestamp = lastDate.getTime();
+				lastTimestamp = GFieldTypes.toTimeStamp(DATE_TIME_FORMAT, lastCalendarDate, lastDeparture);
 			} catch (Exception e) {
 				throw new MTLog.Fatal(e, "Error while parsing dates '%s %s'!", lastCalendarDate, lastDeparture);
 			}
@@ -728,7 +726,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return splitTripStopTimesHeadSign;
 	}
 
-	private final SimpleDateFormat M_TIME_FORMAT = MSpec.getNewTimeFormatInstance(); // not static - not sharable between threads!
+	private final SimpleDateFormat TIME_FORMAT = GFieldTypes.makeTimeFormat();
 
 	private String parseStopTimes(HashMap<String, MSchedule> mSchedules,
 								  long mTripId,
@@ -787,7 +785,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					this.agencyTools.getTimes(
 							gStopTime,
 							gTripStopTimes,
-							M_TIME_FORMAT
+							TIME_FORMAT
 					),
 					gStopTime.getTripIdInt()
 			);

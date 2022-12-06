@@ -2,16 +2,12 @@ package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.Constants.EMPTY
 import org.mtransit.parser.MTLog
-import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 import java.util.regex.Pattern
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 object GTime {
-
-    private const val TIME_FORMAT = "HHmmss"
 
     private val TIME_SEPARATOR_REGEX = Pattern.compile(":")
 
@@ -29,15 +25,11 @@ object GTime {
     }
 
     @JvmStatic
-    fun fromDateS(date: Date): String = getNewTimeFormatInstance().format(date)
+    fun fromDateS(date: Date): String = GFieldTypes.makeTimeFormat().format(date)
 
     @JvmStatic
     fun fromCal(cal: Calendar): Int {
         return fromDate(cal.time)
-    }
-
-    private fun getNewTimeFormatInstance(): SimpleDateFormat {
-        return SimpleDateFormat(TIME_FORMAT, Locale.ENGLISH)
     }
 
     @JvmStatic
@@ -70,13 +62,12 @@ object GTime {
     @JvmStatic
     fun toDate(time: Int): Date {
         val sTime = toString(time) ?: throw MTLog.Fatal("Unexpected date to parse '$time'!")
-        return getNewTimeFormatInstance().parse(sTime)
+        return GFieldTypes.makeTimeFormat().parse(sTime)
     }
 
     @JvmStatic
     fun toMs(time: Int): Long {
-        val dTime = toDate(time)
-        return dTime.time
+        return toDate(time).time
     }
 
     @JvmStatic

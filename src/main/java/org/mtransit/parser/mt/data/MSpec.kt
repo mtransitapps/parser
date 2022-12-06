@@ -3,9 +3,8 @@ package org.mtransit.parser.mt.data
 import org.mtransit.commons.toIntTimestampSec
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.DBUtils
+import org.mtransit.parser.gtfs.data.GFieldTypes
 import java.text.SimpleDateFormat
-import java.util.ArrayList
-import java.util.Locale
 import java.util.TreeMap
 import java.util.concurrent.TimeUnit
 
@@ -86,6 +85,6 @@ data class MSpec(
     companion object {
         @JvmStatic
         val newTimeFormatInstance: SimpleDateFormat
-            get() = SimpleDateFormat("HHmmss", Locale.ENGLISH)
+            get() = GFieldTypes.makeTimeFormat()
     }
 }
