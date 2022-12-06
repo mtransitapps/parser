@@ -459,18 +459,16 @@ public class GSpec {
 								continue;
 							}
 						}
-						int newGeneratedTripIdInt = GIDs.getInt(GIDs.getString(tripIdInt) + "-" + f);
-						if (FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-							addTrip(new GTrip(
-									gOriginalTrip.getRouteIdInt(),
-									gOriginalTrip.getServiceIdInt(),
-									newGeneratedTripIdInt,
-									gOriginalTrip.getDirectionIdE(),
-									gOriginalTrip.getTripHeadsign(),
-									gOriginalTrip.getTripShortName()
-							));
-							t++;
-						}
+						int newGeneratedTripIdInt = GIDs.getInt(GIDs.getString(tripIdInt) + "-" + f); // DB primary keys > [trip ID + sequence]
+						addTrip(new GTrip(
+								gOriginalTrip.getRouteIdInt(),
+								gOriginalTrip.getServiceIdInt(),
+								newGeneratedTripIdInt,
+								gOriginalTrip.getDirectionIdE(),
+								gOriginalTrip.getTripHeadsign(),
+								gOriginalTrip.getTripShortName()
+						));
+						t++;
 						stopTimeCal.setTimeInMillis(firstStopTimeInMs);
 						for (int i = 0; i < tripStopTimes.size(); i++) {
 							GStopTime gStopTime = tripStopTimes.get(i);
@@ -526,7 +524,7 @@ public class GSpec {
 		}
 		DBUtils.setAutoCommit(true); // true => commit()
 		MTLog.log("Generating GTFS trip stop times from frequencies... DONE");
-		MTLog.log("- Trips: %d(after) (new: %d)", this.tripsCount, t);
+		MTLog.log("- Trips: %d (after) (new: %d)", this.tripsCount, t);
 		MTLog.log("- Trip stop: %d (after) (new: %d)", readTripStopsCount(), ts);
 		MTLog.log("- Stop times: %d (after) (new: %d)", readStopTimesCount(), st);
 	}

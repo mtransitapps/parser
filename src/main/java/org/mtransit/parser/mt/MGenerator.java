@@ -17,6 +17,7 @@ import org.mtransit.parser.db.DumpDbUtils;
 import org.mtransit.parser.db.SQLUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
+import org.mtransit.parser.gtfs.data.GFieldTypes;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MFrequency;
@@ -721,7 +722,7 @@ public class MGenerator {
 
 	private static final String GTFS_RTS_VALUES_XML = "gtfs_rts_values.xml";
 
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
+	private static final SimpleDateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
 	private static final Pattern RTS_DB_VERSION_REGEX = Pattern.compile("((<integer name=\"gtfs_rts_db_version\">)([\\d]+)(</integer>))",
 			Pattern.CASE_INSENSITIVE);
@@ -779,7 +780,7 @@ public class MGenerator {
 			long lastModifiedTimeInMs = lastModifiedTime.toMillis();
 			Calendar lastModifiedTimeDate = Calendar.getInstance();
 			lastModifiedTimeDate.setTimeInMillis(lastModifiedTimeInMs);
-			return DATE_FORMAT.format(lastModifiedTimeDate.getTime());
+			return GFieldTypes.fromDate(DATE_FORMAT, lastModifiedTimeDate);
 		} catch (IOException ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while writing values file!");
 		}
@@ -933,7 +934,6 @@ public class MGenerator {
 	private static final String SCHEDULE_KEEP_FROM_TO_FR = "Horaires du $2 au %2$s.";
 
 	private static void dumpStoreListing(File dumpDirF, String fileBase, Integer minDate, Integer maxDate) {
-		SimpleDateFormat CALENDAR_DATE = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
 		SimpleDateFormat SCHEDULE_DATE = new SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH);
 		SimpleDateFormat SCHEDULE_DATE_FR = new SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH);
 		File file;
@@ -950,8 +950,8 @@ public class MGenerator {
 				content = SCHEDULE.matcher(content).replaceAll(
 						String.format(
 								isNext ? SCHEDULE_KEEP_FROM_TO : SCHEDULE_FROM_TO, //
-								SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(minDate))),
-								SCHEDULE_DATE.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))
+								SCHEDULE_DATE.format(GFieldTypes.toDate(DATE_FORMAT, minDate)),
+								SCHEDULE_DATE.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
 						)
 				);
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF_8);
@@ -970,8 +970,10 @@ public class MGenerator {
 				content = SCHEDULE_FR.matcher(content).replaceAll(
 						String.format(
 								isNext ? SCHEDULE_KEEP_FROM_TO_FR : SCHEDULE_FROM_TO_FR, //
-								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(minDate))),
-								SCHEDULE_DATE_FR.format(CALENDAR_DATE.parse(String.valueOf(maxDate)))));
+								SCHEDULE_DATE_FR.format(GFieldTypes.toDate(DATE_FORMAT, minDate)),
+								SCHEDULE_DATE_FR.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
+						)
+				);
 				IOUtils.write(content, new FileOutputStream(file), GReader.UTF_8);
 			} catch (Exception ioe) {
 				throw new MTLog.Fatal(ioe, "Error while writing store listing files!");

@@ -14,6 +14,7 @@ import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
+import org.mtransit.parser.gtfs.data.GFieldTypes;
 import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
@@ -205,7 +206,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		long lastTimestamp = -1L;
 		if (mServiceDatesList.size() > 0) {
 			MServiceDate firstServiceDate = mServiceDatesList.get(0);
-			final int maxCalendarDate = firstServiceDate.getCalendarDate() + 10 * 10_000; // max 10 years
+			final int maxCalendarDate = GFieldTypes.fromDateToInt(new Date()) + 10 * 10_000; // max 10 years IN THE FUTURE
 			mServiceDatesList.removeIf(serviceDate ->
 					serviceDate.getCalendarDate() > maxCalendarDate
 			);
@@ -262,7 +263,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					&& (lastDeparture < -1 || lastDeparture < lastFrequency.getEndTime())) {
 				lastDeparture = lastFrequency.getEndTime();
 			}
-			SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd HHmmss", Locale.ENGLISH);
+			SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(GFieldTypes.DATE_FORMAT_PATTERN + " HHmmss", Locale.ENGLISH);
 			DATE_FORMAT.setTimeZone(TimeZone.getTimeZone(mAgenciesList.get(0).getTimezone()));
 			try {
 				Date firstDate = DATE_FORMAT.parse(firstCalendarDate + " " + String.format(Locale.ENGLISH, "%06d", firstDeparture));

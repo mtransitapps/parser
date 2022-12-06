@@ -2,9 +2,7 @@ package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 // https://developers.google.com/transit/gtfs/reference#calendar_fields
 // https://gtfs.org/reference/static/#calendartxt
@@ -171,7 +169,7 @@ data class GCalendar(
             val newAllDates: MutableList<GCalendarDate> = ArrayList()
             try {
                 @Suppress("LocalVariableName")
-                val DATE_FORMAT = SimpleDateFormat("yyyyMMdd", Locale.ENGLISH)
+                val DATE_FORMAT = GFieldTypes.makeDateFormat()
                 val startDate = Calendar.getInstance()
                 startDate.time = DATE_FORMAT.parse(_startDate.toString())
                 val endDate = Calendar.getInstance()
