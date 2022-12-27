@@ -31,6 +31,7 @@ import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MTrip;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -162,9 +163,27 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return getAgencyName() + " " + getAgencyType();
 	}
 
+	@NotNull
+	private final List<Locale> supportedLanguages = new ArrayList<>();
+
+	@Override
+	public void addSupportedLanguage(@Nullable String supportedLanguage) {
+		if (supportedLanguage == null) {
+			return;
+		}
+		final Locale supportedLocale = Locale.forLanguageTag(supportedLanguage);
+		if (this.supportedLanguages.contains(supportedLocale)) {
+			return;
+		}
+		this.supportedLanguages.add(supportedLocale);
+	}
+
 	@Nullable
 	@Override
 	public List<Locale> getSupportedLanguages() {
+		if (!this.supportedLanguages.isEmpty()) {
+			return this.supportedLanguages;
+		}
 		return null; // no-op
 	}
 
@@ -183,8 +202,20 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return firstLanguage;
 	}
 
+	@Nullable
+	private String agencyName = null;
+
+	@Override
+	public void setAgencyName(@Nullable String agencyName) {
+		this.agencyName = agencyName;
+	}
+
 	@NotNull
 	public String getAgencyName() {
+		if (this.agencyName != null) {
+			return this.agencyName;
+		}
+		MTLog.log("Agency name not provided!");
 		return "Agency Name";
 	}
 

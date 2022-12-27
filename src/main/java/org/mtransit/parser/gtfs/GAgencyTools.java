@@ -41,11 +41,15 @@ public interface GAgencyTools {
 
 	boolean excludingAll();
 
+	void addSupportedLanguage(@Nullable String supportedLanguage);
+
 	/**
 	 * @return sorted supported languages (1st = primary language)
 	 */
 	@Nullable
 	List<Locale> getSupportedLanguages();
+
+	void setAgencyName(@Nullable String agencyName);
 
 	@NotNull
 	String getAgencyName();

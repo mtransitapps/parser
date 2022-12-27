@@ -343,11 +343,17 @@ public class GReader {
 					line.get(GAgency.AGENCY_ID),
 					line.get(GAgency.AGENCY_NAME),
 					line.get(GAgency.AGENCY_URL),
-					line.get(GAgency.AGENCY_TIMEZONE)
+					line.get(GAgency.AGENCY_TIMEZONE),
+					line.get(GAgency.AGENCY_LANG),
+					line.get(GAgency.AGENCY_PHONE),
+					line.get(GAgency.AGENCY_FARE_URL),
+					line.get(GAgency.AGENCY_EMAIL)
 			);
 			if (agencyTools.excludeAgency(gAgency)) {
 				return;
 			}
+			agencyTools.setAgencyName(gAgency.getAgencyName());
+			agencyTools.addSupportedLanguage(gAgency.getAgencyLang());
 			gSpec.addAgency(gAgency);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while processing: '%s'!", line);
