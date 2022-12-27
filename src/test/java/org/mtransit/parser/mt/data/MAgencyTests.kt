@@ -19,6 +19,10 @@ class MAgencyTests {
         const val AGENCY_NAME = "name"
         const val AGENCY_URL = "http://example.org"
         const val AGENCY_TZ = "America/Edmonton"
+        const val AGENCY_TAG = "en"
+        const val AGENCY_PHONE = "514 555 1234"
+        const val AGENCY_FARE_URL = "https://www.agency.ca/fares"
+        const val AGENCY_EMAIL = "agency@example.org"
 
         const val ROUTE_TYPE = 0
     }
@@ -29,7 +33,7 @@ class MAgencyTests {
     @Test
     fun pickColorFromRoutes_Simple() {
         // Arrange
-        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ)
+        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         `when`(routeGTFS.allRoutes).then {
             listOf(
                 makeRoute(id = "1", color = "000000"),
@@ -47,7 +51,7 @@ class MAgencyTests {
     @Test
     fun pickColorFromRoutes_NoRouteColor() {
         // Arrange
-        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ)
+        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         `when`(routeGTFS.allRoutes).then {
             listOf(
                 makeRoute(id = "1", color = null),
@@ -65,7 +69,7 @@ class MAgencyTests {
     @Test
     fun pickColorFromRoutes_Case() {
         // Arrange
-        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ)
+        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         `when`(routeGTFS.allRoutes).then {
             listOf(
                 makeRoute(id = "1", color = "FFFFFF"),
@@ -83,7 +87,7 @@ class MAgencyTests {
     @Test
     fun pickColorFromRoutes_NoWinner() {
         // Arrange
-        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ)
+        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         `when`(routeGTFS.allRoutes).then {
             listOf(
                 makeRoute(id = "1", color = "000000"),
@@ -100,7 +104,7 @@ class MAgencyTests {
     @Test
     fun pickColorFromRoutes_IgnoreOtherAgency() {
         // Arrange
-        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ)
+        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         `when`(routeGTFS.allRoutes).then {
             listOf(
                 makeRoute(id = "1", color = "000000"),
@@ -118,7 +122,7 @@ class MAgencyTests {
     @Test
     fun pickColorFromRoutes_RouteColorMissing() {
         // Arrange
-        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ)
+        val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         `when`(routeGTFS.allRoutes).then {
             listOf(
                 makeRoute(id = "1", color = "000000"),
