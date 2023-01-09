@@ -68,12 +68,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	public static final boolean EXPORT_PATH_ID;
 	public static final boolean EXPORT_ORIGINAL_ID;
-	public static final boolean EXPORT_DESCENT_ONLY;
 
 	static {
 		EXPORT_PATH_ID = false;
 		EXPORT_ORIGINAL_ID = false;
-		EXPORT_DESCENT_ONLY = false;
 	}
 
 	@SuppressWarnings("WeakerAccess")

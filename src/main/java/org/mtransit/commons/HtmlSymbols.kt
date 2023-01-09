@@ -1,9 +1,8 @@
 package org.mtransit.commons
 
-import org.mtransit.commons.Constants.EMPTY
 import org.mtransit.commons.Constants.SPACE_
 
-@Suppress("unused")
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 object HtmlSymbols {
 
     private const val C_AIRPLANE = "&#9992;" // ✈ https://unicode-table.com/en/2708/
@@ -23,45 +22,29 @@ object HtmlSymbols {
 
     // @formatter:off
 
-    @JvmField // TODO const
-    val SUBWAY = if (FeatureFlags.F_HTML_POI_NAME) C_METRO else EMPTY
-    @JvmField // TODO const
-    val SUBWAY_ = if (FeatureFlags.F_HTML_POI_NAME) SUBWAY + SPACE_ else EMPTY
+    const val SUBWAY = C_METRO
+    const val SUBWAY_ = SUBWAY + SPACE_
 
-    @JvmField // TODO const
-    val TRAIN = if (FeatureFlags.F_HTML_POI_NAME) C_TRAIN else EMPTY
-    @JvmField // TODO const
-    val TRAIN_ = if (FeatureFlags.F_HTML_POI_NAME) TRAIN + SPACE_ else EMPTY
+    const val TRAIN = C_TRAIN
+    const val TRAIN_ = TRAIN + SPACE_
 
-    @JvmField // TODO const
-    val AIRPORT = if (FeatureFlags.F_HTML_POI_NAME) C_AIRPLANE else EMPTY
-    @JvmField // TODO const
-    val AIRPORT_ = if (FeatureFlags.F_HTML_POI_NAME) AIRPORT + SPACE_ else EMPTY
+    const val AIRPORT = C_AIRPLANE
+    const val AIRPORT_ = AIRPORT + SPACE_
 
-    @JvmField // TODO const
-    val HOSPITAL = if (FeatureFlags.F_HTML_POI_NAME) C_HOSPITAL else EMPTY
-    @JvmField // TODO const
-    val HOSPITAL_ = if (FeatureFlags.F_HTML_POI_NAME) HOSPITAL + SPACE_ else EMPTY
+    const val HOSPITAL = C_HOSPITAL
+    const val HOSPITAL_ = HOSPITAL + SPACE_
 
-    @JvmField // TODO const
-    val SCHOOL = if (FeatureFlags.F_HTML_POI_NAME) C_SCHOOL else EMPTY
-    @JvmField // TODO const
-    val SCHOOL_ = if (FeatureFlags.F_HTML_POI_NAME) SCHOOL + SPACE_ else EMPTY
+    const val SCHOOL = C_SCHOOL
+    const val SCHOOL_ = SCHOOL + SPACE_
 
-    @JvmField // TODO const
-    val STADIUM = if (FeatureFlags.F_HTML_POI_NAME) C_STADIUM else EMPTY
-    @JvmField // TODO const
-    val STADIUM_ = if (FeatureFlags.F_HTML_POI_NAME) STADIUM + SPACE_ else EMPTY
+    const val STADIUM = C_STADIUM
+    const val STADIUM_ = STADIUM + SPACE_
 
-    @JvmField // TODO const
-    val PARK = if (FeatureFlags.F_HTML_POI_NAME) C_NATIONAL_PARK else EMPTY
-    @JvmField // TODO const
-    val PARK_ = if (FeatureFlags.F_HTML_POI_NAME) PARK + SPACE_ else EMPTY
+    const val PARK = C_NATIONAL_PARK
+    const val PARK_ = PARK + SPACE_
 
-    @JvmField // TODO const
-    val ROLLER_COASTER = if (FeatureFlags.F_HTML_POI_NAME) C_ROLLER_COASTER else EMPTY
-    @JvmField // TODO const
-    val ROLLER_COASTER_ = if (FeatureFlags.F_HTML_POI_NAME) ROLLER_COASTER + SPACE_ else EMPTY
+    const val ROLLER_COASTER = C_ROLLER_COASTER
+    const val ROLLER_COASTER_ = ROLLER_COASTER + SPACE_
 
     // @formatter:on
 }

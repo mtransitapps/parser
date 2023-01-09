@@ -3,10 +3,8 @@ package org.mtransit.parser.mt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CollectionUtils;
-import org.mtransit.commons.FeatureFlags;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.Constants;
-import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.db.DBUtils;
@@ -748,11 +746,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		GStopTime lastStopTime = null;
 		for (int i = 0; i < gTripStopTimes.size(); i++) {
 			GStopTime gStopTime = gTripStopTimes.get(i);
-			if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-				if (gStopTime.getStopSequence() < lastStopSequence) {
-					MTLog.log("%s: Stop sequence out of order (%s => '%s')!", this.routeId, lastStopSequence, gStopTime);
-					throw new MTLog.Fatal("%s: Stop sequence out of order ([%s] => [%s])!", this.routeId, lastStopTime, gStopTime);
-				}
+			if (gStopTime.getStopSequence() < lastStopSequence) {
+				MTLog.log("%s: Stop sequence out of order (%s => '%s')!", this.routeId, lastStopSequence, gStopTime);
+				throw new MTLog.Fatal("%s: Stop sequence out of order ([%s] => [%s])!", this.routeId, lastStopTime, gStopTime);
 			}
 			lastStopSequence = gStopTime.getStopSequence();
 			lastStopTime = gStopTime;
@@ -769,12 +765,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			if (noPickup) {
 				if (addedMTripIdAndGStopIds.containsKey(tripIdStopId) //
 						&& addedMTripIdAndGStopIds.get(tripIdStopId) != gStopTime.getStopSequence()) {
-					if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-						// TODO later, when UI can display multiple times same stop/POI & schedules are affected to a specific sequence, keep both
-					} else {
-						MTLog.logDebug("%s: parseStopTimes() > SKIP same stop & descent only %s.", this.routeId, gStopTime.toStringPlus());
-						continue;
-					}
+					// TODO later, when UI can display multiple times same stop/POI & schedules are affected to a specific sequence, keep both
 				}
 			}
 			mSchedule = new MSchedule(
@@ -798,8 +789,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						mSchedule.toStringPlus(),
 						mSchedules.get(mSchedule.getUID()).toStringPlus());
 			}
-			if ((DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY)
-					&& noPickup) {
+			if (noPickup) {
 				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_NO_PICKUP, null);
 			} else if (gStopTime.hasStopHeadsign()) {
 				stopHeadsign = this.agencyTools.cleanStopHeadSign(gRoute, gTrip, gStopTime, gStopTime.getStopHeadsignOrDefault());
@@ -856,43 +846,27 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 
 	private void setTripStopNoPickup(@NotNull ArrayList<MTripStop> mTripStopsList,
 									 @NotNull Collection<MSchedule> mSchedules) {
-		if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-			for (MTripStop tripStop : mTripStopsList) {
-				boolean isDescentOnly = false;
-				for (MSchedule schedule : mSchedules) {
-					if (schedule.getTripId() != tripStop.getTripId()) {
-						continue;
-					}
-					if (schedule.getStopId() != tripStop.getStopId()) {
-						continue;
-					}
-					if (schedule.isNoPickup()) {
-						isDescentOnly = true;
-						//noinspection UnnecessaryContinue
-						continue;
-					} else {
-						isDescentOnly = false;
-						break;
-					}
+		for (MTripStop tripStop : mTripStopsList) {
+			boolean isDescentOnly = false;
+			for (MSchedule schedule : mSchedules) {
+				if (schedule.getTripId() != tripStop.getTripId()) {
+					continue;
 				}
-				tripStop.setNoPickup(isDescentOnly);
+				if (schedule.getStopId() != tripStop.getStopId()) {
+					continue;
+				}
+				if (schedule.isNoPickup()) {
+					isDescentOnly = true;
+					//noinspection UnnecessaryContinue
+					continue;
+				} else {
+					isDescentOnly = false;
+					break;
+				}
 			}
-			return; // SKIP (descent only set on the stop time schedule level
+			tripStop.setNoPickup(isDescentOnly);
 		}
-		if (mTripStopsList.size() == 0) {
-			return;
-		}
-		int i = mTripStopsList.size() - 1; // starting with last
-		MTripStop currentTripStop;
-		long currentTripId = -1;
-		do {
-			currentTripStop = mTripStopsList.get(i);
-			if (currentTripStop.getTripId() != currentTripId) {
-				currentTripStop.setNoPickup(true);
-			} // ELSE false == default
-			currentTripId = currentTripStop.getTripId();
-			i--; // previous
-		} while (i >= 0);
+		return; // SKIP (descent only set on the stop time schedule level
 	}
 
 	@NotNull

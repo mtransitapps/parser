@@ -1,8 +1,6 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
-import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils
 
@@ -171,24 +169,10 @@ data class MTrip(
         val sb = StringBuilder() //
         sb.append(id) // ID
         sb.append(Constants.COLUMN_SEPARATOR) //
-        if (DefaultAgencyTools.EXPORT_DESCENT_ONLY || FeatureFlags.F_SCHEDULE_DESCENT_ONLY) {
-            sb.append(headsignType) // HEADSIGN TYPE
-            sb.append(Constants.COLUMN_SEPARATOR) //
-            sb.append(SQLUtils.quotes(SQLUtils.escape(headsignValue))) // HEADSIGN STRING
-            sb.append(Constants.COLUMN_SEPARATOR) //
-        } else {
-            if (headsignType == HEADSIGN_TYPE_NO_PICKUP) {
-                sb.append(HEADSIGN_TYPE_STRING) // HEADSIGN TYPE
-                sb.append(Constants.COLUMN_SEPARATOR) //
-                sb.append(SQLUtils.quotes(SQLUtils.escape("Drop Off Only"))) // HEADSIGN STRING
-                sb.append(Constants.COLUMN_SEPARATOR) //
-            } else {
-                sb.append(headsignType) // HEADSIGN TYPE
-                sb.append(Constants.COLUMN_SEPARATOR) //
-                sb.append(SQLUtils.quotes(SQLUtils.escape(headsignValue))) // HEADSIGN STRING
-                sb.append(Constants.COLUMN_SEPARATOR) //
-            }
-        }
+        sb.append(headsignType) // HEADSIGN TYPE
+        sb.append(Constants.COLUMN_SEPARATOR) //
+        sb.append(SQLUtils.quotes(SQLUtils.escape(headsignValue))) // HEADSIGN STRING
+        sb.append(Constants.COLUMN_SEPARATOR) //
         sb.append(routeId) // ROUTE ID
         return sb.toString()
     }
