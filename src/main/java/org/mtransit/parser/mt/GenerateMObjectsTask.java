@@ -717,7 +717,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								this.agencyTools.getStopOriginalId(gStop),
 								this.agencyTools.cleanStopName(gStop.getStopName()),
 								gStop.getStopLat(),
-								gStop.getStopLong()
+								gStop.getStopLong(),
+								gStop.getWheelchairBoarding().getId()
 						));
 			}
 		}
@@ -778,7 +779,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 							gTripStopTimes,
 							TIME_FORMAT
 					),
-					gStopTime.getTripIdInt()
+					gStopTime.getTripIdInt(),
+					gTrip.getWheelchairBoarding().getId()
 			);
 			if (mSchedules.containsKey(mSchedule.getUID()) //
 					&& !mSchedules.get(mSchedule.getUID()).isSameServiceRTSDeparture(mSchedule)) {

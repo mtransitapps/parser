@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.db.SQLUtils
@@ -10,7 +11,8 @@ data class MStop(
     private val originalId: String?,
     val name: String,
     val lat: Double,
-    val lng: Double
+    val lng: Double,
+    val wheelchairAccessible: Int,
 ) : Comparable<MStop> {
 
     fun hasLat(): Boolean {
@@ -36,6 +38,10 @@ data class MStop(
         sb.append(lat) // latitude
         sb.append(Constants.COLUMN_SEPARATOR) //
         sb.append(lng) // longitude
+        if (FeatureFlags.F_ACCESSIBILITY) {
+            sb.append(Constants.COLUMN_SEPARATOR) //
+            sb.append(this.wheelchairAccessible)
+        }
         return sb.toString()
     }
 

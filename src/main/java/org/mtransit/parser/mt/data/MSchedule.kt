@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
@@ -16,8 +17,9 @@ data class MSchedule(
     val arrival: Int,
     val departure: Int,
     val pathIdInt: Int, // trip ID
+    val wheelchairAccessible: Int,
     var headsignType: Int = -1,
-    var headsignValue: String? = null
+    var headsignValue: String? = null,
 ) : Comparable<MSchedule> {
 
     private val arrivalBeforeDeparture: Int = departure - arrival
@@ -28,7 +30,8 @@ data class MSchedule(
         tripId: Long,
         stopId: Int,
         times: Pair<Int?, Int?>,
-        pathIdInt: Int
+        pathIdInt: Int,
+        wheelchairAccessible: Int,
     ) : this(
         routeId,
         serviceIdInt,
@@ -36,7 +39,8 @@ data class MSchedule(
         stopId,
         (times.first ?: 0),
         (times.second ?: 0),
-        pathIdInt
+        pathIdInt,
+        wheelchairAccessible,
     )
 
     @Deprecated(message = "Not memory efficient")
@@ -123,6 +127,10 @@ data class MSchedule(
         sb.append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
         sb.append(Constants.COLUMN_SEPARATOR) //
         sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
+        if (FeatureFlags.F_ACCESSIBILITY) {
+            sb.append(Constants.COLUMN_SEPARATOR) //
+            sb.append(this.wheelchairAccessible)
+        }
         return sb.toString()
     }
 
@@ -154,6 +162,10 @@ data class MSchedule(
             sb.append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
             sb.append(Constants.COLUMN_SEPARATOR) //
             sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
+        }
+        if (FeatureFlags.F_ACCESSIBILITY) {
+            sb.append(Constants.COLUMN_SEPARATOR) //
+            sb.append(this.wheelchairAccessible)
         }
         return sb.toString()
     }
@@ -209,6 +221,7 @@ data class MSchedule(
         const val ARRIVAL = "arrival"
         const val DEPARTURE = "departure"
         const val PATH_ID = "path_id"
+        const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
         const val HEADSIGN_TYPE = "headsign_type"
         const val HEADSIGN_VALUE = "headsign_value"
 

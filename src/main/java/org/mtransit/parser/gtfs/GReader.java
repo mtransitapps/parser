@@ -408,13 +408,15 @@ public class GReader {
 		try {
 			final String directionId = line.get(GTrip.DIRECTION_ID);
 			final String tripHeadsign = line.get(GTrip.TRIP_HEADSIGN);
+			final String wheelchairBoarding = line.get(GStop.WHEELCHAIR_BOARDING);
 			GTrip gTrip = new GTrip(
 					line.get(GTrip.ROUTE_ID),
 					line.get(GTrip.SERVICE_ID),
 					line.get(GTrip.TRIP_ID),
 					StringUtils.isEmpty(directionId) ? null : Integer.valueOf(directionId),
 					tripHeadsign,
-					line.get(GTrip.TRIP_SHORT_NAME)
+					line.get(GTrip.TRIP_SHORT_NAME),
+					wheelchairBoarding == null ? null : Integer.parseInt(wheelchairBoarding)
 			);
 			if (agencyTools.excludeTrip(gTrip)) {
 				logExclude("Exclude trip: %s.", gTrip.toStringPlus());
@@ -448,13 +450,15 @@ public class GReader {
 			if (ENTRANCE_TYPE.equals(line.get(GStop.LOCATION_TYPE))) {
 				return; // skip entrance stations
 			}
-			String code = line.get(GStop.STOP_CODE);
+			final String code = line.get(GStop.STOP_CODE);
+			final String wheelchairBoarding = line.get(GStop.WHEELCHAIR_BOARDING);
 			GStop gStop = new GStop(
 					line.get(GStop.STOP_ID),
 					line.get(GStop.STOP_NAME),
 					Double.parseDouble(line.get(GStop.STOP_LAT)),
 					Double.parseDouble(line.get(GStop.STOP_LON)),
-					code == null ? EMPTY : code.trim()
+					code == null ? EMPTY : code.trim(),
+					wheelchairBoarding == null ? null : Integer.parseInt(wheelchairBoarding)
 			);
 			if (agencyTools.excludeStop(gStop)) {
 				return;

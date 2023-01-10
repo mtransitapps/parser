@@ -87,6 +87,7 @@ object DBUtils {
                 .appendColumn(MSchedule.ARRIVAL, SQLUtilsCommons.INT)
                 .appendColumn(MSchedule.DEPARTURE, SQLUtilsCommons.INT)
                 .appendColumn(MSchedule.PATH_ID, SQLUtilsCommons.INT)
+                .appendColumn(MSchedule.WHEELCHAIR_BOARDING, SQLUtilsCommons.INT)
                 .appendColumn(MSchedule.HEADSIGN_TYPE, SQLUtilsCommons.INT)
                 .appendColumn(MSchedule.HEADSIGN_VALUE, SQLUtilsCommons.TXT) // string ??
                 .build()
@@ -159,6 +160,7 @@ object DBUtils {
                     "${mSchedule.arrival}," +
                     "${mSchedule.departure}," +
                     "${mSchedule.pathIdInt}," +
+                    "${mSchedule.wheelchairAccessible}," +
                     "${mSchedule.headsignType}," +
                     "${mSchedule.headsignValue?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}" +
                     SQLUtilsCommons.P2
@@ -420,6 +422,7 @@ object DBUtils {
                     rs.getInt(MSchedule.ARRIVAL),
                     rs.getInt(MSchedule.DEPARTURE),
                     rs.getInt(MSchedule.PATH_ID),
+                    rs.getInt(MSchedule.WHEELCHAIR_BOARDING),
                     rs.getInt(MSchedule.HEADSIGN_TYPE),
                     headsignValue
                 )

@@ -3,12 +3,14 @@ package org.mtransit.parser.gtfs.data
 import org.mtransit.parser.Constants
 
 // https://developers.google.com/transit/gtfs/reference#stops_fields
+// https://gtfs.org/schedule/reference/#stopstxt
 data class GStop(
     val stopIdInt: Int,
     val stopName: String,
     val stopLat: Double,
     val stopLong: Double,
-    val stopCode: String
+    val stopCode: String,
+    val wheelchairBoarding: GWheelchairBoardingType,
 ) {
 
     constructor(
@@ -16,13 +18,15 @@ data class GStop(
         stopName: String,
         stopLat: Double,
         stopLong: Double,
-        stopCode: String
+        stopCode: String,
+        wheelchairBoarding: Int?,
     ) : this(
         GIDs.getInt(stopId),
         stopName,
         stopLat,
         stopLong,
-        stopCode
+        stopCode,
+        GWheelchairBoardingType.parse(wheelchairBoarding),
     )
 
     @Deprecated(message = "Not memory efficient")
@@ -60,5 +64,6 @@ data class GStop(
         const val STOP_LON = "stop_lon"
         const val STOP_CODE = "stop_code"
         const val LOCATION_TYPE = "location_type"
+        const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
     }
 }

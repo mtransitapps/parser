@@ -459,7 +459,8 @@ public class GSpec {
 								newGeneratedTripIdInt,
 								gOriginalTrip.getDirectionIdE(),
 								gOriginalTrip.getTripHeadsign(),
-								gOriginalTrip.getTripShortName()
+								gOriginalTrip.getTripShortName(),
+								gOriginalTrip.getWheelchairBoarding()
 						));
 						t++;
 						stopTimeCal.setTimeInMillis(firstStopTimeInMs);

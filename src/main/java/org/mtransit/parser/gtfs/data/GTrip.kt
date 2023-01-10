@@ -11,7 +11,8 @@ data class GTrip(
     val tripIdInt: Int,
     var directionIdE: GDirectionId,
     var tripHeadsign: String?, // Optional
-    val tripShortName: String? // Optional
+    val tripShortName: String?, // Optional
+    val wheelchairBoarding: GWheelchairBoardingType,
 ) {
     constructor(
         routeId: String,
@@ -19,14 +20,16 @@ data class GTrip(
         tripId: String,
         directionId: Int?,
         tripHeadsign: String?,
-        tripShortName: String?
+        tripShortName: String?,
+        wheelchairBoarding: Int?,
     ) : this(
         GIDs.getInt(routeId),
         GIDs.getInt(serviceId),
         GIDs.getInt(tripId),
         GDirectionId.parse(directionId),
         tripHeadsign,
-        tripShortName
+        tripShortName,
+        GWheelchairBoardingType.parse(wheelchairBoarding),
     )
 
     val directionId: Int?
@@ -106,6 +109,7 @@ data class GTrip(
         const val TRIP_HEADSIGN = "trip_headsign"
         const val TRIP_SHORT_NAME = "trip_short_name"
         const val DIRECTION_ID = "direction_id"
+        const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
 
         @Suppress("unused")
         @JvmStatic
