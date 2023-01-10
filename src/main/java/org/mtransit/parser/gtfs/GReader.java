@@ -408,7 +408,7 @@ public class GReader {
 		try {
 			final String directionId = line.get(GTrip.DIRECTION_ID);
 			final String tripHeadsign = line.get(GTrip.TRIP_HEADSIGN);
-			final String wheelchairBoarding = line.get(GStop.WHEELCHAIR_BOARDING);
+			final String wheelchairBoarding = line.get(GTrip.WHEELCHAIR_BOARDING);
 			GTrip gTrip = new GTrip(
 					line.get(GTrip.ROUTE_ID),
 					line.get(GTrip.SERVICE_ID),

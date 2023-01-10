@@ -23,6 +23,7 @@ import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTime
 import org.mtransit.parser.gtfs.data.GTimePoint
 import org.mtransit.parser.gtfs.data.GTrip
+import org.mtransit.parser.gtfs.data.GWheelchairBoardingType
 
 
 @RunWith(MockitoJUnitRunner::class)
@@ -33,6 +34,8 @@ class MDirectionHeadSignFinderTest {
         const val RIDS = "route_id"
 
         const val TSN = "trip short name"
+
+        val A11Y = GWheelchairBoardingType.NO_INFO
     }
 
     @Mock
@@ -54,7 +57,7 @@ class MDirectionHeadSignFinderTest {
         `when`(routeGTFS.getTrip(anyInt()))
             .then {
                 val tripIdInt: Int = it.arguments[0] as Int? ?: 1
-                GTrip(GIDs.getInt(RIDS), GIDs.getInt("service_id"), tripIdInt, GDirectionId.NONE, "trip head-sign", TSN)
+                GTrip(GIDs.getInt(RIDS), GIDs.getInt("service_id"), tripIdInt, GDirectionId.NONE, "trip head-sign", TSN, A11Y)
             }
         `when`(routeGTFS.getRoute(anyInt()))
             .then {
@@ -69,7 +72,7 @@ class MDirectionHeadSignFinderTest {
         val directionId = GDirectionId.NONE.id
         val otherDirectionId = GDirectionId.INBOUND.id
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", "trip_id", otherDirectionId, "trip head-sign", TSN)
+            GTrip(RIDS, "service_id", "trip_id", otherDirectionId, "trip head-sign", TSN, A11Y.id)
         )
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
@@ -86,9 +89,9 @@ class MDirectionHeadSignFinderTest {
         val tripId3 = "trip_id_3"
         val sameHeadSign = "same trip head-sign"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id1", tripId1, directionId, sameHeadSign, TSN),
-            GTrip(RIDS, "service_id2", tripId2, directionId, sameHeadSign, TSN),
-            GTrip(RIDS, "service_id3", tripId3, directionId, sameHeadSign, TSN)
+            GTrip(RIDS, "service_id1", tripId1, directionId, sameHeadSign, TSN, A11Y.id),
+            GTrip(RIDS, "service_id2", tripId2, directionId, sameHeadSign, TSN, A11Y.id),
+            GTrip(RIDS, "service_id3", tripId3, directionId, sameHeadSign, TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -115,8 +118,8 @@ class MDirectionHeadSignFinderTest {
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign 1", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign 2", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign 1", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign 2", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -139,8 +142,8 @@ class MDirectionHeadSignFinderTest {
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign 2", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign 2", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -163,8 +166,8 @@ class MDirectionHeadSignFinderTest {
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "1 trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "2 trip head-sign", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "1 trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "2 trip head-sign", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -187,8 +190,8 @@ class MDirectionHeadSignFinderTest {
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign 1", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign 2", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign 1", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign 2", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -212,9 +215,9 @@ class MDirectionHeadSignFinderTest {
         val tripId2 = "trip_id_2"
         val tripId3 = "trip_id_3"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign S", TSN),
-            GTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign S", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -242,9 +245,9 @@ class MDirectionHeadSignFinderTest {
         val tripId2 = "trip_id_2"
         val tripId3 = "trip_id_3"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign S", TSN),
-            GTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign S", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -272,9 +275,9 @@ class MDirectionHeadSignFinderTest {
         val tripId2 = "trip_id_2"
         val tripId3 = "trip_id_3"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN), // most common
-            GTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN) // most common
+            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id), // most common
+            GTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN, A11Y.id) // most common
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -310,9 +313,9 @@ class MDirectionHeadSignFinderTest {
         val tripId2 = "trip_id_2"
         val tripId3 = "trip_id_3"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -360,14 +363,14 @@ class MDirectionHeadSignFinderTest {
         val tripId7 = "trip_id_7"
         val tripId8 = "trip_id_8"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "foo foo", TSN),
-            GTrip(RIDS, "service_id", tripId3, directionId, "foo foo", TSN),
-            GTrip(RIDS, "service_id", tripId4, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId5, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId6, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId7, directionId, "trip head-sign", TSN), // just 1 more than fod // not a winner
-            GTrip(RIDS, "service_id", tripId8, directionId, "other trip", TSN) // similar
+            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "foo foo", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId3, directionId, "foo foo", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId4, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId5, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId6, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId7, directionId, "trip head-sign", TSN, A11Y.id), // just 1 more than fod // not a winner
+            GTrip(RIDS, "service_id", tripId8, directionId, "other trip", TSN, A11Y.id) // similar
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -458,12 +461,12 @@ class MDirectionHeadSignFinderTest {
         val tripId5 = "trip_id_5"
         val tripId6 = "trip_id_6"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN), // GOOD: longest
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN), // GOOD: longest
-            GTrip(RIDS, "service_id", tripId3, directionId, "foo foo", TSN), // WRONG
-            GTrip(RIDS, "service_id", tripId4, directionId, "foo foo", TSN), // WRONG
-            GTrip(RIDS, "service_id", tripId5, directionId, "foo foo", TSN), // GOOD: shortest
-            GTrip(RIDS, "service_id", tripId6, directionId, "foo foo", TSN) // GOOD: shortest
+            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id), // GOOD: longest
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id), // GOOD: longest
+            GTrip(RIDS, "service_id", tripId3, directionId, "foo foo", TSN, A11Y.id), // WRONG
+            GTrip(RIDS, "service_id", tripId4, directionId, "foo foo", TSN, A11Y.id), // WRONG
+            GTrip(RIDS, "service_id", tripId5, directionId, "foo foo", TSN, A11Y.id), // GOOD: shortest
+            GTrip(RIDS, "service_id", tripId6, directionId, "foo foo", TSN, A11Y.id) // GOOD: shortest
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -507,10 +510,10 @@ class MDirectionHeadSignFinderTest {
         val tripId3 = "trip_id_3"
         val tripId4 = "trip_id_3"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "foo foo", TSN),
-            GTrip(RIDS, "service_id", tripId3, directionId, "foo foo", TSN),
-            GTrip(RIDS, "service_id", tripId4, directionId, "foo foo", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "foo foo", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId3, directionId, "foo foo", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId4, directionId, "foo foo", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -561,9 +564,9 @@ class MDirectionHeadSignFinderTest {
         val tripId2 = "trip_id_2"
         val tripId3 = "trip_id_3"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -594,8 +597,8 @@ class MDirectionHeadSignFinderTest {
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -626,8 +629,8 @@ class MDirectionHeadSignFinderTest {
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -658,8 +661,8 @@ class MDirectionHeadSignFinderTest {
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -690,8 +693,8 @@ class MDirectionHeadSignFinderTest {
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -723,8 +726,8 @@ class MDirectionHeadSignFinderTest {
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -756,8 +759,8 @@ class MDirectionHeadSignFinderTest {
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
@@ -789,8 +792,8 @@ class MDirectionHeadSignFinderTest {
         val tripId1 = "trip_id_1"
         val tripId2 = "trip_id_2"
         val gRouteTrips = listOf(
-            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN),
-            GTrip(RIDS, "service_id", tripId2, directionId, "foo foo", TSN)
+            GTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
+            GTrip(RIDS, "service_id", tripId2, directionId, "foo foo", TSN, A11Y.id)
         )
         `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
