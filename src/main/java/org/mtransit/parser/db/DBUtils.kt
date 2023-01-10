@@ -160,7 +160,7 @@ object DBUtils {
                     "${mSchedule.arrival}," +
                     "${mSchedule.departure}," +
                     "${mSchedule.pathIdInt}," +
-                    "${mSchedule.wheelchairAccessible}," +
+                    "${mSchedule.accessible}," +
                     "${mSchedule.headsignType}," +
                     "${mSchedule.headsignValue?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}" +
                     SQLUtilsCommons.P2

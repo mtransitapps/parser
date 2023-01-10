@@ -12,7 +12,7 @@ data class MStop(
     val name: String,
     val lat: Double,
     val lng: Double,
-    val wheelchairAccessible: Int,
+    val accessible: Int,
 ) : Comparable<MStop> {
 
     fun hasLat(): Boolean {
@@ -38,9 +38,9 @@ data class MStop(
         sb.append(lat) // latitude
         sb.append(Constants.COLUMN_SEPARATOR) //
         sb.append(lng) // longitude
-        if (FeatureFlags.F_ACCESSIBILITY) {
+        if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
             sb.append(Constants.COLUMN_SEPARATOR) //
-            sb.append(this.wheelchairAccessible)
+            sb.append(this.accessible)
         }
         return sb.toString()
     }

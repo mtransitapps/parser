@@ -17,7 +17,7 @@ data class MSchedule(
     val arrival: Int,
     val departure: Int,
     val pathIdInt: Int, // trip ID
-    val wheelchairAccessible: Int,
+    val accessible: Int,
     var headsignType: Int = -1,
     var headsignValue: String? = null,
 ) : Comparable<MSchedule> {
@@ -127,9 +127,9 @@ data class MSchedule(
         sb.append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
         sb.append(Constants.COLUMN_SEPARATOR) //
         sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
-        if (FeatureFlags.F_ACCESSIBILITY) {
+        if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
             sb.append(Constants.COLUMN_SEPARATOR) //
-            sb.append(this.wheelchairAccessible)
+            sb.append(this.accessible)
         }
         return sb.toString()
     }
@@ -163,9 +163,9 @@ data class MSchedule(
             sb.append(Constants.COLUMN_SEPARATOR) //
             sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
         }
-        if (FeatureFlags.F_ACCESSIBILITY) {
+        if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
             sb.append(Constants.COLUMN_SEPARATOR) //
-            sb.append(this.wheelchairAccessible)
+            sb.append(this.accessible)
         }
         return sb.toString()
     }
