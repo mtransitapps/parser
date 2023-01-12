@@ -363,6 +363,30 @@ public class GSpec {
 		return DBUtils.countTripStops();
 	}
 
+	public void cleanupStops() {
+		MTLog.log("Cleanup GTFS stops...");
+		final int originalStopCount = this.stopIdIntStops.size();
+		int su = 0;
+		for (Entry<Integer, GStop> stopIdStop : this.stopIdIntStops.entrySet()) {
+			final GStop gStop = stopIdStop.getValue();
+			if (gStop.getParentStationIdInt() != null) {
+				final GStop parentStation = getStop(gStop.getParentStationIdInt());
+				if (parentStation != null && parentStation.getWheelchairBoarding() != GWheelchairBoardingType.NO_INFO) {
+					if (gStop.getWheelchairBoarding() == GWheelchairBoardingType.NO_INFO) {
+						gStop.setWheelchairBoarding(parentStation.getWheelchairBoarding());
+						su++;
+					}
+				}
+			}
+		}
+		this.stopIdIntStops.entrySet().removeIf(stopIdStop ->
+				stopIdStop.getValue().getLocationType() != GLocationType.STOP_PLATFORM
+		);
+		int sr = originalStopCount - this.stopIdIntStops.size();
+		MTLog.log("Cleanup GTFS stops... DONE");
+		MTLog.log("- Stops: %d (%d removed | %d updated)", this.stopIdIntStops.size(), sr, su);
+	}
+
 	public void generateTripStops() {
 		MTLog.log("Generating GTFS trip stops...");
 		String uid;
@@ -460,7 +484,7 @@ public class GSpec {
 								gOriginalTrip.getDirectionIdE(),
 								gOriginalTrip.getTripHeadsign(),
 								gOriginalTrip.getTripShortName(),
-								gOriginalTrip.getWheelchairBoarding()
+								gOriginalTrip.getWheelchairAccessible()
 						));
 						t++;
 						stopTimeCal.setTimeInMillis(firstStopTimeInMs);

@@ -1,11 +1,12 @@
 package org.mtransit.parser.gtfs.data
 
-// https://developers.google.com/transit/gtfs/reference#stopstxt
+// https://gtfs.org/schedule/reference/#stopstxt
+// https://gtfs.org/schedule/reference/#tripstxt
 enum class GWheelchairBoardingType(val id: Int) {
 
-    NO_INFO(0),
-    POSSIBLE(1),
-    NOT_POSSIBLE(2);
+    NO_INFO(0), // No accessibility information for the trip.
+    POSSIBLE(1), // Vehicle being used on this particular trip can accommodate at least one rider in a wheelchair.
+    NOT_POSSIBLE(2); // No riders in wheelchairs can be accommodated on this trip.
 
     companion object {
 

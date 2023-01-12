@@ -140,6 +140,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		long start = System.currentTimeMillis();
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false, false);
+		gtfs.cleanupStops();
 		gtfs.cleanupExcludedData();
 		gtfs.cleanupStopTimesPickupDropOffTypes(this);
 		gtfs.generateTripStops();

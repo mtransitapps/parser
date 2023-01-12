@@ -780,7 +780,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 							TIME_FORMAT
 					),
 					gStopTime.getTripIdInt(),
-					gTrip.getWheelchairBoarding().getId()
+					gTrip.getWheelchairAccessible().getId()
 			);
 			if (mSchedules.containsKey(mSchedule.getUID()) //
 					&& !mSchedules.get(mSchedule.getUID()).isSameServiceRTSDeparture(mSchedule)) {

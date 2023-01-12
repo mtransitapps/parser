@@ -408,7 +408,7 @@ public class GReader {
 		try {
 			final String directionId = line.get(GTrip.DIRECTION_ID);
 			final String tripHeadsign = line.get(GTrip.TRIP_HEADSIGN);
-			final String wheelchairBoarding = line.get(GTrip.WHEELCHAIR_BOARDING);
+			final String wheelchairAccessible = line.get(GTrip.WHEELCHAIR_ACCESSIBLE);
 			GTrip gTrip = new GTrip(
 					line.get(GTrip.ROUTE_ID),
 					line.get(GTrip.SERVICE_ID),
@@ -416,7 +416,7 @@ public class GReader {
 					StringUtils.isEmpty(directionId) ? null : Integer.valueOf(directionId),
 					tripHeadsign,
 					line.get(GTrip.TRIP_SHORT_NAME),
-					wheelchairBoarding == null ? null : Integer.parseInt(wheelchairBoarding)
+					wheelchairAccessible == null ? null : Integer.parseInt(wheelchairAccessible)
 			);
 			if (agencyTools.excludeTrip(gTrip)) {
 				logExclude("Exclude trip: %s.", gTrip.toStringPlus());
@@ -439,25 +439,19 @@ public class GReader {
 		}
 	}
 
-	private static final String PARENT_STATION_TYPE = "1";
-	private static final String ENTRANCE_TYPE = "2";
-
 	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line) {
 		try {
-			if (PARENT_STATION_TYPE.equals(line.get(GStop.LOCATION_TYPE))) {
-				return; // skip parent stations
-			}
-			if (ENTRANCE_TYPE.equals(line.get(GStop.LOCATION_TYPE))) {
-				return; // skip entrance stations
-			}
+			final String locationType = line.get(GStop.LOCATION_TYPE);
 			final String code = line.get(GStop.STOP_CODE);
 			final String wheelchairBoarding = line.get(GStop.WHEELCHAIR_BOARDING);
-			GStop gStop = new GStop(
+			final GStop gStop = new GStop(
 					line.get(GStop.STOP_ID),
 					line.get(GStop.STOP_NAME),
 					Double.parseDouble(line.get(GStop.STOP_LAT)),
 					Double.parseDouble(line.get(GStop.STOP_LON)),
 					code == null ? EMPTY : code.trim(),
+					locationType == null ? null : Integer.parseInt(locationType),
+					line.get(GStop.PARENT_STATION),
 					wheelchairBoarding == null ? null : Integer.parseInt(wheelchairBoarding)
 			);
 			if (agencyTools.excludeStop(gStop)) {

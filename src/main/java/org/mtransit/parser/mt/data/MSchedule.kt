@@ -31,7 +31,7 @@ data class MSchedule(
         stopId: Int,
         times: Pair<Int?, Int?>,
         pathIdInt: Int,
-        wheelchairAccessible: Int,
+        accessible: Int,
     ) : this(
         routeId,
         serviceIdInt,
@@ -40,7 +40,7 @@ data class MSchedule(
         (times.first ?: 0),
         (times.second ?: 0),
         pathIdInt,
-        wheelchairAccessible,
+        accessible,
     )
 
     @Deprecated(message = "Not memory efficient")

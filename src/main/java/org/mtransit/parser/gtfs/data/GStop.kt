@@ -10,7 +10,9 @@ data class GStop(
     val stopLat: Double,
     val stopLong: Double,
     val stopCode: String,
-    val wheelchairBoarding: GWheelchairBoardingType,
+    val locationType: GLocationType,
+    val parentStationIdInt: Int?,
+    var wheelchairBoarding: GWheelchairBoardingType,
 ) {
 
     constructor(
@@ -19,6 +21,8 @@ data class GStop(
         stopLat: Double,
         stopLong: Double,
         stopCode: String,
+        locationType: Int?,
+        parentStationId: String?,
         wheelchairBoarding: Int?,
     ) : this(
         GIDs.getInt(stopId),
@@ -26,6 +30,8 @@ data class GStop(
         stopLat,
         stopLong,
         stopCode,
+        GLocationType.parse(locationType),
+        parentStationId?.let { GIDs.getInt(it) },
         GWheelchairBoardingType.parse(wheelchairBoarding),
     )
 
@@ -38,12 +44,22 @@ data class GStop(
             return GIDs.getString(stopIdInt)
         }
 
+    @Deprecated(message = "Not memory efficient")
+    @Suppress("unused")
+    val parentStationId = _parentStationId
+
+    private val _parentStationId: String?
+        get() {
+            return parentStationIdInt?.let { GIDs.getString(it) }
+        }
+
     @JvmOverloads
     @Suppress("unused")
     fun toStringPlus(debug: Boolean = Constants.DEBUG): String {
         return if (debug) { // longer
             return toString() +
-                    "+(stopId:$_stopId)"
+                    "+(stopId:$_stopId)" +
+                    "+(parent:$_parentStationId)"
         } else { // shorter #CI
             "{s:$_stopId${
                 if (stopCode.isNotBlank() && stopCode != _stopId) {
@@ -64,6 +80,7 @@ data class GStop(
         const val STOP_LON = "stop_lon"
         const val STOP_CODE = "stop_code"
         const val LOCATION_TYPE = "location_type"
+        const val PARENT_STATION = "parent_station"
         const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
     }
 }
