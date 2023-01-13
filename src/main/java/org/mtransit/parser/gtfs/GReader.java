@@ -416,7 +416,7 @@ public class GReader {
 					StringUtils.isEmpty(directionId) ? null : Integer.valueOf(directionId),
 					tripHeadsign,
 					line.get(GTrip.TRIP_SHORT_NAME),
-					wheelchairAccessible == null ? null : Integer.parseInt(wheelchairAccessible)
+					StringUtils.isEmpty(wheelchairAccessible) ? null : Integer.parseInt(wheelchairAccessible)
 			);
 			if (agencyTools.excludeTrip(gTrip)) {
 				logExclude("Exclude trip: %s.", gTrip.toStringPlus());
@@ -452,7 +452,7 @@ public class GReader {
 					code == null ? EMPTY : code.trim(),
 					locationType == null ? null : Integer.parseInt(locationType),
 					line.get(GStop.PARENT_STATION),
-					wheelchairBoarding == null ? null : Integer.parseInt(wheelchairBoarding)
+					StringUtils.isEmpty(wheelchairBoarding) ? null : Integer.parseInt(wheelchairBoarding)
 			);
 			if (agencyTools.excludeStop(gStop)) {
 				return;
