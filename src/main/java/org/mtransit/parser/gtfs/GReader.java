@@ -450,7 +450,7 @@ public class GReader {
 					Double.parseDouble(line.get(GStop.STOP_LAT)),
 					Double.parseDouble(line.get(GStop.STOP_LON)),
 					code == null ? EMPTY : code.trim(),
-					locationType == null ? null : Integer.parseInt(locationType),
+					StringUtils.isEmpty(locationType) ? null : Integer.parseInt(locationType),
 					line.get(GStop.PARENT_STATION),
 					StringUtils.isEmpty(wheelchairBoarding) ? null : Integer.parseInt(wheelchairBoarding)
 			);
