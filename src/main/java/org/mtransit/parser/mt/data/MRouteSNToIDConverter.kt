@@ -1,5 +1,11 @@
 package org.mtransit.parser.mt.data
 
+import org.mtransit.commons.RegexUtils.BEGINNING
+import org.mtransit.commons.RegexUtils.DIGIT_CAR
+import org.mtransit.commons.RegexUtils.END
+import org.mtransit.commons.RegexUtils.any
+import org.mtransit.commons.RegexUtils.atLeastOne
+import org.mtransit.commons.RegexUtils.group
 import org.mtransit.parser.MTLog
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -7,7 +13,9 @@ import java.util.regex.Pattern
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 object MRouteSNToIDConverter {
 
-    private val RSN = Pattern.compile("(^([A-Z]*)([0-9]+)([A-Z]*)$)", Pattern.CASE_INSENSITIVE)
+    private val RSN = Pattern.compile(
+        group(BEGINNING + group(any("[A-Z]")) + group(atLeastOne(DIGIT_CAR)) + group(any("[A-Z]")) + END), Pattern.CASE_INSENSITIVE
+    )
 
     const val NONE_: Long = 0L
     const val A: Long = 1L
