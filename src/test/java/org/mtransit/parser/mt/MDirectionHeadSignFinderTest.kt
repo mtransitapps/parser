@@ -46,7 +46,7 @@ class MDirectionHeadSignFinderTest {
 
     @Before
     fun setUp() {
-        `when`(agencyTools.cleanDirectionHeadsign(anyBoolean(), anyString()))
+        `when`(agencyTools.cleanDirectionHeadsign(anyInt(), anyBoolean(), anyString()))
             .then {
                 it.arguments[1]
             }

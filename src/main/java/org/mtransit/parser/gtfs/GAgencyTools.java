@@ -145,6 +145,10 @@ public interface GAgencyTools {
 	boolean directionOverrideId(long routeId);
 
 	@NotNull
+	String cleanDirectionHeadsign(int directionId, boolean fromStopName, @NotNull String directionHeadSign);
+
+	@Deprecated
+	@NotNull
 	String cleanDirectionHeadsign(boolean fromStopName, @NotNull String directionHeadSign);
 
 	boolean directionFinderEnabled();

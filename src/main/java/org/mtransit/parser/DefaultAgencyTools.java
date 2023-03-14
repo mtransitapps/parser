@@ -554,6 +554,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@NotNull
 	@Override
+	public String cleanDirectionHeadsign(int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
+		//noinspection deprecation
+		return cleanDirectionHeadsign(fromStopName, directionHeadSign);
+	}
+
+	@Deprecated
+	@NotNull
+	@Override
 	public String cleanDirectionHeadsign(boolean fromStopName, @NotNull String directionHeadSign) {
 		return cleanTripHeadsign(directionHeadSign);
 	}
