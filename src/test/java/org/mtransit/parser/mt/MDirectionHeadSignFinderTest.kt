@@ -25,7 +25,6 @@ import org.mtransit.parser.gtfs.data.GTimePoint
 import org.mtransit.parser.gtfs.data.GTrip
 import org.mtransit.parser.gtfs.data.GWheelchairBoardingType
 
-
 @RunWith(MockitoJUnitRunner::class)
 class MDirectionHeadSignFinderTest {
 
@@ -48,7 +47,7 @@ class MDirectionHeadSignFinderTest {
     fun setUp() {
         `when`(agencyTools.cleanDirectionHeadsign(anyInt(), anyBoolean(), anyString()))
             .then {
-                it.arguments[1]
+                it.arguments[2]
             }
         `when`(agencyTools.cleanStopHeadSign(any(), any(), any(), anyString()))
             .then {
