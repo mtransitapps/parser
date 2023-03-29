@@ -177,7 +177,7 @@ object MDirectionSplitter {
             // LOOK FOR INTERSECT
             if (directionsCandidates.size >= 2 // only if 2 directions already found
                 && directionsCandidates.singleOrNull { (_, rStopIdInts) ->
-                    rStopIdInts.intersect(gStopIdInts).isNotEmpty()
+                    rStopIdInts.intersect(gStopIdInts.toSet()).isNotEmpty()
                 }?.let { (rTripIdInts, _) ->
                     MTLog.logDebug("$routeId: intersect for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)

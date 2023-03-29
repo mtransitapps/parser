@@ -21,6 +21,7 @@ import org.mtransit.parser.mt.data.MTrip
 import kotlin.math.abs
 import kotlin.math.max
 
+@Suppress("KotlinConstantConditions")
 object MDirectionHeadSignFinder {
 
     private const val LOG_MERGE = false
@@ -336,6 +337,7 @@ object MDirectionHeadSignFinder {
                 }"
             )
         }
+        distinctTripHeadSignAndStopTimes.sortByDescending { it.gStopTimes.size }
         var candidateHeadSignAndStopTimes: MergedTrip? = null
         for ((routeIdInts, tripHeadSign, tripStopTimes) in distinctTripHeadSignAndStopTimes) {
             if (candidateHeadSignAndStopTimes == null) {
