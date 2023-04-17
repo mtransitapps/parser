@@ -10,11 +10,13 @@ java {
 compileKotlin {
     kotlinOptions {
         jvmTarget = libs.versions.kotlinOptionsJvmTarget.get()
+        allWarningsAsErrors = true
     }
 }
 compileTestKotlin {
     kotlinOptions {
         jvmTarget = libs.versions.kotlinOptionsJvmTarget.get()
+        allWarningsAsErrors = true
     }
 }
 
