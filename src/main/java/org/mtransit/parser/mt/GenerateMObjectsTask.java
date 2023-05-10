@@ -868,7 +868,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			tripStop.setNoPickup(isDescentOnly);
 		}
-		return; // SKIP (descent only set on the stop time schedule level
+		// SKIP (descent only set on the stop time schedule level
 	}
 
 	@NotNull
