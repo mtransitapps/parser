@@ -1,6 +1,6 @@
 plugins {
     id 'java-library'
-    id 'kotlin'
+    alias libs.plugins.kotlin.jvm
 }
 
 java {
@@ -9,13 +9,13 @@ java {
 }
 compileKotlin {
     kotlinOptions {
-        jvmTarget = libs.versions.kotlinOptionsJvmTarget.get()
+        jvmTarget = rootProject.javaVersion
         allWarningsAsErrors = true
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = libs.versions.kotlinOptionsJvmTarget.get()
+        jvmTarget = rootProject.javaVersion
         allWarningsAsErrors = true
     }
 }
@@ -23,13 +23,12 @@ compileTestKotlin {
 dependencies {
     api project(':commons-java')
 
-    implementation libs.bundles.kotlinLibs
+    implementation libs.bundles.kotlin
 
-    api libs.bundles.commonsLibs
-    api libs.xerialSQLiteJDBC
+    api libs.bundles.commons
+    api libs.xerial.SQLiteJDBC
 
-    testImplementation libs.JUnit
-    testImplementation libs.mockitoCore
+    testImplementation libs.bundles.test.unit
 }
 
 test {
