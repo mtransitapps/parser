@@ -84,6 +84,6 @@ data class MTripStop(
         fun getNewUID(
             tripId: Long,
             stopId: Int
-        ) = "${tripId}0${stopId}".toLong()
+        ) = "${tripId}-${stopId}"
     }
 }

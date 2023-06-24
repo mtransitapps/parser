@@ -89,7 +89,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		HashMap<String, MFrequency> mFrequencies = new HashMap<>();
 		HashMap<Long, MRoute> mRoutes = new HashMap<>();
 		HashMap<Long, MTrip> mTrips = new HashMap<>();
-		HashMap<Long, MTripStop> allMTripStops = new HashMap<>();
+		HashMap<String, MTripStop> allMTripStops = new HashMap<>();
 		HashMap<Integer, MStop> mStops = new HashMap<>();
 		HashSet<Integer> tripStopIds = new HashSet<>(); // the list of stop IDs used by trips
 		HashSet<Integer> serviceIdInts = new HashSet<>();
@@ -297,7 +297,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						  HashMap<Long, MRoute> mRoutes,
 						  HashMap<Long, MTrip> mTrips,
 						  HashMap<Integer, MStop> mStops,
-						  HashMap<Long, MTripStop> allMTripStops,
+						  HashMap<String, MTripStop> allMTripStops,
 						  HashSet<Integer> tripStopIds,
 						  HashSet<Integer> serviceIdInts,
 						  GSpec routeGTFS) {
@@ -475,7 +475,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		HashMap<Long, HashSet<String>> mergedTripIdToMTripStops = new HashMap<>();
 		HashMap<Long, Pair<Integer, String>> originalTripHeadsign;
 		ArrayList<MTrip> splitTrips;
-		HashMap<Long, HashMap<Long, MTripStop>> splitTripStops;
+		HashMap<Long, HashMap<String, MTripStop>> splitTripStops;
 		ArrayList<MTripStop> cTripStopsList;
 		ArrayList<MTripStop> mTripStopsList;
 		Integer tripServiceIdInt;
@@ -629,7 +629,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 												 HashMap<Long, Pair<Integer, String>> originalTripHeadsign,
 												 ArrayList<MTrip> splitTrips,
 												 Integer tripServiceIdInt,
-												 HashMap<Long, HashMap<Long, MTripStop>> splitTripStops,
+												 HashMap<Long, HashMap<String, MTripStop>> splitTripStops,
 												 GSpec routeGTFS) {
 		HashMap<Long, String> splitTripStopTimesHeadSign = new HashMap<>();
 		int mStopId;
@@ -668,7 +668,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (!splitTripStops.containsKey(mTripId)) {
 					splitTripStops.put(mTripId, new HashMap<>());
 				}
-				final HashMap<Long, MTripStop> uuidToTripStops = splitTripStops.get(mTripId);
+				final HashMap<String, MTripStop> uuidToTripStops = splitTripStops.get(mTripId);
 				final MTripStop sameUuidTripStop = uuidToTripStops.get(mTripStop.getUID());
 				if (sameUuidTripStop != null) {
 					if (!sameUuidTripStop.equalsExceptStopSequence(mTripStop)) {
