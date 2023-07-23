@@ -1,6 +1,6 @@
 plugins {
-    id 'java-library'
-    alias libs.plugins.kotlin.jvm
+    id("java-library")
+    alias(libs.plugins.kotlin.jvm)
 }
 
 java {
@@ -21,19 +21,19 @@ compileTestKotlin {
 }
 
 dependencies {
-    api project(':commons-java')
+    api(project(":commons-java"))
 
-    implementation libs.bundles.kotlin
+    implementation(libs.bundles.kotlin)
 
-    api libs.bundles.commons
-    api libs.xerial.SQLiteJDBC
+    api(libs.bundles.commons)
+    api(libs.xerial.SQLiteJDBC)
 
-    testImplementation libs.bundles.test.unit
+    testImplementation(libs.bundles.test.unit)
 }
 
 test {
     useJUnit()
     testLogging {
-        events 'passed', 'skipped', 'failed'
+        events("passed", "skipped", "failed")
     }
 }
