@@ -859,7 +859,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			//noinspection deprecation
 			return Integer.parseInt(gStop.getStopId());
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while extracting stop ID from %s!", gStop);
+			throw new MTLog.Fatal(e, "Error while extracting stop ID from %s!", gStop.toStringPlus());
 		}
 	}
 
