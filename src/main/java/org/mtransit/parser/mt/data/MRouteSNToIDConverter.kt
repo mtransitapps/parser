@@ -9,6 +9,7 @@ import org.mtransit.commons.RegexUtils.group
 import org.mtransit.parser.MTLog
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import kotlin.math.absoluteValue
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 object MRouteSNToIDConverter {
@@ -16,6 +17,9 @@ object MRouteSNToIDConverter {
     private val RSN = Pattern.compile(
         group(BEGINNING + group(any("[A-Z]")) + group(atLeastOne(DIGIT_CAR)) + group(any("[A-Z]")) + END), Pattern.CASE_INSENSITIVE
     )
+
+    @JvmStatic
+    fun defaultConverter(routeShortName: String) = routeShortName.padStart(3).lowercase().hashCode().absoluteValue.toLong()
 
     const val NONE_: Long = 0L
     const val A: Long = 1L
@@ -105,6 +109,7 @@ object MRouteSNToIDConverter {
             "Z" -> endsWith(Z)
             else -> {
                 nextCharsToLong?.invoke(nextChars)
+                    ?: notSupportedToRouteId?.invoke(rsn)
                     ?: throw MTLog.Fatal("Unexpected next characters '$nextChars' in short name '$rsn'!")
             }
         }
@@ -138,6 +143,7 @@ object MRouteSNToIDConverter {
             "Z" -> startsWith(Z)
             else -> {
                 previousCharsToLong?.invoke(previousChars)
+                    ?: notSupportedToRouteId?.invoke(rsn)
                     ?: throw MTLog.Fatal("Unexpected previous characters '$previousChars' in short name '$rsn'!")
             }
         }

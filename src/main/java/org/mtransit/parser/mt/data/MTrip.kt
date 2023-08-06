@@ -228,10 +228,10 @@ data class MTrip(
             mTripHeadsign: String?,
             mTripHeadsignToMerge: String?
         ): String? {
-            if (mTripHeadsignToMerge == null || mTripHeadsignToMerge.isEmpty()) {
+            if (mTripHeadsignToMerge.isNullOrEmpty()) {
                 return mTripHeadsign
             }
-            if (mTripHeadsign == null || mTripHeadsign.isEmpty()) {
+            if (mTripHeadsign.isNullOrEmpty()) {
                 return mTripHeadsignToMerge
             }
             if (mTripHeadsignToMerge.contains(mTripHeadsign)) {
