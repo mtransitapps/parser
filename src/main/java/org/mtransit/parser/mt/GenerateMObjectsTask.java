@@ -838,8 +838,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						gFrequency.getHeadwaySecs()
 				);
 				if (mFrequencies.containsKey(mFrequency.getUID()) && !mFrequencies.get(mFrequency.getUID()).equals(mFrequency)) {
-					throw new MTLog.Fatal("%s: Different frequency %s already in list (%s != %s)\n!", this.routeId, mFrequency.getUID(), mFrequency.toString(),
-							mFrequencies.get(mFrequency.getUID()).toString());
+					throw new MTLog.Fatal("%s: Different frequency %s already in list!\n- %s\n- %s \n", this.routeId, mFrequency.getUID(), mFrequency.toStringPlus(),
+							mFrequencies.get(mFrequency.getUID()).toStringPlus());
 				}
 				mFrequencies.put(mFrequency.getUID(), mFrequency);
 			}

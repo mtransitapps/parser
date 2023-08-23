@@ -63,6 +63,12 @@ data class MFrequency(
         }
     }
 
+    fun toStringPlus(): String {
+        return toString() +
+                "+(serviceId:$_serviceId)" +
+                "+(uID:$uID)"
+    }
+
     companion object {
         @JvmStatic
         fun getNewUID(
