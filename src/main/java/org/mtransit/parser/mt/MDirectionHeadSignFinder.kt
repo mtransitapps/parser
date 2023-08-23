@@ -122,6 +122,7 @@ object MDirectionHeadSignFinder {
                     true,
                     agencyTools.cleanStopName(stop.stopName)
                 )
+                MTLog.logDebug("$routeId: $directionId Stop '${stop.toStringPlus(false)}' > '${lastStopDirectionHeadSigns[directionId]}'.")
             }
             val allDirectionHeadSignsEmpty: Boolean = directionHeadSigns
                 .map { (_, headSign) -> headSign }
@@ -250,10 +251,12 @@ object MDirectionHeadSignFinder {
                         MTLog.log("$routeId: $directionId: merge w/ head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId1.headSign}'")
                         return stopTimesHeadSignAndLastStopId1
                     }
+
                     stopTimesHeadSignAndLastStopId2.headSign -> {
                         MTLog.log("$routeId: $directionId: merge w/ head-sign only (agency) -> '${stopTimesHeadSignAndLastStopId2.headSign}'")
                         return stopTimesHeadSignAndLastStopId2
                     }
+
                     else -> {} // SKIP
                 }
             }
