@@ -179,10 +179,17 @@ object MDirectionHeadSignFinder {
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
             throw MTLog.Fatal(
                 "$routeId: Could NOT fix non-descriptive direction head-signs!" +
-                        "\n - directions: ${directionHeadSigns.keys}" +
-                        "\n - head-signs: ${directionHeadSigns.values}" +
-                        "\n - stop IDs: ${GIDs.toStringPlus(directionStopIdInts.values)}" +
-                        "\n - AM/PM: ${GTime.toStringPL(directionAmPm.values.filterNotNull())}"
+                        directionHeadSigns.keys.joinToString { directionId ->
+                            "\n$routeId: $directionId: '${directionHeadSigns[directionId]}' [" +
+                                    "AM/PM: ${directionAmPm[directionId]} | " +
+                                    "last stop: ${
+                                        directionStopIdInts[directionId]?.let {
+                                            routeGTFS.getStop(
+                                                it
+                                            )?.toStringPlus(true) ?: it.toString()
+                                        }
+                                    }]"
+                        }
             )
         }
         return directionHeadSigns
