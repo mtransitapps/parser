@@ -930,7 +930,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 					TimeUtils.cleanExtraSeconds(departureTime)
 			);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while interpolating times for %s!", gStopTime);
+			throw new MTLog.Fatal(e, "Error while interpolating times for %s!", gStopTime.toStringPlus(true));
 		}
 	}
 

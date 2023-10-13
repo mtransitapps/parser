@@ -2,21 +2,21 @@ package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.Constants.EMPTY
 import org.mtransit.parser.MTLog
+import java.lang.Exception
 import java.util.Calendar
 import java.util.Date
-import java.util.regex.Pattern
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 object GTime {
 
-    private val TIME_SEPARATOR_REGEX = Pattern.compile(":")
+    private val TIME_SEPARATOR_REGEX = ":".toRegex()
 
     @JvmStatic
     fun fromString(timeS: String?): Int {
         if (timeS.isNullOrEmpty()) {
             return -1
         }
-        return TIME_SEPARATOR_REGEX.matcher(timeS).replaceAll(EMPTY).toInt()
+        return TIME_SEPARATOR_REGEX.replace(timeS, EMPTY).toInt()
     }
 
     @JvmStatic
@@ -53,10 +53,7 @@ object GTime {
         if (time < 0) {
             return null
         }
-        if (time < 10_00_00) {
-            return "0${time}"
-        }
-        return time.toString()
+        return time.toString().padStart(6, '0')
     }
 
     @JvmStatic

@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import org.mtransit.commons.Letters
 import org.mtransit.commons.RegexUtils.BEGINNING
 import org.mtransit.commons.RegexUtils.DIGIT_CAR
 import org.mtransit.commons.RegexUtils.END
@@ -20,36 +21,6 @@ object MRouteSNToIDConverter {
 
     @JvmStatic
     fun defaultConverter(routeShortName: String) = routeShortName.padStart(3).lowercase().hashCode().absoluteValue.toLong()
-
-    const val NONE_: Long = 0L
-    const val A: Long = 1L
-    const val B: Long = 2L
-    const val C: Long = 3L
-    const val D: Long = 4L
-    const val E: Long = 5L
-    const val F: Long = 6L
-    const val G: Long = 7L
-    const val H: Long = 8L
-    const val I: Long = 9L
-    const val J: Long = 10L
-    const val K: Long = 11L
-    const val L: Long = 12L
-    const val M: Long = 13L
-    const val N: Long = 14L
-    const val O: Long = 15L
-    const val P: Long = 16L
-    const val Q: Long = 17L
-    const val R: Long = 18L
-    const val S: Long = 19L
-    const val T: Long = 20L
-    const val U: Long = 21L
-    const val V: Long = 22L
-    const val W: Long = 23L
-    const val X: Long = 24L
-    const val Y: Long = 25L
-    const val Z: Long = 26L
-
-    const val OTHER_MIN_: Long = 27L
 
     const val PREVIOUS: Long = 1_000_000L
     const val NEXT: Long = 10_000L
@@ -80,33 +51,33 @@ object MRouteSNToIDConverter {
         }
         var routeId: Long = digits
         routeId += when (nextChars) {
-            "" -> endsWith(NONE_)
-            "A" -> endsWith(A)
-            "B" -> endsWith(B)
-            "C" -> endsWith(C)
-            "D" -> endsWith(D)
-            "E" -> endsWith(E)
-            "F" -> endsWith(F)
-            "G" -> endsWith(G)
-            "H" -> endsWith(H)
-            "I" -> endsWith(I)
-            "J" -> endsWith(J)
-            "K" -> endsWith(K)
-            "L" -> endsWith(L)
-            "M" -> endsWith(M)
-            "N" -> endsWith(N)
-            "O" -> endsWith(O)
-            "P" -> endsWith(P)
-            "Q" -> endsWith(Q)
-            "R" -> endsWith(R)
-            "S" -> endsWith(S)
-            "T" -> endsWith(T)
-            "U" -> endsWith(U)
-            "V" -> endsWith(V)
-            "W" -> endsWith(W)
-            "X" -> endsWith(X)
-            "Y" -> endsWith(Y)
-            "Z" -> endsWith(Z)
+            "" -> endsWith(Letters.NONE_)
+            "A" -> endsWith(Letters.A)
+            "B" -> endsWith(Letters.B)
+            "C" -> endsWith(Letters.C)
+            "D" -> endsWith(Letters.D)
+            "E" -> endsWith(Letters.E)
+            "F" -> endsWith(Letters.F)
+            "G" -> endsWith(Letters.G)
+            "H" -> endsWith(Letters.H)
+            "I" -> endsWith(Letters.I)
+            "J" -> endsWith(Letters.J)
+            "K" -> endsWith(Letters.K)
+            "L" -> endsWith(Letters.L)
+            "M" -> endsWith(Letters.M)
+            "N" -> endsWith(Letters.N)
+            "O" -> endsWith(Letters.O)
+            "P" -> endsWith(Letters.P)
+            "Q" -> endsWith(Letters.Q)
+            "R" -> endsWith(Letters.R)
+            "S" -> endsWith(Letters.S)
+            "T" -> endsWith(Letters.T)
+            "U" -> endsWith(Letters.U)
+            "V" -> endsWith(Letters.V)
+            "W" -> endsWith(Letters.W)
+            "X" -> endsWith(Letters.X)
+            "Y" -> endsWith(Letters.Y)
+            "Z" -> endsWith(Letters.Z)
             else -> {
                 nextCharsToLong?.invoke(nextChars)
                     ?: notSupportedToRouteId?.invoke(rsn)
@@ -114,33 +85,33 @@ object MRouteSNToIDConverter {
             }
         }
         routeId += when (previousChars) {
-            "" -> startsWith(NONE_)
-            "A" -> startsWith(A)
-            "B" -> startsWith(B)
-            "C" -> startsWith(C)
-            "D" -> startsWith(D)
-            "E" -> startsWith(E)
-            "F" -> startsWith(F)
-            "G" -> startsWith(G)
-            "H" -> startsWith(H)
-            "I" -> startsWith(I)
-            "J" -> startsWith(J)
-            "K" -> startsWith(K)
-            "L" -> startsWith(L)
-            "M" -> startsWith(M)
-            "N" -> startsWith(N)
-            "O" -> startsWith(O)
-            "P" -> startsWith(P)
-            "Q" -> startsWith(Q)
-            "R" -> startsWith(R)
-            "S" -> startsWith(S)
-            "T" -> startsWith(T)
-            "U" -> startsWith(U)
-            "V" -> startsWith(V)
-            "W" -> startsWith(W)
-            "X" -> startsWith(X)
-            "Y" -> startsWith(Y)
-            "Z" -> startsWith(Z)
+            "" -> startsWith(Letters.NONE_)
+            "A" -> startsWith(Letters.A)
+            "B" -> startsWith(Letters.B)
+            "C" -> startsWith(Letters.C)
+            "D" -> startsWith(Letters.D)
+            "E" -> startsWith(Letters.E)
+            "F" -> startsWith(Letters.F)
+            "G" -> startsWith(Letters.G)
+            "H" -> startsWith(Letters.H)
+            "I" -> startsWith(Letters.I)
+            "J" -> startsWith(Letters.J)
+            "K" -> startsWith(Letters.K)
+            "L" -> startsWith(Letters.L)
+            "M" -> startsWith(Letters.M)
+            "N" -> startsWith(Letters.N)
+            "O" -> startsWith(Letters.O)
+            "P" -> startsWith(Letters.P)
+            "Q" -> startsWith(Letters.Q)
+            "R" -> startsWith(Letters.R)
+            "S" -> startsWith(Letters.S)
+            "T" -> startsWith(Letters.T)
+            "U" -> startsWith(Letters.U)
+            "V" -> startsWith(Letters.V)
+            "W" -> startsWith(Letters.W)
+            "X" -> startsWith(Letters.X)
+            "Y" -> startsWith(Letters.Y)
+            "Z" -> startsWith(Letters.Z)
             else -> {
                 previousCharsToLong?.invoke(previousChars)
                     ?: notSupportedToRouteId?.invoke(rsn)
@@ -162,6 +133,6 @@ object MRouteSNToIDConverter {
 
     @JvmStatic
     fun other(digit: Long): Long {
-        return OTHER_MIN_ + digit
+        return Letters.OTHER_MIN_ + digit
     }
 }
