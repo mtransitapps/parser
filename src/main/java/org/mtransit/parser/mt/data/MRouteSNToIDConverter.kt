@@ -22,6 +22,94 @@ object MRouteSNToIDConverter {
     @JvmStatic
     fun defaultConverter(routeShortName: String) = routeShortName.padStart(3).lowercase().hashCode().absoluteValue.toLong()
 
+    // region letters
+
+    @Deprecated(message = "Use Letters directly")
+    const val NONE_ = Letters.NONE_
+
+    @Deprecated(message = "Use Letters directly")
+    const val A = Letters.A
+
+    @Deprecated(message = "Use Letters directly")
+    const val B = Letters.B
+
+    @Deprecated(message = "Use Letters directly")
+    const val C = Letters.C
+
+    @Deprecated(message = "Use Letters directly")
+    const val D = Letters.D
+
+    @Deprecated(message = "Use Letters directly")
+    const val E = Letters.E
+
+    @Deprecated(message = "Use Letters directly")
+    const val F = Letters.F
+
+    @Deprecated(message = "Use Letters directly")
+    const val G = Letters.G
+
+    @Deprecated(message = "Use Letters directly")
+    const val H = Letters.H
+
+    @Deprecated(message = "Use Letters directly")
+    const val I = Letters.I
+
+    @Deprecated(message = "Use Letters directly")
+    const val J = Letters.J
+
+    @Deprecated(message = "Use Letters directly")
+    const val K = Letters.K
+
+    @Deprecated(message = "Use Letters directly")
+    const val L = Letters.L
+
+    @Deprecated(message = "Use Letters directly")
+    const val M = Letters.M
+
+    @Deprecated(message = "Use Letters directly")
+    const val N = Letters.N
+
+    @Deprecated(message = "Use Letters directly")
+    const val O = Letters.O
+
+    @Deprecated(message = "Use Letters directly")
+    const val P = Letters.P
+
+    @Deprecated(message = "Use Letters directly")
+    const val Q = Letters.Q
+
+    @Deprecated(message = "Use Letters directly")
+    const val R = Letters.R
+
+    @Deprecated(message = "Use Letters directly")
+    const val S = Letters.S
+
+    @Deprecated(message = "Use Letters directly")
+    const val T = Letters.T
+
+    @Deprecated(message = "Use Letters directly")
+    const val U = Letters.U
+
+    @Deprecated(message = "Use Letters directly")
+    const val V = Letters.V
+
+    @Deprecated(message = "Use Letters directly")
+    const val W = Letters.W
+
+    @Deprecated(message = "Use Letters directly")
+    const val X = Letters.X
+
+    @Deprecated(message = "Use Letters directly")
+    const val Y = Letters.Y
+
+    @Deprecated(message = "Use Letters directly")
+    const val Z = Letters.Z
+
+    @Deprecated(message = "Use Letters directly")
+    const val OTHER_MIN_ = Letters.OTHER_MIN_
+
+    // endregion
+
     const val PREVIOUS: Long = 1_000_000L
     const val NEXT: Long = 10_000L
 
