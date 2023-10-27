@@ -1083,9 +1083,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		printMinMaxDate(gCalendars, gCalendarDates);
 		boolean hasCurrent = false;
 		if (gCalendars.size() > 0) {
-			parseCalendars(gCalendars, gCalendarDates, GFieldTypes.DATE_FORMAT, c, usefulPeriod, isCurrentOrNext); // CURRENT OR NEXT
+			parseCalendars(gCalendars, gCalendarDates, GFieldTypes.DATE_FORMAT, c, usefulPeriod, isCurrentOrNext); // CURRENT
 		} else if (gCalendarDates.size() > 0) {
-			parseCalendarDates(gCalendarDates, c, usefulPeriod, isCurrentOrNext); // CURRENT OR NEXT
+			parseCalendarDates(gCalendarDates, c, usefulPeriod, isCurrentOrNext); // CURRENT
 		} else {
 			throw new MTLog.Fatal("NO schedule available for %s! (1)", usefulPeriod.todayStringInt);
 		}
@@ -1315,7 +1315,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return todayServiceIds;
 	}
 
-	static void parseCalendars(@NotNull List<GCalendar> gCalendars, @Nullable List<GCalendarDate> gCalendarDates, SimpleDateFormat DATE_FORMAT, Calendar c, Period p, boolean lookForward) {
+	static void parseCalendars(@NotNull List<GCalendar> gCalendars, @Nullable List<GCalendarDate> gCalendarDates, SimpleDateFormat DATE_FORMAT, Calendar c, Period p, boolean lookBackward) {
 		final int initialTodayStringInt = p.todayStringInt;
 		boolean newDates;
 		while (true) {
@@ -1342,16 +1342,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 			}
 			if (p.startDate == null || p.endDate == null) {
-				if (lookForward) {
-					if (diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MAX_LOOK_BACKWARD_IN_DAYS)) {
+				if (lookBackward) {
+					if (diffLowerThan(DATE_FORMAT, c, p.todayStringInt, initialTodayStringInt, MAX_LOOK_BACKWARD_IN_DAYS)) {
 						p.todayStringInt = incDateDays(GFieldTypes.DATE_FORMAT, c, p.todayStringInt, -1);
-						MTLog.log("new today because no service today: %s (initial today: %s)", p.todayStringInt, initialTodayStringInt);
+						MTLog.log("earlier today because no service: %s (initial today: %s)", p.todayStringInt, initialTodayStringInt);
 						continue;
 					}
 				} else {
 					if (diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.todayStringInt, MAX_LOOK_FORWARD_IN_DAYS)) {
 						p.todayStringInt = incDateDays(DATE_FORMAT, c, p.todayStringInt, 1);
-						MTLog.log("new today because no service today: %s (initial today: %s)", p.todayStringInt, initialTodayStringInt);
+						MTLog.log("latter today because no service: %s (initial today: %s)", p.todayStringInt, initialTodayStringInt);
 						continue;
 					}
 				}
@@ -1403,7 +1403,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (diffLowerThan(DATE_FORMAT, c, p.startDate, p.endDate, MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS)) {
 				long nextPeriodCoverageInMs = pNext.startDate == null || pNext.endDate == null ? 0L : diffInMs(DATE_FORMAT, c, pNext.startDate, pNext.endDate);
 				long previousPeriodCoverageInMs = pPrevious.startDate == null || pPrevious.endDate == null ? 0L : diffInMs(DATE_FORMAT, c, pPrevious.startDate, pPrevious.endDate);
-				if (lookForward // NOT next schedule, only current schedule can look behind
+				if (lookBackward // NOT next schedule, only current schedule can look behind
 						&& previousPeriodCoverageInMs > 0L && previousPeriodCoverageInMs < nextPeriodCoverageInMs) {
 					p.startDate = incDateDays(DATE_FORMAT, c, p.startDate, -1); // start--
 					MTLog.log("new start date because coverage lower than %s days: %s", MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS, p.startDate);
