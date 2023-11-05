@@ -31,8 +31,6 @@ import org.mtransit.parser.mt.data.MTripStop;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -46,6 +44,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,9 +55,11 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.mtransit.commons.Constants.EMPTY;
 import static org.mtransit.commons.FeatureFlags.F_PRE_FILLED_DB;
 
 public class MGenerator {
@@ -724,7 +725,7 @@ public class MGenerator {
 
 	private static final SimpleDateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
-	private static final Pattern RTS_DB_VERSION_REGEX = Pattern.compile("((<integer name=\"gtfs_rts_db_version\">)([\\d]+)(</integer>))",
+	private static final Pattern RTS_DB_VERSION_REGEX = Pattern.compile("((<integer name=\"gtfs_rts_db_version\">)(\\d+)(</integer>))",
 			Pattern.CASE_INSENSITIVE);
 	private static final String RTS_DB_VERSION_REPLACEMENT = "$2%s$4";
 
@@ -884,9 +885,9 @@ public class MGenerator {
 				ow.write(getRESOURCES_STRING(GTFS_RTS_COLOR, mSpec.getFirstAgency().getColor()));
 				ow.write(Constants.NEW_LINE);
 			}
-			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_FIRST_DEPARTURE_IN_SEC, firstTimestampInSec));
+			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_FIRST_DEPARTURE_IN_SEC, firstTimestampInSec) + getCommentedDateTime(firstTimestampInSec));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_LAST_DEPARTURE_IN_SEC, lastTimestampInSec));
+			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_LAST_DEPARTURE_IN_SEC, lastTimestampInSec) + getCommentedDateTime(lastTimestampInSec));
 			ow.write(Constants.NEW_LINE);
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);
@@ -894,6 +895,18 @@ public class MGenerator {
 			throw new MTLog.Fatal(ioe, "I/O Error while writing values file!");
 		} finally {
 			CloseableUtils.closeQuietly(ow);
+		}
+	}
+
+	@NotNull
+	private static String getCommentedDateTime(int timestampInSec) {
+		try {
+			final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH);
+			final String formattedTime = dateTimeFormat.format(new Date(TimeUnit.SECONDS.toMillis(timestampInSec)));
+			return "<!-- " + formattedTime + " -->";
+		} catch (Exception e) {
+			MTLog.logNonFatal(e, "Error while generating commented date time %d!", timestampInSec);
+			return EMPTY;
 		}
 	}
 
@@ -928,7 +941,7 @@ public class MGenerator {
 	private static final String SCHEDULE_FROM_TO = "Schedule from %1$s to %2$s.";
 	private static final String SCHEDULE_KEEP_FROM_TO = "Schedule from $2 to %2$s.";
 
-	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du ([0-9]{1,2} [\\w]+ [0-9]{4}) au ([0-9]{1,2} [\\w]+ [0-9]{4})(\\.)?)",
+	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du ([0-9]{1,2} \\w+ [0-9]{4}) au ([0-9]{1,2} \\w+ [0-9]{4})(\\.)?)",
 			Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
 	private static final String SCHEDULE_FROM_TO_FR = "Horaires du %1$s au %2$s.";
 	private static final String SCHEDULE_KEEP_FROM_TO_FR = "Horaires du $2 au %2$s.";
@@ -946,7 +959,7 @@ public class MGenerator {
 		if (file.exists()) {
 			MTLog.log("Generated store listing file: '%s'.", file);
 			try {
-				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF_8);
+				String content = IOUtils.toString(Files.newInputStream(file.toPath()), GReader.UTF_8);
 				content = SCHEDULE.matcher(content).replaceAll(
 						String.format(
 								isNext ? SCHEDULE_KEEP_FROM_TO : SCHEDULE_FROM_TO, //
@@ -954,7 +967,7 @@ public class MGenerator {
 								SCHEDULE_DATE.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
 						)
 				);
-				IOUtils.write(content, new FileOutputStream(file), GReader.UTF_8);
+				IOUtils.write(content, Files.newOutputStream(file.toPath()), GReader.UTF_8);
 			} catch (Exception ioe) {
 				throw new MTLog.Fatal(ioe, "Error while writing store listing files!");
 			}
@@ -966,7 +979,7 @@ public class MGenerator {
 		if (file.exists()) {
 			MTLog.log("Generated store listing file: %s.", file);
 			try {
-				String content = IOUtils.toString(new FileInputStream(file), GReader.UTF_8);
+				String content = IOUtils.toString(Files.newInputStream(file.toPath()), GReader.UTF_8);
 				content = SCHEDULE_FR.matcher(content).replaceAll(
 						String.format(
 								isNext ? SCHEDULE_KEEP_FROM_TO_FR : SCHEDULE_FROM_TO_FR, //
@@ -974,7 +987,7 @@ public class MGenerator {
 								SCHEDULE_DATE_FR.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
 						)
 				);
-				IOUtils.write(content, new FileOutputStream(file), GReader.UTF_8);
+				IOUtils.write(content, Files.newOutputStream(file.toPath()), GReader.UTF_8);
 			} catch (Exception ioe) {
 				throw new MTLog.Fatal(ioe, "Error while writing store listing files!");
 			}
