@@ -125,37 +125,45 @@ data class MTrip(
             obj !is MTrip -> {
                 false
             }
+
             obj.headsignType != headsignType -> {
                 false
             }
+
             else -> !(obj.routeId != 0L && obj.routeId != routeId)
         }
     }
 
+    @Suppress("SameReturnValue")
     fun mergeHeadsignValue(mTripToMerge: MTrip?): Boolean {
         return when {
             mTripToMerge == null || mTripToMerge.headsignValue.isEmpty() -> {
                 MTLog.log("$routeId: mergeHeadsignValue() > no trip heading value to merge > $headsignValue.")
                 true
             }
+
             headsignValue.isEmpty() -> {
                 headsignValue = mTripToMerge.headsignValue
                 MTLog.log("$routeId: mergeHeadsignValue() > no current headsign value > $headsignValue.")
                 true
             }
+
             mTripToMerge.headsignValue.contains(headsignValue) -> {
                 headsignValue = mTripToMerge.headsignValue
                 true
             }
+
             headsignValue.contains(mTripToMerge.headsignValue) -> {
                 true
             }
+
             headsignValue > mTripToMerge.headsignValue -> {
                 headsignValue =
                     mTripToMerge.headsignValue + SLASH + headsignValue
                 MTLog.log("$routeId: mergeHeadsignValue() > merge 2 headsign value > $headsignValue.")
                 true
             }
+
             else -> {
                 headsignValue =
                     headsignValue + SLASH + mTripToMerge.headsignValue
@@ -165,16 +173,15 @@ data class MTrip(
         }
     }
 
-    fun toFile(): String {
-        val sb = StringBuilder() //
-        sb.append(id) // ID
-        sb.append(Constants.COLUMN_SEPARATOR) //
-        sb.append(headsignType) // HEADSIGN TYPE
-        sb.append(Constants.COLUMN_SEPARATOR) //
-        sb.append(SQLUtils.quotes(SQLUtils.escape(headsignValue))) // HEADSIGN STRING
-        sb.append(Constants.COLUMN_SEPARATOR) //
-        sb.append(routeId) // ROUTE ID
-        return sb.toString()
+    @Suppress("SameReturnValue")
+    fun toFile() = buildString {
+        append(id) // ID
+        append(Constants.COLUMN_SEPARATOR) //
+        append(headsignType) // HEADSIGN TYPE
+        append(Constants.COLUMN_SEPARATOR) //
+        append(SQLUtils.quotes(SQLUtils.escape(headsignValue))) // HEADSIGN STRING
+        append(Constants.COLUMN_SEPARATOR) //
+        append(routeId) // ROUTE ID
     }
 
     override fun compareTo(other: MTrip): Int {
@@ -211,10 +218,12 @@ data class MTrip(
                     mTrip.setHeadsignString(mTripToMerge.headsignValue, mTrip.headsignId)
                     true // merged
                 }
+
                 mTripToMerge.headsignValue.isEmpty() -> {
                     mTrip.setHeadsignString(mTrip.headsignValue, mTrip.headsignId)
                     true // merged
                 }
+
                 else -> {
                     false // not merged
                 }

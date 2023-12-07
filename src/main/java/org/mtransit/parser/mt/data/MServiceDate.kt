@@ -39,10 +39,10 @@ data class MServiceDate(
         } else _serviceId.compareTo(other._serviceId, ignoreCase = true) // SORT BY real service ID
     }
 
-    fun toFile(agencyTools: GAgencyTools): String {
-        return SQLUtils.quotes(SQLUtils.escape(getCleanServiceId(agencyTools))) + // service ID
-                "${Constants.COLUMN_SEPARATOR}" +
-                "$calendarDate" // calendar date
+    fun toFile(agencyTools: GAgencyTools) = buildString {
+        append(SQLUtils.quotes(SQLUtils.escape(getCleanServiceId(agencyTools)))) // service ID
+        append(Constants.COLUMN_SEPARATOR)
+        append(calendarDate) // calendar date
     }
 
     @Suppress("unused")

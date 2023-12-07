@@ -103,71 +103,68 @@ data class MSchedule(
                 "+(uID:$uID)"
     }
 
-    fun toFileNewServiceIdAndTripId(agencyTools: GAgencyTools): String {
-        val sb = StringBuilder() //
-        sb.append(SQLUtils.quotes(SQLUtils.escape(getCleanServiceId(agencyTools)))) // service ID
-        sb.append(Constants.COLUMN_SEPARATOR) //
+    fun toFileNewServiceIdAndTripId(agencyTools: GAgencyTools) = buildString {
+        append(SQLUtils.quotes(SQLUtils.escape(getCleanServiceId(agencyTools)))) // service ID
+        append(Constants.COLUMN_SEPARATOR) //
         // no route ID, just for file split
-        sb.append(tripId) // trip ID
-        sb.append(Constants.COLUMN_SEPARATOR) //
-        sb.append(departure) // departure
-        sb.append(Constants.COLUMN_SEPARATOR) //
+        append(tripId) // trip ID
+        append(Constants.COLUMN_SEPARATOR) //
+        append(departure) // departure
+        append(Constants.COLUMN_SEPARATOR) //
         if (DefaultAgencyTools.EXPORT_PATH_ID) {
             @Suppress("ControlFlowWithEmptyBody")
             if (arrivalBeforeDeparture > 0) {
                 // TODO ?
             }
-            sb.append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
-            sb.append(Constants.COLUMN_SEPARATOR) //
+            append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
+            append(Constants.COLUMN_SEPARATOR) //
         }
         if (DefaultAgencyTools.EXPORT_PATH_ID) {
-            sb.append(SQLUtils.quotes(_pathId)) // original trip ID
-            sb.append(Constants.COLUMN_SEPARATOR) //
+            append(SQLUtils.quotes(_pathId)) // original trip ID
+            append(Constants.COLUMN_SEPARATOR) //
         }
-        sb.append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
-        sb.append(Constants.COLUMN_SEPARATOR) //
-        sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
+        append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
+        append(Constants.COLUMN_SEPARATOR) //
+        append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
         if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
-            sb.append(Constants.COLUMN_SEPARATOR) //
-            sb.append(this.accessible)
+            append(Constants.COLUMN_SEPARATOR) //
+            append(accessible)
         }
-        return sb.toString()
     }
 
-    fun toFileSameServiceIdAndTripId(lastSchedule: MSchedule?): String {
-        val sb = StringBuilder() //
+    fun toFileSameServiceIdAndTripId(lastSchedule: MSchedule?) = buildString {
         if (lastSchedule == null) {
-            sb.append(departure) // departure
+            append(departure) // departure
         } else {
-            sb.append(departure - lastSchedule.departure) // departure
+            append(departure - lastSchedule.departure) // departure
         }
-        sb.append(Constants.COLUMN_SEPARATOR) //
+        append(Constants.COLUMN_SEPARATOR) //
         if (DefaultAgencyTools.EXPORT_PATH_ID) {
             @Suppress("ControlFlowWithEmptyBody")
             if (arrivalBeforeDeparture > 0) {
                 // TODO ?
             }
-            sb.append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
-            sb.append(Constants.COLUMN_SEPARATOR) //
+            append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
+            append(Constants.COLUMN_SEPARATOR) //
         }
         if (DefaultAgencyTools.EXPORT_PATH_ID) {
-            sb.append(_pathId) // original trip ID
-            sb.append(Constants.COLUMN_SEPARATOR) //
+            append(_pathId) // original trip ID
+            append(Constants.COLUMN_SEPARATOR) //
         }
         if (headsignType == MTrip.HEADSIGN_TYPE_NO_PICKUP) {
-            sb.append(MTrip.HEADSIGN_TYPE_NO_PICKUP) // HEADSIGN TYPE
-            sb.append(Constants.COLUMN_SEPARATOR) //
-            sb.append(SQLUtils.quotes(Constants.EMPTY)) // HEADSIGN STRING
+            append(MTrip.HEADSIGN_TYPE_NO_PICKUP) // HEADSIGN TYPE
+            append(Constants.COLUMN_SEPARATOR) //
+            append(SQLUtils.quotes(Constants.EMPTY)) // HEADSIGN STRING
         } else {
-            sb.append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
-            sb.append(Constants.COLUMN_SEPARATOR) //
-            sb.append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
+            append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
+            append(Constants.COLUMN_SEPARATOR) //
+            append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
         }
         if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
-            sb.append(Constants.COLUMN_SEPARATOR) //
-            sb.append(this.accessible)
+            append(Constants.COLUMN_SEPARATOR) //
+            append(accessible)
         }
-        return sb.toString()
+        return toString()
     }
 
     fun isSameServiceAndTrip(lastSchedule: MSchedule?): Boolean {
@@ -186,6 +183,7 @@ data class MSchedule(
         if (ts.stopId != 0 && ts.stopId != stopId) {
             return false
         }
+        @Suppress("RedundantIf")
         if (ts.departure != 0 && ts.departure != departure) {
             return false
         }
@@ -198,15 +196,19 @@ data class MSchedule(
             routeId != other.routeId -> {
                 routeId.compareTo(other.routeId)
             }
+
             serviceIdInt != other.serviceIdInt -> {
                 _serviceId.compareTo(other._serviceId)
             }
+
             tripId != other.tripId -> {
                 tripId.compareTo(other.tripId)
             }
+
             stopId != other.stopId -> {
                 stopId - other.stopId
             }
+
             else -> {
                 departure - other.departure
             }

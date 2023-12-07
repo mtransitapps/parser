@@ -226,6 +226,7 @@ public interface GAgencyTools {
 	@NotNull
 	String getStopCode(@NotNull GStop gStop);
 
+	@Deprecated
 	@Nullable
 	String getStopOriginalId(@NotNull GStop gStop);
 

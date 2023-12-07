@@ -38,14 +38,14 @@ data class MAgency(
             return GIDs.getString(idInt)
         }
 
-    fun toFile(): String {
-        return _id +  //
-                Constants.COLUMN_SEPARATOR +  //
-                timezone +  //
-                Constants.COLUMN_SEPARATOR +  //
-                color +  //
-                Constants.COLUMN_SEPARATOR +  //
-                type //
+    fun toFile() = buildString {
+        append(_id) //
+        append(Constants.COLUMN_SEPARATOR) //
+        append(timezone) //
+        append(Constants.COLUMN_SEPARATOR) //
+        append(color) //
+        append(Constants.COLUMN_SEPARATOR) //
+        append(type) //
     }
 
     fun toStringPlus(): String {

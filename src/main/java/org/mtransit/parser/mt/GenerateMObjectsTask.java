@@ -329,11 +329,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			final MAgency agency = gRoute.hasAgencyId() ? mAgencies.get(gRoute.getAgencyIdInt())
 					// TODO ? : mAgencies.size() == 1 ? mAgencies.values().iterator().next()
 					: mAgencies.values().iterator().next();
+			//noinspection deprecation
 			final MRoute mRoute = new MRoute(
 					this.routeId,
 					this.agencyTools.getRouteShortName(gRoute),
 					this.agencyTools.getRouteLongName(gRoute),
-					this.agencyTools.getRouteColor(gRoute, agency)
+					this.agencyTools.getRouteColor(gRoute, agency),
+					gRoute.getRouteId()
 			);
 			final MRoute otherRoute = mRoutes.get(mRoute.getId());
 			if (otherRoute != null && !mRoute.equals(otherRoute)) {
@@ -710,15 +712,16 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				serviceIdInts.add(tripServiceIdInt);
 			}
 			if (!mStops.containsKey(mStopId)) {
+				//noinspection deprecation
 				mStops.put(
 						mStopId,
 						new MStop(mStopId,
 								this.agencyTools.getStopCode(gStop),
-								this.agencyTools.getStopOriginalId(gStop),
 								this.agencyTools.cleanStopName(gStop.getStopName()),
 								gStop.getStopLat(),
 								gStop.getStopLong(),
-								gStop.getWheelchairBoarding().getId()
+								gStop.getWheelchairBoarding().getId(),
+								gStop.getStopId()
 						));
 			}
 		}
@@ -945,7 +948,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				lastInL1 = list1StopIds.contains(last.getStopId());
 				lastInL2 = list2StopIds.contains(last.getStopId());
 				if (lastInL1 && !lastInL2) {
-					MTLog.log("" + this.routeId
+					MTLog.log(this.routeId
 							+ ": pick t:" + ts1.getTripId() + ">s:" + ts1.getStopId()
 							+ " in same list w/ s:" + last.getStopId()
 							+ " instead of t:" + ts2.getTripId() + ">s:" + ts2.getStopId());
@@ -956,7 +959,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					continue;
 				}
 				if (!lastInL1 && lastInL2) {
-					MTLog.log("" + this.routeId
+					MTLog.log(this.routeId
 							+ ": pick t:" + ts2.getTripId() + ">s:" + ts2.getStopId()
 							+ " in same list w/ s:" + last.getStopId()
 							+ " instead of t:" + ts1.getTripId() + ">s:" + ts1.getStopId());
@@ -976,7 +979,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				ts1Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts1GStop.getStopLat(), ts1GStop.getStopLong());
 				ts2Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts2GStop.getStopLat(), ts2GStop.getStopLong());
 				if (ts1Distance < ts2Distance) {
-					MTLog.log("" + this.routeId
+					MTLog.log(this.routeId
 							+ ": pick t:" + ts1.getTripId() + ">" + ts1GStop.toStringPlus()
 							+ " closest (" + (ts2Distance - ts1Distance) + ") to " + lastGStop.toStringPlus()
 							+ " instead of t:" + ts2.getTripId() + ">" + ts2GStop.toStringPlus());
@@ -985,7 +988,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					last = ts1;
 					i1++;
 				} else {
-					MTLog.log("" + this.routeId
+					MTLog.log(this.routeId
 							+ ": pick t:" + ts2.getTripId() + ">" + ts2GStop.toStringPlus()
 							+ " closest (" + (ts1Distance - ts2Distance) + ") to " + lastGStop.toStringPlus()
 							+ " instead of t:" + ts1.getTripId() + ">" + ts1GStop.toStringPlus());
@@ -1006,7 +1009,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						previousTs1GStop.getStopLong());
 				previousTs2Distance = findDistance(commonGStop.getStopLat(), commonGStop.getStopLong(), previousTs2GStop.getStopLat(),
 						previousTs2GStop.getStopLong());
-				MTLog.log("" + this.routeId + ": Resolved using 1st common stop trip ID:" + ts1.getTripId() + ", stop IDs:"
+				MTLog.log(this.routeId + ": Resolved using 1st common stop trip ID:" + ts1.getTripId() + ", stop IDs:"
 						+ ts1.getStopId() + "," + ts2.getStopId() + " ("
 						+ commonStopAndPrevious[1].getStopId() + ":" + previousTs1Distance + ", "
 						+ commonStopAndPrevious[2].getStopId() + ":" + previousTs2Distance + ")");
@@ -1080,7 +1083,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			for (MTripStop tts2 : l2) {
 				if (tts1.getStopId() == tts2.getStopId()) {
 					if (previousTs1 == null || previousTs2 == null) {
-						MTLog.log("" + this.routeId + ": findFirstCommonStop() > Common stop found '" + tts1.getStopId()
+						MTLog.log(this.routeId + ": findFirstCommonStop() > Common stop found '" + tts1.getStopId()
 								+ "' but no previous stop! Looking for next common stop...");
 					} else {
 						commonStopAndPrevious = new MTripStop[3];

@@ -28,16 +28,16 @@ data class MFrequency(
 
     val uID by lazy { getNewUID(serviceIdInt, tripId, startTime, endTime) }
 
-    fun toFile(agencyTools: GAgencyTools): String {
-        return SQLUtils.quotes(SQLUtils.escape(getCleanServiceId(agencyTools))) + // service ID
-                Constants.COLUMN_SEPARATOR +  //
-                tripId +  // trip ID
-                Constants.COLUMN_SEPARATOR +  //
-                startTime +  // start time
-                Constants.COLUMN_SEPARATOR +  //
-                endTime +  // end time
-                Constants.COLUMN_SEPARATOR +  //
-                headwayInSec // headway in seconds
+    fun toFile(agencyTools: GAgencyTools) = buildString {
+        append(SQLUtils.quotes(SQLUtils.escape(getCleanServiceId(agencyTools)))) // service ID
+        append(Constants.COLUMN_SEPARATOR) //
+        append(tripId) // trip ID
+        append(Constants.COLUMN_SEPARATOR) //
+        append(startTime) // start time
+        append(Constants.COLUMN_SEPARATOR) //
+        append(endTime) // end time
+        append(Constants.COLUMN_SEPARATOR) //
+        append(headwayInSec) // headway in seconds
     }
 
     override fun compareTo(other: MFrequency?): Int {
@@ -45,18 +45,23 @@ data class MFrequency(
             other !is MFrequency -> {
                 +1
             }
+
             serviceIdInt != other.serviceIdInt -> {
                 _serviceId.compareTo(other._serviceId)
             }
+
             tripId != other.tripId -> {
                 tripId.compareTo(other.tripId)
             }
+
             startTime != other.startTime -> {
                 startTime - other.startTime
             }
+
             endTime != other.endTime -> {
                 endTime - other.endTime
             }
+
             else -> {
                 headwayInSec - other.headwayInSec
             }

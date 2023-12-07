@@ -1,5 +1,7 @@
 package org.mtransit.parser.mt.data
 
+import org.mtransit.commons.FeatureFlags
+import org.mtransit.commons.GTFSCommons
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils
 import kotlin.math.max
@@ -8,21 +10,38 @@ data class MRoute(
     val id: Long,
     val shortName: String?,
     var longName: String,
-    private val color: String?
+    private val color: String?,
+    private val originalIdHash: Int,
 ) : Comparable<MRoute> {
+
+    constructor(
+        id: Long,
+        shortName: String?,
+        longName: String,
+        color: String?,
+        originalId: String,
+    ) : this(
+        id,
+        shortName,
+        longName,
+        color,
+        GTFSCommons.stringIdToHash(originalId),
+    )
 
     val shortNameOrDefault: String = shortName ?: Constants.EMPTY
 
-    fun toFile(): String {
-        return id.toString() +  // ID
-                Constants.COLUMN_SEPARATOR +  //
-                // (this.shortName == null ? Constants.EMPTY : CleanUtils.escape(this.shortName)) + // short name
-                SQLUtils.quotes(SQLUtils.escape(shortName ?: Constants.EMPTY)) +  // short name
-                Constants.COLUMN_SEPARATOR +  //
-                // (this.longName == null ? Constants.EMPTY : CleanUtils.escape(this.longName)) + // long name
-                SQLUtils.quotes(SQLUtils.escape(longName)) +  // long name
-                Constants.COLUMN_SEPARATOR +  //
-                SQLUtils.quotes(color ?: Constants.EMPTY)  // color
+    fun toFile() = buildString {
+        append(id.toString()) // ID
+        append(Constants.COLUMN_SEPARATOR) //
+        append(SQLUtils.quotes(SQLUtils.escape(shortName ?: Constants.EMPTY))) // short name
+        append(Constants.COLUMN_SEPARATOR) //
+        append(SQLUtils.quotes(SQLUtils.escape(longName))) // long name
+        append(Constants.COLUMN_SEPARATOR) //
+        append(SQLUtils.quotes(color ?: Constants.EMPTY)) // color
+        if (FeatureFlags.F_EXPORT_GTFS_ID_HASH_INT) {
+            append(Constants.COLUMN_SEPARATOR) //
+            append(originalIdHash) // original ID hash
+        }
     }
 
     override fun compareTo(other: MRoute): Int {
@@ -34,10 +53,12 @@ data class MRoute(
         return when {
             id != o.id -> false
             shortName != o.shortName -> false // not equal
+            originalIdHash != o.originalIdHash -> false // not equal?
             else -> true // mostly equal
         }
     }
 
+    @Suppress("SameReturnValue")
     fun mergeLongName(mRouteToMerge: MRoute?): Boolean {
         if (mRouteToMerge == null || mRouteToMerge.longName.isEmpty()) {
             return true

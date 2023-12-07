@@ -8,8 +8,8 @@ class MRouteTest {
     @Test
     fun testMergeLongName_CommonPrefix() {
         // Arrange
-        val route1 = MRoute(1L, "RSN", "Jasper Pl - CN Tower", "000000")
-        val route2 = MRoute(1L, "RSN", "Jasper Pl - Downtown", "000000")
+        val route1 = MRoute(1L, "RSN", "Jasper Pl - CN Tower", "000000", "1")
+        val route2 = MRoute(1L, "RSN", "Jasper Pl - Downtown", "000000", "1")
         // Act
         val result = route1.mergeLongName(route2)
         // Assert
@@ -20,8 +20,8 @@ class MRouteTest {
     @Test
     fun testMergeLongName_CommonSuffix() {
         // Arrange
-        val route1 = MRoute(1L, "RSN", "CN Tower - Jasper Pl", "000000")
-        val route2 = MRoute(1L, "RSN", "Downtown - Jasper Pl", "000000")
+        val route1 = MRoute(1L, "RSN", "CN Tower - Jasper Pl", "000000", "1")
+        val route2 = MRoute(1L, "RSN", "Downtown - Jasper Pl", "000000", "1")
         // Act
         val result = route1.mergeLongName(route2)
         // Assert

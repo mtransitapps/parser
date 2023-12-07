@@ -67,11 +67,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final int MIN_PREVIOUS_NEXT_ADDED_DAYS = 2;
 
 	public static final boolean EXPORT_PATH_ID;
-	public static final boolean EXPORT_ORIGINAL_ID;
+	@Deprecated
+	public static final boolean EXPORT_ORIGINAL_ID = false;
 
 	static {
 		EXPORT_PATH_ID = false;
-		EXPORT_ORIGINAL_ID = false;
 	}
 
 	@SuppressWarnings("WeakerAccess")
@@ -847,6 +847,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return gStop.getStopCode();
 	}
 
+	@Deprecated
 	@Nullable
 	@Override
 	public String getStopOriginalId(@NotNull GStop gStop) {

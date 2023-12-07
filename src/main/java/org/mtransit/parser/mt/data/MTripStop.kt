@@ -27,20 +27,21 @@ data class MTripStop(
         if (ts.tripId != 0L && ts.tripId != tripId) {
             return false
         }
+        @Suppress("RedundantIf")
         if (ts.stopId != 0 && ts.stopId != stopId) {
             return false
         }
         return true
     }
 
-    fun toFile(): String {
-        return tripId.toString() +  // TRIP ID
-                Constants.COLUMN_SEPARATOR +  //
-                stopId +  // STOP ID
-                Constants.COLUMN_SEPARATOR +
-                stopSequence +  // STOP SEQUENCE
-                Constants.COLUMN_SEPARATOR +
-                if (isNoPickup) 1 else 0 // DROP OFF ONLY
+    fun toFile() = buildString {
+        append(tripId.toString()) // TRIP ID
+        append(Constants.COLUMN_SEPARATOR) //
+        append(stopId) // STOP ID
+        append(Constants.COLUMN_SEPARATOR)
+        append(stopSequence) // STOP SEQUENCE
+        append(Constants.COLUMN_SEPARATOR)
+        append(if (isNoPickup) 1 else 0) // DROP OFF ONLY
     }
 
     override fun compareTo(other: MTripStop): Int {

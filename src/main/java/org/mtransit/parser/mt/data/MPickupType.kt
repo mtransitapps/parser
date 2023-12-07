@@ -10,8 +10,8 @@ enum class MPickupType(val id: Int) {
     MUST_COORDINATE_WITH_DRIVER(3);
 
     @Suppress("unused")
-    fun toFile(): String {
-        return id.toString()
+    fun toFile() = buildString {
+        append(id.toString())
     }
 
     companion object {

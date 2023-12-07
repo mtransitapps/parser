@@ -7,8 +7,8 @@ enum class MDropOffType(val id: Int) {
     MUST_PHONE_AGENCY(2),
     MUST_COORDINATE_WITH_DRIVER(3);
 
-    fun toFile(): String {
-        return id.toString()
+    fun toFile() = buildString {
+        append(id.toString())
     }
 
     companion object {
