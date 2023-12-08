@@ -13,7 +13,7 @@ data class MStop(
     val lat: Double,
     val lng: Double,
     val accessible: Int,
-    private val originalIdHash: Int,
+    private val originalIdHash: Int?,
 ) : Comparable<MStop> {
 
     constructor(
@@ -31,7 +31,7 @@ data class MStop(
         lat,
         lng,
         accessible,
-        GTFSCommons.stringIdToHash(originalId),
+        GTFSCommons.stringIdToHashIfEnabled(originalId),
     )
 
     fun hasLat(): Boolean {
@@ -58,7 +58,7 @@ data class MStop(
         }
         if (FeatureFlags.F_EXPORT_GTFS_ID_HASH_INT) {
             append(Constants.COLUMN_SEPARATOR) //
-            append(originalIdHash)
+            originalIdHash?.let { append(it) } // original ID hash
         }
     }
 
