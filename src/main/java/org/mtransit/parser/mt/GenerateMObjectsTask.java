@@ -335,7 +335,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					this.agencyTools.getRouteShortName(gRoute),
 					this.agencyTools.getRouteLongName(gRoute),
 					this.agencyTools.getRouteColor(gRoute, agency),
-					gRoute.getRouteId()
+					gRoute.getRouteId(),
+					gRoute.getRouteType()
 			);
 			final MRoute otherRoute = mRoutes.get(mRoute.getId());
 			if (otherRoute != null && !mRoute.equals(otherRoute)) {

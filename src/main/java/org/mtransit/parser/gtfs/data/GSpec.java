@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 // https://developers.google.com/transit/gtfs/reference#FeedFiles
+// https://developers.google.com/transit/gtfs/reference/difference-gtfs-transit-implement
 @SuppressWarnings("RedundantSuppression")
 public class GSpec {
 

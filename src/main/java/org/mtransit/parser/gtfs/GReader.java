@@ -206,6 +206,7 @@ public class GReader {
 		readCsv(filename, reader, lineProcessor, null);
 	}
 
+	@SuppressWarnings("resource")
 	private static void readCsv(String filename, BufferedReader reader,
 								LineProcessor lineProcessor,
 								@Nullable OnColumnNamesFound onColumnNamesFoundCallback) throws IOException {

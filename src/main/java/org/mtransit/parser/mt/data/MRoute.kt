@@ -12,6 +12,7 @@ data class MRoute(
     var longName: String,
     private val color: String?,
     private val originalIdHash: Int?,
+    private val type: Int?,
 ) : Comparable<MRoute> {
 
     constructor(
@@ -20,12 +21,14 @@ data class MRoute(
         longName: String,
         color: String?,
         originalId: String,
+        type: Int?,
     ) : this(
         id,
         shortName,
         longName,
         color,
         GTFSCommons.stringIdToHashIfEnabled(originalId),
+        type,
     )
 
     val shortNameOrDefault: String = shortName ?: Constants.EMPTY
@@ -41,6 +44,10 @@ data class MRoute(
         if (FeatureFlags.F_EXPORT_GTFS_ID_HASH_INT) {
             append(Constants.COLUMN_SEPARATOR) //
             originalIdHash?.let { append(it) } // original ID hash
+            if (FeatureFlags.F_EXPORT_ORIGINAL_ROUTE_TYPE) {
+                append(Constants.COLUMN_SEPARATOR) //
+                type?.let { append(it) } // route type
+            }
         }
     }
 
