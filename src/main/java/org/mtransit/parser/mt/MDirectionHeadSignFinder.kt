@@ -38,7 +38,7 @@ object MDirectionHeadSignFinder {
         val directionAmPm = mutableMapOf<Int, Pair<Int, Int>?>()
         val directionStopTimeHeadSigns = mutableMapOf<Int, List<String>>()
         val directionRouteIdInts = mutableMapOf<Int, List<Int>>()
-        GDirectionId.values().forEach { gDirectionId ->
+        GDirectionId.entries.forEach { gDirectionId ->
             val directionId = gDirectionId.id
             findDirectionHeadSign(
                 routeId,

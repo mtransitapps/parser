@@ -81,7 +81,7 @@ object GTime {
     }
 
     fun isAM(time: Int): Boolean {
-        return time in 0..11_99_99
+        return time in 0..12_99_99
     }
 
     fun arePM(times: Pair<Int, Int>): Boolean {
