@@ -341,7 +341,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			final MRoute otherRoute = mRoutes.get(mRoute.getId());
 			if (otherRoute != null && !mRoute.equals(otherRoute)) {
 				mergeSuccessful = false;
-				if (mRoute.equalsExceptLongName(otherRoute)) {
+				if (mRoute.equalsExceptLongName(otherRoute, this.agencyTools.allowGTFSIdOverride())) {
 					mergeSuccessful = this.agencyTools.mergeRouteLongName(mRoute, otherRoute);
 				}
 				if (!mergeSuccessful) {

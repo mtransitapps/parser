@@ -438,6 +438,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public boolean allowGTFSIdOverride() {
+		return false; // if true, breaks GTFS-RT
+	}
+
+	@Override
 	public boolean mergeRouteLongName(@NotNull MRoute mRoute, @NotNull MRoute mRouteToMerge) {
 		return mRoute.mergeLongName(mRouteToMerge);
 	}

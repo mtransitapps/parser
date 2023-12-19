@@ -55,12 +55,13 @@ data class MRoute(
         return id.compareTo(other.id)
     }
 
-    fun equalsExceptLongName(obj: Any): Boolean {
+    @JvmOverloads
+    fun equalsExceptLongName(obj: Any, allowGTFSIdOverride: Boolean = false): Boolean {
         val o = obj as MRoute
         return when {
             id != o.id -> false
             shortName != o.shortName -> false // not equal
-            originalIdHash != o.originalIdHash -> false // not equal?
+            !allowGTFSIdOverride && originalIdHash != o.originalIdHash -> false // not equal?
             else -> true // mostly equal
         }
     }
