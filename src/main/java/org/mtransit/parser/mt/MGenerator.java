@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -885,9 +886,9 @@ public class MGenerator {
 				ow.write(getRESOURCES_STRING(GTFS_RTS_COLOR, mSpec.getFirstAgency().getColor()));
 				ow.write(Constants.NEW_LINE);
 			}
-			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_FIRST_DEPARTURE_IN_SEC, firstTimestampInSec) + getCommentedDateTime(firstTimestampInSec));
+			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_FIRST_DEPARTURE_IN_SEC, firstTimestampInSec) + getCommentedDateTime(firstTimestampInSec, mSpec));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_LAST_DEPARTURE_IN_SEC, lastTimestampInSec) + getCommentedDateTime(lastTimestampInSec));
+			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_LAST_DEPARTURE_IN_SEC, lastTimestampInSec) + getCommentedDateTime(lastTimestampInSec, mSpec));
 			ow.write(Constants.NEW_LINE);
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);
@@ -899,9 +900,14 @@ public class MGenerator {
 	}
 
 	@NotNull
-	private static String getCommentedDateTime(int timestampInSec) {
+	private static String getCommentedDateTime(int timestampInSec, @NotNull MSpec mSpec) {
 		try {
 			final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH);
+			try {
+				dateTimeFormat.setTimeZone(TimeZone.getTimeZone(mSpec.getFirstAgency().getTimezone()));
+			} catch (Exception e) {
+				MTLog.logNonFatal(e, "Error while setting time-zone for commented date time %s!", mSpec.getFirstAgency().getTimezone());
+			}
 			final String formattedTime = dateTimeFormat.format(new Date(TimeUnit.SECONDS.toMillis(timestampInSec)));
 			return "<!-- " + formattedTime + " -->";
 		} catch (Exception e) {
