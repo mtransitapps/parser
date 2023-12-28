@@ -126,6 +126,7 @@ public interface GAgencyTools {
 	@NotNull
 	String cleanRouteLongName(@NotNull String routeLongName);
 
+	@Deprecated
 	boolean allowGTFSIdOverride();
 
 	boolean mergeRouteLongName(@NotNull MRoute mRoute, @NotNull MRoute mRouteToMerge);

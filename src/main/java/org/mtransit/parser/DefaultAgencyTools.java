@@ -459,6 +459,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return org.mtransit.commons.CleanUtils.cleanLabel(routeLongName);
 	}
 
+	@Deprecated
 	@Override
 	public boolean allowGTFSIdOverride() {
 		return false; // if true, breaks GTFS-RT
