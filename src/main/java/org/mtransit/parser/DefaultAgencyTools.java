@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CharUtils;
 import org.mtransit.commons.CommonsApp;
+import org.mtransit.commons.GTFSCommons;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -41,6 +42,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 @SuppressWarnings({"RedundantSuppression", "unused", "WeakerAccess"})
 public class DefaultAgencyTools implements GAgencyTools {
@@ -327,7 +329,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanRouteOriginalId(@NotNull String gRouteId) {
-		return gRouteId;
+		return GTFSCommons.cleanOriginalId(gRouteId, getRouteIdCleanupPattern());
 	}
 
 	@Override
@@ -376,6 +378,26 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean useRouteShortNameForRouteId() {
 		return false; // OPT-IN feature
+	}
+
+	@Nullable
+	@Override
+	public String getRouteIdCleanupRegex() {
+		return null;
+	}
+
+	@Nullable
+	private Pattern routeIdCleanupPattern = null;
+
+	private boolean routeIdCleanupPatternSet = false;
+
+	@Override
+	public @Nullable Pattern getRouteIdCleanupPattern() {
+		if (this.routeIdCleanupPattern == null && !routeIdCleanupPatternSet) {
+			this.routeIdCleanupPattern = GTFSCommons.makeIdCleanupPattern(getRouteIdCleanupRegex());
+			this.routeIdCleanupPatternSet = true;
+		}
+		return this.routeIdCleanupPattern;
 	}
 
 	@NotNull

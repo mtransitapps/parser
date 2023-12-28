@@ -3,7 +3,6 @@ package org.mtransit.parser.mt.data
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.parser.Constants
-import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.db.SQLUtils
 
 data class MStop(

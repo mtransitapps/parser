@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @SuppressWarnings({"RedundantSuppression", "unused"})
 public interface GAgencyTools {
@@ -99,6 +100,12 @@ public interface GAgencyTools {
 	boolean defaultRouteIdEnabled();
 
 	boolean useRouteShortNameForRouteId();
+
+	@Nullable
+	String getRouteIdCleanupRegex();
+
+	@Nullable
+	Pattern getRouteIdCleanupPattern();
 
 	@NotNull
 	String getRouteShortName(@NotNull GRoute gRoute);

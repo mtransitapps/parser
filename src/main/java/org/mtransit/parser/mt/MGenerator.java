@@ -1,8 +1,12 @@
 package org.mtransit.parser.mt;
 
+import static org.mtransit.commons.Constants.EMPTY;
+import static org.mtransit.commons.FeatureFlags.F_PRE_FILLED_DB;
+
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.Cleaner;
 import org.mtransit.commons.CloseableUtils;
 import org.mtransit.commons.GTFSCommons;
 import org.mtransit.commons.StringUtils;
@@ -59,9 +63,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static org.mtransit.commons.Constants.EMPTY;
-import static org.mtransit.commons.FeatureFlags.F_PRE_FILLED_DB;
 
 public class MGenerator {
 
@@ -275,7 +276,7 @@ public class MGenerator {
 		if (deleteAll) {
 			dumpValues(rawDirF, fileBase, null, null, null, null, null, -1, -1, true);
 		} else {
-			dumpCommonValues(rawDirF, mSpec);
+			dumpCommonValues(rawDirF, gAgencyTools, mSpec);
 			dumpValues(
 					rawDirF, fileBase, mSpec,
 					minMaxLatLng.first.first, minMaxLatLng.second.first, minMaxLatLng.first.second, minMaxLatLng.second.second,
@@ -796,6 +797,7 @@ public class MGenerator {
 	private static final String GTFS_RTS_AGENCY_TYPE = "gtfs_rts_agency_type";
 	private static final String GTFS_RTS_TIMEZONE = "gtfs_rts_timezone";
 	private static final String GTFS_RTS_COLOR = "gtfs_rts_color";
+	private static final String GTFS_RTS_ROUTE_ID_CLEANUP_REGEX = "gtfs_rts_route_id_cleanup_regex";
 
 	private static final String GTFS_RTS_SCHEDULE_AVAILABLE = "gtfs_rts_schedule_available";
 	private static final String GTFS_RTS_FREQUENCY_AVAILABLE = "gtfs_rts_frequency_available";
@@ -807,7 +809,7 @@ public class MGenerator {
 	private static final String GTFS_RTS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec";
 	// TODO later max integer = 2147483647 = Tuesday, January 19, 2038 3:14:07 AM GMT
 
-	private static void dumpCommonValues(File dumpDirF, MSpec mSpec) {
+	private static void dumpCommonValues(File dumpDirF, GAgencyTools gAgencyTools, MSpec mSpec) {
 		BufferedWriter ow = null;
 		File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
 		File dumpDirResF = new File(dumpDirRootF, RES);
@@ -828,6 +830,10 @@ public class MGenerator {
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_STRING(GTFS_RTS_COLOR, mSpec.getFirstAgency().getColor()));
 			ow.write(Constants.NEW_LINE);
+			if (gAgencyTools.getRouteIdCleanupRegex() != null) {
+				ow.write(getRESOURCES_STRING(GTFS_RTS_ROUTE_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getRouteIdCleanupRegex())));
+				ow.write(Constants.NEW_LINE);
+			}
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);
 		} catch (IOException ioe) {
@@ -835,6 +841,25 @@ public class MGenerator {
 		} finally {
 			CloseableUtils.closeQuietly(ow);
 		}
+	}
+
+	private static final Cleaner RES_STRING_ESCAPE = new Cleaner(
+			"(\\\\|\\@|\\?|'|\")",
+			"\\\\$1"
+	);
+
+	private static final Cleaner RES_STRING_ESCAPE_PERCENT = new Cleaner(
+			"%",
+			"%%"
+	);
+
+	// https://developer.android.com/guide/topics/resources/string-resource#FormattingAndStyling
+	// https://developer.android.com/guide/topics/resources/string-resource#escaping_quotes
+	@NotNull
+	public static String escapeResString(@NotNull String string) {
+		string = RES_STRING_ESCAPE.clean(string);
+		string = RES_STRING_ESCAPE_PERCENT.clean(string);
+		return string;
 	}
 
 	private static void dumpValues(File dumpDirF, String fileBase, MSpec mSpec, Double minLat, Double maxLat, Double minLng, Double maxLng,
@@ -932,7 +957,7 @@ public class MGenerator {
 		return String.format(RESOURCE_BOOL_AND_NAME_VALUE, resName, resValue);
 	}
 
-	private static String getRESOURCES_STRING(String resName, Object resValue) {
+	private static String getRESOURCES_STRING(@NotNull String resName, @Nullable Object resValue) {
 		return String.format(RESOURCE_STRING_AND_NAME_VALUE, resName, resValue);
 	}
 

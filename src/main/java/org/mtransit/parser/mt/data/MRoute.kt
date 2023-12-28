@@ -4,6 +4,7 @@ import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils
+import org.mtransit.parser.gtfs.GAgencyTools
 import kotlin.math.max
 
 data class MRoute(
@@ -22,12 +23,13 @@ data class MRoute(
         color: String?,
         originalId: String,
         type: Int?,
+        agencyTools: GAgencyTools? = null,
     ) : this(
         id,
         shortName,
         longName,
         color,
-        GTFSCommons.stringIdToHashIfEnabled(originalId),
+        GTFSCommons.stringIdToHashIfEnabled(originalId, agencyTools?.routeIdCleanupPattern),
         type,
     )
 
