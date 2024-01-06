@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -7,16 +8,18 @@ import org.mtransit.parser.gtfs.data.GIDs
 
 data class MServiceDate(
     val serviceIdInt: Int,
-    val calendarDate: Int
+    val calendarDate: Int,
+    val exceptionType: Int,
 ) : Comparable<MServiceDate> {
 
-    @Suppress("unused")
     constructor(
-        serviceId: String,
-        calendarDate: Int
+        serviceIdInt: Int,
+        calendarDate: Int,
+        exceptionType: MCalendarExceptionType
     ) : this(
-        GIDs.getInt(serviceId),
-        calendarDate
+        serviceIdInt,
+        calendarDate,
+        exceptionType.id
     )
 
     @Deprecated(message = "Not memory efficient")
@@ -43,12 +46,17 @@ data class MServiceDate(
         append(SQLUtils.quotes(SQLUtils.escape(getCleanServiceId(agencyTools)))) // service ID
         append(Constants.COLUMN_SEPARATOR)
         append(calendarDate) // calendar date
+        if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
+            append(Constants.COLUMN_SEPARATOR) //
+            append(exceptionType) // exception type
+        }
     }
 
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(serviceIdInt:$_serviceId)"
+                "+(service:$_serviceId)" +
+                "+(exception:$exceptionType)"
     }
 
     companion object {

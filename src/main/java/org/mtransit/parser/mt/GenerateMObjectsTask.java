@@ -3,6 +3,7 @@ package org.mtransit.parser.mt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CollectionUtils;
+import org.mtransit.commons.FeatureFlags;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.MTLog;
@@ -22,6 +23,7 @@ import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MAgency;
+import org.mtransit.parser.mt.data.MCalendarExceptionType;
 import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
@@ -140,19 +142,28 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				serviceIdInts,
 				routeGTFS
 		);
-		HashSet<Long> gCalendarDateServiceRemoved = new HashSet<>();
+		final HashSet<Long> gCalendarDateServiceRemoved = new HashSet<>();
 		for (GCalendarDate gCalendarDate : routeGTFS.getAllCalendarDates()) {
 			if (!serviceIdInts.contains(gCalendarDate.getServiceIdInt())) {
 				continue;
 			}
 			switch (gCalendarDate.getExceptionType()) {
 			case SERVICE_REMOVED: // keep list of removed service for calendars processing
-				gCalendarDateServiceRemoved.add(gCalendarDate.getUID());
+				if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
+					mServiceDates.add(new MServiceDate(
+							gCalendarDate.getServiceIdInt(),
+							gCalendarDate.getDate(),
+							MCalendarExceptionType.REMOVED
+					));
+				} else {
+					gCalendarDateServiceRemoved.add(gCalendarDate.getUID());
+				}
 				break;
 			case SERVICE_ADDED:
 				mServiceDates.add(new MServiceDate(
 						gCalendarDate.getServiceIdInt(),
-						gCalendarDate.getDate()
+						gCalendarDate.getDate(),
+						FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE ? MCalendarExceptionType.ADDED : MCalendarExceptionType.DEFAULT
 				));
 				break;
 			default:
@@ -164,12 +175,15 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				continue;
 			}
 			for (GCalendarDate gCalendarDate : gCalendar.getDates()) {
-				if (gCalendarDateServiceRemoved.contains(gCalendarDate.getUID())) {
-					continue; // service REMOVED at this date
+				if (!FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
+					if (gCalendarDateServiceRemoved.contains(gCalendarDate.getUID())) {
+						continue; // service REMOVED at this date
+					}
 				}
 				mServiceDates.add(new MServiceDate(
 						gCalendarDate.getServiceIdInt(),
-						gCalendarDate.getDate()
+						gCalendarDate.getDate(),
+						MCalendarExceptionType.DEFAULT
 				));
 			}
 		}
@@ -342,6 +356,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			final MRoute otherRoute = mRoutes.get(mRoute.getId());
 			if (otherRoute != null && !mRoute.equals(otherRoute)) {
 				mergeSuccessful = false;
+				//noinspection deprecation // TODO remove method
 				if (mRoute.equalsExceptLongName(otherRoute, this.agencyTools.allowGTFSIdOverride())) {
 					mergeSuccessful = this.agencyTools.mergeRouteLongName(mRoute, otherRoute);
 				}
