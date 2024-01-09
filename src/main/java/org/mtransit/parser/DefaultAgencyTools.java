@@ -1123,7 +1123,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 				&& (usefulPeriod.startDate == null || usefulPeriod.endDate == null)) {
 			if (isCurrent) {
 				MTLog.log("No CURRENT schedules for %s. (start:%s|end:%s)", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
-				System.exit(0); // keeping current schedule
+				if (MGenerator.checkDataFilesExists(args[2])) {
+					System.exit(0); // keeping current schedule
+				} else {
+					throw new MTLog.Fatal("NO CURRENT schedules already available!");
+				}
 				return null;
 			}
 			//noinspection ConstantConditions

@@ -1026,4 +1026,35 @@ public class MGenerator {
 			MTLog.log("Do not generate store listing file: %s.", file);
 		}
 	}
+
+	public static boolean checkDataFilesExists(@NotNull String fileBase) {
+		try {
+			final String rootDir = "../app-android/";
+			final String mainSourceSetDir = rootDir + "src/main/";
+			final String resDirName;
+			if ("current_".equalsIgnoreCase(fileBase)) {
+				resDirName = RES + "-current";
+			} else if ("next_".equalsIgnoreCase(fileBase)) {
+				resDirName = RES + "-next";
+			} else {
+				resDirName = RES;
+			}
+			final String resDir = mainSourceSetDir + resDirName;
+			if (!new File(resDir).exists()) {
+				return false;
+			}
+			final String rawDir = resDir + "/" + RAW;
+			if (!new File(rawDir).exists()) {
+				return false;
+			}
+			final String valuesDir = resDir + "/" + VALUES;
+			//noinspection IfStatementWithIdenticalBranches,RedundantIfStatement
+			if (!new File(valuesDir).exists()) {
+				return false;
+			}
+			return true;
+		} catch (Exception e) {
+			throw new MTLog.Fatal(e, "Error while checking if date files exists for %s!", fileBase);
+		}
+	}
 }
