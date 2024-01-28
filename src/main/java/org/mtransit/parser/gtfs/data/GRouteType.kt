@@ -19,6 +19,7 @@ enum class GRouteType(
     EX_BUS_SERVICE(700), // Bus Service
     EX_DEMAND_AND_RESPONSE_BUS_SERVICE(715), // Demand and Response Bus Service
     EX_SHARE_TAXI_SERVICE(717), // Share Taxi Service // REMOVED
+    EX_TRAM_SERVICE(900), // Streetcar
     EX_COMMUNAL_TAXI_SERVICE(1501) // Communal Taxi Service
     ;
 
@@ -40,6 +41,11 @@ enum class GRouteType(
                     || routeType == EX_SHARE_TAXI_SERVICE.id
                     || routeType == EX_COMMUNAL_TAXI_SERVICE.id
                 ) {
+                    return true
+                }
+            }
+            if (agencyRouteType == LIGHT_RAIL.id) {
+                if (routeType == EX_TRAM_SERVICE.id) {
                     return true
                 }
             }
