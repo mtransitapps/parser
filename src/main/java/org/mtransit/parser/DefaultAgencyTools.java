@@ -297,6 +297,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 		throw new MTLog.Fatal("AGENCY ROUTE TYPE NOT PROVIDED");
 	}
 
+	@Nullable
+	public Integer getAgencyExtendedRouteType() {
+		return null; // optional
+	}
+
 	@NotNull
 	@Override
 	public Integer getOriginalAgencyRouteType() {

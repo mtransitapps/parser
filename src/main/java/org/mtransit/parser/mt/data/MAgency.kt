@@ -1,6 +1,5 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.parser.Constants
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GAgency
 import org.mtransit.parser.gtfs.data.GIDs
@@ -13,7 +12,7 @@ data class MAgency(
     val url: String,
     val timezone: String,
     val color: String,
-    val type: Int
+    val type: Int,
 ) : Comparable<MAgency?> {
 
     constructor(
@@ -26,7 +25,7 @@ data class MAgency(
         gAgency.agencyUrl,
         gAgency.agencyTimezone,
         agencyTools.getAgencyColor(gAgency, gSpec),
-        agencyTools.agencyRouteType
+        agencyTools.agencyRouteType,
     )
 
     @Deprecated(message = "Not memory efficient")
@@ -37,16 +36,6 @@ data class MAgency(
         get() {
             return GIDs.getString(idInt)
         }
-
-    fun toFile() = buildString {
-        append(_id) //
-        append(Constants.COLUMN_SEPARATOR) //
-        append(timezone) //
-        append(Constants.COLUMN_SEPARATOR) //
-        append(color) //
-        append(Constants.COLUMN_SEPARATOR) //
-        append(type) //
-    }
 
     fun toStringPlus(): String {
         return toString() +

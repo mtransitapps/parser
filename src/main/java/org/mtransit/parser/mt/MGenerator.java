@@ -795,6 +795,7 @@ public class MGenerator {
 	private static final String GTFS_RTS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml";
 
 	private static final String GTFS_RTS_AGENCY_TYPE = "gtfs_rts_agency_type";
+	private static final String GTFS_RTS_AGENCY_EXTENDED_TYPE = "gtfs_rts_agency_extended_type";
 	private static final String GTFS_RTS_TIMEZONE = "gtfs_rts_timezone";
 	private static final String GTFS_RTS_COLOR = "gtfs_rts_color";
 	private static final String GTFS_RTS_ROUTE_ID_CLEANUP_REGEX = "gtfs_rts_route_id_cleanup_regex";
@@ -826,6 +827,10 @@ public class MGenerator {
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_INTEGER(GTFS_RTS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
 			ow.write(Constants.NEW_LINE);
+			if (gAgencyTools.getAgencyExtendedRouteType() != null) {
+				ow.write(getRESOURCES_INTEGER(GTFS_RTS_AGENCY_EXTENDED_TYPE, gAgencyTools.getAgencyExtendedRouteType()));
+				ow.write(Constants.NEW_LINE);
+			}
 			ow.write(getRESOURCES_STRING(GTFS_RTS_TIMEZONE, mSpec.getFirstAgency().getTimezone()));
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_STRING(GTFS_RTS_COLOR, mSpec.getFirstAgency().getColor()));

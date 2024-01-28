@@ -72,6 +72,9 @@ public interface GAgencyTools {
 	@NotNull
 	Integer getAgencyRouteType();
 
+	@Nullable
+	Integer getAgencyExtendedRouteType();
+
 	@NotNull
 	Integer getOriginalAgencyRouteType();
 
