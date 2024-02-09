@@ -746,14 +746,14 @@ public class MGenerator {
 			File valuesDirF = new File(dumpDirResF, VALUES);
 			File gtfsRtsValuesXmlF = new File(valuesDirF, GTFS_RTS_VALUES_XML); // shared between different schedule (current, next...)
 			String content = new String(Files.readAllBytes(gtfsRtsValuesXmlF.toPath()), StandardCharsets.UTF_8);
-			Matcher matcher = RTS_DB_VERSION_REGEX.matcher(content);
+			final Matcher matcher = RTS_DB_VERSION_REGEX.matcher(content);
 			if (!matcher.find() || matcher.groupCount() < 4) {
 				MTLog.log("Bumping DB version... SKIP (error while reading current DB version)");
 				return;
 			}
 			String currentRtsDbVersion = matcher.group(3);
 			String currentLastModifiedTimeS = currentRtsDbVersion.substring(0, 8);
-			int currentLastModifiedTimeI = Integer.parseInt(currentLastModifiedTimeS);
+			final int currentLastModifiedTimeI = Integer.parseInt(currentLastModifiedTimeS);
 			if (lastModifiedTimeDateI <= currentLastModifiedTimeI) {
 				MTLog.log("Bumping DB version... SKIP (current DB version '%s' NOT older than last modified date '%s')", currentRtsDbVersion,
 						lastModifiedTimeDateS);
