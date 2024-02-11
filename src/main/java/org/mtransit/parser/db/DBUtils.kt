@@ -25,11 +25,14 @@ object DBUtils {
 
     private val connection: Connection by lazy {
         FileUtils.deleteIfExist(File(FILE_PATH)) // delete previous
+        MTLog.log("DB connection > IS_CI: ${DefaultAgencyTools.IS_CI}")
         DriverManager.getConnection(
             if (DefaultAgencyTools.IS_CI) {
                 SQLUtils.getJDBCSQLiteFile(FILE_PATH)
             } else {
                 SQLUtils.JDBC_SQLITE_MEMORY // faster
+            }.also {
+                MTLog.log("DB connection: $it")
             }
         )
     }
