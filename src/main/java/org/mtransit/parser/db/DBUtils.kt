@@ -180,6 +180,7 @@ object DBUtils {
         limitMaxNbRow: Int? = null,
         limitOffset: Int? = null
     ): List<GStopTime> {
+        MTLog.log("selectStopTimes($tripId, $tripIds, $limitMaxNbRow, $limitOffset)")
         var query = "SELECT * FROM $STOP_TIMES_TABLE_NAME"
         tripId?.let {
             query += " WHERE ${GStopTime.TRIP_ID} = $tripId"
@@ -205,8 +206,11 @@ object DBUtils {
                 query += " OFFSET $limitOffset"
             }
         }
+        MTLog.log("selectStopTimes() > $query")
         val result = ArrayList<GStopTime>()
         val rs = SQLUtils.executeQuery(connection.createStatement(), query)
+        MTLog.log("selectStopTimes() > query executed")
+        val selectRowCountBefore =selectRowCount
         while (rs.next()) {
             var stopHeadSign: String? = rs.getString(GStopTime.STOP_HEADSIGN)
             if (stopHeadSign == SQL_NULL) {
@@ -227,6 +231,7 @@ object DBUtils {
             )
             selectRowCount++
         }
+        MTLog.log("selectStopTimes() > loaded: $selectRowCountBefore")
         selectCount++
         return result
     }

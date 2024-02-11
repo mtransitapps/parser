@@ -396,13 +396,14 @@ public class GSpec {
 		List<GStopTime> tripStopTimes;
 		GTripStop gTripStop;
 		final int stopTimesCount = readStopTimesCount();
+		int tripStopsCount = 0;
 		int offset = 0;
-		final int maxRowNumber = DefaultAgencyTools.IS_CI ? 10_000 : 1_000_000;
+		final int maxRowNumber = DefaultAgencyTools.IS_CI ? 50_000 : 1_000_000;
 		DBUtils.setAutoCommit(false);
 		while (offset < stopTimesCount) {
 			MTLog.log("Generating GTFS trip stops from stop times... (%d -> %d)", offset, offset + maxRowNumber);
 			tripStopTimes = DBUtils.selectStopTimes(null, null, maxRowNumber, offset);
-			MTLog.log("Generating GTFS trip stops from stop times... (%d found)", tripStopTimes.size());
+			MTLog.log("Generating GTFS trip stops from stop times... (%d stop times found)", tripStopTimes.size());
 			offset += tripStopTimes.size();
 			for (int i = 0; i < tripStopTimes.size(); i++) {
 				gStopTime = tripStopTimes.get(i);
@@ -418,6 +419,8 @@ public class GSpec {
 				gTripStop = new GTripStop(tripUID, gStopTime.getTripIdInt(), gStopTime.getStopIdInt(), gStopTime.getStopSequence());
 				addTripStops(gTripStop);
 			}
+			MTLog.log("Generating GTFS trip stops from stop times... (created %s trip stops)", (this.tripStopsUIDs.size() - tripStopsCount));
+			tripStopsCount = this.tripStopsUIDs.size();
 		}
 		MTLog.log("Generating GTFS trip stops from stop times... > commit to DB...");
 		DBUtils.setAutoCommit(true); // true => commit()
