@@ -210,7 +210,7 @@ object DBUtils {
         val result = ArrayList<GStopTime>()
         val rs = SQLUtils.executeQuery(connection.createStatement(), query)
         MTLog.log("selectStopTimes() > query executed")
-        val selectRowCountBefore =selectRowCount
+        val selectRowCountBefore = selectRowCount
         while (rs.next()) {
             var stopHeadSign: String? = rs.getString(GStopTime.STOP_HEADSIGN)
             if (stopHeadSign == SQL_NULL) {
@@ -231,8 +231,9 @@ object DBUtils {
             )
             selectRowCount++
         }
-        MTLog.log("selectStopTimes() > loaded: $selectRowCountBefore")
+        MTLog.log("selectStopTimes() > loaded: ${selectRowCount - selectRowCountBefore}")
         selectCount++
+        MTLog.log("selectStopTimes() > selectCount: $selectCount")
         return result
     }
 

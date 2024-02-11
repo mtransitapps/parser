@@ -403,6 +403,7 @@ public class GSpec {
 		while (offset < stopTimesCount) {
 			MTLog.log("Generating GTFS trip stops from stop times... (%d -> %d)", offset, offset + maxRowNumber);
 			tripStopTimes = DBUtils.selectStopTimes(null, null, maxRowNumber, offset);
+			MTLog.log("Generating GTFS trip stops from stop times...");
 			MTLog.log("Generating GTFS trip stops from stop times... (%d stop times found)", tripStopTimes.size());
 			offset += tripStopTimes.size();
 			for (int i = 0; i < tripStopTimes.size(); i++) {
