@@ -1,14 +1,12 @@
 package org.mtransit.parser.gtfs.data
 
+import androidx.collection.mutableScatterMapOf
 import org.mtransit.parser.Constants.EMPTY
 import org.mtransit.parser.MTLog
 
 object GIDs {
 
-    private var increment = 0
-
-    private val integerToString = hashMapOf<Int, String>()
-    private val stringToInteger = hashMapOf<String, Int>()
+    private val integerToString = mutableScatterMapOf<Int, String>()
 
     @JvmStatic
     fun getString(integer: Int): String {
@@ -17,20 +15,17 @@ object GIDs {
 
     @JvmStatic
     fun getInt(string: String): Int {
-        return stringToInteger[string] ?: add(string)
+        return add(string)
     }
 
     private fun add(newString: String): Int {
-        val newInteger = increment
-        integerToString[newInteger] = newString
-        stringToInteger[newString] = newInteger
-        increment++ // ready for next call
-        return newInteger
+        return newString.hashCode()
+            .also { integerToString[it] = newString }
     }
 
     @JvmStatic
     fun count(): Int {
-        return increment
+        return integerToString.size
     }
 
     @Suppress("unused")

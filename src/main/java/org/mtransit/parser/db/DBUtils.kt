@@ -7,9 +7,12 @@ import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTripStop
 import org.mtransit.parser.mt.data.MSchedule
+import org.sqlite.SQLiteException
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.PreparedStatement
+import java.sql.SQLException
 import org.mtransit.commons.sql.SQLUtils as SQLUtilsCommons
 
 object DBUtils {
@@ -23,11 +26,13 @@ object DBUtils {
     private const val SQL_RESULT_ALIAS = "result"
     private const val SQL_NULL = "null"
 
+    private val IS_USING_FILE_INSTEAD_OF_MEMORY = DefaultAgencyTools.IS_CI
+
     private val connection: Connection by lazy {
         FileUtils.deleteIfExist(File(FILE_PATH)) // delete previous
-        MTLog.log("DB connection > IS_CI: ${DefaultAgencyTools.IS_CI}")
+        MTLog.log("DB connection > IS_USING_FILE_INSTEAD_OF_MEMORY: $IS_USING_FILE_INSTEAD_OF_MEMORY")
         DriverManager.getConnection(
-            if (DefaultAgencyTools.IS_CI) {
+            if (IS_USING_FILE_INSTEAD_OF_MEMORY) {
                 SQLUtils.getJDBCSQLiteFile(FILE_PATH)
             } else {
                 SQLUtils.JDBC_SQLITE_MEMORY // faster
@@ -97,6 +102,11 @@ object DBUtils {
         )
     }
 
+    @JvmStatic
+    fun getDBSize() = if (IS_USING_FILE_INSTEAD_OF_MEMORY) {
+        FileUtils.size(File(FILE_PATH))
+    } else null
+
     @Suppress("unused")
     @JvmStatic
     fun beginTransaction() = SQLUtils.beginTransaction(this.connection)
@@ -111,6 +121,57 @@ object DBUtils {
     @Suppress("unused")
     @JvmStatic
     fun commit() = SQLUtils.commit(this.connection)
+
+    @JvmStatic
+    fun prepareInsertStopTime(allowUpdate: Boolean = false): PreparedStatement {
+        return connection.prepareStatement(
+            (if (allowUpdate) SQLUtilsCommons.INSERT_OR_REPLACE_INTO else SQLUtilsCommons.INSERT_INTO)
+                    + STOP_TIMES_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
+                    "?," + // trip ID
+                    "?," + // stop ID
+                    "?," + // stop sequence
+                    "?," + // arrival time
+                    "?," + // departure time
+                    "?," + // stop head-sign
+                    "?," + // pickup type
+                    "?," + // drop off type
+                    "?" + // time point
+                    SQLUtilsCommons.P2
+        )
+    }
+
+    @JvmStatic
+    fun insertStopTime(gStopTime: GStopTime, preparedStatement: PreparedStatement) {
+        try {
+            var idx = 1
+            with(preparedStatement) {
+                setInt(idx++, gStopTime.tripIdInt)
+                setInt(idx++, gStopTime.stopIdInt)
+                setInt(idx++, gStopTime.stopSequence)
+                setInt(idx++, gStopTime.arrivalTime)
+                setInt(idx++, gStopTime.departureTime)
+                setString(idx++, "${gStopTime.stopHeadsign?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}")
+                setInt(idx++, gStopTime.pickupType.id)
+                setInt(idx++, gStopTime.dropOffType.id)
+                setInt(idx++, gStopTime.timePoint.id)
+                addBatch()
+            }
+            insertRowCount++
+            insertCount++
+        } catch (e: SQLiteException) {
+            throw MTLog.Fatal(e, "SQL lite error while inserting '$gStopTime'!")
+        } catch (e: SQLException) {
+            throw MTLog.Fatal(e, "SQL error while inserting '$gStopTime'!")
+        } catch (e: Exception) {
+            throw MTLog.Fatal(e, "Error while inserting '$gStopTime'!")
+        }
+    }
+
+    @JvmStatic
+    fun executeInsertStopTime(preparedStatement: PreparedStatement): Boolean {
+        val rs = preparedStatement.executeBatch()
+        return rs.isNotEmpty()
+    }
 
     @JvmStatic
     @JvmOverloads
@@ -180,7 +241,6 @@ object DBUtils {
         limitMaxNbRow: Int? = null,
         limitOffset: Int? = null
     ): List<GStopTime> {
-        MTLog.log("selectStopTimes($tripId, $tripIds, $limitMaxNbRow, $limitOffset)")
         var query = "SELECT * FROM $STOP_TIMES_TABLE_NAME"
         tripId?.let {
             query += " WHERE ${GStopTime.TRIP_ID} = $tripId"
@@ -206,11 +266,8 @@ object DBUtils {
                 query += " OFFSET $limitOffset"
             }
         }
-        MTLog.log("selectStopTimes() > $query")
         val result = ArrayList<GStopTime>()
         val rs = SQLUtils.executeQuery(connection.createStatement(), query)
-        MTLog.log("selectStopTimes() > query executed")
-        val selectRowCountBefore = selectRowCount
         while (rs.next()) {
             var stopHeadSign: String? = rs.getString(GStopTime.STOP_HEADSIGN)
             if (stopHeadSign == SQL_NULL) {
@@ -231,9 +288,7 @@ object DBUtils {
             )
             selectRowCount++
         }
-        MTLog.log("selectStopTimes() > loaded: ${selectRowCount - selectRowCountBefore}")
         selectCount++
-        MTLog.log("selectStopTimes() > selectCount: $selectCount")
         return result
     }
 

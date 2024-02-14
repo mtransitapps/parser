@@ -102,6 +102,16 @@ public final class MTLog {
 		System.exit(-1);
 	}
 
+	public static void waitForEnter() {
+		System.out.println("\nPress Enter to continue...");
+		try {
+			//noinspection ResultOfMethodCallIgnored
+			System.in.read(new byte[2]); // requires run { standardInput = System.in } in build.gradle
+		} catch (Exception e) {
+			throw new MTLog.Fatal(e, "Error while waiting for Enter!");
+		}
+	}
+
 	public static class Fatal extends RuntimeException {
 		public Fatal(@NotNull String format, @Nullable Object... args) {
 			super();

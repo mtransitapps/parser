@@ -9,6 +9,7 @@ import org.mtransit.parser.MTLog
 import org.sqlite.SQLiteException
 import java.sql.Connection
 import java.sql.ResultSet
+import java.sql.SQLException
 import java.sql.Statement
 
 object SQLUtils {
@@ -46,6 +47,8 @@ object SQLUtils {
         try {
             return statement.execute(query)
         } catch (e: SQLiteException) {
+            throw MTLog.Fatal(e, "SQL lite error while executing '$query'!")
+        } catch (e: SQLException) {
             throw MTLog.Fatal(e, "SQL error while executing '$query'!")
         }
     }
@@ -58,6 +61,8 @@ object SQLUtils {
         try {
             return statement.executeQuery(query)
         } catch (e: SQLiteException) {
+            throw MTLog.Fatal(e, "SQL lite error while executing '$query'!")
+        } catch (e: SQLException) {
             throw MTLog.Fatal(e, "SQL error while executing '$query'!")
         }
     }
@@ -70,6 +75,8 @@ object SQLUtils {
         try {
             return statement.executeUpdate(query)
         } catch (e: SQLiteException) {
+            throw MTLog.Fatal(e, "SQL lite error while executing '$query'!")
+        } catch (e: SQLException) {
             throw MTLog.Fatal(e, "SQL error while executing '$query'!")
         }
     }

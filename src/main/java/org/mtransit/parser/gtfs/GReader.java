@@ -7,7 +7,6 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mtransit.commons.CloseableUtils;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Utils;
@@ -18,6 +17,7 @@ import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
 import org.mtransit.parser.gtfs.data.GDropOffType;
 import org.mtransit.parser.gtfs.data.GFrequency;
+import org.mtransit.parser.gtfs.data.GIDs;
 import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
@@ -28,10 +28,11 @@ import org.mtransit.parser.gtfs.data.GTrip;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -59,140 +60,118 @@ public class GReader {
 		if (!gtfsDirF.exists()) {
 			throw new MTLog.Fatal("'%s' GTFS directory does not exist!", gtfsDirF);
 		}
-		FileReader fr = null;
-		BufferedReader reader = null;
 		try {
 			// AGENCY
 			if (!calendarsOnly) {
-				File agencyFile = new File(gtfsDir, GAgency.FILENAME);
-				if (!agencyFile.exists()) {
-					throw new MTLog.Fatal("'%s' agency file does not exist!", agencyFile);
-				} else {
-					fr = new FileReader(agencyFile);
-					reader = new BufferedReader(fr);
-					readCsv(agencyFile.getName(), reader, line ->
-							processAgency(agencyTools, gSpec, line)
-					);
-				}
+				readFile(agencyTools, gtfsDir, GAgency.FILENAME, true, line ->
+						processAgency(agencyTools, gSpec, line)
+				);
 			}
 			// CALENDAR DATES
-			boolean hasCalendar = false;
-			File calendarDateFile = new File(gtfsDir, GCalendarDate.FILENAME);
-			if (!calendarDateFile.exists()) {
-				MTLog.log("Reading file '%s'... SKIP (non-existing).", calendarDateFile.getName());
-			} else {
-				hasCalendar = true;
-				fr = new FileReader(calendarDateFile);
-				reader = new BufferedReader(fr);
-				readCsv(calendarDateFile.getName(), reader, line ->
-						processCalendarDate(agencyTools, gSpec, line)
-				);
-			}
+			boolean hasCalendarDates = readFile(agencyTools, gtfsDir, GCalendarDate.FILENAME, false, line ->
+					processCalendarDate(agencyTools, gSpec, line)
+			);
 			// CALENDAR
-			File calendarFile = new File(gtfsDir, GCalendar.FILENAME);
-			if (!calendarFile.exists()) {
-				MTLog.log("Reading file '%s'... SKIP (non-existing).", calendarFile.getName());
-			} else {
-				hasCalendar = true;
-				fr = new FileReader(calendarFile);
-				reader = new BufferedReader(fr);
-				readCsv(calendarFile.getName(), reader, line ->
-						processCalendar(agencyTools, gSpec, line)
-				);
-			}
+			boolean hasCalendars = readFile(agencyTools, gtfsDir, GCalendar.FILENAME, false, line ->
+					processCalendar(agencyTools, gSpec, line)
+			);
+			boolean hasCalendar = hasCalendarDates || hasCalendars;
 			if (!hasCalendar) {
 				throw new MTLog.Fatal("'%s' & '%s' file do not exist!", GCalendar.FILENAME, GCalendarDate.FILENAME);
 			}
 			// ROUTES
 			if (!calendarsOnly) {
-				File routeFile = new File(gtfsDir, GRoute.FILENAME);
-				if (!routeFile.exists()) {
-					throw new MTLog.Fatal("'%s' route file does not exist!", routeFile);
-				} else {
-					fr = new FileReader(routeFile);
-					reader = new BufferedReader(fr);
-					readCsv(routeFile.getName(), reader, line ->
-							processRoute(agencyTools, gSpec, line)
-					);
-				}
+				readFile(agencyTools, gtfsDir, GRoute.FILENAME, true, line ->
+						processRoute(agencyTools, gSpec, line)
+				);
 			}
 			// TRIPS
 			if (!calendarsOnly) {
-				File tripFile = new File(gtfsDir, GTrip.FILENAME);
-				if (!tripFile.exists()) {
-					throw new MTLog.Fatal("'%s' trip file does not exist!", tripFile);
-				} else {
-					fr = new FileReader(tripFile);
-					reader = new BufferedReader(fr);
-					readCsv(tripFile.getName(), reader, line ->
-							processTrip(agencyTools, gSpec, line)
-					);
-				}
+				readFile(agencyTools, gtfsDir, GTrip.FILENAME, true, line ->
+						processTrip(agencyTools, gSpec, line)
+				);
 			}
 			// FREQUENCIES
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
-				File frequencyFile = new File(gtfsDir, GFrequency.FILENAME);
-				if (!frequencyFile.exists()) {
-					MTLog.log("Reading file '%s'... SKIP (non-existing).", frequencyFile.getName());
-				} else {
-					fr = new FileReader(frequencyFile);
-					reader = new BufferedReader(fr);
-					readCsv(frequencyFile.getName(), reader, line ->
-							processFrequency(agencyTools, gSpec, line)
-					);
-				}
+				readFile(agencyTools, gtfsDir, GFrequency.FILENAME, false, line ->
+						processFrequency(agencyTools, gSpec, line)
+				);
 			}
 			// STOPS
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
-				File stopFile = new File(gtfsDir, GStop.FILENAME);
-				if (!stopFile.exists()) {
-					throw new MTLog.Fatal("'%s' stop file does not exist!", stopFile);
-				} else {
-					fr = new FileReader(stopFile);
-					reader = new BufferedReader(fr);
-					readCsv(stopFile.getName(), reader, line ->
-							processStop(agencyTools, gSpec, line)
-					);
-				}
+				readFile(agencyTools, gtfsDir, GStop.FILENAME, true, line ->
+						processStop(agencyTools, gSpec, line)
+				);
 			}
 			// STOP TIMES
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
-				File stopTimeFile = new File(gtfsDir, GStopTime.FILENAME);
-				if (!stopTimeFile.exists()) {
-					MTLog.log("Reading file '%s'... SKIP (non-existing).", stopTimeFile.getName());
-				} else {
-					fr = new FileReader(stopTimeFile);
-					reader = new BufferedReader(fr);
-					DBUtils.setAutoCommit(false);
-					readCsv(stopTimeFile.getName(), reader,
-							line -> processStopTime(agencyTools, gSpec, line),
-							columnNames -> {
-								if (!columnNames.contains(GStopTime.PICKUP_TYPE)) {
-									agencyTools.setForceStopTimeLastNoPickupType(true); // pickup types not provided
-								}
-								if (!columnNames.contains(GStopTime.DROP_OFF_TYPE)) {
-									agencyTools.setForceStopTimeFirstNoDropOffType(true); // drop-off  types not provided
-								}
-							});
-					if (!agencyTools.stopTimesHasPickupTypeNotRegular()) {
-						agencyTools.setForceStopTimeLastNoPickupType(true); // all provided pickup type are REGULAR == not provided
-					}
-					if (!agencyTools.stopTimesHasDropOffTypeNotRegular()) {
-						agencyTools.setForceStopTimeFirstNoDropOffType(true); // all provided drop-off type are REGULAR == not provided
-					}
-					DBUtils.setAutoCommit(true); // true => commit()
+				MTLog.log("- IDs: %d", GIDs.count());
+				DBUtils.setAutoCommit(false);
+				final PreparedStatement insertStopTimePrepared = DBUtils.prepareInsertStopTime(false);
+				readFile(agencyTools, gtfsDir, GStopTime.FILENAME, false,
+						line -> processStopTime(agencyTools, gSpec, line, insertStopTimePrepared),
+						columnNames -> {
+							if (!columnNames.contains(GStopTime.PICKUP_TYPE)) {
+								agencyTools.setForceStopTimeLastNoPickupType(true); // pickup types not provided
+							}
+							if (!columnNames.contains(GStopTime.DROP_OFF_TYPE)) {
+								agencyTools.setForceStopTimeFirstNoDropOffType(true); // drop-off  types not provided
+							}
+						}
+				);
+				if (!agencyTools.stopTimesHasPickupTypeNotRegular()) {
+					agencyTools.setForceStopTimeLastNoPickupType(true); // all provided pickup type are REGULAR == not provided
 				}
+				if (!agencyTools.stopTimesHasDropOffTypeNotRegular()) {
+					agencyTools.setForceStopTimeFirstNoDropOffType(true); // all provided drop-off type are REGULAR == not provided
+				}
+				DBUtils.executeInsertStopTime(insertStopTimePrepared);
+				DBUtils.commit();
+				DBUtils.setAutoCommit(true); // true => commit()
+				MTLog.log("- IDs: %d", GIDs.count());
 			}
-			// TODO OTHER FILE TYPE
-		} catch (IOException ioe) {
+			// TODO OTHER FILES TYPE
+		} catch (Exception ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while reading GTFS file!");
-		} finally {
-			CloseableUtils.closeQuietly(reader);
-			CloseableUtils.closeQuietly(fr);
 		}
 		MTLog.log("Reading GTFS file '%1$s'... DONE in %2$s.", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
 		gSpec.print(calendarsOnly, false);
 		return gSpec;
+	}
+
+	private static boolean readFile(
+			@NotNull final GAgencyTools agencyTools,
+			@NotNull String gtfsDir,
+			@NotNull String fileName,
+			boolean fileRequired,
+			@NotNull LineProcessor lineProcessor
+	) {
+		return readFile(agencyTools, gtfsDir, fileName, fileRequired, lineProcessor, null);
+	}
+
+	private static boolean readFile(
+			@NotNull final GAgencyTools agencyTools,
+			@NotNull String gtfsDir,
+			@NotNull String fileName,
+			boolean fileRequired,
+			@NotNull LineProcessor lineProcessor,
+			@Nullable OnColumnNamesFound onColumnNamesFoundCallback
+	) {
+		final File gtfsFile = new File(gtfsDir, fileName);
+		if (!gtfsFile.exists()) {
+			if (fileRequired) {
+				throw new MTLog.Fatal("'%s' file does not exist!", gtfsFile);
+			} else {
+				MTLog.log("Reading file '%s'... SKIP (non-existing).", gtfsFile.getName());
+				return false;
+			}
+		}
+		try (BufferedReader br = Files.newBufferedReader(gtfsFile.toPath())) {
+			readCsv(gtfsFile.getName(), br, lineProcessor, onColumnNamesFoundCallback);
+		} catch (IOException ioe) {
+			throw new MTLog.Fatal(ioe, "I/O Error while reading GTFS file %s!", gtfsFile);
+		}
+		return true;
 	}
 
 	private static final CSVFormat CSV_FORMAT = CSVFormat.RFC4180.builder().setIgnoreSurroundingSpaces(true).build();
@@ -283,18 +262,18 @@ public class GReader {
 		MTLog.log("Reading file '%s' (lines: %s)... DONE", filename, l);
 	}
 
-	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
+	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line, PreparedStatement insertStopTimePrepared) {
 		try {
-			GStopTime gStopTime = new GStopTime(
+			final GStopTime gStopTime = new GStopTime(
 					line.get(GStopTime.TRIP_ID),
 					line.get(GStopTime.ARRIVAL_TIME).trim(),
 					line.get(GStopTime.DEPARTURE_TIME).trim(),
 					line.get(GStopTime.STOP_ID).trim(),
 					Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()),
-					line.get(GStopTime.STOP_HEADSIGN), //
-					GPickupType.parse(line.get(GStopTime.PICKUP_TYPE)), //
-					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)), //
-					GTimePoint.parse(line.get(GStopTime.TIME_POINT)) //
+					line.get(GStopTime.STOP_HEADSIGN),
+					GPickupType.parse(line.get(GStopTime.PICKUP_TYPE)),
+					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)),
+					GTimePoint.parse(line.get(GStopTime.TIME_POINT))
 			);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
 				return;
@@ -311,7 +290,7 @@ public class GReader {
 			if (agencyTools.excludeStopTime(gStopTime)) {
 				return;
 			}
-			gSpec.addStopTime(gStopTime, false);
+			gSpec.addStopTime(gStopTime, insertStopTimePrepared);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while parsing: '%s'!", line);
 		}

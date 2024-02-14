@@ -1,7 +1,9 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.commons.StringUtils
+import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
+import java.lang.Exception
 
 // https://developers.google.com/transit/gtfs/reference#tripstxt
 // https://gtfs.org/reference/static/#tripstxt
@@ -111,31 +113,30 @@ data class GTrip(
         const val DIRECTION_ID = "direction_id"
         const val WHEELCHAIR_ACCESSIBLE = "wheelchair_accessible"
 
-        @Suppress("unused")
-        @JvmStatic
-        fun extractRouteIdInt(tripUID: String): Int {
-            val (_, routeIdInt) = split(tripUID)
-            return routeIdInt
-        }
+        private const val UID_SEPARATOR = "+" // int IDs can be negative
 
         @Suppress("unused")
         @JvmStatic
-        fun extractTripIdInt(tripUID: String): Int {
-            val (tripIdInt, _) = split(tripUID)
-            return tripIdInt
-        }
+        fun extractRouteIdInt(tripUID: String) = split(tripUID).second
+
+        @Suppress("unused")
+        @JvmStatic
+        fun extractTripIdInt(tripUID: String) = split(tripUID).first
 
         @JvmStatic
-        fun split(tripUID: String): Pair<Int, Int> {
-            val s = tripUID.split("-")
-            return Pair(s[0].toInt(), s[1].toInt())
+        fun split(tripUID: String) = try {
+            tripUID.split(UID_SEPARATOR).let { s ->
+                Pair(s[0].toInt(), s[1].toInt())
+            }
+        } catch (e: Exception) {
+            throw MTLog.Fatal(e, "Error while trying to split $tripUID!")
         }
 
         @JvmStatic
         fun getNewUID(
             routeIdInt: Int,
             tripIdInt: Int
-        ) = "${routeIdInt}-${tripIdInt}"
+        ) = "${routeIdInt}$UID_SEPARATOR${tripIdInt}"
 
         @JvmStatic
         fun longestFirst(tripList: List<GTrip>, tripStopListGetter: (Int) -> List<GTripStop>?): List<GTrip> {
