@@ -4,12 +4,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
+import org.mtransit.parser.FileUtils;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.mt.GenerateMObjectsTask;
 
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -272,6 +274,10 @@ public class GSpec {
 		DBUtils.insertStopTime(gStopTime, allowUpdate);
 	}
 
+	public void addStopTime(@NotNull GStopTime gStopTime, @NotNull PreparedStatement insertStopTimePrepared) {
+		DBUtils.insertStopTime(gStopTime, insertStopTimePrepared);
+	}
+
 	private int removeTripStopTimes(@NotNull Integer gTripId) {
 		int r = 0;
 		r += DBUtils.deleteStopTimes(gTripId);
@@ -398,7 +404,8 @@ public class GSpec {
 		final int stopTimesCount = readStopTimesCount();
 		int tripStopsCount = 0;
 		int offset = 0;
-		final int maxRowNumber = DefaultAgencyTools.IS_CI ? 50_000 : 1_000_000;
+		final int maxRowNumber = DefaultAgencyTools.IS_CI ? 100_000 : 1_000_000;
+		MTLog.log("Generating GTFS trip stops from stop times... (DB size: %s)", FileUtils.sizeToDiplayString(DBUtils.getDBSize()));
 		DBUtils.setAutoCommit(false);
 		while (offset < stopTimesCount) {
 			MTLog.log("Generating GTFS trip stops from stop times... (%d -> %d)", offset, offset + maxRowNumber);
@@ -426,6 +433,7 @@ public class GSpec {
 		MTLog.log("Generating GTFS trip stops from stop times... > commit to DB...");
 		DBUtils.setAutoCommit(true); // true => commit()
 		MTLog.log("Generating GTFS trip stops from stop times... > commit to DB... DONE");
+		MTLog.log("Generating GTFS trip stops from stop times... (DB size: %s)", FileUtils.sizeToDiplayString(DBUtils.getDBSize()));
 		MTLog.log("Generating GTFS trip stops from stop times... DONE");
 		MTLog.log("- Trip stops: %d", readTripStopsCount());
 		MTLog.log("- IDs: %d", GIDs.count());

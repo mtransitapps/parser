@@ -23,20 +23,21 @@ object DumpDbUtils {
 
     @JvmStatic
     fun init(connection: Connection) {
-        val statement = connection.createStatement()
-        SQLUtils.execute(statement, "PRAGMA auto_vacuum = NONE")
-        // DROP IF EXIST
-        SQLUtils.executeUpdate(statement, GTFSCommons.T_TRIP_STOPS_SQL_DROP)
-        SQLUtils.executeUpdate(statement, GTFSCommons.T_STOP_SQL_DROP)
-        SQLUtils.executeUpdate(statement, GTFSCommons.T_TRIP_SQL_DROP)
-        SQLUtils.executeUpdate(statement, GTFSCommons.T_ROUTE_SQL_DROP)
-        SQLUtils.executeUpdate(statement, GTFSCommons.T_SERVICE_DATES_SQL_DROP)
-        SQLUtils.executeUpdate(statement, GTFSCommons.T_ROUTE_SQL_DROP)
-        // CREATE
-        SQLUtils.executeUpdate(statement, GTFSCommons.T_ROUTE_SQL_CREATE)
-        SQLUtils.executeUpdate(statement, GTFSCommons.T_TRIP_SQL_CREATE)
-        SQLUtils.executeUpdate(statement, GTFSCommons.T_STOP_SQL_CREATE)
-        SQLUtils.executeUpdate(statement, GTFSCommons.T_TRIP_STOPS_SQL_CREATE)
-        SQLUtils.executeUpdate(statement, GTFSCommons.T_SERVICE_DATES_SQL_CREATE)
+        connection.createStatement().use { statement ->
+            SQLUtils.execute(statement, "PRAGMA auto_vacuum = NONE")
+            // DROP IF EXIST
+            SQLUtils.executeUpdate(statement, GTFSCommons.T_TRIP_STOPS_SQL_DROP)
+            SQLUtils.executeUpdate(statement, GTFSCommons.T_STOP_SQL_DROP)
+            SQLUtils.executeUpdate(statement, GTFSCommons.T_TRIP_SQL_DROP)
+            SQLUtils.executeUpdate(statement, GTFSCommons.T_ROUTE_SQL_DROP)
+            SQLUtils.executeUpdate(statement, GTFSCommons.T_SERVICE_DATES_SQL_DROP)
+            SQLUtils.executeUpdate(statement, GTFSCommons.T_ROUTE_SQL_DROP)
+            // CREATE
+            SQLUtils.executeUpdate(statement, GTFSCommons.T_ROUTE_SQL_CREATE)
+            SQLUtils.executeUpdate(statement, GTFSCommons.T_TRIP_SQL_CREATE)
+            SQLUtils.executeUpdate(statement, GTFSCommons.T_STOP_SQL_CREATE)
+            SQLUtils.executeUpdate(statement, GTFSCommons.T_TRIP_STOPS_SQL_CREATE)
+            SQLUtils.executeUpdate(statement, GTFSCommons.T_SERVICE_DATES_SQL_CREATE)
+        }
     }
 }

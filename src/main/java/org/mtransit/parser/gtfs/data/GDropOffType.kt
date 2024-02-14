@@ -29,7 +29,7 @@ enum class GDropOffType(val id: Int) {
 
         @JvmStatic
         fun parse(id: String?): GDropOffType {
-            return if (id == null || id.isEmpty()) { // that's OK
+            return if (id.isNullOrEmpty()) { // that's OK
                 REGULAR // default
             } else try {
                 parse(id.toInt())
