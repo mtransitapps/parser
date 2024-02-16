@@ -1,12 +1,19 @@
 package org.mtransit.parser.gtfs.data
 
 import androidx.collection.SparseArrayCompat
+import androidx.collection.mutableScatterMapOf
 import org.mtransit.parser.Constants.EMPTY
 import org.mtransit.parser.MTLog
 
 object GIDs {
 
+    private const val USE_HASHCODE = false // hashcode Collision is real
+    // "11667511__MCOB-DO:123:0:Weekday:2:23SEP:41054:12345".hashCode() == "11612895__MCOB-DO:123:0:Weekday:1:23SEP:31011:12345".hashCode()
+
+    private var increment = 0
+
     private val intToString = SparseArrayCompat<String>()
+    private val stringToInt = mutableScatterMapOf<String, Int>()
 
     @JvmStatic
     fun getString(integer: Int): String {
@@ -15,19 +22,32 @@ object GIDs {
 
     @JvmStatic
     fun getInt(string: String): Int {
-        return add(string)
+        if (USE_HASHCODE) {
+            return add(string)
+        }
+        return stringToInt[string] ?: add(string)
     }
 
     private fun add(newString: String): Int {
-        return newString.hashCode()
-            .also {
-                intToString.put(it, newString)
-            }
+        if (USE_HASHCODE) {
+            return newString.hashCode()
+                .also {
+                    intToString.put(it, newString)
+                }
+        }
+        val newInteger = increment
+        intToString.put(newInteger, newString)
+        stringToInt[newString] = newInteger
+        increment++ // ready for next call
+        return newInteger
     }
 
     @JvmStatic
     fun count(): Int {
-        return intToString.size()
+        if (USE_HASHCODE) {
+            return intToString.size()
+        }
+        return increment
     }
 
     @Suppress("unused")

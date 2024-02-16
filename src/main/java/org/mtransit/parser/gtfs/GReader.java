@@ -17,7 +17,6 @@ import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
 import org.mtransit.parser.gtfs.data.GDropOffType;
 import org.mtransit.parser.gtfs.data.GFrequency;
-import org.mtransit.parser.gtfs.data.GIDs;
 import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
@@ -45,6 +44,9 @@ public class GReader {
 
 	private static final boolean LOG_EXCLUDE = false;
 	// private static final boolean LOG_EXCLUDE = true; // DEBUG
+
+	private static final boolean USE_PREPARED_STATEMENT = true;
+	// private static final boolean USE_PREPARED_STATEMENT = false;
 
 	@NotNull
 	public static GSpec readGtfsZipFile(@NotNull String gtfsFile,
@@ -104,9 +106,8 @@ public class GReader {
 			}
 			// STOP TIMES
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
-				MTLog.log("- IDs: %d", GIDs.count());
 				DBUtils.setAutoCommit(false);
-				final PreparedStatement insertStopTimePrepared = DBUtils.prepareInsertStopTime(false);
+				final PreparedStatement insertStopTimePrepared = USE_PREPARED_STATEMENT ? DBUtils.prepareInsertStopTime(false) : null;
 				readFile(gtfsDir, GStopTime.FILENAME, false,
 						line -> processStopTime(agencyTools, gSpec, line, insertStopTimePrepared),
 						columnNames -> {
@@ -124,10 +125,11 @@ public class GReader {
 				if (!agencyTools.stopTimesHasDropOffTypeNotRegular()) {
 					agencyTools.setForceStopTimeFirstNoDropOffType(true); // all provided drop-off type are REGULAR == not provided
 				}
-				DBUtils.executeInsertStopTime(insertStopTimePrepared);
+				if (USE_PREPARED_STATEMENT) {
+					DBUtils.executeInsertStopTime(insertStopTimePrepared);
+				}
 				DBUtils.commit();
 				DBUtils.setAutoCommit(true); // true => commit()
-				MTLog.log("- IDs: %d", GIDs.count());
 			}
 			// TODO OTHER FILES TYPE
 		} catch (Exception ioe) {
@@ -260,7 +262,8 @@ public class GReader {
 		MTLog.log("Reading file '%s' (lines: %s)... DONE", filename, l);
 	}
 
-	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line, PreparedStatement insertStopTimePrepared) {
+	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line,
+										@Nullable PreparedStatement insertStopTimePrepared) {
 		try {
 			final GStopTime gStopTime = GStopTime.fromLine(line);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
@@ -278,7 +281,11 @@ public class GReader {
 			if (agencyTools.excludeStopTime(gStopTime)) {
 				return;
 			}
-			gSpec.addStopTime(gStopTime, insertStopTimePrepared);
+			if (insertStopTimePrepared != null) {
+				gSpec.addStopTime(gStopTime, insertStopTimePrepared);
+			} else {
+				gSpec.addStopTime(gStopTime, false);
+			}
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while parsing: '%s'!", line);
 		}
