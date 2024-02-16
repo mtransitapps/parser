@@ -25,13 +25,13 @@ data class GTrip(
         tripShortName: String?,
         wheelchairBoarding: Int?,
     ) : this(
-        GIDs.getInt(routeId),
-        GIDs.getInt(serviceId),
-        GIDs.getInt(tripId),
-        GDirectionId.parse(directionId),
-        tripHeadsign,
-        tripShortName,
-        GWheelchairBoardingType.parse(wheelchairBoarding),
+        routeIdInt = GIDs.getInt(routeId),
+        serviceIdInt = GIDs.getInt(serviceId),
+        tripIdInt = GIDs.getInt(tripId),
+        directionIdE = GDirectionId.parse(directionId),
+        tripHeadsign = tripHeadsign,
+        tripShortName = tripShortName,
+        wheelchairAccessible = GWheelchairBoardingType.parse(wheelchairBoarding),
     )
 
     val directionId: Int?

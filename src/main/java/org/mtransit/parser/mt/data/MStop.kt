@@ -3,7 +3,7 @@ package org.mtransit.parser.mt.data
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.parser.Constants
-import org.mtransit.parser.db.SQLUtils
+import org.mtransit.parser.db.SQLUtils.quotesEscape
 
 data class MStop(
     val id: Int,
@@ -44,9 +44,9 @@ data class MStop(
     fun toFile() = buildString {
         append(id) // ID
         append(Constants.COLUMN_SEPARATOR) //
-        append(SQLUtils.quotes(SQLUtils.escape(code))) // code
+        append(code.quotesEscape()) // code
         append(Constants.COLUMN_SEPARATOR) //
-        append(SQLUtils.quotes(SQLUtils.escape(name))) // name
+        append(name.quotesEscape()) // name
         append(Constants.COLUMN_SEPARATOR) //
         append(lat) // latitude
         append(Constants.COLUMN_SEPARATOR) //

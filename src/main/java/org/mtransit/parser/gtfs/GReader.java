@@ -23,7 +23,6 @@ import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
-import org.mtransit.parser.gtfs.data.GTimePoint;
 import org.mtransit.parser.gtfs.data.GTrip;
 
 import java.io.BufferedReader;
@@ -63,16 +62,16 @@ public class GReader {
 		try {
 			// AGENCY
 			if (!calendarsOnly) {
-				readFile(agencyTools, gtfsDir, GAgency.FILENAME, true, line ->
+				readFile(gtfsDir, GAgency.FILENAME, true, line ->
 						processAgency(agencyTools, gSpec, line)
 				);
 			}
 			// CALENDAR DATES
-			boolean hasCalendarDates = readFile(agencyTools, gtfsDir, GCalendarDate.FILENAME, false, line ->
+			boolean hasCalendarDates = readFile(gtfsDir, GCalendarDate.FILENAME, false, line ->
 					processCalendarDate(agencyTools, gSpec, line)
 			);
 			// CALENDAR
-			boolean hasCalendars = readFile(agencyTools, gtfsDir, GCalendar.FILENAME, false, line ->
+			boolean hasCalendars = readFile(gtfsDir, GCalendar.FILENAME, false, line ->
 					processCalendar(agencyTools, gSpec, line)
 			);
 			boolean hasCalendar = hasCalendarDates || hasCalendars;
@@ -81,25 +80,25 @@ public class GReader {
 			}
 			// ROUTES
 			if (!calendarsOnly) {
-				readFile(agencyTools, gtfsDir, GRoute.FILENAME, true, line ->
+				readFile(gtfsDir, GRoute.FILENAME, true, line ->
 						processRoute(agencyTools, gSpec, line)
 				);
 			}
 			// TRIPS
 			if (!calendarsOnly) {
-				readFile(agencyTools, gtfsDir, GTrip.FILENAME, true, line ->
+				readFile(gtfsDir, GTrip.FILENAME, true, line ->
 						processTrip(agencyTools, gSpec, line)
 				);
 			}
 			// FREQUENCIES
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
-				readFile(agencyTools, gtfsDir, GFrequency.FILENAME, false, line ->
+				readFile(gtfsDir, GFrequency.FILENAME, false, line ->
 						processFrequency(agencyTools, gSpec, line)
 				);
 			}
 			// STOPS
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
-				readFile(agencyTools, gtfsDir, GStop.FILENAME, true, line ->
+				readFile(gtfsDir, GStop.FILENAME, true, line ->
 						processStop(agencyTools, gSpec, line)
 				);
 			}
@@ -108,7 +107,7 @@ public class GReader {
 				MTLog.log("- IDs: %d", GIDs.count());
 				DBUtils.setAutoCommit(false);
 				final PreparedStatement insertStopTimePrepared = DBUtils.prepareInsertStopTime(false);
-				readFile(agencyTools, gtfsDir, GStopTime.FILENAME, false,
+				readFile(gtfsDir, GStopTime.FILENAME, false,
 						line -> processStopTime(agencyTools, gSpec, line, insertStopTimePrepared),
 						columnNames -> {
 							if (!columnNames.contains(GStopTime.PICKUP_TYPE)) {
@@ -140,17 +139,15 @@ public class GReader {
 	}
 
 	private static boolean readFile(
-			@NotNull final GAgencyTools agencyTools,
 			@NotNull String gtfsDir,
 			@NotNull String fileName,
 			boolean fileRequired,
 			@NotNull LineProcessor lineProcessor
 	) {
-		return readFile(agencyTools, gtfsDir, fileName, fileRequired, lineProcessor, null);
+		return readFile(gtfsDir, fileName, fileRequired, lineProcessor, null);
 	}
 
 	private static boolean readFile(
-			@NotNull final GAgencyTools agencyTools,
 			@NotNull String gtfsDir,
 			@NotNull String fileName,
 			boolean fileRequired,
@@ -180,6 +177,7 @@ public class GReader {
 
 	private static final Pattern QUOTE_ = Pattern.compile("\"");
 
+	@SuppressWarnings("unused")
 	private static void readCsv(String filename, BufferedReader reader,
 								LineProcessor lineProcessor) throws IOException {
 		readCsv(filename, reader, lineProcessor, null);
@@ -264,17 +262,7 @@ public class GReader {
 
 	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line, PreparedStatement insertStopTimePrepared) {
 		try {
-			final GStopTime gStopTime = new GStopTime(
-					line.get(GStopTime.TRIP_ID),
-					line.get(GStopTime.ARRIVAL_TIME).trim(),
-					line.get(GStopTime.DEPARTURE_TIME).trim(),
-					line.get(GStopTime.STOP_ID).trim(),
-					Integer.parseInt(line.get(GStopTime.STOP_SEQUENCE).trim()),
-					line.get(GStopTime.STOP_HEADSIGN),
-					GPickupType.parse(line.get(GStopTime.PICKUP_TYPE)),
-					GDropOffType.parse(line.get(GStopTime.DROP_OFF_TYPE)),
-					GTimePoint.parse(line.get(GStopTime.TIME_POINT))
-			);
+			final GStopTime gStopTime = GStopTime.fromLine(line);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
 				return;
 			}
@@ -389,7 +377,7 @@ public class GReader {
 			final String directionId = line.get(GTrip.DIRECTION_ID);
 			final String tripHeadsign = line.get(GTrip.TRIP_HEADSIGN);
 			final String wheelchairAccessible = line.get(GTrip.WHEELCHAIR_ACCESSIBLE);
-			GTrip gTrip = new GTrip(
+			final GTrip gTrip = new GTrip(
 					line.get(GTrip.ROUTE_ID),
 					line.get(GTrip.SERVICE_ID),
 					line.get(GTrip.TRIP_ID),

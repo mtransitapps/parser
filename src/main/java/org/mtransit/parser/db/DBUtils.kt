@@ -1,9 +1,11 @@
 package org.mtransit.parser.db
 
 import org.mtransit.commons.sql.SQLCreateBuilder
+import org.mtransit.commons.sql.getStringOrNull
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTripStop
 import org.mtransit.parser.mt.data.MSchedule
@@ -24,7 +26,6 @@ object DBUtils {
     private const val SCHEDULES_TABLE_NAME = "m_schedule"
 
     private const val SQL_RESULT_ALIAS = "result"
-    private const val SQL_NULL = "null"
 
     private val IS_USING_FILE_INSTEAD_OF_MEMORY = DefaultAgencyTools.IS_CI
 
@@ -150,7 +151,7 @@ object DBUtils {
                 setInt(idx++, gStopTime.stopSequence)
                 setInt(idx++, gStopTime.arrivalTime)
                 setInt(idx++, gStopTime.departureTime)
-                setString(idx++, "${gStopTime.stopHeadsign?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}")
+                setString(idx++, gStopTime.stopHeadsign?.quotesEscape())
                 setInt(idx++, gStopTime.pickupType.id)
                 setInt(idx++, gStopTime.dropOffType.id)
                 setInt(idx++, gStopTime.timePoint.id)
@@ -186,7 +187,7 @@ object DBUtils {
                         "${gStopTime.stopSequence}," +
                         "${gStopTime.arrivalTime}," +
                         "${gStopTime.departureTime}," +
-                        "${gStopTime.stopHeadsign?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}," +
+                        "${gStopTime.stopHeadsign?.quotesEscape()}," +
                         "${gStopTime.pickupType.id}," +
                         "${gStopTime.dropOffType.id}," +
                         "${gStopTime.timePoint.id}" +
@@ -231,7 +232,7 @@ object DBUtils {
                         "${mSchedule.pathIdInt}," +
                         "${mSchedule.accessible}," +
                         "${mSchedule.headsignType}," +
-                        "${mSchedule.headsignValue?.let { SQLUtils.quotes(SQLUtils.escape(it)) }}" +
+                        "${mSchedule.headsignValue?.quotesEscape()}" +
                         SQLUtilsCommons.P2
             )
             insertRowCount++
@@ -276,10 +277,6 @@ object DBUtils {
         connection.createStatement().use { statement ->
             val rs = SQLUtils.executeQuery(statement, query)
             while (rs.next()) {
-                var stopHeadSign: String? = rs.getString(GStopTime.STOP_HEADSIGN)
-                if (stopHeadSign == SQL_NULL) {
-                    stopHeadSign = null
-                }
                 result.add(
                     GStopTime(
                         rs.getInt(GStopTime.TRIP_ID),
@@ -287,7 +284,7 @@ object DBUtils {
                         rs.getInt(GStopTime.DEPARTURE_TIME),
                         rs.getInt(GStopTime.STOP_ID),
                         rs.getInt(GStopTime.STOP_SEQUENCE),
-                        stopHeadSign,
+                        rs.getStringOrNull(GStopTime.STOP_HEADSIGN),
                         rs.getInt(GStopTime.PICKUP_TYPE),
                         rs.getInt(GStopTime.DROP_OFF_TYPE),
                         rs.getInt(GStopTime.TIME_POINT),
@@ -484,10 +481,6 @@ object DBUtils {
         connection.createStatement().use { statement ->
             val rs = SQLUtils.executeQuery(statement, query)
             while (rs.next()) {
-                var headsignValue: String? = rs.getString(MSchedule.HEADSIGN_VALUE)
-                if (headsignValue == SQL_NULL) {
-                    headsignValue = null
-                }
                 result.add(
                     MSchedule(
                         rs.getLong(MSchedule.ROUTE_ID),
@@ -499,7 +492,7 @@ object DBUtils {
                         rs.getInt(MSchedule.PATH_ID),
                         rs.getInt(MSchedule.WHEELCHAIR_BOARDING),
                         rs.getInt(MSchedule.HEADSIGN_TYPE),
-                        headsignValue
+                        rs.getStringOrNull(MSchedule.HEADSIGN_VALUE),
                     )
                 )
                 selectRowCount++

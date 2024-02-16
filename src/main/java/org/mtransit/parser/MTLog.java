@@ -103,6 +103,7 @@ public final class MTLog {
 	}
 
 	public static void waitForEnter() {
+		// if (true) return;
 		if (DefaultAgencyTools.IS_CI) {
 			return;
 		}

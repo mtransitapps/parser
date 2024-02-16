@@ -5,7 +5,8 @@ import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
-import org.mtransit.parser.db.SQLUtils
+import org.mtransit.parser.db.SQLUtils.quotes
+import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 
@@ -33,14 +34,14 @@ data class MSchedule(
         pathIdInt: Int,
         accessible: Int,
     ) : this(
-        routeId,
-        serviceIdInt,
-        tripId,
-        stopId,
-        (times.first ?: 0),
-        (times.second ?: 0),
-        pathIdInt,
-        accessible,
+        routeId = routeId,
+        serviceIdInt = serviceIdInt,
+        tripId = tripId,
+        stopId = stopId,
+        arrival = (times.first ?: 0),
+        departure = (times.second ?: 0),
+        pathIdInt = pathIdInt,
+        accessible = accessible,
     )
 
     @Deprecated(message = "Not memory efficient")
@@ -104,7 +105,7 @@ data class MSchedule(
     }
 
     fun toFileNewServiceIdAndTripId(agencyTools: GAgencyTools) = buildString {
-        append(SQLUtils.quotes(SQLUtils.escape(getCleanServiceId(agencyTools)))) // service ID
+        append(getCleanServiceId(agencyTools).quotesEscape()) // service ID
         append(Constants.COLUMN_SEPARATOR) //
         // no route ID, just for file split
         append(tripId) // trip ID
@@ -120,12 +121,12 @@ data class MSchedule(
             append(Constants.COLUMN_SEPARATOR) //
         }
         if (DefaultAgencyTools.EXPORT_PATH_ID) {
-            append(SQLUtils.quotes(_pathId)) // original trip ID
+            append(_pathId.quotesEscape()) // original trip ID
             append(Constants.COLUMN_SEPARATOR) //
         }
         append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
         append(Constants.COLUMN_SEPARATOR) //
-        append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
+        append((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
         if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
             append(Constants.COLUMN_SEPARATOR) //
             append(accessible)
@@ -154,11 +155,11 @@ data class MSchedule(
         if (headsignType == MTrip.HEADSIGN_TYPE_NO_PICKUP) {
             append(MTrip.HEADSIGN_TYPE_NO_PICKUP) // HEADSIGN TYPE
             append(Constants.COLUMN_SEPARATOR) //
-            append(SQLUtils.quotes(Constants.EMPTY)) // HEADSIGN STRING
+            append(Constants.EMPTY.quotes()) // HEADSIGN STRING
         } else {
             append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
             append(Constants.COLUMN_SEPARATOR) //
-            append(SQLUtils.quotes(headsignValue ?: Constants.EMPTY)) // HEADSIGN STRING
+            append((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
         }
         if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
             append(Constants.COLUMN_SEPARATOR) //
@@ -227,12 +228,14 @@ data class MSchedule(
         const val HEADSIGN_TYPE = "headsign_type"
         const val HEADSIGN_VALUE = "headsign_value"
 
+        private const val UID_SEPARATOR = "+" // int IDs can be negative
+
         @JvmStatic
         fun getNewUID(
             serviceIdInt: Int,
             tripId: Long,
             stopId: Int,
             departure: Int
-        ) = "${serviceIdInt}-${tripId}-${stopId}-${departure}"
+        ) = "${serviceIdInt}$UID_SEPARATOR${tripId}$UID_SEPARATOR${stopId}$UID_SEPARATOR${departure}"
     }
 }

@@ -80,12 +80,14 @@ data class GTripStop(
         const val STOP_ID = "stop_id"
         const val STOP_SEQUENCE = "stop_sequence"
 
+        private const val UID_SEPARATOR = "+" // int IDs can be negative
+
         @JvmStatic
         fun getNewUID(
             tripUID: String,
             stopIdInt: Int,
             stopSequence: Int
-        ) = "${tripUID}-${stopIdInt}-${stopSequence}"
+        ) = "${tripUID}$UID_SEPARATOR${stopIdInt}$UID_SEPARATOR${stopSequence}"
 
         @JvmStatic
         fun getNewUID(
@@ -93,7 +95,7 @@ data class GTripStop(
             tripIdInt: Int,
             stopIdInt: Int,
             stopSequence: Int
-        ) = "${routeIdInt}-${tripIdInt}-${stopIdInt}-${stopSequence}"
+        ) = "${routeIdInt}$UID_SEPARATOR${tripIdInt}$UID_SEPARATOR${stopIdInt}$UID_SEPARATOR${stopSequence}"
 
         @Suppress("unused")
         @JvmStatic

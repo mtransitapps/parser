@@ -2,7 +2,7 @@ package org.mtransit.parser.mt.data
 
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
-import org.mtransit.parser.db.SQLUtils
+import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 
@@ -35,15 +35,14 @@ data class MServiceDate(
         return agencyTools.cleanServiceId(_serviceId)
     }
 
-    override fun compareTo(other: MServiceDate): Int {
-        val cd = calendarDate - other.calendarDate
-        return if (cd != 0) {
-            cd
-        } else _serviceId.compareTo(other._serviceId, ignoreCase = true) // SORT BY real service ID
-    }
+    override fun compareTo(other: MServiceDate): Int = compareBy(
+        MServiceDate::calendarDate,
+        MServiceDate::_serviceId,
+        MServiceDate::exceptionType,
+    ).compare(this, other)
 
     fun toFile(agencyTools: GAgencyTools) = buildString {
-        append(SQLUtils.quotes(SQLUtils.escape(getCleanServiceId(agencyTools)))) // service ID
+        append(getCleanServiceId(agencyTools).quotesEscape()) // service ID
         append(Constants.COLUMN_SEPARATOR)
         append(calendarDate) // calendar date
         if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {

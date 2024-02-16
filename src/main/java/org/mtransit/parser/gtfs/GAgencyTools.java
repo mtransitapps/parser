@@ -129,6 +129,7 @@ public interface GAgencyTools {
 	@NotNull
 	String cleanRouteLongName(@NotNull String routeLongName);
 
+	@SuppressWarnings("DeprecatedIsStillUsed")
 	@Deprecated
 	boolean allowGTFSIdOverride();
 

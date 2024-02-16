@@ -2,7 +2,7 @@ package org.mtransit.parser.mt.data
 
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.db.SQLUtils
+import org.mtransit.parser.db.SQLUtils.quotesEscape
 
 @Suppress("unused")
 data class MTrip(
@@ -179,7 +179,7 @@ data class MTrip(
         append(Constants.COLUMN_SEPARATOR) //
         append(headsignType) // HEADSIGN TYPE
         append(Constants.COLUMN_SEPARATOR) //
-        append(SQLUtils.quotes(SQLUtils.escape(headsignValue))) // HEADSIGN STRING
+        append(headsignValue.quotesEscape()) // HEADSIGN STRING
         append(Constants.COLUMN_SEPARATOR) //
         append(routeId) // ROUTE ID
     }

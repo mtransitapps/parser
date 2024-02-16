@@ -76,11 +76,13 @@ data class GCalendarDate(
         const val DATE = "date"
         const val EXCEPTION_DATE = "exception_type"
 
+        private const val UID_SEPARATOR = "0" // int IDs can be negative
+
         @JvmStatic
         fun getNewUID(
             date: Int,
             serviceIdInt: Int,
-        ) = "${date}0${serviceIdInt}".toLong()
+        ) = "${date}$UID_SEPARATOR${serviceIdInt}".toLong()
 
         @JvmStatic
         fun isServiceEntirelyRemoved(

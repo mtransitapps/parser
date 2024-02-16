@@ -30,15 +30,15 @@ data class GStopTime(
         dropOffTypeInt: Int,
         timePointInt: Int,
     ) : this(
-        tripIdInt,
-        arrivalTime,
-        departureTime,
-        stopIdInt,
-        stopSequence,
-        stopHeadsign,
-        GPickupType.parse(pickupTypeInt),
-        GDropOffType.parse(dropOffTypeInt),
-        GTimePoint.parse(timePointInt),
+        tripIdInt = tripIdInt,
+        _arrivalTime = arrivalTime,
+        _departureTime = departureTime,
+        stopIdInt = stopIdInt,
+        stopSequence = stopSequence,
+        stopHeadsign = stopHeadsign,
+        pickupType = GPickupType.parse(pickupTypeInt),
+        dropOffType = GDropOffType.parse(dropOffTypeInt),
+        timePoint = GTimePoint.parse(timePointInt),
     )
 
     constructor(
@@ -52,15 +52,15 @@ data class GStopTime(
         dropOffType: GDropOffType,
         timePoint: GTimePoint,
     ) : this(
-        GIDs.getInt(tripId),
-        arrivalTime,
-        departureTime,
-        stopIdInt,
-        stopSequence,
-        stopHeadsign,
-        pickupType,
-        dropOffType,
-        timePoint,
+        tripIdInt = GIDs.getInt(tripId),
+        _arrivalTime = arrivalTime,
+        _departureTime = departureTime,
+        stopIdInt = stopIdInt,
+        stopSequence = stopSequence,
+        stopHeadsign = stopHeadsign,
+        pickupType = pickupType,
+        dropOffType = dropOffType,
+        timePoint = timePoint,
     )
 
     constructor(
@@ -74,15 +74,15 @@ data class GStopTime(
         dropOffType: GDropOffType,
         timePoint: GTimePoint,
     ) : this(
-        GIDs.getInt(tripId),
-        GTime.fromString(arrivalTime),
-        GTime.fromString(departureTime),
-        GIDs.getInt(stopId),
-        stopSequence,
-        stopHeadsign,
-        pickupType,
-        dropOffType,
-        timePoint,
+        tripIdInt = GIDs.getInt(tripId),
+        _arrivalTime = GTime.fromString(arrivalTime),
+        _departureTime = GTime.fromString(departureTime),
+        stopIdInt = GIDs.getInt(stopId),
+        stopSequence = stopSequence,
+        stopHeadsign = stopHeadsign,
+        pickupType = pickupType,
+        dropOffType = dropOffType,
+        timePoint = timePoint,
     )
 
     @Deprecated(message = "Not memory efficient")
@@ -136,7 +136,7 @@ data class GStopTime(
 
     val uID by lazy { getNewUID(tripIdInt, stopIdInt, stopSequence) }
 
-    fun hasStopHeadsign() = !this.stopHeadsign.isNullOrEmpty()
+    fun hasStopHeadsign() = !this.stopHeadsign.isNullOrBlank()
 
     @Suppress("unused")
     val stopHeadsignOrDefault: String = stopHeadsign ?: StringUtils.EMPTY
@@ -191,11 +191,26 @@ data class GStopTime(
         const val TIME_POINT = "timepoint"
 
         @JvmStatic
+        fun fromLine(line: Map<String, String>) = GStopTime(
+            line[TRIP_ID] ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+            line[ARRIVAL_TIME]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+            line[DEPARTURE_TIME]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+            line[STOP_ID]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+            line[STOP_SEQUENCE]?.trim()?.toInt() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+            line[STOP_HEADSIGN]?.takeIf { it.isNotBlank() },
+            GPickupType.parse(line[PICKUP_TYPE]),
+            GDropOffType.parse(line[DROP_OFF_TYPE]),
+            GTimePoint.parse(line[TIME_POINT]),
+        )
+
+        private const val UID_SEPARATOR = "0" // int IDs can be negative
+
+        @JvmStatic
         fun getNewUID(
             tripIdInt: Int,
             stopIdInt: Int,
             stopSequence: Int
-        ) = "${tripIdInt}0${stopIdInt}0${stopSequence}".toLong()
+        ) = "${tripIdInt}$UID_SEPARATOR${stopIdInt}$UID_SEPARATOR${stopSequence}".toLong()
 
         fun Iterable<GStopTime>.minStopSequence(): Int {
             return this.minOfOrNull { it.stopSequence } ?: 0

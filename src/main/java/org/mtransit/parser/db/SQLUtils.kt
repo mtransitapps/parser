@@ -39,6 +39,11 @@ object SQLUtils {
         return "'$string'"
     }
 
+    @JvmName("quotesExt")
+    fun String.quotes() = quotes(this)
+
+    fun String.quotesEscape() = escape(this).quotes()
+
     @JvmStatic
     fun execute(statement: Statement, query: String): Boolean {
         if (org.mtransit.parser.Constants.LOG_SQL) {

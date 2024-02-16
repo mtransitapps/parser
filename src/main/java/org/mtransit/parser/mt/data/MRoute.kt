@@ -3,7 +3,8 @@ package org.mtransit.parser.mt.data
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.parser.Constants
-import org.mtransit.parser.db.SQLUtils
+import org.mtransit.parser.db.SQLUtils.quotes
+import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import kotlin.math.max
 
@@ -38,11 +39,11 @@ data class MRoute(
     fun toFile() = buildString {
         append(id.toString()) // ID
         append(Constants.COLUMN_SEPARATOR) //
-        append(SQLUtils.quotes(SQLUtils.escape(shortName ?: Constants.EMPTY))) // short name
+        append((shortName ?: Constants.EMPTY).quotesEscape()) // short name
         append(Constants.COLUMN_SEPARATOR) //
-        append(SQLUtils.quotes(SQLUtils.escape(longName))) // long name
+        append(longName.quotesEscape()) // long name
         append(Constants.COLUMN_SEPARATOR) //
-        append(SQLUtils.quotes(color ?: Constants.EMPTY)) // color
+        append((color ?: Constants.EMPTY).quotes()) // color
         if (FeatureFlags.F_EXPORT_GTFS_ID_HASH_INT) {
             append(Constants.COLUMN_SEPARATOR) //
             originalIdHash?.let { append(it) } // original ID hash

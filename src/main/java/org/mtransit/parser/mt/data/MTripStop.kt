@@ -63,6 +63,8 @@ data class MTripStop(
 
     companion object {
 
+        private const val UID_SEPARATOR = "+" // int IDs can be negative
+
         @Suppress("unused")
         @JvmStatic
         fun containsStopIds(mainList: List<MTripStop>, otherList: List<MTripStop>): Boolean {
@@ -85,6 +87,6 @@ data class MTripStop(
         fun getNewUID(
             tripId: Long,
             stopId: Int
-        ) = "${tripId}-${stopId}"
+        ) = "${tripId}$UID_SEPARATOR${stopId}"
     }
 }
