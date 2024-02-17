@@ -1,6 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.Constants
+import org.mtransit.parser.MTLog
 
 // https://gtfs.org/schedule/reference/#agencytxt
 // https://developers.google.com/transit/gtfs/reference#agency_fields
@@ -54,16 +55,28 @@ data class GAgency(
     companion object {
         const val FILENAME = "agency.txt"
 
-        const val AGENCY_ID = "agency_id" // Conditionally Required
-        const val AGENCY_NAME = "agency_name" // Required
-        const val AGENCY_URL = "agency_url" // Required
-        const val AGENCY_TIMEZONE = "agency_timezone" // Required
+        private const val AGENCY_ID = "agency_id" // Conditionally Required
+        private const val AGENCY_NAME = "agency_name" // Required
+        private const val AGENCY_URL = "agency_url" // Required
+        private const val AGENCY_TIMEZONE = "agency_timezone" // Required
 
-        const val AGENCY_LANG = "agency_lang" // Optional
-        const val AGENCY_PHONE = "agency_phone" // Optional
-        const val AGENCY_FARE_URL = "agency_fare_url" // Optional
-        const val AGENCY_EMAIL = "agency_email" // Optional
+        private const val AGENCY_LANG = "agency_lang" // Optional
+        private const val AGENCY_PHONE = "agency_phone" // Optional
+        private const val AGENCY_FARE_URL = "agency_fare_url" // Optional
+        private const val AGENCY_EMAIL = "agency_email" // Optional
 
         const val MISSING_AGENCY_ID = Constants.EMPTY
+
+        @JvmStatic
+        fun fromLine(line: Map<String, String>) = GAgency(
+            line[AGENCY_ID],
+            line[AGENCY_NAME] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
+            line[AGENCY_URL] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
+            line[AGENCY_TIMEZONE] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
+            line[AGENCY_LANG],
+            line[AGENCY_PHONE],
+            line[AGENCY_FARE_URL],
+            line[AGENCY_EMAIL],
+        )
     }
 }

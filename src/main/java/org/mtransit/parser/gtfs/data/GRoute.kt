@@ -1,6 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.Constants.EMPTY
+import org.mtransit.parser.MTLog
 
 // https://developers.google.com/transit/gtfs/reference#routestxt
 // https://gtfs.org/reference/static/#routestxt
@@ -104,12 +105,23 @@ data class GRoute(
     companion object {
         const val FILENAME = "routes.txt"
 
-        const val ROUTE_ID = "route_id"
-        const val ROUTE_SHORT_NAME = "route_short_name"
-        const val ROUTE_LONG_NAME = "route_long_name"
-        const val ROUTE_TYPE = "route_type"
-        const val AGENCY_ID = "agency_id"
-        const val ROUTE_DESC = "route_desc"
-        const val ROUTE_COLOR = "route_color"
+        private const val ROUTE_ID = "route_id"
+        private const val ROUTE_SHORT_NAME = "route_short_name"
+        private const val ROUTE_LONG_NAME = "route_long_name"
+        private const val ROUTE_TYPE = "route_type"
+        private const val AGENCY_ID = "agency_id"
+        private const val ROUTE_DESC = "route_desc"
+        private const val ROUTE_COLOR = "route_color"
+
+        @JvmStatic
+        fun fromLine(line: Map<String, String>) = GRoute(
+            line[AGENCY_ID],
+            line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GRoute from $line!"),
+            line[ROUTE_SHORT_NAME]?.trim() ?: EMPTY,
+            line[ROUTE_LONG_NAME],
+            line[ROUTE_DESC],
+            line[ROUTE_TYPE]?.toInt() ?: throw MTLog.Fatal("Invalid GRoute from $line!"),
+            line[ROUTE_COLOR]?.takeIf { it.isNotBlank() }?.trim(),
+        )
     }
 }

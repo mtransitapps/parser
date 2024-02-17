@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -72,9 +73,22 @@ data class GCalendarDate(
     companion object {
         const val FILENAME = "calendar_dates.txt"
 
-        const val SERVICE_ID = "service_id"
-        const val DATE = "date"
-        const val EXCEPTION_DATE = "exception_type"
+        private const val SERVICE_ID = "service_id"
+        private const val DATE = "date"
+        private const val EXCEPTION_DATE = "exception_type"
+
+        @JvmStatic
+        fun fromLine(line: Map<String, String>) = line
+            .let { listOf(it[SERVICE_ID], it[DATE], it[EXCEPTION_DATE]) }
+            .takeUnless { (serviceId, date, exceptionDate) ->
+                serviceId.isNullOrBlank() && date.isNullOrBlank() && exceptionDate.isNullOrBlank()
+            }?.let { (serviceId, date, exceptionDate) ->
+                GCalendarDate(
+                    serviceId ?: throw MTLog.Fatal("Invalid GCalendarDate from $line!"),
+                    date?.toInt() ?: throw MTLog.Fatal("Invalid GCalendarDate from $line!"),
+                    GCalendarDatesExceptionType.parse(exceptionDate),
+                )
+            }
 
         private const val UID_SEPARATOR = "0" // int IDs can be negative
 

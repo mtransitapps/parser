@@ -14,7 +14,6 @@ import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
-import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
 import org.mtransit.parser.gtfs.data.GDropOffType;
 import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GPickupType;
@@ -295,12 +294,7 @@ public class GReader {
 										 GSpec gSpec,
 										 HashMap<String, String> line) {
 		try {
-			GFrequency gFrequency = new GFrequency(
-					line.get(GFrequency.TRIP_ID),
-					line.get(GFrequency.START_TIME),
-					line.get(GFrequency.END_TIME),
-					Integer.parseInt(line.get(GFrequency.HEADWAY_SECS))
-			);
+			final GFrequency gFrequency = GFrequency.fromLine(line);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gFrequency.getTripIdInt()))) {
 				return;
 			}
@@ -314,16 +308,7 @@ public class GReader {
 									  GSpec gSpec,
 									  HashMap<String, String> line) {
 		try {
-			final GAgency gAgency = new GAgency(
-					line.get(GAgency.AGENCY_ID),
-					line.get(GAgency.AGENCY_NAME),
-					line.get(GAgency.AGENCY_URL),
-					line.get(GAgency.AGENCY_TIMEZONE),
-					line.get(GAgency.AGENCY_LANG),
-					line.get(GAgency.AGENCY_PHONE),
-					line.get(GAgency.AGENCY_FARE_URL),
-					line.get(GAgency.AGENCY_EMAIL)
-			);
+			final GAgency gAgency = GAgency.fromLine(line);
 			if (agencyTools.excludeAgency(gAgency)) {
 				return;
 			}
@@ -337,14 +322,11 @@ public class GReader {
 
 	private static void processCalendarDate(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			String serviceId = line.get(GCalendarDate.SERVICE_ID);
-			String date = line.get(GCalendarDate.DATE);
-			String exceptionDate = line.get(GCalendarDate.EXCEPTION_DATE);
-			if (StringUtils.isEmpty(serviceId) && StringUtils.isEmpty(date) && StringUtils.isEmpty(exceptionDate)) {
+			final GCalendarDate gCalendarDate = GCalendarDate.fromLine(line);
+			if (gCalendarDate == null) {
 				MTLog.log("Empty calendar dates ignored (%s).", line);
 				return;
 			}
-			GCalendarDate gCalendarDate = new GCalendarDate(serviceId, Integer.parseInt(date), GCalendarDatesExceptionType.parse(exceptionDate));
 			if (agencyTools.excludeCalendarDate(gCalendarDate)) {
 				return;
 			}
@@ -354,22 +336,9 @@ public class GReader {
 		}
 	}
 
-	private static final String DAY_TRUE = "1";
-
 	private static void processCalendar(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			GCalendar gCalendar = new GCalendar( //
-					line.get(GCalendar.SERVICE_ID), //
-					DAY_TRUE.equals(line.get(GCalendar.MONDAY)), //
-					DAY_TRUE.equals(line.get(GCalendar.TUESDAY)), //
-					DAY_TRUE.equals(line.get(GCalendar.WEDNESDAY)), //
-					DAY_TRUE.equals(line.get(GCalendar.THURSDAY)), //
-					DAY_TRUE.equals(line.get(GCalendar.FRIDAY)), //
-					DAY_TRUE.equals(line.get(GCalendar.SATURDAY)), //
-					DAY_TRUE.equals(line.get(GCalendar.SUNDAY)), //
-					Integer.parseInt(line.get(GCalendar.START_DATE)), //
-					Integer.parseInt(line.get(GCalendar.END_DATE)) //
-			);
+			final GCalendar gCalendar = GCalendar.fromLine(line);
 			if (agencyTools.excludeCalendar(gCalendar)) {
 				return;
 			}
@@ -381,18 +350,7 @@ public class GReader {
 
 	private static void processTrip(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final String directionId = line.get(GTrip.DIRECTION_ID);
-			final String tripHeadsign = line.get(GTrip.TRIP_HEADSIGN);
-			final String wheelchairAccessible = line.get(GTrip.WHEELCHAIR_ACCESSIBLE);
-			final GTrip gTrip = new GTrip(
-					line.get(GTrip.ROUTE_ID),
-					line.get(GTrip.SERVICE_ID),
-					line.get(GTrip.TRIP_ID),
-					StringUtils.isEmpty(directionId) ? null : Integer.valueOf(directionId),
-					tripHeadsign,
-					line.get(GTrip.TRIP_SHORT_NAME),
-					StringUtils.isEmpty(wheelchairAccessible) ? null : Integer.parseInt(wheelchairAccessible)
-			);
+			final GTrip gTrip = GTrip.fromLine(line);
 			if (agencyTools.excludeTrip(gTrip)) {
 				logExclude("Exclude trip: %s.", gTrip.toStringPlus());
 				return;
@@ -416,19 +374,7 @@ public class GReader {
 
 	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line) {
 		try {
-			final String locationType = line.get(GStop.LOCATION_TYPE);
-			final String code = line.get(GStop.STOP_CODE);
-			final String wheelchairBoarding = line.get(GStop.WHEELCHAIR_BOARDING);
-			final GStop gStop = new GStop(
-					line.get(GStop.STOP_ID),
-					line.get(GStop.STOP_NAME),
-					Double.parseDouble(line.get(GStop.STOP_LAT)),
-					Double.parseDouble(line.get(GStop.STOP_LON)),
-					code == null ? EMPTY : code.trim(),
-					StringUtils.isEmpty(locationType) ? null : Integer.parseInt(locationType),
-					line.get(GStop.PARENT_STATION),
-					StringUtils.isEmpty(wheelchairBoarding) ? null : Integer.parseInt(wheelchairBoarding)
-			);
+			final GStop gStop = GStop.fromLine(line);
 			if (agencyTools.excludeStop(gStop)) {
 				return;
 			}
@@ -440,17 +386,7 @@ public class GReader {
 
 	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final String routeColor = line.get(GRoute.ROUTE_COLOR);
-			final String rsn = line.get(GRoute.ROUTE_SHORT_NAME);
-			GRoute gRoute = new GRoute(
-					line.get(GRoute.AGENCY_ID),
-					line.get(GRoute.ROUTE_ID),
-					rsn == null ? EMPTY : rsn.trim(),
-					line.get(GRoute.ROUTE_LONG_NAME),
-					line.get(GRoute.ROUTE_DESC),
-					Integer.parseInt(line.get(GRoute.ROUTE_TYPE)),
-					routeColor == null ? null : routeColor.trim()
-			);
+			final GRoute gRoute = GRoute.fromLine(line);
 			final GAgency routeAgency = gRoute.getAgencyIdInt() == null ? null : gSpec.getAgency(gRoute.getAgencyIdInt());
 			if (agencyTools.excludeRoute(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute.toStringPlus());

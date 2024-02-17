@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.parser.MTLog
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
@@ -74,14 +75,23 @@ data class GFrequency(
     companion object {
         const val FILENAME = "frequencies.txt"
 
+        private const val TRIP_ID = "trip_id"
+        private const val START_TIME = "start_time"
+        private const val END_TIME = "end_time"
+        private const val HEADWAY_SECS = "headway_secs"
+
         @Suppress("unused")
         val DEFAULT_PICKUP_TYPE = GPickupType.REGULAR // Regularly scheduled pickup
 
         @Suppress("unused")
         val DEFAULT_DROP_OFF_TYPE = GDropOffType.REGULAR // Regularly scheduled drop off
-        const val TRIP_ID = "trip_id"
-        const val START_TIME = "start_time"
-        const val END_TIME = "end_time"
-        const val HEADWAY_SECS = "headway_secs"
+
+        @JvmStatic
+        fun fromLine(line: Map<String, String>) = GFrequency(
+            line[TRIP_ID] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
+            line[START_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
+            line[END_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
+            line[HEADWAY_SECS]?.toInt() ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
+        )
     }
 }

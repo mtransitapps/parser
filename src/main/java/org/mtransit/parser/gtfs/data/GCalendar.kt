@@ -143,16 +143,32 @@ data class GCalendar(
     companion object {
         const val FILENAME = "calendar.txt"
 
-        const val SERVICE_ID = "service_id"
-        const val MONDAY = "monday"
-        const val TUESDAY = "tuesday"
-        const val WEDNESDAY = "wednesday"
-        const val THURSDAY = "thursday"
-        const val FRIDAY = "friday"
-        const val SATURDAY = "saturday"
-        const val SUNDAY = "sunday"
-        const val START_DATE = "start_date"
-        const val END_DATE = "end_date"
+        private const val SERVICE_ID = "service_id"
+        private const val MONDAY = "monday"
+        private const val TUESDAY = "tuesday"
+        private const val WEDNESDAY = "wednesday"
+        private const val THURSDAY = "thursday"
+        private const val FRIDAY = "friday"
+        private const val SATURDAY = "saturday"
+        private const val SUNDAY = "sunday"
+        private const val START_DATE = "start_date"
+        private const val END_DATE = "end_date"
+
+        private const val DAY_TRUE = "1"
+
+        @JvmStatic
+        fun fromLine(line: Map<String, String>) = GCalendar(
+            line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
+            DAY_TRUE == line[MONDAY],
+            DAY_TRUE == line[TUESDAY],
+            DAY_TRUE == line[WEDNESDAY],
+            DAY_TRUE == line[THURSDAY],
+            DAY_TRUE == line[FRIDAY],
+            DAY_TRUE == line[SATURDAY],
+            DAY_TRUE == line[SUNDAY],
+            line[START_DATE]?.toInt() ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
+            line[END_DATE]?.toInt() ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
+        )
 
         private fun initAllDates(
             _serviceId: Int,
@@ -193,6 +209,7 @@ data class GCalendar(
                                     )
                                 )
                             }
+
                             Calendar.TUESDAY -> if (_tuesday) {
                                 newAllDates.add(
                                     GCalendarDate(
@@ -202,6 +219,7 @@ data class GCalendar(
                                     )
                                 )
                             }
+
                             Calendar.WEDNESDAY -> if (_wednesday) {
                                 newAllDates.add(
                                     GCalendarDate(
@@ -211,6 +229,7 @@ data class GCalendar(
                                     )
                                 )
                             }
+
                             Calendar.THURSDAY -> if (_thursday) {
                                 newAllDates.add(
                                     GCalendarDate(
@@ -220,6 +239,7 @@ data class GCalendar(
                                     )
                                 )
                             }
+
                             Calendar.FRIDAY -> if (_friday) {
                                 newAllDates.add(
                                     GCalendarDate(
@@ -229,6 +249,7 @@ data class GCalendar(
                                     )
                                 )
                             }
+
                             Calendar.SATURDAY -> if (_saturday) {
                                 newAllDates.add(
                                     GCalendarDate(
@@ -238,6 +259,7 @@ data class GCalendar(
                                     )
                                 )
                             }
+
                             Calendar.SUNDAY -> if (_sunday) {
                                 newAllDates.add(
                                     GCalendarDate(

@@ -1,6 +1,9 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.commons.StringUtils.EMPTY
+import org.mtransit.commons.StringUtils.isEmpty
 import org.mtransit.parser.Constants
+import org.mtransit.parser.MTLog
 
 // https://developers.google.com/transit/gtfs/reference#stops_fields
 // https://gtfs.org/schedule/reference/#stopstxt
@@ -74,13 +77,25 @@ data class GStop(
     companion object {
         const val FILENAME = "stops.txt"
 
-        const val STOP_ID = "stop_id"
-        const val STOP_NAME = "stop_name"
-        const val STOP_LAT = "stop_lat"
-        const val STOP_LON = "stop_lon"
-        const val STOP_CODE = "stop_code"
-        const val LOCATION_TYPE = "location_type"
-        const val PARENT_STATION = "parent_station"
-        const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
+        private const val STOP_ID = "stop_id"
+        private const val STOP_NAME = "stop_name"
+        private const val STOP_LAT = "stop_lat"
+        private const val STOP_LON = "stop_lon"
+        private const val STOP_CODE = "stop_code"
+        private const val LOCATION_TYPE = "location_type"
+        private const val PARENT_STATION = "parent_station"
+        private const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
+
+        @JvmStatic
+        fun fromLine(line: Map<String, String>) = GStop(
+            line[STOP_ID] ?: throw MTLog.Fatal("Invalid GStop from $line!"),
+            line[STOP_NAME] ?: throw MTLog.Fatal("Invalid GStop from $line!"),
+            line[STOP_LAT]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),
+            line[STOP_LON]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),
+            line[STOP_CODE]?.trim() ?: EMPTY,
+            line[LOCATION_TYPE]?.takeIf { it.isNotBlank() }?.toInt(),
+            line[PARENT_STATION],
+            line[WHEELCHAIR_BOARDING]?.takeIf { it.isNotBlank() }?.toInt(),
+        )
     }
 }
