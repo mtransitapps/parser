@@ -534,12 +534,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 			MTLog.logDebug("Route excluded because of different type: %s != %s (%s)", getOriginalAgencyRouteType(), gRoute.getRouteType(), gRoute.toStringPlus());
 			return EXCLUDE;
 		}
-		//noinspection deprecation
-		if (getAgencyId() != null && gRoute.isDifferentAgency(getAgencyId())) {
-			//noinspection deprecation
-			MTLog.logDebug("Route excluded because of different agency: %s != %s (%s)", getAgencyId(), gRoute.getAgencyId(), gRoute.toStringPlus());
-			return EXCLUDE;
-		}
 		// MTLog.logDebug("Route NOT excluded: %s", gRoute.toStringPlus());
 		return KEEP;
 	}

@@ -19,7 +19,7 @@ public final class MTLog {
 		if (!Constants.DEBUG) {
 			return;
 		}
-		System.out.printf("\n" + format, args);
+		print(format, args);
 	}
 
 	public static void logDebugMethodCall(@NotNull String methodName, @Nullable Object... args) {
@@ -46,14 +46,14 @@ public final class MTLog {
 		if (!Constants.DEBUG) {
 			return;
 		}
-		System.out.print("\n" + "----------" + methodName + "()");
+		print("----------" + methodName + "().");
 	}
 
 	public static void logDebugMethodEnd(@NotNull String methodName, @Nullable Object result) {
 		if (!Constants.DEBUG) {
 			return;
 		}
-		System.out.printf("\n" + "----------" + methodName + "() > %s.", result);
+		print("----------" + methodName + "() > %s.", result);
 	}
 
 	public static void logPOINT() {
@@ -77,7 +77,11 @@ public final class MTLog {
 	}
 
 	public static void log(@NotNull String format, @Nullable Object... args) {
-		System.out.printf("\n" + format, args);
+		print(format, args);
+	}
+
+	private static void print(@NotNull String format, @Nullable Object... args) {
+		System.out.println(String.format(format, args));
 	}
 
 	public static void logNonFatal(@NotNull Throwable t) {
@@ -85,7 +89,7 @@ public final class MTLog {
 	}
 
 	public static void logNonFatal(@NotNull Throwable t, @NotNull String format, @Nullable Object... args) {
-		System.out.printf("\n" + format, args);
+		print(format, args);
 		t.printStackTrace(); // NON-FATAL
 	}
 
