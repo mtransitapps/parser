@@ -262,7 +262,7 @@ public class DefaultAgencyToolsTest {
 		assertNotNull(p.endDate);
 		assertEquals(2024_04_25, p.endDate.intValue());
 		// NEXT
-		p.todayStringInt = 2024_04_26; // p.endDate + 1;
+		p.todayStringInt = p.endDate + 1; // current + 1
 		p.startDate = null; // reset
 		p.endDate = null; // reset
 		lookBackward = false;
@@ -274,6 +274,117 @@ public class DefaultAgencyToolsTest {
 		assertEquals(2024_04_26, p.startDate.intValue());
 		assertNotNull(p.endDate);
 		assertEquals(2024_05_10, p.endDate.intValue());
+	}
+
+	@Test
+	public void test_parseCalendarDates_Split_ShouldBeOne() { // #GRT
+		// Arrange
+		List<GCalendarDate> gCalendarDates = Arrays.asList(
+				// current
+				new GCalendarDate("10-Weekday-1-24WINT-1111100", 2024_04_08, 1),
+				new GCalendarDate("10-Weekday-1-24WINT-1111100", 2024_04_09, 1),
+				new GCalendarDate("10-Weekday-1-24WINT-1111100", 2024_04_10, 1),
+				new GCalendarDate("10-Weekday-1-24WINT-1111100", 2024_04_11, 1),
+				new GCalendarDate("10-Weekday-1-24WINT-1111100", 2024_04_12, 1),
+				new GCalendarDate("10-Saturday-1-24WINT-0000010", 2024_04_13, 1),
+				new GCalendarDate("10-Sunday-1-24WINT-0000001", 2024_04_14, 1),
+				new GCalendarDate("10-Weekday-1-24WINT-1111100", 2024_04_15, 1),
+				new GCalendarDate("10-Weekday-1-24WINT-1111100", 2024_04_16, 1),
+				new GCalendarDate("10-Weekday-1-24WINT-1111100", 2024_04_17, 1),
+				new GCalendarDate("10-Weekday-1-24WINT-1111100", 2024_04_18, 1),
+				new GCalendarDate("10-Weekday-1-24WINT-1111100", 2024_04_19, 1),
+				new GCalendarDate("10-Saturday-1-24WINT-0000010", 2024_04_20, 1),
+				new GCalendarDate("10-Sunday-1-24WINT-0000001", 2024_04_21, 1),
+				// next
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_04_22, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_04_23, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_04_24, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_04_25, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_04_26, 1),
+				new GCalendarDate("10-Saturday-1-20242-0000010", 2024_04_27, 1),
+				new GCalendarDate("10-Sunday-1-20242-0000001", 2024_04_28, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_04_29, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_04_30, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_01, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_02, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_03, 1),
+				new GCalendarDate("10-Saturday-1-20242-0000010", 2024_05_04, 1),
+				new GCalendarDate("10-Sunday-1-20242-0000001", 2024_05_05, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_06, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_07, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_08, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_09, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_10, 1),
+				new GCalendarDate("10-Saturday-1-20242-0000010", 2024_05_11, 1),
+				new GCalendarDate("10-Sunday-1-20242-0000001", 2024_05_12, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_13, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_14, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_15, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_16, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_17, 1),
+				new GCalendarDate("10-Saturday-1-20242-0000010", 2024_05_18, 1),
+				new GCalendarDate("10-Sunday-1-20242-0000001", 2024_05_19, 1),
+				new GCalendarDate("10-Holiday1-1-20242-0000001", 2024_05_20, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_21, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_22, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_23, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_24, 1),
+				new GCalendarDate("10-Saturday-1-20242-0000010", 2024_05_25, 1),
+				new GCalendarDate("10-Sunday-1-20242-0000001", 2024_05_26, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_27, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_28, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_29, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_30, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_05_31, 1),
+				new GCalendarDate("10-Saturday-1-20242-0000010", 2024_06_01, 1),
+				new GCalendarDate("10-Sunday-1-20242-0000001", 2024_06_02, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_03, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_04, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_05, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_06, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_07, 1),
+				new GCalendarDate("10-Saturday-1-20242-0000010", 2024_06_08, 1),
+				new GCalendarDate("10-Sunday-1-20242-0000001", 2024_06_09, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_10, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_11, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_12, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_13, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_14, 1),
+				new GCalendarDate("10-Saturday-1-20242-0000010", 2024_06_15, 1),
+				new GCalendarDate("10-Sunday-1-20242-0000001", 2024_06_16, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_17, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_18, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_19, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_20, 1),
+				new GCalendarDate("10-Weekday-1-20242-1111100", 2024_06_21, 1),
+				new GCalendarDate("10-Saturday-1-20242-0000010", 2024_06_22, 1),
+				new GCalendarDate("10-Sunday-1-20242-0000001", 2024_06_23, 1)
+		);
+		// CURRENT
+		Period p = new Period();
+		p.todayStringInt = 2024_04_09;
+		boolean lookBackward = true;
+		// Act
+		DefaultAgencyTools.parseCalendarDates(gCalendarDates, c, p, lookBackward);
+		System.out.println("CURRENT: " + p);
+		// Assert
+		assertNotNull(p.startDate);
+		assertEquals(2024_04_08, p.startDate.intValue());
+		assertNotNull(p.endDate);
+		assertEquals(2024_04_21, p.endDate.intValue());
+		// NEXT
+		p.todayStringInt = p.endDate + 1; // current + 1
+		p.startDate = null; // reset
+		p.endDate = null; // reset
+		lookBackward = false;
+		// Act
+		DefaultAgencyTools.parseCalendarDates(gCalendarDates, c, p, lookBackward);
+		System.out.println("NEXT: " + p);
+		// Assert
+		assertNotNull(p.startDate);
+		assertEquals(2024_04_22, p.startDate.intValue());
+		assertNotNull(p.endDate);
+		assertEquals(2024_06_23, p.endDate.intValue());
 	}
 
 	@Test

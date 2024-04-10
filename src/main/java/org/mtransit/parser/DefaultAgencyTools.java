@@ -64,7 +64,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 5;
 	private static final int MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS = 14;
 
-	private static final long MAX_CALENDAR_DATE_COVERAGE_RATIO = 10;
+	// 2024-04-09: 10x -> 3x because merging 2 schedule can create very bad schedule info #GRTbus
+	private static final long MAX_CALENDAR_DATE_COVERAGE_RATIO = 3;
 
 	private static final int MIN_PREVIOUS_NEXT_ADDED_DAYS = 2;
 
