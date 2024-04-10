@@ -191,7 +191,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	public Locale getFirstLanguage() {
 		final List<Locale> supportedLanguages = getSupportedLanguages();
-		return supportedLanguages == null || supportedLanguages.size() < 1 ? null : supportedLanguages.get(0);
+		return supportedLanguages == null || supportedLanguages.isEmpty() ? null : supportedLanguages.get(0);
 	}
 
 	@NotNull
@@ -1109,11 +1109,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 		List<GCalendar> gCalendars = gtfs.getAllCalendars();
 		List<GCalendarDate> gCalendarDates = gtfs.getAllCalendarDates();
 		final Period entirePeriod = getEntirePeriodMinMaxDate(gCalendars, gCalendarDates);
-		MTLog.log("Schedule available from %s to %s.", entirePeriod.startDate, entirePeriod.endDate);
+		MTLog.log("* Schedule available from %s to %s.", entirePeriod.startDate, entirePeriod.endDate);
+		MTLog.log("------------------------------");
+		MTLog.log("* Looking for CURRENT schedules...");
 		boolean hasCurrent = false;
-		if (gCalendars.size() > 0) {
+		if (!gCalendars.isEmpty()) {
 			parseCalendars(gCalendars, gCalendarDates, GFieldTypes.DATE_FORMAT, c, usefulPeriod, isCurrentOrNext); // CURRENT
-		} else if (gCalendarDates.size() > 0) {
+		} else if (!gCalendarDates.isEmpty()) {
 			parseCalendarDates(gCalendarDates, c, usefulPeriod, isCurrentOrNext); // CURRENT
 		} else {
 			throw new MTLog.Fatal("NO schedule available for %s! (1)", usefulPeriod.todayStringInt);
@@ -1121,7 +1123,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (!isNext //
 				&& (usefulPeriod.startDate == null || usefulPeriod.endDate == null)) {
 			if (isCurrent) {
-				MTLog.log("No CURRENT schedules for %s. (start:%s|end:%s)", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
+				MTLog.log("* No CURRENT schedules for %s. (start:%s|end:%s)", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
 				if (MGenerator.checkDataFilesExists(args[2])) {
 					System.exit(0); // keeping current schedule
 				} else {
@@ -1135,11 +1137,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (usefulPeriod.todayStringInt != null && usefulPeriod.startDate != null && usefulPeriod.endDate != null) {
 			hasCurrent = true;
 		}
-		MTLog.log("Generated on %s | Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
+		MTLog.log("* Generated on %s | CURRENT Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
+		MTLog.log("------------------------------");
 		if (isNext) {
 			if (hasCurrent //
 					&& !diffLowerThan(GFieldTypes.DATE_FORMAT, c, usefulPeriod.todayStringInt, usefulPeriod.endDate, MAX_NEXT_LOOKUP_IN_DAYS)) {
-				MTLog.log("Skipping NEXT schedules... (%d days from %s to %s)", //
+				MTLog.log("* Skipping NEXT schedules... (%d days from %s to %s)", //
 						TimeUnit.MILLISECONDS.toDays(diffInMs(GFieldTypes.DATE_FORMAT, c, usefulPeriod.todayStringInt, usefulPeriod.endDate)), //
 						usefulPeriod.todayStringInt, //
 						usefulPeriod.endDate);
@@ -1150,19 +1153,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 				gtfs = null;
 				return new HashSet<>(); // non-null = service IDs
 			}
-			MTLog.log("Looking for NEXT schedules...");
+			MTLog.log("* Looking for NEXT schedules...");
 			if (hasCurrent) {
 				usefulPeriod.todayStringInt = incDateDays(GFieldTypes.DATE_FORMAT, c, usefulPeriod.endDate, 1); // start from next to current last date
 			}
 			usefulPeriod.startDate = null; // reset
 			usefulPeriod.endDate = null; // reset
-			if (gCalendars.size() > 0) {
+			if (!gCalendars.isEmpty()) {
 				parseCalendars(gCalendars, gCalendarDates, GFieldTypes.DATE_FORMAT, c, usefulPeriod, false); // NEXT
-			} else if (gCalendarDates.size() > 0) {
+			} else if (!gCalendarDates.isEmpty()) {
 				parseCalendarDates(gCalendarDates, c, usefulPeriod, false); // NEXT
 			}
 			if (usefulPeriod.startDate == null || usefulPeriod.endDate == null) {
-				MTLog.log("NO NEXT schedule available for %s. (start:%s|end:%s)", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
+				MTLog.log("* NO NEXT schedule available for %s. (start:%s|end:%s)", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
 				usefulPeriod.todayStringInt = null; // reset
 				usefulPeriod.startDate = null; // reset
 				usefulPeriod.endDate = null; // reset
@@ -1170,7 +1173,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 				gtfs = null;
 				return new HashSet<>(); // non-null = service IDs
 			}
-			MTLog.log("Generated on %s | NEXT Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
+			MTLog.log("* Generated on %s | NEXT Schedules from %s to %s.", usefulPeriod.todayStringInt, usefulPeriod.startDate, usefulPeriod.endDate);
+			MTLog.log("------------------------------");
 		}
 		HashSet<Integer> serviceIds = getPeriodServiceIds(usefulPeriod.startDate, usefulPeriod.endDate, gCalendars, gCalendarDates);
 		improveUsefulPeriod(usefulPeriod, c, gCalendars, gCalendarDates);
@@ -1181,8 +1185,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	private static void improveUsefulPeriod(@NotNull Period usefulPeriod, Calendar c, List<GCalendar> gCalendars, List<GCalendarDate> gCalendarDates) {
-		if (gCalendars != null && gCalendars.size() > 0 //
-				&& gCalendarDates != null && gCalendarDates.size() > 0) {
+		if (gCalendars != null && !gCalendars.isEmpty() //
+				&& gCalendarDates != null && !gCalendarDates.isEmpty()) {
 			boolean newDateFound;
 			do {
 				newDateFound = false;
@@ -1215,7 +1219,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	private static void parseCalendarDates(List<GCalendarDate> gCalendarDates, Calendar c, Period p, boolean lookForward) {
+	static void parseCalendarDates(List<GCalendarDate> gCalendarDates, Calendar c, Period p, boolean lookForward) {
 		HashSet<Integer> todayServiceIds = findCalendarDatesTodayServiceIds(gCalendarDates, c, p,
 				lookForward ? 1 : 0, // min-size backward
 				lookForward ? 0 : 1, // min-size forward
@@ -1226,11 +1230,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		refreshStartEndDatesFromCalendarDates(p, todayServiceIds, gCalendarDates);
 		while (true) {
-			MTLog.log("Schedules from %s to %s... ", p.startDate, p.endDate);
+			MTLog.log("> Schedules from %s to %s... ", p.startDate, p.endDate);
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
 				if (gCalendarDate.isBetween(p.startDate, p.endDate)) {
 					if (!gCalendarDate.isServiceIdInts(todayServiceIds)) {
-						MTLog.log("> new service ID from calendar date active on %s between %s and %s: '%s'", gCalendarDate.getDate(), p.startDate, p.endDate, gCalendarDate.getServiceIdInt());
+						//noinspection deprecation
+						MTLog.log("> new service ID from calendar date active on %s between %s and %s: '%s'", gCalendarDate.getDate(), p.startDate, p.endDate, gCalendarDate.getServiceId());
 						todayServiceIds.add(gCalendarDate.getServiceIdInt());
 					}
 				}
@@ -1562,7 +1567,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static Period getEntirePeriodMinMaxDate(List<GCalendar> gCalendars, List<GCalendarDate> gCalendarDates) {
 		final Period p = new Period();
-		if (gCalendars != null && gCalendars.size() > 0) {
+		if (gCalendars != null && !gCalendars.isEmpty()) {
 			for (GCalendar gCalendar : gCalendars) {
 				if (p.startDate == null || gCalendar.startsBefore(p.startDate)) {
 					p.startDate = gCalendar.getStartDate();
@@ -1572,7 +1577,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 			}
 		}
-		if (gCalendarDates != null && gCalendarDates.size() > 0) {
+		if (gCalendarDates != null && !gCalendarDates.isEmpty()) {
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
 				if (p.startDate == null || gCalendarDate.isBefore(p.startDate)) {
 					p.startDate = gCalendarDate.getDate();

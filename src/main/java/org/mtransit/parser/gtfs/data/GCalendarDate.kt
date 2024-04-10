@@ -23,6 +23,16 @@ data class GCalendarDate(
         exceptionType
     )
 
+    constructor(
+        serviceId: String,
+        date: Int,
+        exceptionTypeInt: Int
+    ) : this(
+        GIDs.getInt(serviceId),
+        date,
+        GCalendarDatesExceptionType.parse(exceptionTypeInt)
+    )
+
     @Deprecated(message = "Not memory efficient")
     @Suppress("unused")
     val serviceId = _serviceId

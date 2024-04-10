@@ -201,6 +201,82 @@ public class DefaultAgencyToolsTest {
 	}
 
 	@Test
+	public void test_parseCalendarDates_Split() { // #KingstonTransit #Should be 2 group of calendars
+		// Arrange
+		List<GCalendarDate> gCalendarDates = Arrays.asList(
+				// current
+				new GCalendarDate("1203", 2024_04_06, 1), // SATURDAY
+				new GCalendarDate("1205", 2024_04_07, 1), // SUNDAY
+				new GCalendarDate("1216", 2024_04_08, 1), // WEEKDAY
+				new GCalendarDate("1214", 2024_04_09, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_09, 1), // WEEKDAY
+				new GCalendarDate("1214", 2024_04_10, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_10, 1), // WEEKDAY
+				new GCalendarDate("1214", 2024_04_11, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_11, 1), // WEEKDAY
+				new GCalendarDate("1214", 2024_04_12, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_12, 1), // WEEKDAY
+				new GCalendarDate("1203", 2024_04_13, 1), // SATURDAY
+				new GCalendarDate("1205", 2024_04_14, 1), // SUNDAY
+				new GCalendarDate("1214", 2024_04_15, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_15, 1), // WEEKDAY
+				new GCalendarDate("1214", 2024_04_16, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_16, 1), // WEEKDAY
+				new GCalendarDate("1214", 2024_04_17, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_17, 1), // WEEKDAY
+				new GCalendarDate("1214", 2024_04_18, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_18, 1), // WEEKDAY
+				new GCalendarDate("1214", 2024_04_19, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_19, 1), // WEEKDAY
+				new GCalendarDate("1203", 2024_04_20, 1), // SATURDAY
+				new GCalendarDate("1205", 2024_04_21, 1), // SUNDAY
+				new GCalendarDate("1214", 2024_04_22, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_22, 1), // WEEKDAY
+				new GCalendarDate("1214", 2024_04_23, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_23, 1), // WEEKDAY
+				new GCalendarDate("1214", 2024_04_24, 1), // WEEKDAY
+				new GCalendarDate("1215", 2024_04_24, 1), // WEEKDAY
+				new GCalendarDate("1169", 2024_04_25, 1), // WEEKDAY
+				// next
+				new GCalendarDate("1209", 2024_04_26, 1), // WEEKDAY
+				new GCalendarDate("1210", 2024_04_27, 1), // SATURDAY
+				new GCalendarDate("1211", 2024_04_28, 1), // SUNDAY
+				new GCalendarDate("1209", 2024_04_29, 1), // WEEKDAY
+				new GCalendarDate("1209", 2024_04_30, 1), // WEEKDAY
+				new GCalendarDate("1209", 2024_05_01, 1), // WEEKDAY
+				new GCalendarDate("1209", 2024_05_02, 1), // WEEKDAY
+				new GCalendarDate("1209", 2024_05_03, 1), // WEEKDAY
+				new GCalendarDate("1210", 2024_05_04, 1), // SATURDAY
+				new GCalendarDate("1211", 2024_05_05, 1) // SUNDAY
+		);
+		// CURRENT
+		Period p = new Period();
+		p.todayStringInt = 2024_04_09;
+		boolean lookBackward = true;
+		// Act
+		DefaultAgencyTools.parseCalendarDates(gCalendarDates, c, p, lookBackward);
+		System.out.println("CURRENT: " + p);
+		// Assert
+		assertNotNull(p.startDate);
+		assertEquals(2024_04_06, p.startDate.intValue());
+		assertNotNull(p.endDate);
+		assertEquals(2024_04_25, p.endDate.intValue());
+		// NEXT
+		p.todayStringInt = 2024_04_26; // p.endDate + 1;
+		p.startDate = null; // reset
+		p.endDate = null; // reset
+		lookBackward = false;
+		// Act
+		DefaultAgencyTools.parseCalendarDates(gCalendarDates, c, p, lookBackward);
+		System.out.println("NEXT: " + p);
+		// Assert
+		assertNotNull(p.startDate);
+		assertEquals(2024_04_26, p.startDate.intValue());
+		assertNotNull(p.endDate);
+		assertEquals(2024_05_10, p.endDate.intValue());
+	}
+
+	@Test
 	public void testDirectionHeadSignsDescriptive_None() {
 		// Arrange
 		Map<Integer, String> directionHeadSigns = new HashMap<>();
@@ -260,7 +336,7 @@ public class DefaultAgencyToolsTest {
 	@Test
 	public void test_findCalendarsTodayPeriod_Current_NoCurrentScheduleNextOnly() {
 		List<GCalendar> gCalendars = Arrays.asList(
-				new GCalendar("id0", 1, 1, 1 ,1, 1, 1, 0, 2024_01_01, 2024_12_31),
+				new GCalendar("id0", 1, 1, 1, 1, 1, 1, 0, 2024_01_01, 2024_12_31),
 				new GCalendar("id1", 0, 0, 0, 0, 0, 1, 0, 2024_01_01, 2024_12_31),
 				new GCalendar("id2", 0, 0, 0, 0, 0, 0, 1, 2024_01_01, 2024_12_31)
 		);
@@ -278,7 +354,7 @@ public class DefaultAgencyToolsTest {
 	@Test
 	public void test_findCalendarsTodayPeriod_Current_InProgress() {
 		List<GCalendar> gCalendars = Arrays.asList(
-				new GCalendar("id0", 1, 1, 1 ,1, 1, 1, 0, 2023_01_01, 2023_12_31),
+				new GCalendar("id0", 1, 1, 1, 1, 1, 1, 0, 2023_01_01, 2023_12_31),
 				new GCalendar("id1", 0, 0, 0, 0, 0, 1, 0, 2023_01_01, 2023_12_31),
 				new GCalendar("id2", 0, 0, 0, 0, 0, 0, 1, 2023_01_01, 2023_12_31)
 		);
@@ -296,7 +372,7 @@ public class DefaultAgencyToolsTest {
 	@Test
 	public void test_findCalendarsTodayPeriod_Current_InTheDistantPast() {
 		List<GCalendar> gCalendars = Arrays.asList(
-				new GCalendar("id0", 1, 1, 1 ,1, 1, 1, 0, 2010_01_01, 2010_12_31),
+				new GCalendar("id0", 1, 1, 1, 1, 1, 1, 0, 2010_01_01, 2010_12_31),
 				new GCalendar("id1", 0, 0, 0, 0, 0, 1, 0, 2010_01_01, 2010_12_31),
 				new GCalendar("id2", 0, 0, 0, 0, 0, 0, 1, 2010_01_01, 2010_12_31)
 		);
@@ -314,7 +390,7 @@ public class DefaultAgencyToolsTest {
 	@Test
 	public void test_findCalendarsTodayPeriod_Next_NoNextScheduleCurrentOnly() {
 		List<GCalendar> gCalendars = Arrays.asList(
-				new GCalendar("id0", 1, 1, 1 ,1, 1, 1, 0, 2023_01_01, 2023_12_31),
+				new GCalendar("id0", 1, 1, 1, 1, 1, 1, 0, 2023_01_01, 2023_12_31),
 				new GCalendar("id1", 0, 0, 0, 0, 0, 1, 0, 2023_01_01, 2023_12_31),
 				new GCalendar("id2", 0, 0, 0, 0, 0, 0, 1, 2023_01_01, 2023_12_31)
 		);
@@ -334,7 +410,7 @@ public class DefaultAgencyToolsTest {
 	@Test
 	public void test_findCalendarsTodayPeriod_Next_NextOnly() {
 		List<GCalendar> gCalendars = Arrays.asList(
-				new GCalendar("id0", 1, 1, 1 ,1, 1, 1, 0, 2024_01_01, 2024_12_31),
+				new GCalendar("id0", 1, 1, 1, 1, 1, 1, 0, 2024_01_01, 2024_12_31),
 				new GCalendar("id1", 0, 0, 0, 0, 0, 1, 0, 2024_01_01, 2024_12_31),
 				new GCalendar("id2", 0, 0, 0, 0, 0, 0, 1, 2024_01_01, 2024_12_31)
 		);
@@ -352,7 +428,7 @@ public class DefaultAgencyToolsTest {
 	@Test
 	public void test_findCalendarsTodayPeriod_Next_NextOnly_StartRemoved() {
 		List<GCalendar> gCalendars = Arrays.asList(
-				new GCalendar("id0", 1, 1, 1 ,1, 1, 1, 0, 2024_01_01, 2024_12_31),
+				new GCalendar("id0", 1, 1, 1, 1, 1, 1, 0, 2024_01_01, 2024_12_31),
 				new GCalendar("id1", 0, 0, 0, 0, 0, 1, 0, 2024_01_01, 2024_12_31),
 				new GCalendar("id2", 0, 0, 0, 0, 0, 0, 1, 2024_01_01, 2024_12_31)
 		);
