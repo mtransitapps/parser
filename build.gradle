@@ -23,7 +23,8 @@ compileTestKotlin {
 dependencies {
     api(project(":commons-java"))
 
-    //noinspection DependencyNotationArgument // fixed in AGP 8.3.0 https://issuetracker.google.com/issues/295282939
+    implementation(platform(libs.kotlin.bom))
+    implementation(platform(libs.kotlinx.coroutines.bom))
     implementation(libs.bundles.kotlin)
 
     implementation(libs.androidx.collection)
