@@ -515,10 +515,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			originalTripHeadsign = new HashMap<>();
 			for (MTrip mTrip : splitTrips) {
 				this.agencyTools.setTripHeadsign(mRoute, mTrip, gTrip, routeGTFS);
-				final Pair<Integer, String> originalTripHeadSignTypeAndValue = new Pair<>(mTrip.getHeadsignType(), mTrip.getHeadsignValue());
+				Pair<Integer, String> originalTripHeadSignTypeAndValue = new Pair<>(mTrip.getHeadsignType(), mTrip.getHeadsignValue());
 				long originalTripHeadSignId = mTrip.getId();
 				if (splitTrips.size() == 1 // not split-ed
-						&& gDirectionHeadSigns != null) {
+						&& gDirectionHeadSigns != null) { // direction finder enabled
 					final String directionHeadSign = gDirectionHeadSigns.get(gTrip.getDirectionIdOrDefault());
 					if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
 						if (directionHeadSign != null && !directionHeadSign.isEmpty()) {
@@ -531,6 +531,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						if (direction != null) {
 							mTrip.setHeadsignDirection(direction);
 							originalTripHeadSignId = mTrip.getId();
+							if (StringUtils.equals(directionHeadSign, originalTripHeadSignTypeAndValue.second)) {
+								originalTripHeadSignTypeAndValue = new Pair<>(mTrip.getHeadsignType(), mTrip.getHeadsignValue());
+							}
 						}
 					}
 				}
