@@ -24,6 +24,7 @@ import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.MGenerator;
+import org.mtransit.parser.mt.MReader;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MRoute;
@@ -1085,6 +1086,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Nullable
+	private static Period lastPeriod = null;
+
+	@Nullable
 	private static Period usefulPeriod = null;
 
 	@SuppressWarnings("WeakerAccess")
@@ -1094,6 +1098,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 		usefulPeriod = new Period();
 		boolean isCurrent = "current_".equalsIgnoreCase(args[2]);
 		boolean isNext = "next_".equalsIgnoreCase(args[2]);
+		final Pair<Integer, Integer> lastPeriodFirstLastInSec = MReader.readFirstLastDepartures(args[2]);
+		if (lastPeriodFirstLastInSec != null) {
+			MTLog.log("Last '%s' period from %s to %s", args[2], lastPeriodFirstLastInSec.first, lastPeriodFirstLastInSec.second);
+			lastPeriod = new Period();
+			lastPeriod.startDate = lastPeriodFirstLastInSec.first;
+			lastPeriod.endDate = lastPeriodFirstLastInSec.second;
+		}
 		boolean isCurrentOrNext = isCurrent || isNext;
 		Calendar c = Calendar.getInstance();
 		if (!isCurrentOrNext && TOMORROW) {

@@ -3,7 +3,7 @@ package org.mtransit.parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"unused", "WeakerAccess", "CallToPrintStackTrace"})
 public final class MTLog {
 
 	private static final Character POINT = '.';
@@ -81,7 +81,7 @@ public final class MTLog {
 	}
 
 	private static void print(@NotNull String format, @Nullable Object... args) {
-		System.out.println(String.format(format, args));
+		System.out.printf((format) + "%n", args);
 	}
 
 	public static void logNonFatal(@NotNull Throwable t) {
