@@ -1,7 +1,12 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.db.SQLUtils.escape
 import org.mtransit.parser.gtfs.GAgencyTools
+import org.mtransit.parser.gtfs.data.GFieldTypes.isAfter
+import org.mtransit.parser.gtfs.data.GFieldTypes.isBefore
+import org.mtransit.parser.gtfs.data.GFieldTypes.isBetween
+import org.mtransit.parser.gtfs.data.GFieldTypes.isDate
 import java.lang.Integer.max
 import java.lang.Integer.min
 
@@ -37,6 +42,12 @@ data class GCalendarDate(
     @Suppress("unused")
     val serviceId = _serviceId
 
+    val escapedServiceId: String
+        get() = _serviceId.escape()
+
+    val escapedServiceIdInt: Int
+        get() = escapedServiceId.toGIDInt()
+
     private val _serviceId: String
         get() {
             return GIDs.getString(serviceIdInt)
@@ -58,26 +69,18 @@ data class GCalendarDate(
         return serviceIdInts.contains(serviceIdInt)
     }
 
-    fun isBefore(date: Int): Boolean {
-        return this.date < date
-    }
+    fun isBefore(date: Int?) = this.date.isBefore(date)
 
-    fun isBetween(startDate: Int, endDate: Int): Boolean {
-        return date in startDate..endDate
-    }
+    fun isBetween(startDate: Int?, endDate: Int?) = this.date.isBetween(startDate, endDate)
 
-    fun isDate(date: Int): Boolean {
-        return this.date == date
-    }
+    fun isDate(date: Int?) = this.date.isDate(date)
 
-    fun isAfter(date: Int): Boolean {
-        return this.date > date
-    }
+    fun isAfter(date: Int?) = this.date.isAfter(date)
 
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(serviceIdInt:$_serviceId)"
+                "+(serviceId:$_serviceId)"
     }
 
     companion object {
@@ -118,9 +121,11 @@ data class GCalendarDate(
         fun isServiceEntirelyRemoved(
             gCalendar: GCalendar,
             gCalendarDates: List<GCalendarDate>?,
-            startDate: Int,
-            endDate: Int,
+            startDate: Int?,
+            endDate: Int?,
         ): Boolean {
+            startDate ?: return false
+            endDate ?: return false
             val startDateToCheck = max(startDate, gCalendar.startDate)
             val endDateToCheck = min(endDate, gCalendar.endDate)
             val gCalendarDateServiceId = gCalendarDates?.filter { it.isServiceIdInt(gCalendar.serviceIdInt) } ?: return false  // NOT entirely removed

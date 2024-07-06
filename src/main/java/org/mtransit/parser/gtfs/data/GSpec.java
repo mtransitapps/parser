@@ -110,6 +110,13 @@ public class GSpec {
 		return this.calendarDates;
 	}
 
+	public void replaceCalendarDatesSameServiceIds(@Nullable Collection<GCalendarDate> calendarDates) {
+		this.calendarDates.clear();
+		if (calendarDates != null) {
+			this.calendarDates.addAll(calendarDates);
+		}
+	}
+
 	public void addOtherRoute(@NotNull GRoute gRoute) {
 		final int agencyIdInt = gRoute.getAgencyIdIntOrDefault();
 		ArrayList<GRoute> agencyOtherRoutes = this.agencyIdIntOtherRoutes.get(agencyIdInt);
@@ -738,7 +745,7 @@ public class GSpec {
 		for (GRoute gRoute : this.routeIdIntRoutes.values()) {
 			mRouteId = agencyTools.getRouteId(gRoute);
 			routeTrips = this.routeIdIntTrips.get(gRoute.getRouteIdInt());
-			if (routeTrips == null || routeTrips.size() == 0) {
+			if (routeTrips == null || routeTrips.isEmpty()) {
 				MTLog.log("%s: Skip GTFS route '%s' because no trips", mRouteId, gRoute);
 				continue;
 			} else {

@@ -5,6 +5,10 @@ import androidx.collection.mutableScatterMapOf
 import org.mtransit.parser.Constants.EMPTY
 import org.mtransit.parser.MTLog
 
+fun String.toGIDInt(): Int = GIDs.getInt(this)
+
+fun Int.toGIDString(): String = GIDs.getString(this)
+
 object GIDs {
 
     private const val USE_HASHCODE = false // hashcode Collision is real

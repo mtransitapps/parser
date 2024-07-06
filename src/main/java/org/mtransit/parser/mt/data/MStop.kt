@@ -4,6 +4,7 @@ import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils.quotesEscape
+import org.mtransit.parser.mt.MDataChangedManager
 
 data class MStop(
     val id: Int,
@@ -48,9 +49,9 @@ data class MStop(
         append(Constants.COLUMN_SEPARATOR) //
         append(name.quotesEscape()) // name
         append(Constants.COLUMN_SEPARATOR) //
-        append(lat) // latitude
+        append(MDataChangedManager.avoidLatLngChanged(lat)) // latitude
         append(Constants.COLUMN_SEPARATOR) //
-        append(lng) // longitude
+        append(MDataChangedManager.avoidLatLngChanged(lng)) // longitude
         if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
             append(Constants.COLUMN_SEPARATOR) //
             append(accessible)

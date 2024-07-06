@@ -91,4 +91,24 @@ object GFieldTypes {
     fun toDate(dateTimeFormat: SimpleDateFormat = DATE_TIME_FORMAT, gDateString: String, gTimeString: String): Date {
         return dateTimeFormat.parse(gDateString + SPACE_ + cleanTime(gTimeString))
     }
+
+    fun Int.isBefore(date: Int?): Boolean {
+        date ?: return false
+        return this < date
+    }
+
+    fun Int.isBetween(startDate: Int?, endDate: Int?): Boolean {
+        startDate ?: return false
+        endDate ?: return false
+        return this in startDate..endDate
+    }
+
+    fun Int.isDate(date: Int?): Boolean {
+        return this == date
+    }
+
+    fun Int.isAfter(date: Int?): Boolean {
+        date ?: return false
+        return this > date
+    }
 }

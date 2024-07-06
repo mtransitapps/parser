@@ -5,6 +5,7 @@ package org.mtransit.parser.db
 import org.apache.commons.text.translate.CharSequenceTranslator
 import org.apache.commons.text.translate.LookupTranslator
 import org.mtransit.commons.Constants
+import org.mtransit.commons.Constants.EMPTY
 import org.mtransit.parser.MTLog
 import org.sqlite.SQLiteException
 import java.sql.Connection
@@ -17,14 +18,19 @@ object SQLUtils {
     const val JDBC_SQLITE = "jdbc:sqlite:"
     const val JDBC_SQLITE_MEMORY = "$JDBC_SQLITE:memory:"
 
+    private const val QUOTE_ = '\''
+    private const val QUOTE = "'"
+
+    private const val UNDERSCORE = "_"
+
     @JvmStatic
     fun getJDBCSQLiteFile(filePath: String) = JDBC_SQLITE + filePath
 
     private val ESCAPE: CharSequenceTranslator by lazy {
         LookupTranslator(
             mapOf(
-                "'" to "''",
-                "_" to Constants.EMPTY
+                QUOTE to "$QUOTE$QUOTE",
+                UNDERSCORE to EMPTY, // removed
             )
         )
     }
@@ -34,15 +40,26 @@ object SQLUtils {
         return ESCAPE.translate(string)
     }
 
+    @JvmName("escapeExt")
+    fun String.escape() = escape(this)
+
     @JvmStatic
     fun quotes(string: String): String {
-        return "'$string'"
+        return "$QUOTE$string$QUOTE"
     }
 
     @JvmName("quotesExt")
     fun String.quotes() = quotes(this)
 
     fun String.quotesEscape() = escape(this).quotes()
+
+    @JvmStatic
+    fun unquotes(string: String): String {
+        return string.trim { it == QUOTE_ }
+    }
+
+    @JvmName("unquotesExt")
+    fun String.unquotes() = unquotes(this)
 
     @JvmStatic
     fun execute(statement: Statement, query: String): Boolean {

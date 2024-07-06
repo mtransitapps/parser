@@ -1,7 +1,6 @@
 package org.mtransit.parser;
 
 import org.junit.Test;
-import org.mtransit.parser.DefaultAgencyTools.Period;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType;
@@ -40,12 +39,12 @@ public class DefaultAgencyToolsTest {
 				new GCalendar("JAN20-uLINE1-Sunday-01", 0, 0, 0, 0, 0, 0, 1, 2019_12_22, 2020_04_12)
 		);
 		Period p = new Period();
-		p.todayStringInt = 2019120;
+		p.setTodayStringInt(2019120);
 		// Act
 		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, null, p);
 		// Assert
-		assertNull(p.startDate);
-		assertNull(p.endDate);
+		assertNull(p.getStartDate());
+		assertNull(p.getEndDate());
 	}
 
 	@Test
@@ -60,15 +59,15 @@ public class DefaultAgencyToolsTest {
 				new GCalendar("JAN20-uLINE1-Sunday-01", 0, 0, 0, 0, 0, 0, 1, 2019_12_22, 2020_04_12)
 		);
 		Period p = new Period();
-		p.todayStringInt = 2019_12_21;
+		p.setTodayStringInt(2019_12_21);
 		// Act
 		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, null, p);
 		// Assert
-		assertNotNull(p.startDate);
-		assertEquals(2019_12_21, p.startDate.intValue());
-		assertNotNull(p.endDate);
-		assertEquals(2019_12_21, p.endDate.intValue());
-		assertEquals(1, p.endDate - p.startDate + 1);
+		assertNotNull(p.getStartDate());
+		assertEquals(2019_12_21, p.getStartDate().intValue());
+		assertNotNull(p.getEndDate());
+		assertEquals(2019_12_21, p.getEndDate().intValue());
+		assertEquals(1, p.getEndDate() - p.getStartDate() + 1);
 	}
 
 	@Test
@@ -87,15 +86,15 @@ public class DefaultAgencyToolsTest {
 				new GCalendar("SEPT19-305Shop-Weekday-01", 1, 1, 1, 1, 1, 0, 0, 2019_12_20, 2019_12_20)
 		);
 		Period p = new Period();
-		p.todayStringInt = 2019_12_16;
+		p.setTodayStringInt(2019_12_16);
 		// Act
 		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, null, p);
 		// Assert
-		assertNotNull(p.startDate);
-		assertEquals(2019_12_16, p.startDate.intValue());
-		assertNotNull(p.endDate);
-		assertEquals(2019_12_20, p.endDate.intValue());
-		assertEquals(5, p.endDate - p.startDate + 1);
+		assertNotNull(p.getStartDate());
+		assertEquals(2019_12_16, p.getStartDate().intValue());
+		assertNotNull(p.getEndDate());
+		assertEquals(2019_12_20, p.getEndDate().intValue());
+		assertEquals(5, p.getEndDate() - p.getStartDate() + 1);
 	}
 
 	@Test
@@ -114,15 +113,15 @@ public class DefaultAgencyToolsTest {
 				new GCalendar("SEPT19-305Shop-Weekday-01", 1, 1, 1, 1, 1, 0, 0, 2019_12_20, 2019_12_20)
 		);
 		Period p = new Period();
-		p.todayStringInt = 2019_12_17;
+		p.setTodayStringInt(2019_12_17);
 		// Act
 		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, null, p);
 		// Assert
-		assertNotNull(p.startDate);
-		assertEquals(2019_12_16, p.startDate.intValue());
-		assertNotNull(p.endDate);
-		assertEquals(2019_12_20, p.endDate.intValue());
-		assertEquals(5, p.endDate - p.startDate + 1);
+		assertNotNull(p.getStartDate());
+		assertEquals(2019_12_16, p.getStartDate().intValue());
+		assertNotNull(p.getEndDate());
+		assertEquals(2019_12_20, p.getEndDate().intValue());
+		assertEquals(5, p.getEndDate() - p.getStartDate() + 1);
 	}
 
 	@Test
@@ -146,15 +145,15 @@ public class DefaultAgencyToolsTest {
 				new GCalendar("JAN20-uLINE1-Sunday-01", 0, 0, 0, 0, 0, 0, 1, 2019_12_22, 2020_04_12)
 		);
 		Period p = new Period();
-		p.todayStringInt = 2019_12_17;
+		p.setTodayStringInt(2019_12_17);
 		boolean lookBackward = true;
 		// Act
 		DefaultAgencyTools.parseCalendars(gCalendars, null, DATE_FORMAT, c, p, lookBackward);
 		// Assert
-		assertNotNull(p.startDate);
-		assertEquals(2019_12_16, p.startDate.intValue());
-		assertNotNull(p.endDate);
-		assertEquals(2019_12_21, p.endDate.intValue());
+		assertNotNull(p.getStartDate());
+		assertEquals(2019_12_16, p.getStartDate().intValue());
+		assertNotNull(p.getEndDate());
+		assertEquals(2019_12_21, p.getEndDate().intValue());
 	}
 
 	@Test
@@ -170,14 +169,14 @@ public class DefaultAgencyToolsTest {
 				new GCalendar("JAN20-uLINE1-Sunday-01", 0, 0, 0, 0, 0, 0, 1, 2019_12_22, 2020_04_12)
 		);
 		Period p = new Period();
-		p.todayStringInt = 2019_12_22;
+		p.setTodayStringInt(2019_12_22);
 		// Act
 		DefaultAgencyTools.findDayServiceIdsPeriod(gCalendars, null, p);
 		// Assert
-		assertNotNull(p.startDate);
-		assertEquals(2019_12_22, p.startDate.intValue());
-		assertNotNull(p.endDate);
-		assertEquals(2020_04_12, p.endDate.intValue());
+		assertNotNull(p.getStartDate());
+		assertEquals(2019_12_22, p.getStartDate().intValue());
+		assertNotNull(p.getEndDate());
+		assertEquals(2020_04_12, p.getEndDate().intValue());
 	}
 
 	@Test
@@ -189,15 +188,15 @@ public class DefaultAgencyToolsTest {
 		);
 
 		Period p = new Period();
-		p.todayStringInt = 2019_12_22;
+		p.setTodayStringInt(2019_12_22);
 		boolean lookBackward = true;
 		// Act
 		DefaultAgencyTools.parseCalendars(gCalendars, null, DATE_FORMAT, c, p, lookBackward);
 		// Assert
-		assertNotNull(p.startDate);
-		assertEquals(2019_12_22, p.startDate.intValue());
-		assertNotNull(p.endDate);
-		assertEquals(2020_04_12, p.endDate.intValue());
+		assertNotNull(p.getStartDate());
+		assertEquals(2019_12_22, p.getStartDate().intValue());
+		assertNotNull(p.getEndDate());
+		assertEquals(2020_04_12, p.getEndDate().intValue());
 	}
 
 	@Test
@@ -251,29 +250,29 @@ public class DefaultAgencyToolsTest {
 		);
 		// CURRENT
 		Period p = new Period();
-		p.todayStringInt = 2024_04_09;
+		p.setTodayStringInt(2024_04_09);
 		boolean lookBackward = true;
 		// Act
-		DefaultAgencyTools.parseCalendarDates(gCalendarDates, c, p, lookBackward);
+		DefaultAgencyTools.parseCalendarDates(gCalendarDates, null, c, p, lookBackward);
 		System.out.println("CURRENT: " + p);
 		// Assert
-		assertNotNull(p.startDate);
-		assertEquals(2024_04_06, p.startDate.intValue());
-		assertNotNull(p.endDate);
-		assertEquals(2024_04_25, p.endDate.intValue());
+		assertNotNull(p.getStartDate());
+		assertEquals(2024_04_06, p.getStartDate().intValue());
+		assertNotNull(p.getEndDate());
+		assertEquals(2024_04_25, p.getEndDate().intValue());
 		// NEXT
-		p.todayStringInt = p.endDate + 1; // current + 1
-		p.startDate = null; // reset
-		p.endDate = null; // reset
+		p.setTodayStringInt(p.getEndDate() + 1); // current + 1
+		p.setStartDate(null); // reset
+		p.setEndDate(null); // reset
 		lookBackward = false;
 		// Act
-		DefaultAgencyTools.parseCalendarDates(gCalendarDates, c, p, lookBackward);
+		DefaultAgencyTools.parseCalendarDates(gCalendarDates, null, c, p, lookBackward);
 		System.out.println("NEXT: " + p);
 		// Assert
-		assertNotNull(p.startDate);
-		assertEquals(2024_04_26, p.startDate.intValue());
-		assertNotNull(p.endDate);
-		assertEquals(2024_05_10, p.endDate.intValue());
+		assertNotNull(p.getStartDate());
+		assertEquals(2024_04_26, p.getStartDate().intValue());
+		assertNotNull(p.getEndDate());
+		assertEquals(2024_05_10, p.getEndDate().intValue());
 	}
 
 	@Test
@@ -362,29 +361,29 @@ public class DefaultAgencyToolsTest {
 		);
 		// CURRENT
 		Period p = new Period();
-		p.todayStringInt = 2024_04_09;
+		p.setTodayStringInt(2024_04_09);
 		boolean lookBackward = true;
 		// Act
-		DefaultAgencyTools.parseCalendarDates(gCalendarDates, c, p, lookBackward);
+		DefaultAgencyTools.parseCalendarDates(gCalendarDates, null, c, p, lookBackward);
 		System.out.println("CURRENT: " + p);
 		// Assert
-		assertNotNull(p.startDate);
-		assertEquals(2024_04_08, p.startDate.intValue());
-		assertNotNull(p.endDate);
-		assertEquals(2024_04_21, p.endDate.intValue());
+		assertNotNull(p.getStartDate());
+		assertEquals(2024_04_08, p.getStartDate().intValue());
+		assertNotNull(p.getEndDate());
+		assertEquals(2024_04_21, p.getEndDate().intValue());
 		// NEXT
-		p.todayStringInt = p.endDate + 1; // current + 1
-		p.startDate = null; // reset
-		p.endDate = null; // reset
+		p.setTodayStringInt(p.getEndDate() + 1); // current + 1
+		p.setStartDate(null); // reset
+		p.setEndDate(null); // reset
 		lookBackward = false;
 		// Act
-		DefaultAgencyTools.parseCalendarDates(gCalendarDates, c, p, lookBackward);
+		DefaultAgencyTools.parseCalendarDates(gCalendarDates, null, c, p, lookBackward);
 		System.out.println("NEXT: " + p);
 		// Assert
-		assertNotNull(p.startDate);
-		assertEquals(2024_04_22, p.startDate.intValue());
-		assertNotNull(p.endDate);
-		assertEquals(2024_06_23, p.endDate.intValue());
+		assertNotNull(p.getStartDate());
+		assertEquals(2024_04_22, p.getStartDate().intValue());
+		assertNotNull(p.getEndDate());
+		assertEquals(2024_06_23, p.getEndDate().intValue());
 	}
 
 	@Test
@@ -452,14 +451,14 @@ public class DefaultAgencyToolsTest {
 				new GCalendar("id2", 0, 0, 0, 0, 0, 0, 1, 2024_01_01, 2024_12_31)
 		);
 		Period p = new Period();
-		p.todayStringInt = 2023_11_25;
+		p.setTodayStringInt(2023_11_25);
 		boolean lookBackward = true;
 		List<GCalendarDate> gCalendarDates = Collections.emptyList();
 
 		DefaultAgencyTools.findCalendarsTodayPeriod(gCalendars, gCalendarDates, DATE_FORMAT, c, p, lookBackward);
 
-		assertNull(p.startDate);
-		assertNull(p.endDate);
+		assertNull(p.getStartDate());
+		assertNull(p.getEndDate());
 	}
 
 	@Test
@@ -470,14 +469,14 @@ public class DefaultAgencyToolsTest {
 				new GCalendar("id2", 0, 0, 0, 0, 0, 0, 1, 2023_01_01, 2023_12_31)
 		);
 		Period p = new Period();
-		p.todayStringInt = 2023_11_25;
+		p.setTodayStringInt(2023_11_25);
 		boolean lookBackward = true;
 		List<GCalendarDate> gCalendarDates = Collections.emptyList();
 
 		DefaultAgencyTools.findCalendarsTodayPeriod(gCalendars, gCalendarDates, DATE_FORMAT, c, p, lookBackward);
 
-		assertEquals(2023_01_01, p.startDate.intValue());
-		assertEquals(2023_12_31, p.endDate.intValue());
+		assertEquals(2023_01_01, p.getStartDate().intValue());
+		assertEquals(2023_12_31, p.getEndDate().intValue());
 	}
 
 	@Test
@@ -488,14 +487,14 @@ public class DefaultAgencyToolsTest {
 				new GCalendar("id2", 0, 0, 0, 0, 0, 0, 1, 2010_01_01, 2010_12_31)
 		);
 		Period p = new Period();
-		p.todayStringInt = 2023_11_25;
+		p.setTodayStringInt(2023_11_25);
 		boolean lookBackward = true;
 		List<GCalendarDate> gCalendarDates = Collections.emptyList();
 
 		DefaultAgencyTools.findCalendarsTodayPeriod(gCalendars, gCalendarDates, DATE_FORMAT, c, p, lookBackward);
 
-		assertEquals(2010_01_01, p.startDate.intValue());
-		assertEquals(2010_12_31, p.endDate.intValue());
+		assertEquals(2010_01_01, p.getStartDate().intValue());
+		assertEquals(2010_12_31, p.getEndDate().intValue());
 	}
 
 	@Test
@@ -507,15 +506,15 @@ public class DefaultAgencyToolsTest {
 		);
 		Period p = new Period();
 		//noinspection UnusedAssignment
-		p.todayStringInt = 2023_11_25; // current
-		p.todayStringInt = 2024_01_01; // current.endDate + 1 = next.todayStringInt
+		p.setTodayStringInt(2023_11_25); // current
+		p.setTodayStringInt(2024_01_01); // current.getEndDate() + 1 = next.getTodayStringInt()
 		boolean lookBackward = false;
 		List<GCalendarDate> gCalendarDates = Collections.emptyList();
 
 		DefaultAgencyTools.findCalendarsTodayPeriod(gCalendars, gCalendarDates, DATE_FORMAT, c, p, lookBackward);
 
-		assertNull(p.startDate);
-		assertNull(p.endDate);
+		assertNull(p.getStartDate());
+		assertNull(p.getEndDate());
 	}
 
 	@Test
@@ -526,14 +525,14 @@ public class DefaultAgencyToolsTest {
 				new GCalendar("id2", 0, 0, 0, 0, 0, 0, 1, 2024_01_01, 2024_12_31)
 		);
 		Period p = new Period();
-		p.todayStringInt = 2023_11_25;
+		p.setTodayStringInt(2023_11_25);
 		boolean lookBackward = false;
 		List<GCalendarDate> gCalendarDates = Collections.emptyList();
 
 		DefaultAgencyTools.findCalendarsTodayPeriod(gCalendars, gCalendarDates, DATE_FORMAT, c, p, lookBackward);
 
-		assertEquals(2024_01_01, p.startDate.intValue());
-		assertEquals(2024_12_31, p.endDate.intValue());
+		assertEquals(2024_01_01, p.getStartDate().intValue());
+		assertEquals(2024_12_31, p.getEndDate().intValue());
 	}
 
 	@Test
@@ -544,7 +543,7 @@ public class DefaultAgencyToolsTest {
 				new GCalendar("id2", 0, 0, 0, 0, 0, 0, 1, 2024_01_01, 2024_12_31)
 		);
 		Period p = new Period();
-		p.todayStringInt = 2023_11_25;
+		p.setTodayStringInt(2023_11_25);
 		boolean lookBackward = false;
 		List<GCalendarDate> gCalendarDates = Collections.singletonList(
 				new GCalendarDate("id1", 2024_01_01, GCalendarDatesExceptionType.SERVICE_REMOVED)
@@ -552,7 +551,7 @@ public class DefaultAgencyToolsTest {
 
 		DefaultAgencyTools.findCalendarsTodayPeriod(gCalendars, gCalendarDates, DATE_FORMAT, c, p, lookBackward);
 
-		assertEquals(2024_01_01, p.startDate.intValue());
-		assertEquals(2024_12_31, p.endDate.intValue());
+		assertEquals(2024_01_01, p.getStartDate().intValue());
+		assertEquals(2024_12_31, p.getEndDate().intValue());
 	}
 }

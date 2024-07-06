@@ -110,12 +110,16 @@ data class GCalendar(
     }
 
     @Suppress("unused")
-    fun isOverlapping(startDate: Int, endDate: Int): Boolean {
+    fun isOverlapping(startDate: Int?, endDate: Int?): Boolean {
+        startDate ?: return false
+        endDate ?: return false
         return startsBetween(startDate, endDate) || endsBetween(startDate, endDate)
     }
 
     @Suppress("unused")
-    fun isInside(startDate: Int, endDate: Int): Boolean {
+    fun isInside(startDate: Int?, endDate: Int?): Boolean {
+        startDate ?: return false
+        endDate ?: return false
         return startsBetween(startDate, endDate) && endsBetween(startDate, endDate)
     }
 
@@ -130,7 +134,8 @@ data class GCalendar(
     }
 
     @Suppress("unused")
-    fun containsDate(date: Int): Boolean {
+    fun containsDate(date: Int?): Boolean {
+        date ?: return false
         return date in startDate..endDate
     }
 
