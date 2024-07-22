@@ -35,6 +35,15 @@ dependencies {
     testImplementation(libs.bundles.test.unit)
 }
 
+dependencyGuard {
+    // lib
+    configuration("compileClasspath")
+    configuration("runtimeClasspath")
+    // tests
+    configuration("testCompileClasspath")
+    configuration("testRuntimeClasspath")
+}
+
 test {
     useJUnit()
     testLogging {
