@@ -157,7 +157,7 @@ object MDataChangedManager {
     }
 
     fun avoidLatLngChanged(latLng: Double): String {
-        if (!FeatureFlags.F_AVOID_DATA_CHANGED) return latLng.toString()
+        // if (!FeatureFlags.F_AVOID_DATA_CHANGED) return latLng.toString()
         return String.format(Locale.ENGLISH, "%.5f", latLng) // ~ 1 meter precision
     }
 }
