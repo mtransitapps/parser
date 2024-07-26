@@ -1,7 +1,7 @@
-androidx.annotation:annotation-jvm:1.7.0
-androidx.annotation:annotation:1.7.0
-androidx.collection:collection-jvm:1.4.1
-androidx.collection:collection:1.4.1
+androidx.annotation:annotation-jvm:1.8.1
+androidx.annotation:annotation:1.8.1
+androidx.collection:collection-jvm:1.4.2
+androidx.collection:collection:1.4.2
 commons-codec:commons-codec:1.16.1
 commons-io:commons-io:2.16.1
 junit:junit:4.13.2
