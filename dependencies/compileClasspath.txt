@@ -14,4 +14,4 @@ org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.8.1
 org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1
 org.jetbrains:annotations:23.0.0
 org.slf4j:slf4j-api:1.7.36
-org.xerial:sqlite-jdbc:3.46.0.0
+org.xerial:sqlite-jdbc:3.46.0.1
