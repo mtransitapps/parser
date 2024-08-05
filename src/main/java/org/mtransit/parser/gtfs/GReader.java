@@ -48,14 +48,13 @@ public class GReader {
 	// private static final boolean USE_PREPARED_STATEMENT = false;
 
 	@NotNull
-	public static GSpec readGtfsZipFile(@NotNull String gtfsFile,
+	public static GSpec readGtfsZipFile(@NotNull String gtfsDir,
 										@NotNull final GAgencyTools agencyTools,
 										boolean calendarsOnly,
 										boolean routeTripCalendarsOnly) {
-		MTLog.log("Reading GTFS file '%s'...", gtfsFile);
+		MTLog.log("Reading GTFS file '%s'...", gtfsDir);
 		long start = System.currentTimeMillis();
 		final GSpec gSpec = new GSpec();
-		String gtfsDir = gtfsFile.substring(0, gtfsFile.length() - 4);
 		File gtfsDirF = new File(gtfsDir);
 		if (!gtfsDirF.exists()) {
 			throw new MTLog.Fatal("'%s' GTFS directory does not exist!", gtfsDirF);
@@ -134,7 +133,7 @@ public class GReader {
 		} catch (Exception ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while reading GTFS file!");
 		}
-		MTLog.log("Reading GTFS file '%1$s'... DONE in %2$s.", gtfsFile, Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		MTLog.log("Reading GTFS file '%1$s'... DONE in %2$s.", gtfsDir, Utils.getPrettyDuration(System.currentTimeMillis() - start));
 		gSpec.print(calendarsOnly, false);
 		return gSpec;
 	}
@@ -192,7 +191,7 @@ public class GReader {
 		String line;
 		String[] columnNames;
 		line = reader.readLine();
-		if (line == null || line.length() == 0) {
+		if (line == null || line.isEmpty()) {
 			return;
 		}
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
@@ -225,7 +224,7 @@ public class GReader {
 					records = CSVParser.parse(line, CSV_FORMAT_NO_QUOTE).getRecords();
 					withQuotes = false;
 				}
-				if (records.size() == 0) {
+				if (records.isEmpty()) {
 					continue; // empty line
 				}
 				recordColumns = records.get(0);

@@ -133,7 +133,7 @@ public class MGenerator {
 						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies...)", mRouteSpec
 								.getFirstRoute().getId());
 						for (Entry<Long, ArrayList<MFrequency>> routeFrequenciesEntry : mRouteSpec.getRouteFrequencies().entrySet()) {
-							if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().size() == 0) {
+							if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().isEmpty()) {
 								continue;
 							}
 							if (!mRouteFrequencies.containsKey(routeFrequenciesEntry.getKey())) {
@@ -211,7 +211,7 @@ public class MGenerator {
 
 	public static void dumpFiles(@NotNull GAgencyTools gAgencyTools,
 								 @Nullable MSpec mSpec,
-								 @NotNull String gtfsFile,
+								 @NotNull String gtfsDir,
 								 @SuppressWarnings("unused") @NotNull String unused,
 								 final @NotNull String fileBase,
 								 boolean deleteAll) {
@@ -284,7 +284,7 @@ public class MGenerator {
 					false
 			);
 			dumpStoreListing(rawDirF, fileBase, minMaxDates.first, minMaxDates.second);
-			bumpDBVersion(rawDirF, gtfsFile);
+			bumpDBVersion(rawDirF, gtfsDir);
 		}
 		MTLog.log("Writing files (%s)... DONE in %s.",
 				rawDirF.toURI(),
@@ -631,7 +631,7 @@ public class MGenerator {
 					try {
 						mStopSchedules = mStopScheduleMap.get(stopId);
 						Collections.sort(mStopSchedules); // DB sort uses IntId instead of id string
-						if (mStopSchedules.size() > 0) {
+						if (!mStopSchedules.isEmpty()) {
 							fileName = fileBaseScheduleStop + stopId;
 							file = new File(rawDirF, fileName);
 							empty = true;
@@ -697,7 +697,7 @@ public class MGenerator {
 			for (Long routeId : mSpec.getRouteFrequencies().keySet()) {
 				try {
 					mRouteFrequencies = mSpec.getRouteFrequencies().get(routeId);
-					if (mRouteFrequencies != null && mRouteFrequencies.size() > 0) {
+					if (mRouteFrequencies != null && !mRouteFrequencies.isEmpty()) {
 						fileName = fileBaseRouteFrequency + routeId;
 						file = new File(rawDirF, fileName);
 						empty = true;
@@ -731,10 +731,10 @@ public class MGenerator {
 			Pattern.CASE_INSENSITIVE);
 	private static final String RTS_DB_VERSION_REPLACEMENT = "$2%s$4";
 
-	private static void bumpDBVersion(File dumpDirF, String gtfsFile) {
+	private static void bumpDBVersion(File dumpDirF, String gtfsDir) {
 		MTLog.log("Bumping DB version...");
 		BufferedWriter ow = null;
-		String lastModifiedTimeDateS = getLastModified(gtfsFile);
+		String lastModifiedTimeDateS = getLastModified(gtfsDir);
 		if (StringUtils.isEmpty(lastModifiedTimeDateS)) {
 			MTLog.log("Bumping DB version... SKIP (error while reading last modified time)");
 			return;
@@ -775,17 +775,17 @@ public class MGenerator {
 	}
 
 	@NotNull
-	private static String getLastModified(String gtfsFile) {
+	private static String getLastModified(String gtfsDir) {
 		try {
-			Path gtfsFileF = new File(gtfsFile).toPath();
-			BasicFileAttributes attr = Files.readAttributes(gtfsFileF, BasicFileAttributes.class);
+			Path gtfsDirF = new File(gtfsDir).toPath();
+			BasicFileAttributes attr = Files.readAttributes(gtfsDirF, BasicFileAttributes.class);
 			FileTime lastModifiedTime = attr.lastModifiedTime();
 			long lastModifiedTimeInMs = lastModifiedTime.toMillis();
 			Calendar lastModifiedTimeDate = Calendar.getInstance();
 			lastModifiedTimeDate.setTimeInMillis(lastModifiedTimeInMs);
 			return GFieldTypes.fromDate(DATE_FORMAT, lastModifiedTimeDate);
 		} catch (IOException ioe) {
-			throw new MTLog.Fatal(ioe, "I/O Error while writing values file!");
+			throw new MTLog.Fatal(ioe, "I/O Error while reading last modified file!");
 		}
 	}
 
