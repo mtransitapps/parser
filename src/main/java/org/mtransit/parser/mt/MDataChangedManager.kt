@@ -1,15 +1,18 @@
 package org.mtransit.parser.mt
 
 import org.mtransit.commons.FeatureFlags
+import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.Period
 import org.mtransit.parser.db.SQLUtils.escape
+import org.mtransit.parser.gtfs.data.GCalendar
 import org.mtransit.parser.gtfs.data.GCalendarDate
 import org.mtransit.parser.gtfs.data.GFieldTypes
 import org.mtransit.parser.gtfs.data.GFieldTypes.isAfter
 import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GSpec
+import org.mtransit.parser.mt.data.MCalendarExceptionType
 import org.mtransit.parser.mt.data.MServiceDate
 import java.util.Calendar
 import java.util.Locale
@@ -95,32 +98,112 @@ object MDataChangedManager {
     ) {
         if (!FeatureFlags.F_AVOID_DATA_CHANGED) return
         lastServiceDates ?: return
-        if (gtfs.allCalendars.isNotEmpty()) return // TODO support calendar
+        MTLog.log("> Optimising data changed for calendar dates...")
         val dateFormat = GFieldTypes.makeDateFormat()
         val c = Calendar.getInstance()
         val todayStringInt = GFieldTypes.fromDateToInt(dateFormat, c.time)
-        val lastServiceIdInts = lastServiceDates.map { it.serviceIdInt }.distinct().sorted()
-        val gCalendarDatesEscapedServiceIdInts = gtfs.allCalendarDates.map { it.escapedServiceIdInt }.distinct().sorted()
-        if (lastServiceIdInts != gCalendarDatesEscapedServiceIdInts) {
-            val removed = lastServiceIdInts.filter { it !in gCalendarDatesEscapedServiceIdInts }
-            val added = gCalendarDatesEscapedServiceIdInts.filter { it !in lastServiceIdInts }
-            val same = lastServiceIdInts.intersect(gCalendarDatesEscapedServiceIdInts.toSet())
-            MTLog.log("> Cannot optimize data changed because service IDs changed.")
+        val (lastCalendarsServiceDates, lastCalendarDatesServiceDates) =
+            lastServiceDates.partition { it.exceptionType == MCalendarExceptionType.DEFAULT.id }
+        val allCalendarsWithDays = gtfs.allCalendars.filter { it.hasDays() }
+        @Suppress("DEPRECATION")
+        MTLog.log("> Last service IDs from '${GCalendar.FILENAME}': ${lastCalendarsServiceDates.map { it.serviceId }.distinct().sorted()}")
+        @Suppress("DEPRECATION")
+        MTLog.log("> New service IDs from '${GCalendar.FILENAME}':  ${allCalendarsWithDays.map { it.serviceId.escape() }.distinct().sorted()}")
+        @Suppress("DEPRECATION")
+        MTLog.log("> Last service IDs from '${GCalendarDate.FILENAME}': ${lastCalendarDatesServiceDates.map { it.serviceId }.distinct().sorted()}")
+        @Suppress("DEPRECATION")
+        MTLog.log("> New service IDs from '${GCalendarDate.FILENAME}':  ${gtfs.allCalendarDates.map { it.serviceId.escape() }.distinct().sorted()}")
+
+        // 0 - check service IDs available in last/new data
+        val lastCalendarsServiceIdInts = lastCalendarsServiceDates.map { it.serviceIdInt }.distinct().sorted()
+        val gCalendarsEscapedServiceIdInts = allCalendarsWithDays.map { it.escapedServiceIdInt }.distinct().sorted()
+        if (lastCalendarsServiceIdInts != gCalendarsEscapedServiceIdInts) {
+            val removed = lastCalendarsServiceIdInts.filter { it !in gCalendarsEscapedServiceIdInts }
+            val added = gCalendarsEscapedServiceIdInts.filter { it !in lastCalendarsServiceIdInts }
+            val same = lastCalendarsServiceIdInts.intersect(gCalendarsEscapedServiceIdInts.toSet())
+            MTLog.log("> Cannot optimize data changed because calendars service IDs changed.")
             MTLog.log("> - added [${added.size}]: ${GIDs.toStringPlus(added)}")
             MTLog.log("> - removed [${removed.size}]: ${GIDs.toStringPlus(removed)}")
             MTLog.log("> - same [${same.size}]: ${GIDs.toStringPlus(same)}")
             return // new service IDs
+        } else {
+            MTLog.log("> Calendars service IDs NOT changed (${GIDs.toStringPlus(lastCalendarsServiceIdInts)}).")
         }
-        var dataChanged = false
-        val newGCalendarDates = gtfs.allCalendarDates.toMutableList()
+        val lastCalendarDatesServiceIdInts = lastCalendarDatesServiceDates.map { it.serviceIdInt }.distinct().sorted()
+        val gCalendarDatesEscapedServiceIdInts = gtfs.allCalendarDates.map { it.escapedServiceIdInt }.distinct().sorted()
+        if (lastCalendarDatesServiceIdInts != gCalendarDatesEscapedServiceIdInts) {
+            val removed = lastCalendarDatesServiceIdInts.filter { it !in gCalendarDatesEscapedServiceIdInts }
+            val added = gCalendarDatesEscapedServiceIdInts.filter { it !in lastCalendarDatesServiceIdInts }
+            val same = lastCalendarDatesServiceIdInts.intersect(gCalendarDatesEscapedServiceIdInts.toSet())
+            MTLog.log("> Cannot optimize data changed because calendar dates service IDs changed.")
+            MTLog.log("> - added [${added.size}]: ${GIDs.toStringPlus(added)}")
+            MTLog.log("> - removed [${removed.size}]: ${GIDs.toStringPlus(removed)}")
+            MTLog.log("> - same [${same.size}]: ${GIDs.toStringPlus(same)}")
+            return // new service IDs
+        } else {
+            MTLog.log("> Calendar dates service IDs NOT changed (${GIDs.toStringPlus(lastCalendarDatesServiceIdInts)}).")
+        }
+
         // 1 - look for removed dates with known service IDs
+        var dataChanged = false
+        val newGCalendars = gtfs.allCalendars.toMutableList()
+        val newGCalendarDates = gtfs.allCalendarDates.toMutableList()
+        val gCalendarsDates = gtfs.allCalendars.flatMap { it.dates }.map { it.date }.distinct()
         val gCalendarDatesDates = gtfs.allCalendarDates.map { it.date }
-        val removedServiceDates = lastServiceDates.filter { it.calendarDate !in gCalendarDatesDates }
-        if (removedServiceDates.any { it.calendarDate.isAfter(todayStringInt) }) {
-            MTLog.log("> Cannot optimize data changed before date removed in future.")
+        val removedCalendarsServiceDates = lastCalendarsServiceDates.filter { it.calendarDate !in gCalendarsDates }
+        val removedCalendarDatesServiceDates = lastCalendarDatesServiceDates.filter { it.calendarDate !in gCalendarDatesDates }
+        MTLog.logDebug("> Removed calendars service: ${removedCalendarsServiceDates.size}")
+        if (Constants.DEBUG) {
+            removedCalendarsServiceDates.forEach {
+                @Suppress("DEPRECATION")
+                MTLog.logDebug("> - ${it.calendarDate}: '${it.serviceId}'.")
+            }
+        }
+        val calendarsRemovedInFuture = removedCalendarDatesServiceDates.filter { it.calendarDate.isAfter(todayStringInt) }
+        if (calendarsRemovedInFuture.isNotEmpty()) {
+            MTLog.log("> Cannot optimize calendars data changed: date removed in future ($calendarsRemovedInFuture).")
             return
         }
-        removedServiceDates.forEach { removedServiceDate ->
+        MTLog.logDebug("> Removed calendars dates service: ${removedCalendarDatesServiceDates.size}")
+        if (Constants.DEBUG) {
+            removedCalendarDatesServiceDates.forEach {
+                @Suppress("DEPRECATION")
+                MTLog.logDebug("> - ${it.calendarDate}: '${it.serviceId}'.")
+            }
+        }
+        val calendarDatesRemovedInFuture = removedCalendarDatesServiceDates.filter { it.calendarDate.isAfter(todayStringInt) }
+        if (calendarDatesRemovedInFuture.isNotEmpty()) {
+            MTLog.log("> Cannot optimize calendar dates data changed: date removed in future ($calendarDatesRemovedInFuture).")
+            return
+        }
+        @Suppress("LocalVariableName")
+        val DATE_FORMAT = GFieldTypes.makeDateFormat()
+        removedCalendarsServiceDates.sortedDescending().forEach { removedServiceDate ->
+            if (!gCalendarsEscapedServiceIdInts.contains(removedServiceDate.serviceIdInt)) {
+                MTLog.log("> Cannot re-add removed dates because of removed service ID '${removedServiceDate.toStringPlus()}'")
+                return
+            }
+            @Suppress("DEPRECATION")
+            val originalCalendar = newGCalendars.firstOrNull { it.serviceId.escape() == removedServiceDate.serviceId }
+            if (originalCalendar == null) {
+                MTLog.log("> Cannot find original calendar for '${removedServiceDate.toStringPlus()}'!")
+                return
+            }
+            if (!GCalendar.isRunningOnDay(originalCalendar, removedServiceDate.calendarDate.toString())) {
+                MTLog.log("> Wrong day: cannot re-add '${removedServiceDate.toStringPlus()}' to ${originalCalendar.toStringShort()}!")
+                return
+            }
+            val updatedCalendar = originalCalendar.copy(startDate = removedServiceDate.calendarDate)
+            if (updatedCalendar.dates.size - originalCalendar.dates.size != 1) {
+                MTLog.log("> Cannot re-add removed dates because of wrong number of added dates (${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})")
+                return
+            }
+            newGCalendars.remove(originalCalendar)
+            newGCalendars.add(updatedCalendar)
+            MTLog.log("> Optimising data changed by updating ${updatedCalendar.toStringShort()}...")
+            dataChanged = true
+        }
+        removedCalendarDatesServiceDates.forEach { removedServiceDate ->
             if (!gCalendarDatesEscapedServiceIdInts.contains(removedServiceDate.serviceIdInt)) {
                 MTLog.log("> Cannot re-add removed dates because of removed service ID '${removedServiceDate.toStringPlus()}'")
                 return
@@ -132,15 +215,64 @@ object MDataChangedManager {
             newGCalendarDates.add(missingCalendarDate)
             dataChanged = true
         }
+
         // 2 - look for added dates with known service IDs
-        val lastServiceDatesDates = lastServiceDates.map { it.calendarDate }
-        val addedGCalendarDatesDates = newGCalendarDates.filter { it.date !in lastServiceDatesDates }
+        val lastServiceCalendarsDates = lastCalendarsServiceDates.map { it.calendarDate }
+        val addedGCalendarsDates = newGCalendars.flatMap { it.dates }.filter { it.date !in lastServiceCalendarsDates }
+            .sortedByDescending { it.date } // oldest first to remove
+        MTLog.logDebug("> Added calendars service: ${addedGCalendarsDates.size}")
+        if (Constants.DEBUG) {
+            addedGCalendarsDates.forEach {
+                @Suppress("DEPRECATION")
+                MTLog.logDebug("> - ${it.date}: '${it.serviceId}'.")
+            }
+        }
+        addedGCalendarsDates.forEach { addedGCalendarDate ->
+            if (DefaultAgencyTools.diffLowerThan(dateFormat, c, todayStringInt, addedGCalendarDate.date, MIN_NOT_IGNORED_IN_DAYS)) {
+                MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")
+                return
+            }
+            if (!lastCalendarsServiceIdInts.contains(addedGCalendarDate.escapedServiceIdInt)) {
+                MTLog.log("> Cannot remove added date because of new service ID '${addedGCalendarDate.toStringPlus()}'")
+                return
+            }
+            @Suppress("DEPRECATION")
+            val originalCalendar = newGCalendars.firstOrNull { it.serviceId == addedGCalendarDate.serviceId }
+            if (originalCalendar == null) {
+                MTLog.log("> Cannot find original calendar for '${addedGCalendarDate.toStringPlus()}'!")
+                return
+            }
+            val removedDate = addedGCalendarDate.date
+            var dayBeforeRemovedDate = DefaultAgencyTools.incDateDays(DATE_FORMAT, c, removedDate, -1)
+            var tryCount = 0
+            while (tryCount <= 7 && !GCalendar.isRunningOnDay(originalCalendar, dayBeforeRemovedDate.toString())) {
+                dayBeforeRemovedDate = DefaultAgencyTools.incDateDays(DATE_FORMAT, c, removedDate, -1)
+                tryCount++
+            }
+            val updatedCalendar = originalCalendar.copy(endDate = dayBeforeRemovedDate)
+            if (originalCalendar.dates.size - updatedCalendar.dates.size != 1) {
+                MTLog.log("> Cannot remove added dates because of wrong number of added dates (${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})")
+                return
+            }
+            newGCalendars.remove(originalCalendar)
+            newGCalendars.add(updatedCalendar)
+            dataChanged = true
+        }
+        val lastServiceCalendarDatesDates = lastCalendarDatesServiceDates.map { it.calendarDate }
+        val addedGCalendarDatesDates = newGCalendarDates.filter { it.date !in lastServiceCalendarDatesDates }
+        MTLog.logDebug("> Added calendars dates service: ${addedGCalendarDatesDates.size}")
+        if (Constants.DEBUG) {
+            addedGCalendarDatesDates.forEach {
+                @Suppress("DEPRECATION")
+                MTLog.logDebug("> - ${it.date}: '${it.serviceId}'.")
+            }
+        }
         addedGCalendarDatesDates.forEach { addedGCalendarDate ->
             if (DefaultAgencyTools.diffLowerThan(dateFormat, c, todayStringInt, addedGCalendarDate.date, MIN_NOT_IGNORED_IN_DAYS)) {
                 MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")
                 return
             }
-            if (!lastServiceIdInts.contains(addedGCalendarDate.escapedServiceIdInt)) {
+            if (!lastCalendarDatesServiceIdInts.contains(addedGCalendarDate.escapedServiceIdInt)) {
                 MTLog.log("> Cannot remove new date because of new service ID '${addedGCalendarDate.toStringPlus()}'")
                 return
             }
@@ -149,10 +281,14 @@ object MDataChangedManager {
             dataChanged = true
         }
         if (dataChanged) {
-            MTLog.log("> Optimised data changed from ${gtfs.allCalendarDates.size} to ${newGCalendarDates.size} calendar dates.")
-            gtfs.replaceCalendarDatesSameServiceIds(newGCalendarDates)
+            MTLog.log("> Optimised data changed: " +
+                    "`${GCalendar.FILENAME}`: ${gtfs.allCalendars.flatMap { it.dates }.size} -> ${newGCalendars.flatMap { it.dates }.size} | " +
+                    "& " +
+                    "'${GCalendarDate.FILENAME}': ${gtfs.allCalendarDates.size} -> ${newGCalendarDates.size}."
+            )
+            gtfs.replaceCalendarsSameServiceIds(newGCalendars, newGCalendarDates)
         } else {
-            MTLog.log("> No optimization for date changed required for calendar dates.")
+            MTLog.log("> No optimization for date changed required for calendars & calendar dates.")
         }
     }
 

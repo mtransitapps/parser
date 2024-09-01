@@ -110,8 +110,12 @@ public class GSpec {
 		return this.calendarDates;
 	}
 
-	public void replaceCalendarDatesSameServiceIds(@Nullable Collection<GCalendarDate> calendarDates) {
+	public void replaceCalendarsSameServiceIds(@Nullable Collection<GCalendar> calendars, @Nullable Collection<GCalendarDate> calendarDates) {
+		this.calendars.clear();
 		this.calendarDates.clear();
+		if (calendars != null) {
+			this.calendars.addAll(calendars);
+		}
 		if (calendarDates != null) {
 			this.calendarDates.addAll(calendarDates);
 		}

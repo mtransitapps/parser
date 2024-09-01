@@ -1,6 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.db.SQLUtils.escape
 import org.mtransit.parser.gtfs.GAgencyTools
 import java.util.Calendar
 
@@ -75,6 +76,12 @@ data class GCalendar(
             return GIDs.getString(serviceIdInt)
         }
 
+    val escapedServiceId: String
+        get() = _serviceId.escape()
+
+    val escapedServiceIdInt: Int
+        get() = escapedServiceId.toGIDInt()
+
     @Suppress("unused")
     fun getCleanServiceId(agencyTools: GAgencyTools): String {
         return agencyTools.cleanServiceId(_serviceId)
@@ -93,6 +100,10 @@ data class GCalendar(
             startDate,
             endDate
         )
+    }
+
+    fun hasDays(): Boolean {
+        return monday || tuesday || wednesday || thursday || friday || saturday || sunday
     }
 
     fun isServiceIdInts(serviceIdInts: Collection<Int?>): Boolean {
@@ -145,6 +156,41 @@ data class GCalendar(
                 "+(serviceIdInt:$_serviceId)"
     }
 
+    @Suppress("unused")
+    fun toStringShort() = buildString {
+        append("Calendar:{'")
+        append(_serviceId)
+        append("': ")
+        append(startDate)
+        append("-")
+        append(endDate)
+        append(" [")
+        append(if (monday) "M" else "_")
+        append(if (tuesday) "T" else "_")
+        append(if (wednesday) "W" else "_")
+        append(if (thursday) "T" else "_")
+        append(if (friday) "F" else "_")
+        append(if (saturday) "S" else "_")
+        append(if (sunday) "S" else "_")
+        append("]")
+        append("}")
+    }
+
+    fun isRunningOnCalendarDayOfWeek(calendarDayOfWeek: Int) =
+        when (calendarDayOfWeek) {
+            Calendar.MONDAY -> monday
+            Calendar.TUESDAY -> tuesday
+            Calendar.WEDNESDAY -> wednesday
+            Calendar.THURSDAY -> thursday
+            Calendar.FRIDAY -> friday
+            Calendar.SATURDAY -> saturday
+            Calendar.SUNDAY -> sunday
+            else -> {
+                MTLog.log("Unexpected day of week '$calendarDayOfWeek'!")
+                false
+            }
+        }
+
     companion object {
         const val FILENAME = "calendar.txt"
 
@@ -174,6 +220,11 @@ data class GCalendar(
             line[START_DATE]?.toInt() ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
             line[END_DATE]?.toInt() ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
         )
+
+        fun isRunningOnDay(calendar: GCalendar, dayString: String): Boolean =
+            calendar.isRunningOnCalendarDayOfWeek(Calendar.getInstance()
+                .apply { time = GFieldTypes.makeDateFormat().parse(dayString) }
+                .get(Calendar.DAY_OF_WEEK))
 
         private fun initAllDates(
             _serviceId: Int,

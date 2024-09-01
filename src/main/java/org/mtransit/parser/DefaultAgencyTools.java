@@ -1600,7 +1600,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return p;
 	}
 
-	private static int incDateDays(SimpleDateFormat dateFormat, Calendar calendar, Integer dateInt, int numberOfDays) {
+	public static int incDateDays(@NotNull SimpleDateFormat dateFormat,
+								  @NotNull Calendar calendar,
+								  @Nullable Integer dateInt,
+								  int numberOfDays) {
 		try {
 			calendar.setTime(dateFormat.parse(String.valueOf(dateInt)));
 			calendar.add(Calendar.DAY_OF_MONTH, numberOfDays);
