@@ -19,7 +19,7 @@ object TorontoTTCCommons {
     @JvmOverloads
     @JvmStatic
     fun fixColor(color: String?, subway: Boolean = false) : String? {
-        return when (color) {
+        return when (color?.uppercase()) {
             "FF0000" -> TTC_RED
             "008000" -> if (subway) TTC_LINE_2_GREEN else TTC_BUS_EXPRESS_GREEN
             "0000FF" -> TTC_BUS_NIGHT_BLUE

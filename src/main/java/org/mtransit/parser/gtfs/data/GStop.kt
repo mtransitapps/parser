@@ -1,7 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.commons.StringUtils.EMPTY
-import org.mtransit.commons.StringUtils.isEmpty
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 

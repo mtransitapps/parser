@@ -6,6 +6,7 @@ import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.quotesEscape
+import org.mtransit.parser.db.SQLUtils.unquotes
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTripStop
 import org.mtransit.parser.mt.data.MSchedule
@@ -284,7 +285,7 @@ object DBUtils {
                         rs.getInt(GStopTime.DEPARTURE_TIME),
                         rs.getInt(GStopTime.STOP_ID),
                         rs.getInt(GStopTime.STOP_SEQUENCE),
-                        rs.getStringOrNull(GStopTime.STOP_HEADSIGN),
+                        rs.getStringOrNull(GStopTime.STOP_HEADSIGN)?.unquotes(),
                         rs.getInt(GStopTime.PICKUP_TYPE),
                         rs.getInt(GStopTime.DROP_OFF_TYPE),
                         rs.getInt(GStopTime.TIME_POINT),
@@ -492,7 +493,7 @@ object DBUtils {
                         rs.getInt(MSchedule.PATH_ID),
                         rs.getInt(MSchedule.WHEELCHAIR_BOARDING),
                         rs.getInt(MSchedule.HEADSIGN_TYPE),
-                        rs.getStringOrNull(MSchedule.HEADSIGN_VALUE),
+                        rs.getStringOrNull(MSchedule.HEADSIGN_VALUE)?.unquotes(),
                     )
                 )
                 selectRowCount++

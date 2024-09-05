@@ -1,7 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.commons.StringUtils
-import org.mtransit.commons.StringUtils.isEmpty
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
 

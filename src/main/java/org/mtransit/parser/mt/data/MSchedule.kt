@@ -70,7 +70,7 @@ data class MSchedule(
         if (newHeadsignValue.isNullOrBlank()
             && newHeadsignType != MTrip.HEADSIGN_TYPE_NO_PICKUP
         ) {
-            MTLog.log("Setting '$newHeadsignValue' head-sign! (type:$newHeadsignType)")
+            MTLog.logDebug("Setting '$newHeadsignValue' head-sign! (type:$newHeadsignType)")
         }
         this.headsignType = newHeadsignType
         this.headsignValue = newHeadsignValue

@@ -171,9 +171,13 @@ public class GReader {
 		return true;
 	}
 
-	private static final CSVFormat CSV_FORMAT = CSVFormat.RFC4180.builder().setIgnoreSurroundingSpaces(true).build();
+	private static final CSVFormat CSV_FORMAT = CSVFormat.RFC4180.builder()
+			.setIgnoreSurroundingSpaces(true)
+			.build();
 
-	private static final CSVFormat CSV_FORMAT_NO_QUOTE = CSV_FORMAT.builder().setQuote(null).build();
+	private static final CSVFormat CSV_FORMAT_NO_QUOTE = CSV_FORMAT.builder()
+			.setQuote(null)
+			.build();
 
 	private static final Pattern QUOTE_ = Pattern.compile("\"");
 
