@@ -13,4 +13,4 @@ org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.9.0
 org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.9.0
 org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0
 org.jetbrains:annotations:23.0.0
-org.xerial:sqlite-jdbc:3.46.1.2
+org.xerial:sqlite-jdbc:3.46.1.3
