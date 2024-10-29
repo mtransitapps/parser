@@ -561,7 +561,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return;
 		}
 		if (gTrip.getDirectionId() == null || gTrip.getDirectionId() < 0 || gTrip.getDirectionId() > 1) {
-			throw new MTLog.Fatal("Default agency implementation required 'direction_id' field in 'trips.txt'!");
+			throw new MTLog.Fatal("Default agency implementation requires 'direction_id' field in '%s'!", gTrip.toStringPlus());
 		}
 		try {
 			mTrip.setHeadsignString(
