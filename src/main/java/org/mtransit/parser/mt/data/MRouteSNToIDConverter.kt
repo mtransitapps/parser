@@ -125,6 +125,9 @@ object MRouteSNToIDConverter {
             return notSupportedToRouteId?.invoke(rsn)
                 ?: throw MTLog.Fatal("Unexpected route short name '$rsn' to convert to route ID!")
         }
+        if (rsn.length == 1 && rsn[0].isLetter()) {
+            endsWithLetter(rsn)?.let { return it }
+        }
         val matcher: Matcher = RSN.matcher(rsn)
         if (!matcher.find()) {
             return notSupportedToRouteId?.invoke(rsn)
@@ -138,75 +141,81 @@ object MRouteSNToIDConverter {
                 ?: throw MTLog.Fatal("Unexpected route short name digits '$digits' in short name '$rsn' to convert to route ID!")
         }
         var routeId: Long = digits
-        routeId += when (nextChars) {
-            "" -> endsWith(Letters.NONE_)
-            "A" -> endsWith(Letters.A)
-            "B" -> endsWith(Letters.B)
-            "C" -> endsWith(Letters.C)
-            "D" -> endsWith(Letters.D)
-            "E" -> endsWith(Letters.E)
-            "F" -> endsWith(Letters.F)
-            "G" -> endsWith(Letters.G)
-            "H" -> endsWith(Letters.H)
-            "I" -> endsWith(Letters.I)
-            "J" -> endsWith(Letters.J)
-            "K" -> endsWith(Letters.K)
-            "L" -> endsWith(Letters.L)
-            "M" -> endsWith(Letters.M)
-            "N" -> endsWith(Letters.N)
-            "O" -> endsWith(Letters.O)
-            "P" -> endsWith(Letters.P)
-            "Q" -> endsWith(Letters.Q)
-            "R" -> endsWith(Letters.R)
-            "S" -> endsWith(Letters.S)
-            "T" -> endsWith(Letters.T)
-            "U" -> endsWith(Letters.U)
-            "V" -> endsWith(Letters.V)
-            "W" -> endsWith(Letters.W)
-            "X" -> endsWith(Letters.X)
-            "Y" -> endsWith(Letters.Y)
-            "Z" -> endsWith(Letters.Z)
-            else -> {
-                nextCharsToLong?.invoke(nextChars)
-                    ?: notSupportedToRouteId?.invoke(rsn)
-                    ?: throw MTLog.Fatal("Unexpected next characters '$nextChars' in short name '$rsn'!")
-            }
+        routeId += endsWithLetter(nextChars) ?: run {
+            nextCharsToLong?.invoke(nextChars)
+                ?: notSupportedToRouteId?.invoke(rsn)
+                ?: throw MTLog.Fatal("Unexpected next characters '$nextChars' in short name '$rsn'!")
         }
-        routeId += when (previousChars) {
-            "" -> startsWith(Letters.NONE_)
-            "A" -> startsWith(Letters.A)
-            "B" -> startsWith(Letters.B)
-            "C" -> startsWith(Letters.C)
-            "D" -> startsWith(Letters.D)
-            "E" -> startsWith(Letters.E)
-            "F" -> startsWith(Letters.F)
-            "G" -> startsWith(Letters.G)
-            "H" -> startsWith(Letters.H)
-            "I" -> startsWith(Letters.I)
-            "J" -> startsWith(Letters.J)
-            "K" -> startsWith(Letters.K)
-            "L" -> startsWith(Letters.L)
-            "M" -> startsWith(Letters.M)
-            "N" -> startsWith(Letters.N)
-            "O" -> startsWith(Letters.O)
-            "P" -> startsWith(Letters.P)
-            "Q" -> startsWith(Letters.Q)
-            "R" -> startsWith(Letters.R)
-            "S" -> startsWith(Letters.S)
-            "T" -> startsWith(Letters.T)
-            "U" -> startsWith(Letters.U)
-            "V" -> startsWith(Letters.V)
-            "W" -> startsWith(Letters.W)
-            "X" -> startsWith(Letters.X)
-            "Y" -> startsWith(Letters.Y)
-            "Z" -> startsWith(Letters.Z)
-            else -> {
-                previousCharsToLong?.invoke(previousChars)
-                    ?: notSupportedToRouteId?.invoke(rsn)
-                    ?: throw MTLog.Fatal("Unexpected previous characters '$previousChars' in short name '$rsn'!")
-            }
+        routeId += startsWithLetter(previousChars) ?: run {
+            previousCharsToLong?.invoke(previousChars)
+                ?: notSupportedToRouteId?.invoke(rsn)
+                ?: throw MTLog.Fatal("Unexpected previous characters '$previousChars' in short name '$rsn'!")
         }
         return routeId
+    }
+
+    @JvmStatic
+    fun startsWithLetter(previousChars: String): Long? = when (previousChars) {
+        "" -> startsWith(Letters.NONE_)
+        "A" -> startsWith(Letters.A)
+        "B" -> startsWith(Letters.B)
+        "C" -> startsWith(Letters.C)
+        "D" -> startsWith(Letters.D)
+        "E" -> startsWith(Letters.E)
+        "F" -> startsWith(Letters.F)
+        "G" -> startsWith(Letters.G)
+        "H" -> startsWith(Letters.H)
+        "I" -> startsWith(Letters.I)
+        "J" -> startsWith(Letters.J)
+        "K" -> startsWith(Letters.K)
+        "L" -> startsWith(Letters.L)
+        "M" -> startsWith(Letters.M)
+        "N" -> startsWith(Letters.N)
+        "O" -> startsWith(Letters.O)
+        "P" -> startsWith(Letters.P)
+        "Q" -> startsWith(Letters.Q)
+        "R" -> startsWith(Letters.R)
+        "S" -> startsWith(Letters.S)
+        "T" -> startsWith(Letters.T)
+        "U" -> startsWith(Letters.U)
+        "V" -> startsWith(Letters.V)
+        "W" -> startsWith(Letters.W)
+        "X" -> startsWith(Letters.X)
+        "Y" -> startsWith(Letters.Y)
+        "Z" -> startsWith(Letters.Z)
+        else -> null
+    }
+
+    @JvmStatic
+    fun endsWithLetter(nextChars: String) = when (nextChars) {
+        "" -> endsWith(Letters.NONE_)
+        "A" -> endsWith(Letters.A)
+        "B" -> endsWith(Letters.B)
+        "C" -> endsWith(Letters.C)
+        "D" -> endsWith(Letters.D)
+        "E" -> endsWith(Letters.E)
+        "F" -> endsWith(Letters.F)
+        "G" -> endsWith(Letters.G)
+        "H" -> endsWith(Letters.H)
+        "I" -> endsWith(Letters.I)
+        "J" -> endsWith(Letters.J)
+        "K" -> endsWith(Letters.K)
+        "L" -> endsWith(Letters.L)
+        "M" -> endsWith(Letters.M)
+        "N" -> endsWith(Letters.N)
+        "O" -> endsWith(Letters.O)
+        "P" -> endsWith(Letters.P)
+        "Q" -> endsWith(Letters.Q)
+        "R" -> endsWith(Letters.R)
+        "S" -> endsWith(Letters.S)
+        "T" -> endsWith(Letters.T)
+        "U" -> endsWith(Letters.U)
+        "V" -> endsWith(Letters.V)
+        "W" -> endsWith(Letters.W)
+        "X" -> endsWith(Letters.X)
+        "Y" -> endsWith(Letters.Y)
+        "Z" -> endsWith(Letters.Z)
+        else -> null
     }
 
     @JvmStatic
