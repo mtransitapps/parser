@@ -389,7 +389,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					headsignTypeString = true;
 				}
 			}
-			// HashSet<String> mTripStopHeadsignStrings = new HashSet<>(mTripStopTimesHeadsign.values());
 			tripKeptNonDescriptiveHeadsign = false; // 1 trip can keep the same non descriptive head sign
 			if (headsignTypeString && mTripHeadsignStrings.size() != mTrips.size()) {
 				MTLog.log("%s: Non descriptive trip headsigns (%s different headsign(s) for %s trips)", this.routeId, mTripHeadsignStrings.size(), mTrips.size());
@@ -741,7 +740,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								gStop.getStopLat(),
 								gStop.getStopLong(),
 								gStop.getWheelchairBoarding().getId(),
-								gStop.getStopId()
+								gStop.getStopId(),
+								this.agencyTools
 						));
 			}
 		}

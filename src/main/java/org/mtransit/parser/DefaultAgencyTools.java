@@ -898,10 +898,29 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
+	@Override
+	public @Nullable String getStopIdCleanupRegex() {
+		return null;
+	}
+
+	@Nullable
+	private Pattern stopIdCleanupPattern = null;
+
+	private boolean stopIdCleanupPatternSet = false;
+
+	@Override
+	public @Nullable Pattern getStopIdCleanupPattern() {
+		if (this.stopIdCleanupPattern == null && !stopIdCleanupPatternSet) {
+			this.stopIdCleanupPattern = GTFSCommons.makeIdCleanupPattern(getStopIdCleanupRegex());
+			this.stopIdCleanupPatternSet = true;
+		}
+		return this.stopIdCleanupPattern;
+	}
+
 	@NotNull
 	@Override
 	public String cleanStopOriginalId(@NotNull String gStopId) {
-		return gStopId;
+		return GTFSCommons.cleanOriginalId(gStopId, getStopIdCleanupPattern());
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils.quotesEscape
+import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.mt.MDataChangedManager
 
 data class MStop(
@@ -24,6 +25,7 @@ data class MStop(
         lng: Double,
         accessible: Int,
         originalId: String,
+        agencyTools: GAgencyTools? = null,
     ) : this(
         id,
         code,
@@ -31,7 +33,7 @@ data class MStop(
         lat,
         lng,
         accessible,
-        GTFSCommons.stringIdToHashIfEnabled(originalId),
+        GTFSCommons.stringIdToHashIfEnabled(originalId, agencyTools?.stopIdCleanupPattern),
     )
 
     fun hasLat(): Boolean {
