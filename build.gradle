@@ -37,6 +37,7 @@ dependencies {
     testImplementation(libs.bundles.test.unit)
 }
 
+// update baseline with: ./gradlew :parser:dependencyGuardBaseline
 dependencyGuard {
     // lib
     configuration("compileClasspath")
