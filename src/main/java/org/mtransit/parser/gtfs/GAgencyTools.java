@@ -190,7 +190,10 @@ public interface GAgencyTools {
 	@Nullable
 	MDirectionType convertDirection(@Nullable String headSign);
 
+	@Deprecated
 	boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge);
+
+	boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge, @NotNull GRoute gRoute);
 
 	boolean excludeTripNullable(@Nullable GTrip gTrip);
 

@@ -211,12 +211,12 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		ArrayList<MFrequency> mFrequenciesList = new ArrayList<>(mFrequencies.values());
 		Collections.sort(mFrequenciesList);
 		TreeMap<Long, ArrayList<MFrequency>> mRouteFrequencies = new TreeMap<>();
-		if (mFrequenciesList.size() > 0) {
+		if (!mFrequenciesList.isEmpty()) {
 			mRouteFrequencies.put(this.routeId, mFrequenciesList);
 		}
 		long firstTimestamp = -1L;
 		long lastTimestamp = -1L;
-		if (mServiceDatesList.size() > 0) {
+		if (!mServiceDatesList.isEmpty()) {
 			MServiceDate firstServiceDate = mServiceDatesList.get(0);
 			final int maxCalendarDate = GFieldTypes.fromDateToInt(new Date()) + 10 * 10_000; // max 10 years IN THE FUTURE
 			mServiceDatesList.removeIf(serviceDate ->
@@ -543,7 +543,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (currentTrip != null && !currentTrip.equals(mTrip)) {
 					mergeSuccessful = false;
 					if (mTrip.equalsExceptHeadsignValue(currentTrip)) {
-						mergeSuccessful = this.agencyTools.mergeHeadsign(mTrip, currentTrip);
+						mergeSuccessful = this.agencyTools.mergeHeadsign(mTrip, currentTrip, gRoute);
 					}
 					if (!mergeSuccessful) {
 						throw new MTLog.Fatal("%s: Different trip %s already in list (%s != %s)", this.routeId, mTrip.getId(), mTrip, currentTrip);
@@ -612,7 +612,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				String tripStopTimesHeadsign = splitTripStopTimesHeadsign.get(mTrip.getId());
 				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING
 						&& tripStopTimesHeadsign != null
-						&& tripStopTimesHeadsign.length() > 0) {
+						&& !tripStopTimesHeadsign.isEmpty()) {
 					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
 						if (!mTripStopTimesHeadsign.get(mTrip.getId()).equals(tripStopTimesHeadsign)) {
 							if (!mTripStopTimesHeadsign.get(mTrip.getId()).contains(tripStopTimesHeadsign)) {
@@ -1207,11 +1207,11 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		results[0] = distance;
 		if (results.length > 1) {
 			float initialBearing = (float) Math.atan2(cosU2 * sinLambda, cosU1 * sinU2 - sinU1 * cosU2 * cosLambda);
-			initialBearing *= 180.0 / Math.PI;
+			initialBearing *= (float) (180.0 / Math.PI);
 			results[1] = initialBearing;
 			if (results.length > 2) {
 				float finalBearing = (float) Math.atan2(cosU1 * sinLambda, -sinU1 * cosU2 + cosU1 * sinU2 * cosLambda);
-				finalBearing *= 180.0 / Math.PI;
+				finalBearing *= (float) (180.0 / Math.PI);
 				results[2] = finalBearing;
 			}
 		}

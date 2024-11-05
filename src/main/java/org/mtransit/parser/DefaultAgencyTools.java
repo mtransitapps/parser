@@ -553,7 +553,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
-		if (directionFinderEnabled()) {
+		final GRoute gRoute = gtfs.getRoute(gTrip.getRouteIdInt());
+		if (gRoute == null) {
+			//noinspection deprecation
+			throw new MTLog.Fatal("Trying to set trip head-sign w/o valid GTFS route (ID: %s)", gTrip.getRouteId());
+		}
+		if (directionFinderEnabled(mRoute.getId(), gRoute)) {
 			mTrip.setHeadsignString(
 					cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
 					gTrip.getDirectionIdOrDefault()
@@ -733,9 +738,18 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return null; // no direction conversion by default
 	}
 
+	@Deprecated
 	@Override
 	public boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge) {
 		if (directionFinderEnabled()) {
+			throw new MTLog.Fatal("Unexpected trips to merge: %s & %s!", mTrip, mTripToMerge);
+		}
+		return mTrip.mergeHeadsignValue(mTripToMerge);
+	}
+
+	@Override
+	public boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge, @NotNull GRoute gRoute) {
+		if (directionFinderEnabled(mTrip.getRouteId(), gRoute)) {
 			throw new MTLog.Fatal("Unexpected trips to merge: %s & %s!", mTrip, mTripToMerge);
 		}
 		return mTrip.mergeHeadsignValue(mTripToMerge);
