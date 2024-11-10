@@ -256,6 +256,7 @@ object MDataChangedManager {
             }
             newGCalendars.remove(originalCalendar)
             newGCalendars.add(updatedCalendar)
+            MTLog.log("> Optimising data changed by removing date '$removedDate' from ${updatedCalendar.toStringShort()}...")
             dataChanged = true
         }
         val lastServiceCalendarDatesDates = lastCalendarDatesServiceDates.map { it.calendarDate }
