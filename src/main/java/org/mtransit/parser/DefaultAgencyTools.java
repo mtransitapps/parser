@@ -142,8 +142,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (defaultExcludeEnabled()) {
 			this.serviceIdInts = extractUsefulServiceIdInts(args, this, true, lastServiceDates);
 		}
+		final String inputUrl = args.length >= 5 ? args[4] : null;
 		if (excludingAll()) {
-			MGenerator.dumpFiles(this, null, args[0], args[1], args[2], true);
+			MGenerator.dumpFiles(this, null, args[0], args[1], args[2], inputUrl, true);
 			return;
 		}
 		long start = System.currentTimeMillis();
@@ -162,7 +163,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (Constants.SKIP_FILE_DUMP) {
 			return; // DEBUG
 		}
-		MGenerator.dumpFiles(this, mSpec, args[0], args[1], args[2], false);
+		MGenerator.dumpFiles(this, mSpec, args[0], args[1], args[2], inputUrl, false);
 		MTLog.log("Generating %s data... DONE in %s.", getAgencyLabel(), Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 

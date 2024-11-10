@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.Cleaner;
 import org.mtransit.commons.CloseableUtils;
 import org.mtransit.commons.GTFSCommons;
+import org.mtransit.commons.SourceUtils;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
@@ -214,6 +215,7 @@ public class MGenerator {
 								 @NotNull String gtfsDir,
 								 @SuppressWarnings("unused") @NotNull String unused,
 								 final @NotNull String fileBase,
+								 @Nullable String inputUrl,
 								 boolean deleteAll) {
 		if (!deleteAll && (mSpec == null || !mSpec.isValid())) {
 			throw new MTLog.Fatal("Generated data invalid (agencies:%s)!", mSpec);
@@ -274,13 +276,13 @@ public class MGenerator {
 		// FREQUENCY ROUTES
 		dumpFrequencyRoutes(gAgencyTools, mSpec, fileBase, deleteAll, rawDirF);
 		if (deleteAll) {
-			dumpValues(rawDirF, fileBase, null, null, null, null, null, -1, -1, true);
+			dumpValues(rawDirF, fileBase, null, null, null, null, null, -1, -1, null, true);
 		} else {
-			dumpCommonValues(rawDirF, gAgencyTools, mSpec);
+			dumpCommonValues(rawDirF, gAgencyTools, mSpec, inputUrl);
 			dumpValues(
 					rawDirF, fileBase, mSpec,
 					minMaxLatLng.first.first, minMaxLatLng.second.first, minMaxLatLng.first.second, minMaxLatLng.second.second,
-					mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds(),
+					mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds(), inputUrl,
 					false
 			);
 			dumpStoreListing(rawDirF, fileBase, minMaxDates.first, minMaxDates.second);
@@ -794,6 +796,7 @@ public class MGenerator {
 	private static final String VALUES = "values";
 	private static final String GTFS_RTS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml";
 
+	private static final String GTFS_RTS_SOURCE_LABEL = "gtfs_rts_source_label";
 	private static final String GTFS_RTS_AGENCY_ID = "gtfs_rts_agency_id";
 	private static final String GTFS_RTS_AGENCY_TYPE = "gtfs_rts_agency_type";
 	private static final String GTFS_RTS_AGENCY_EXTENDED_TYPE = "gtfs_rts_agency_extended_type";
@@ -812,7 +815,7 @@ public class MGenerator {
 	private static final String GTFS_RTS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec";
 	// TODO later max integer = 2147483647 = Tuesday, January 19, 2038 3:14:07 AM GMT
 
-	private static void dumpCommonValues(File dumpDirF, GAgencyTools gAgencyTools, MSpec mSpec) {
+	private static void dumpCommonValues(File dumpDirF, GAgencyTools gAgencyTools, MSpec mSpec, @Nullable String inputUrl) {
 		BufferedWriter ow = null;
 		File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
 		File dumpDirResF = new File(dumpDirRootF, RES);
@@ -827,6 +830,11 @@ public class MGenerator {
 			ow.write(Constants.NEW_LINE);
 			ow.write(RESOURCES_START);
 			ow.write(Constants.NEW_LINE);
+			final String sourceLabel = SourceUtils.getSourceLabel(inputUrl);
+			if (sourceLabel != null && !sourceLabel.isEmpty()) {
+				ow.write(getRESOURCES_STRING(GTFS_RTS_SOURCE_LABEL, sourceLabel));
+				ow.write(Constants.NEW_LINE);
+			}
 			//noinspection deprecation
 			ow.write(getRESOURCES_STRING(GTFS_RTS_AGENCY_ID, mSpec.getFirstAgency().getId()));
 			ow.write(Constants.NEW_LINE);
@@ -877,7 +885,7 @@ public class MGenerator {
 	}
 
 	private static void dumpValues(File dumpDirF, String fileBase, MSpec mSpec, Double minLat, Double maxLat, Double minLng, Double maxLng,
-								   int firstTimestampInSec, int lastTimestampInSec, boolean deleteAll) {
+								   int firstTimestampInSec, int lastTimestampInSec, @Nullable String inputUrl, boolean deleteAll) {
 		File file;
 		BufferedWriter ow = null;
 		File dumpDirResF = dumpDirF.getParentFile();
@@ -902,6 +910,11 @@ public class MGenerator {
 			ow.write(RESOURCES_START);
 			ow.write(Constants.NEW_LINE);
 			if (StringUtils.isEmpty(fileBase)) {
+				final String sourceLabel = SourceUtils.getSourceLabel(inputUrl);
+				if (sourceLabel != null && !sourceLabel.isEmpty()) {
+					ow.write(getRESOURCES_STRING(GTFS_RTS_SOURCE_LABEL, sourceLabel));
+					ow.write(Constants.NEW_LINE);
+				}
 				//noinspection deprecation
 				ow.write(getRESOURCES_STRING(GTFS_RTS_AGENCY_ID, mSpec.getFirstAgency().getId()));
 				ow.write(Constants.NEW_LINE);
