@@ -794,6 +794,7 @@ public class MGenerator {
 	private static final String VALUES = "values";
 	private static final String GTFS_RTS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml";
 
+	private static final String GTFS_RTS_AGENCY_ID = "gtfs_rts_agency_id";
 	private static final String GTFS_RTS_AGENCY_TYPE = "gtfs_rts_agency_type";
 	private static final String GTFS_RTS_AGENCY_EXTENDED_TYPE = "gtfs_rts_agency_extended_type";
 	private static final String GTFS_RTS_TIMEZONE = "gtfs_rts_timezone";
@@ -825,6 +826,9 @@ public class MGenerator {
 			ow.write(XML_HEADER);
 			ow.write(Constants.NEW_LINE);
 			ow.write(RESOURCES_START);
+			ow.write(Constants.NEW_LINE);
+			//noinspection deprecation
+			ow.write(getRESOURCES_STRING(GTFS_RTS_AGENCY_ID, mSpec.getFirstAgency().getId()));
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_INTEGER(GTFS_RTS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
 			ow.write(Constants.NEW_LINE);
@@ -898,6 +902,9 @@ public class MGenerator {
 			ow.write(RESOURCES_START);
 			ow.write(Constants.NEW_LINE);
 			if (StringUtils.isEmpty(fileBase)) {
+				//noinspection deprecation
+				ow.write(getRESOURCES_STRING(GTFS_RTS_AGENCY_ID, mSpec.getFirstAgency().getId()));
+				ow.write(Constants.NEW_LINE);
 				ow.write(getRESOURCES_INTEGER(GTFS_RTS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
 				ow.write(Constants.NEW_LINE);
 			}
