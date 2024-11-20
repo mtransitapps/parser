@@ -3,7 +3,7 @@ androidx.annotation:annotation:1.9.0
 androidx.collection:collection-jvm:1.4.5
 androidx.collection:collection:1.4.5
 commons-codec:commons-codec:1.17.1
-commons-io:commons-io:2.17.0
+commons-io:commons-io:2.18.0
 junit:junit:4.13.2
 net.bytebuddy:byte-buddy-agent:1.15.4
 net.bytebuddy:byte-buddy:1.15.4
