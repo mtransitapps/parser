@@ -8,6 +8,7 @@ import org.mtransit.parser.FileUtils;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.db.DBUtils;
+import org.mtransit.parser.db.GTFSDataBase;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.mt.GenerateMObjectsTask;
 
@@ -32,8 +33,6 @@ public class GSpec {
 	private static final boolean LOG_REMOVED = false;
 	// private static final boolean LOG_REMOVED = true; // DEBUG
 
-	@NotNull
-	private final HashMap<Integer, GAgency> agencies = new HashMap<>();
 	@NotNull
 	private final ArrayList<GCalendar> calendars = new ArrayList<>();
 	@NotNull
@@ -72,22 +71,27 @@ public class GSpec {
 	}
 
 	public void addAgency(@NotNull GAgency gAgency) {
-		this.agencies.put(gAgency.getAgencyIdInt(), gAgency);
-	}
-
-	@SuppressWarnings("unused")
-	public void addAllAgencies(@NotNull HashMap<Integer, GAgency> agencies) {
-		this.agencies.putAll(agencies);
+		GTFSDataBase.insertAgency(gAgency.to());
 	}
 
 	@NotNull
 	public Collection<GAgency> getAllAgencies() {
-		return this.agencies.values();
+		return GAgency.from(GTFSDataBase.selectAgencies());
 	}
 
-	@NotNull
+	@Deprecated
+	@Nullable
 	public GAgency getAgency(@NotNull Integer agencyIdInt) {
-		return this.agencies.get(agencyIdInt);
+		return getAgency(GIDs.getString(agencyIdInt));
+	}
+
+	@Nullable
+	public GAgency getAgency(@NotNull String agencyId) {
+		return GAgency.from(GTFSDataBase.selectAgency(agencyId));
+	}
+
+	private int readAgenciesCount() {
+		return GTFSDataBase.countAgencies();
 	}
 
 	public void addCalendar(@NotNull GCalendar gCalendar) {
@@ -342,7 +346,7 @@ public class GSpec {
 	@Override
 	public String toString() {
 		return GSpec.class.getSimpleName() + '[' + //
-				AGENCIES + this.agencies.size() + Constants.COLUMN_SEPARATOR + //
+				AGENCIES + readAgenciesCount() + Constants.COLUMN_SEPARATOR + //
 				CALENDARS + this.calendars.size() + Constants.COLUMN_SEPARATOR + //
 				CALENDAR_DATES + this.calendarDates.size() + Constants.COLUMN_SEPARATOR + //
 				ROUTES + this.routesCount + Constants.COLUMN_SEPARATOR + //
@@ -361,7 +365,7 @@ public class GSpec {
 		} else if (stopTimesOnly) {
 			MTLog.log("- StopTimes: %d", readStopTimesCount());
 		} else {
-			MTLog.log("- Agencies: %d", this.agencies.size());
+			MTLog.log("- Agencies: %d", readAgenciesCount());
 			MTLog.log("- Calendars: %d", this.calendars.size());
 			MTLog.log("- CalendarDates: %d", this.calendarDates.size());
 			MTLog.log("- Routes: %d", this.routesCount);

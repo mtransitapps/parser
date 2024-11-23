@@ -4,7 +4,6 @@ package org.mtransit.parser.db
 
 import org.apache.commons.text.translate.CharSequenceTranslator
 import org.apache.commons.text.translate.LookupTranslator
-import org.mtransit.commons.Constants
 import org.mtransit.commons.Constants.EMPTY
 import org.mtransit.parser.MTLog
 import org.sqlite.SQLiteException
@@ -12,6 +11,7 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
+import org.mtransit.commons.sql.SQLUtils as SQLUtilsCommons
 
 object SQLUtils {
 
@@ -19,7 +19,7 @@ object SQLUtils {
     const val JDBC_SQLITE_MEMORY = "$JDBC_SQLITE:memory:"
 
     private const val QUOTE_ = '\''
-    private const val QUOTE = "'"
+    private const val QUOTE = SQLUtilsCommons.STRING_DELIMITER
 
     private const val UNDERSCORE = "_"
 
@@ -45,7 +45,7 @@ object SQLUtils {
 
     @JvmStatic
     fun quotes(string: String): String {
-        return "$QUOTE$string$QUOTE"
+        return SQLUtilsCommons.escapeString(string)
     }
 
     @JvmName("quotesExt")

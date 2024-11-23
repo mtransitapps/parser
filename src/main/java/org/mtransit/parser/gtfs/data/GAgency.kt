@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
+import org.mtransit.commons.gtfs.data.Agency
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 
@@ -52,6 +53,17 @@ data class GAgency(
     @Suppress("unused")
     fun isDifferentAgency(otherAgencyId: String): Boolean = isDifferentAgency(GIDs.getInt(otherAgencyId))
 
+    fun to() = Agency(
+        _agencyId,
+        agencyName,
+        agencyUrl,
+        agencyTimezone,
+        agencyLang,
+        agencyPhone,
+        agencyFareUrl,
+        agencyEmail,
+    )
+
     companion object {
         const val FILENAME = "agency.txt"
 
@@ -78,5 +90,22 @@ data class GAgency(
             line[AGENCY_FARE_URL],
             line[AGENCY_EMAIL],
         )
+
+        @JvmStatic
+        fun from(agency: Collection<Agency>) = agency.map { from(it) }
+
+        @JvmStatic
+        fun from(agency: Agency?) = agency?.let {
+            GAgency(
+                it.agencyId,
+                it.agencyName,
+                it.agencyUrl,
+                it.agencyTimezone,
+                it.agencyLang,
+                it.agencyPhone,
+                it.agencyFareUrl,
+                it.agencyEmail,
+            )
+        }
     }
 }

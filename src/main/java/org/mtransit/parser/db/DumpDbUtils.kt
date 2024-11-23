@@ -31,7 +31,6 @@ object DumpDbUtils {
             SQLUtils.executeUpdate(statement, GTFSCommons.T_TRIP_SQL_DROP)
             SQLUtils.executeUpdate(statement, GTFSCommons.T_ROUTE_SQL_DROP)
             SQLUtils.executeUpdate(statement, GTFSCommons.T_SERVICE_DATES_SQL_DROP)
-            SQLUtils.executeUpdate(statement, GTFSCommons.T_ROUTE_SQL_DROP)
             // CREATE
             SQLUtils.executeUpdate(statement, GTFSCommons.T_ROUTE_SQL_CREATE)
             SQLUtils.executeUpdate(statement, GTFSCommons.T_TRIP_SQL_CREATE)
