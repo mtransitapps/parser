@@ -5,6 +5,7 @@ import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GSpec
 import org.mtransit.parser.gtfs.data.GStopTime
+import org.mtransit.parser.gtfs.data.getRoute
 
 data class DirectionResult(
     val headSign: String,
@@ -43,7 +44,7 @@ data class DirectionResult(
             val lastTime = gStopTimes.last().arrivalTime
             val tripIdInt = gStopTimes.first().tripIdInt
             val gTrip = routeGTFS.getTrip(tripIdInt) ?: throw MTLog.Fatal("Can not find direction trip '${GIDs.toStringPlus(tripIdInt)}'!")
-            val gRoute = routeGTFS.getRoute(gTrip.routeIdInt) ?: throw MTLog.Fatal("Can not find direction route '${GIDs.toStringPlus(gTrip.routeIdInt)}'!")
+            val gRoute = routeGTFS.getRoute(gTrip) ?: throw MTLog.Fatal("Can not find direction route '${GIDs.toStringPlus(gTrip.routeIdInt)}'!")
             val stopHeadSigns = gStopTimes.map { gStopTime ->
                 agencyTools.cleanStopHeadSign(gRoute, gTrip, gStopTime, gStopTime.stopHeadsignOrDefault)
             }.filter {

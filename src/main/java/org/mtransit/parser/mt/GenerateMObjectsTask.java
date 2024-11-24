@@ -321,7 +321,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		HashSet<String> mTripHeadsignStrings;
 		boolean headsignTypeString;
 		boolean tripKeptNonDescriptiveHeadsign;
-		final ArrayList<GRoute> gRoutes = routeGTFS.getRoutes(this.routeId);
+		final List<GRoute> gRoutes = routeGTFS.getRoutes(this.routeId);
 		Map<Integer, String> gDirectionHeadSigns = null;
 		if (this.agencyTools.directionSplitterEnabled(this.routeId)) {
 			MDirectionSplitter.splitDirection(this.routeId, gRoutes, routeGTFS, this.agencyTools);

@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import androidx.annotation.Discouraged
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils.quotesEscape
@@ -25,7 +26,7 @@ data class MServiceDate(
         exceptionType.id
     )
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val serviceId = _serviceId
 
@@ -104,12 +105,15 @@ data class MServiceDate(
                 )
             }
 
+        @Suppress("unused")
         @JvmStatic
         fun findStartDate(lastServiceDates: Collection<MServiceDate>) = lastServiceDates.map { it.calendarDate }.minOf { it }
 
+        @Suppress("unused")
         @JvmStatic
         fun findEndDate(lastServiceDates: Collection<MServiceDate>) = lastServiceDates.map { it.calendarDate }.maxOf { it }
 
+        @Suppress("unused")
         @JvmStatic
         fun findServiceIdInts(lastServiceDates: Collection<MServiceDate>) = lastServiceDates.map { it.serviceIdInt }.distinct()
     }

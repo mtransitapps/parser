@@ -1,7 +1,8 @@
 package org.mtransit.parser.gtfs.data
 
+import androidx.annotation.Discouraged
 import org.mtransit.commons.gtfs.data.Agency
-import org.mtransit.parser.Constants
+import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.parser.MTLog
 
 // https://gtfs.org/schedule/reference/#agencytxt
@@ -18,7 +19,7 @@ data class GAgency(
 ) {
 
     constructor(
-        agencyId: String?,
+        agencyId: AgencyId,
         agencyName: String,
         agencyUrl: String,
         agencyTimezone: String,
@@ -27,7 +28,7 @@ data class GAgency(
         agencyFareUrl: String?,
         agencyEmail: String?,
     ) : this(
-        GIDs.getInt(agencyId ?: MISSING_AGENCY_ID),
+        GIDs.getInt(agencyId),
         agencyName,
         agencyUrl,
         agencyTimezone,
@@ -37,11 +38,11 @@ data class GAgency(
         agencyEmail,
     )
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val agencyId = _agencyId
 
-    private val _agencyId: String
+    private val _agencyId: AgencyId
         get() {
             return GIDs.getString(agencyIdInt)
         }
@@ -49,19 +50,25 @@ data class GAgency(
     @Suppress("unused")
     fun isDifferentAgency(otherAgencyIdInt: Int): Boolean = agencyIdInt != otherAgencyIdInt
 
-    @Deprecated(message = "Not memory efficient", replaceWith = ReplaceWith("isDifferentAgency(GIDs.getInt(otherAgencyId))"))
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    fun isDifferentAgency(otherAgencyId: String): Boolean = isDifferentAgency(GIDs.getInt(otherAgencyId))
+    fun isDifferentAgency(otherAgencyId: AgencyId): Boolean = isDifferentAgency(GIDs.getInt(otherAgencyId))
+
+    @Suppress("unused")
+    fun toStringPlus(): String {
+        return toString() +
+                "+(agencyId:$_agencyId)"
+    }
 
     fun to() = Agency(
-        _agencyId,
-        agencyName,
-        agencyUrl,
-        agencyTimezone,
-        agencyLang,
-        agencyPhone,
-        agencyFareUrl,
-        agencyEmail,
+        agencyId = _agencyId,
+        agencyName = agencyName,
+        agencyUrl = agencyUrl,
+        agencyTimezone = agencyTimezone,
+        agencyLang = agencyLang,
+        agencyPhone = agencyPhone,
+        agencyFareUrl = agencyFareUrl,
+        agencyEmail = agencyEmail,
     )
 
     companion object {
@@ -77,34 +84,32 @@ data class GAgency(
         private const val AGENCY_FARE_URL = "agency_fare_url" // Optional
         private const val AGENCY_EMAIL = "agency_email" // Optional
 
-        const val MISSING_AGENCY_ID = Constants.EMPTY
-
         @JvmStatic
         fun fromLine(line: Map<String, String>) = GAgency(
-            line[AGENCY_ID],
-            line[AGENCY_NAME] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
-            line[AGENCY_URL] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
-            line[AGENCY_TIMEZONE] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
-            line[AGENCY_LANG],
-            line[AGENCY_PHONE],
-            line[AGENCY_FARE_URL],
-            line[AGENCY_EMAIL],
+            agencyId = line[AGENCY_ID].orEmpty(),
+            agencyName = line[AGENCY_NAME] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
+            agencyUrl = line[AGENCY_URL] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
+            agencyTimezone = line[AGENCY_TIMEZONE] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
+            agencyLang = line[AGENCY_LANG],
+            agencyPhone = line[AGENCY_PHONE],
+            agencyFareUrl = line[AGENCY_FARE_URL],
+            agencyEmail = line[AGENCY_EMAIL],
         )
 
         @JvmStatic
-        fun from(agency: Collection<Agency>) = agency.map { from(it) }
+        fun from(agencies: Collection<Agency>) = agencies.map { from(it) }
 
         @JvmStatic
         fun from(agency: Agency?) = agency?.let {
             GAgency(
-                it.agencyId,
-                it.agencyName,
-                it.agencyUrl,
-                it.agencyTimezone,
-                it.agencyLang,
-                it.agencyPhone,
-                it.agencyFareUrl,
-                it.agencyEmail,
+                agencyId = it.agencyId,
+                agencyName = it.agencyName,
+                agencyUrl = it.agencyUrl,
+                agencyTimezone = it.agencyTimezone,
+                agencyLang = it.agencyLang,
+                agencyPhone = it.agencyPhone,
+                agencyFareUrl = it.agencyFareUrl,
+                agencyEmail = it.agencyEmail,
             )
         }
     }

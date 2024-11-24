@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import androidx.annotation.Discouraged
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GAgency
 import org.mtransit.parser.gtfs.data.GIDs
@@ -28,7 +29,7 @@ data class MAgency(
         agencyTools.agencyRouteType,
     )
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val id = _id
 

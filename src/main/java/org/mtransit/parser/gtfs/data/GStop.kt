@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
+import androidx.annotation.Discouraged
 import org.mtransit.commons.StringUtils.EMPTY
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
@@ -37,7 +38,7 @@ data class GStop(
         GWheelchairBoardingType.parse(wheelchairBoarding),
     )
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val stopId = _stopId
 
@@ -46,7 +47,7 @@ data class GStop(
             return GIDs.getString(stopIdInt)
         }
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val parentStationId = _parentStationId
 

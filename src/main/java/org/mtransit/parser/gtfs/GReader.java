@@ -390,7 +390,7 @@ public class GReader {
 	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
 			final GRoute gRoute = GRoute.fromLine(line);
-			final GAgency routeAgency = gRoute.getAgencyIdInt() == null ? null : gSpec.getAgency(gRoute.getAgencyIdInt());
+			final GAgency routeAgency = gSpec.getAgency(gRoute.getAgencyIdInt());
 			if (agencyTools.excludeRoute(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute.toStringPlus());
 				if ((gRoute.hasAgencyId() && routeAgency != null)

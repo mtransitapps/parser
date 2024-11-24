@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
+import androidx.annotation.Discouraged
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.escape
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -67,7 +68,7 @@ data class GCalendar(
         endDate
     )
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val serviceId = _serviceId
 

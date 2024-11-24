@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
+import androidx.annotation.Discouraged
 import org.mtransit.commons.StringUtils
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
@@ -85,7 +86,7 @@ data class GStopTime(
         timePoint = timePoint,
     )
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val tripId = _tripId
 
@@ -94,7 +95,7 @@ data class GStopTime(
             return GIDs.getString(tripIdInt)
         }
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val stopId = _stopId
 

@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
+import androidx.annotation.Discouraged
 import org.mtransit.commons.StringUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -56,7 +57,7 @@ data class GTrip(
 
     val uID by lazy { getNewUID(routeIdInt, tripIdInt) }
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val routeId = _routeId
 
@@ -65,7 +66,7 @@ data class GTrip(
             return GIDs.getString(routeIdInt)
         }
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val serviceId = _serviceId
 
@@ -79,7 +80,7 @@ data class GTrip(
         return agencyTools.cleanServiceId(_serviceId)
     }
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val tripId = _tripId
 

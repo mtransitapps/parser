@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import androidx.annotation.Discouraged
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -13,7 +14,7 @@ data class MFrequency(
     private val headwayInSec: Int
 ) : Comparable<MFrequency?> {
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val serviceId = _serviceId
 

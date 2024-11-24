@@ -1,5 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
+import androidx.annotation.Discouraged
 import org.mtransit.parser.MTLog
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -25,7 +26,7 @@ data class GFrequency(
         headwaySecs
     )
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val tripId = _tripId
 

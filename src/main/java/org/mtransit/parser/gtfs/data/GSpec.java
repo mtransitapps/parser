@@ -42,11 +42,8 @@ public class GSpec {
 
 	@NotNull
 	private final HashMap<Integer, GStop> stopIdIntStops = new HashMap<>();
-	private int routesCount = 0;
 	@NotNull
 	private final HashMap<Integer, ArrayList<GRoute>> agencyIdIntOtherRoutes = new HashMap<>();
-	@NotNull
-	private final HashMap<Integer, GRoute> routeIdIntRoutes = new HashMap<>();
 	private int tripsCount = 0;
 	@NotNull
 	private final HashMap<Integer, String> tripIdIntsUIDs = new HashMap<>();
@@ -60,7 +57,7 @@ public class GSpec {
 	private final HashMap<Integer, ArrayList<GFrequency>> tripIdIntFrequencies = new HashMap<>();
 
 	@NotNull
-	private final HashMap<Long, ArrayList<GRoute>> mRouteIdRoutes = new HashMap<>();
+	private final HashMap<Long, List<String>> mRouteIdToRouteIds = new HashMap<>();
 	@NotNull
 	private final HashMap<Integer, Integer> tripIdIntRouteId = new HashMap<>();
 
@@ -76,7 +73,7 @@ public class GSpec {
 
 	@NotNull
 	public Collection<GAgency> getAllAgencies() {
-		return GAgency.from(GTFSDataBase.selectAgencies());
+		return GAgency.from(GTFSDataBase.selectAllAgencies());
 	}
 
 	@Deprecated
@@ -91,7 +88,7 @@ public class GSpec {
 	}
 
 	private int readAgenciesCount() {
-		return GTFSDataBase.countAgencies();
+		return GTFSDataBase.countAllAgencies();
 	}
 
 	public void addCalendar(@NotNull GCalendar gCalendar) {
@@ -141,37 +138,41 @@ public class GSpec {
 	}
 
 	public void addRoute(@NotNull GRoute gRoute) {
-		this.routeIdIntRoutes.put(gRoute.getRouteIdInt(), gRoute);
-		this.routesCount++;
+		GTFSDataBase.insertRoute(gRoute.to());
 	}
 
 	@NotNull
-	public ArrayList<GRoute> getRoutes(@Nullable Long optMRouteId) {
+	public List<GRoute> getRoutes(@Nullable Long optMRouteId) {
 		if (optMRouteId != null) {
-			return this.mRouteIdRoutes.get(optMRouteId);
+			List<String> gRouteIds = this.mRouteIdToRouteIds.get(optMRouteId);
+			return GRoute.from(GTFSDataBase.selectAllRoutes(gRouteIds));
 		}
 		throw new MTLog.Fatal("getRoutes() > trying to use ALL routes!");
 	}
 
 	@Deprecated
 	@Nullable
-	public GRoute getRoute(@NotNull String gRouteId) {
-		for (GRoute gRoute : this.routeIdIntRoutes.values()) {
-			if (gRouteId.equals(gRoute.getRouteId())) {
-				return gRoute;
-			}
-		}
-		throw new MTLog.Fatal("getRoute() > Cannot find route with ID '%s'!", gRouteId);
+	public GRoute getRoute(@NotNull Integer routeIdInt) {
+		return getRoute(GIDs.getString(routeIdInt));
 	}
 
 	@Nullable
-	public GRoute getRoute(@NotNull Integer routeIdInt) {
-		return this.routeIdIntRoutes.get(routeIdInt);
+	public GRoute getRoute(@NotNull String routeId) {
+		return GRoute.from(GTFSDataBase.selectRoute(routeId));
 	}
 
 	@Nullable
 	public Collection<GRoute> getAllRoutes() {
-		return this.routeIdIntRoutes.values();
+		return GRoute.from(GTFSDataBase.selectAllRoutes());
+	}
+
+	@NotNull
+	public Collection<String> getAllRouteIds() {
+		return GTFSDataBase.selectAllRoutesIds();
+	}
+
+	private int readRoutesCount() {
+		return GTFSDataBase.countRoutes();
 	}
 
 	public void addStop(@NotNull GStop gStop) {
@@ -349,7 +350,7 @@ public class GSpec {
 				AGENCIES + readAgenciesCount() + Constants.COLUMN_SEPARATOR + //
 				CALENDARS + this.calendars.size() + Constants.COLUMN_SEPARATOR + //
 				CALENDAR_DATES + this.calendarDates.size() + Constants.COLUMN_SEPARATOR + //
-				ROUTES + this.routesCount + Constants.COLUMN_SEPARATOR + //
+				ROUTES + readRoutesCount() + Constants.COLUMN_SEPARATOR + //
 				TRIPS + this.tripsCount + Constants.COLUMN_SEPARATOR + //
 				STOPS + this.stopIdIntStops.size() + Constants.COLUMN_SEPARATOR + //
 				STOP_TIMES + readStopTimesCount() + Constants.COLUMN_SEPARATOR + //
@@ -368,7 +369,7 @@ public class GSpec {
 			MTLog.log("- Agencies: %d", readAgenciesCount());
 			MTLog.log("- Calendars: %d", this.calendars.size());
 			MTLog.log("- CalendarDates: %d", this.calendarDates.size());
-			MTLog.log("- Routes: %d", this.routesCount);
+			MTLog.log("- Routes: %d", readRoutesCount());
 			MTLog.log("- Trips: %d", this.tripsCount);
 			MTLog.log("- Stops: %d", this.stopIdIntStops.size());
 			MTLog.log("- StopTimes: %d", readStopTimesCount());
@@ -613,10 +614,11 @@ public class GSpec {
 		MTLog.log("Removing more excluded data...");
 		int r = 0;
 		try {
+			final Collection<Integer> allRouteIdsInt = GIDs.getInts(getAllRouteIds());
 			Iterator<Entry<Integer, ArrayList<GTrip>>> it = this.routeIdIntTrips.entrySet().iterator();
 			while (it.hasNext()) {
 				Entry<Integer, ArrayList<GTrip>> routeAndTrip = it.next();
-				if (!this.routeIdIntRoutes.containsKey(routeAndTrip.getKey())) {
+				if (!allRouteIdsInt.contains(routeAndTrip.getKey())) {
 					for (GTrip gTrip : routeAndTrip.getValue()) {
 						if (this.tripIdIntsUIDs.remove(gTrip.getTripIdInt()) != null) {
 							r++;
@@ -682,8 +684,9 @@ public class GSpec {
 		MTLog.log("Removing more excluded service IDs...");
 		int r = 0;
 		try {
+			final Collection<Integer> allRouteIdsInt = GIDs.getInts(getAllRouteIds());
 			HashSet<Integer> routeTripServiceIdInts = new HashSet<>();
-			for (Integer gRouteIdInt : this.routeIdIntRoutes.keySet()) {
+			for (Integer gRouteIdInt : allRouteIdsInt) {
 				if (this.routeIdIntTrips.containsKey(gRouteIdInt)) {
 					for (GTrip gTrip : this.routeIdIntTrips.get(gRouteIdInt)) {
 						routeTripServiceIdInts.add(gTrip.getServiceIdInt());
@@ -724,10 +727,10 @@ public class GSpec {
 		MTLog.log("%d: Removing route data...", mRouteId);
 		int r = 0;
 		try {
-			List<GRoute> gRoutes = this.mRouteIdRoutes.get(mRouteId);
-			if (gRoutes != null) {
-				for (GRoute gRoute : gRoutes) {
-					List<GTrip> routeTrips = this.routeIdIntTrips.get(gRoute.getRouteIdInt());
+			List<String> gRouteIds = this.mRouteIdToRouteIds.get(mRouteId);
+			if (gRouteIds != null) {
+				for (String gRouteId : gRouteIds) {
+					List<GTrip> routeTrips = this.routeIdIntTrips.get(GIDs.getInt(gRouteId));
 					if (routeTrips != null) {
 						for (GTrip gTrip : routeTrips) {
 							r += removeTripStopTimes(gTrip.getTripIdInt());
@@ -750,30 +753,34 @@ public class GSpec {
 		this.mRouteWithTripIds.clear();
 		Long mRouteId;
 		Collection<GTrip> routeTrips;
-		for (GRoute gRoute : this.routeIdIntRoutes.values()) {
-			mRouteId = agencyTools.getRouteId(gRoute);
-			routeTrips = this.routeIdIntTrips.get(gRoute.getRouteIdInt());
-			if (routeTrips == null || routeTrips.isEmpty()) {
-				MTLog.log("%s: Skip GTFS route '%s' because no trips", mRouteId, gRoute);
-				continue;
-			} else {
-				boolean tripServed = false;
-				for (GTrip routeTrip : routeTrips) {
-					if (this.allServiceIds.contains(routeTrip.getServiceIdInt())) {
-						tripServed = true;
-						break;
+		Collection<GRoute> allRoutes = getAllRoutes();
+		if (allRoutes != null) {
+			for (GRoute gRoute : allRoutes) {
+				mRouteId = agencyTools.getRouteId(gRoute);
+				routeTrips = this.routeIdIntTrips.get(gRoute.getRouteIdInt());
+				if (routeTrips == null || routeTrips.isEmpty()) {
+					MTLog.log("%s: Skip GTFS route '%s' because no trips", mRouteId, gRoute);
+					continue;
+				} else {
+					boolean tripServed = false;
+					for (GTrip routeTrip : routeTrips) {
+						if (this.allServiceIds.contains(routeTrip.getServiceIdInt())) {
+							tripServed = true;
+							break;
+						}
+					}
+					if (!tripServed) {
+						MTLog.log("%s: Skip GTFS route '%s' because no useful trips.", mRouteId, gRoute);
+						continue;
 					}
 				}
-				if (!tripServed) {
-					MTLog.log("%s: Skip GTFS route '%s' because no useful trips.", mRouteId, gRoute);
-					continue;
+				if (!this.mRouteIdToRouteIds.containsKey(mRouteId)) {
+					this.mRouteIdToRouteIds.put(mRouteId, new ArrayList<>());
 				}
+				//noinspection deprecation
+				this.mRouteIdToRouteIds.get(mRouteId).add(gRoute.getRouteId());
+				this.mRouteWithTripIds.add(mRouteId);
 			}
-			if (!this.mRouteIdRoutes.containsKey(mRouteId)) {
-				this.mRouteIdRoutes.put(mRouteId, new ArrayList<>());
-			}
-			this.mRouteIdRoutes.get(mRouteId).add(gRoute);
-			this.mRouteWithTripIds.add(mRouteId);
 		}
 		MTLog.log("Splitting GTFS by route ID... DONE");
 	}

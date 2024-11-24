@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import androidx.annotation.Discouraged
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
@@ -44,7 +45,7 @@ data class MSchedule(
         accessible = accessible,
     )
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val serviceId = _serviceId
 
@@ -53,7 +54,7 @@ data class MSchedule(
             return GIDs.getString(serviceIdInt)
         }
 
-    @Deprecated(message = "Not memory efficient")
+    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val pathId = _pathId
 

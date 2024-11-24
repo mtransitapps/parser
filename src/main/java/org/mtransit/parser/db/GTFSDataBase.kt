@@ -1,7 +1,11 @@
 package org.mtransit.parser.db
 
 import org.mtransit.commons.gtfs.data.Agency
+import org.mtransit.commons.gtfs.data.AgencyId
+import org.mtransit.commons.gtfs.data.Route
+import org.mtransit.commons.gtfs.data.RouteId
 import org.mtransit.commons.gtfs.sql.AgencySQL
+import org.mtransit.commons.gtfs.sql.RouteSQL
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
 import org.mtransit.parser.MTLog
@@ -39,8 +43,10 @@ object GTFSDataBase {
             SQLUtils.execute(statement, SQLUtilsCommons.PRAGMA_AUTO_VACUUM_NONE)
             // drop if exist
             AgencySQL.getSQLDropIfExistsQueries().forEach { SQLUtils.execute(statement, it) }
+            RouteSQL.getSQLDropIfExistsQueries().forEach { SQLUtils.execute(statement, it) }
             // create tables
             AgencySQL.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) }
+            RouteSQL.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) }
         }
     }
 
@@ -52,23 +58,59 @@ object GTFSDataBase {
     }
 
     @JvmStatic
-    fun selectAgency(agencyId: String): Agency? {
+    fun selectAgency(agencyId: AgencyId): Agency? {
         connection.createStatement().use { statement ->
             return AgencySQL.select(agencyId, statement).singleOrNull()
         }
     }
 
     @JvmStatic
-    fun selectAgencies(): List<Agency> {
+    fun selectAllAgencies(): List<Agency> {
         connection.createStatement().use { statement ->
             return AgencySQL.select(null, statement)
         }
     }
 
     @JvmStatic
-    fun countAgencies(): Int {
+    fun countAllAgencies(): Int {
         connection.createStatement().use { statement ->
             return AgencySQL.count(statement)
+        }
+    }
+
+    @JvmStatic
+    fun insertRoute(route: Route) {
+        connection.createStatement().use { statement ->
+            RouteSQL.insert(route, statement)
+        }
+    }
+
+    @JvmStatic
+    fun selectRoute(routeId: RouteId): Route? {
+        connection.createStatement().use { statement ->
+            return RouteSQL.select(routeIds = listOf(routeId), statement = statement).singleOrNull()
+        }
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun selectAllRoutes(routeIds: Collection<RouteId>? = null, agencyId: AgencyId? = null, notAgencyId: AgencyId? = null): List<Route> {
+        connection.createStatement().use { statement ->
+            return RouteSQL.select(routeIds, agencyId, notAgencyId, statement)
+        }
+    }
+
+    @JvmStatic
+    fun selectAllRoutesIds(): List<RouteId> {
+        connection.createStatement().use { statement ->
+            return RouteSQL.selectAllRouteIds(statement)
+        }
+    }
+
+    @JvmStatic
+    fun countRoutes(): Int {
+        connection.createStatement().use { statement ->
+            return RouteSQL.count(statement)
         }
     }
 }
