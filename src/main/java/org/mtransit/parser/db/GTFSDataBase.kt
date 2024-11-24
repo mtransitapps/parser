@@ -6,6 +6,7 @@ import org.mtransit.commons.gtfs.data.Route
 import org.mtransit.commons.gtfs.data.RouteId
 import org.mtransit.commons.gtfs.data.Stop
 import org.mtransit.commons.gtfs.data.StopId
+import org.mtransit.commons.gtfs.sql.ALL_SQL_TABLES
 import org.mtransit.commons.gtfs.sql.AgencySQL
 import org.mtransit.commons.gtfs.sql.RouteSQL
 import org.mtransit.commons.gtfs.sql.StopSQL
@@ -45,13 +46,9 @@ object GTFSDataBase {
             SQLUtils.execute(statement, "PRAGMA journal_mode = MEMORY")
             SQLUtils.execute(statement, SQLUtilsCommons.PRAGMA_AUTO_VACUUM_NONE)
             // drop if exist
-            AgencySQL.getSQLDropIfExistsQueries().forEach { SQLUtils.execute(statement, it) }
-            RouteSQL.getSQLDropIfExistsQueries().forEach { SQLUtils.execute(statement, it) }
-            StopSQL.getSQLDropIfExistsQueries().forEach { SQLUtils.execute(statement, it) }
+            ALL_SQL_TABLES.forEach { it.getSQLDropIfExistsQueries().forEach { SQLUtils.execute(statement, it) } }
             // create tables
-            AgencySQL.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) }
-            RouteSQL.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) }
-            StopSQL.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) }
+            ALL_SQL_TABLES.forEach { it.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) } }
         }
     }
 
