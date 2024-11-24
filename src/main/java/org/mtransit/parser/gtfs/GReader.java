@@ -313,6 +313,7 @@ public class GReader {
 		try {
 			final GAgency gAgency = GAgency.fromLine(line);
 			if (agencyTools.excludeAgency(gAgency)) {
+				MTLog.logDebug("processAgency() > SKIP (exclude agency)");
 				return;
 			}
 			agencyTools.setAgencyName(gAgency.getAgencyName());

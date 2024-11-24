@@ -2,6 +2,7 @@ package org.mtransit.parser.gtfs.data;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.CollectionUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.FileUtils;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +43,7 @@ public class GSpec {
 	private final HashSet<Integer> allServiceIds = new HashSet<>();
 
 	@NotNull
-	private final HashMap<Integer, ArrayList<GRoute>> agencyIdIntOtherRoutes = new HashMap<>(); // not exported -> not in DB
+	private final Map<Integer, List<GRoute>> agencyIdIntOtherRoutes = new HashMap<>(); // not exported -> not in DB
 	private int tripsCount = 0;
 	@NotNull
 	private final HashMap<Integer, String> tripIdIntsUIDs = new HashMap<>();
@@ -124,21 +126,19 @@ public class GSpec {
 	 * Add other routes (from same agency or NOT) for later (pick agency color from routes)
 	 */
 	public void addOtherRoute(@NotNull GRoute gRoute) {
-		final int agencyIdInt = gRoute.getAgencyIdIntOrDefault();
-		ArrayList<GRoute> agencyOtherRoutes = this.agencyIdIntOtherRoutes.get(agencyIdInt);
-		if (agencyOtherRoutes == null) {
-			agencyOtherRoutes = new ArrayList<>();
-		}
-		agencyOtherRoutes.add(gRoute);
-		this.agencyIdIntOtherRoutes.put(agencyIdInt, agencyOtherRoutes);
+		CollectionUtils.addMapListValue(
+				this.agencyIdIntOtherRoutes,
+				gRoute.getAgencyIdInt(),
+				gRoute
+		);
 	}
 
 	/**
 	 * @return other routes for the provided agency ID
 	 */
 	@Nullable
-	public Collection<GRoute> getOtherRoutes(int agencyIdIntOrDefault) {
-		return this.agencyIdIntOtherRoutes.get(agencyIdIntOrDefault);
+	public Collection<GRoute> getOtherRoutes(int agencyIdInt) {
+		return this.agencyIdIntOtherRoutes.get(agencyIdInt);
 	}
 
 	public void addRoute(@NotNull GRoute gRoute) {
@@ -148,8 +148,7 @@ public class GSpec {
 	@NotNull
 	public List<GRoute> getRoutes(@Nullable Long optMRouteId) {
 		if (optMRouteId != null) {
-			List<String> gRouteIds = this.mRouteIdToRouteIds.get(optMRouteId);
-			return GRoute.from(GTFSDataBase.selectAllRoutes(gRouteIds));
+			return GRoute.from(GTFSDataBase.selectAllRoutes(this.mRouteIdToRouteIds.get(optMRouteId)));
 		}
 		throw new MTLog.Fatal("getRoutes() > trying to use ALL routes!");
 	}
@@ -165,8 +164,8 @@ public class GSpec {
 		return GRoute.from(GTFSDataBase.selectRoute(routeId));
 	}
 
-	@Nullable
-	public Collection<GRoute> getAllRoutes() {
+	@NotNull
+	public Collection<GRoute> getAllRoutes() { // all exported route for current agency & type
 		return GRoute.from(GTFSDataBase.selectAllRoutes());
 	}
 
@@ -766,33 +765,31 @@ public class GSpec {
 		Long mRouteId;
 		Collection<GTrip> routeTrips;
 		Collection<GRoute> allRoutes = getAllRoutes();
-		if (allRoutes != null) {
-			for (GRoute gRoute : allRoutes) {
-				mRouteId = agencyTools.getRouteId(gRoute);
-				routeTrips = this.routeIdIntTrips.get(gRoute.getRouteIdInt());
-				if (routeTrips == null || routeTrips.isEmpty()) {
-					MTLog.log("%s: Skip GTFS route '%s' because no trips", mRouteId, gRoute);
+		for (GRoute gRoute : allRoutes) {
+			mRouteId = agencyTools.getRouteId(gRoute);
+			routeTrips = this.routeIdIntTrips.get(gRoute.getRouteIdInt());
+			if (routeTrips == null || routeTrips.isEmpty()) {
+				MTLog.log("%s: Skip GTFS route '%s' because no trips", mRouteId, gRoute);
+				continue;
+			} else {
+				boolean tripServed = false;
+				for (GTrip routeTrip : routeTrips) {
+					if (this.allServiceIds.contains(routeTrip.getServiceIdInt())) {
+						tripServed = true;
+						break;
+					}
+				}
+				if (!tripServed) {
+					MTLog.log("%s: Skip GTFS route '%s' because no useful trips.", mRouteId, gRoute);
 					continue;
-				} else {
-					boolean tripServed = false;
-					for (GTrip routeTrip : routeTrips) {
-						if (this.allServiceIds.contains(routeTrip.getServiceIdInt())) {
-							tripServed = true;
-							break;
-						}
-					}
-					if (!tripServed) {
-						MTLog.log("%s: Skip GTFS route '%s' because no useful trips.", mRouteId, gRoute);
-						continue;
-					}
 				}
-				if (!this.mRouteIdToRouteIds.containsKey(mRouteId)) {
-					this.mRouteIdToRouteIds.put(mRouteId, new ArrayList<>());
-				}
-				//noinspection deprecation
-				this.mRouteIdToRouteIds.get(mRouteId).add(gRoute.getRouteId());
-				this.mRouteWithTripIds.add(mRouteId);
 			}
+			if (!this.mRouteIdToRouteIds.containsKey(mRouteId)) {
+				this.mRouteIdToRouteIds.put(mRouteId, new ArrayList<>());
+			}
+			//noinspection deprecation
+			this.mRouteIdToRouteIds.get(mRouteId).add(gRoute.getRouteId());
+			this.mRouteWithTripIds.add(mRouteId);
 		}
 		MTLog.log("Splitting GTFS by route ID... DONE");
 	}

@@ -81,7 +81,7 @@ data class MAgency(
 
         @JvmStatic
         fun pickColorFromRoutes(gAgency: GAgency, gSpec: GSpec): String? {
-            val agencyRoutes = gSpec.allRoutes?.filter { route -> !route.isDifferentAgency(gAgency.agencyIdInt) } ?: return null
+            val agencyRoutes = gSpec.allRoutes.filter { route -> !route.isDifferentAgency(gAgency.agencyIdInt) }.takeIf { it.isNotEmpty() } ?: return null
             val otherAgencyRoutes = gSpec.getOtherRoutes(gAgency.agencyIdInt) ?: emptyList() // same agency, different type
             val allRoutes = agencyRoutes + otherAgencyRoutes
             allRoutes

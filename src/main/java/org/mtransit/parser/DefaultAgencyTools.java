@@ -539,7 +539,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			throw new MTLog.Fatal("ERROR: unexpected route type '%s'!", gRoute.getRouteType());
 		}
 		if (!GRouteType.isSameType(getOriginalAgencyRouteType(), gRoute.getRouteType())) {
-			MTLog.logDebug("Route excluded because of different type: %s != %s (%s)", getOriginalAgencyRouteType(), gRoute.getRouteType(), gRoute.toStringPlus());
+			MTLog.logDebug("Route excluded because of different type: %s != %s (%s)", getOriginalAgencyRouteType(), gRoute.getRouteType(), gRoute.toStringShort());
 			return EXCLUDE;
 		}
 		// MTLog.logDebug("Route NOT excluded: %s", gRoute.toStringPlus());

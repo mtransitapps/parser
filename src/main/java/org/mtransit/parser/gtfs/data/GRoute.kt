@@ -54,9 +54,6 @@ data class GRoute(
     @Suppress("unused")
     fun hasAgencyId(): Boolean = _agencyId.isNotBlank()
 
-    val agencyIdIntOrDefault: Int
-        get() = agencyIdInt
-
     @Suppress("unused")
     fun isDifferentAgency(otherAgencyIdInt: Int): Boolean = agencyIdInt != otherAgencyIdInt
 
@@ -103,6 +100,18 @@ data class GRoute(
         return toString() +
                 "+(routeId:$_routeId)" +
                 "+(agencyId:$_agencyId)"
+    }
+
+    fun toStringShort() = buildString {
+        append("Route{")
+        append(_agencyId)
+        append("-")
+        append(_routeId)
+        if (_routeId != routeShortName) {
+            append(" (")
+            append(routeShortName)
+            append(")")
+        }
     }
 
     fun to() = Route(
