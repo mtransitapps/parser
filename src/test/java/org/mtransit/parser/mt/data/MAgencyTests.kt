@@ -138,5 +138,13 @@ class MAgencyTests {
     }
 
     private fun makeRoute(agencyIdInt: Int = AGENCY_ID_INT, id: String, routeType: Int = ROUTE_TYPE, color: String?) =
-        GRoute(agencyIdInt, GIDs.getInt(id), "RSN$id", "Long Name $id", null, routeType, color)
+        GRoute(
+            agencyIdInt = agencyIdInt,
+            routeIdInt = GIDs.getInt(id),
+            routeShortName = "RSN$id",
+            routeLongName = "Long Name $id",
+            routeDesc = null,
+            routeType = routeType,
+            routeColor = color
+        )
 }
