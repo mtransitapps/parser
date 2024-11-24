@@ -122,6 +122,9 @@ public class GSpec {
 		}
 	}
 
+	/**
+	 * Add other routes (from same agency or NOT) for later (pick agency color from routes)
+	 */
 	public void addOtherRoute(@NotNull GRoute gRoute) {
 		final int agencyIdInt = gRoute.getAgencyIdIntOrDefault();
 		ArrayList<GRoute> agencyOtherRoutes = this.agencyIdIntOtherRoutes.get(agencyIdInt);
@@ -132,6 +135,9 @@ public class GSpec {
 		this.agencyIdIntOtherRoutes.put(agencyIdInt, agencyOtherRoutes);
 	}
 
+	/**
+	 * @return other routes for the provided agency ID
+	 */
 	@Nullable
 	public Collection<GRoute> getOtherRoutes(int agencyIdIntOrDefault) {
 		return this.agencyIdIntOtherRoutes.get(agencyIdIntOrDefault);
