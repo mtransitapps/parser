@@ -43,6 +43,7 @@ class MDirectionHeadSignFinderTest {
     @Mock
     private lateinit var agencyTools: GAgencyTools
 
+    @Suppress("DEPRECATION")
     @Before
     fun setUp() {
         `when`(agencyTools.cleanDirectionHeadsign(anyInt(), anyBoolean(), anyString()))
@@ -60,8 +61,15 @@ class MDirectionHeadSignFinderTest {
             }
         `when`(routeGTFS.getRoute(anyString()))
             .then {
-                val routeIdInt: Int = it.arguments[0] as Int? ?: 1
-                GRoute(0, routeIdInt, "RSN", "RLN", null, GRouteType.BUS.id)
+                val routeId = it.arguments[0] as? String ?: ""
+                GRoute(
+                    agencyId = "0",
+                    routeId = routeId,
+                    routeShortName = "RSN",
+                    routeLongName = "RLN",
+                    routeDesc = null,
+                    routeType = GRouteType.BUS.id
+                )
             }
     }
 
@@ -826,8 +834,8 @@ class MDirectionHeadSignFinderTest {
     ): List<GStopTime> {
         return (fromStopIdx..toStopIdx).mapIndexed { idx, stopIdx ->
             makeStopTime(
-                tripId,
-                stopIdx,
+                tripId = tripId,
+                stopIdx = stopIdx,
                 pickupType = if (idx == (toStopIdx - fromStopIdx)) {
                     lastPickupType
                 } else {
@@ -852,15 +860,15 @@ class MDirectionHeadSignFinderTest {
         timePoint: GTimePoint = GTimePoint.EXACT,
     ): GStopTime {
         return GStopTime(
-            tripId,
-            arrivalTime,
-            departureTime,
-            "stop_$stopIdx",
-            stopIdx,
-            "stop head-sign",
-            pickupType,
-            dropOffType,
-            timePoint,
+            tripId = tripId,
+            arrivalTime = arrivalTime,
+            departureTime = departureTime,
+            stopId = "stop_$stopIdx",
+            stopSequence = stopIdx,
+            stopHeadsign = "stop head-sign",
+            pickupType = pickupType,
+            dropOffType = dropOffType,
+            timePoint = timePoint,
         )
     }
 }
