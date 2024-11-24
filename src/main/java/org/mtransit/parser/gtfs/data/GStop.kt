@@ -2,6 +2,8 @@ package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
 import org.mtransit.commons.StringUtils.EMPTY
+import org.mtransit.commons.gtfs.data.Stop
+import org.mtransit.commons.gtfs.data.StopId
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 
@@ -19,13 +21,13 @@ data class GStop(
 ) {
 
     constructor(
-        stopId: String,
+        stopId: StopId,
         stopName: String,
         stopLat: Double,
         stopLong: Double,
         stopCode: String,
         locationType: Int?,
-        parentStationId: String?,
+        parentStationId: StopId?,
         wheelchairBoarding: Int?,
     ) : this(
         GIDs.getInt(stopId),
@@ -42,7 +44,7 @@ data class GStop(
     @Suppress("unused")
     val stopId = _stopId
 
-    private val _stopId: String
+    private val _stopId: StopId
         get() {
             return GIDs.getString(stopIdInt)
         }
@@ -51,7 +53,7 @@ data class GStop(
     @Suppress("unused")
     val parentStationId = _parentStationId
 
-    private val _parentStationId: String?
+    private val _parentStationId: StopId?
         get() {
             return parentStationIdInt?.let { GIDs.getString(it) }
         }
@@ -73,6 +75,18 @@ data class GStop(
             }}"
         }
     }
+
+    fun to() = Stop(
+        stopId = _stopId,
+        stopCode = stopCode,
+        stopName = stopName,
+        stopLat = stopLat,
+        stopLon = stopLong,
+        stopUrl = null, // TODO
+        locationType = locationType.id,
+        parentStationId = _parentStationId,
+        wheelchairBoarding = wheelchairBoarding.id,
+    )
 
     companion object {
         const val FILENAME = "stops.txt"
@@ -97,5 +111,22 @@ data class GStop(
             line[PARENT_STATION],
             line[WHEELCHAIR_BOARDING]?.takeIf { it.isNotBlank() }?.toInt(),
         )
+
+        @JvmStatic
+        fun from(stops: Collection<Stop>) = stops.map { from(it) }
+
+        @JvmStatic
+        fun from(stop: Stop?) = stop?.let {
+            GStop(
+                stopId = it.stopId,
+                stopName = it.stopName,
+                stopLat = it.stopLat,
+                stopLong = it.stopLon,
+                stopCode = it.stopCode ?: EMPTY,
+                locationType = it.locationType,
+                parentStationId = it.parentStationId,
+                wheelchairBoarding = it.wheelchairBoarding,
+            )
+        }
     }
 }

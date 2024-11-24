@@ -4,8 +4,11 @@ import org.mtransit.commons.gtfs.data.Agency
 import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.commons.gtfs.data.Route
 import org.mtransit.commons.gtfs.data.RouteId
+import org.mtransit.commons.gtfs.data.Stop
+import org.mtransit.commons.gtfs.data.StopId
 import org.mtransit.commons.gtfs.sql.AgencySQL
 import org.mtransit.commons.gtfs.sql.RouteSQL
+import org.mtransit.commons.gtfs.sql.StopSQL
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
 import org.mtransit.parser.MTLog
@@ -44,9 +47,11 @@ object GTFSDataBase {
             // drop if exist
             AgencySQL.getSQLDropIfExistsQueries().forEach { SQLUtils.execute(statement, it) }
             RouteSQL.getSQLDropIfExistsQueries().forEach { SQLUtils.execute(statement, it) }
+            StopSQL.getSQLDropIfExistsQueries().forEach { SQLUtils.execute(statement, it) }
             // create tables
             AgencySQL.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) }
             RouteSQL.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) }
+            StopSQL.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) }
         }
     }
 
@@ -103,7 +108,7 @@ object GTFSDataBase {
     @JvmStatic
     fun selectAllRoutesIds(): List<RouteId> {
         connection.createStatement().use { statement ->
-            return RouteSQL.selectAllRouteIds(statement)
+            return RouteSQL.selectAllIds(statement)
         }
     }
 
@@ -111,6 +116,42 @@ object GTFSDataBase {
     fun countRoutes(): Int {
         connection.createStatement().use { statement ->
             return RouteSQL.count(statement)
+        }
+    }
+
+    @JvmStatic
+    fun insertStop(stop: Stop) {
+        connection.createStatement().use { statement ->
+            StopSQL.insert(stop, statement)
+        }
+    }
+
+    @JvmStatic
+    fun selectStop(stopId: StopId): Stop? {
+        connection.createStatement().use { statement ->
+            return StopSQL.select(stopId, statement).singleOrNull()
+        }
+    }
+
+    @JvmStatic
+    fun selectAllStops(): List<Stop> {
+        connection.createStatement().use { statement ->
+            return StopSQL.select(null, statement)
+        }
+    }
+
+    @JvmStatic
+    fun countStops(): Int {
+        connection.createStatement().use { statement ->
+            return StopSQL.count(statement)
+        }
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun deleteStops(notLocationType: Int? = null) {
+        connection.createStatement().use { statement ->
+            StopSQL.delete(statement, notLocationType)
         }
     }
 }

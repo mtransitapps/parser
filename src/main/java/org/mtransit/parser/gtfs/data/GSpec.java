@@ -41,9 +41,7 @@ public class GSpec {
 	private final HashSet<Integer> allServiceIds = new HashSet<>();
 
 	@NotNull
-	private final HashMap<Integer, GStop> stopIdIntStops = new HashMap<>();
-	@NotNull
-	private final HashMap<Integer, ArrayList<GRoute>> agencyIdIntOtherRoutes = new HashMap<>();
+	private final HashMap<Integer, ArrayList<GRoute>> agencyIdIntOtherRoutes = new HashMap<>(); // not exported -> not in DB
 	private int tripsCount = 0;
 	@NotNull
 	private final HashMap<Integer, String> tripIdIntsUIDs = new HashMap<>();
@@ -182,18 +180,27 @@ public class GSpec {
 	}
 
 	public void addStop(@NotNull GStop gStop) {
-		this.stopIdIntStops.put(gStop.getStopIdInt(), gStop);
+		GTFSDataBase.insertStop(gStop.to());
 	}
 
-	@SuppressWarnings("unused")
 	@Nullable
 	public GStop getStop(@NotNull String gStopId) {
-		return getStop(GIDs.getInt(gStopId));
+		return GStop.from(GTFSDataBase.selectStop(gStopId));
 	}
 
+	@Deprecated
 	@Nullable
 	public GStop getStop(@NotNull Integer gStopIdInt) {
-		return this.stopIdIntStops.get(gStopIdInt);
+		return getStop(GIDs.getString(gStopIdInt));
+	}
+
+	@NotNull
+	public Collection<GStop> getAllStops() {
+		return GStop.from(GTFSDataBase.selectAllStops());
+	}
+
+	private int readStopsCount() {
+		return GTFSDataBase.countStops();
 	}
 
 	public void addTrip(@NotNull GTrip gTrip) {
@@ -358,7 +365,7 @@ public class GSpec {
 				CALENDAR_DATES + this.calendarDates.size() + Constants.COLUMN_SEPARATOR + //
 				ROUTES + readRoutesCount() + Constants.COLUMN_SEPARATOR + //
 				TRIPS + this.tripsCount + Constants.COLUMN_SEPARATOR + //
-				STOPS + this.stopIdIntStops.size() + Constants.COLUMN_SEPARATOR + //
+				STOPS + readStopsCount() + Constants.COLUMN_SEPARATOR + //
 				STOP_TIMES + readStopTimesCount() + Constants.COLUMN_SEPARATOR + //
 				FREQUENCIES + this.frequenciesCount + Constants.COLUMN_SEPARATOR + //
 				TRIP_STOPS + readTripStopsCount() + Constants.COLUMN_SEPARATOR + //
@@ -377,7 +384,7 @@ public class GSpec {
 			MTLog.log("- CalendarDates: %d", this.calendarDates.size());
 			MTLog.log("- Routes: %d", readRoutesCount());
 			MTLog.log("- Trips: %d", this.tripsCount);
-			MTLog.log("- Stops: %d", this.stopIdIntStops.size());
+			MTLog.log("- Stops: %d", readStopsCount());
 			MTLog.log("- StopTimes: %d", readStopTimesCount());
 			MTLog.log("- Frequencies: %d", this.frequenciesCount);
 			MTLog.log("- IDs: %d", GIDs.count());
@@ -394,12 +401,13 @@ public class GSpec {
 
 	public void cleanupStops() {
 		MTLog.log("Cleanup GTFS stops...");
-		final int originalStopCount = this.stopIdIntStops.size();
+		final int originalStopCount = readStopsCount();
 		int su = 0;
-		for (Entry<Integer, GStop> stopIdStop : this.stopIdIntStops.entrySet()) {
-			final GStop gStop = stopIdStop.getValue();
-			if (gStop.getParentStationIdInt() != null) {
-				final GStop parentStation = getStop(gStop.getParentStationIdInt());
+		Collection<GStop> allStops = getAllStops();
+		for (GStop gStop : allStops) {
+			Integer parentStationIdInt = gStop.getParentStationIdInt();
+			if (parentStationIdInt != null) {
+				final GStop parentStation = getStop(parentStationIdInt);
 				if (parentStation != null && parentStation.getWheelchairBoarding() != GWheelchairBoardingType.NO_INFO) {
 					if (gStop.getWheelchairBoarding() == GWheelchairBoardingType.NO_INFO) {
 						gStop.setWheelchairBoarding(parentStation.getWheelchairBoarding());
@@ -408,12 +416,10 @@ public class GSpec {
 				}
 			}
 		}
-		this.stopIdIntStops.entrySet().removeIf(stopIdStop ->
-				stopIdStop.getValue().getLocationType() != GLocationType.STOP_PLATFORM
-		);
-		int sr = originalStopCount - this.stopIdIntStops.size();
+		GTFSDataBase.deleteStops(GLocationType.STOP_PLATFORM.getId());
+		int sr = originalStopCount - readStopsCount();
 		MTLog.log("Cleanup GTFS stops... DONE");
-		MTLog.log("- Stops: %d (%d removed | %d updated)", this.stopIdIntStops.size(), sr, su);
+		MTLog.log("- Stops: %d (%d removed | %d updated)", readStopsCount(), sr, su);
 	}
 
 	public void generateTripStops() {

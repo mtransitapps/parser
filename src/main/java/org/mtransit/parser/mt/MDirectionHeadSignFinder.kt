@@ -116,6 +116,7 @@ object MDirectionHeadSignFinder {
             val lastStopDirectionHeadSigns = mutableMapOf<Int, String>()
             for ((directionId, _) in directionHeadSigns) {
                 val stopIdInt = directionStopIdInts[directionId] ?: continue
+                @Suppress("DEPRECATION")
                 val stop = routeGTFS.getStop(stopIdInt) ?: continue
                 lastStopDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(
                     directionId,
@@ -177,6 +178,7 @@ object MDirectionHeadSignFinder {
             return directionHeadSigns
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
+            @Suppress("DEPRECATION")
             throw MTLog.Fatal(
                 "$routeId: Could NOT fix non-descriptive direction head-signs!" +
                         directionHeadSigns.keys.joinToString { directionId ->
@@ -375,6 +377,7 @@ object MDirectionHeadSignFinder {
         } ?: throw MTLog.Fatal("$routeId: $directionId: no candidate after complex merge!")
     }
 
+    @Suppress("DEPRECATION")
     private fun mergeTrips(
         routeId: Long,
         directionId: Int,
@@ -1132,16 +1135,10 @@ object MDirectionHeadSignFinder {
         return stopIdIntsAfterCommonCount
     }
 
+    @Suppress("DEPRECATION")
     private fun getStop(gSpec: GSpec, stopIdInts: Pair<Int?, Int?>?): GStop? {
-        var stop: GStop? = stopIdInts?.first?.let { first ->
-            gSpec.getStop(first)
-        }
-        if (stop == null) {
-            stop = stopIdInts?.second?.let { second ->
-                gSpec.getStop(second)
-            }
-        }
-        return stop
+        return stopIdInts?.first?.let { first -> gSpec.getStop(first) }
+            ?: stopIdInts?.second?.let { second -> gSpec.getStop(second) }
     }
 
     private fun logMerge(debug: Boolean = false, format: String, vararg args: Any?) {
