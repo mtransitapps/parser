@@ -18,6 +18,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import org.mtransit.commons.sql.SQLUtils as SQLUtilsCommons
 
+@Suppress("unused")
 object GTFSDataBase {
 
     private val LOG_TAG: String = GTFSDataBase::class.java.simpleName

@@ -59,7 +59,7 @@ class MDirectionHeadSignFinderTest {
                 val tripIdInt: Int = it.arguments[0] as Int? ?: 1
                 GTrip(GIDs.getInt(RIDS), GIDs.getInt("service_id"), tripIdInt, GDirectionId.NONE, "trip head-sign", TSN, A11Y)
             }
-        `when`(routeGTFS.getRoute(anyString()))
+        `when`(routeGTFS.getRoute(anyInt()))
             .then {
                 val routeId = it.arguments[0] as? String ?: ""
                 GRoute(

@@ -92,7 +92,7 @@ object MDirectionHeadSignFinder {
                 if (routeIdInts.size != 1) {
                     continue
                 }
-                val route = routeGTFS.getRoute(GIDs.getString(routeIdInts[0])) ?: continue
+                val route = routeGTFS.getRoute(routeIdInts[0]) ?: continue
                 val rln = route.routeLongNameOrDefault
                 if (rln.isBlank()) {
                     continue
