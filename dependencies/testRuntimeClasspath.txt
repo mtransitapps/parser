@@ -24,4 +24,4 @@ org.jetbrains:annotations:23.0.0
 org.mockito.kotlin:mockito-kotlin:4.1.0
 org.mockito:mockito-core:5.14.2
 org.objenesis:objenesis:3.3
-org.xerial:sqlite-jdbc:3.47.0.0
+org.xerial:sqlite-jdbc:3.47.1.0
