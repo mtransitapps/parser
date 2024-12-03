@@ -142,13 +142,15 @@ data class GRoute(
         private const val ROUTE_SORT_ORDER = "route_sort_order"
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>) = GRoute(
-            agencyId = line[AGENCY_ID].orEmpty(),
-            routeId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GRoute from $line!"),
+        fun fromLine(line: Map<String, String>, defaultAgencyId: String?) = GRoute(
+            agencyId = line[AGENCY_ID]?.takeIf { it.isNotBlank() }
+                ?: defaultAgencyId
+                ?: throw MTLog.Fatal("Invalid GRoute.$AGENCY_ID from $line!"),
+            routeId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
             routeShortName = line[ROUTE_SHORT_NAME]?.trim() ?: EMPTY,
             routeLongName = line[ROUTE_LONG_NAME],
             routeDesc = line[ROUTE_DESC],
-            routeType = line[ROUTE_TYPE]?.toInt() ?: throw MTLog.Fatal("Invalid GRoute from $line!"),
+            routeType = line[ROUTE_TYPE]?.toInt() ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_TYPE from $line!"),
             routeUrl = line[ROUTE_URL]?.takeIf { it.isNotBlank() }?.trim(),
             routeColor = line[ROUTE_COLOR]?.takeIf { it.isNotBlank() }?.trim(),
             routeTextColor = line[ROUTE_TEXT_COLOR]?.takeIf { it.isNotBlank() }?.trim(),

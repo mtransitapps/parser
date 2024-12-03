@@ -84,6 +84,14 @@ public class GSpec {
 	}
 
 	@Nullable
+	public GAgency getSingleAgency() {
+		if (readAgenciesCount() != 1) {
+			return null;
+		}
+		return getAllAgencies().iterator().next();
+	}
+
+	@Nullable
 	public GAgency getAgency(@NotNull Integer agencyIdInt) {
 		return this.agenciesCache.get(agencyIdInt);
 	}

@@ -80,8 +80,10 @@ public class GReader {
 			}
 			// ROUTES
 			if (!calendarsOnly) {
+				final GAgency singleAgency = gSpec.getSingleAgency();
+				final String defaultAgencyId = singleAgency == null ? null : singleAgency.getAgencyId();
 				readFile(gtfsDir, GRoute.FILENAME, true, line ->
-						processRoute(agencyTools, gSpec, line)
+						processRoute(agencyTools, gSpec, line, defaultAgencyId)
 				);
 			}
 			// TRIPS
@@ -388,9 +390,9 @@ public class GReader {
 		}
 	}
 
-	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
+	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line, @Nullable String defaultAgencyId) {
 		try {
-			final GRoute gRoute = GRoute.fromLine(line);
+			final GRoute gRoute = GRoute.fromLine(line, defaultAgencyId);
 			final GAgency routeAgency = gSpec.getAgency(gRoute.getAgencyIdInt());
 			if (agencyTools.excludeRoute(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute.toStringPlus());
