@@ -3,7 +3,6 @@ package org.mtransit.parser.gtfs.data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CollectionUtils;
-import org.mtransit.commons.GTFSCommons;
 import org.mtransit.commons.gtfs.data.CalendarDate;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
