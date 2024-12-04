@@ -3,6 +3,8 @@ package org.mtransit.parser.gtfs.data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CollectionUtils;
+import org.mtransit.commons.GTFSCommons;
+import org.mtransit.commons.gtfs.data.CalendarDate;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.FileUtils;
@@ -38,11 +40,9 @@ public class GSpec {
 	@NotNull
 	private final HashMap<Integer, GAgency> agenciesCache = new HashMap<>();
 	@NotNull
-	private final ArrayList<GCalendar> calendars = new ArrayList<>();
+	private final ArrayList<GCalendarDate> calendarDatesCache = new ArrayList<>(); // includes flatten calendars
 	@NotNull
-	private final ArrayList<GCalendarDate> calendarDates = new ArrayList<>();
-	@NotNull
-	private final HashSet<Integer> allServiceIds = new HashSet<>();
+	private final HashSet<Integer> allServiceIdIntsCache = new HashSet<>(); // set = distinct ID
 
 	@NotNull
 	private final HashMap<Integer, GStop> stopsCache = new HashMap<>();
@@ -107,34 +107,59 @@ public class GSpec {
 	}
 
 	public void addCalendar(@NotNull GCalendar gCalendar) {
-		this.calendars.add(gCalendar);
-		this.allServiceIds.add(gCalendar.getServiceIdInt());
+		addCalendarDates(gCalendar.flattenToCalendarDates(GCalendarDatesExceptionType.SERVICE_DEFAULT));
 	}
 
+	public static final boolean ALL_CALENDARS_IN_CALENDAR_DATES = true;
+
+	@SuppressWarnings("DeprecatedIsStillUsed") // guarded by FF
+	@Deprecated
 	@NotNull
-	public ArrayList<GCalendar> getAllCalendars() {
-		return this.calendars;
+	public List<GCalendar> getAllCalendars() {
+		if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) {
+			throw new MTLog.Fatal("getAllCalendars() > trying to use ALL calendars while FF is ON!");
+		}
+		return Collections.emptyList();
 	}
 
 	public void addCalendarDate(@NotNull GCalendarDate gCalendarDate) {
-		this.calendarDates.add(gCalendarDate);
-		this.allServiceIds.add(gCalendarDate.getServiceIdInt());
+		addCalendarDates(Collections.singletonList(gCalendarDate));
+	}
+
+	public void addCalendarDates(@NotNull Collection<GCalendarDate> gCalendarDates) {
+		GTFSDataBase.insertCalendarDate(GCalendarDate.to(gCalendarDates).toArray(new CalendarDate[0]));
+		this.calendarDatesCache.addAll(gCalendarDates);
+		for (GCalendarDate gCalendarDate : gCalendarDates) {
+			this.allServiceIdIntsCache.add(gCalendarDate.getServiceIdInt());
+		}
 	}
 
 	@NotNull
 	public ArrayList<GCalendarDate> getAllCalendarDates() {
-		return this.calendarDates;
+		return this.calendarDatesCache;
 	}
 
 	public void replaceCalendarsSameServiceIds(@Nullable Collection<GCalendar> calendars, @Nullable Collection<GCalendarDate> calendarDates) {
-		this.calendars.clear();
-		this.calendarDates.clear();
+		deleteAllCalendars();
 		if (calendars != null) {
-			this.calendars.addAll(calendars);
+			for (GCalendar gCalendar : calendars) {
+				addCalendar(gCalendar);
+			}
 		}
 		if (calendarDates != null) {
-			this.calendarDates.addAll(calendarDates);
+			for (GCalendarDate gCalendarDate : calendarDates) {
+				addCalendarDate(gCalendarDate);
+			}
 		}
+	}
+
+	private void deleteAllCalendars() {
+		GTFSDataBase.deleteCalendarDate(); // ALL
+		this.calendarDatesCache.clear();
+	}
+
+	private int readCalendarDatesCount() {
+		return this.calendarDatesCache.size();
 	}
 
 	/**
@@ -370,8 +395,7 @@ public class GSpec {
 	}
 
 	private static final String AGENCIES = "agencies:";
-	private static final String CALENDARS = "calendars:";
-	private static final String CALENDAR_DATES = "calendarDates:";
+	private static final String CALENDARS_CALENDAR_DATES = "calendar+calendarDates:";
 	private static final String ROUTES = "routes:";
 	private static final String TRIPS = "trips:";
 	private static final String STOPS = "stops:";
@@ -383,8 +407,7 @@ public class GSpec {
 	public String toString() {
 		return GSpec.class.getSimpleName() + '[' + //
 				AGENCIES + readAgenciesCount() + Constants.COLUMN_SEPARATOR + //
-				CALENDARS + this.calendars.size() + Constants.COLUMN_SEPARATOR + //
-				CALENDAR_DATES + this.calendarDates.size() + Constants.COLUMN_SEPARATOR + //
+				CALENDARS_CALENDAR_DATES + readCalendarDatesCount() + Constants.COLUMN_SEPARATOR + //
 				ROUTES + readRoutesCount() + Constants.COLUMN_SEPARATOR + //
 				TRIPS + this.tripsCount + Constants.COLUMN_SEPARATOR + //
 				STOPS + readStopsCount() + Constants.COLUMN_SEPARATOR + //
@@ -396,14 +419,12 @@ public class GSpec {
 
 	public void print(boolean calendarsOnly, boolean stopTimesOnly) {
 		if (calendarsOnly) {
-			MTLog.log("- Calendars: %d", this.calendars.size());
-			MTLog.log("- CalendarDates: %d", this.calendarDates.size());
+			MTLog.log("- Calendar+CalendarDates: %d", readCalendarDatesCount());
 		} else if (stopTimesOnly) {
 			MTLog.log("- StopTimes: %d", readStopTimesCount());
 		} else {
 			MTLog.log("- Agencies: %d", readAgenciesCount());
-			MTLog.log("- Calendars: %d", this.calendars.size());
-			MTLog.log("- CalendarDates: %d", this.calendarDates.size());
+			MTLog.log("- Calendar+CalendarDates: %d", readCalendarDatesCount());
 			MTLog.log("- Routes: %d", readRoutesCount());
 			MTLog.log("- Trips: %d", this.tripsCount);
 			MTLog.log("- Stops: %d", readStopsCount());
@@ -727,22 +748,25 @@ public class GSpec {
 					}
 				}
 			}
-			Iterator<GCalendar> itGCalendar = this.calendars.iterator();
-			while (itGCalendar.hasNext()) {
-				GCalendar gCalendar = itGCalendar.next();
-				if (!routeTripServiceIdInts.contains(gCalendar.getServiceIdInt())) {
-					itGCalendar.remove();
-					logRemoved("Removed calendar: %s.", gCalendar.toStringPlus());
-					r++;
-					MTLog.logPOINT();
+			if (!ALL_CALENDARS_IN_CALENDAR_DATES) {
+				//noinspection deprecation // for backward compatibility
+				Iterator<GCalendar> itGCalendar = getAllCalendars().iterator();
+				while (itGCalendar.hasNext()) {
+					GCalendar gCalendar = itGCalendar.next();
+					if (!routeTripServiceIdInts.contains(gCalendar.getServiceIdInt())) {
+						itGCalendar.remove();
+						logRemoved("Removed calendar: %s.", gCalendar.toStringPlus());
+						r++;
+						MTLog.logPOINT();
+					}
 				}
 			}
-			Iterator<GCalendarDate> itGCalendarDate = this.calendarDates.iterator();
+			Iterator<GCalendarDate> itGCalendarDate = getAllCalendarDates().iterator();
 			while (itGCalendarDate.hasNext()) {
 				GCalendarDate gCalendarDate = itGCalendarDate.next();
 				if (!routeTripServiceIdInts.contains(gCalendarDate.getServiceIdInt())) {
 					itGCalendarDate.remove();
-					logRemoved("Removed calendar date: %s.", gCalendarDate.toStringPlus());
+					logRemoved("Removed calendar date (or calendar): %s.", gCalendarDate.toStringPlus());
 					r++;
 					MTLog.logPOINT();
 				}
@@ -794,7 +818,7 @@ public class GSpec {
 			} else {
 				boolean tripServed = false;
 				for (GTrip routeTrip : routeTrips) {
-					if (this.allServiceIds.contains(routeTrip.getServiceIdInt())) {
+					if (this.allServiceIdIntsCache.contains(routeTrip.getServiceIdInt())) {
 						tripServed = true;
 						break;
 					}

@@ -18,7 +18,7 @@ data class GCalendar(
     private val saturday: Boolean,
     private val sunday: Boolean,
     val startDate: Int, // YYYYMMDD
-    val endDate: Int  // YYYYMMDD
+    val endDate: Int, // YYYYMMDD
 ) {
     constructor(
         serviceId: String,
@@ -30,7 +30,7 @@ data class GCalendar(
         saturday: Boolean,
         sunday: Boolean,
         startDate: Int,
-        endDate: Int
+        endDate: Int,
     ) : this(
         GIDs.getInt(serviceId),
         monday,
@@ -54,7 +54,7 @@ data class GCalendar(
         saturday: Int,
         sunday: Int,
         startDate: Int,
-        endDate: Int
+        endDate: Int,
     ) : this(
         GIDs.getInt(serviceId),
         monday == 1,
@@ -100,6 +100,22 @@ data class GCalendar(
             sunday,
             startDate,
             endDate
+        )
+    }
+
+    fun flattenToCalendarDates(exceptionType: GCalendarDatesExceptionType): List<GCalendarDate> {
+        return initAllDates(
+            serviceIdInt,
+            monday,
+            tuesday,
+            wednesday,
+            thursday,
+            friday,
+            saturday,
+            sunday,
+            startDate,
+            endDate,
+            exceptionType
         )
     }
 
@@ -237,7 +253,8 @@ data class GCalendar(
             _saturday: Boolean,
             _sunday: Boolean,
             _startDate: Int,
-            _endDate: Int
+            _endDate: Int,
+            exceptionType: GCalendarDatesExceptionType = GCalendarDatesExceptionType.SERVICE_ADDED,
         ): List<GCalendarDate> {
             val newAllDates: MutableList<GCalendarDate> = ArrayList()
             try {
@@ -258,73 +275,31 @@ data class GCalendar(
                         date = Integer.valueOf(DATE_FORMAT.format(c.time))
                         when (c[Calendar.DAY_OF_WEEK]) {
                             Calendar.MONDAY -> if (_monday) {
-                                newAllDates.add(
-                                    GCalendarDate(
-                                        _serviceId,
-                                        date,
-                                        GCalendarDatesExceptionType.SERVICE_ADDED
-                                    )
-                                )
+                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
                             }
 
                             Calendar.TUESDAY -> if (_tuesday) {
-                                newAllDates.add(
-                                    GCalendarDate(
-                                        _serviceId,
-                                        date,
-                                        GCalendarDatesExceptionType.SERVICE_ADDED
-                                    )
-                                )
+                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
                             }
 
                             Calendar.WEDNESDAY -> if (_wednesday) {
-                                newAllDates.add(
-                                    GCalendarDate(
-                                        _serviceId,
-                                        date,
-                                        GCalendarDatesExceptionType.SERVICE_ADDED
-                                    )
-                                )
+                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
                             }
 
                             Calendar.THURSDAY -> if (_thursday) {
-                                newAllDates.add(
-                                    GCalendarDate(
-                                        _serviceId,
-                                        date,
-                                        GCalendarDatesExceptionType.SERVICE_ADDED
-                                    )
-                                )
+                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
                             }
 
                             Calendar.FRIDAY -> if (_friday) {
-                                newAllDates.add(
-                                    GCalendarDate(
-                                        _serviceId,
-                                        date,
-                                        GCalendarDatesExceptionType.SERVICE_ADDED
-                                    )
-                                )
+                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
                             }
 
                             Calendar.SATURDAY -> if (_saturday) {
-                                newAllDates.add(
-                                    GCalendarDate(
-                                        _serviceId,
-                                        date,
-                                        GCalendarDatesExceptionType.SERVICE_ADDED
-                                    )
-                                )
+                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
                             }
 
                             Calendar.SUNDAY -> if (_sunday) {
-                                newAllDates.add(
-                                    GCalendarDate(
-                                        _serviceId,
-                                        date,
-                                        GCalendarDatesExceptionType.SERVICE_ADDED
-                                    )
-                                )
+                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
                             }
                         }
                     } catch (e: Exception) {

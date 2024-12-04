@@ -2,12 +2,14 @@ package org.mtransit.parser.db
 
 import org.mtransit.commons.gtfs.data.Agency
 import org.mtransit.commons.gtfs.data.AgencyId
+import org.mtransit.commons.gtfs.data.CalendarDate
 import org.mtransit.commons.gtfs.data.Route
 import org.mtransit.commons.gtfs.data.RouteId
 import org.mtransit.commons.gtfs.data.Stop
 import org.mtransit.commons.gtfs.data.StopId
 import org.mtransit.commons.gtfs.sql.ALL_SQL_TABLES
 import org.mtransit.commons.gtfs.sql.AgencySQL
+import org.mtransit.commons.gtfs.sql.CalendarDateSQL
 import org.mtransit.commons.gtfs.sql.RouteSQL
 import org.mtransit.commons.gtfs.sql.StopSQL
 import org.mtransit.parser.DefaultAgencyTools
@@ -152,6 +154,22 @@ object GTFSDataBase {
     fun deleteStops(notLocationType: Int? = null) {
         connection.createStatement().use { statement ->
             StopSQL.delete(statement, notLocationType)
+        }
+    }
+
+    @JvmStatic
+    fun insertCalendarDate(vararg calendarDates: CalendarDate) {
+        connection.createStatement().use { statement ->
+            calendarDates.forEach { calendarDate ->
+                CalendarDateSQL.insert(calendarDate, statement)
+            }
+        }
+    }
+
+    @JvmStatic
+    fun deleteCalendarDate() {
+        connection.createStatement().use { statement ->
+            CalendarDateSQL.delete(statement)
         }
     }
 }

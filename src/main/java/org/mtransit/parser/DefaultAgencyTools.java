@@ -125,6 +125,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		TOMORROW = false;
 	}
 
+	private static final SimpleDateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
+
 	public static void main(@NotNull String[] args) {
 		throw new MTLog.Fatal("NEED TO IMPLEMENT MAIN METHOD"); // UNTIL WE HAVE JSON CONFIG FILE
 	}
@@ -326,7 +328,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeAgency(@NotNull GAgency gAgency) {
-		//noinspection deprecation
+		//noinspection DiscouragedApi
 		if (getAgencyId() != null && gAgency.isDifferentAgency(getAgencyId())) {
 			return EXCLUDE;
 		}
@@ -348,7 +350,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public long getRouteId(@NotNull GRoute gRoute) {
 		try {
-			//noinspection deprecation
+			//noinspection DiscouragedApi
 			final String routeIdS = useRouteShortNameForRouteId() ? cleanRouteShortName(getRouteShortName(gRoute)) : cleanRouteOriginalId(gRoute.getRouteId());
 			if (defaultRouteIdEnabled()
 					&& !CharUtils.isDigitsOnly(routeIdS)) {
@@ -556,7 +558,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
 		final GRoute gRoute = gtfs.getRoute(gTrip.getRouteIdInt());
 		if (gRoute == null) {
-			//noinspection deprecation
+			//noinspection DiscouragedApi
 			throw new MTLog.Fatal("Trying to set trip head-sign w/o valid GTFS route (ID: %s)", gTrip.getRouteId());
 		}
 		if (directionFinderEnabled(mRoute.getId(), gRoute)) {
@@ -906,7 +908,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public int getStopId(@NotNull GStop gStop) {
 		try {
-			//noinspection deprecation
+			//noinspection DiscouragedApi
 			return Integer.parseInt(gStop.getStopId());
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while extracting stop ID from %s!", gStop.toStringPlus());
@@ -1064,23 +1066,23 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 		}
 		if (previousArrivalTime == -1 || previousDepartureTime == -1) {
-			//noinspection deprecation
+			//noinspection DiscouragedApi
 			MTLog.log("Trip ID '%s' stops: ", gStopTime.getTripId());
 			for (GStopTime aStopTime : tripStopTimes) {
 				MTLog.log("- %s", aStopTime);
 			}
-			//noinspection deprecation
+			//noinspection DiscouragedApi
 			throw new MTLog.Fatal("Invalid stop time trip ID '%s' > no previous stop for %s!", gStopTime.getTripId(), gStopTime);
 		}
 		long previousArrivalTimeInMs = GTime.toMs(previousArrivalTime);
 		long previousDepartureTimeInMs = GTime.toMs(previousDepartureTime);
 		if (nextArrivalTime == -1 || nextDepartureTime == -1) {
-			//noinspection deprecation
+			//noinspection DiscouragedApi
 			MTLog.log("Trip ID '%s' stops: ", gStopTime.getTripId());
 			for (GStopTime aStopTime : tripStopTimes) {
 				MTLog.log("- %s", aStopTime);
 			}
-			//noinspection deprecation
+			//noinspection DiscouragedApi
 			throw new MTLog.Fatal("Invalid stop time trip ID '%s' > no next stop for %s!", gStopTime.getTripId(), gStopTime);
 		}
 		long nextArrivalTimeInMs = GTime.toMs(nextArrivalTime);
@@ -1125,7 +1127,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (!isCurrentOrNext && TOMORROW) {
 			c.add(Calendar.DAY_OF_MONTH, 1); // TOMORROW (too late to publish today's schedule)
 		}
-		usefulPeriod.setTodayStringInt(Integer.valueOf(GFieldTypes.DATE_FORMAT.format(c.getTime())));
+		usefulPeriod.setTodayStringInt(Integer.valueOf(DATE_FORMAT.format(c.getTime())));
 		if (!isCurrentOrNext && OVERRIDE_DATE != null) {
 			usefulPeriod.setTodayStringInt(OVERRIDE_DATE);
 		}
@@ -1134,7 +1136,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (agencyFilter) {
 			gtfs.cleanupExcludedServiceIds();
 		}
-		List<GCalendar> gCalendars = gtfs.getAllCalendars();
+		//noinspection deprecation // using calendar flatten into calendar dates only should output same result as calendar + calendar dates
+		List<GCalendar> gCalendars = GSpec.ALL_CALENDARS_IN_CALENDAR_DATES ? Collections.emptyList() : gtfs.getAllCalendars();
 		List<GCalendarDate> gCalendarDates = gtfs.getAllCalendarDates();
 		final Period entirePeriod = getEntirePeriodMinMaxDate(gCalendars, gCalendarDates);
 		MTLog.log("* Schedule available from %s to %s.", entirePeriod.getStartDate(), entirePeriod.getEndDate());
@@ -1142,7 +1145,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		MTLog.log("* Looking for CURRENT schedules...");
 		boolean hasCurrent = false;
 		if (!gCalendars.isEmpty()) {
-			parseCalendars(gCalendars, gCalendarDates, GFieldTypes.DATE_FORMAT, c, usefulPeriod, isCurrentOrNext); // CURRENT
+			parseCalendars(gCalendars, gCalendarDates, DATE_FORMAT, c, usefulPeriod, isCurrentOrNext); // CURRENT
 		} else if (!gCalendarDates.isEmpty()) {
 			parseCalendarDates(gCalendarDates, lastServiceDates, c, usefulPeriod, isCurrentOrNext); // CURRENT
 		} else {
@@ -1169,9 +1172,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		MTLog.log("------------------------------");
 		if (isNext) {
 			if (hasCurrent //
-					&& !diffLowerThan(GFieldTypes.DATE_FORMAT, c, usefulPeriod.getTodayStringInt(), usefulPeriod.getEndDate(), MAX_NEXT_LOOKUP_IN_DAYS)) {
+					&& !diffLowerThan(DATE_FORMAT, c, usefulPeriod.getTodayStringInt(), usefulPeriod.getEndDate(), MAX_NEXT_LOOKUP_IN_DAYS)) {
 				MTLog.log("* Skipping NEXT schedules... (%d days from %s to %s)", //
-						TimeUnit.MILLISECONDS.toDays(diffInMs(GFieldTypes.DATE_FORMAT, c, usefulPeriod.getTodayStringInt(), usefulPeriod.getEndDate())), //
+						TimeUnit.MILLISECONDS.toDays(diffInMs(DATE_FORMAT, c, usefulPeriod.getTodayStringInt(), usefulPeriod.getEndDate())), //
 						usefulPeriod.getTodayStringInt(), //
 						usefulPeriod.getEndDate());
 				usefulPeriod.setTodayStringInt(null); // reset
@@ -1183,12 +1186,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			MTLog.log("* Looking for NEXT schedules...");
 			if (hasCurrent) {
-				usefulPeriod.setTodayStringInt(incDateDays(GFieldTypes.DATE_FORMAT, c, usefulPeriod.getEndDate(), 1)); // start from next to current last date
+				usefulPeriod.setTodayStringInt(incDateDays(DATE_FORMAT, c, usefulPeriod.getEndDate(), 1)); // start from next to current last date
 			}
 			usefulPeriod.setStartDate(null); // reset
 			usefulPeriod.setEndDate(null); // reset
 			if (!gCalendars.isEmpty()) {
-				parseCalendars(gCalendars, gCalendarDates, GFieldTypes.DATE_FORMAT, c, usefulPeriod, false); // NEXT
+				parseCalendars(gCalendars, gCalendarDates, DATE_FORMAT, c, usefulPeriod, false); // NEXT
 			} else if (!gCalendarDates.isEmpty()) {
 				parseCalendarDates(gCalendarDates, lastServiceDates, c, usefulPeriod, false); // NEXT
 			}
@@ -1218,7 +1221,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			boolean newDateFound;
 			do {
 				newDateFound = false;
-				int minNewStartDate = incDateDays(GFieldTypes.DATE_FORMAT, c, usefulPeriod.getStartDate(), -1);
+				int minNewStartDate = incDateDays(DATE_FORMAT, c, usefulPeriod.getStartDate(), -1);
 				for (GCalendarDate gCalendarDate : gCalendarDates) {
 					if (gCalendarDate.isBefore(usefulPeriod.getStartDate())) {
 						if (gCalendarDate.isBetween(minNewStartDate, usefulPeriod.getStartDate())) {
@@ -1232,7 +1235,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			} while (newDateFound);
 			do {
 				newDateFound = false;
-				int minNewEndDate = incDateDays(GFieldTypes.DATE_FORMAT, c, usefulPeriod.getEndDate(), +1);
+				int minNewEndDate = incDateDays(DATE_FORMAT, c, usefulPeriod.getEndDate(), +1);
 				for (GCalendarDate gCalendarDate : gCalendarDates) {
 					if (gCalendarDate.isAfter(usefulPeriod.getEndDate())) {
 						if (gCalendarDate.isBetween(usefulPeriod.getEndDate(), minNewEndDate)) {
@@ -1266,7 +1269,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
 				if (gCalendarDate.isBetween(p.getStartDate(), p.getEndDate())) {
 					if (!gCalendarDate.isServiceIdInts(todayServiceIds)) {
-						//noinspection deprecation
+						//noinspection DiscouragedApi
 						MTLog.log("> new service ID from calendar date active on %s between %s and %s: '%s'", gCalendarDate.getDate(), p.getStartDate(), p.getEndDate(), gCalendarDate.getServiceId());
 						todayServiceIds.add(gCalendarDate.getServiceIdInt());
 					}
@@ -1278,39 +1281,39 @@ public class DefaultAgencyTools implements GAgencyTools {
 				continue;
 			}
 			Period pNext = new Period();
-			pNext.setTodayStringInt(incDateDays(GFieldTypes.DATE_FORMAT, c, p.getEndDate(), 1));
+			pNext.setTodayStringInt(incDateDays(DATE_FORMAT, c, p.getEndDate(), 1));
 			HashSet<Integer> nextDayServiceIds = findCalendarDatesTodayServiceIds(gCalendarDates, c, pNext, 0, 0, 0);
 			refreshStartEndDatesFromCalendarDates(pNext, nextDayServiceIds, gCalendarDates, lastServiceDates);
 			if (pNext.getStartDate() != null && pNext.getEndDate() != null
-					&& diffLowerThan(GFieldTypes.DATE_FORMAT, c, pNext.getStartDate(), pNext.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
+					&& diffLowerThan(DATE_FORMAT, c, pNext.getStartDate(), pNext.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
 				p.setEndDate(pNext.getEndDate());
 				MTLog.log("> new end date '%s' because next %s day has own service ID(s)", p.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS);
 				continue;
 			}
 			Period pPrevious = new Period();
-			pPrevious.setTodayStringInt(incDateDays(GFieldTypes.DATE_FORMAT, c, p.getStartDate(), -1));
+			pPrevious.setTodayStringInt(incDateDays(DATE_FORMAT, c, p.getStartDate(), -1));
 			HashSet<Integer> previousDayServiceIds = findCalendarDatesTodayServiceIds(gCalendarDates, c, pPrevious, 0, 0, 0);
 			refreshStartEndDatesFromCalendarDates(pPrevious, previousDayServiceIds, gCalendarDates, lastServiceDates);
 			if (lookForward // NOT next schedule, only current schedule can look behind
 					&& pPrevious.getStartDate() != null && pPrevious.getEndDate() != null
-					&& diffLowerThan(GFieldTypes.DATE_FORMAT, c, pPrevious.getStartDate(), pPrevious.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
+					&& diffLowerThan(DATE_FORMAT, c, pPrevious.getStartDate(), pPrevious.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
 				p.setStartDate(pPrevious.getStartDate());
 				MTLog.log("> new start date '%s' because previous %s day has own service ID(s)", p.getStartDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS);
 				continue;
 			}
-			if (diffLowerThan(GFieldTypes.DATE_FORMAT, c, p.getStartDate(), p.getEndDate(), MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS)) {
+			if (diffLowerThan(DATE_FORMAT, c, p.getStartDate(), p.getEndDate(), MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS)) {
 				long currentPeriodCoverageInMs = p.getStartDate() == null || p.getEndDate() == null ? 0L :
-						diffInMs(GFieldTypes.DATE_FORMAT, c,
+						diffInMs(DATE_FORMAT, c,
 								p.getStartDate(), // morning
 								p.getEndDate() + 1 // midnight ≈ tomorrow
 						);
 				long nextPeriodCoverageInMs = pNext.getStartDate() == null || pNext.getEndDate() == null ? 0L :
-						diffInMs(GFieldTypes.DATE_FORMAT, c,
+						diffInMs(DATE_FORMAT, c,
 								pNext.getStartDate(), // morning
 								pNext.getEndDate() + 1 // midnight ≈ tomorrow
 						);
 				long previousPeriodCoverageInMs = pPrevious.getStartDate() == null || pPrevious.getEndDate() == null ? 0L :
-						diffInMs(GFieldTypes.DATE_FORMAT, c,
+						diffInMs(DATE_FORMAT, c,
 								pPrevious.getStartDate(), // morning
 								pPrevious.getEndDate() + 1 // midnight ≈ tomorrow
 						);
@@ -1320,10 +1323,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 						&& previousPeriodCoverageInMs > 0L
 						&& (nextPeriodCoverageInMs <= 0L || previousPeriodCoverageInMs < nextPeriodCoverageInMs)
 						&& previousToCurrent < MAX_CALENDAR_DATE_COVERAGE_RATIO) {
-					p.setStartDate(incDateDays(GFieldTypes.DATE_FORMAT, c, p.getStartDate(), -1)); // start--
+					p.setStartDate(incDateDays(DATE_FORMAT, c, p.getStartDate(), -1)); // start--
 					MTLog.log("new start date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.getStartDate());
 				} else if (nextToCurrent < MAX_CALENDAR_DATE_COVERAGE_RATIO) {
-					p.setEndDate(incDateDays(GFieldTypes.DATE_FORMAT, c, p.getEndDate(), 1)); // end++
+					p.setEndDate(incDateDays(DATE_FORMAT, c, p.getEndDate(), 1)); // end++
 					MTLog.log("new end date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.getEndDate());
 				} else {
 					MTLog.log("coverage lower than %s days but would add too many days (p: %sx, n: %sx)", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, nextToCurrent, previousToCurrent);
@@ -1376,13 +1379,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 			}
 			if (todayServiceIds.size() < minSizeForward //
-					&& diffLowerThan(GFieldTypes.DATE_FORMAT, c, initialTodayStringInt, p.getTodayStringInt(), MAX_LOOK_FORWARD_IN_DAYS)) {
-				p.setTodayStringInt(incDateDays(GFieldTypes.DATE_FORMAT, c, p.getTodayStringInt(), incDays));
+					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.getTodayStringInt(), MAX_LOOK_FORWARD_IN_DAYS)) {
+				p.setTodayStringInt(incDateDays(DATE_FORMAT, c, p.getTodayStringInt(), incDays));
 				MTLog.log("new today because not enough service today: %s (initial today: %s, min: %s)", p.getTodayStringInt(), initialTodayStringInt, minSizeForward);
 				continue;
 			} else if (todayServiceIds.size() < minSizeBackward //
-					&& diffLowerThan(GFieldTypes.DATE_FORMAT, c, p.getTodayStringInt(), initialTodayStringInt, MAX_LOOK_BACKWARD_IN_DAYS)) {
-				p.setTodayStringInt(incDateDays(GFieldTypes.DATE_FORMAT, c, p.getTodayStringInt(), -incDays));
+					&& diffLowerThan(DATE_FORMAT, c, p.getTodayStringInt(), initialTodayStringInt, MAX_LOOK_BACKWARD_IN_DAYS)) {
+				p.setTodayStringInt(incDateDays(DATE_FORMAT, c, p.getTodayStringInt(), -incDays));
 				MTLog.log("new today because not enough service today: %s (initial today: %s, min: %s)", p.getTodayStringInt(), initialTodayStringInt, minSizeBackward);
 				continue;
 			}
@@ -1406,7 +1409,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 					continue;
 				}
 				if (GCalendarDate.isServiceEntirelyRemoved(gCalendar, gCalendarDates)) {
-					//noinspection deprecation
+					//noinspection DiscouragedApi
 					MTLog.logDebug("parseCalendars() > ignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", gCalendar.getStartDate(), gCalendar.getEndDate(), gCalendar.getServiceId());
 					continue;
 				}
@@ -1463,7 +1466,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 					continue;
 				}
 				if (GCalendarDate.isServiceEntirelyRemoved(gCalendar, gCalendarDates)) {
-					//noinspection deprecation
+					//noinspection DiscouragedApi
 					MTLog.logDebug("findCalendarsTodayPeriod() > ignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", gCalendar.getStartDate(), gCalendar.getEndDate(), gCalendar.getServiceId());
 					continue;
 				}
@@ -1510,7 +1513,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 					continue;
 				}
 				if (GCalendarDate.isServiceEntirelyRemoved(gCalendar, gCalendarDates)) {
-					//noinspection deprecation
+					//noinspection DiscouragedApi
 					MTLog.logDebug("findDayServiceIdsPeriod() > ignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", gCalendar.getStartDate(), gCalendar.getEndDate(), gCalendar.getServiceId());
 					continue;
 				}
@@ -1542,7 +1545,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 					continue;
 				}
 				if (GCalendarDate.isServiceEntirelyRemoved(gCalendar, gCalendarDates)) {
-					//noinspection deprecation
+					//noinspection DiscouragedApi
 					MTLog.logDebug("findDayServiceIdsPeriod() > ignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", gCalendar.getStartDate(), gCalendar.getEndDate(), gCalendar.getServiceId());
 					continue;
 				}
@@ -1578,11 +1581,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 						continue;
 					}
 					if (GCalendarDate.isServiceEntirelyRemoved(gCalendar, gCalendarDates, startDate, endDate)) {
-						//noinspection deprecation
+						//noinspection DiscouragedApi
 						MTLog.logDebug("getPeriodServiceIds() > ignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", startDate, endDate, gCalendar.getServiceId());
 						continue;
 					}
-					//noinspection deprecation
+					//noinspection DiscouragedApi
 					MTLog.log("new service ID from calendar active between %s and %s: %s", startDate, endDate, gCalendar.getServiceId());
 					serviceIdInts.add(gCalendar.getServiceIdInt());
 				}
@@ -1595,11 +1598,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 						continue;
 					}
 					if (gCalendarDate.getExceptionType() == GCalendarDatesExceptionType.SERVICE_REMOVED) {
-						//noinspection deprecation
+						//noinspection DiscouragedApi
 						MTLog.log("ignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", startDate, endDate, gCalendarDate.getServiceId());
 						continue;
 					}
-					//noinspection deprecation
+					//noinspection DiscouragedApi
 					MTLog.log("new service ID from calendar date active between %s and %s: %s", startDate, endDate, gCalendarDate.getServiceId());
 					serviceIdInts.add(gCalendarDate.getServiceIdInt());
 				}
@@ -1695,7 +1698,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 		}
 		if (usefulPeriod != null) {
-			if (gCalendarDate.getExceptionType() == GCalendarDatesExceptionType.SERVICE_ADDED) {
+			if (gCalendarDate.getExceptionType() != GCalendarDatesExceptionType.SERVICE_REMOVED) {
 				if (gCalendarDate.isBefore(usefulPeriod.getStartDate()) //
 						|| gCalendarDate.isAfter(usefulPeriod.getEndDate())) {
 					MTLog.log("Exclude calendar date \"%s\" because it's out of the useful period (start:%s|end:%s).", gCalendarDate,

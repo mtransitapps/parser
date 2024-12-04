@@ -1,6 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
+import org.mtransit.commons.gtfs.data.CalendarDate
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.escape
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -16,13 +17,13 @@ import java.lang.Integer.min
 data class GCalendarDate(
     val serviceIdInt: Int,
     val date: Int, // YYYYMMDD
-    val exceptionType: GCalendarDatesExceptionType
+    val exceptionType: GCalendarDatesExceptionType,
 ) {
 
     constructor(
         serviceId: String,
         date: Int,
-        exceptionType: GCalendarDatesExceptionType
+        exceptionType: GCalendarDatesExceptionType,
     ) : this(
         GIDs.getInt(serviceId),
         date,
@@ -32,7 +33,7 @@ data class GCalendarDate(
     constructor(
         serviceId: String,
         date: Int,
-        exceptionTypeInt: Int
+        exceptionTypeInt: Int,
     ) : this(
         GIDs.getInt(serviceId),
         date,
@@ -84,6 +85,12 @@ data class GCalendarDate(
                 "+(serviceId:$_serviceId)"
     }
 
+    fun to() = CalendarDate(
+        serviceId = _serviceId,
+        date = date,
+        exceptionTypeInt = exceptionType.id,
+    )
+
     companion object {
         const val FILENAME = "calendar_dates.txt"
 
@@ -103,6 +110,21 @@ data class GCalendarDate(
                     GCalendarDatesExceptionType.parse(exceptionDate),
                 )
             }
+
+        @JvmStatic
+        fun to(calendarDates: Collection<GCalendarDate>) = calendarDates.map { it.to() }
+
+        @JvmStatic
+        fun from(calendars: Collection<CalendarDate>) = calendars.map { from(it) }
+
+        @JvmStatic
+        fun from(calendar: CalendarDate?) = calendar?.let {
+            CalendarDate(
+                serviceId = it.serviceId,
+                date = it.date,
+                exceptionTypeInt = it.exceptionType.id,
+            )
+        }
 
         private const val UID_SEPARATOR = "0" // int IDs can be negative
 

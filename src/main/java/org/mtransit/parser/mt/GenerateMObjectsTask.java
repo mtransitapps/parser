@@ -166,25 +166,35 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE ? MCalendarExceptionType.ADDED : MCalendarExceptionType.DEFAULT
 				));
 				break;
-			default:
-				throw new MTLog.Fatal("%s: Unexpected calendar date exception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
-			}
-		}
-		for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
-			if (!serviceIdInts.contains(gCalendar.getServiceIdInt())) {
-				continue;
-			}
-			for (GCalendarDate gCalendarDate : gCalendar.getDates()) {
-				if (!FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-					if (gCalendarDateServiceRemoved.contains(gCalendarDate.getUID())) {
-						continue; // service REMOVED at this date
-					}
-				}
+			case SERVICE_DEFAULT:
 				mServiceDates.add(new MServiceDate(
 						gCalendarDate.getServiceIdInt(),
 						gCalendarDate.getDate(),
 						MCalendarExceptionType.DEFAULT
 				));
+				break;
+			default:
+				throw new MTLog.Fatal("%s: Unexpected calendar date exception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
+			}
+		}
+		if (!GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) {
+			//noinspection deprecation
+			for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
+				if (!serviceIdInts.contains(gCalendar.getServiceIdInt())) {
+					continue;
+				}
+				for (GCalendarDate gCalendarDate : gCalendar.getDates()) {
+					if (!FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
+						if (gCalendarDateServiceRemoved.contains(gCalendarDate.getUID())) {
+							continue; // service REMOVED at this date
+						}
+					}
+					mServiceDates.add(new MServiceDate(
+							gCalendarDate.getServiceIdInt(),
+							gCalendarDate.getDate(),
+							MCalendarExceptionType.DEFAULT
+					));
+				}
 			}
 		}
 		MTrip mTrip;

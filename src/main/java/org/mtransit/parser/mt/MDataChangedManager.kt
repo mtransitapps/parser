@@ -45,13 +45,13 @@ object MDataChangedManager {
         ) {
             return false // to soon to ignore
         }
-        @Suppress("DEPRECATION")
+        //noinspection DiscouragedApi
         val lastServiceIds = lastServiceDates.map { it.serviceId }.distinct()
-        @Suppress("DEPRECATION")
+        //noinspection DiscouragedApi
         if (gCalendarDateToAdd.serviceId.escape() !in lastServiceIds) {
             return false // new service ID not in last service dates
         }
-        @Suppress("DEPRECATION")
+        //noinspection DiscouragedApi
         MTLog.log("> ignored known service '${gCalendarDateToAdd.serviceId}' on new '${gCalendarDateToAdd.date}' date to avoid data changed")
         return true
     }
@@ -77,7 +77,7 @@ object MDataChangedManager {
         val missingLastServiceDates = lastServiceDates.filter {
             it.calendarDate !in pStartDate..pEndDate
         }
-        @Suppress("DEPRECATION")
+        @Suppress("DiscouragedApi")
         if (missingLastServiceDates.any { it.serviceId !in pServiceIds }) {
             return // last service dates service IDs missing from new data
         }
@@ -103,15 +103,16 @@ object MDataChangedManager {
         val c = Calendar.getInstance()
         val todayStringInt = GFieldTypes.fromDateToInt(dateFormat, c.time)
         val (lastCalendarsServiceDates, lastCalendarDatesServiceDates) =
-            lastServiceDates.partition { it.exceptionType == MCalendarExceptionType.DEFAULT.id }
-        val allCalendarsWithDays = gtfs.allCalendars.filter { it.hasDays() }
-        @Suppress("DEPRECATION")
+            if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) emptyList<MServiceDate>() to lastServiceDates // calendar dates only
+            else lastServiceDates.partition { it.exceptionType == MCalendarExceptionType.DEFAULT.id }
+        val allCalendarsWithDays = if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) emptyList() else gtfs.allCalendars.filter { it.hasDays() }
+        //noinspection DiscouragedApi
         MTLog.log("> Last service IDs from '${GCalendar.FILENAME}': ${lastCalendarsServiceDates.map { it.serviceId }.distinct().sorted()}")
-        @Suppress("DEPRECATION")
+        //noinspection DiscouragedApi
         MTLog.log("> New service IDs from '${GCalendar.FILENAME}':  ${allCalendarsWithDays.map { it.serviceId.escape() }.distinct().sorted()}")
-        @Suppress("DEPRECATION")
+        //noinspection DiscouragedApi
         MTLog.log("> Last service IDs from '${GCalendarDate.FILENAME}': ${lastCalendarDatesServiceDates.map { it.serviceId }.distinct().sorted()}")
-        @Suppress("DEPRECATION")
+        //noinspection DiscouragedApi
         MTLog.log("> New service IDs from '${GCalendarDate.FILENAME}':  ${gtfs.allCalendarDates.map { it.serviceId.escape() }.distinct().sorted()}")
 
         // 0 - check service IDs available in last/new data
@@ -146,16 +147,16 @@ object MDataChangedManager {
 
         // 1 - look for removed dates with known service IDs
         var dataChanged = false
-        val newGCalendars = gtfs.allCalendars.toMutableList()
+        val newGCalendars = if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) mutableListOf() else gtfs.allCalendars.toMutableList()
         val newGCalendarDates = gtfs.allCalendarDates.toMutableList()
-        val gCalendarsDates = gtfs.allCalendars.flatMap { it.dates }.map { it.date }.distinct()
+        val gCalendarsDates = if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) emptyList() else gtfs.allCalendars.flatMap { it.dates }.map { it.date }.distinct()
         val gCalendarDatesDates = gtfs.allCalendarDates.map { it.date }
         val removedCalendarsServiceDates = lastCalendarsServiceDates.filter { it.calendarDate !in gCalendarsDates }
         val removedCalendarDatesServiceDates = lastCalendarDatesServiceDates.filter { it.calendarDate !in gCalendarDatesDates }
         MTLog.logDebug("> Removed calendars service: ${removedCalendarsServiceDates.size}")
         if (Constants.DEBUG) {
             removedCalendarsServiceDates.forEach {
-                @Suppress("DEPRECATION")
+                //noinspection DiscouragedApi
                 MTLog.logDebug("> - ${it.calendarDate}: '${it.serviceId}'.")
             }
         }
@@ -167,7 +168,7 @@ object MDataChangedManager {
         MTLog.logDebug("> Removed calendars dates service: ${removedCalendarDatesServiceDates.size}")
         if (Constants.DEBUG) {
             removedCalendarDatesServiceDates.forEach {
-                @Suppress("DEPRECATION")
+                //noinspection DiscouragedApi
                 MTLog.logDebug("> - ${it.calendarDate}: '${it.serviceId}'.")
             }
         }
@@ -179,11 +180,14 @@ object MDataChangedManager {
         @Suppress("LocalVariableName")
         val DATE_FORMAT = GFieldTypes.makeDateFormat()
         removedCalendarsServiceDates.sortedDescending().forEach { removedServiceDate ->
+            if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) {
+                return
+            }
             if (!gCalendarsEscapedServiceIdInts.contains(removedServiceDate.serviceIdInt)) {
                 MTLog.log("> Cannot re-add removed dates because of removed service ID '${removedServiceDate.toStringPlus()}'")
                 return
             }
-            @Suppress("DEPRECATION")
+            //noinspection DiscouragedApi
             val originalCalendar = newGCalendars.firstOrNull { it.serviceId.escape() == removedServiceDate.serviceId }
             if (originalCalendar == null) {
                 MTLog.log("> Cannot find original calendar for '${removedServiceDate.toStringPlus()}'!")
@@ -208,7 +212,7 @@ object MDataChangedManager {
                 MTLog.log("> Cannot re-add removed dates because of removed service ID '${removedServiceDate.toStringPlus()}'")
                 return
             }
-            @Suppress("DEPRECATION")
+            //noinspection DiscouragedApi
             val originalServiceIdInt = newGCalendarDates.firstOrNull { it.serviceId.escape() == removedServiceDate.serviceId }?.serviceIdInt
             val missingCalendarDate = removedServiceDate.toCalendarDate(overrideServiceIdInt = originalServiceIdInt)
             MTLog.log("> Optimising data changed by adding ${missingCalendarDate?.toStringPlus()}...")
@@ -223,7 +227,7 @@ object MDataChangedManager {
         MTLog.logDebug("> Added calendars service: ${addedGCalendarsDates.size}")
         if (Constants.DEBUG) {
             addedGCalendarsDates.forEach {
-                @Suppress("DEPRECATION")
+                //noinspection DiscouragedApi
                 MTLog.logDebug("> - ${it.date}: '${it.serviceId}'.")
             }
         }
@@ -236,7 +240,7 @@ object MDataChangedManager {
                 MTLog.log("> Cannot remove added date because of new service ID '${addedGCalendarDate.toStringPlus()}'")
                 return
             }
-            @Suppress("DEPRECATION")
+            //noinspection DiscouragedApi
             val originalCalendar = newGCalendars.firstOrNull { it.serviceId == addedGCalendarDate.serviceId }
             if (originalCalendar == null) {
                 MTLog.log("> Cannot find original calendar for '${addedGCalendarDate.toStringPlus()}'!")
@@ -264,7 +268,7 @@ object MDataChangedManager {
         MTLog.logDebug("> Added calendars dates service: ${addedGCalendarDatesDates.size}")
         if (Constants.DEBUG) {
             addedGCalendarDatesDates.forEach {
-                @Suppress("DEPRECATION")
+                //noinspection DiscouragedApi
                 MTLog.logDebug("> - ${it.date}: '${it.serviceId}'.")
             }
         }
@@ -282,10 +286,14 @@ object MDataChangedManager {
             dataChanged = true
         }
         if (dataChanged) {
-            MTLog.log("> Optimised data changed: " +
-                    "`${GCalendar.FILENAME}`: ${gtfs.allCalendars.flatMap { it.dates }.size} -> ${newGCalendars.flatMap { it.dates }.size} | " +
-                    "& " +
-                    "'${GCalendarDate.FILENAME}': ${gtfs.allCalendarDates.size} -> ${newGCalendarDates.size}."
+            MTLog.log(buildString {
+                append("> Optimised data changed: ")
+                if (!GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) {
+                    append("`${GCalendar.FILENAME}`: ${gtfs.allCalendars.flatMap { it.dates }.size} -> ${newGCalendars.flatMap { it.dates }.size} | ")
+                    append("& ")
+                }
+                append("'${GCalendarDate.FILENAME}': ${gtfs.allCalendarDates.size} -> ${newGCalendarDates.size}.")
+            }
             )
             gtfs.replaceCalendarsSameServiceIds(newGCalendars, newGCalendarDates)
         } else {

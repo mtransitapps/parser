@@ -1,26 +1,30 @@
 package org.mtransit.parser.gtfs.data
 
-// https://developers.google.com/transit/gtfs/reference#calendar_dates_exception_type_field
-enum class GCalendarDatesExceptionType(private val id: Int) {
+import org.mtransit.commons.GTFSCommons
 
-    SERVICE_ADDED(1),
-    SERVICE_REMOVED(2);
+// https://developers.google.com/transit/gtfs/reference#calendar_dates_exception_type_field
+enum class GCalendarDatesExceptionType(val id: Int) {
+
+    SERVICE_DEFAULT(GTFSCommons.EXCEPTION_TYPE_DEFAULT), // from calendar (added by MT)
+    SERVICE_ADDED(GTFSCommons.EXCEPTION_TYPE_ADDED),
+    SERVICE_REMOVED(GTFSCommons.EXCEPTION_TYPE_REMOVED),
+    ;
 
     companion object {
 
         fun parse(id: Int): GCalendarDatesExceptionType {
-            if (SERVICE_ADDED.id == id) {
-                return SERVICE_ADDED
+            return when {
+                SERVICE_DEFAULT.id == id -> SERVICE_DEFAULT
+                SERVICE_ADDED.id == id -> SERVICE_ADDED
+                SERVICE_REMOVED.id == id -> SERVICE_REMOVED
+                else -> SERVICE_ADDED // default
             }
-            return if (SERVICE_REMOVED.id == id) {
-                SERVICE_REMOVED
-            } else SERVICE_ADDED // default
         }
 
         @JvmStatic
         fun parse(id: String?): GCalendarDatesExceptionType {
             return if (id.isNullOrEmpty()) { // that's OK
-                SERVICE_ADDED // default
+                SERVICE_ADDED // default in GTFS spec
             } else parse(id.toInt())
         }
     }
