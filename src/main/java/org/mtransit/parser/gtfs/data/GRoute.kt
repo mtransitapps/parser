@@ -158,7 +158,7 @@ data class GRoute(
         )
 
         @JvmStatic
-        fun from(routes: Collection<Route>) = routes.map { from(it) }
+        fun from(routes: Collection<Route>) = routes.mapNotNull { from(it) }
 
         @JvmStatic
         fun from(route: Route?) = route?.let {

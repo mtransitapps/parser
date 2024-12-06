@@ -3,15 +3,21 @@ package org.mtransit.parser.db
 import org.mtransit.commons.gtfs.data.Agency
 import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.commons.gtfs.data.CalendarDate
+import org.mtransit.commons.gtfs.data.DirectionId
 import org.mtransit.commons.gtfs.data.Route
 import org.mtransit.commons.gtfs.data.RouteId
+import org.mtransit.commons.gtfs.data.ServiceId
 import org.mtransit.commons.gtfs.data.Stop
 import org.mtransit.commons.gtfs.data.StopId
+import org.mtransit.commons.gtfs.data.Trip
+import org.mtransit.commons.gtfs.data.TripId
 import org.mtransit.commons.gtfs.sql.ALL_SQL_TABLES
 import org.mtransit.commons.gtfs.sql.AgencySQL
 import org.mtransit.commons.gtfs.sql.CalendarDateSQL
 import org.mtransit.commons.gtfs.sql.RouteSQL
 import org.mtransit.commons.gtfs.sql.StopSQL
+import org.mtransit.commons.gtfs.sql.TripSQL
+import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
 import org.mtransit.parser.MTLog
@@ -28,6 +34,7 @@ object GTFSDataBase {
     private const val FILE_PATH = "input/gtfs_db_file"
 
     private val IS_USING_FILE_INSTEAD_OF_MEMORY = DefaultAgencyTools.IS_CI
+            || Constants.DEBUG
     // private val IS_USING_FILE_INSTEAD_OF_MEMORY = false // (GHA.standard.linux > RAM = 16 GB)
     //         || true // DEBUG
 
@@ -65,21 +72,18 @@ object GTFSDataBase {
     }
 
     @JvmStatic
-    fun selectAgency(agencyId: AgencyId): Agency? {
+    fun selectAgency(agencyId: AgencyId) = selectAgencies(agencyId).singleOrNull()
+
+    @JvmOverloads
+    @JvmStatic
+    fun selectAgencies(agencyId: AgencyId? = null): List<Agency> {
         connection.createStatement().use { statement ->
-            return AgencySQL.select(agencyId, statement).singleOrNull()
+            return AgencySQL.select(agencyId, statement)
         }
     }
 
     @JvmStatic
-    fun selectAllAgencies(): List<Agency> {
-        connection.createStatement().use { statement ->
-            return AgencySQL.select(null, statement)
-        }
-    }
-
-    @JvmStatic
-    fun countAllAgencies(): Int {
+    fun countAgencies(): Int {
         connection.createStatement().use { statement ->
             return AgencySQL.count(statement)
         }
@@ -93,24 +97,20 @@ object GTFSDataBase {
     }
 
     @JvmStatic
-    fun selectRoute(routeId: RouteId): Route? {
-        connection.createStatement().use { statement ->
-            return RouteSQL.select(routeIds = listOf(routeId), statement = statement).singleOrNull()
-        }
-    }
+    fun selectRoute(routeId: RouteId) = selectRoutes(routeIds = listOf(routeId)).singleOrNull()
 
     @JvmOverloads
     @JvmStatic
-    fun selectAllRoutes(routeIds: Collection<RouteId>? = null, agencyId: AgencyId? = null, notAgencyId: AgencyId? = null): List<Route> {
+    fun selectRoutes(routeIds: Collection<RouteId>? = null, agencyId: AgencyId? = null, notAgencyId: AgencyId? = null): List<Route> {
         connection.createStatement().use { statement ->
             return RouteSQL.select(routeIds, agencyId, notAgencyId, statement)
         }
     }
 
     @JvmStatic
-    fun selectAllRoutesIds(): List<RouteId> {
+    fun selectRoutesIds(): List<RouteId> {
         connection.createStatement().use { statement ->
-            return RouteSQL.selectAllIds(statement)
+            return RouteSQL.selectRouteIds(statement)
         }
     }
 
@@ -129,16 +129,13 @@ object GTFSDataBase {
     }
 
     @JvmStatic
-    fun selectStop(stopId: StopId): Stop? {
-        connection.createStatement().use { statement ->
-            return StopSQL.select(stopId, statement).singleOrNull()
-        }
-    }
+    fun selectStop(stopId: StopId) = selectStops(stopId).singleOrNull()
 
+    @JvmOverloads
     @JvmStatic
-    fun selectAllStops(): List<Stop> {
+    fun selectStops(stopId: StopId? = null): List<Stop> {
         connection.createStatement().use { statement ->
-            return StopSQL.select(null, statement)
+            return StopSQL.select(stopId, statement)
         }
     }
 
@@ -158,6 +155,13 @@ object GTFSDataBase {
     }
 
     @JvmStatic
+    fun selectServiceIds(): List<ServiceId> {
+        connection.createStatement().use { statement ->
+            return CalendarDateSQL.selectServiceIds(statement)
+        }
+    }
+
+    @JvmStatic
     fun insertCalendarDate(vararg calendarDates: CalendarDate) {
         connection.createStatement().use { statement ->
             calendarDates.forEach { calendarDate ->
@@ -166,10 +170,73 @@ object GTFSDataBase {
         }
     }
 
+    @JvmOverloads
     @JvmStatic
-    fun deleteCalendarDate() {
+    fun selectCalendarDates(serviceId: ServiceId? = null): List<CalendarDate> {
         connection.createStatement().use { statement ->
-            CalendarDateSQL.delete(statement)
+            return CalendarDateSQL.select(serviceId, statement)
+        }
+    }
+
+    @JvmStatic
+    fun countCalendarDates(): Int {
+        connection.createStatement().use { statement ->
+            return CalendarDateSQL.count(statement)
+        }
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun deleteCalendarDate(calendarDate: CalendarDate? = null) {
+        connection.createStatement().use { statement ->
+            CalendarDateSQL.delete(statement, calendarDate)
+        }
+    }
+
+    @JvmStatic
+    fun insertTrip(trip: Trip) {
+        connection.createStatement().use { statement ->
+            TripSQL.insert(trip, statement)
+        }
+    }
+
+    @JvmStatic
+    fun updateTrip(tripIds: Collection<TripId>, directionId: DirectionId) {
+        connection.createStatement().use { statement ->
+            TripSQL.update(statement, tripIds, directionId)
+        }
+    }
+
+    @JvmStatic
+    fun selectTrip(tripId: TripId) = selectTrips(tripIds = listOf(tripId)).singleOrNull()
+
+    @JvmOverloads
+    @JvmStatic
+    fun selectTrips(tripIds: Collection<TripId>? = null, routeIds: Collection<RouteId>? = null): List<Trip> {
+        connection.createStatement().use { statement ->
+            return TripSQL.select(statement, tripIds, routeIds)
+        }
+    }
+
+    @JvmStatic
+    fun selectTripRouteIds(): List<RouteId> {
+        connection.createStatement().use { statement ->
+            return TripSQL.selectTripRouteIds(statement)
+        }
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun deleteTrips(routeId: RouteId? = null) {
+        connection.createStatement().use { statement ->
+            TripSQL.delete(statement, routeId)
+        }
+    }
+
+    @JvmStatic
+    fun countTrips(): Int {
+        connection.createStatement().use { statement ->
+            return TripSQL.count(statement)
         }
     }
 }

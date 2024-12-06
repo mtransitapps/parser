@@ -10,13 +10,13 @@ import java.util.concurrent.TimeUnit
 
 @Suppress("MemberVisibilityCanBePrivate")
 data class MSpec(
-    val agencies: ArrayList<MAgency>,
-    val stops: ArrayList<MStop>,
-    val routes: ArrayList<MRoute>,
-    val trips: ArrayList<MTrip>,
-    val tripStops: ArrayList<MTripStop>,
-    val serviceDates: ArrayList<MServiceDate>,
-    val routeFrequencies: TreeMap<Long, ArrayList<MFrequency>>,
+    val agencies: List<MAgency>,
+    val stops: List<MStop>,
+    val routes: List<MRoute>,
+    val trips: List<MTrip>,
+    val tripStops: List<MTripStop>,
+    val serviceDates: List<MServiceDate>,
+    val routeFrequencies: TreeMap<Long, List<MFrequency>>,
     val firstTimestamp: Long,
     val lastTimestamp: Long,
 ) {
@@ -28,7 +28,7 @@ data class MSpec(
                 && (hasStopSchedules() || hasRouteFrequencies()))
 
     fun hasAgencies(): Boolean {
-        return agencies.size > 0
+        return agencies.isNotEmpty()
     }
 
     val firstAgency: MAgency
@@ -40,11 +40,11 @@ data class MSpec(
         }
 
     fun hasStops(): Boolean {
-        return stops.size > 0
+        return stops.isNotEmpty()
     }
 
     fun hasRoutes(): Boolean {
-        return routes.size > 0
+        return routes.isNotEmpty()
     }
 
     val firstRoute: MRoute
@@ -56,15 +56,15 @@ data class MSpec(
         }
 
     fun hasTrips(): Boolean {
-        return trips.size > 0
+        return trips.isNotEmpty()
     }
 
     fun hasTripStops(): Boolean {
-        return tripStops.size > 0
+        return tripStops.isNotEmpty()
     }
 
     fun hasServiceDates(): Boolean {
-        return serviceDates.size > 0
+        return serviceDates.isNotEmpty()
     }
 
     fun hasStopSchedules(): Boolean {
@@ -72,7 +72,7 @@ data class MSpec(
     }
 
     fun hasRouteFrequencies(): Boolean {
-        return routeFrequencies.size > 0
+        return routeFrequencies.isNotEmpty()
     }
 
     // TODO later max integer = 2147483647 = Tuesday, January 19, 2038 3:14:07 AM GMT

@@ -2,36 +2,46 @@ package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
 import org.mtransit.commons.StringUtils
+import org.mtransit.commons.gtfs.data.Trip
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
 
 // https://developers.google.com/transit/gtfs/reference#tripstxt
 // https://gtfs.org/reference/static/#tripstxt
 data class GTrip(
+    val tripIdInt: Int,
     val routeIdInt: Int,
     val serviceIdInt: Int,
-    val tripIdInt: Int,
-    var directionIdE: GDirectionId,
     var tripHeadsign: String?, // Optional
     val tripShortName: String?, // Optional
+    val directionIdE: GDirectionId,
+    val blockId: String?, // Optional
+    val shapeId: String?, // Optional
     val wheelchairAccessible: GWheelchairBoardingType,
+    val bikesAllowed: Boolean?, // Optional
 ) {
     constructor(
+        tripId: String,
         routeId: String,
         serviceId: String,
-        tripId: String,
-        directionId: Int?,
         tripHeadsign: String?,
         tripShortName: String?,
-        wheelchairBoarding: Int?,
+        directionId: Int?,
+        blockId: String?,
+        shapeId: String?,
+        wheelchairBoardingId: Int?,
+        bikesAllowed: Boolean?,
     ) : this(
+        tripIdInt = GIDs.getInt(tripId),
         routeIdInt = GIDs.getInt(routeId),
         serviceIdInt = GIDs.getInt(serviceId),
-        tripIdInt = GIDs.getInt(tripId),
-        directionIdE = GDirectionId.parse(directionId),
         tripHeadsign = tripHeadsign,
         tripShortName = tripShortName,
-        wheelchairAccessible = GWheelchairBoardingType.parse(wheelchairBoarding),
+        directionIdE = GDirectionId.parse(directionId),
+        blockId = blockId,
+        shapeId = shapeId,
+        wheelchairAccessible = GWheelchairBoardingType.parse(wheelchairBoardingId),
+        bikesAllowed = bikesAllowed,
     )
 
     val directionId: Int?
@@ -44,10 +54,6 @@ data class GTrip(
     @Suppress("unused")
     val directionIdOrOriginal: Int?
         get() = directionIdE.originalId()
-
-    fun setDirectionId(newDirectionId: Int?) {
-        this.directionIdE = GDirectionId.parse(newDirectionId)
-    }
 
     @Suppress("unused")
     val tripHeadsignOrDefault: String = tripHeadsign ?: StringUtils.EMPTY
@@ -102,27 +108,65 @@ data class GTrip(
                 "+(tripId:$_tripId)"
     }
 
+    fun to() = Trip(
+        tripId = _tripId,
+        routeId = _routeId,
+        serviceId = _serviceId,
+        tripHeadsign = tripHeadsign,
+        tripShortName = tripShortName,
+        directionId = directionId,
+        blockId = blockId,
+        shapeId = shapeId,
+        wheelchairAccessible = wheelchairAccessible.id,
+        bikesAllowed = bikesAllowed, // no GTFS data
+    )
+
     companion object {
         const val FILENAME = "trips.txt"
 
+        private const val TRIP_ID = "trip_id"
         private const val ROUTE_ID = "route_id"
         private const val SERVICE_ID = "service_id"
-        private const val TRIP_ID = "trip_id"
         private const val TRIP_HEADSIGN = "trip_headsign"
         private const val TRIP_SHORT_NAME = "trip_short_name"
         private const val DIRECTION_ID = "direction_id"
+        private const val BLOCK_ID = "block_id"
+        private const val SHAPE_ID = "shape_id"
         private const val WHEELCHAIR_ACCESSIBLE = "wheelchair_accessible"
+        private const val BIKES_ALLOWED = "bikes_allowed"
 
         @JvmStatic
         fun fromLine(line: Map<String, String>) = GTrip(
-            line[ROUTE_ID]?: throw MTLog.Fatal("Invalid GTrip from $line!"),
-            line[SERVICE_ID]?: throw MTLog.Fatal("Invalid GTrip from $line!"),
-            line[TRIP_ID]?: throw MTLog.Fatal("Invalid GTrip from $line!"),
-            line[DIRECTION_ID]?.takeIf { it.isNotBlank() }?.toInt(),
-            line[TRIP_HEADSIGN]?.takeIf { it.isNotBlank() },
-            line[TRIP_SHORT_NAME]?.takeIf { it.isNotBlank() },
-            line[WHEELCHAIR_ACCESSIBLE]?.takeIf { it.isNotBlank() }?.toInt(),
+            tripId = line[TRIP_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
+            routeId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
+            serviceId = line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
+            tripHeadsign = line[TRIP_HEADSIGN]?.takeIf { it.isNotBlank() },
+            tripShortName = line[TRIP_SHORT_NAME]?.takeIf { it.isNotBlank() },
+            directionId = line[DIRECTION_ID]?.takeIf { it.isNotBlank() }?.toInt(),
+            blockId = line[BLOCK_ID]?.takeIf { it.isNotBlank() },
+            shapeId = line[SHAPE_ID]?.takeIf { it.isNotBlank() },
+            wheelchairBoardingId = line[WHEELCHAIR_ACCESSIBLE]?.takeIf { it.isNotBlank() }?.toInt(),
+            bikesAllowed = line[BIKES_ALLOWED]?.takeIf { it.isNotBlank() }?.toBoolean(),
         )
+
+        @JvmStatic
+        fun from(trips: Collection<Trip>) = trips.mapNotNull { from(it) }
+
+        @JvmStatic
+        fun from(trip: Trip?) = trip?.let {
+            GTrip(
+                tripId = it.tripId,
+                routeId = it.routeId,
+                serviceId = it.serviceId,
+                tripHeadsign = it.tripHeadsign,
+                tripShortName = it.tripShortName,
+                directionId = it.directionId,
+                blockId = it.blockId,
+                shapeId = it.shapeId,
+                wheelchairBoardingId = it.wheelchairAccessible,
+                bikesAllowed = it.bikesAllowed,
+            )
+        }
 
         private const val UID_SEPARATOR = "+" // int IDs can be negative
 
@@ -146,7 +190,7 @@ data class GTrip(
         @JvmStatic
         fun getNewUID(
             routeIdInt: Int,
-            tripIdInt: Int
+            tripIdInt: Int,
         ) = "${routeIdInt}$UID_SEPARATOR${tripIdInt}"
 
         @JvmStatic
@@ -154,6 +198,26 @@ data class GTrip(
             return tripList.sortedByDescending { trip ->
                 tripStopListGetter(trip.tripIdInt)?.size ?: 0
             }
+        }
+
+        @JvmStatic
+        fun updateDirectionIdForTrips(gTrips: MutableList<GTrip>, tripIdInts: Collection<Int>, directionId: Int): List<GTrip> {
+            return updateList(
+                gTrips = gTrips,
+                condition = { tripIdInts.contains(it.tripIdInt) },
+                updateTrip = { it.copy(directionIdE = GDirectionId.parse(directionId)) }
+            )
+        }
+
+        fun updateList(gTrips: MutableList<GTrip>, condition: (GTrip) -> Boolean, updateTrip: (GTrip) -> GTrip): List<GTrip> {
+            for (i in 0 until gTrips.size) {
+                val gTrip = gTrips[i]
+                if (condition(gTrip)) {
+                    gTrips[i] = updateTrip(gTrip)
+                }
+            }
+
+            return gTrips
         }
     }
 }

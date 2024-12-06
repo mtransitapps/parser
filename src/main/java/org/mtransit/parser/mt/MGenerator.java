@@ -75,7 +75,7 @@ public class MGenerator {
 		HashSet<MTrip> mTrips = new HashSet<>(); // use set to avoid duplicates
 		HashSet<MTripStop> mTripStops = new HashSet<>(); // use set to avoid duplicates
 		HashMap<Integer, MStop> mStops = new HashMap<>();
-		TreeMap<Long, ArrayList<MFrequency>> mRouteFrequencies = new TreeMap<>();
+		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<>();
 		HashSet<MServiceDate> mServiceDates = new HashSet<>(); // use set to avoid duplicates
 		long firstTimestamp = -1L;
 		long lastTimestamp = -1L;
@@ -133,7 +133,7 @@ public class MGenerator {
 					if (mRouteSpec.hasRouteFrequencies()) {
 						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies...)", mRouteSpec
 								.getFirstRoute().getId());
-						for (Entry<Long, ArrayList<MFrequency>> routeFrequenciesEntry : mRouteSpec.getRouteFrequencies().entrySet()) {
+						for (Entry<Long, List<MFrequency>> routeFrequenciesEntry : mRouteSpec.getRouteFrequencies().entrySet()) {
 							if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().isEmpty()) {
 								continue;
 							}
@@ -692,7 +692,7 @@ public class MGenerator {
 				FileUtils.delete(f);
 			}
 		}
-		ArrayList<MFrequency> mRouteFrequencies;
+		List<MFrequency> mRouteFrequencies;
 		if (!deleteAll) {
 			BufferedWriter ow = null;
 			int fw = 0;

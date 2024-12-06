@@ -97,7 +97,7 @@ data class GAgency(
         )
 
         @JvmStatic
-        fun from(agencies: Collection<Agency>) = agencies.map { from(it) }
+        fun from(agencies: Collection<Agency>) = agencies.mapNotNull { from(it) }
 
         @JvmStatic
         fun from(agency: Agency?) = agency?.let {

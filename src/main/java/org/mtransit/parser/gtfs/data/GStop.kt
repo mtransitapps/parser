@@ -113,7 +113,7 @@ data class GStop(
         )
 
         @JvmStatic
-        fun from(stops: Collection<Stop>) = stops.map { from(it) }
+        fun from(stops: Collection<Stop>) = stops.mapNotNull { from(it) }
 
         @JvmStatic
         fun from(stop: Stop?) = stop?.let {

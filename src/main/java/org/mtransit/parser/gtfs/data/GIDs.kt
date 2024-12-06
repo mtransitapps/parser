@@ -25,6 +25,11 @@ object GIDs {
     }
 
     @JvmStatic
+    fun getStrings(ints: Iterable<Int>): List<String> {
+        return ints.map { getString(it) }
+    }
+
+    @JvmStatic
     fun getInt(string: String): Int {
         if (USE_HASHCODE) {
             return add(string)

@@ -115,11 +115,11 @@ data class GCalendarDate(
         fun to(calendarDates: Collection<GCalendarDate>) = calendarDates.map { it.to() }
 
         @JvmStatic
-        fun from(calendars: Collection<CalendarDate>) = calendars.map { from(it) }
+        fun from(calendars: Collection<CalendarDate>) = calendars.mapNotNull { from(it) }
 
         @JvmStatic
         fun from(calendar: CalendarDate?) = calendar?.let {
-            CalendarDate(
+            GCalendarDate(
                 serviceId = it.serviceId,
                 date = it.date,
                 exceptionTypeInt = it.exceptionType.id,

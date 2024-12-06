@@ -220,7 +220,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Collections.sort(mServiceDatesList);
 		ArrayList<MFrequency> mFrequenciesList = new ArrayList<>(mFrequencies.values());
 		Collections.sort(mFrequenciesList);
-		TreeMap<Long, ArrayList<MFrequency>> mRouteFrequencies = new TreeMap<>();
+		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<>();
 		if (!mFrequenciesList.isEmpty()) {
 			mRouteFrequencies.put(this.routeId, mFrequenciesList);
 		}
@@ -353,7 +353,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			final MAgency agency = gRoute.hasAgencyId() ? mAgencies.get(gRoute.getAgencyIdInt())
 					// TODO ? : mAgencies.size() == 1 ? mAgencies.values().iterator().next()
 					: mAgencies.values().iterator().next();
-			//noinspection deprecation
+			//noinspection DiscouragedApi
 			final MRoute mRoute = new MRoute(
 					this.routeId,
 					this.agencyTools.getRouteShortName(gRoute),
@@ -512,7 +512,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				routeGTFS.getRouteTrips(gRoute.getRouteIdInt()),
 				this.routeTripIdTripStops::get
 		);
-		//noinspection deprecation
+		///noinspection DiscouragedApi
 		final String gRouteId = gRoute.getRouteId();
 		MTLog.log("%s: parsing %d trips for route ID '%s'... ", this.routeId, gRouteTrips.size(), gRouteId);
 		int g = 0;
@@ -685,7 +685,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			mStopId = this.agencyTools.getStopId(gStop);
 			this.gStopsCache.put(mStopId, gStop);
 			if (mStopId < 0) {
-				//noinspection deprecation
+				//noinspection DiscouragedApi
 				throw new MTLog.Fatal("%s: Can't find GTFS stop ID (%s) '%s' from trip ID '%s' (%s)", this.routeId, mStopId, gTripStop.getStopIdInt(),
 						gTripStop.getTripId(), gStop.toStringPlus(true));
 			}
@@ -741,7 +741,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				serviceIdInts.add(tripServiceIdInt);
 			}
 			if (!mStops.containsKey(mStopId)) {
-				//noinspection deprecation
+				//noinspection DiscouragedApi
 				mStops.put(
 						mStopId,
 						new MStop(mStopId,
