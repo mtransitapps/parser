@@ -148,9 +148,11 @@ object MDataChangedManager {
 
         // 1 - look for removed dates with known service IDs
         var dataChanged = false
+
         @Suppress("DEPRECATION")
         val newGCalendars = if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) mutableListOf() else gtfs.allCalendars.toMutableList()
         val newGCalendarDates = gtfs.allCalendarDates.toMutableList()
+
         @Suppress("DEPRECATION")
         val gCalendarsDates = if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) emptyList() else gtfs.allCalendars.flatMap { it.dates }.map { it.date }.distinct()
         val gCalendarDatesDates = gtfs.allCalendarDates.map { it.date }
@@ -228,12 +230,12 @@ object MDataChangedManager {
         val addedGCalendarsDates = newGCalendars.flatMap { it.dates }.filter { it.date !in lastServiceCalendarsDates }
             .sortedByDescending { it.date } // oldest first to remove
         MTLog.logDebug("> Added calendars service: ${addedGCalendarsDates.size}")
-        if (Constants.DEBUG) {
-            addedGCalendarsDates.forEach {
-                //noinspection DiscouragedApi
-                MTLog.logDebug("> - ${it.date}: '${it.serviceId}'.")
-            }
-        }
+        // if (Constants.DEBUG) {
+        // addedGCalendarsDates.forEach {
+        // //noinspection DiscouragedApi
+        // MTLog.logDebug("> - ${it.date}: '${it.serviceId}'.")
+        // }
+        // }
         addedGCalendarsDates.forEach { addedGCalendarDate ->
             if (DefaultAgencyTools.diffLowerThan(dateFormat, c, todayStringInt, addedGCalendarDate.date, MIN_NOT_IGNORED_IN_DAYS)) {
                 MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")
@@ -269,12 +271,12 @@ object MDataChangedManager {
         val lastServiceCalendarDatesDates = lastCalendarDatesServiceDates.map { it.calendarDate }
         val addedGCalendarDatesDates = newGCalendarDates.filter { it.date !in lastServiceCalendarDatesDates }
         MTLog.logDebug("> Added calendars dates service: ${addedGCalendarDatesDates.size}")
-        if (Constants.DEBUG) {
-            addedGCalendarDatesDates.forEach {
-                //noinspection DiscouragedApi
-                MTLog.logDebug("> - ${it.date}: '${it.serviceId}'.")
-            }
-        }
+        // if (Constants.DEBUG) {
+        // addedGCalendarDatesDates.forEach {
+        // //noinspection DiscouragedApi
+        // MTLog.logDebug("> - ${it.date}: '${it.serviceId}'.")
+        // }
+        // }
         addedGCalendarDatesDates.forEach { addedGCalendarDate ->
             if (DefaultAgencyTools.diffLowerThan(dateFormat, c, todayStringInt, addedGCalendarDate.date, MIN_NOT_IGNORED_IN_DAYS)) {
                 MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")

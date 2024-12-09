@@ -259,16 +259,22 @@ object GTFSDataBase {
 
     @JvmStatic
     fun selectFrequencyTripIds(): List<TripId> {
-        // connection.createStatement().use { statement ->
-        //     return FrequencySQL.select(statement, tripId)
-        // }
-        return selectFrequencies().map { it.tripId }.distinct()
+        connection.createStatement().use { statement ->
+            return FrequencySQL.selectFrequencyTripIds(statement)
+        }
     }
 
     @JvmStatic
     fun deleteFrequency(tripId: TripId) {
         connection.createStatement().use { statement ->
             FrequencySQL.delete(statement, tripId)
+        }
+    }
+
+    @JvmStatic
+    fun countFrequencies(): Int {
+        connection.createStatement().use { statement ->
+            return FrequencySQL.count(statement)
         }
     }
 }

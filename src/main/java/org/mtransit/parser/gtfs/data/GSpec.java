@@ -53,7 +53,6 @@ public class GSpec {
 	private final Map<Integer, List<GRoute>> agencyIdIntOtherRoutes = new HashMap<>(); // not exported -> not in DB
 	@NotNull
 	private final HashMap<Integer, String> tripIdIntsUIDs = new HashMap<>();
-	private int frequenciesCount = 0;
 	@NotNull
 	private final HashSet<String> tripStopsUIDs = new HashSet<>();
 
@@ -409,7 +408,6 @@ public class GSpec {
 	public void addFrequency(@NotNull GFrequency gFrequency) {
 		GTFSDataBase.insertFrequency(gFrequency.to());
 		CollectionUtils.addMapListValue(this.tripIdIntFrequenciesCache, gFrequency.getTripIdInt(), gFrequency);
-		this.frequenciesCount++;
 	}
 
 	@NotNull
@@ -429,6 +427,13 @@ public class GSpec {
 			return GIDs.getInts(GTFSDataBase.selectFrequencyTripIds());
 		}
 		return this.tripIdIntFrequenciesCache.keySet();
+	}
+
+	private int readFrequenciesCount() {
+		if (USE_DB_ONLY) {
+			return GTFSDataBase.countFrequencies();
+		}
+		return this.tripIdIntFrequenciesCache.values().size();
 	}
 
 	@SuppressWarnings("unused")
@@ -463,7 +468,7 @@ public class GSpec {
 				TRIPS + readTripsCount() + Constants.COLUMN_SEPARATOR + //
 				STOPS + readStopsCount() + Constants.COLUMN_SEPARATOR + //
 				STOP_TIMES + readStopTimesCount() + Constants.COLUMN_SEPARATOR + //
-				FREQUENCIES + this.frequenciesCount + Constants.COLUMN_SEPARATOR + //
+				FREQUENCIES + readFrequenciesCount() + Constants.COLUMN_SEPARATOR + //
 				TRIP_STOPS + readTripStopsCount() + Constants.COLUMN_SEPARATOR + //
 				']';
 	}
@@ -480,7 +485,7 @@ public class GSpec {
 			MTLog.log("- Trips: %d", readTripsCount());
 			MTLog.log("- Stops: %d", readStopsCount());
 			MTLog.log("- StopTimes: %d", readStopTimesCount());
-			MTLog.log("- Frequencies: %d", this.frequenciesCount);
+			MTLog.log("- Frequencies: %d", readFrequenciesCount());
 			MTLog.log("- IDs: %d", GIDs.count());
 		}
 	}
