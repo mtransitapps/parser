@@ -39,16 +39,16 @@ public class GSpec {
 	// private static final boolean USE_DB_ONLY = true; // WIP
 
 	@NotNull
-	private final HashMap<Integer, GAgency> agenciesCache = new HashMap<>();
+	private final Map<Integer, GAgency> agenciesCache = new HashMap<>();
 	@NotNull
-	private final ArrayList<GCalendarDate> calendarDatesCache = new ArrayList<>(); // includes flatten calendars
+	private final List<GCalendarDate> calendarDatesCache = new ArrayList<>(); // includes flatten calendars
 	@NotNull
-	private final HashSet<Integer> allServiceIdIntsCache = new HashSet<>(); // set = distinct ID
+	private final Set<Integer> allServiceIdIntsCache = new HashSet<>(); // set = distinct ID
 
 	@NotNull
-	private final HashMap<Integer, GStop> stopsCache = new HashMap<>();
+	private final Map<Integer, GStop> stopsCache = new HashMap<>();
 	@NotNull
-	private final HashMap<Integer, GRoute> routesCache = new HashMap<>();
+	private final Map<Integer, GRoute> routesCache = new HashMap<>();
 	@NotNull
 	private final Map<Integer, List<GRoute>> agencyIdIntOtherRoutes = new HashMap<>(); // not exported -> not in DB
 	@NotNull
@@ -60,7 +60,7 @@ public class GSpec {
 	@NotNull
 	private final Map<Integer, List<GTrip>> routeIdIntTripsCache = new HashMap<>();
 	@NotNull
-	private final HashMap<Integer, ArrayList<GFrequency>> tripIdIntFrequencies = new HashMap<>();
+	private final Map<Integer, List<GFrequency>> tripIdIntFrequenciesCache = new HashMap<>();
 
 	@NotNull
 	private final HashMap<Long, List<Integer>> mRouteIdToGRouteIdInts = new HashMap<>();
@@ -407,23 +407,28 @@ public class GSpec {
 	}
 
 	public void addFrequency(@NotNull GFrequency gFrequency) {
-		if (!this.tripIdIntFrequencies.containsKey(gFrequency.getTripIdInt())) {
-			this.tripIdIntFrequencies.put(gFrequency.getTripIdInt(), new ArrayList<>());
-		}
-		this.tripIdIntFrequencies.get(gFrequency.getTripIdInt()).add(gFrequency);
+		GTFSDataBase.insertFrequency(gFrequency.to());
+		CollectionUtils.addMapListValue(this.tripIdIntFrequenciesCache, gFrequency.getTripIdInt(), gFrequency);
 		this.frequenciesCount++;
 	}
 
 	@NotNull
-	public List<GFrequency> getFrequencies(@Nullable Integer optTripId) {
-		if (optTripId != null) {
-			if (this.tripIdIntFrequencies.containsKey(optTripId)) {
-				return this.tripIdIntFrequencies.get(optTripId);
-			} else {
-				return Collections.emptyList();
+	public List<GFrequency> getFrequencies(@Nullable Integer optTripIdInt) {
+		if (optTripIdInt != null) {
+			if (USE_DB_ONLY) {
+				return GFrequency.from(GTFSDataBase.selectFrequencies(GIDs.getString(optTripIdInt)));
 			}
+			return this.tripIdIntFrequenciesCache.getOrDefault(optTripIdInt, Collections.emptyList());
 		}
 		throw new MTLog.Fatal("getFrequencies() > trying to use ALL frequencies!");
+	}
+
+	@NotNull
+	private Collection<Integer> getFrequencyTripIds() {
+		if (USE_DB_ONLY) {
+			return GIDs.getInts(GTFSDataBase.selectFrequencyTripIds());
+		}
+		return this.tripIdIntFrequenciesCache.keySet();
 	}
 
 	@SuppressWarnings("unused")
@@ -565,7 +570,7 @@ public class GSpec {
 		int t = 0;
 		int ts = 0;
 		int st = 0;
-		for (Integer tripIdInt : this.tripIdIntFrequencies.keySet()) {
+		for (Integer tripIdInt : getFrequencyTripIds()) {
 			if (!this.tripIdIntsUIDs.containsKey(tripIdInt)) {
 				continue; // excluded service ID
 			}
@@ -599,7 +604,7 @@ public class GSpec {
 			long frequencyStartInMs;
 			long frequencyEndInMs;
 			long frequencyHeadwayInMs;
-			ArrayList<GFrequency> tripFrequencies = this.tripIdIntFrequencies.get(tripIdInt);
+			List<GFrequency> tripFrequencies = getFrequencies(tripIdInt);
 			for (GFrequency gFrequency : tripFrequencies) {
 				try {
 					frequencyStartInMs = gFrequency.getStartTimeMs();
@@ -734,9 +739,10 @@ public class GSpec {
 						if (DBUtils.deleteStopTimes(gTrip.getTripIdInt()) > 0) {
 							r++;
 						}
-						if (this.tripIdIntFrequencies.remove(gTrip.getTripIdInt()) != null) {
+						if (this.tripIdIntFrequenciesCache.remove(gTrip.getTripIdInt()) != null) {
 							r++;
 						}
+						GTFSDataBase.deleteFrequency(GIDs.getString(gTrip.getTripIdInt()));
 					}
 					this.routeIdIntTripsCache.remove(tripRouteIdInt);
 					GTFSDataBase.deleteTrips(GIDs.getString(tripRouteIdInt));

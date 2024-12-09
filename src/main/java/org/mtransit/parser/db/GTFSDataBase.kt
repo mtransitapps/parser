@@ -4,6 +4,7 @@ import org.mtransit.commons.gtfs.data.Agency
 import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.commons.gtfs.data.CalendarDate
 import org.mtransit.commons.gtfs.data.DirectionId
+import org.mtransit.commons.gtfs.data.Frequency
 import org.mtransit.commons.gtfs.data.Route
 import org.mtransit.commons.gtfs.data.RouteId
 import org.mtransit.commons.gtfs.data.ServiceId
@@ -14,6 +15,7 @@ import org.mtransit.commons.gtfs.data.TripId
 import org.mtransit.commons.gtfs.sql.ALL_SQL_TABLES
 import org.mtransit.commons.gtfs.sql.AgencySQL
 import org.mtransit.commons.gtfs.sql.CalendarDateSQL
+import org.mtransit.commons.gtfs.sql.FrequencySQL
 import org.mtransit.commons.gtfs.sql.RouteSQL
 import org.mtransit.commons.gtfs.sql.StopSQL
 import org.mtransit.commons.gtfs.sql.TripSQL
@@ -237,6 +239,36 @@ object GTFSDataBase {
     fun countTrips(): Int {
         connection.createStatement().use { statement ->
             return TripSQL.count(statement)
+        }
+    }
+
+    @JvmStatic
+    fun insertFrequency(frequency: Frequency) {
+        connection.createStatement().use { statement ->
+            FrequencySQL.insert(frequency, statement)
+        }
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun selectFrequencies(tripId: TripId? = null): List<Frequency> {
+        connection.createStatement().use { statement ->
+            return FrequencySQL.select(statement, tripId)
+        }
+    }
+
+    @JvmStatic
+    fun selectFrequencyTripIds(): List<TripId> {
+        // connection.createStatement().use { statement ->
+        //     return FrequencySQL.select(statement, tripId)
+        // }
+        return selectFrequencies().map { it.tripId }.distinct()
+    }
+
+    @JvmStatic
+    fun deleteFrequency(tripId: TripId) {
+        connection.createStatement().use { statement ->
+            FrequencySQL.delete(statement, tripId)
         }
     }
 }
