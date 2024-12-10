@@ -362,7 +362,7 @@ public class GSpec {
 		if (USE_DB_ONLY) {
 			return GTrip.from(GTFSDataBase.selectTrips(null, Collections.singleton(GIDs.getString(routeIdInt))));
 		}
-		return this.routeIdIntTripsCache.get(routeIdInt);
+		return this.routeIdIntTripsCache.getOrDefault(routeIdInt, Collections.emptyList());
 	}
 
 	public void add(long mRouteId, @NotNull GenerateMObjectsTask routeGenerator) {
@@ -877,7 +877,7 @@ public class GSpec {
 		for (GRoute gRoute : getAllRoutes()) {
 			mRouteId = agencyTools.getRouteId(gRoute);
 			routeTrips = getRouteTrips(gRoute.getRouteIdInt());
-			if (routeTrips == null || routeTrips.isEmpty()) {
+			if (routeTrips.isEmpty()) {
 				MTLog.log("%s: Skip GTFS route '%s' because no trips", mRouteId, gRoute);
 				continue;
 			} else {
