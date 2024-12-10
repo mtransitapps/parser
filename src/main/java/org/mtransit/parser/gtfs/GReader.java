@@ -11,6 +11,7 @@ import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.db.DBUtils;
+import org.mtransit.parser.db.GTFSDataBase;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
@@ -55,6 +56,7 @@ public class GReader {
 		MTLog.log("Reading GTFS file '%s'...", gtfsDir);
 		long start = System.currentTimeMillis();
 		final GSpec gSpec = new GSpec();
+		GTFSDataBase.reset();
 		File gtfsDirF = new File(gtfsDir);
 		if (!gtfsDirF.exists()) {
 			throw new MTLog.Fatal("'%s' GTFS directory does not exist!", gtfsDirF);
@@ -81,6 +83,7 @@ public class GReader {
 			// ROUTES
 			if (!calendarsOnly) {
 				final GAgency singleAgency = gSpec.getSingleAgency();
+				//noinspection DiscouragedApi
 				final String defaultAgencyId = singleAgency == null ? null : singleAgency.getAgencyId();
 				readFile(gtfsDir, GRoute.FILENAME, true, line ->
 						processRoute(agencyTools, gSpec, line, defaultAgencyId)
@@ -88,9 +91,16 @@ public class GReader {
 			}
 			// TRIPS
 			if (!calendarsOnly) {
+				GTFSDataBase.setAutoCommit(false);
+				final PreparedStatement insertTripsPrepared = USE_PREPARED_STATEMENT ? GTFSDataBase.prepareInsertTrip(false) : null;
 				readFile(gtfsDir, GTrip.FILENAME, true, line ->
-						processTrip(agencyTools, gSpec, line)
+						processTrip(agencyTools, gSpec, line, insertTripsPrepared)
 				);
+				if (USE_PREPARED_STATEMENT) {
+					GTFSDataBase.executePreparedStatement(insertTripsPrepared);
+				}
+				GTFSDataBase.commit();
+				GTFSDataBase.setAutoCommit(true); // true => commit()
 			}
 			// FREQUENCIES
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
@@ -354,7 +364,8 @@ public class GReader {
 		}
 	}
 
-	private static void processTrip(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
+	private static void processTrip(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line,
+									@Nullable PreparedStatement insertStopTimePrepared) {
 		try {
 			final GTrip gTrip = GTrip.fromLine(line);
 			if (agencyTools.excludeTrip(gTrip)) {
@@ -372,7 +383,7 @@ public class GReader {
 					&& agencyTools.getDirectionTypes().get(0) == org.mtransit.parser.mt.data.MTrip.HEADSIGN_TYPE_DIRECTION) {
 				gTrip.setTripHeadsign(agencyTools.provideMissingTripHeadSign(gTrip));
 			}
-			gSpec.addTrip(gTrip);
+			gSpec.addTrip(gTrip, insertStopTimePrepared);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while processing: %s", line);
 		}

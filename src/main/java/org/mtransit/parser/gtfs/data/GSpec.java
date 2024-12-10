@@ -294,7 +294,11 @@ public class GSpec {
 	}
 
 	public void addTrip(@NotNull GTrip gTrip) {
-		GTFSDataBase.insertTrip(gTrip.to());
+		addTrip(gTrip, null);
+	}
+
+	public void addTrip(@NotNull GTrip gTrip, @Nullable PreparedStatement insertStopTimePrepared) {
+		GTFSDataBase.insertTrip(gTrip.to(), insertStopTimePrepared);
 		CollectionUtils.addMapListValue(this.routeIdIntTripsCache, gTrip.getRouteIdInt(), gTrip);
 		this.tripIdIntRouteIdInt.put(gTrip.getTripIdInt(), gTrip.getRouteIdInt());
 		this.tripIdIntsUIDs.put(gTrip.getTripIdInt(), gTrip.getUID());

@@ -26,6 +26,7 @@ import org.mtransit.parser.MTLog
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.PreparedStatement
 import org.mtransit.commons.sql.SQLUtils as SQLUtilsCommons
 
 @Suppress("unused")
@@ -64,6 +65,29 @@ object GTFSDataBase {
             // create tables
             ALL_SQL_TABLES.forEach { it.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) } }
         }
+    }
+
+    @JvmStatic
+    fun reset() {
+        println("RESET GTFS DB")
+        connection.createStatement().use { statement ->
+            // drop if exist
+            ALL_SQL_TABLES.forEach { it.getSQLDropIfExistsQueries().forEach { SQLUtils.execute(statement, it) } }
+            ALL_SQL_TABLES.forEach { it.clearCache() }
+            // create tables
+            ALL_SQL_TABLES.forEach { it.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) } }
+        }
+    }
+
+    @JvmStatic
+    fun setAutoCommit(autoCommit: Boolean) = SQLUtils.setAutoCommit(this.connection, autoCommit)
+
+    @JvmStatic
+    fun commit() = SQLUtils.commit(this.connection)
+
+    @JvmStatic
+    fun executePreparedStatement(preparedStatement: PreparedStatement?): Boolean? {
+        return preparedStatement?.executeBatch()?.isNotEmpty()
     }
 
     @JvmStatic
@@ -195,11 +219,19 @@ object GTFSDataBase {
         }
     }
 
+    @JvmOverloads
     @JvmStatic
-    fun insertTrip(trip: Trip) {
+    fun insertTrip(trip: Trip, preparedStatement: PreparedStatement? = null) {
         connection.createStatement().use { statement ->
-            TripSQL.insert(trip, statement)
+            TripSQL.insert(trip, statement, preparedStatement)
         }
+    }
+
+    @JvmStatic
+    fun prepareInsertTrip(allowUpdate: Boolean = false): PreparedStatement {
+        return connection.prepareStatement(
+            TripSQL.getInsertPreparedStatement(allowUpdate)
+        )
     }
 
     @JvmStatic
