@@ -877,7 +877,7 @@ public class GSpec {
 		for (GRoute gRoute : getAllRoutes()) {
 			mRouteId = agencyTools.getRouteId(gRoute);
 			routeTrips = getRouteTrips(gRoute.getRouteIdInt());
-			if (routeTrips.isEmpty()) {
+			if (routeTrips == null || routeTrips.isEmpty()) {
 				MTLog.log("%s: Skip GTFS route '%s' because no trips", mRouteId, gRoute);
 				continue;
 			} else {
