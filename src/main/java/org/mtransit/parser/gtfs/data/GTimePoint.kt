@@ -11,7 +11,7 @@ enum class GTimePoint(val id: Int) {
 
     companion object {
 
-        fun parse(id: Int): GTimePoint {
+        fun parse(id: Int?): GTimePoint {
             return when {
                 APPROXIMATE.id == id -> APPROXIMATE
                 EXACT.id == id -> EXACT

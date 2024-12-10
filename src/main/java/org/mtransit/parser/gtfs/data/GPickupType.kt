@@ -11,7 +11,7 @@ enum class GPickupType(val id: Int) {
     MUST_COORDINATE_WITH_DRIVER(3);
 
     companion object {
-        fun parse(id: Int): GPickupType {
+        fun parse(id: Int?): GPickupType {
             if (REGULAR.id == id) {
                 return REGULAR
             }

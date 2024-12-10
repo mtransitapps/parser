@@ -2,6 +2,7 @@ package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
 import org.mtransit.commons.StringUtils
+import org.mtransit.commons.gtfs.data.StopTime
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 import java.util.Date
@@ -178,6 +179,18 @@ data class GStopTime(
         }
     }
 
+    fun to() = StopTime(
+        tripId = _tripId,
+        stopId = _stopId,
+        stopSequence = stopSequence,
+        arrivalTime = GTime.toString(_arrivalTime) ?: throw MTLog.Fatal("Unexpected start time '$_arrivalTime'!"),
+        departureTime = GTime.toString(_departureTime) ?: throw MTLog.Fatal("Unexpected end time '$_departureTime'!"),
+        stopHeadsign = stopHeadsign,
+        pickupType = pickupType.id,
+        dropOffType = dropOffType.id,
+        timePoint = timePoint.id,
+    )
+
     companion object {
         const val FILENAME = "stop_times.txt"
 
@@ -203,6 +216,24 @@ data class GStopTime(
             GDropOffType.parse(line[DROP_OFF_TYPE]),
             GTimePoint.parse(line[TIME_POINT]),
         )
+
+        @JvmStatic
+        fun from(stopTimes: Collection<StopTime>) = stopTimes.mapNotNull { from(it) }
+
+        @JvmStatic
+        fun from(stopTime: StopTime?) = stopTime?.let {
+            GStopTime(
+                it.tripId,
+                it.arrivalTime,
+                it.departureTime,
+                it.stopId,
+                it.stopSequence,
+                it.stopHeadsign,
+                GPickupType.parse(it.pickupType),
+                GDropOffType.parse(it.dropOffType),
+                GTimePoint.parse(it.timePoint),
+            )
+        }
 
         private const val UID_SEPARATOR = "0" // int IDs can be negative
 

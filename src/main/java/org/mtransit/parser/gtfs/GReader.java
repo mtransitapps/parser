@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Utils;
-import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.db.GTFSDataBase;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
@@ -116,8 +115,8 @@ public class GReader {
 			}
 			// STOP TIMES
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
-				DBUtils.setAutoCommit(false);
-				final PreparedStatement insertStopTimePrepared = USE_PREPARED_STATEMENT ? DBUtils.prepareInsertStopTime(false) : null;
+				GTFSDataBase.setAutoCommit(false);
+				final PreparedStatement insertStopTimePrepared = USE_PREPARED_STATEMENT ? GTFSDataBase.prepareInsertStopTime(false) : null;
 				readFile(gtfsDir, GStopTime.FILENAME, false,
 						line -> processStopTime(agencyTools, gSpec, line, insertStopTimePrepared),
 						columnNames -> {
@@ -136,10 +135,10 @@ public class GReader {
 					agencyTools.setForceStopTimeFirstNoDropOffType(true); // all provided drop-off type are REGULAR == not provided
 				}
 				if (USE_PREPARED_STATEMENT) {
-					DBUtils.executeInsertStopTime(insertStopTimePrepared);
+					GTFSDataBase.executePreparedStatement(insertStopTimePrepared);
 				}
-				DBUtils.commit();
-				DBUtils.setAutoCommit(true); // true => commit()
+				GTFSDataBase.commit();
+				GTFSDataBase.setAutoCommit(true); // true => commit()
 			}
 			// TODO OTHER FILES TYPE
 		} catch (Exception ioe) {

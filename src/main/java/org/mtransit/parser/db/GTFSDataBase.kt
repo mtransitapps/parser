@@ -10,6 +10,7 @@ import org.mtransit.commons.gtfs.data.RouteId
 import org.mtransit.commons.gtfs.data.ServiceId
 import org.mtransit.commons.gtfs.data.Stop
 import org.mtransit.commons.gtfs.data.StopId
+import org.mtransit.commons.gtfs.data.StopTime
 import org.mtransit.commons.gtfs.data.Trip
 import org.mtransit.commons.gtfs.data.TripId
 import org.mtransit.commons.gtfs.sql.ALL_SQL_TABLES
@@ -18,6 +19,7 @@ import org.mtransit.commons.gtfs.sql.CalendarDateSQL
 import org.mtransit.commons.gtfs.sql.FrequencySQL
 import org.mtransit.commons.gtfs.sql.RouteSQL
 import org.mtransit.commons.gtfs.sql.StopSQL
+import org.mtransit.commons.gtfs.sql.StopTimeSQL
 import org.mtransit.commons.gtfs.sql.TripSQL
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
@@ -66,6 +68,11 @@ object GTFSDataBase {
             ALL_SQL_TABLES.forEach { it.getSQLCreateTablesQueries().forEach { SQLUtils.execute(statement, it) } }
         }
     }
+
+    @JvmStatic
+    fun getDBSize() = if (IS_USING_FILE_INSTEAD_OF_MEMORY) {
+        FileUtils.size(File(FILE_PATH))
+    } else null
 
     @JvmStatic
     fun reset() {
@@ -312,6 +319,44 @@ object GTFSDataBase {
     fun countFrequencies(): Int {
         connection.createStatement().use { statement ->
             return FrequencySQL.count(statement)
+        }
+    }
+
+    @JvmStatic
+    fun prepareInsertStopTime(allowUpdate: Boolean = false): PreparedStatement {
+        return connection.prepareStatement(
+            StopTimeSQL.getMainTableInsertPreparedStatement(allowUpdate)
+        )
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun insertStopTime(stopTime: StopTime, preparedStatement: PreparedStatement? = null, allowUpdate: Boolean = false) {
+        connection.createStatement().use { statement ->
+            StopTimeSQL.insertIntoMainTable(stopTime, statement, preparedStatement, allowUpdate)
+        }
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun selectStopTimes(tripIds: Collection<TripId>? = null, limitMaxNbRow: Int? = null, limitOffset: Int? = null): List<StopTime> {
+        connection.createStatement().use { statement ->
+            return StopTimeSQL.select(statement, tripIds, limitMaxNbRow, limitOffset)
+        }
+
+    }
+
+    @JvmStatic
+    fun deleteStopTimes(tripId: TripId): Int {
+        connection.createStatement().use { statement ->
+            return StopTimeSQL.delete(statement, tripId)
+        }
+    }
+
+    @JvmStatic
+    fun countStopTimes(): Int {
+        connection.createStatement().use { statement ->
+            return StopTimeSQL.count(statement)
         }
     }
 }

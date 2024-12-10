@@ -12,7 +12,7 @@ enum class GDropOffType(val id: Int) {
 
     companion object {
 
-        fun parse(id: Int): GDropOffType {
+        fun parse(id: Int?): GDropOffType {
             if (REGULAR.id == id) {
                 return REGULAR
             }

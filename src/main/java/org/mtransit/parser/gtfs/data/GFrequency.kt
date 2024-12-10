@@ -109,7 +109,7 @@ data class GFrequency(
             line[EXACT_TIMES]?.toIntOrNull(),
         )
 
-         @JvmStatic
+        @JvmStatic
         fun from(frequencies: Collection<Frequency>) = frequencies.mapNotNull { from(it) }
 
         @JvmStatic

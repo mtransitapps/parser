@@ -9,12 +9,14 @@ import org.mtransit.parser.Constants;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.db.DBUtils;
+import org.mtransit.parser.db.GTFSDataBase;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GFieldTypes;
 import org.mtransit.parser.gtfs.data.GFrequency;
+import org.mtransit.parser.gtfs.data.GIDs;
 import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
@@ -103,7 +105,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				routeTripsIntIds.add(gTrip.getTripIdInt());
 			}
 		}
-		for (GStopTime gStopTime : DBUtils.selectStopTimes(null, routeTripsIntIds, null, null)) {
+		for (GStopTime gStopTime : GStopTime.from(GTFSDataBase.selectStopTimes(GIDs.getStrings(routeTripsIntIds), null, null))) {
 			List<GStopTime> tripIdStopTimes = routeTripIdStopTimes.get(gStopTime.getTripIdInt());
 			if (tripIdStopTimes == null) {
 				tripIdStopTimes = new ArrayList<>();

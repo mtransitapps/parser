@@ -124,6 +124,10 @@ object DBUtils {
     @JvmStatic
     fun commit() = SQLUtils.commit(this.connection)
 
+    // region Stop Time
+
+    @Suppress("unused")
+    @Deprecated("Use GTFSDataBase instead.")
     @JvmStatic
     fun prepareInsertStopTime(allowUpdate: Boolean = false): PreparedStatement {
         return connection.prepareStatement(
@@ -142,6 +146,8 @@ object DBUtils {
         )
     }
 
+    @Suppress("unused")
+    @Deprecated("Use GTFSDataBase instead.")
     @JvmStatic
     fun insertStopTime(gStopTime: GStopTime, preparedStatement: PreparedStatement) {
         try {
@@ -169,12 +175,16 @@ object DBUtils {
         }
     }
 
+    @Suppress("unused")
+    @Deprecated("Use GTFSDataBase instead.")
     @JvmStatic
     fun executeInsertStopTime(preparedStatement: PreparedStatement): Boolean {
         val rs = preparedStatement.executeBatch()
         return rs.isNotEmpty()
     }
 
+    @Suppress("unused")
+    @Deprecated("Use GTFSDataBase instead.")
     @JvmStatic
     @JvmOverloads
     fun insertStopTime(gStopTime: GStopTime, allowUpdate: Boolean = false): Boolean {
@@ -200,48 +210,8 @@ object DBUtils {
         }
     }
 
-    @JvmStatic
-    fun insertTripStop(gTripStop: GTripStop): Boolean {
-        connection.createStatement().use { statement ->
-            val rs = SQLUtils.executeUpdate(
-                statement,
-                SQLUtilsCommons.INSERT_INTO + TRIP_STOPS_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
-                        "${gTripStop.routeIdInt}," +
-                        "${gTripStop.tripIdInt}," +
-                        "${gTripStop.stopIdInt}," +
-                        "${gTripStop.stopSequence}" +
-                        SQLUtilsCommons.P2
-            )
-            insertRowCount++
-            insertCount++
-            return rs > 0
-        }
-    }
-
-    @JvmStatic
-    fun insertSchedule(mSchedule: MSchedule): Boolean {
-        connection.createStatement().use { statement ->
-            val rs = SQLUtils.executeUpdate(
-                statement,
-                SQLUtilsCommons.INSERT_INTO + SCHEDULES_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
-                        "${mSchedule.routeId}," +
-                        "${mSchedule.serviceIdInt}," +
-                        "${mSchedule.tripId}," +
-                        "${mSchedule.stopId}," +
-                        "${mSchedule.arrival}," +
-                        "${mSchedule.departure}," +
-                        "${mSchedule.pathIdInt}," +
-                        "${mSchedule.accessible}," +
-                        "${mSchedule.headsignType}," +
-                        "${mSchedule.headsignValue?.quotesEscape()}" +
-                        SQLUtilsCommons.P2
-            )
-            insertRowCount++
-            insertCount++
-            return rs > 0
-        }
-    }
-
+    @Suppress("unused")
+    @Deprecated("Use GTFSDataBase instead.")
     @JvmStatic
     fun selectStopTimes(
         tripId: Int? = null,
@@ -295,6 +265,107 @@ object DBUtils {
             }
             selectCount++
             return result
+        }
+    }
+
+    @Suppress("unused")
+    @Deprecated("Use GTFSDataBase instead.")
+    @JvmStatic
+    fun countStopTimes(): Int {
+        connection.createStatement().use { statement ->
+            val rs = SQLUtils.executeQuery(
+                statement,
+                "SELECT COUNT(*) AS $SQL_RESULT_ALIAS FROM $STOP_TIMES_TABLE_NAME"
+            )
+            selectCount++
+            if (rs.next()) {
+                selectRowCount++
+                return rs.getInt(SQL_RESULT_ALIAS)
+            }
+        }
+        throw MTLog.Fatal("Error while counting stop times!")
+    }
+
+    @Suppress("unused")
+    @Deprecated("Use GTFSDataBase instead.")
+    @JvmStatic
+    fun deleteStopTime(gStopTime: GStopTime): Boolean {
+        var query = "DELETE FROM $STOP_TIMES_TABLE_NAME"
+        query += " WHERE " +
+                "${GStopTime.TRIP_ID} = ${gStopTime.tripIdInt}" +
+                " AND " +
+                "${GStopTime.STOP_ID} = ${gStopTime.stopIdInt}" +
+                " AND " +
+                "${GStopTime.STOP_SEQUENCE} = ${gStopTime.stopSequence}"
+        connection.createStatement().use { statement ->
+            val rs = SQLUtils.executeUpdate(statement, query)
+            deletedRowCount += rs
+            if (rs > 1) {
+                throw MTLog.Fatal("Deleted too many stop times!")
+            }
+            deleteCount++
+            return rs > 0
+        }
+    }
+
+    @Suppress("unused")
+    @Deprecated("Use GTFSDataBase instead.")
+    @JvmStatic
+    fun deleteStopTimes(tripId: Int? = null): Int {
+        var query = "DELETE FROM $STOP_TIMES_TABLE_NAME"
+        tripId?.let {
+            query += " WHERE " +
+                    "${GStopTime.TRIP_ID} = $tripId"
+        }
+        deleteCount++
+        connection.createStatement().use { statement ->
+            val rs = SQLUtils.executeUpdate(statement, query)
+            deletedRowCount += rs
+            return rs
+        }
+    }
+
+    // endregion Stop Time
+
+    @JvmStatic
+    fun insertTripStop(gTripStop: GTripStop): Boolean {
+        connection.createStatement().use { statement ->
+            val rs = SQLUtils.executeUpdate(
+                statement,
+                SQLUtilsCommons.INSERT_INTO + TRIP_STOPS_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
+                        "${gTripStop.routeIdInt}," +
+                        "${gTripStop.tripIdInt}," +
+                        "${gTripStop.stopIdInt}," +
+                        "${gTripStop.stopSequence}" +
+                        SQLUtilsCommons.P2
+            )
+            insertRowCount++
+            insertCount++
+            return rs > 0
+        }
+    }
+
+    @JvmStatic
+    fun insertSchedule(mSchedule: MSchedule): Boolean {
+        connection.createStatement().use { statement ->
+            val rs = SQLUtils.executeUpdate(
+                statement,
+                SQLUtilsCommons.INSERT_INTO + SCHEDULES_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
+                        "${mSchedule.routeId}," +
+                        "${mSchedule.serviceIdInt}," +
+                        "${mSchedule.tripId}," +
+                        "${mSchedule.stopId}," +
+                        "${mSchedule.arrival}," +
+                        "${mSchedule.departure}," +
+                        "${mSchedule.pathIdInt}," +
+                        "${mSchedule.accessible}," +
+                        "${mSchedule.headsignType}," +
+                        "${mSchedule.headsignValue?.quotesEscape()}" +
+                        SQLUtilsCommons.P2
+            )
+            insertRowCount++
+            insertCount++
+            return rs > 0
         }
     }
 
@@ -505,42 +576,6 @@ object DBUtils {
 
     @Suppress("unused")
     @JvmStatic
-    fun deleteStopTime(gStopTime: GStopTime): Boolean {
-        var query = "DELETE FROM $STOP_TIMES_TABLE_NAME"
-        query += " WHERE " +
-                "${GStopTime.TRIP_ID} = ${gStopTime.tripIdInt}" +
-                " AND " +
-                "${GStopTime.STOP_ID} = ${gStopTime.stopIdInt}" +
-                " AND " +
-                "${GStopTime.STOP_SEQUENCE} = ${gStopTime.stopSequence}"
-        connection.createStatement().use { statement ->
-            val rs = SQLUtils.executeUpdate(statement, query)
-            deletedRowCount += rs
-            if (rs > 1) {
-                throw MTLog.Fatal("Deleted too many stop times!")
-            }
-            deleteCount++
-            return rs > 0
-        }
-    }
-
-    @JvmStatic
-    fun deleteStopTimes(tripId: Int? = null): Int {
-        var query = "DELETE FROM $STOP_TIMES_TABLE_NAME"
-        tripId?.let {
-            query += " WHERE " +
-                    "${GStopTime.TRIP_ID} = $tripId"
-        }
-        deleteCount++
-        connection.createStatement().use { statement ->
-            val rs = SQLUtils.executeUpdate(statement, query)
-            deletedRowCount += rs
-            return rs
-        }
-    }
-
-    @Suppress("unused")
-    @JvmStatic
     fun deleteSchedules(
         serviceIdInt: Int? = null,
         tripId: Long? = null,
@@ -606,22 +641,6 @@ object DBUtils {
             deletedRowCount += rs
             return rs
         }
-    }
-
-    @JvmStatic
-    fun countStopTimes(): Int {
-        connection.createStatement().use { statement ->
-            val rs = SQLUtils.executeQuery(
-                statement,
-                "SELECT COUNT(*) AS $SQL_RESULT_ALIAS FROM $STOP_TIMES_TABLE_NAME"
-            )
-            selectCount++
-            if (rs.next()) {
-                selectRowCount++
-                return rs.getInt(SQL_RESULT_ALIAS)
-            }
-        }
-        throw MTLog.Fatal("Error while counting stop times!")
     }
 
     @JvmStatic

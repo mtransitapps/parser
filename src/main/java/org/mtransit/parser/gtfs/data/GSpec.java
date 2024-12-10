@@ -396,16 +396,16 @@ public class GSpec {
 	}
 
 	public void addStopTime(@NotNull GStopTime gStopTime, boolean allowUpdate) {
-		DBUtils.insertStopTime(gStopTime, allowUpdate);
+		GTFSDataBase.insertStopTime(gStopTime.to(), null, allowUpdate);
 	}
 
 	public void addStopTime(@NotNull GStopTime gStopTime, @NotNull PreparedStatement insertStopTimePrepared) {
-		DBUtils.insertStopTime(gStopTime, insertStopTimePrepared);
+		GTFSDataBase.insertStopTime(gStopTime.to(), insertStopTimePrepared);
 	}
 
 	private int removeTripStopTimes(@NotNull Integer gTripId) {
 		int r = 0;
-		r += DBUtils.deleteStopTimes(gTripId);
+		r += GTFSDataBase.deleteStopTimes(GIDs.getString(gTripId));
 		return r;
 	}
 
@@ -495,7 +495,7 @@ public class GSpec {
 	}
 
 	private int readStopTimesCount() {
-		return DBUtils.countStopTimes();
+		return GTFSDataBase.countStopTimes();
 	}
 
 	private int readTripStopsCount() {
@@ -537,10 +537,10 @@ public class GSpec {
 		int offset = 0;
 		final int maxRowNumber = DefaultAgencyTools.IS_CI ? 100_000 : 1_000_000;
 		MTLog.log("Generating GTFS trip stops from stop times... (DB size: %s)", FileUtils.sizeToDiplayString(DBUtils.getDBSize()));
-		DBUtils.setAutoCommit(false);
+		DBUtils.setAutoCommit(false); // trip stops
 		while (offset < stopTimesCount) {
 			MTLog.log("Generating GTFS trip stops from stop times... (%d -> %d)", offset, offset + maxRowNumber);
-			tripStopTimes = DBUtils.selectStopTimes(null, null, maxRowNumber, offset);
+			tripStopTimes = GStopTime.from(GTFSDataBase.selectStopTimes(null, maxRowNumber, offset));
 			MTLog.log("Generating GTFS trip stops from stop times...");
 			MTLog.log("Generating GTFS trip stops from stop times... (%d stop times found)", tripStopTimes.size());
 			offset += tripStopTimes.size();
@@ -562,7 +562,7 @@ public class GSpec {
 			tripStopsCount = this.tripStopsUIDs.size();
 		}
 		MTLog.log("Generating GTFS trip stops from stop times... > commit to DB...");
-		DBUtils.setAutoCommit(true); // true => commit()
+		DBUtils.setAutoCommit(true); // true => commit() // trip stops
 		MTLog.log("Generating GTFS trip stops from stop times... > commit to DB... DONE");
 		MTLog.log("Generating GTFS trip stops from stop times... (DB size: %s)", FileUtils.sizeToDiplayString(DBUtils.getDBSize()));
 		MTLog.log("Generating GTFS trip stops from stop times... DONE");
@@ -575,7 +575,8 @@ public class GSpec {
 		MTLog.log("- Trips: %d (before)", readTripsCount());
 		MTLog.log("- Trip stops: %d (before)", readTripStopsCount());
 		MTLog.log("- Stop times: %d (before)", readStopTimesCount());
-		DBUtils.setAutoCommit(false);
+		DBUtils.setAutoCommit(false); // trip stops
+		GTFSDataBase.setAutoCommit(false); // trip + stop times
 		int t = 0;
 		int ts = 0;
 		int st = 0;
@@ -587,7 +588,7 @@ public class GSpec {
 			if (gOriginalTrip == null) {
 				throw new MTLog.Fatal("Cannot find original trip for ID '%s' (%d)!", GIDs.getString(tripIdInt), tripIdInt);
 			}
-			List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripIdInt, null, null, null);
+			List<GStopTime> tripStopTimes = GStopTime.from(GTFSDataBase.selectStopTimes(Collections.singletonList(GIDs.getString(tripIdInt))));
 			ArrayList<GStopTime> newGStopTimes = new ArrayList<>();
 			Calendar stopTimeCal = Calendar.getInstance();
 			HashMap<Long, Integer> gStopTimeIncInSec = new HashMap<>();
@@ -600,7 +601,7 @@ public class GSpec {
 								gStopTimeIncInSec.get(gStopTime.getUID()));
 					}
 					setDepartureTimeCal(stopTimeCal, gStopTime, tripStopTimes);
-					int stopTimeInSec = (int) TimeUnit.MILLISECONDS.toSeconds(stopTimeCal.getTimeInMillis());
+					final int stopTimeInSec = (int) TimeUnit.MILLISECONDS.toSeconds(stopTimeCal.getTimeInMillis());
 					gStopTimeIncInSec.put(gStopTime.getUID(), previousStopTimeInSec == null ? 0 : stopTimeInSec - previousStopTimeInSec);
 					previousStopTimeInSec = stopTimeInSec;
 					if (lastFirstStopTimeInMs < 0L) {
@@ -688,7 +689,8 @@ public class GSpec {
 				ts++;
 			}
 		}
-		DBUtils.setAutoCommit(true); // true => commit()
+		DBUtils.setAutoCommit(true); // true => commit() // trip stops
+		GTFSDataBase.setAutoCommit(true); // true => commit() // trip + stop times
 		MTLog.log("Generating GTFS trip stop times from frequencies... DONE");
 		MTLog.log("- Trips: %d (after) (new: %d)", readTripsCount(), t);
 		MTLog.log("- Trip stop: %d (after) (new: %d)", readTripStopsCount(), ts);
@@ -736,16 +738,14 @@ public class GSpec {
 			final Collection<Integer> allTripRouteIdInts =
 					USE_DB_ONLY ? GIDs.getInts(GTFSDataBase.selectTripRouteIds())
 							: this.routeIdIntTripsCache.keySet();
-			final Iterator<Integer> allTripRouteIdIntsIt = allTripRouteIdInts.iterator();
-			while (allTripRouteIdIntsIt.hasNext()) {
-				final Integer tripRouteIdInt = allTripRouteIdIntsIt.next();
+			for (Integer tripRouteIdInt : allTripRouteIdInts) {
 				if (!allRouteIdsInt.contains(tripRouteIdInt)) {
 					final List<GTrip> routeTrips = getRouteTrips(tripRouteIdInt);
 					for (GTrip gTrip : routeTrips) {
 						if (this.tripIdIntsUIDs.remove(gTrip.getTripIdInt()) != null) {
 							r++;
 						}
-						if (DBUtils.deleteStopTimes(gTrip.getTripIdInt()) > 0) {
+						if (GTFSDataBase.deleteStopTimes(GIDs.getString(gTrip.getTripIdInt())) > 0) {
 							r++;
 						}
 						if (this.tripIdIntFrequenciesCache.remove(gTrip.getTripIdInt()) != null) {
@@ -771,9 +771,9 @@ public class GSpec {
 		try {
 			boolean forceStopTimeLastNoPickupType = true; // we need it for NO PICKUP stops
 			boolean forceStopTimeFirstNoDropOffType = agencyTools.forceStopTimeFirstNoDropOffType();
-			DBUtils.setAutoCommit(false);
+			GTFSDataBase.setAutoCommit(false); // stop times
 			for (Integer tripIdInt : this.tripIdIntsUIDs.keySet()) {
-				List<GStopTime> tripStopTimes = DBUtils.selectStopTimes(tripIdInt, null, null, null);
+				List<GStopTime> tripStopTimes = GStopTime.from(GTFSDataBase.selectStopTimes(Collections.singletonList(GIDs.getString(tripIdInt))));
 				if (tripStopTimes.isEmpty()) {
 					continue;
 				}
@@ -782,7 +782,7 @@ public class GSpec {
 					GStopTime lastStopTime = tripStopTimes.get(tripStopTimes.size() - 1);
 					if (lastStopTime.getPickupType() != GPickupType.NO_PICKUP) {
 						lastStopTime.setPickupType(GPickupType.NO_PICKUP);
-						addStopTime(lastStopTime, true);
+						addStopTime(lastStopTime, true); // UPDATE
 						stu++;
 					}
 				}
@@ -790,13 +790,13 @@ public class GSpec {
 					GStopTime firstStopTime = tripStopTimes.get(0);
 					if (firstStopTime.getDropOffType() != GDropOffType.NO_DROP_OFF) {
 						firstStopTime.setDropOffType(GDropOffType.NO_DROP_OFF);
-						addStopTime(firstStopTime, true);
+						addStopTime(firstStopTime, true); // UPDATE
 						stu++;
 					}
 
 				}
 			}
-			DBUtils.setAutoCommit(true); // true => commit()
+			GTFSDataBase.setAutoCommit(true); // true => commit() // stop times
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while doing cleanup of stop times pickup & drop-off types!");
 		}
