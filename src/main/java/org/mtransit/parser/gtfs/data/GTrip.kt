@@ -14,7 +14,7 @@ data class GTrip(
     val serviceIdInt: Int,
     var tripHeadsign: String?, // Optional
     val tripShortName: String?, // Optional
-    val directionIdE: GDirectionId,
+    var directionIdE: GDirectionId, // TODO val
     val blockId: String?, // Optional
     val shapeId: String?, // Optional
     val wheelchairAccessible: GWheelchairBoardingType,
@@ -54,6 +54,11 @@ data class GTrip(
     @Suppress("unused")
     val directionIdOrOriginal: Int?
         get() = directionIdE.originalId()
+
+    @Discouraged(message = "Should not be changed")
+    fun setDirectionId(newDirectionId: Int?) {
+        this.directionIdE = GDirectionId.parse(newDirectionId)
+    }
 
     @Suppress("unused")
     val tripHeadsignOrDefault: String = tripHeadsign ?: StringUtils.EMPTY
