@@ -90,10 +90,11 @@ object GTFSDataBase {
         return preparedStatement?.executeBatch()?.isNotEmpty()
     }
 
+    @JvmOverloads
     @JvmStatic
-    fun insertAgency(agency: Agency) {
+    fun insertAgency(agency: Agency, preparedStatement: PreparedStatement? = null) {
         connection.createStatement().use { statement ->
-            AgencySQL.insert(agency, statement)
+            AgencySQL.insertIntoMainTable(agency, statement, preparedStatement)
         }
     }
 
@@ -115,10 +116,11 @@ object GTFSDataBase {
         }
     }
 
+    @JvmOverloads
     @JvmStatic
-    fun insertRoute(route: Route) {
+    fun insertRoute(route: Route, preparedStatement: PreparedStatement? = null) {
         connection.createStatement().use { statement ->
-            RouteSQL.insert(route, statement)
+            RouteSQL.insertIntoMainTable(route, statement, preparedStatement)
         }
     }
 
@@ -147,10 +149,11 @@ object GTFSDataBase {
         }
     }
 
+    @JvmOverloads
     @JvmStatic
-    fun insertStop(stop: Stop) {
+    fun insertStop(stop: Stop, preparedStatement: PreparedStatement? = null) {
         connection.createStatement().use { statement ->
-            StopSQL.insert(stop, statement)
+            StopSQL.insertIntoMainTable(stop, statement, preparedStatement)
         }
     }
 
@@ -187,11 +190,12 @@ object GTFSDataBase {
         }
     }
 
+    @JvmOverloads
     @JvmStatic
-    fun insertCalendarDate(vararg calendarDates: CalendarDate) {
+    fun insertCalendarDate(vararg calendarDates: CalendarDate, preparedStatement: PreparedStatement? = null) {
         connection.createStatement().use { statement ->
             calendarDates.forEach { calendarDate ->
-                CalendarDateSQL.insert(calendarDate, statement)
+                CalendarDateSQL.insertIntoMainTable(calendarDate, statement, preparedStatement)
             }
         }
     }
@@ -223,14 +227,14 @@ object GTFSDataBase {
     @JvmStatic
     fun insertTrip(trip: Trip, preparedStatement: PreparedStatement? = null) {
         connection.createStatement().use { statement ->
-            TripSQL.insert(trip, statement, preparedStatement)
+            TripSQL.insertIntoMainTable(trip, statement, preparedStatement)
         }
     }
 
     @JvmStatic
     fun prepareInsertTrip(allowUpdate: Boolean = false): PreparedStatement {
         return connection.prepareStatement(
-            TripSQL.getInsertPreparedStatement(allowUpdate)
+            TripSQL.getMainTableInsertPreparedStatement(allowUpdate)
         )
     }
 
@@ -274,10 +278,11 @@ object GTFSDataBase {
         }
     }
 
+    @JvmOverloads
     @JvmStatic
-    fun insertFrequency(frequency: Frequency) {
+    fun insertFrequency(frequency: Frequency, preparedStatement: PreparedStatement? = null) {
         connection.createStatement().use { statement ->
-            FrequencySQL.insert(frequency, statement)
+            FrequencySQL.insertIntoMainTable(frequency, statement, preparedStatement)
         }
     }
 
