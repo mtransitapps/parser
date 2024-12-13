@@ -95,7 +95,7 @@ public class GReader {
 				readFile(gtfsDir, GTrip.FILENAME, true, line ->
 						processTrip(agencyTools, gSpec, line, insertTripsPrepared)
 				);
-				if (USE_PREPARED_STATEMENT) {
+				if (insertTripsPrepared != null) {
 					GTFSDataBase.executePreparedStatement(insertTripsPrepared);
 				}
 				GTFSDataBase.commit();
@@ -134,7 +134,7 @@ public class GReader {
 				if (!agencyTools.stopTimesHasDropOffTypeNotRegular()) {
 					agencyTools.setForceStopTimeFirstNoDropOffType(true); // all provided drop-off type are REGULAR == not provided
 				}
-				if (USE_PREPARED_STATEMENT) {
+				if (insertStopTimePrepared != null) {
 					GTFSDataBase.executePreparedStatement(insertStopTimePrepared);
 				}
 				GTFSDataBase.commit();

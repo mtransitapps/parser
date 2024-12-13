@@ -1,5 +1,6 @@
 package org.mtransit.parser.db
 
+import androidx.annotation.Discouraged
 import org.mtransit.commons.gtfs.data.Agency
 import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.commons.gtfs.data.CalendarDate
@@ -21,6 +22,9 @@ import org.mtransit.commons.gtfs.sql.RouteSQL
 import org.mtransit.commons.gtfs.sql.StopSQL
 import org.mtransit.commons.gtfs.sql.StopTimeSQL
 import org.mtransit.commons.gtfs.sql.TripSQL
+import org.mtransit.commons.sql.executeMT
+import org.mtransit.commons.sql.executeQueryMT
+import org.mtransit.commons.sql.executeUpdateMT
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
@@ -29,6 +33,7 @@ import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.PreparedStatement
+import java.sql.ResultSet
 import org.mtransit.commons.sql.SQLUtils as SQLUtilsCommons
 
 @Suppress("unused")
@@ -95,6 +100,30 @@ object GTFSDataBase {
     @JvmStatic
     fun executePreparedStatement(preparedStatement: PreparedStatement?): Boolean? {
         return preparedStatement?.executeBatch()?.isNotEmpty()
+    }
+
+    @Discouraged("only for debugging")
+    @JvmStatic
+    fun execute(query: String): Boolean {
+        connection.createStatement().use { statement ->
+            return statement.executeMT(query)
+        }
+    }
+
+    @Discouraged("only for debugging")
+    @JvmStatic
+    fun executeQueryUpdate(query: String): Int {
+        connection.createStatement().use { statement ->
+            return statement.executeUpdateMT(query)
+        }
+    }
+
+    @Discouraged("only for debugging")
+    @JvmStatic
+    fun executeQuery(query: String): ResultSet {
+        connection.createStatement().use { statement ->
+            return statement.executeQueryMT(query)
+        }
     }
 
     @JvmOverloads
@@ -334,6 +363,32 @@ object GTFSDataBase {
     fun insertStopTime(stopTime: StopTime, preparedStatement: PreparedStatement? = null, allowUpdate: Boolean = false) {
         connection.createStatement().use { statement ->
             StopTimeSQL.insertIntoMainTable(stopTime, statement, preparedStatement, allowUpdate)
+        }
+    }
+
+    @JvmStatic
+    fun updateStopTime(
+        stopTime: StopTime,
+        pickupType: Int? = null, dropOffType: Int? = null,
+        orderByDesc: Boolean? = null, // true = ASC, false = DESC
+        limit: Int? = null,
+    ) = updateStopTime(
+        stopTime.tripId,
+        stopTime.stopId,
+        stopTime.stopSequence,
+        pickupType,
+        dropOffType
+    )
+
+    @JvmStatic
+    fun updateStopTime(
+        tripId: TripId, stopId: StopId? = null, stopSequence: Int? = null,
+        pickupType: Int? = null, dropOffType: Int? = null,
+        orderByDesc: Boolean? = null, // true = ASC, false = DESC
+        limit: Int? = null,
+    ): Boolean {
+        connection.createStatement().use { statement ->
+            return StopTimeSQL.update(statement, tripId, stopId, stopSequence, pickupType, dropOffType, orderByDesc, limit)
         }
     }
 

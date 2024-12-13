@@ -768,33 +768,41 @@ public class GSpec {
 	public void cleanupStopTimesPickupDropOffTypes(@NotNull DefaultAgencyTools agencyTools) {
 		MTLog.log("Cleanup stop times pickup & drop-off types...");
 		int stu = 0;
+		int stp = 0;
 		try {
 			boolean forceStopTimeLastNoPickupType = true; // we need it for NO PICKUP stops
+			MTLog.logDebug("forceStopTimeLastNoPickupType: %s", forceStopTimeLastNoPickupType);
 			boolean forceStopTimeFirstNoDropOffType = agencyTools.forceStopTimeFirstNoDropOffType();
+			MTLog.logDebug("forceStopTimeFirstNoDropOffType: %s", forceStopTimeFirstNoDropOffType);
 			GTFSDataBase.setAutoCommit(false); // stop times
+			MTLog.logDebug("Cleanup stop times pickup & drop-off types from (%d trips)...", this.tripIdIntsUIDs.keySet().size());
 			for (Integer tripIdInt : this.tripIdIntsUIDs.keySet()) {
-				List<GStopTime> tripStopTimes = GStopTime.from(GTFSDataBase.selectStopTimes(Collections.singletonList(GIDs.getString(tripIdInt))));
-				if (tripStopTimes.isEmpty()) {
-					continue;
-				}
 				//noinspection ConstantConditions
 				if (forceStopTimeLastNoPickupType) {
-					GStopTime lastStopTime = tripStopTimes.get(tripStopTimes.size() - 1);
-					if (lastStopTime.getPickupType() != GPickupType.NO_PICKUP) {
-						lastStopTime.setPickupType(GPickupType.NO_PICKUP);
-						addStopTime(lastStopTime, true); // UPDATE
+					if (GTFSDataBase.updateStopTime(
+							GIDs.getString(tripIdInt), null, null,
+							GPickupType.NO_PICKUP.getId(), null,
+							true, 1 // LAST
+					)) {
 						stu++;
 					}
 				}
 				if (forceStopTimeFirstNoDropOffType) {
-					GStopTime firstStopTime = tripStopTimes.get(0);
-					if (firstStopTime.getDropOffType() != GDropOffType.NO_DROP_OFF) {
-						firstStopTime.setDropOffType(GDropOffType.NO_DROP_OFF);
-						addStopTime(firstStopTime, true); // UPDATE
+					if (GTFSDataBase.updateStopTime(
+							GIDs.getString(tripIdInt), null, null,
+							null, GDropOffType.NO_DROP_OFF.getId(),
+							false, 1 // FIRST
+					)) {
 						stu++;
 					}
-
 				}
+				stp++;
+				if (stp % 1_000 == 0) { // LOG
+					MTLog.logPOINT(); // LOG
+				} // LOG
+				if (stp % 10_000 == 0) { // LOG
+					MTLog.log("Cleanup stop times pickup & drop-off types from (%d/%d trips) (%d updated objects)...", stp, this.tripIdIntsUIDs.keySet().size(), stu); // LOG
+				} // LOG
 			}
 			GTFSDataBase.setAutoCommit(true); // true => commit() // stop times
 		} catch (Exception e) {
