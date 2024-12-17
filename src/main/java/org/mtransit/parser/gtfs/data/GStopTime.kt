@@ -183,8 +183,8 @@ data class GStopTime(
         tripId = _tripId,
         stopId = _stopId,
         stopSequence = stopSequence,
-        arrivalTime = GTime.toString(_arrivalTime) ?: throw MTLog.Fatal("Unexpected start time '$_arrivalTime'!"),
-        departureTime = GTime.toString(_departureTime) ?: throw MTLog.Fatal("Unexpected end time '$_departureTime'!"),
+        arrivalTime = GTime.toString(_arrivalTime),
+        departureTime = GTime.toString(_departureTime),
         stopHeadsign = stopHeadsign,
         pickupType = pickupType.id,
         dropOffType = dropOffType.id,
@@ -241,7 +241,7 @@ data class GStopTime(
         fun getNewUID(
             tripIdInt: Int,
             stopIdInt: Int,
-            stopSequence: Int
+            stopSequence: Int,
         ) = "${tripIdInt}$UID_SEPARATOR${stopIdInt}$UID_SEPARATOR${stopSequence}".toLong()
 
         fun Iterable<GStopTime>.minStopSequence(): Int {

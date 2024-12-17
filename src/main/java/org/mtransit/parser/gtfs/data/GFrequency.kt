@@ -18,8 +18,8 @@ data class GFrequency(
 
     constructor(
         tripId: String,
-        startTime: String,
-        endTime: String,
+        startTime: String?,
+        endTime: String?,
         headwaySecs: Int,
         exactTimes: Int?,
     ) : this(
@@ -79,8 +79,8 @@ data class GFrequency(
 
     fun to() = Frequency(
         tripId = _tripId,
-        startTime = GTime.toString(_startTime) ?: throw MTLog.Fatal("Unexpected start time '$_startTime'!"),
-        endTime = GTime.toString(_endTime) ?: throw MTLog.Fatal("Unexpected end time '$_endTime'!"),
+        startTime = GTime.toString(_startTime),
+        endTime = GTime.toString(_endTime),
         headwaySecs = headwaySecs,
         exactTimes = exactTimes
     )
