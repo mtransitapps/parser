@@ -308,7 +308,7 @@ public class GSpec {
 		if (USE_DB_ONLY) {
 			return GTFSDataBase.countTrips();
 		}
-		return this.routeIdIntTripsCache.values().size();
+		return CollectionUtils.totalMapSize(this.routeIdIntTripsCache);
 	}
 
 	public void updateTripDirectionId(@NotNull GDirectionId gDirectionId, @Nullable Collection<Integer> tripIdInts) {
@@ -437,7 +437,7 @@ public class GSpec {
 		if (USE_DB_ONLY) {
 			return GTFSDataBase.countFrequencies();
 		}
-		return this.tripIdIntFrequenciesCache.values().size();
+		return CollectionUtils.totalMapSize(this.tripIdIntFrequenciesCache);
 	}
 
 	@SuppressWarnings("unused")
