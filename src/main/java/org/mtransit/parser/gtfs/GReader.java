@@ -104,7 +104,7 @@ public class GReader {
 			}
 			// DIRECTIONS (ext)
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
-				readFile(gtfsDir, GDirection.FILENAME, true, line ->
+				readFile(gtfsDir, GDirection.FILENAME, false, line ->
 						processDirection(agencyTools, gSpec, line)
 				);
 			}
