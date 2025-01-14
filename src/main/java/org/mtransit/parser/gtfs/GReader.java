@@ -14,6 +14,7 @@ import org.mtransit.parser.db.GTFSDataBase;
 import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
+import org.mtransit.parser.gtfs.data.GDirection;
 import org.mtransit.parser.gtfs.data.GDropOffType;
 import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GPickupType;
@@ -100,6 +101,12 @@ public class GReader {
 				}
 				GTFSDataBase.commit();
 				GTFSDataBase.setAutoCommit(true); // true => commit()
+			}
+			// DIRECTIONS (ext)
+			if (!calendarsOnly && !routeTripCalendarsOnly) {
+				readFile(gtfsDir, GDirection.FILENAME, true, line ->
+						processDirection(agencyTools, gSpec, line)
+				);
 			}
 			// FREQUENCIES
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
@@ -360,6 +367,19 @@ public class GReader {
 			gSpec.addCalendar(gCalendar);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while processing: %s!", line);
+		}
+	}
+
+	private static void processDirection(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
+		try {
+			final GDirection gDirection = GDirection.fromLine(line);
+			final GRoute gRoute = gSpec.getRoute(gDirection.getRouteIdInt());
+			if (agencyTools.excludeRouteNullable(gRoute)) {
+				logExclude("Exclude route: %s.", gRoute == null ? null : gRoute.toStringPlus());
+				return;
+			}
+		} catch (Exception e) {
+			throw new MTLog.Fatal(e, "Error while parsing route line %s!", line);
 		}
 	}
 
