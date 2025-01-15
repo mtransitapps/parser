@@ -62,7 +62,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final int MAX_NEXT_LOOKUP_IN_DAYS = 60;
 
-	private static final int MAX_LOOK_BACKWARD_IN_DAYS = 7;
+	private static final int MAX_LOOK_BACKWARD_IN_DAYS = 10 * 365; // used for CURRENT schedule from calendar_dates.txt all in the past
 	private static final int MAX_LOOK_FORWARD_IN_DAYS = 60;
 
 	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 5;
@@ -1254,11 +1254,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 								   @Nullable List<MServiceDate> lastServiceDates,
 								   Calendar c,
 								   Period p,
-								   boolean lookForward) {
-		HashSet<Integer> todayServiceIds = findCalendarDatesTodayServiceIds(gCalendarDates, c, p,
-				lookForward ? 1 : 0, // min-size backward
-				lookForward ? 0 : 1, // min-size forward
-				1);
+								   boolean lookBackward) {
+		HashSet<Integer> todayServiceIds = findCalendarDatesTodayServiceIds(gCalendarDates, c, p, lookBackward, 1, true);
 		if (todayServiceIds.isEmpty()) {
 			MTLog.log("NO schedule available for %s in calendar dates.", p.getTodayStringInt());
 			return;
@@ -1282,7 +1279,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			Period pNext = new Period();
 			pNext.setTodayStringInt(incDateDays(DATE_FORMAT, c, p.getEndDate(), 1));
-			HashSet<Integer> nextDayServiceIds = findCalendarDatesTodayServiceIds(gCalendarDates, c, pNext, 0, 0, 0);
+			HashSet<Integer> nextDayServiceIds = findCalendarDatesTodayServiceIds(gCalendarDates, c, pNext, false, 0, false);
 			refreshStartEndDatesFromCalendarDates(pNext, nextDayServiceIds, gCalendarDates, lastServiceDates);
 			if (pNext.getStartDate() != null && pNext.getEndDate() != null
 					&& diffLowerThan(DATE_FORMAT, c, pNext.getStartDate(), pNext.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
@@ -1292,9 +1289,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 			}
 			Period pPrevious = new Period();
 			pPrevious.setTodayStringInt(incDateDays(DATE_FORMAT, c, p.getStartDate(), -1));
-			HashSet<Integer> previousDayServiceIds = findCalendarDatesTodayServiceIds(gCalendarDates, c, pPrevious, 0, 0, 0);
+			HashSet<Integer> previousDayServiceIds = findCalendarDatesTodayServiceIds(gCalendarDates, c, pPrevious, false, 0, false);
 			refreshStartEndDatesFromCalendarDates(pPrevious, previousDayServiceIds, gCalendarDates, lastServiceDates);
-			if (lookForward // NOT next schedule, only current schedule can look behind
+			if (lookBackward // NOT next schedule, only current schedule can look behind
 					&& pPrevious.getStartDate() != null && pPrevious.getEndDate() != null
 					&& diffLowerThan(DATE_FORMAT, c, pPrevious.getStartDate(), pPrevious.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
 				p.setStartDate(pPrevious.getStartDate());
@@ -1319,7 +1316,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 						);
 				long previousToCurrent = previousPeriodCoverageInMs / currentPeriodCoverageInMs;
 				long nextToCurrent = nextPeriodCoverageInMs / currentPeriodCoverageInMs;
-				if (lookForward // NOT next schedule, only current schedule can look behind
+				if (lookBackward // NOT next schedule, only current schedule can look behind
 						&& previousPeriodCoverageInMs > 0L
 						&& (nextPeriodCoverageInMs <= 0L || previousPeriodCoverageInMs < nextPeriodCoverageInMs)
 						&& previousToCurrent < MAX_CALENDAR_DATE_COVERAGE_RATIO) {
@@ -1365,9 +1362,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static HashSet<Integer> findCalendarDatesTodayServiceIds(@NotNull List<GCalendarDate> gCalendarDates,
 																	 Calendar c,
 																	 Period p,
-																	 int minSizeBackward,
-																	 int minSizeForward,
-																	 int incDays) {
+																	 boolean lookBackward,
+																	 int minTodayServiceIdsSize,
+																	 boolean canIncDays) {
 		HashSet<Integer> todayServiceIds = new HashSet<>();
 		final Integer initialTodayStringInt = p.getTodayStringInt();
 		while (true) {
@@ -1378,16 +1375,18 @@ public class DefaultAgencyTools implements GAgencyTools {
 					}
 				}
 			}
-			if (todayServiceIds.size() < minSizeForward //
-					&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.getTodayStringInt(), MAX_LOOK_FORWARD_IN_DAYS)) {
-				p.setTodayStringInt(incDateDays(DATE_FORMAT, c, p.getTodayStringInt(), incDays));
-				MTLog.log("new today because not enough service today: %s (initial today: %s, min: %s)", p.getTodayStringInt(), initialTodayStringInt, minSizeForward);
-				continue;
-			} else if (todayServiceIds.size() < minSizeBackward //
-					&& diffLowerThan(DATE_FORMAT, c, p.getTodayStringInt(), initialTodayStringInt, MAX_LOOK_BACKWARD_IN_DAYS)) {
-				p.setTodayStringInt(incDateDays(DATE_FORMAT, c, p.getTodayStringInt(), -incDays));
-				MTLog.log("new today because not enough service today: %s (initial today: %s, min: %s)", p.getTodayStringInt(), initialTodayStringInt, minSizeBackward);
-				continue;
+			if (canIncDays) {
+				if (!lookBackward && todayServiceIds.size() < minTodayServiceIdsSize //
+						&& diffLowerThan(DATE_FORMAT, c, initialTodayStringInt, p.getTodayStringInt(), MAX_LOOK_FORWARD_IN_DAYS)) {
+					p.setTodayStringInt(incDateDays(DATE_FORMAT, c, p.getTodayStringInt(), 1));
+					MTLog.log("new today in the future because not enough service today: %s (initial today: %s)", p.getTodayStringInt(), initialTodayStringInt);
+					continue;
+				} else if (lookBackward && todayServiceIds.size() < minTodayServiceIdsSize //
+						&& diffLowerThan(DATE_FORMAT, c, p.getTodayStringInt(), initialTodayStringInt, MAX_LOOK_BACKWARD_IN_DAYS)) {
+					p.setTodayStringInt(incDateDays(DATE_FORMAT, c, p.getTodayStringInt(), -1));
+					MTLog.log("new today in the past because not enough service today: %s (initial today: %s)", p.getTodayStringInt(), initialTodayStringInt);
+					continue;
+				}
 			}
 			break;
 		}
