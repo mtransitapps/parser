@@ -9,16 +9,16 @@ data class MTrip(
     val routeId: Long,
     var headsignId: Int = 0, // >= 0
     var headsignType: Int = HEADSIGN_TYPE_STRING, // 0=string, 1=direction, 2=inbound, 3=stopId, 4=descent-only
-    var headsignValue: String = Constants.EMPTY
+    var headsignValue: String = Constants.EMPTY,
 ) : Comparable<MTrip> {
 
     constructor(
         routeId: Long
     ) : this(
-        routeId,
-        0,
-        HEADSIGN_TYPE_STRING,
-        Constants.EMPTY
+        routeId = routeId,
+        headsignId = 0,
+        headsignType = HEADSIGN_TYPE_STRING,
+        headsignValue = Constants.EMPTY,
     )
 
     constructor(

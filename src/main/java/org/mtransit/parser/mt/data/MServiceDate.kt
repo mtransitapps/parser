@@ -75,7 +75,7 @@ data class MServiceDate(
                 when (this.exceptionType) {
                     MCalendarExceptionType.ADDED.id -> GCalendarDatesExceptionType.SERVICE_ADDED
                     MCalendarExceptionType.REMOVED.id -> GCalendarDatesExceptionType.SERVICE_REMOVED
-                    MCalendarExceptionType.DEFAULT.id -> GCalendarDatesExceptionType.SERVICE_ADDED // default
+                    MCalendarExceptionType.DEFAULT.id -> GCalendarDatesExceptionType.SERVICE_DEFAULT
                     else -> GCalendarDatesExceptionType.SERVICE_ADDED // default
                 }
             } else {

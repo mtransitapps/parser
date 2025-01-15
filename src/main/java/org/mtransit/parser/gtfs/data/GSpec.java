@@ -339,7 +339,7 @@ public class GSpec {
 		final Collection<GTrip> routeTrips = tripRouteId == null ? null : getRouteTrips(tripRouteId);
 		if (routeTrips != null) {
 			for (GTrip trip : routeTrips) {
-				if (tripIdInt.equals(trip.getTripIdInt())) {
+				if (trip.getTripIdInt() == tripIdInt) {
 					return trip;
 				}
 			}

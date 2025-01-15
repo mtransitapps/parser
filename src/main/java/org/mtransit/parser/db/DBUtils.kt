@@ -250,15 +250,15 @@ object DBUtils {
             while (rs.next()) {
                 result.add(
                     GStopTime(
-                        rs.getInt(GStopTime.TRIP_ID),
-                        rs.getInt(GStopTime.ARRIVAL_TIME),
-                        rs.getInt(GStopTime.DEPARTURE_TIME),
-                        rs.getInt(GStopTime.STOP_ID),
-                        rs.getInt(GStopTime.STOP_SEQUENCE),
-                        rs.getStringOrNull(GStopTime.STOP_HEADSIGN)?.unquotes(),
-                        rs.getInt(GStopTime.PICKUP_TYPE),
-                        rs.getInt(GStopTime.DROP_OFF_TYPE),
-                        rs.getInt(GStopTime.TIME_POINT),
+                        tripIdInt = rs.getInt(GStopTime.TRIP_ID),
+                        arrivalTime = rs.getInt(GStopTime.ARRIVAL_TIME),
+                        departureTime = rs.getInt(GStopTime.DEPARTURE_TIME),
+                        stopIdInt = rs.getInt(GStopTime.STOP_ID),
+                        stopSequence = rs.getInt(GStopTime.STOP_SEQUENCE),
+                        stopHeadsign = rs.getStringOrNull(GStopTime.STOP_HEADSIGN)?.unquotes(),
+                        pickupTypeInt = rs.getInt(GStopTime.PICKUP_TYPE),
+                        dropOffTypeInt = rs.getInt(GStopTime.DROP_OFF_TYPE),
+                        timePointInt = rs.getInt(GStopTime.TIME_POINT),
                     )
                 )
                 selectRowCount++

@@ -206,15 +206,15 @@ data class GStopTime(
 
         @JvmStatic
         fun fromLine(line: Map<String, String>) = GStopTime(
-            line[TRIP_ID] ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
-            line[ARRIVAL_TIME]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
-            line[DEPARTURE_TIME]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
-            line[STOP_ID]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
-            line[STOP_SEQUENCE]?.trim()?.toInt() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
-            line[STOP_HEADSIGN]?.takeIf { it.isNotBlank() },
-            GPickupType.parse(line[PICKUP_TYPE]),
-            GDropOffType.parse(line[DROP_OFF_TYPE]),
-            GTimePoint.parse(line[TIME_POINT]),
+            tripId = line[TRIP_ID] ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+            arrivalTime = line[ARRIVAL_TIME]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+            departureTime = line[DEPARTURE_TIME]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+            stopId = line[STOP_ID]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+            stopSequence = line[STOP_SEQUENCE]?.trim()?.toInt() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+            stopHeadsign = line[STOP_HEADSIGN]?.takeIf { it.isNotBlank() },
+            pickupType = GPickupType.parse(line[PICKUP_TYPE]),
+            dropOffType = GDropOffType.parse(line[DROP_OFF_TYPE]),
+            timePoint = GTimePoint.parse(line[TIME_POINT]),
         )
 
         @JvmStatic

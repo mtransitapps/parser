@@ -129,8 +129,8 @@ object MReader {
                 return null
             }
             val gtfsScheduleServiceDatesFileLines = gtfsScheduleServiceDatesFile.readLines()
-            val serviceDates = gtfsScheduleServiceDatesFileLines.mapNotNull {
-                MServiceDate.fromFileLine(it)
+            val serviceDates = gtfsScheduleServiceDatesFileLines.mapNotNull { line ->
+                MServiceDate.fromFileLine(line)
             }
             return serviceDates
         } catch (e: Exception) {
