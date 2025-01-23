@@ -77,14 +77,16 @@ object GIDs {
     }
 
     @Suppress("unused")
+    @JvmOverloads
     @JvmStatic
-    fun toStringPlus(integers: Iterable<Int?>?): String {
-        return integers?.joinToString { toStringPlus(it) } ?: EMPTY
+    fun toStringPlus(integers: Iterable<Int?>?, limit: Int = 50): String {
+        return integers?.joinToString(limit = limit) { toStringPlus(it) } ?: EMPTY
     }
 
     @Suppress("unused")
+    @JvmOverloads
     @JvmStatic
-    fun toStringPlusP1(integers: Iterable<org.mtransit.parser.Pair<Int, Int>>): String {
-        return integers.joinToString { "[1:" + toStringPlus(it.first) + "|2:" + it.second + "]" }
+    fun toStringPlusP1(integers: Iterable<org.mtransit.parser.Pair<Int, Int>>, limit: Int = 50): String {
+        return integers.joinToString(limit = limit) { "[1:" + toStringPlus(it.first) + "|2:" + it.second + "]" }
     }
 }

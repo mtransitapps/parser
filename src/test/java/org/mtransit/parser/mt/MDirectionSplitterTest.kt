@@ -282,4 +282,17 @@ class MDirectionSplitterTest {
         // Assert
         assertEquals(1, result.size)
     }
+
+    @Test
+    fun testSplitDirections_Other_As_Only2_stops_express() { // #Sudbury2
+        // Arrange
+        val gTripIdIntStopIdInts = listOf(
+            t1 to listOf(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9),
+            t2 to listOf(s0, s9),
+        )
+        // Act
+        val result = MDirectionSplitter.splitDirections(RID, gTripIdIntStopIdInts)
+        // Assert
+        assertEquals(1, result.size)
+    }
 }

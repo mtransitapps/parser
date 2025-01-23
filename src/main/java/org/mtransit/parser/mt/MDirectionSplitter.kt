@@ -104,15 +104,15 @@ object MDirectionSplitter {
 
     fun splitDirections(
         routeId: Long,
-        gTripIdIntStopIdInts: List<Pair<Int, List<Int>>>
+        gTripIdIntStopIdInts: List<Pair<Int, List<Int>>>,
     ): MutableList<DirectionTripsStops> {
         val directionsCandidates = mutableListOf<DirectionTripsStops>()
 
         for ((gTripIdInt, gStopIdInts) in gTripIdIntStopIdInts) {
             if (LOG_NUMBERS) {
                 logNumbers("$routeId: ----------")
-                logNumbers("$routeId: gTripIdInt: ${GIDs.toStringPlus(gTripIdInt)}")
-                logNumbers("$routeId: gStopIdInts: ${GIDs.toStringPlus(gStopIdInts)}")
+                logNumbers("$routeId: gTripId: '${GIDs.toStringPlus(gTripIdInt)}'.")
+                logNumbers("$routeId: gStopIds: ${GIDs.toStringPlus(gStopIdInts)}.")
             }
             // LOOK FOR PERFECT EXACT MATCH
             if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
@@ -126,9 +126,9 @@ object MDirectionSplitter {
             }
             // LOOK FOR ALMOST A MATCH
             if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
-                    val matchList = rStopIdInts.matchList(gStopIdInts, ignoreRepeat = true, ignoreFirstAndLast = true, combineMatch = true)
+                    val matchList = rStopIdInts.matchList(gStopIdInts, ignoreRepeat = true, ignoreFirstAndLast = gStopIdInts.size > 2, combineMatch = true)
                     if (LOG_NUMBERS) {
-                        logNumbers("$routeId: rStopIdInts.matchList(gStopIdInts): $matchList (rStopIdInts: ${GIDs.toStringPlus(rStopIdInts)})")
+                        logNumbers("$routeId: rStopIds.matchList(gStopIds): $matchList (rStopIds: ${GIDs.toStringPlus(rStopIdInts)})")
                     }
                     matchList >= ALMOST_A_MATCH
                 }?.let { (rTripIdInts, _) ->
@@ -222,8 +222,8 @@ object MDirectionSplitter {
             }
             if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
                     rStopIdInts.overlap(gStopIdInts)
-                }?.let { (rTripIdInts, _) ->
-                    MTLog.logDebug("$routeId: overlap for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
+                }?.let { (rTripIdInts, rStopIdInts) ->
+                    MTLog.logDebug("$routeId: overlap with trips ${GIDs.toStringPlus(rTripIdInts)}\nwith stops:${GIDs.toStringPlus(rStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)
                     true
                 } == true) {

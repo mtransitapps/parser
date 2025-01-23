@@ -835,7 +835,9 @@ public class GSpec {
 						itGCalendar.remove();
 						logRemoved("Removed calendar: %s.", gCalendar.toStringPlus());
 						r++;
-						MTLog.logPOINT();
+						if (r % 100 == 0) {
+							MTLog.logPOINT();
+						}
 					}
 				}
 			}
@@ -847,7 +849,9 @@ public class GSpec {
 					GTFSDataBase.deleteCalendarDate(gCalendarDate.to());
 					logRemoved("Removed calendar date (or calendar): %s.", gCalendarDate.toStringPlus());
 					r++;
-					MTLog.logPOINT();
+					if (r % 100 == 0) {
+						MTLog.logPOINT();
+					}
 				}
 			}
 		} catch (Exception e) {
