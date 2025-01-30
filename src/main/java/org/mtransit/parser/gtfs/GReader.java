@@ -191,11 +191,11 @@ public class GReader {
 
 	private static final CSVFormat CSV_FORMAT = CSVFormat.RFC4180.builder()
 			.setIgnoreSurroundingSpaces(true)
-			.build();
+			.get();
 
 	private static final CSVFormat CSV_FORMAT_NO_QUOTE = CSV_FORMAT.builder()
 			.setQuote(null)
-			.build();
+			.get();
 
 	private static final Pattern QUOTE_ = Pattern.compile("\"");
 
