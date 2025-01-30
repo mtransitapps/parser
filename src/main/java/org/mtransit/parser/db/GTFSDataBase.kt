@@ -319,7 +319,6 @@ object GTFSDataBase {
     @JvmOverloads
     @JvmStatic
     fun insertDirection(direction: Direction, preparedStatement: PreparedStatement? = null) {
-        MTLog.logDebug(LOG_TAG, "insertDirection($direction)")
         connection.createStatement().use { statement ->
             DirectionSQL.insertIntoMainTable(direction, statement, preparedStatement)
         }
