@@ -4,6 +4,7 @@ import androidx.annotation.Discouraged
 import org.mtransit.commons.gtfs.data.Agency
 import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.commons.gtfs.data.CalendarDate
+import org.mtransit.commons.gtfs.data.Direction
 import org.mtransit.commons.gtfs.data.DirectionId
 import org.mtransit.commons.gtfs.data.Frequency
 import org.mtransit.commons.gtfs.data.Route
@@ -17,6 +18,7 @@ import org.mtransit.commons.gtfs.data.TripId
 import org.mtransit.commons.gtfs.sql.ALL_SQL_TABLES
 import org.mtransit.commons.gtfs.sql.AgencySQL
 import org.mtransit.commons.gtfs.sql.CalendarDateSQL
+import org.mtransit.commons.gtfs.sql.DirectionSQL
 import org.mtransit.commons.gtfs.sql.FrequencySQL
 import org.mtransit.commons.gtfs.sql.RouteSQL
 import org.mtransit.commons.gtfs.sql.StopSQL
@@ -316,6 +318,23 @@ object GTFSDataBase {
 
     @JvmOverloads
     @JvmStatic
+    fun insertDirection(direction: Direction, preparedStatement: PreparedStatement? = null) {
+        MTLog.logDebug(LOG_TAG, "insertDirection($direction)")
+        connection.createStatement().use { statement ->
+            DirectionSQL.insertIntoMainTable(direction, statement, preparedStatement)
+        }
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun selectDirections(routeId: RouteId? = null, directionId: DirectionId? = null): List<Direction> {
+        connection.createStatement().use { statement ->
+            return DirectionSQL.select(statement, routeId, directionId)
+        }
+    }
+
+    @JvmOverloads
+    @JvmStatic
     fun insertFrequency(frequency: Frequency, preparedStatement: PreparedStatement? = null) {
         connection.createStatement().use { statement ->
             FrequencySQL.insertIntoMainTable(frequency, statement, preparedStatement)
@@ -398,7 +417,6 @@ object GTFSDataBase {
         connection.createStatement().use { statement ->
             return StopTimeSQL.select(statement, tripIds, limitMaxNbRow, limitOffset)
         }
-
     }
 
     @JvmStatic

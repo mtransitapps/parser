@@ -1,22 +1,47 @@
 package org.mtransit.parser.gtfs.data
 
+import androidx.annotation.Discouraged
+import org.mtransit.commons.gtfs.data.Direction
+import org.mtransit.commons.gtfs.data.DirectionType
 import org.mtransit.parser.MTLog
 
 data class GDirection(
     val routeIdInt: Int,
-    val directionIdE: GDirectionId,
-    val directionType: GDirectionType,
-    val destination: String?,
+    val directionId: GDirectionId,
+    val directionType: GDirectionType, // optional
+    val destination: String?, // optional
 ) {
     constructor(
         routeId: String,
         directionIdInt: Int,
-        directionTypeValue: String?,
-        destination: String?,
+        directionTypeValue: String?, // optional
+        destination: String?, // optional
     ) : this(
         routeIdInt = GIDs.getInt(routeId),
-        directionIdE = GDirectionId.parse(directionIdInt),
+        directionId = GDirectionId.parse(directionIdInt),
         directionType = GDirectionType.parse(directionTypeValue),
+        destination = destination,
+    )
+
+    @Discouraged(message = "Not memory efficient")
+    @Suppress("unused")
+    val routeId = _routeId
+
+    private val _routeId: String
+        get() {
+            return GIDs.getString(routeIdInt)
+        }
+
+    @Suppress("unused")
+    fun toStringPlus(): String {
+        return toString() +
+                "+(routeId:$_routeId)"
+    }
+
+    fun to() = Direction(
+        routeId = _routeId,
+        directionId = directionId.originalId() ?: throw MTLog.Fatal("Unexpected direction ID '$directionId' to parse!"),
+        directionType = DirectionType.fromValue(directionType.value),
         destination = destination,
     )
 
@@ -38,5 +63,18 @@ data class GDirection(
             directionTypeValue = line[DIRECTION]?.trim(),
             destination = line[DESTINATION]?.trim() ?: line[DESTINATION_DIRECTION_NAME]?.trim(),
         )
+
+        @JvmStatic
+        fun from(directions: Collection<Direction>) = directions.mapNotNull { from(it) }
+
+        @JvmStatic
+        fun from(direction: Direction?) = direction?.let {
+            GDirection(
+                routeId = it.routeId,
+                directionIdInt = it.directionId,
+                directionTypeValue = it.directionType?.value,
+                destination = it.destination,
+            )
+        }
     }
 }

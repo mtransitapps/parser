@@ -67,6 +67,9 @@ public class GSpec {
 	private final HashMap<Integer, Integer> tripIdIntRouteIdInt = new HashMap<>();
 
 	@NotNull
+	private final Map<Integer, List<GDirection>> routeIdIntDirectionsCache = new HashMap<>();
+
+	@NotNull
 	private final HashMap<Long, GenerateMObjectsTask> routeGenerators = new HashMap<>();
 
 	public GSpec() {
@@ -367,6 +370,32 @@ public class GSpec {
 			return GTrip.from(GTFSDataBase.selectTrips(null, Collections.singleton(GIDs.getString(routeIdInt))));
 		}
 		return this.routeIdIntTripsCache.getOrDefault(routeIdInt, Collections.emptyList());
+	}
+
+	public void addDirection(@NotNull GDirection gDirection) {
+		GTFSDataBase.insertDirection(gDirection.to());
+		CollectionUtils.addMapListValue(this.routeIdIntDirectionsCache, gDirection.getRouteIdInt(), gDirection);
+	}
+
+	@Nullable
+	public List<GDirection> getDirection(@NotNull Integer routeIdInt) {
+		if (USE_DB_ONLY) {
+			return GDirection.from(GTFSDataBase.selectDirections(GIDs.getString(routeIdInt)));
+		}
+		return this.routeIdIntDirectionsCache.get(routeIdInt);
+	}
+
+	@Nullable
+	public GDirection getDirection(@NotNull Integer routeIdInt, @NotNull GDirectionId directionId) {
+		List<GDirection> directions = getDirection(routeIdInt);
+		if (directions != null) {
+			for (GDirection direction : directions) {
+				if (direction.getDirectionId() == directionId) {
+					return direction;
+				}
+			}
+		}
+		return null;
 	}
 
 	public void add(long mRouteId, @NotNull GenerateMObjectsTask routeGenerator) {

@@ -378,6 +378,13 @@ public class GReader {
 				logExclude("Exclude route: %s.", gRoute == null ? null : gRoute.toStringPlus());
 				return;
 			}
+			final GDirection existingDirection = gSpec.getDirection(gDirection.getRouteIdInt(), gDirection.getDirectionId());
+			if (existingDirection != null) {
+				//noinspection DiscouragedApi
+				MTLog.logDebug("Duplicate direction ID for route ID! (new:%s|old:%s)", gDirection, existingDirection);
+				return; // SKIP last declared (KEEP 1st declared)
+			}
+			gSpec.addDirection(gDirection);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while parsing route line %s!", line);
 		}
