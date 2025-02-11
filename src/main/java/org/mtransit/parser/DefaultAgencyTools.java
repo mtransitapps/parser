@@ -1187,6 +1187,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 			MTLog.log("* Looking for NEXT schedules...");
 			if (hasCurrent) {
 				usefulPeriod.setTodayStringInt(incDateDays(DATE_FORMAT, c, usefulPeriod.getEndDate(), 1)); // start from next to current last date
+			} else { // reset today for next schedule
+				usefulPeriod.setTodayStringInt(Integer.valueOf(DATE_FORMAT.format(Calendar.getInstance().getTime())));
 			}
 			usefulPeriod.setStartDate(null); // reset
 			usefulPeriod.setEndDate(null); // reset
