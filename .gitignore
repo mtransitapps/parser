@@ -19,3 +19,6 @@ build/
 
 # IntelliJ
 *.iml
+
+# Shared files
+/dependencies/*
