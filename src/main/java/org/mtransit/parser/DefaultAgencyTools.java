@@ -6,6 +6,8 @@ import org.mtransit.commons.CharUtils;
 import org.mtransit.commons.CollectionUtils;
 import org.mtransit.commons.CommonsApp;
 import org.mtransit.commons.GTFSCommons;
+import org.mtransit.commons.StringsCleaner;
+import org.mtransit.parser.config.Configs;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -128,7 +130,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final SimpleDateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
 	public static void main(@NotNull String[] args) {
-		throw new MTLog.Fatal("NEED TO IMPLEMENT MAIN METHOD"); // UNTIL WE HAVE JSON CONFIG FILE
+		new DefaultAgencyTools().start(args);
+		// throw new MTLog.Fatal("NEED TO IMPLEMENT MAIN METHOD"); // UNTIL WE HAVE FULLY MIGRATED TO JSON CONFIG FILE
 	}
 
 	@Nullable
@@ -138,12 +141,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (args.length < 3) {
 			throw new MTLog.Fatal("Invalid number(%d) of arguments! (%s)", args.length, Arrays.asList(args));
 		}
-		MTLog.log("Generating %s data...", getAgencyLabel());
+		MTLog.log("Reading configuration...");
+		Configs.load();
+		MTLog.log("Generating data...");
 		MTLog.logDebug("Args [%d]: %s.", args.length, Arrays.asList(args));
 		final List<MServiceDate> lastServiceDates = MReader.loadServiceDates(args[2]);
-		if (defaultExcludeEnabled()) {
-			this.serviceIdInts = extractUsefulServiceIdInts(args, this, true, lastServiceDates);
-		}
+		this.serviceIdInts = extractUsefulServiceIdInts(args, this, true, lastServiceDates);
 		final String inputUrl = args.length >= 5 ? args[4] : null;
 		if (excludingAll()) {
 			MGenerator.dumpFiles(this, null, args[0], args[1], args[2], inputUrl, true);
@@ -166,12 +169,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return; // DEBUG
 		}
 		MGenerator.dumpFiles(this, mSpec, args[0], args[1], args[2], inputUrl, false);
-		MTLog.log("Generating %s data... DONE in %s.", getAgencyLabel(), Utils.getPrettyDuration(System.currentTimeMillis() - start));
-	}
-
-	@NotNull
-	private String getAgencyLabel() {
-		return getAgencyName() + " " + getAgencyType();
+		MTLog.log("Generating data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
 	@NotNull
@@ -213,20 +211,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return firstLanguage;
 	}
 
-	@Nullable
-	private String agencyName = null;
-
 	@Override
 	public void setAgencyName(@Nullable String agencyName) {
-		this.agencyName = agencyName;
 	}
 
 	@NotNull
 	public String getAgencyName() {
-		if (this.agencyName != null) {
-			return this.agencyName;
-		}
-		MTLog.log("Agency name not provided!");
 		return "Agency Name";
 	}
 
@@ -248,17 +238,23 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return "type";
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	public boolean defaultExcludeEnabled() {
+		return true;
+	}
+
+	@Override
+	public boolean defaultStringsCleanerEnabled() {
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getDefaultStringsCleanerEnabled();
+		}
 		return false; // OPT-IN feature
 	}
 
 	@Override
 	public boolean excludingAll() {
-		if (defaultExcludeEnabled()) {
-			return this.serviceIdInts != null && this.serviceIdInts.isEmpty();
-		}
-		throw new MTLog.Fatal("NEED TO IMPLEMENT EXCLUDE ALL");
+		return this.serviceIdInts != null && this.serviceIdInts.isEmpty();
 	}
 
 	@Override
@@ -278,6 +274,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String getAgencyColor() {
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getDefaultColor();
+		}
 		throw new MTLog.Fatal("AGENCY COLOR NOT PROVIDED");
 	}
 
@@ -304,6 +303,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public Integer getAgencyRouteType() {
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getTargetRouteTypeId();
+		}
 		throw new MTLog.Fatal("AGENCY ROUTE TYPE NOT PROVIDED");
 	}
 
@@ -387,7 +389,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean defaultRouteIdEnabled() {
-		return false; // OPT-IN feature
+		return Configs.getRouteConfig().getDefaultRouteIdEnabled();
 	}
 
 	@Override
@@ -398,7 +400,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public String getRouteIdCleanupRegex() {
-		return null;
+		return Configs.getRouteConfig().getRouteIdCleanupRegex();
 	}
 
 	@Nullable
@@ -471,6 +473,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (org.mtransit.commons.StringUtils.isEmpty(routeLongName)) {
 			throw new MTLog.Fatal("No default route long name for %s!", routeLongName);
 		}
+		if (defaultStringsCleanerEnabled()) {
+			return StringsCleaner.cleanRouteLongName(routeLongName, getSupportedLanguages());
+		}
 		return org.mtransit.commons.CleanUtils.cleanLabel(routeLongName);
 	}
 
@@ -520,7 +525,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public String provideMissingRouteColor(@NotNull GRoute gRoute) {
-		return null;  // use agency color
+		return Configs.getRouteConfig().getRouteColor(gRoute); // or use agency color
 	}
 
 	@Override
@@ -584,6 +589,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
+		if (defaultStringsCleanerEnabled()) {
+			return StringsCleaner.cleanTripHeadsign(tripHeadsign, getSupportedLanguages());
+		}
 		return tripHeadsign;
 	}
 
@@ -614,7 +622,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean directionFinderEnabled() {
-		return false; // OPT-IN feature
+		return Configs.getRouteConfig().getDirectionFinderEnabled();
 	}
 
 	@Override
@@ -846,30 +854,24 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeTrip(@NotNull GTrip gTrip) {
-		if (defaultExcludeEnabled()) {
-			if (this.serviceIdInts != null) {
-				return excludeUselessTripInt(gTrip, this.serviceIdInts);
-			}
+		if (this.serviceIdInts != null) {
+			return excludeUselessTripInt(gTrip, this.serviceIdInts);
 		}
 		return KEEP;
 	}
 
 	@Override
 	public boolean excludeCalendarDate(@NotNull GCalendarDate gCalendarDate) {
-		if (defaultExcludeEnabled()) {
-			if (this.serviceIdInts != null) {
-				return excludeUselessCalendarDateInt(gCalendarDate, this.serviceIdInts);
-			}
+		if (this.serviceIdInts != null) {
+			return excludeUselessCalendarDateInt(gCalendarDate, this.serviceIdInts);
 		}
 		return false;
 	}
 
 	@Override
 	public boolean excludeCalendar(@NotNull GCalendar gCalendar) {
-		if (defaultExcludeEnabled()) {
-			if (this.serviceIdInts != null) {
-				return excludeUselessCalendarInt(gCalendar, this.serviceIdInts);
-			}
+		if (this.serviceIdInts != null) {
+			return excludeUselessCalendarInt(gCalendar, this.serviceIdInts);
 		}
 		return false;
 	}
@@ -877,6 +879,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopName(@NotNull String gStopName) {
+		if (defaultStringsCleanerEnabled()) {
+			return StringsCleaner.cleanStopName(gStopName, getSupportedLanguages());
+		}
 		return org.mtransit.commons.CleanUtils.cleanLabel(gStopName);
 	}
 

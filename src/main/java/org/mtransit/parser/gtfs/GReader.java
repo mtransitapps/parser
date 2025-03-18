@@ -334,7 +334,6 @@ public class GReader {
 				MTLog.logDebug("processAgency() > SKIP (exclude agency)");
 				return;
 			}
-			agencyTools.setAgencyName(gAgency.getAgencyName());
 			agencyTools.addSupportedLanguage(gAgency.getAgencyLang());
 			gSpec.addAgency(gAgency);
 		} catch (Exception e) {

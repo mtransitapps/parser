@@ -25,7 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-@SuppressWarnings({"RedundantSuppression", "unused"})
+@SuppressWarnings("unused")
 public interface GAgencyTools {
 
 	boolean EXCLUDE = true;
@@ -38,7 +38,10 @@ public interface GAgencyTools {
 
 	int getThreadPoolSize();
 
+	@Deprecated // TO BE REMOVED
 	boolean defaultExcludeEnabled();
+
+	boolean defaultStringsCleanerEnabled();
 
 	boolean excludingAll();
 
@@ -50,8 +53,10 @@ public interface GAgencyTools {
 	@Nullable
 	List<Locale> getSupportedLanguages();
 
+	@Deprecated // TO BE REMOVED
 	void setAgencyName(@Nullable String agencyName);
 
+	@Deprecated // TO BE REMOVED
 	@NotNull
 	String getAgencyName();
 
