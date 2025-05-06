@@ -238,14 +238,14 @@ object MDirectionSplitter {
             throw MTLog.Fatal(
                 "$routeId: Unresolved situation! \n" +
                         "- ?: Trips: '${GIDs.toStringPlus(gTripIdInt)}': \n" +
-                        "Stops: ${GIDs.toStringPlus(gStopIdInts)} \n" +
+                        "  -> Stops: ${GIDs.toStringPlus(gStopIdInts, limit = -1)} \n" +
                         " - ${directionsCandidates.size} candidates: \n" +
                         "---------- \n" +
-                        "- 0: Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.tripIdInts)}: \n" +
-                        "Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.stopIdInts)} \n" +
+                        "- 0: Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.tripIdInts, limit = -1)}: \n" +
+                        "  -> Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.stopIdInts, limit = -1)} \n" +
                         "---------- \n" +
-                        "- 1 Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.tripIdInts)}: \n" +
-                        "Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.stopIdInts)}: \n" +
+                        "- 1 Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.tripIdInts, limit = -1)}: \n" +
+                        "  -> Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.stopIdInts, limit = -1)}: \n" +
                         "---------- \n" +
                         "!"
             )
