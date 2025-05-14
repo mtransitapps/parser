@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 @Deprecated
-@SuppressWarnings({"RedundantSuppression", "unused", "WeakerAccess"})
 public final class CleanUtils {
 
 	private CleanUtils() {
@@ -43,6 +42,7 @@ public final class CleanUtils {
 		return SQLUtils.quotes(string);
 	}
 
+	@Deprecated
 	@NotNull
 	public static String cleanLabel(@NotNull String label) {
 		return org.mtransit.commons.CleanUtils.cleanLabel(label);

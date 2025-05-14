@@ -476,7 +476,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (defaultStringsCleanerEnabled()) {
 			return StringsCleaner.cleanRouteLongName(routeLongName, getSupportedLanguages());
 		}
-		return org.mtransit.commons.CleanUtils.cleanLabel(routeLongName);
+		return org.mtransit.commons.CleanUtils.cleanLabel(getFirstLanguageNN(), routeLongName);
 	}
 
 	@Deprecated
@@ -882,7 +882,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (defaultStringsCleanerEnabled()) {
 			return StringsCleaner.cleanStopName(gStopName, getSupportedLanguages());
 		}
-		return org.mtransit.commons.CleanUtils.cleanLabel(gStopName);
+		return org.mtransit.commons.CleanUtils.cleanLabel(getFirstLanguageNN(), gStopName);
 	}
 
 	@NotNull
