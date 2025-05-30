@@ -242,11 +242,11 @@ public final class ColorUtils {
 					throw new IllegalArgumentException("Unknown color: " + colorString);
 				}
 				return (int) color;
-				//			} else {
-				//				Integer color = sColorNameMap.get(colorString.toLowerCase(Locale.ROOT));
-				//				if (color != null) {
-				//					return color;
-				//				}
+				// } else {
+				// Integer color = sColorNameMap.get(colorString.toLowerCase(Locale.ROOT));
+				// if (color != null) {
+				// return color;
+				// }
 				// }
 				// throw new IllegalArgumentException("Unknown color: " + colorString);
 			}
@@ -325,65 +325,65 @@ public final class ColorUtils {
 				return color & 0xFF;
 			}
 
-			//		/**
-			//		 * Returns the red component encoded in the specified color long.
-			//		 * The range of the returned value depends on the color space
-			//		 * associated with the specified color. The color space can be
-			//		 * queried by calling {link #colorSpace(long)}.
-			//		 *
-			//		 * @param color The color long whose red channel to extract
-			//		 * @return A float value with a range defined by the specified color's
-			//		 * color space
-			//		 *
-			//		 * see #colorSpace(long)
-			//		 * see #green(long)
-			//		 * see #blue(long)
-			//		 * see #alpha(long)
-			//		 */
-			//		public static float red(/*@ColorLong*/ long color) {
-			//			if ((color & 0x3fL) == 0L) return ((color >> 48) & 0xff) / 255.0f;
-			//			return Half.toFloat((short) ((color >> 48) & 0xffff));
-			//		}
+			// /**
+			// * Returns the red component encoded in the specified color long.
+			// * The range of the returned value depends on the color space
+			// * associated with the specified color. The color space can be
+			// * queried by calling {link #colorSpace(long)}.
+			// *
+			// * @param color The color long whose red channel to extract
+			// * @return A float value with a range defined by the specified color's
+			// * color space
+			// *
+			// * see #colorSpace(long)
+			// * see #green(long)
+			// * see #blue(long)
+			// * see #alpha(long)
+			// */
+			// public static float red(/*@ColorLong*/ long color) {
+			// if ((color & 0x3fL) == 0L) return ((color >> 48) & 0xff) / 255.0f;
+			// return Half.toFloat((short) ((color >> 48) & 0xffff));
+			// }
 			//
-			//		/**
-			//		 * Returns the green component encoded in the specified color long.
-			//		 * The range of the returned value depends on the color space
-			//		 * associated with the specified color. The color space can be
-			//		 * queried by calling {link #colorSpace(long)}.
-			//		 *
-			//		 * @param color The color long whose green channel to extract
-			//		 * @return A float value with a range defined by the specified color's
-			//		 * color space
-			//		 *
-			//		 * see #colorSpace(long)
-			//		 * see #red(long)
-			//		 * see #blue(long)
-			//		 * see #alpha(long)
-			//		 */
-			//		public static float green(/*@ColorLong*/ long color) {
-			//			if ((color & 0x3fL) == 0L) return ((color >> 40) & 0xff) / 255.0f;
-			//			return Half.toFloat((short) ((color >> 32) & 0xffff));
-			//		}
+			// /**
+			// * Returns the green component encoded in the specified color long.
+			// * The range of the returned value depends on the color space
+			// * associated with the specified color. The color space can be
+			// * queried by calling {link #colorSpace(long)}.
+			// *
+			// * @param color The color long whose green channel to extract
+			// * @return A float value with a range defined by the specified color's
+			// * color space
+			// *
+			// * see #colorSpace(long)
+			// * see #red(long)
+			// * see #blue(long)
+			// * see #alpha(long)
+			// */
+			// public static float green(/*@ColorLong*/ long color) {
+			// if ((color & 0x3fL) == 0L) return ((color >> 40) & 0xff) / 255.0f;
+			// return Half.toFloat((short) ((color >> 32) & 0xffff));
+			// }
 			//
-			//		/**
-			//		 * Returns the blue component encoded in the specified color long.
-			//		 * The range of the returned value depends on the color space
-			//		 * associated with the specified color. The color space can be
-			//		 * queried by calling {link #colorSpace(long)}.
-			//		 *
-			//		 * @param color The color long whose blue channel to extract
-			//		 * @return A float value with a range defined by the specified color's
-			//		 * color space
-			//		 *
-			//		 * see #colorSpace(long)
-			//		 * see #red(long)
-			//		 * see #green(long)
-			//		 * see #alpha(long)
-			//		 */
-			//		public static float blue(/*@ColorLong*/ long color) {
-			//			if ((color & 0x3fL) == 0L) return ((color >> 32) & 0xff) / 255.0f;
-			//			return Half.toFloat((short) ((color >> 16) & 0xffff));
-			//		}
+			// /**
+			// * Returns the blue component encoded in the specified color long.
+			// * The range of the returned value depends on the color space
+			// * associated with the specified color. The color space can be
+			// * queried by calling {link #colorSpace(long)}.
+			// *
+			// * @param color The color long whose blue channel to extract
+			// * @return A float value with a range defined by the specified color's
+			// * color space
+			// *
+			// * see #colorSpace(long)
+			// * see #red(long)
+			// * see #green(long)
+			// * see #alpha(long)
+			// */
+			// public static float blue(/*@ColorLong*/ long color) {
+			// if ((color & 0x3fL) == 0L) return ((color >> 32) & 0xff) / 255.0f;
+			// return Half.toFloat((short) ((color >> 16) & 0xffff));
+			// }
 		}
 	}
 }

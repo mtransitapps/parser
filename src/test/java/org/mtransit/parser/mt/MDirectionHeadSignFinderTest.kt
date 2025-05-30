@@ -447,7 +447,6 @@ class MDirectionHeadSignFinderTest {
                 makeStopTimeList(tripId8, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
                     .apply {
-                        //  add(makeStopTime(tripId8, 8)) // distinct
                         add(makeStopTime(tripId8, 6, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )

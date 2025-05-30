@@ -48,7 +48,7 @@ object GTFSDataBase {
     private val IS_USING_FILE_INSTEAD_OF_MEMORY = DefaultAgencyTools.IS_CI
             || Constants.DEBUG
     // private val IS_USING_FILE_INSTEAD_OF_MEMORY = false // (GHA.standard.linux > RAM = 16 GB)
-    //         || true // DEBUG
+    // || true // DEBUG
 
     private val connection: Connection by lazy {
         FileUtils.deleteIfExist(File(FILE_PATH)) // delete previous
