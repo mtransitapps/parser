@@ -525,7 +525,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public String provideMissingRouteColor(@NotNull GRoute gRoute) {
-		return Configs.getRouteConfig().getRouteColor(gRoute); // or use agency color
+		return fixColor(Configs.getRouteConfig().getRouteColor(gRoute)); // or use agency color
 	}
 
 	@Override
