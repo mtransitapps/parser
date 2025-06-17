@@ -53,4 +53,25 @@ public final class FileUtils {
 			return null;
 		}
 	}
+
+	@Nullable
+	public static File findFileCaseInsensitive(@NotNull String directoryPath, @NotNull String fileNameToFind) {
+		final File directory = new File(directoryPath);
+		// Check if the provided path is a directory and exists
+		if (!directory.isDirectory()) {
+			System.out.println("Error: " + directoryPath + " is not a valid directory.");
+			return null;
+		}
+		final File[] files = directory.listFiles(); // Get all files and subdirectories
+		if (files != null) {
+			for (File file : files) {
+				if (file.isFile()) { // Check if it's a file (not a directory)
+					if (file.getName().equalsIgnoreCase(fileNameToFind)) {
+						return file; // Found the file (case-insensitive)
+					}
+				}
+			}
+		}
+		return null; // File not found
+	}
 }

@@ -107,14 +107,16 @@ object MDataChangedManager {
             else lastServiceDates.partition { it.exceptionType == MCalendarExceptionType.DEFAULT.id }
         @Suppress("DEPRECATION")
         val allCalendarsWithDays = if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) emptyList() else gtfs.allCalendars.filter { it.hasDays() }
+        MTLog.log("> Service IDS from '${GCalendar.FILENAME}':")
         //noinspection DiscouragedApi
-        MTLog.log("> Last service IDs from '${GCalendar.FILENAME}': ${lastCalendarsServiceDates.map { it.serviceId }.distinct().sorted().joinToString(limit = 50)}")
+        MTLog.log("> - Last: ${lastCalendarsServiceDates.map { it.serviceId }.distinct().sorted().joinToString(limit = 50)}")
         //noinspection DiscouragedApi
-        MTLog.log("> New service IDs from '${GCalendar.FILENAME}':  ${allCalendarsWithDays.map { it.serviceId.escape() }.distinct().sorted().joinToString(limit = 50)}")
+        MTLog.log("> - New : ${allCalendarsWithDays.map { it.serviceId.escape() }.distinct().sorted().joinToString(limit = 50)}")
+        MTLog.log("> Service IDS from '${GCalendarDate.FILENAME}':")
         //noinspection DiscouragedApi
-        MTLog.log("> Last service IDs from '${GCalendarDate.FILENAME}': ${lastCalendarDatesServiceDates.map { it.serviceId }.distinct().sorted().joinToString(limit = 50)}")
+        MTLog.log("> - Last: ${lastCalendarDatesServiceDates.map { it.serviceId }.distinct().sorted().joinToString(limit = 50)}")
         //noinspection DiscouragedApi
-        MTLog.log("> New service IDs from '${GCalendarDate.FILENAME}':  ${gtfs.allCalendarDates.map { it.serviceId.escape() }.distinct().sorted().joinToString(limit = 50)}")
+        MTLog.log("> - New : ${gtfs.allCalendarDates.map { it.serviceId.escape() }.distinct().sorted().joinToString(limit = 50)}")
 
         // 0 - check service IDs available in last/new data
         val lastCalendarsServiceIdInts = lastCalendarsServiceDates.map { it.serviceIdInt }.distinct().sorted()

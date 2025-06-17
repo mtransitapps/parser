@@ -8,6 +8,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.StringUtils;
+import org.mtransit.parser.FileUtils;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.db.GTFSDataBase;
@@ -124,7 +125,7 @@ public class GReader {
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				GTFSDataBase.setAutoCommit(false);
 				final PreparedStatement insertStopTimePrepared = USE_PREPARED_STATEMENT ? GTFSDataBase.prepareInsertStopTime(false) : null;
-				readFile(gtfsDir, GStopTime.FILENAME, false,
+				readFile(gtfsDir, GStopTime.FILENAME, true,
 						line -> processStopTime(agencyTools, gSpec, line, insertStopTimePrepared),
 						columnNames -> {
 							if (!columnNames.contains(GStopTime.PICKUP_TYPE)) {
@@ -172,12 +173,12 @@ public class GReader {
 			@NotNull LineProcessor lineProcessor,
 			@Nullable OnColumnNamesFound onColumnNamesFoundCallback
 	) {
-		final File gtfsFile = new File(gtfsDir, fileName);
-		if (!gtfsFile.exists()) {
+		final File gtfsFile = FileUtils.findFileCaseInsensitive(gtfsDir, fileName);
+		if (gtfsFile == null || !gtfsFile.exists()) {
 			if (fileRequired) {
 				throw new MTLog.Fatal("'%s' file does not exist!", gtfsFile);
 			} else {
-				MTLog.log("Reading file '%s'... SKIP (non-existing).", gtfsFile.getName());
+				MTLog.log("Reading file '%s'... SKIP (non-existing).", fileName);
 				return false;
 			}
 		}

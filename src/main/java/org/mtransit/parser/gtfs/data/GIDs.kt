@@ -67,20 +67,20 @@ object GIDs {
     @Suppress("unused")
     @JvmStatic
     fun toStringPlus(integer: Int?): String {
-        return integer?.let { if (it != -1) getString(it) else EMPTY } ?: EMPTY
+        return integer?.let { if (it != -1) getString(it) else EMPTY } ?: "{ no id }"
     }
 
     @Suppress("unused")
     @JvmStatic
     fun toStringPlus(integer: Pair<Int?, Int?>?): String {
-        return integer?.let { toStringPlus(it.first) + ", " + toStringPlus(it.second) } ?: EMPTY
+        return integer?.let { toStringPlus(it.first) + ", " + toStringPlus(it.second) } ?: "{ empty pair }"
     }
 
     @Suppress("unused")
     @JvmOverloads
     @JvmStatic
     fun toStringPlus(integers: Iterable<Int?>?, limit: Int = 50): String {
-        return integers?.joinToString(limit = limit) { toStringPlus(it) } ?: EMPTY
+        return integers?.joinToString(limit = limit) { toStringPlus(it) }?.takeIf { it.isNotBlank() } ?: "{ empty list }"
     }
 
     @Suppress("unused")
