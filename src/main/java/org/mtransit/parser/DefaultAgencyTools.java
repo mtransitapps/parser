@@ -1329,7 +1329,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 						&& previousToCurrent < MAX_CALENDAR_DATE_COVERAGE_RATIO) {
 					p.setStartDate(incDateDays(DATE_FORMAT, c, p.getStartDate(), -1)); // start--
 					MTLog.log("new start date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.getStartDate());
-				} else if (nextToCurrent < MAX_CALENDAR_DATE_COVERAGE_RATIO) {
+				} else if (TimeUnit.MILLISECONDS.toDays(currentPeriodCoverageInMs) < MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS
+						|| nextToCurrent < MAX_CALENDAR_DATE_COVERAGE_RATIO) {
 					p.setEndDate(incDateDays(DATE_FORMAT, c, p.getEndDate(), 1)); // end++
 					MTLog.log("new end date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.getEndDate());
 				} else {
