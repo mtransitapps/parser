@@ -590,7 +590,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
 		if (defaultStringsCleanerEnabled()) {
-			return StringsCleaner.cleanTripHeadsign(tripHeadsign, getSupportedLanguages());
+			return StringsCleaner.cleanTripHeadsign(tripHeadsign, getSupportedLanguages(), Configs.getRouteConfig().getTripHeadsignRemoveVia());
 		}
 		return tripHeadsign;
 	}
