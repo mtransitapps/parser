@@ -14,6 +14,8 @@ data class RouteConfig(
     val routeIdCleanupRegex: String? = null, // optional
     @SerialName("route_colors")
     val routeColors: List<RouteColor> = emptyList(),
+    @SerialName("trip_headsign_remove_via")
+    val tripHeadsignRemoveVia: Boolean = false, // OPT-IN feature
     @SerialName("direction_finder_enabled")
     val directionFinderEnabled: Boolean = false, // OPT-IN feature
 ) {
