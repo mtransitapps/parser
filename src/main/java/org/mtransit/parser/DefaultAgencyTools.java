@@ -394,7 +394,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean useRouteShortNameForRouteId() {
-		return false; // OPT-IN feature
+		return Configs.getRouteConfig().getUseRouteShortNameForRouteId();
 	}
 
 	@Nullable
@@ -439,12 +439,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String provideMissingRouteShortName(@NotNull GRoute gRoute) {
+		if (Configs.getRouteConfig().getUseRouteLongNameForMissingRouteShortName()) {
+			return gRoute.getRouteLongNameOrDefault();
+		}
 		throw new MTLog.Fatal("No default route short name for %s!", gRoute.toStringPlus());
 	}
 
 	@Override
 	public boolean defaultRouteLongNameEnabled() {
-		return false; // OPT-IN feature
+		return Configs.getRouteConfig().getDefaultRouteLongNameEnabled();
 	}
 
 	@Override
@@ -473,6 +476,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (org.mtransit.commons.StringUtils.isEmpty(routeLongName)) {
 			throw new MTLog.Fatal("No default route long name for %s!", routeLongName);
 		}
+		routeLongName = Configs.getRouteConfig().cleanRouteLongName(routeLongName);
 		if (defaultStringsCleanerEnabled()) {
 			return StringsCleaner.cleanRouteLongName(routeLongName, getSupportedLanguages());
 		}
@@ -589,6 +593,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
+		tripHeadsign = Configs.getRouteConfig().cleanTripHeadsign(tripHeadsign);
 		if (defaultStringsCleanerEnabled()) {
 			return StringsCleaner.cleanTripHeadsign(tripHeadsign, getSupportedLanguages(), Configs.getRouteConfig().getTripHeadsignRemoveVia());
 		}
@@ -608,6 +613,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanDirectionHeadsign(int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
+		directionHeadSign = Configs.getRouteConfig().cleanDirectionHeadsign(directionHeadSign);
 		//noinspection deprecation
 		return cleanDirectionHeadsign(fromStopName, directionHeadSign);
 	}
