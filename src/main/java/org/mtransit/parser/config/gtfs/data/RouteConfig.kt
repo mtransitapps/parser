@@ -7,26 +7,32 @@ import org.mtransit.parser.gtfs.data.GRoute
 
 @Serializable
 data class RouteConfig(
+    // ID
     @SerialName("default_route_id_enabled")
     val defaultRouteIdEnabled: Boolean = false, // OPT-IN feature
-    @SerialName("use_route_short_name_for_route_id")
-    val useRouteShortNameForRouteId: Boolean = false, // OPT-IN feature
-    @SerialName("default_route_long_name_enabled")
-    val defaultRouteLongNameEnabled: Boolean = false, // OPT-IN feature
-    @SerialName("use_route_long_name_for_missing_route_short_name")
-    val useRouteLongNameForMissingRouteShortName: Boolean = false, // OPT-IN feature
-    @SerialName("route_long_name_cleaners")
-    val routeLongNameCleaners: List<Cleaner> = emptyList(),
     @SerialName("route_id_cleanup_regex")
     val routeIdCleanupRegex: String? = null, // optional
+    @SerialName("use_route_short_name_for_route_id")
+    val useRouteShortNameForRouteId: Boolean = false, // OPT-IN feature
+    // short-name
+    @SerialName("use_route_long_name_for_missing_route_short_name")
+    val useRouteLongNameForMissingRouteShortName: Boolean = false, // OPT-IN feature
+    @SerialName("route_short_name_cleaners")
+    val routeShortNameCleaners: List<Cleaner> = emptyList(),
+    // long-name
+    @SerialName("default_route_long_name_enabled")
+    val defaultRouteLongNameEnabled: Boolean = false, // OPT-IN feature
+    @SerialName("route_long_name_cleaners")
+    val routeLongNameCleaners: List<Cleaner> = emptyList(),
+    // colors
     @SerialName("route_colors")
     val routeColors: List<RouteColor> = emptyList(),
-    // trip
+    // TRIP
     @SerialName("trip_headsign_cleaners")
     val tripHeadsignCleaners: List<Cleaner> = emptyList(),
     @SerialName("trip_headsign_remove_via")
     val tripHeadsignRemoveVia: Boolean = false, // OPT-IN feature
-    // direction
+    // DIRECTION
     @SerialName("direction_headsign_cleaners")
     val directionHeadsignCleaners: List<Cleaner> = emptyList(),
     @SerialName("direction_finder_enabled")
@@ -61,6 +67,9 @@ data class RouteConfig(
         }
         return gRoute.routeColor
     }
+
+    fun cleanRouteShortName(routeShortName: String) =
+        cleanString(routeShortName, this.routeShortNameCleaners)
 
     fun cleanRouteLongName(routeLongName: String) =
         cleanString(routeLongName, this.routeLongNameCleaners)

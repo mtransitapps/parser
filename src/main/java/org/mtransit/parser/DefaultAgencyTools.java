@@ -433,6 +433,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (org.mtransit.commons.StringUtils.isEmpty(routeShortName)) {
 			throw new MTLog.Fatal("No default route short name for %s!", routeShortName);
 		}
+		routeShortName = Configs.getRouteConfig().cleanRouteShortName(routeShortName);
 		return routeShortName.trim();
 	}
 
