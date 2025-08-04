@@ -372,7 +372,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public Long convertRouteIdFromShortNameNotSupported(@NotNull String routeShortName) {
-		return null;
+		return Configs.getRouteConfig().convertRouteIdFromShortNameNotSupported(routeShortName);
 	}
 
 	@Nullable
@@ -921,15 +921,22 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public int getStopId(@NotNull GStop gStop) {
 		try {
 			//noinspection DiscouragedApi
-			return Integer.parseInt(gStop.getStopId());
+			final String stopIdS = useStopCodeForStopId() ? getStopCode(gStop) : cleanStopOriginalId(gStop.getStopId());
+			//noinspection DiscouragedApi
+			return Integer.parseInt(stopIdS);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while extracting stop ID from %s!", gStop.toStringPlus());
 		}
 	}
 
 	@Override
+	public boolean useStopCodeForStopId() {
+		return Configs.getRouteConfig().getUseStopCodeForStopId();
+	}
+
+	@Override
 	public @Nullable String getStopIdCleanupRegex() {
-		return null;
+		return Configs.getRouteConfig().getStopIdCleanupRegex();
 	}
 
 	@Nullable

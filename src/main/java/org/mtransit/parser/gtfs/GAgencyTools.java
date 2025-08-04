@@ -236,6 +236,8 @@ public interface GAgencyTools {
 	// STOP
 	int getStopId(@NotNull GStop gStop);
 
+	boolean useStopCodeForStopId();
+
 	@Nullable
 	String getStopIdCleanupRegex();
 

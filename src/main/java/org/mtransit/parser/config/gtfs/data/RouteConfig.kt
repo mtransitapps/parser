@@ -14,6 +14,8 @@ data class RouteConfig(
     val routeIdCleanupRegex: String? = null, // optional
     @SerialName("use_route_short_name_for_route_id")
     val useRouteShortNameForRouteId: Boolean = false, // OPT-IN feature
+    @SerialName("route_short_name_to_route_id_configs")
+    val routeShortNameToRouteIdConfigs: List<RouteShortNameToRouteIdConfig> = emptyList(),
     // short-name
     @SerialName("use_route_long_name_for_missing_route_short_name")
     val useRouteLongNameForMissingRouteShortName: Boolean = false, // OPT-IN feature
@@ -37,7 +39,22 @@ data class RouteConfig(
     val directionHeadsignCleaners: List<Cleaner> = emptyList(),
     @SerialName("direction_finder_enabled")
     val directionFinderEnabled: Boolean = false, // OPT-IN feature
+    // STOP
+    @SerialName("stop_id_cleanup_regex")
+    val stopIdCleanupRegex: String? = null, // optional
+    @SerialName("use_stop_code_for_stop_id")
+    val useStopCodeForStopId: Boolean = false, // OPT-IN feature
+
 ) {
+
+    @Serializable
+    data class RouteShortNameToRouteIdConfig(
+        @SerialName("route_short_name")
+        val routeShortName: String,
+        @SerialName("route_id")
+        val routeId: Long,
+    )
+
     @Serializable
     data class RouteColor(
         @SerialName("route_short_name")
@@ -57,6 +74,15 @@ data class RouteConfig(
         @SerialName("replacement")
         val replacement: String = "",
     )
+
+    fun convertRouteIdFromShortNameNotSupported(routeShortName: String): Long? {
+        this.routeShortNameToRouteIdConfigs
+            .singleOrNull { it.routeShortName == routeShortName }
+            ?.let { routeShortNameToRouteIdConfig ->
+                return routeShortNameToRouteIdConfig.routeId
+            }
+        return null
+    }
 
     @JvmOverloads
     fun getRouteColor(gRoute: GRoute, override: Boolean = false): String? {
