@@ -643,6 +643,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public boolean allowDuplicateKeyError() {
+		return false; // this is bad, probably wrong copy-paste -> duplicated lines
+	}
+
+	@Override
 	public boolean directionHeadSignsDescriptive(@NotNull Map<Integer, String> directionHeadSigns) {
 		return directionHeadSignsDescriptiveS(directionHeadSigns);
 	}

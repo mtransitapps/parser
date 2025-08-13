@@ -93,7 +93,7 @@ public class GReader {
 			// TRIPS
 			if (!calendarsOnly) {
 				GTFSDataBase.setAutoCommit(false);
-				final PreparedStatement insertTripsPrepared = USE_PREPARED_STATEMENT ? GTFSDataBase.prepareInsertTrip(false) : null;
+				final PreparedStatement insertTripsPrepared = USE_PREPARED_STATEMENT ? GTFSDataBase.prepareInsertTrip(agencyTools.allowDuplicateKeyError()) : null;
 				readFile(gtfsDir, GTrip.FILENAME, true, line ->
 						processTrip(agencyTools, gSpec, line, insertTripsPrepared)
 				);
@@ -124,7 +124,7 @@ public class GReader {
 			// STOP TIMES
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				GTFSDataBase.setAutoCommit(false);
-				final PreparedStatement insertStopTimePrepared = USE_PREPARED_STATEMENT ? GTFSDataBase.prepareInsertStopTime(false) : null;
+				final PreparedStatement insertStopTimePrepared = USE_PREPARED_STATEMENT ? GTFSDataBase.prepareInsertStopTime(agencyTools.allowDuplicateKeyError()) : null;
 				readFile(gtfsDir, GStopTime.FILENAME, true,
 						line -> processStopTime(agencyTools, gSpec, line, insertStopTimePrepared),
 						columnNames -> {

@@ -176,6 +176,8 @@ public interface GAgencyTools {
 
 	boolean directionHeadSignsDescriptive(@NotNull Map<Integer, String> directionHeadSigns);
 
+	boolean allowDuplicateKeyError();
+
 	boolean allowNonDescriptiveHeadSigns(long routeId);
 
 	@Nullable
