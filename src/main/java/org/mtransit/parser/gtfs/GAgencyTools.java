@@ -165,7 +165,7 @@ public interface GAgencyTools {
 	@Nullable
 	Pattern getTripIdCleanupPattern();
 
-	@NotNull String cleanTripOriginalId(@NotNull String gRouteId);
+	@NotNull String cleanTripOriginalId(@NotNull String gTripId);
 
 	boolean directionSplitterEnabled(long routeId);
 
