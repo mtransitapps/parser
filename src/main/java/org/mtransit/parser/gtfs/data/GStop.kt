@@ -6,6 +6,7 @@ import org.mtransit.commons.gtfs.data.Stop
 import org.mtransit.commons.gtfs.data.StopId
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.gtfs.GAgencyTools
 
 // https://developers.google.com/transit/gtfs/reference#stops_fields
 // https://gtfs.org/schedule/reference/#stopstxt
@@ -91,7 +92,7 @@ data class GStop(
     companion object {
         const val FILENAME = "stops.txt"
 
-        private const val STOP_ID = "stop_id"
+        internal const val STOP_ID = "stop_id"
         private const val STOP_NAME = "stop_name"
         private const val STOP_LAT = "stop_lat"
         private const val STOP_LON = "stop_lon"
@@ -101,8 +102,10 @@ data class GStop(
         private const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>) = GStop(
-            line[STOP_ID] ?: throw MTLog.Fatal("Invalid GStop from $line!"),
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GStop(
+            line[STOP_ID]
+                ?.let { agencyTools.cleanStopOriginalId(it) }
+                ?: throw MTLog.Fatal("Invalid GStop from $line!"),
             line[STOP_NAME] ?: throw MTLog.Fatal("Invalid GStop from $line!"),
             line[STOP_LAT]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),
             line[STOP_LON]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),

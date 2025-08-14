@@ -77,9 +77,9 @@ data class GTripStop(
     }
 
     companion object {
-        const val ROUTE_ID = "route_id"
-        const val TRIP_ID = "trip_id"
-        const val STOP_ID = "stop_id"
+        const val ROUTE_ID = GRoute.ROUTE_ID
+        const val TRIP_ID = GTrip.TRIP_ID
+        const val STOP_ID = GStop.STOP_ID
         const val STOP_SEQUENCE = "stop_sequence"
 
         private const val UID_SEPARATOR = "+" // int IDs can be negative

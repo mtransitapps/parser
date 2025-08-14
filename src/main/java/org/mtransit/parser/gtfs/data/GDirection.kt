@@ -1,9 +1,11 @@
 package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
+import org.mtransit.commons.GTFSCommons
 import org.mtransit.commons.gtfs.data.Direction
 import org.mtransit.commons.gtfs.data.DirectionType
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.gtfs.GAgencyTools
 
 data class GDirection(
     val routeIdInt: Int,
@@ -48,7 +50,7 @@ data class GDirection(
     companion object {
         const val FILENAME = "directions.txt"
 
-        private const val ROUTE_ID = "route_id"
+        private const val ROUTE_ID = GRoute.ROUTE_ID
         private const val DIRECTION_ID = "direction_id"
         private const val DIRECTION = "direction"
 
@@ -57,8 +59,10 @@ data class GDirection(
         // TODO other alternatives
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>) = GDirection(
-            routeId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GDirection from $line!"),
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GDirection(
+            routeId = line[ROUTE_ID]
+                ?.let { agencyTools.cleanRouteOriginalId(it) }
+                ?: throw MTLog.Fatal("Invalid GDirection from $line!"),
             directionIdInt = line[DIRECTION_ID]?.toIntOrNull() ?: throw MTLog.Fatal("Invalid GDirection from $line!"),
             directionTypeValue = line[DIRECTION]?.trim(),
             destination = line[DESTINATION]?.trim() ?: line[DESTINATION_DIRECTION_NAME]?.trim(),

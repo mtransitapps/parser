@@ -286,7 +286,7 @@ public class GReader {
 	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line,
 										@Nullable PreparedStatement insertStopTimePrepared) {
 		try {
-			final GStopTime gStopTime = GStopTime.fromLine(line);
+			final GStopTime gStopTime = GStopTime.fromLine(line, agencyTools);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
 				return;
 			}
@@ -316,7 +316,7 @@ public class GReader {
 										 GSpec gSpec,
 										 HashMap<String, String> line) {
 		try {
-			final GFrequency gFrequency = GFrequency.fromLine(line);
+			final GFrequency gFrequency = GFrequency.fromLine(line, agencyTools);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gFrequency.getTripIdInt()))) {
 				return;
 			}
@@ -372,7 +372,7 @@ public class GReader {
 
 	private static void processDirection(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final GDirection gDirection = GDirection.fromLine(line);
+			final GDirection gDirection = GDirection.fromLine(line, agencyTools);
 			final GRoute gRoute = gSpec.getRoute(gDirection.getRouteIdInt());
 			if (agencyTools.excludeRouteNullable(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute == null ? null : gRoute.toStringPlus());
@@ -393,7 +393,7 @@ public class GReader {
 	private static void processTrip(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line,
 									@Nullable PreparedStatement insertStopTimePrepared) {
 		try {
-			final GTrip gTrip = GTrip.fromLine(line);
+			final GTrip gTrip = GTrip.fromLine(line, agencyTools);
 			if (agencyTools.excludeTrip(gTrip)) {
 				logExclude("Exclude trip: %s.", gTrip.toStringPlus());
 				return;
@@ -417,7 +417,7 @@ public class GReader {
 
 	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line) {
 		try {
-			final GStop gStop = GStop.fromLine(line);
+			final GStop gStop = GStop.fromLine(line, agencyTools);
 			if (agencyTools.excludeStop(gStop)) {
 				return;
 			}
@@ -429,7 +429,7 @@ public class GReader {
 
 	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line, @Nullable String defaultAgencyId) {
 		try {
-			final GRoute gRoute = GRoute.fromLine(line, defaultAgencyId);
+			final GRoute gRoute = GRoute.fromLine(line, defaultAgencyId, agencyTools);
 			final GAgency routeAgency = gSpec.getAgency(gRoute.getAgencyIdInt());
 			if (agencyTools.excludeRoute(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute.toStringPlus());

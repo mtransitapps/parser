@@ -1,11 +1,14 @@
 package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
+import org.mtransit.commons.GTFSCommons
 import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.commons.gtfs.data.Route
 import org.mtransit.commons.gtfs.data.RouteId
 import org.mtransit.parser.Constants.EMPTY
+import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.gtfs.GAgencyTools
 
 // https://developers.google.com/transit/gtfs/reference#routestxt
 // https://gtfs.org/reference/static/#routestxt
@@ -131,7 +134,7 @@ data class GRoute(
         const val FILENAME = "routes.txt"
 
         private const val AGENCY_ID = "agency_id"
-        private const val ROUTE_ID = "route_id"
+        internal const val ROUTE_ID = "route_id"
         private const val ROUTE_SHORT_NAME = "route_short_name"
         private const val ROUTE_LONG_NAME = "route_long_name"
         private const val ROUTE_DESC = "route_desc"
@@ -142,11 +145,13 @@ data class GRoute(
         private const val ROUTE_SORT_ORDER = "route_sort_order"
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>, defaultAgencyId: String?) = GRoute(
+        fun fromLine(line: Map<String, String>, defaultAgencyId: String?, agencyTools: GAgencyTools) = GRoute(
             agencyId = line[AGENCY_ID]?.takeIf { it.isNotBlank() }
                 ?: defaultAgencyId
                 ?: throw MTLog.Fatal("Invalid GRoute.$AGENCY_ID from $line!"),
-            routeId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
+            routeId = line[ROUTE_ID]
+                ?.let { agencyTools.cleanRouteOriginalId(it) }
+                ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
             routeShortName = line[ROUTE_SHORT_NAME]?.trim() ?: EMPTY,
             routeLongName = line[ROUTE_LONG_NAME],
             routeDesc = line[ROUTE_DESC],

@@ -159,6 +159,14 @@ public interface GAgencyTools {
 	@NotNull
 	String cleanTripHeadsign(@NotNull String tripHeadsign);
 
+	@Nullable
+	String getTripIdCleanupRegex();
+
+	@Nullable
+	Pattern getTripIdCleanupPattern();
+
+	@NotNull String cleanTripOriginalId(@NotNull String gRouteId);
+
 	boolean directionSplitterEnabled(long routeId);
 
 	boolean directionOverrideId(long routeId);

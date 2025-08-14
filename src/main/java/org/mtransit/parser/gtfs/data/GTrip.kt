@@ -1,6 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
+import org.mtransit.commons.GTFSCommons
 import org.mtransit.commons.StringUtils
 import org.mtransit.commons.gtfs.data.Trip
 import org.mtransit.parser.MTLog
@@ -129,8 +130,8 @@ data class GTrip(
     companion object {
         const val FILENAME = "trips.txt"
 
-        private const val TRIP_ID = "trip_id"
-        private const val ROUTE_ID = "route_id"
+        internal const val TRIP_ID = "trip_id"
+        private const val ROUTE_ID = GRoute.ROUTE_ID
         private const val SERVICE_ID = "service_id"
         private const val TRIP_HEADSIGN = "trip_headsign"
         private const val TRIP_SHORT_NAME = "trip_short_name"
@@ -141,9 +142,13 @@ data class GTrip(
         private const val BIKES_ALLOWED = "bikes_allowed"
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>) = GTrip(
-            tripId = line[TRIP_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
-            routeId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GTrip(
+            tripId = line[TRIP_ID]
+                ?.let { agencyTools.cleanTripOriginalId(it) }
+                ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
+            routeId = line[ROUTE_ID]
+                ?.let { agencyTools.cleanRouteOriginalId(it) }
+                ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
             serviceId = line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
             tripHeadsign = line[TRIP_HEADSIGN]?.takeIf { it.isNotBlank() },
             tripShortName = line[TRIP_SHORT_NAME]?.takeIf { it.isNotBlank() },
