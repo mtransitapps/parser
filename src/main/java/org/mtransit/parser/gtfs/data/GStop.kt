@@ -103,16 +103,16 @@ data class GStop(
 
         @JvmStatic
         fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GStop(
-            line[STOP_ID]
+            stopId = line[STOP_ID]?.trim()
                 ?.let { agencyTools.cleanStopOriginalId(it) }
                 ?: throw MTLog.Fatal("Invalid GStop from $line!"),
-            line[STOP_NAME] ?: throw MTLog.Fatal("Invalid GStop from $line!"),
-            line[STOP_LAT]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),
-            line[STOP_LON]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),
-            line[STOP_CODE]?.trim() ?: EMPTY,
-            line[LOCATION_TYPE]?.takeIf { it.isNotBlank() }?.toInt(),
-            line[PARENT_STATION],
-            line[WHEELCHAIR_BOARDING]?.takeIf { it.isNotBlank() }?.toInt(),
+            stopName = line[STOP_NAME] ?: throw MTLog.Fatal("Invalid GStop from $line!"),
+            stopLat = line[STOP_LAT]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),
+            stopLong = line[STOP_LON]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),
+            stopCode = line[STOP_CODE]?.trim() ?: EMPTY,
+            locationType = line[LOCATION_TYPE]?.takeIf { it.isNotBlank() }?.toInt(),
+            parentStationId = line[PARENT_STATION],
+            wheelchairBoarding = line[WHEELCHAIR_BOARDING]?.takeIf { it.isNotBlank() }?.toInt(),
         )
 
         @JvmStatic

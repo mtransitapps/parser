@@ -143,10 +143,10 @@ data class GTrip(
 
         @JvmStatic
         fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GTrip(
-            tripId = line[TRIP_ID]
+            tripId = line[TRIP_ID]?.trim()
                 ?.let { agencyTools.cleanTripOriginalId(it) }
                 ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
-            routeId = line[ROUTE_ID]
+            routeId = line[ROUTE_ID]?.trim()
                 ?.let { agencyTools.cleanRouteOriginalId(it) }
                 ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
             serviceId = line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),

@@ -103,13 +103,13 @@ data class GFrequency(
 
         @JvmStatic
         fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GFrequency(
-            line[TRIP_ID]
+            tripId = line[TRIP_ID]?.trim()
                 ?.let { agencyTools.cleanTripOriginalId(it) }
                 ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
-            line[START_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
-            line[END_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
-            line[HEADWAY_SECS]?.toInt() ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
-            line[EXACT_TIMES]?.toIntOrNull(),
+            startTime = line[START_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
+            endTime = line[END_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
+            headwaySecs = line[HEADWAY_SECS]?.toInt() ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
+            exactTimes = line[EXACT_TIMES]?.toIntOrNull(),
         )
 
         @JvmStatic

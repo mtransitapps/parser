@@ -60,7 +60,7 @@ data class GDirection(
 
         @JvmStatic
         fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GDirection(
-            routeId = line[ROUTE_ID]
+            routeId = line[ROUTE_ID]?.trim()
                 ?.let { agencyTools.cleanRouteOriginalId(it) }
                 ?: throw MTLog.Fatal("Invalid GDirection from $line!"),
             directionIdInt = line[DIRECTION_ID]?.toIntOrNull() ?: throw MTLog.Fatal("Invalid GDirection from $line!"),

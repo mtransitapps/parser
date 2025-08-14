@@ -149,7 +149,7 @@ data class GRoute(
             agencyId = line[AGENCY_ID]?.takeIf { it.isNotBlank() }
                 ?: defaultAgencyId
                 ?: throw MTLog.Fatal("Invalid GRoute.$AGENCY_ID from $line!"),
-            routeId = line[ROUTE_ID]
+            routeId = line[ROUTE_ID]?.trim()
                 ?.let { agencyTools.cleanRouteOriginalId(it) }
                 ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
             routeShortName = line[ROUTE_SHORT_NAME]?.trim() ?: EMPTY,

@@ -207,7 +207,7 @@ data class GStopTime(
 
         @JvmStatic
         fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GStopTime(
-            tripId = line[TRIP_ID]
+            tripId = line[TRIP_ID]?.trim()
                 ?.let { agencyTools.cleanTripOriginalId(it) }
                 ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
             arrivalTime = line[ARRIVAL_TIME]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
