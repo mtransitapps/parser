@@ -421,6 +421,12 @@ public class GReader {
 			if (agencyTools.excludeStop(gStop)) {
 				return;
 			}
+			if (agencyTools.getStopIdCleanupRegex() != null) { // IF stop ID cleanup regex set DO
+				final GStop previousStop = gSpec.getStop(gStop.getStopIdInt());
+				if (previousStop != null && previousStop.equals(gStop)) {
+					return; // ignore if stop already exists with same values
+				}
+			}
 			gSpec.addStop(gStop);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while parsing stop line %s!", line);
