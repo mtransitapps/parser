@@ -803,6 +803,7 @@ public class MGenerator {
 	private static final String GTFS_RTS_TIMEZONE = "gtfs_rts_timezone";
 	private static final String GTFS_RTS_COLOR = "gtfs_rts_color";
 	private static final String GTFS_RTS_ROUTE_ID_CLEANUP_REGEX = "gtfs_rts_route_id_cleanup_regex";
+	private static final String GTFS_RTS_TRIP_ID_CLEANUP_REGEX = "gtfs_rts_trip_id_cleanup_regex";
 	private static final String GTFS_RTS_STOP_ID_CLEANUP_REGEX = "gtfs_rts_stop_id_cleanup_regex";
 
 	private static final String GTFS_RTS_SCHEDULE_AVAILABLE = "gtfs_rts_schedule_available";
@@ -852,6 +853,10 @@ public class MGenerator {
 			ow.write(Constants.NEW_LINE);
 			if (gAgencyTools.getRouteIdCleanupRegex() != null) {
 				ow.write(getRESOURCES_STRING(GTFS_RTS_ROUTE_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getRouteIdCleanupRegex())));
+				ow.write(Constants.NEW_LINE);
+			}
+			if (gAgencyTools.getTripIdCleanupRegex() != null) {
+				ow.write(getRESOURCES_STRING(GTFS_RTS_TRIP_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getTripIdCleanupRegex())));
 				ow.write(Constants.NEW_LINE);
 			}
 			if (gAgencyTools.getStopIdCleanupRegex() != null) {

@@ -30,7 +30,7 @@ data class MRoute(
         shortName,
         longName,
         color,
-        GTFSCommons.stringIdToHashIfEnabled(originalId, agencyTools?.routeIdCleanupPattern),
+        GTFSCommons.stringIdToHashIfEnabled(originalId),
         type,
     )
 
