@@ -836,6 +836,7 @@ class MDirectionHeadSignFinderTest {
         return GTrip(
             tripId = tripId,
             routeId = routeId,
+            originalRouteId = routeId,
             serviceId = serviceId,
             tripHeadsign = tripHeadsign,
             tripShortName = tripShortName,
@@ -859,6 +860,7 @@ class MDirectionHeadSignFinderTest {
         return GTrip(
             tripIdInt = tripId,
             routeIdInt = routeId,
+            originalRouteIdInt = routeId,
             serviceIdInt = serviceId,
             tripHeadsign = tripHeadsign,
             tripShortName = tripShortName,
