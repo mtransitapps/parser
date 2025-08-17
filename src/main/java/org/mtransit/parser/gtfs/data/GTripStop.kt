@@ -80,7 +80,7 @@ data class GTripStop(
         const val ROUTE_ID = GRoute.ROUTE_ID
         const val TRIP_ID = GTrip.TRIP_ID
         const val STOP_ID = GStop.STOP_ID
-        const val STOP_SEQUENCE = "stop_sequence"
+        const val STOP_SEQUENCE = GStopTime.STOP_SEQUENCE
 
         private const val UID_SEPARATOR = "+" // int IDs can be negative
 

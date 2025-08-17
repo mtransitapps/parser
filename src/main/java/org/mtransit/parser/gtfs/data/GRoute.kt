@@ -128,6 +128,7 @@ data class GRoute(
     fun equalsExceptLongNameAndUrl(obj: Any?): Boolean {
         val o = obj as GRoute
         return when {
+            agencyIdInt != o.agencyIdInt -> false // not equal
             routeIdInt != o.routeIdInt -> false // not equal
             routeShortName != o.routeShortName -> false // not equal
             routeDesc != o.routeDesc -> false // not equal
