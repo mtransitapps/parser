@@ -95,7 +95,7 @@ object DBUtils {
                     .appendColumn(MSchedule.STOP_ID, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.ARRIVAL, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.DEPARTURE, SQLUtilsCommons.INT)
-                    .appendColumn(MSchedule.PATH_ID, SQLUtilsCommons.INT)
+                    .appendColumn(MSchedule.TRIP_ID, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.WHEELCHAIR_BOARDING, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.HEADSIGN_TYPE, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.HEADSIGN_VALUE, SQLUtilsCommons.TXT) // string ??
@@ -357,7 +357,7 @@ object DBUtils {
                         "${mSchedule.stopId}," +
                         "${mSchedule.arrival}," +
                         "${mSchedule.departure}," +
-                        "${mSchedule.pathIdInt}," +
+                        "${mSchedule.tripIdInt}," +
                         "${mSchedule.accessible}," +
                         "${mSchedule.headsignType}," +
                         "${mSchedule.headsignValue?.quotesEscape()}" +
@@ -561,7 +561,7 @@ object DBUtils {
                         rs.getInt(MSchedule.STOP_ID),
                         rs.getInt(MSchedule.ARRIVAL),
                         rs.getInt(MSchedule.DEPARTURE),
-                        rs.getInt(MSchedule.PATH_ID),
+                        rs.getInt(MSchedule.TRIP_ID),
                         rs.getInt(MSchedule.WHEELCHAIR_BOARDING),
                         rs.getInt(MSchedule.HEADSIGN_TYPE),
                         rs.getStringOrNull(MSchedule.HEADSIGN_VALUE)?.unquotes(),

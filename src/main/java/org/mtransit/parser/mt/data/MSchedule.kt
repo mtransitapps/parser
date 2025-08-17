@@ -18,7 +18,7 @@ data class MSchedule(
     val stopId: Int,
     val arrival: Int,
     val departure: Int,
-    val pathIdInt: Int, // GTFS trip ID
+    val tripIdInt: Int,
     val accessible: Int,
     var headsignType: Int = -1,
     var headsignValue: String? = null,
@@ -32,7 +32,7 @@ data class MSchedule(
         directionId: Long,
         stopId: Int,
         times: Pair<Int?, Int?>,
-        pathIdInt: Int,
+        tripIdInt: Int,
         accessible: Int,
     ) : this(
         routeId = routeId,
@@ -41,7 +41,7 @@ data class MSchedule(
         stopId = stopId,
         arrival = (times.first ?: 0),
         departure = (times.second ?: 0),
-        pathIdInt = pathIdInt,
+        tripIdInt = tripIdInt,
         accessible = accessible,
     )
 
@@ -56,11 +56,11 @@ data class MSchedule(
 
     @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val pathId = _pathId
+    val tripId = _tripId
 
-    private val _pathId: String
+    private val _tripId: String
         get() {
-            return GIDs.getString(pathIdInt)
+            return GIDs.getString(tripIdInt)
         }
 
     private fun getCleanServiceId(agencyTools: GAgencyTools): String {
@@ -113,7 +113,7 @@ data class MSchedule(
         append(Constants.COLUMN_SEPARATOR) //
         append(departure) // departure
         append(Constants.COLUMN_SEPARATOR) //
-        if (DefaultAgencyTools.EXPORT_PATH_ID) {
+        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             @Suppress("ControlFlowWithEmptyBody")
             if (arrivalBeforeDeparture > 0) {
                 // TODO ?
@@ -121,8 +121,8 @@ data class MSchedule(
             append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
             append(Constants.COLUMN_SEPARATOR) //
         }
-        if (DefaultAgencyTools.EXPORT_PATH_ID) {
-            append(_pathId.quotesEscape()) // GTFS trip ID
+        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
+            append(_tripId.quotesEscape())
             append(Constants.COLUMN_SEPARATOR) //
         }
         append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
@@ -141,7 +141,7 @@ data class MSchedule(
             append(departure - lastSchedule.departure) // departure
         }
         append(Constants.COLUMN_SEPARATOR) //
-        if (DefaultAgencyTools.EXPORT_PATH_ID) {
+        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             @Suppress("ControlFlowWithEmptyBody")
             if (arrivalBeforeDeparture > 0) {
                 // TODO ?
@@ -149,8 +149,8 @@ data class MSchedule(
             append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
             append(Constants.COLUMN_SEPARATOR) //
         }
-        if (DefaultAgencyTools.EXPORT_PATH_ID) {
-            append(_pathId) // GTFS trip ID
+        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
+            append(_tripId)
             append(Constants.COLUMN_SEPARATOR) //
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
@@ -224,7 +224,7 @@ data class MSchedule(
         const val STOP_ID = "stop_id"
         const val ARRIVAL = "arrival"
         const val DEPARTURE = "departure"
-        const val PATH_ID = "path_id" // TBR // GTFS trip ID
+        const val TRIP_ID = "trip_id"
         const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
         const val HEADSIGN_TYPE = "headsign_type"
         const val HEADSIGN_VALUE = "headsign_value"

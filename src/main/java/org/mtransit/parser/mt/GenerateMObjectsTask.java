@@ -688,7 +688,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			this.gStopsCache.put(mStopId, gStop);
 			if (mStopId < 0) {
 				//noinspection DiscouragedApi
-				throw new MTLog.Fatal("%s: Can't find GTFS stop ID (%s) '%s' from GTFS trip ID '%s' (%s)", this.routeId, mStopId, gTripStop.getStopIdInt(),
+				throw new MTLog.Fatal("%s: Can't find GTFS stop ID (%s) '%s' from trip ID '%s' (%s)", this.routeId, mStopId, gTripStop.getStopIdInt(),
 						gTripStop.getTripId(), gStop.toStringPlus(true));
 			}
 			mDirectionsAndStopSequences = new Pair<>(
