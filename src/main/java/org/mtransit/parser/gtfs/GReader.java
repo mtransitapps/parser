@@ -435,7 +435,7 @@ public class GReader {
 
 	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line, @Nullable String defaultAgencyId) {
 		try {
-			GRoute gRoute = GRoute.fromLine(line, defaultAgencyId, agencyTools);
+			final GRoute gRoute = GRoute.fromLine(line, defaultAgencyId, agencyTools);
 			final GAgency routeAgency = gSpec.getAgency(gRoute.getAgencyIdInt());
 			if (agencyTools.excludeRoute(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute.toStringPlus());
@@ -462,8 +462,7 @@ public class GReader {
 				if (previousRoute != null && previousRoute.equalsExceptLongNameAndUrl(gRoute)) {
 					final String mergedRouteLongName = GRoute.mergeRouteLongNames(previousRoute.getRouteLongName(), gRoute.getRouteLongName());
 					if (mergedRouteLongName != null) { // merge successful
-						gRoute = gRoute.clone(mergedRouteLongName);
-						gSpec.addRoute(gRoute, true);
+						gSpec.addRoute(previousRoute.clone(mergedRouteLongName), true);
 						return;
 					}
 				}
