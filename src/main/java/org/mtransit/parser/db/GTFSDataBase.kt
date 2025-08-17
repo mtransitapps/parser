@@ -156,9 +156,9 @@ object GTFSDataBase {
 
     @JvmOverloads
     @JvmStatic
-    fun insertRoute(route: Route, preparedStatement: PreparedStatement? = null) {
+    fun insertRoute(route: Route, allowUpdate: Boolean = false, preparedStatement: PreparedStatement? = null) {
         connection.createStatement().use { statement ->
-            RouteSQL.insertIntoMainTable(route, statement, preparedStatement)
+            RouteSQL.insertIntoMainTable(route, statement, preparedStatement, allowUpdate)
         }
     }
 

@@ -1,7 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
-import org.mtransit.commons.GTFSCommons
 import org.mtransit.commons.StringUtils
 import org.mtransit.commons.gtfs.data.Trip
 import org.mtransit.parser.MTLog
@@ -12,6 +11,7 @@ import org.mtransit.parser.gtfs.GAgencyTools
 data class GTrip(
     val tripIdInt: Int,
     val routeIdInt: Int,
+    val originalRouteIdInt: Int,
     val serviceIdInt: Int,
     var tripHeadsign: String?, // Optional
     val tripShortName: String?, // Optional
@@ -24,6 +24,7 @@ data class GTrip(
     constructor(
         tripId: String,
         routeId: String,
+        originalRouteId: String,
         serviceId: String,
         tripHeadsign: String?,
         tripShortName: String?,
@@ -35,6 +36,7 @@ data class GTrip(
     ) : this(
         tripIdInt = GIDs.getInt(tripId),
         routeIdInt = GIDs.getInt(routeId),
+        originalRouteIdInt = GIDs.getInt(originalRouteId),
         serviceIdInt = GIDs.getInt(serviceId),
         tripHeadsign = tripHeadsign,
         tripShortName = tripShortName,
@@ -80,6 +82,15 @@ data class GTrip(
 
     @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
+    val originalRouteId = _originalRouteId
+
+    private val _originalRouteId: String
+        get() {
+            return GIDs.getString(originalRouteIdInt)
+        }
+
+    @Discouraged(message = "Not memory efficient")
+    @Suppress("unused")
     val serviceId = _serviceId
 
     private val _serviceId: String
@@ -117,6 +128,7 @@ data class GTrip(
     fun to() = Trip(
         tripId = _tripId,
         routeId = _routeId,
+        originalRouteId = _originalRouteId,
         serviceId = _serviceId,
         tripHeadsign = tripHeadsign,
         tripShortName = tripShortName,
@@ -149,6 +161,7 @@ data class GTrip(
             routeId = line[ROUTE_ID]?.trim()
                 ?.let { agencyTools.cleanRouteOriginalId(it) }
                 ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
+            originalRouteId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
             serviceId = line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
             tripHeadsign = line[TRIP_HEADSIGN]?.takeIf { it.isNotBlank() },
             tripShortName = line[TRIP_SHORT_NAME]?.takeIf { it.isNotBlank() },
@@ -167,6 +180,7 @@ data class GTrip(
             GTrip(
                 tripId = it.tripId,
                 routeId = it.routeId,
+                originalRouteId = it.originalRouteId,
                 serviceId = it.serviceId,
                 tripHeadsign = it.tripHeadsign,
                 tripShortName = it.tripShortName,

@@ -338,7 +338,7 @@ public class GReader {
 			agencyTools.addSupportedLanguage(gAgency.getAgencyLang());
 			gSpec.addAgency(gAgency);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: '%s'!", line);
+			throw new MTLog.Fatal(e, "Error while processing agency: '%s'!", line);
 		}
 	}
 
@@ -354,7 +354,7 @@ public class GReader {
 			}
 			gSpec.addCalendarDate(gCalendarDate);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: '%s'!", line);
+			throw new MTLog.Fatal(e, "Error while processing calendar date: '%s'!", line);
 		}
 	}
 
@@ -366,7 +366,7 @@ public class GReader {
 			}
 			gSpec.addCalendar(gCalendar);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: %s!", line);
+			throw new MTLog.Fatal(e, "Error while processing calendar: %s!", line);
 		}
 	}
 
@@ -411,7 +411,7 @@ public class GReader {
 			}
 			gSpec.addTrip(gTrip, insertStopTimePrepared);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: %s", line);
+			throw new MTLog.Fatal(e, "Error while processing trip: %s", line);
 		}
 	}
 
@@ -435,7 +435,7 @@ public class GReader {
 
 	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line, @Nullable String defaultAgencyId) {
 		try {
-			final GRoute gRoute = GRoute.fromLine(line, defaultAgencyId, agencyTools);
+			GRoute gRoute = GRoute.fromLine(line, defaultAgencyId, agencyTools);
 			final GAgency routeAgency = gSpec.getAgency(gRoute.getAgencyIdInt());
 			if (agencyTools.excludeRoute(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute.toStringPlus());
@@ -453,6 +453,23 @@ public class GReader {
 					gSpec.addOtherRoute(gRoute);
 				}
 				return;
+			}
+			if (agencyTools.getRouteIdCleanupRegex() != null) { // IF route ID cleanup regex set DO
+				final GRoute previousRoute = gSpec.getRoute(gRoute.getRouteIdInt());
+				if (previousRoute != null && previousRoute.equals(gRoute)) {
+					return; // ignore if route already exists with same values
+				}
+				if (previousRoute != null && previousRoute.equalsExceptLongNameAndUrl(gRoute)) {
+					final String mergedRouteLongName = GRoute.mergeRouteLongNames(previousRoute.getRouteLongName(), gRoute.getRouteLongName());
+					if (mergedRouteLongName != null) { // merge successful
+						gRoute = gRoute.clone(mergedRouteLongName);
+						gSpec.addRoute(gRoute, true);
+						return;
+					}
+				}
+				if (previousRoute != null) {
+					MTLog.log("Duplicate route ID!\n-%s\n-%s", gRoute.toStringPlus(), previousRoute.toStringPlus());
+				}
 			}
 			gSpec.addRoute(gRoute);
 		} catch (Exception e) {

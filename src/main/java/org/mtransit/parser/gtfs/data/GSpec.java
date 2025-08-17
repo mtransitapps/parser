@@ -203,7 +203,11 @@ public class GSpec {
 	}
 
 	public void addRoute(@NotNull GRoute gRoute) {
-		GTFSDataBase.insertRoute(gRoute.to());
+		addRoute(gRoute, false);
+	}
+
+	public void addRoute(@NotNull GRoute gRoute, boolean allowUpdate) {
+		GTFSDataBase.insertRoute(gRoute.to(), allowUpdate);
 		this.routesCache.put(gRoute.getRouteIdInt(), gRoute);
 	}
 
@@ -657,6 +661,7 @@ public class GSpec {
 						addTrip(new GTrip(
 								newGeneratedTripIdInt,
 								gOriginalTrip.getRouteIdInt(),
+								gOriginalTrip.getOriginalRouteIdInt(),
 								gOriginalTrip.getServiceIdInt(),
 								gOriginalTrip.getTripHeadsign(),
 								gOriginalTrip.getTripShortName(),
@@ -805,7 +810,7 @@ public class GSpec {
 			boolean forceStopTimeFirstNoDropOffType = agencyTools.forceStopTimeFirstNoDropOffType();
 			MTLog.logDebug("forceStopTimeFirstNoDropOffType: %s", forceStopTimeFirstNoDropOffType);
 			GTFSDataBase.setAutoCommit(false); // stop times
-			MTLog.logDebug("Cleanup stop times pickup & drop-off types from (%d trips)...", this.tripIdIntsUIDs.keySet().size());
+			MTLog.logDebug("Cleanup stop times pickup & drop-off types from (%d trips)...", this.tripIdIntsUIDs.size());
 			for (Integer tripIdInt : this.tripIdIntsUIDs.keySet()) {
 				//noinspection ConstantConditions
 				if (forceStopTimeLastNoPickupType) {
@@ -831,7 +836,7 @@ public class GSpec {
 					MTLog.logPOINT(); // LOG
 				} // LOG
 				if (stp % 10_000 == 0) { // LOG
-					MTLog.log("Cleanup stop times pickup & drop-off types from (%d/%d trips) (%d updated objects)...", stp, this.tripIdIntsUIDs.keySet().size(), stu); // LOG
+					MTLog.log("Cleanup stop times pickup & drop-off types from (%d/%d trips) (%d updated objects)...", stp, this.tripIdIntsUIDs.size(), stu); // LOG
 				} // LOG
 			}
 			GTFSDataBase.setAutoCommit(true); // true => commit() // stop times

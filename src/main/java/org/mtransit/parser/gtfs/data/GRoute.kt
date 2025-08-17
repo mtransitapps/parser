@@ -1,14 +1,13 @@
 package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
-import org.mtransit.commons.GTFSCommons
 import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.commons.gtfs.data.Route
 import org.mtransit.commons.gtfs.data.RouteId
 import org.mtransit.parser.Constants.EMPTY
-import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
+import kotlin.math.max
 
 // https://developers.google.com/transit/gtfs/reference#routestxt
 // https://gtfs.org/reference/static/#routestxt
@@ -85,11 +84,7 @@ data class GRoute(
         }
 
     @Suppress("unused")
-    val shortestRouteName = if (routeShortName.isEmpty()) {
-        routeLongName
-    } else {
-        routeShortName
-    }
+    val shortestRouteName = routeShortName.ifEmpty { routeLongName }
 
     @Suppress("unused")
     val longestRouteName = if (routeLongName.isNullOrEmpty()) {
@@ -128,6 +123,24 @@ data class GRoute(
         routeColor = routeColor,
         routeTextColor = routeTextColor,
         routeSortOrder = routeSortOrder,
+    )
+
+    fun equalsExceptLongNameAndUrl(obj: Any?): Boolean {
+        val o = obj as GRoute
+        return when {
+            routeIdInt != o.routeIdInt -> false // not equal
+            routeShortName != o.routeShortName -> false // not equal
+            routeDesc != o.routeDesc -> false // not equal
+            routeType != o.routeType -> false // not equal
+            routeColor != o.routeColor -> false // not equal
+            routeTextColor != o.routeTextColor -> false // not equal
+            routeSortOrder != o.routeSortOrder -> false // not equal
+            else -> true // mostly equal
+        }
+    }
+
+    fun clone(routeLongName: String?) = this.copy(
+        routeLongName = routeLongName,
     )
 
     companion object {
@@ -179,6 +192,41 @@ data class GRoute(
                 routeTextColor = it.routeTextColor,
                 routeSortOrder = it.routeSortOrder,
             )
+        }
+
+        private const val SLASH_: String = " / "
+
+        @JvmStatic
+        fun mergeRouteLongNames(routeLongName1: String?, routeLongName2: String?): String? {
+            if (routeLongName2.isNullOrEmpty()) {
+                return routeLongName1
+            } else if (routeLongName1.isNullOrEmpty()) {
+                return routeLongName2
+            } else if (routeLongName2.contains(routeLongName1)) {
+                return routeLongName2
+            } else if (routeLongName1.contains(routeLongName2)) {
+                return routeLongName1
+            }
+            val prefix = routeLongName1.commonPrefixWith(routeLongName2)
+            val maxLength = max(routeLongName1.length, routeLongName2.length)
+            if (prefix.length > maxLength / 2) {
+                return prefix +
+                        routeLongName1.substring(prefix.length) +
+                        SLASH_ +
+                        routeLongName2.substring(prefix.length)
+            }
+            val suffix = routeLongName1.commonSuffixWith(routeLongName2)
+            if (suffix.length > maxLength / 2) {
+                return routeLongName1.substring(0, routeLongName1.length - suffix.length) +
+                        SLASH_ +
+                        routeLongName2.substring(0, routeLongName2.length - suffix.length) +
+                        suffix
+            }
+            return if (routeLongName1 > routeLongName2) {
+                routeLongName2 + SLASH_ + routeLongName1
+            } else {
+                routeLongName1 + SLASH_ + routeLongName2
+            }
         }
     }
 }
