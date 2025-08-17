@@ -18,14 +18,12 @@ enum class MDirectionType(val id: String) {
         private const val WEST_FR = "O"
 
         @JvmStatic
-        fun parse(id: String?): MDirectionType {
-            return when {
-                MDirectionCardinalType.EAST.id == id -> EAST
-                MDirectionCardinalType.WEST.id == id || WEST_FR == id -> WEST
-                MDirectionCardinalType.NORTH.id == id -> NORTH
-                MDirectionCardinalType.SOUTH.id == id -> SOUTH
-                else -> NONE // default
-            }
+        fun parse(id: String?) = when {
+            MDirectionCardinalType.EAST.id == id -> EAST
+            MDirectionCardinalType.WEST.id == id || WEST_FR == id -> WEST
+            MDirectionCardinalType.NORTH.id == id -> NORTH
+            MDirectionCardinalType.SOUTH.id == id -> SOUTH
+            else -> NONE // default
         }
     }
 }
