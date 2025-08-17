@@ -91,7 +91,7 @@ object DBUtils {
                 SQLCreateBuilder.getNew(SCHEDULES_TABLE_NAME)
                     .appendColumn(MSchedule.ROUTE_ID, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.SERVICE_ID, SQLUtilsCommons.INT)
-                    .appendColumn(MSchedule.TRIP_ID, SQLUtilsCommons.INT)
+                    .appendColumn(MSchedule.DIRECTION_ID, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.STOP_ID, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.ARRIVAL, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.DEPARTURE, SQLUtilsCommons.INT)
@@ -353,7 +353,7 @@ object DBUtils {
                 SQLUtilsCommons.INSERT_INTO + SCHEDULES_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
                         "${mSchedule.routeId}," +
                         "${mSchedule.serviceIdInt}," +
-                        "${mSchedule.tripId}," +
+                        "${mSchedule.directionId}," +
                         "${mSchedule.stopId}," +
                         "${mSchedule.arrival}," +
                         "${mSchedule.departure}," +
@@ -420,8 +420,8 @@ object DBUtils {
     fun selectSchedules(
         serviceIdInt: Int? = null,
         serviceIdInts: List<Int>? = null,
-        tripId: Long? = null,
-        tripIds: List<Long>? = null,
+        directionId: Long? = null,
+        directionIds: List<Long>? = null,
         stopIdInt: Int? = null,
         stopIdInts: List<Int>? = null,
         arrival: Int? = null,
@@ -460,26 +460,26 @@ object DBUtils {
             }"
             whereAdded = true
         }
-        // TRIP ID
-        tripId?.let {
+        // DIRECTION ID
+        directionId?.let {
             query += if (whereAdded) {
                 " AND"
             } else {
                 " WHERE"
             }
             whereAdded = true
-            query += " ${MSchedule.TRIP_ID} = $tripId"
+            query += " ${MSchedule.DIRECTION_ID} = $directionId"
 
         }
-        tripIds?.let {
+        directionIds?.let {
             query += if (whereAdded) {
                 " AND"
             } else {
                 " WHERE"
             }
             whereAdded = true
-            query += " ${MSchedule.TRIP_ID} IN ${
-                tripIds
+            query += " ${MSchedule.DIRECTION_ID} IN ${
+                directionIds
                     .distinct()
                     .joinToString(
                         separator = ",",
@@ -539,7 +539,7 @@ object DBUtils {
         }
         query += " ORDER BY " +
                 "${MSchedule.SERVICE_ID} ASC, " +
-                "${MSchedule.TRIP_ID} ASC, " +
+                "${MSchedule.DIRECTION_ID} ASC, " +
                 "${MSchedule.STOP_ID} ASC, " +
                 "${MSchedule.DEPARTURE} ASC"
         // LIMIT
@@ -557,7 +557,7 @@ object DBUtils {
                     MSchedule(
                         rs.getLong(MSchedule.ROUTE_ID),
                         rs.getInt(MSchedule.SERVICE_ID),
-                        rs.getLong(MSchedule.TRIP_ID),
+                        rs.getLong(MSchedule.DIRECTION_ID),
                         rs.getInt(MSchedule.STOP_ID),
                         rs.getInt(MSchedule.ARRIVAL),
                         rs.getInt(MSchedule.DEPARTURE),
@@ -578,7 +578,7 @@ object DBUtils {
     @JvmStatic
     fun deleteSchedules(
         serviceIdInt: Int? = null,
-        tripId: Long? = null,
+        directionId: Long? = null,
         stopIdInt: Int? = null,
         arrival: Int? = null,
         departure: Int? = null
@@ -595,14 +595,14 @@ object DBUtils {
             whereAdded = true
             query += " ${MSchedule.SERVICE_ID} = $serviceIdInt"
         }
-        tripId?.let {
+        directionId?.let {
             query += if (whereAdded) {
                 " AND"
             } else {
                 " WHERE"
             }
             whereAdded = true
-            query += " ${MSchedule.TRIP_ID} = $tripId"
+            query += " ${MSchedule.DIRECTION_ID} = $directionId"
 
         }
         // STOP ID

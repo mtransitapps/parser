@@ -13,9 +13,10 @@ import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.data.MAgency;
+import org.mtransit.parser.mt.data.MDirectionCardinalType;
 import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MRoute;
-import org.mtransit.parser.mt.data.MTrip;
+import org.mtransit.parser.mt.data.MDirection;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -154,7 +155,7 @@ public interface GAgencyTools {
 	boolean excludeRoute(@NotNull GRoute gRoute);
 
 	// TRIP
-	void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs);
+	void setDirectionHeadsign(@NotNull MRoute mRoute, @NotNull MDirection mDirection, @NotNull GTrip gTrip, @NotNull GSpec gtfs);
 
 	@NotNull
 	String cleanTripHeadsign(@NotNull String tripHeadsign);
@@ -195,12 +196,12 @@ public interface GAgencyTools {
 	List<Integer> getDirectionTypes();
 
 	@Nullable
-	MDirectionType convertDirection(@Nullable String headSign);
+	MDirectionCardinalType convertDirection(@Nullable String headSign);
 
 	@Deprecated
-	boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge);
+	boolean mergeHeadsign(@NotNull MDirection mDirection, @NotNull MDirection mDirectionToMerge);
 
-	boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge, @NotNull GRoute gRoute);
+	boolean mergeHeadsign(@NotNull MDirection mDirection, @NotNull MDirection mDirectionToMerge, @NotNull GRoute gRoute);
 
 	boolean excludeTripNullable(@Nullable GTrip gTrip);
 

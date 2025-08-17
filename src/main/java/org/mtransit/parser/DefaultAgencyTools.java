@@ -30,12 +30,12 @@ import org.mtransit.parser.mt.MDataChangedManager;
 import org.mtransit.parser.mt.MGenerator;
 import org.mtransit.parser.mt.MReader;
 import org.mtransit.parser.mt.data.MAgency;
-import org.mtransit.parser.mt.data.MDirectionType;
+import org.mtransit.parser.mt.data.MDirectionCardinalType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MRouteSNToIDConverter;
 import org.mtransit.parser.mt.data.MServiceDate;
 import org.mtransit.parser.mt.data.MSpec;
-import org.mtransit.parser.mt.data.MTrip;
+import org.mtransit.parser.mt.data.MDirection;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -565,15 +565,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
+	public void setDirectionHeadsign(@NotNull MRoute mRoute, @NotNull MDirection mDirection, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
 		final GRoute gRoute = gtfs.getRoute(gTrip.getRouteIdInt());
 		if (gRoute == null) {
 			//noinspection DiscouragedApi
-			throw new MTLog.Fatal("Trying to set trip head-sign w/o valid GTFS route (ID: %s)", gTrip.getRouteId());
+			throw new MTLog.Fatal("Trying to set direction head-sign w/o valid GTFS route (ID: %s)", gTrip.getRouteId());
 		}
+		boolean fromStopName = mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STOP_ID;
 		if (directionFinderEnabled(mRoute.getId(), gRoute)) {
-			mTrip.setHeadsignString(
-					cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
+			mDirection.setHeadsignString(
+					cleanDirectionHeadsign(gTrip.getDirectionIdOrDefault(), fromStopName, gTrip.getTripHeadsignOrDefault()),
 					gTrip.getDirectionIdOrDefault()
 			);
 			return;
@@ -582,8 +583,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 			throw new MTLog.Fatal("Default agency implementation requires 'direction_id' field in '%s'!", gTrip.toStringPlus());
 		}
 		try {
-			mTrip.setHeadsignString(
-					cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
+			mDirection.setHeadsignString(
+					cleanDirectionHeadsign(gTrip.getDirectionIdOrDefault(), fromStopName, gTrip.getTripHeadsignOrDefault()),
 					gTrip.getDirectionIdOrDefault()
 			);
 		} catch (NumberFormatException nfe) {
@@ -611,6 +612,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return false;
 	}
 
+	/**
+	 * @param directionId {@link org.mtransit.parser.gtfs.data.GDirectionId} (0 or 1 or missing/generated)
+	 */
 	@NotNull
 	@Override
 	public String cleanDirectionHeadsign(int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
@@ -701,22 +705,22 @@ public class DefaultAgencyTools implements GAgencyTools {
 		//noinspection deprecation
 		final int deprecatedDirectionType = getDirectionType();
 		if (deprecatedDirectionType != -1
-				&& deprecatedDirectionType != MTrip.HEADSIGN_TYPE_STRING) {
+				&& deprecatedDirectionType != MDirection.HEADSIGN_TYPE_STRING) {
 			return Arrays.asList(
 					deprecatedDirectionType,
-					MTrip.HEADSIGN_TYPE_STRING
+					MDirection.HEADSIGN_TYPE_STRING
 			);
 		}
 		return Collections.singletonList(
-				MTrip.HEADSIGN_TYPE_STRING // default = string
+				MDirection.HEADSIGN_TYPE_STRING // default = string
 		);
 	}
 
 	@Nullable
 	@Override
-	public MDirectionType convertDirection(@Nullable String headSign) {
+	public MDirectionCardinalType convertDirection(@Nullable String headSign) {
 		if (headSign != null) {
-			if (getDirectionTypes().contains(MTrip.HEADSIGN_TYPE_DIRECTION)) {
+			if (getDirectionTypes().contains(MDirection.HEADSIGN_TYPE_DIRECTION)) {
 				final String tripHeadsignLC = headSign.toLowerCase(Locale.ENGLISH);
 				switch (tripHeadsignLC) {
 				case "eastbound":
@@ -725,7 +729,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				case "eb":
 				case "e":
 				case "eb / east":
-					return MDirectionType.EAST;
+					return MDirectionCardinalType.EAST;
 				case "westbound":
 				case "west":
 				case "ouest":
@@ -733,7 +737,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				case "w":
 				case "o":
 				case "wb / west":
-					return MDirectionType.WEST;
+					return MDirectionCardinalType.WEST;
 				case "northbound":
 				case "north":
 				case "nord":
@@ -742,7 +746,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				case "nb / north":
 				case "north / nord": // i18b
 				case "n / nord": // i18b
-					return MDirectionType.NORTH;
+					return MDirectionCardinalType.NORTH;
 				case "southbound":
 				case "south":
 				case "sud":
@@ -751,7 +755,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				case "sb / south":
 				case "south / sud": // i18n
 				case "s / sud": // i18n
-					return MDirectionType.SOUTH;
+					return MDirectionCardinalType.SOUTH;
 				}
 				if (getDirectionTypes().size() == 1) { // only DIRECTION!
 					throw new MTLog.Fatal("Unexpected direction for '%s'!", headSign);
@@ -763,19 +767,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Deprecated
 	@Override
-	public boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge) {
+	public boolean mergeHeadsign(@NotNull MDirection mDirection, @NotNull MDirection mDirectionToMerge) {
 		if (directionFinderEnabled()) {
-			throw new MTLog.Fatal("Unexpected trips to merge: %s & %s!", mTrip, mTripToMerge);
+			throw new MTLog.Fatal("Unexpected directions to merge: %s & %s!", mDirection, mDirectionToMerge);
 		}
-		return mTrip.mergeHeadsignValue(mTripToMerge);
+		return mDirection.mergeHeadsignValue(mDirectionToMerge);
 	}
 
 	@Override
-	public boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge, @NotNull GRoute gRoute) {
-		if (directionFinderEnabled(mTrip.getRouteId(), gRoute)) {
-			throw new MTLog.Fatal("Unexpected trips to merge: %s & %s!", mTrip, mTripToMerge);
+	public boolean mergeHeadsign(@NotNull MDirection mDirection, @NotNull MDirection mDirectionToMerge, @NotNull GRoute gRoute) {
+		if (directionFinderEnabled(mDirection.getRouteId(), gRoute)) {
+			throw new MTLog.Fatal("Unexpected directions to merge: %s & %s!", mDirection, mDirectionToMerge);
 		}
-		return mTrip.mergeHeadsignValue(mTripToMerge);
+		return mDirection.mergeHeadsignValue(mDirectionToMerge);
 	}
 
 	private boolean stopTimesHasPickupTypeNotRegular = false;  // opt-in feature
