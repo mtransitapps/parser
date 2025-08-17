@@ -657,6 +657,7 @@ public class GSpec {
 						addTrip(new GTrip(
 								newGeneratedTripIdInt,
 								gOriginalTrip.getRouteIdInt(),
+								gOriginalTrip.getOriginalRouteIdInt(),
 								gOriginalTrip.getServiceIdInt(),
 								gOriginalTrip.getTripHeadsign(),
 								gOriginalTrip.getTripShortName(),
