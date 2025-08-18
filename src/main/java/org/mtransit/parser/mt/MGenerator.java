@@ -370,7 +370,7 @@ public class MGenerator {
 				if (F_PRE_FILLED_DB) {
 					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 					dbStatement = dbConnection.createStatement();
-					sqlInsert = GTFSCommons.getT_TRIP_SQL_INSERT();
+					sqlInsert = GTFSCommons.getT_DIRECTION_SQL_INSERT();
 				}
 				for (MDirection mDirection : mSpec.getDirections()) {
 					final String tripInsert = mDirection.toFile();
@@ -420,7 +420,7 @@ public class MGenerator {
 				if (F_PRE_FILLED_DB) {
 					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 					dbStatement = dbConnection.createStatement();
-					sqlInsert = GTFSCommons.getT_TRIP_STOPS_SQL_INSERT();
+					sqlInsert = GTFSCommons.getT_DIRECTION_STOPS_SQL_INSERT();
 				}
 				for (MDirectionStop mDirectionStop : mSpec.getDirectionStops()) {
 					final String tripStopInsert = mDirectionStop.toFile();

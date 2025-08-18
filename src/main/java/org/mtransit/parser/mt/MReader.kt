@@ -42,18 +42,18 @@ object MReader {
 
     // region first/last departures
 
-    private const val GTFS_RTS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml"
+    private const val GTFS_RDS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml" // do not rename to avoid breaking change
 
-    private const val GTFS_RTS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec"
-    private const val GTFS_RTS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec"
+    private const val GTFS_RDS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec" // do not rename to avoid breaking change
+    private const val GTFS_RDS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec" // do not rename to avoid breaking change
 
     private fun makeFirstDepartureRegex(fileBase: String) =
-        Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase$GTFS_RTS_FIRST_DEPARTURE_IN_SEC\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
+        Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase$GTFS_RDS_FIRST_DEPARTURE_IN_SEC\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
 
     private fun makeLastDepartureRegex(fileBase: String) =
-        Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase$GTFS_RTS_LAST_DEPARTURE_IN_SEC\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
+        Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase$GTFS_RDS_LAST_DEPARTURE_IN_SEC\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
 
-    private const val GTFS_RTS_TIMEZONE = "gtfs_rts_timezone"
+    private const val GTFS_RTS_TIMEZONE = "gtfs_rts_timezone" // do not rename to avoid breaking change
 
     private fun makeTimeZoneRegex() =
         Regex(any(WHITESPACE_CAR) + "<string name=\"$GTFS_RTS_TIMEZONE\">${group(oneOrMore(ALPHA_NUM_CAR) + "/" + oneOrMore(ALPHA_NUM_CAR))}</string>")
@@ -62,13 +62,13 @@ object MReader {
     @JvmStatic
     fun readFirstLastDepartures(fileBase: String): Pair<Int?, Int?>? {
         try {
-            val gtfsRtsValuesGenXml = getResDirName(fileBase) + "/$VALUES/${fileBase}$GTFS_RTS_VALUES_GEN_XML"
+            val gtfsRtsValuesGenXml = getResDirName(fileBase) + "/$VALUES/${fileBase}$GTFS_RDS_VALUES_GEN_XML"
             val gtfsRtsValuesGenXmlFile = File(gtfsRtsValuesGenXml)
             if (!gtfsRtsValuesGenXmlFile.exists()) {
                 MTLog.log("File not found '$gtfsRtsValuesGenXml'!")
                 return null
             }
-            val commonRtsValuesGenXml = getResDirName() + "/$VALUES/$GTFS_RTS_VALUES_GEN_XML"
+            val commonRtsValuesGenXml = getResDirName() + "/$VALUES/$GTFS_RDS_VALUES_GEN_XML"
             val commonRtsValuesGenXmlFile = File(commonRtsValuesGenXml)
             if (!commonRtsValuesGenXmlFile.exists()) {
                 MTLog.log("File not found '$commonRtsValuesGenXml'!")
