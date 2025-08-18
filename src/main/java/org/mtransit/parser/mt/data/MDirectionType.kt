@@ -1,42 +1,29 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.parser.MTLog
-
+@Deprecated("use MDirectionCardinalType instead")
 enum class MDirectionType(val id: String) {
 
-    NONE(""),
-    EAST("E"),
-    WEST("W"),
-    NORTH("N"),
-    SOUTH("S");
+    NONE(MDirectionCardinalType.NONE.id),
+    EAST(MDirectionCardinalType.EAST.id),
+    WEST(MDirectionCardinalType.WEST.id),
+    NORTH(MDirectionCardinalType.NORTH.id),
+    SOUTH(MDirectionCardinalType.SOUTH.id);
 
-    override fun toString(): String {
-        return id
-    }
+    override fun toString() = MDirectionCardinalType.parse(id).toString()
 
-    fun intValue(): Int {
-        return when (id) {
-            EAST.id -> 1
-            WEST.id -> 2
-            NORTH.id -> 3
-            SOUTH.id -> 4
-            else -> throw MTLog.Fatal("Unknown direction type '$id'!")
-        }
-    }
+    fun intValue() = MDirectionCardinalType.parse(id).intValue()
 
     companion object {
 
         private const val WEST_FR = "O"
 
         @JvmStatic
-        fun parse(id: String?): MDirectionType {
-            return when {
-                EAST.id == id -> EAST
-                WEST.id == id || WEST_FR == id -> WEST
-                NORTH.id == id -> NORTH
-                SOUTH.id == id -> SOUTH
-                else -> NONE // default
-            }
+        fun parse(id: String?) = when {
+            MDirectionCardinalType.EAST.id == id -> EAST
+            MDirectionCardinalType.WEST.id == id || WEST_FR == id -> WEST
+            MDirectionCardinalType.NORTH.id == id -> NORTH
+            MDirectionCardinalType.SOUTH.id == id -> SOUTH
+            else -> NONE // default
         }
     }
 }

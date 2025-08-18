@@ -2,7 +2,7 @@ package org.mtransit.parser.mt.data
 
 import org.mtransit.parser.MTLog
 
-enum class MInboundType(val id: String) {
+enum class MDirectionInboundType(val id: String) {
 
     NONE(""),
     INBOUND("1"),
@@ -23,7 +23,7 @@ enum class MInboundType(val id: String) {
 
     companion object {
         @JvmStatic
-        fun parse(id: String?): MInboundType {
+        fun parse(id: String?): MDirectionInboundType {
             return when(id) {
                 INBOUND.id -> INBOUND
                 OUTBOUND.id -> OUTBOUND

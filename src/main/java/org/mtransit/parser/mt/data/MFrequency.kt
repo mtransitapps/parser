@@ -8,7 +8,7 @@ import org.mtransit.parser.gtfs.data.GIDs
 
 data class MFrequency(
     val serviceIdInt: Int,
-    private val tripId: Long, // exported
+    private val directionId: Long, // exported
     val startTime: Int,
     val endTime: Int,
     private val headwayInSec: Int
@@ -27,12 +27,12 @@ data class MFrequency(
         return agencyTools.cleanServiceId(_serviceId)
     }
 
-    val uID by lazy { getNewUID(serviceIdInt, tripId, startTime, endTime) }
+    val uID by lazy { getNewUID(serviceIdInt, directionId, startTime, endTime) }
 
     fun toFile(agencyTools: GAgencyTools) = buildString {
         append(getCleanServiceId(agencyTools).quotesEscape()) // service ID
         append(Constants.COLUMN_SEPARATOR) //
-        append(tripId) // trip ID
+        append(directionId) // direction ID
         append(Constants.COLUMN_SEPARATOR) //
         append(startTime) // start time
         append(Constants.COLUMN_SEPARATOR) //
@@ -51,8 +51,8 @@ data class MFrequency(
                 _serviceId.compareTo(other._serviceId)
             }
 
-            tripId != other.tripId -> {
-                tripId.compareTo(other.tripId)
+            directionId != other.directionId -> {
+                directionId.compareTo(other.directionId)
             }
 
             startTime != other.startTime -> {
@@ -82,9 +82,9 @@ data class MFrequency(
         @JvmStatic
         fun getNewUID(
             serviceIdInt: Int,
-            tripId: Long,
+            directionId: Long,
             startTime: Int,
             endTime: Int
-        ) = "${serviceIdInt}$UID_SEPARATOR${tripId}$UID_SEPARATOR${startTime}$UID_SEPARATOR${endTime}"
+        ) = "${serviceIdInt}$UID_SEPARATOR${directionId}$UID_SEPARATOR${startTime}$UID_SEPARATOR${endTime}"
     }
 }

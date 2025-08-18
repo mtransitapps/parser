@@ -31,8 +31,8 @@ import org.mtransit.parser.mt.data.MSchedule;
 import org.mtransit.parser.mt.data.MServiceDate;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MStop;
-import org.mtransit.parser.mt.data.MTrip;
-import org.mtransit.parser.mt.data.MTripStop;
+import org.mtransit.parser.mt.data.MDirection;
+import org.mtransit.parser.mt.data.MDirectionStop;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -72,8 +72,8 @@ public class MGenerator {
 		MTLog.log("Generating routes, trips, trip stops & stops objects... ");
 		HashSet<MAgency> mAgencies = new HashSet<>(); // use set to avoid duplicates
 		HashSet<MRoute> mRoutes = new HashSet<>(); // use set to avoid duplicates
-		HashSet<MTrip> mTrips = new HashSet<>(); // use set to avoid duplicates
-		HashSet<MTripStop> mTripStops = new HashSet<>(); // use set to avoid duplicates
+		HashSet<MDirection> mDirections = new HashSet<>(); // use set to avoid duplicates
+		HashSet<MDirectionStop> mDirectionStops = new HashSet<>(); // use set to avoid duplicates
 		HashMap<Integer, MStop> mStops = new HashMap<>();
 		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<>();
 		HashSet<MServiceDate> mServiceDates = new HashSet<>(); // use set to avoid duplicates
@@ -97,8 +97,8 @@ public class MGenerator {
 				if (mRouteSpec.hasStops() && mRouteSpec.hasServiceDates()) {
 					mAgencies.addAll(mRouteSpec.getAgencies());
 					mRoutes.addAll(mRouteSpec.getRoutes());
-					mTrips.addAll(mRouteSpec.getTrips());
-					mTripStops.addAll(mRouteSpec.getTripStops());
+					mDirections.addAll(mRouteSpec.getDirections());
+					mDirectionStops.addAll(mRouteSpec.getDirectionStops());
 					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging stops...)", mRouteSpec.getFirstRoute().getId());
 					for (MStop mStop : mRouteSpec.getStops()) {
 						if (mStops.containsKey(mStop.getId())) {
@@ -168,17 +168,17 @@ public class MGenerator {
 		Collections.sort(mStopsList);
 		ArrayList<MRoute> mRoutesList = new ArrayList<>(mRoutes);
 		Collections.sort(mRoutesList);
-		ArrayList<MTrip> mTripsList = new ArrayList<>(mTrips);
+		ArrayList<MDirection> mTripsList = new ArrayList<>(mDirections);
 		Collections.sort(mTripsList);
-		ArrayList<MTripStop> mTripStopsList = new ArrayList<>(mTripStops);
-		Collections.sort(mTripStopsList);
+		ArrayList<MDirectionStop> mDirectionStopsList = new ArrayList<>(mDirectionStops);
+		Collections.sort(mDirectionStopsList);
 		ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
 		Collections.sort(mServiceDatesList);
 		MTLog.log("Generating routes, trips, trip stops & stops objects... DONE");
 		MTLog.log("- Agencies: %d", mAgenciesList.size());
 		MTLog.log("- Routes: %d", mRoutesList.size());
 		MTLog.log("- Trips: %d", mTripsList.size());
-		MTLog.log("- Trip stops: %d", mTripStopsList.size());
+		MTLog.log("- Trip stops: %d", mDirectionStopsList.size());
 		MTLog.log("- Stops: %d", mStopsList.size());
 		MTLog.log("- Service Dates: %d", mServiceDatesList.size());
 		MTLog.log("- Route with Frequencies: %d", mRouteFrequencies.size());
@@ -189,7 +189,7 @@ public class MGenerator {
 				mStopsList,
 				mRoutesList,
 				mTripsList,
-				mTripStopsList,
+				mDirectionStopsList,
 				mServiceDatesList,
 				mRouteFrequencies,
 				firstTimestamp,
@@ -370,10 +370,10 @@ public class MGenerator {
 				if (F_PRE_FILLED_DB) {
 					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 					dbStatement = dbConnection.createStatement();
-					sqlInsert = GTFSCommons.getT_TRIP_SQL_INSERT();
+					sqlInsert = GTFSCommons.getT_DIRECTION_SQL_INSERT();
 				}
-				for (MTrip mTrip : mSpec.getTrips()) {
-					final String tripInsert = mTrip.toFile();
+				for (MDirection mDirection : mSpec.getDirections()) {
+					final String tripInsert = mDirection.toFile();
 					if (F_PRE_FILLED_DB) {
 						SQLUtils.executeUpdate(
 								dbStatement,
@@ -420,10 +420,10 @@ public class MGenerator {
 				if (F_PRE_FILLED_DB) {
 					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 					dbStatement = dbConnection.createStatement();
-					sqlInsert = GTFSCommons.getT_TRIP_STOPS_SQL_INSERT();
+					sqlInsert = GTFSCommons.getT_DIRECTION_STOPS_SQL_INSERT();
 				}
-				for (MTripStop mTripStop : mSpec.getTripStops()) {
-					final String tripStopInsert = mTripStop.toFile();
+				for (MDirectionStop mDirectionStop : mSpec.getDirectionStops()) {
+					final String tripStopInsert = mDirectionStop.toFile();
 					if (F_PRE_FILLED_DB) {
 						SQLUtils.executeUpdate(
 								dbStatement,
@@ -643,14 +643,14 @@ public class MGenerator {
 							} // LOG
 							MSchedule lastSchedule = null;
 							for (MSchedule mSchedule : mStopSchedules) {
-								if (mSchedule.isSameServiceAndTrip(lastSchedule)) {
+								if (mSchedule.isSameServiceAndDirection(lastSchedule)) {
 									ow.write(Constants.COLUMN_SEPARATOR);
-									ow.write(mSchedule.toFileSameServiceIdAndTripId(lastSchedule));
+									ow.write(mSchedule.toFileSameServiceIdAndDirectionId(lastSchedule));
 								} else {
 									if (!empty) {
 										ow.write(Constants.NEW_LINE);
 									}
-									ow.write(mSchedule.toFileNewServiceIdAndTripId(gAgencyTools));
+									ow.write(mSchedule.toFileNewServiceIdAndDirectionId(gAgencyTools));
 								}
 								empty = false;
 								lastSchedule = mSchedule;

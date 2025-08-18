@@ -14,11 +14,11 @@ import org.mtransit.parser.gtfs.data.GIDs
 data class MSchedule(
     val routeId: Long,
     val serviceIdInt: Int,
-    val tripId: Long,  // direction ID
+    val directionId: Long,
     val stopId: Int,
     val arrival: Int,
     val departure: Int,
-    val pathIdInt: Int, // trip ID
+    val tripIdInt: Int,
     val accessible: Int,
     var headsignType: Int = -1,
     var headsignValue: String? = null,
@@ -29,19 +29,19 @@ data class MSchedule(
     constructor(
         routeId: Long,
         serviceIdInt: Int,
-        tripId: Long,
+        directionId: Long,
         stopId: Int,
         times: Pair<Int?, Int?>,
-        pathIdInt: Int,
+        tripIdInt: Int,
         accessible: Int,
     ) : this(
         routeId = routeId,
         serviceIdInt = serviceIdInt,
-        tripId = tripId,
+        directionId = directionId,
         stopId = stopId,
         arrival = (times.first ?: 0),
         departure = (times.second ?: 0),
-        pathIdInt = pathIdInt,
+        tripIdInt = tripIdInt,
         accessible = accessible,
     )
 
@@ -56,11 +56,11 @@ data class MSchedule(
 
     @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val pathId = _pathId
+    val tripId = _tripId
 
-    private val _pathId: String
+    private val _tripId: String
         get() {
-            return GIDs.getString(pathIdInt)
+            return GIDs.getString(tripIdInt)
         }
 
     private fun getCleanServiceId(agencyTools: GAgencyTools): String {
@@ -69,7 +69,7 @@ data class MSchedule(
 
     fun setHeadsign(newHeadsignType: Int, newHeadsignValue: String?) {
         if (newHeadsignValue.isNullOrBlank()
-            && newHeadsignType != MTrip.HEADSIGN_TYPE_NO_PICKUP
+            && newHeadsignType != MDirection.HEADSIGN_TYPE_NO_PICKUP
         ) {
             MTLog.logDebug("Setting '$newHeadsignValue' head-sign! (type:$newHeadsignType)")
         }
@@ -88,16 +88,16 @@ data class MSchedule(
             return false
         }
         if (headsignValue.isNullOrBlank()) {
-            if (headsignType != MTrip.HEADSIGN_TYPE_NO_PICKUP) {
+            if (headsignType != MDirection.HEADSIGN_TYPE_NO_PICKUP) {
                 return false
             }
         }
         return true
     }
 
-    fun isNoPickup() = headsignType == MTrip.HEADSIGN_TYPE_NO_PICKUP
+    fun isNoPickup() = headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP
 
-    val uID by lazy { getNewUID(serviceIdInt, tripId, stopId, departure) }
+    val uID by lazy { getNewUID(serviceIdInt, directionId, stopId, departure) }
 
     fun toStringPlus(): String {
         return toString() +
@@ -105,15 +105,15 @@ data class MSchedule(
                 "+(uID:$uID)"
     }
 
-    fun toFileNewServiceIdAndTripId(agencyTools: GAgencyTools) = buildString {
+    fun toFileNewServiceIdAndDirectionId(agencyTools: GAgencyTools) = buildString {
         append(getCleanServiceId(agencyTools).quotesEscape()) // service ID
         append(Constants.COLUMN_SEPARATOR) //
         // no route ID, just for file split
-        append(tripId) // trip ID
+        append(directionId) // direction ID
         append(Constants.COLUMN_SEPARATOR) //
         append(departure) // departure
         append(Constants.COLUMN_SEPARATOR) //
-        if (DefaultAgencyTools.EXPORT_PATH_ID) {
+        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             @Suppress("ControlFlowWithEmptyBody")
             if (arrivalBeforeDeparture > 0) {
                 // TODO ?
@@ -121,8 +121,8 @@ data class MSchedule(
             append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
             append(Constants.COLUMN_SEPARATOR) //
         }
-        if (DefaultAgencyTools.EXPORT_PATH_ID) {
-            append(_pathId.quotesEscape()) // original trip ID
+        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
+            append(_tripId.quotesEscape())
             append(Constants.COLUMN_SEPARATOR) //
         }
         append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
@@ -134,14 +134,14 @@ data class MSchedule(
         }
     }
 
-    fun toFileSameServiceIdAndTripId(lastSchedule: MSchedule?) = buildString {
+    fun toFileSameServiceIdAndDirectionId(lastSchedule: MSchedule?) = buildString {
         if (lastSchedule == null) {
             append(departure) // departure
         } else {
             append(departure - lastSchedule.departure) // departure
         }
         append(Constants.COLUMN_SEPARATOR) //
-        if (DefaultAgencyTools.EXPORT_PATH_ID) {
+        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             @Suppress("ControlFlowWithEmptyBody")
             if (arrivalBeforeDeparture > 0) {
                 // TODO ?
@@ -149,12 +149,12 @@ data class MSchedule(
             append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
             append(Constants.COLUMN_SEPARATOR) //
         }
-        if (DefaultAgencyTools.EXPORT_PATH_ID) {
-            append(_pathId) // original trip ID
+        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
+            append(_tripId)
             append(Constants.COLUMN_SEPARATOR) //
         }
-        if (headsignType == MTrip.HEADSIGN_TYPE_NO_PICKUP) {
-            append(MTrip.HEADSIGN_TYPE_NO_PICKUP) // HEADSIGN TYPE
+        if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
+            append(MDirection.HEADSIGN_TYPE_NO_PICKUP) // HEADSIGN TYPE
             append(Constants.COLUMN_SEPARATOR) //
             append(Constants.EMPTY.quotes()) // HEADSIGN STRING
         } else {
@@ -169,9 +169,9 @@ data class MSchedule(
         return toString()
     }
 
-    fun isSameServiceAndTrip(lastSchedule: MSchedule?): Boolean {
+    fun isSameServiceAndDirection(lastSchedule: MSchedule?): Boolean {
         return lastSchedule?.serviceIdInt == serviceIdInt
-                && lastSchedule.tripId == tripId
+                && lastSchedule.directionId == directionId
     }
 
     fun isSameServiceRTSDeparture(ts: MSchedule): Boolean {
@@ -179,7 +179,7 @@ data class MSchedule(
             return false
         }
         // no route ID, just for file split
-        if (ts.tripId != 0L && ts.tripId != tripId) {
+        if (ts.directionId != 0L && ts.directionId != directionId) {
             return false
         }
         if (ts.stopId != 0 && ts.stopId != stopId) {
@@ -193,7 +193,7 @@ data class MSchedule(
     }
 
     override fun compareTo(other: MSchedule): Int {
-        // sort by route_id => service_id => trip_id => stop_id => departure
+        // sort by route_id => service_id => direction_id => stop_id => departure
         return when {
             routeId != other.routeId -> {
                 routeId.compareTo(other.routeId)
@@ -203,8 +203,8 @@ data class MSchedule(
                 _serviceId.compareTo(other._serviceId)
             }
 
-            tripId != other.tripId -> {
-                tripId.compareTo(other.tripId)
+            directionId != other.directionId -> {
+                directionId.compareTo(other.directionId)
             }
 
             stopId != other.stopId -> {
@@ -220,11 +220,11 @@ data class MSchedule(
     companion object {
         const val ROUTE_ID = "route_id"
         const val SERVICE_ID = "service_id"
-        const val TRIP_ID = "trip_id"
+        const val DIRECTION_ID = "direction_id"
         const val STOP_ID = "stop_id"
         const val ARRIVAL = "arrival"
         const val DEPARTURE = "departure"
-        const val PATH_ID = "path_id"
+        const val TRIP_ID = "trip_id"
         const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
         const val HEADSIGN_TYPE = "headsign_type"
         const val HEADSIGN_VALUE = "headsign_value"
@@ -234,9 +234,9 @@ data class MSchedule(
         @JvmStatic
         fun getNewUID(
             serviceIdInt: Int,
-            tripId: Long,
+            directionId: Long,
             stopId: Int,
             departure: Int
-        ) = "${serviceIdInt}$UID_SEPARATOR${tripId}$UID_SEPARATOR${stopId}$UID_SEPARATOR${departure}"
+        ) = "${serviceIdInt}$UID_SEPARATOR${directionId}$UID_SEPARATOR${stopId}$UID_SEPARATOR${departure}"
     }
 }
