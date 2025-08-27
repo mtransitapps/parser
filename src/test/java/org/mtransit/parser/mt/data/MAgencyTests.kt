@@ -141,6 +141,7 @@ class MAgencyTests {
         GRoute(
             agencyIdInt = agencyIdInt,
             routeIdInt = GIDs.getInt(id),
+            originalRouteIdInt = GIDs.getInt(id),
             routeShortName = "RSN$id",
             routeLongName = "Long Name $id",
             routeDesc = null,

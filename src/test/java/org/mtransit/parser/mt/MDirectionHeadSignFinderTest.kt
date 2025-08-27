@@ -65,6 +65,7 @@ class MDirectionHeadSignFinderTest {
                 GRoute(
                     agencyId = "0",
                     routeId = routeId,
+                    originalRouteId = routeId,
                     routeShortName = "RSN",
                     routeLongName = "RLN",
                     routeDesc = null,
