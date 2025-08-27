@@ -5,6 +5,7 @@ import org.mtransit.commons.StringUtils
 import org.mtransit.commons.gtfs.data.StopTime
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.gtfs.GAgencyTools
 import java.util.Date
 
 // https://gtfs.org/schedule/reference/#stop_timestxt
@@ -194,8 +195,8 @@ data class GStopTime(
     companion object {
         const val FILENAME = "stop_times.txt"
 
-        const val TRIP_ID = "trip_id"
-        const val STOP_ID = "stop_id"
+        const val TRIP_ID = GTrip.TRIP_ID
+        const val STOP_ID = GStop.STOP_ID
         const val STOP_SEQUENCE = "stop_sequence"
         const val ARRIVAL_TIME = "arrival_time"
         const val DEPARTURE_TIME = "departure_time"
@@ -205,11 +206,15 @@ data class GStopTime(
         const val TIME_POINT = "timepoint"
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>) = GStopTime(
-            tripId = line[TRIP_ID] ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GStopTime(
+            tripId = line[TRIP_ID]?.trim()
+                ?.let { agencyTools.cleanTripOriginalId(it) }
+                ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
             arrivalTime = line[ARRIVAL_TIME]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
             departureTime = line[DEPARTURE_TIME]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
-            stopId = line[STOP_ID]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
+            stopId = line[STOP_ID]?.trim()
+                ?.let { agencyTools.cleanStopOriginalId(it) }
+                ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
             stopSequence = line[STOP_SEQUENCE]?.trim()?.toInt() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
             stopHeadsign = line[STOP_HEADSIGN]?.takeIf { it.isNotBlank() },
             pickupType = GPickupType.parse(line[PICKUP_TYPE]),
