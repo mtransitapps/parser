@@ -35,6 +35,8 @@ data class RouteConfig(
     @SerialName("trip_headsign_remove_via")
     val tripHeadsignRemoveVia: Boolean = false, // OPT-IN feature
     // DIRECTION
+    @SerialName("trip_id_cleanup_regex")
+    val tripIdCleanupRegex: String? = null, // optional
     @SerialName("direction_headsign_cleaners")
     val directionHeadsignCleaners: List<Cleaner> = emptyList(),
     @SerialName("direction_finder_enabled")

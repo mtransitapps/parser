@@ -353,7 +353,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public long getRouteId(@NotNull GRoute gRoute) {
 		try {
 			//noinspection DiscouragedApi
-			final String routeIdS = useRouteShortNameForRouteId() ? cleanRouteShortName(getRouteShortName(gRoute)) : cleanRouteOriginalId(gRoute.getRouteId());
+			final String routeIdS = useRouteShortNameForRouteId() ? cleanRouteShortName(getRouteShortName(gRoute)) : gRoute.getRouteId();
 			if (defaultRouteIdEnabled()
 					&& !CharUtils.isDigitsOnly(routeIdS)) {
 				return MRouteSNToIDConverter.convert(
@@ -600,6 +600,31 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return StringsCleaner.cleanTripHeadsign(tripHeadsign, getSupportedLanguages(), Configs.getRouteConfig().getTripHeadsignRemoveVia());
 		}
 		return tripHeadsign;
+	}
+
+	@Nullable
+	@Override
+	public String getTripIdCleanupRegex() {
+		return Configs.getRouteConfig().getTripIdCleanupRegex();
+	}
+
+	@Nullable
+	private Pattern tripIdCleanupPattern = null;
+
+	private boolean tripIdCleanupPatternSet = false;
+
+	@Override
+	public @Nullable Pattern getTripIdCleanupPattern() {
+		if (this.tripIdCleanupPattern == null && !tripIdCleanupPatternSet) {
+			this.tripIdCleanupPattern = GTFSCommons.makeIdCleanupPattern(getTripIdCleanupRegex());
+			this.tripIdCleanupPatternSet = true;
+		}
+		return this.tripIdCleanupPattern;
+	}
+
+	@Override
+	public @NotNull String cleanTripOriginalId(@NotNull String gTripId) {
+		return GTFSCommons.cleanOriginalId(gTripId, getTripIdCleanupPattern());
 	}
 
 	@Override
@@ -930,7 +955,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public int getStopId(@NotNull GStop gStop) {
 		try {
 			//noinspection DiscouragedApi
-			final String stopIdS = useStopCodeForStopId() ? getStopCode(gStop) : cleanStopOriginalId(gStop.getStopId());
+			final String stopIdS = useStopCodeForStopId() ? getStopCode(gStop) : gStop.getStopId();
 			//noinspection DiscouragedApi
 			return Integer.parseInt(stopIdS);
 		} catch (Exception e) {

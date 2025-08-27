@@ -33,7 +33,7 @@ data class MStop(
         lat,
         lng,
         accessible,
-        GTFSCommons.stringIdToHashIfEnabled(originalId, agencyTools?.stopIdCleanupPattern),
+        GTFSCommons.stringIdToHashIfEnabled(originalId),
     )
 
     fun hasLat(): Boolean {

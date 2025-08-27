@@ -3,6 +3,7 @@ package org.mtransit.parser.gtfs.data
 import androidx.annotation.Discouraged
 import org.mtransit.commons.gtfs.data.Frequency
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.gtfs.GAgencyTools
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
@@ -88,7 +89,7 @@ data class GFrequency(
     companion object {
         const val FILENAME = "frequencies.txt"
 
-        private const val TRIP_ID = "trip_id"
+        private const val TRIP_ID = GTrip.TRIP_ID
         private const val START_TIME = "start_time"
         private const val END_TIME = "end_time"
         private const val HEADWAY_SECS = "headway_secs"
@@ -101,12 +102,14 @@ data class GFrequency(
         val DEFAULT_DROP_OFF_TYPE = GDropOffType.REGULAR // Regularly scheduled drop off
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>) = GFrequency(
-            line[TRIP_ID] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
-            line[START_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
-            line[END_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
-            line[HEADWAY_SECS]?.toInt() ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
-            line[EXACT_TIMES]?.toIntOrNull(),
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GFrequency(
+            tripId = line[TRIP_ID]?.trim()
+                ?.let { agencyTools.cleanTripOriginalId(it) }
+                ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
+            startTime = line[START_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
+            endTime = line[END_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
+            headwaySecs = line[HEADWAY_SECS]?.toInt() ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
+            exactTimes = line[EXACT_TIMES]?.toIntOrNull(),
         )
 
         @JvmStatic

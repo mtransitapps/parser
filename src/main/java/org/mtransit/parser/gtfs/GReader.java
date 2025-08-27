@@ -286,7 +286,7 @@ public class GReader {
 	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line,
 										@Nullable PreparedStatement insertStopTimePrepared) {
 		try {
-			final GStopTime gStopTime = GStopTime.fromLine(line);
+			final GStopTime gStopTime = GStopTime.fromLine(line, agencyTools);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
 				return;
 			}
@@ -316,7 +316,7 @@ public class GReader {
 										 GSpec gSpec,
 										 HashMap<String, String> line) {
 		try {
-			final GFrequency gFrequency = GFrequency.fromLine(line);
+			final GFrequency gFrequency = GFrequency.fromLine(line, agencyTools);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gFrequency.getTripIdInt()))) {
 				return;
 			}
@@ -338,7 +338,7 @@ public class GReader {
 			agencyTools.addSupportedLanguage(gAgency.getAgencyLang());
 			gSpec.addAgency(gAgency);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: '%s'!", line);
+			throw new MTLog.Fatal(e, "Error while processing agency: '%s'!", line);
 		}
 	}
 
@@ -354,7 +354,7 @@ public class GReader {
 			}
 			gSpec.addCalendarDate(gCalendarDate);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: '%s'!", line);
+			throw new MTLog.Fatal(e, "Error while processing calendar date: '%s'!", line);
 		}
 	}
 
@@ -366,13 +366,13 @@ public class GReader {
 			}
 			gSpec.addCalendar(gCalendar);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: %s!", line);
+			throw new MTLog.Fatal(e, "Error while processing calendar: %s!", line);
 		}
 	}
 
 	private static void processDirection(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final GDirection gDirection = GDirection.fromLine(line);
+			final GDirection gDirection = GDirection.fromLine(line, agencyTools);
 			final GRoute gRoute = gSpec.getRoute(gDirection.getRouteIdInt());
 			if (agencyTools.excludeRouteNullable(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute == null ? null : gRoute.toStringPlus());
@@ -393,7 +393,7 @@ public class GReader {
 	private static void processTrip(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line,
 									@Nullable PreparedStatement insertStopTimePrepared) {
 		try {
-			final GTrip gTrip = GTrip.fromLine(line);
+			final GTrip gTrip = GTrip.fromLine(line, agencyTools);
 			if (agencyTools.excludeTrip(gTrip)) {
 				logExclude("Exclude trip: %s.", gTrip.toStringPlus());
 				return;
@@ -411,15 +411,21 @@ public class GReader {
 			}
 			gSpec.addTrip(gTrip, insertStopTimePrepared);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while processing: %s", line);
+			throw new MTLog.Fatal(e, "Error while processing trip: %s", line);
 		}
 	}
 
 	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line) {
 		try {
-			final GStop gStop = GStop.fromLine(line);
+			final GStop gStop = GStop.fromLine(line, agencyTools);
 			if (agencyTools.excludeStop(gStop)) {
 				return;
+			}
+			if (agencyTools.getStopIdCleanupRegex() != null) { // IF stop ID cleanup regex set DO
+				final GStop previousStop = gSpec.getStop(gStop.getStopIdInt());
+				if (previousStop != null && previousStop.equals(gStop)) {
+					return; // ignore if stop already exists with same values
+				}
 			}
 			gSpec.addStop(gStop);
 		} catch (Exception e) {
@@ -429,7 +435,7 @@ public class GReader {
 
 	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line, @Nullable String defaultAgencyId) {
 		try {
-			final GRoute gRoute = GRoute.fromLine(line, defaultAgencyId);
+			final GRoute gRoute = GRoute.fromLine(line, defaultAgencyId, agencyTools);
 			final GAgency routeAgency = gSpec.getAgency(gRoute.getAgencyIdInt());
 			if (agencyTools.excludeRoute(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute.toStringPlus());
@@ -447,6 +453,22 @@ public class GReader {
 					gSpec.addOtherRoute(gRoute);
 				}
 				return;
+			}
+			if (agencyTools.getRouteIdCleanupRegex() != null) { // IF route ID cleanup regex set DO
+				final GRoute previousRoute = gSpec.getRoute(gRoute.getRouteIdInt());
+				if (previousRoute != null && previousRoute.equals(gRoute)) {
+					return; // ignore if route already exists with same values
+				}
+				if (previousRoute != null && previousRoute.equalsExceptLongNameAndUrl(gRoute)) {
+					final String mergedRouteLongName = GRoute.mergeRouteLongNames(previousRoute.getRouteLongName(), gRoute.getRouteLongName());
+					if (mergedRouteLongName != null) { // merge successful
+						gSpec.addRoute(previousRoute.clone(mergedRouteLongName), true);
+						return;
+					}
+				}
+				if (previousRoute != null) {
+					MTLog.log("Duplicate route ID!\n-%s\n-%s", gRoute.toStringPlus(), previousRoute.toStringPlus());
+				}
 			}
 			gSpec.addRoute(gRoute);
 		} catch (Exception e) {
