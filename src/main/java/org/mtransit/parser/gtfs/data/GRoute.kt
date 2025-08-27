@@ -14,6 +14,7 @@ import kotlin.math.max
 data class GRoute(
     val agencyIdInt: Int, // Optional (or empty)
     val routeIdInt: Int,
+    val originalRouteIdInt: Int,
     val routeShortName: String, // Conditionally required
     val routeLongName: String?, // Conditionally required
     val routeDesc: String?, // Optional
@@ -27,6 +28,7 @@ data class GRoute(
     constructor(
         agencyId: AgencyId,
         routeId: RouteId,
+        originalRouteId: String,
         routeShortName: String,
         routeLongName: String?,
         routeDesc: String?,
@@ -38,6 +40,7 @@ data class GRoute(
     ) : this(
         agencyIdInt = GIDs.getInt(agencyId),
         routeIdInt = GIDs.getInt(routeId),
+        originalRouteIdInt = GIDs.getInt(originalRouteId),
         routeShortName = routeShortName,
         routeLongName = routeLongName,
         routeDesc = routeDesc,
@@ -83,6 +86,15 @@ data class GRoute(
             return GIDs.getString(routeIdInt)
         }
 
+    @Discouraged(message = "Not memory efficient")
+    @Suppress("unused")
+    val originalRouteId = _originalRouteId
+
+    private val _originalRouteId: String
+        get() {
+            return GIDs.getString(originalRouteIdInt)
+        }
+
     @Suppress("unused")
     val shortestRouteName = routeShortName.ifEmpty { routeLongName }
 
@@ -114,6 +126,7 @@ data class GRoute(
 
     fun to() = Route(
         routeId = _routeId,
+        originalRouteId = _originalRouteId,
         agencyId = _agencyId,
         routeShortName = routeShortName,
         routeLongName = routeLongName,
@@ -166,6 +179,7 @@ data class GRoute(
             routeId = line[ROUTE_ID]?.trim()
                 ?.let { agencyTools.cleanRouteOriginalId(it) }
                 ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
+            originalRouteId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
             routeShortName = line[ROUTE_SHORT_NAME]?.trim() ?: EMPTY,
             routeLongName = line[ROUTE_LONG_NAME],
             routeDesc = line[ROUTE_DESC],
@@ -184,6 +198,7 @@ data class GRoute(
             GRoute(
                 agencyId = it.agencyId,
                 routeId = it.routeId,
+                originalRouteId = it.originalRouteId,
                 routeShortName = it.routeShortName,
                 routeLongName = it.routeLongName,
                 routeDesc = it.routeDesc,
