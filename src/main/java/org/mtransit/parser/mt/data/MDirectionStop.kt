@@ -2,29 +2,29 @@ package org.mtransit.parser.mt.data
 
 import org.mtransit.parser.Constants
 
-data class MTripStop(
-    val tripId: Long,
+data class MDirectionStop(
+    val directionId: Long,
     val stopId: Int,
     var stopSequence: Int,
     var isNoPickup: Boolean = false
-) : Comparable<MTripStop> {
+) : Comparable<MDirectionStop> {
 
     // JAVA
     constructor(
-        tripId: Long,
+        directionId: Long,
         stopId: Int,
         stopSequence: Int
     ) : this(
-        tripId,
+        directionId,
         stopId,
         stopSequence,
         false
     )
 
-    val uID by lazy { getNewUID(tripId, stopId) }
+    val uID by lazy { getNewUID(directionId, stopId) }
 
-    fun equalsExceptStopSequence(ts: MTripStop): Boolean {
-        if (ts.tripId != 0L && ts.tripId != tripId) {
+    fun equalsExceptStopSequence(ts: MDirectionStop): Boolean {
+        if (ts.directionId != 0L && ts.directionId != directionId) {
             return false
         }
         @Suppress("RedundantIf")
@@ -35,7 +35,7 @@ data class MTripStop(
     }
 
     fun toFile() = buildString {
-        append(tripId.toString()) // TRIP ID
+        append(directionId.toString()) // DIRECTION ID
         append(Constants.COLUMN_SEPARATOR) //
         append(stopId) // STOP ID
         append(Constants.COLUMN_SEPARATOR)
@@ -44,21 +44,21 @@ data class MTripStop(
         append(if (isNoPickup) 1 else 0) // DROP OFF ONLY
     }
 
-    override fun compareTo(other: MTripStop): Int {
-        // sort by trip_id => stop_sequence
-        return if (tripId != other.tripId) {
-            tripId.compareTo(other.tripId)
+    override fun compareTo(other: MDirectionStop): Int {
+        // sort by direction_id => stop_sequence
+        return if (directionId != other.directionId) {
+            directionId.compareTo(other.directionId)
         } else stopSequence - other.stopSequence
     }
 
     @Suppress("unused")
     fun toStringSimple(): String {
-        return "TS{$tripId>$stopId[$stopSequence](${if (this.isNoPickup) 0 else 1})"
+        return "DS{$directionId>$stopId[$stopSequence](${if (this.isNoPickup) 0 else 1})"
     }
 
     @Suppress("unused")
-    fun toStringSameTrip(): String {
-        return "${this.stopSequence}:${this.stopId}";
+    fun toStringSameDirection(): String {
+        return "${this.stopSequence}:${this.stopId}"
     }
 
     companion object {
@@ -67,26 +67,26 @@ data class MTripStop(
 
         @Suppress("unused")
         @JvmStatic
-        fun containsStopIds(mainList: List<MTripStop>, otherList: List<MTripStop>): Boolean {
+        fun containsStopIds(mainList: List<MDirectionStop>, otherList: List<MDirectionStop>): Boolean {
             return toStopIds(mainList).contains(toStopIds(otherList))
         }
 
         @Suppress("unused")
         @JvmStatic
-        fun toStopIds(l: List<MTripStop>): String {
+        fun toStopIds(l: List<MDirectionStop>): String {
             return l.joinToString { "${it.stopId}" }
         }
 
         @Suppress("unused")
         @JvmStatic
-        fun printTripStops(l: List<MTripStop>): String {
-            return "[${l.size}] > ${l.joinToString { it.toStringSameTrip() }}"
+        fun printDirectionStops(l: List<MDirectionStop>): String {
+            return "[${l.size}] > ${l.joinToString { it.toStringSameDirection() }}"
         }
 
         @JvmStatic
         fun getNewUID(
-            tripId: Long,
+            directionId: Long,
             stopId: Int
-        ) = "${tripId}$UID_SEPARATOR${stopId}"
+        ) = "${directionId}$UID_SEPARATOR${stopId}"
     }
 }

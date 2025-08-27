@@ -406,7 +406,7 @@ public class GReader {
 				gTrip.setTripHeadsign(agencyTools.provideMissingTripHeadSign(gTrip));
 			}
 			if (agencyTools.getDirectionTypes().size() == 1
-					&& agencyTools.getDirectionTypes().get(0) == org.mtransit.parser.mt.data.MTrip.HEADSIGN_TYPE_DIRECTION) {
+					&& agencyTools.getDirectionTypes().get(0) == org.mtransit.parser.mt.data.MDirection.HEADSIGN_TYPE_DIRECTION) {
 				gTrip.setTripHeadsign(agencyTools.provideMissingTripHeadSign(gTrip));
 			}
 			gSpec.addTrip(gTrip, insertStopTimePrepared);

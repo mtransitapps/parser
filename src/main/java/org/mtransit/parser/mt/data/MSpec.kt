@@ -13,8 +13,8 @@ data class MSpec(
     val agencies: List<MAgency>,
     val stops: List<MStop>,
     val routes: List<MRoute>,
-    val trips: List<MTrip>,
-    val tripStops: List<MTripStop>,
+    val directions: List<MDirection>,
+    val directionStops: List<MDirectionStop>,
     val serviceDates: List<MServiceDate>,
     val routeFrequencies: TreeMap<Long, List<MFrequency>>,
     val firstTimestamp: Long,
@@ -24,7 +24,7 @@ data class MSpec(
     var schedules: Collection<MSchedule>? = null
 
     val isValid: Boolean
-        get() = (hasAgencies() && hasServiceDates() && hasRoutes() && hasTrips() && hasTripStops() && hasStops() //
+        get() = (hasAgencies() && hasServiceDates() && hasRoutes() && hasDirections() && hasDirectionStops() && hasStops() //
                 && (hasStopSchedules() || hasRouteFrequencies()))
 
     fun hasAgencies(): Boolean {
@@ -55,12 +55,12 @@ data class MSpec(
             return routes[0]
         }
 
-    fun hasTrips(): Boolean {
-        return trips.isNotEmpty()
+    fun hasDirections(): Boolean {
+        return directions.isNotEmpty()
     }
 
-    fun hasTripStops(): Boolean {
-        return tripStops.isNotEmpty()
+    fun hasDirectionStops(): Boolean {
+        return directionStops.isNotEmpty()
     }
 
     fun hasServiceDates(): Boolean {

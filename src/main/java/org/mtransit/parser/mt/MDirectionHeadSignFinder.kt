@@ -17,7 +17,7 @@ import org.mtransit.parser.gtfs.data.GStopTime.Companion.maxStopSequence
 import org.mtransit.parser.gtfs.data.GStopTime.Companion.minStopSequence
 import org.mtransit.parser.gtfs.data.GTime
 import org.mtransit.parser.gtfs.data.GTrip
-import org.mtransit.parser.mt.data.MTrip
+import org.mtransit.parser.mt.data.MDirection
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -888,7 +888,7 @@ object MDirectionHeadSignFinder {
                     && tripHeadSignCounts2 != 0 // not-merged
                     && abs(tripHeadSignCounts2 - tripHeadSignCounts1) <= minHeadSignCountsDiff
                 ) {
-                    val merged = MTrip.mergeHeadsignValue(stopTimesHeadSign1, stopTimesHeadSign2) ?: EMPTY
+                    val merged = MDirection.mergeHeadsignValue(stopTimesHeadSign1, stopTimesHeadSign2) ?: EMPTY
                     logMerge(!dataLossAuthorized, "$routeId: $directionId: merge #1 / #2 head-signs -> '$merged'")
                     return MergedTrip(
                         routeIdInts1, routeIdInts2, merged to pickAndMergeLongestTripStopTimes(

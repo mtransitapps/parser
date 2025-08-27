@@ -423,7 +423,7 @@ public class GSpec {
 										@SuppressWarnings("unused") @Nullable Integer optGStopSequence) {
 		GenerateMObjectsTask routeGenerator = this.routeGenerators.get(mRouteId);
 		if (routeGenerator != null) {
-			return routeGenerator.getTripStopTimes(gTripIdInt);
+			return routeGenerator.getTripGStopTimes(gTripIdInt);
 		}
 		throw new MTLog.Fatal("getStopTimes() > trying to use ALL stop times (route:%s|trip:%s)!", mRouteId, GIDs.getString(gTripIdInt));
 	}

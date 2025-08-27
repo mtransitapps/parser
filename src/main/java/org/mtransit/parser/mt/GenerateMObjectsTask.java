@@ -26,15 +26,15 @@ import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MCalendarExceptionType;
-import org.mtransit.parser.mt.data.MDirectionType;
+import org.mtransit.parser.mt.data.MDirectionCardinalType;
 import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSchedule;
 import org.mtransit.parser.mt.data.MServiceDate;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MStop;
-import org.mtransit.parser.mt.data.MTrip;
-import org.mtransit.parser.mt.data.MTripStop;
+import org.mtransit.parser.mt.data.MDirection;
+import org.mtransit.parser.mt.data.MDirectionStop;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,9 +58,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	@NotNull
 	private final GSpec globalGTFS;
 	@NotNull
-	private final Map<Integer, List<GStopTime>> routeTripIdStopTimes = new HashMap<>();
+	private final Map<Integer, List<GStopTime>> routeGTripIdIntIdGStopTimes = new HashMap<>();
 	@NotNull
-	private final Map<Integer, List<GTripStop>> routeTripIdTripStops = new HashMap<>();
+	private final Map<Integer, List<GTripStop>> routeGTripIdIntGTripStops = new HashMap<>();
 
 	GenerateMObjectsTask(long routeId, @NotNull GAgencyTools agencyTools, @NotNull GSpec gtfs) {
 		this.routeId = routeId;
@@ -79,8 +79,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	}
 
 	@NotNull
-	public List<GStopTime> getTripStopTimes(int tripIdInt) {
-		return this.routeTripIdStopTimes.getOrDefault(tripIdInt, Collections.emptyList());
+	public List<GStopTime> getTripGStopTimes(int gTripIdInt) {
+		return this.routeGTripIdIntIdGStopTimes.getOrDefault(gTripIdInt, Collections.emptyList());
 	}
 
 	private MSpec doCall() {
@@ -92,34 +92,34 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		HashMap<String, MSchedule> mSchedules = new HashMap<>();
 		HashMap<String, MFrequency> mFrequencies = new HashMap<>();
 		HashMap<Long, MRoute> mRoutes = new HashMap<>();
-		HashMap<Long, MTrip> mTrips = new HashMap<>();
-		HashMap<String, MTripStop> allMTripStops = new HashMap<>();
+		HashMap<Long, MDirection> mDirections = new HashMap<>();
+		HashMap<String, MDirectionStop> allMDirectionStops = new HashMap<>();
 		HashMap<Integer, MStop> mStops = new HashMap<>();
-		HashSet<Integer> tripStopIds = new HashSet<>(); // the list of stop IDs used by trips
+		HashSet<Integer> directionStopIds = new HashSet<>(); // the list of stop IDs used by directions
 		HashSet<Integer> serviceIdInts = new HashSet<>();
 		final GSpec routeGTFS = this.globalGTFS.getRouteGTFS(this.routeId);
-		List<Integer> routeTripsIntIds = new ArrayList<>();
+		List<Integer> routeGTripsIntIds = new ArrayList<>();
 		for (GRoute gRoute : routeGTFS.getRoutes(this.routeId)) {
-			List<GTrip> routeTrips = routeGTFS.getRouteTrips(gRoute.getRouteIdInt());
-			for (GTrip gTrip : routeTrips) {
-				routeTripsIntIds.add(gTrip.getTripIdInt());
+			List<GTrip> routeGTrips = routeGTFS.getRouteTrips(gRoute.getRouteIdInt());
+			for (GTrip gTrip : routeGTrips) {
+				routeGTripsIntIds.add(gTrip.getTripIdInt());
 			}
 		}
-		for (GStopTime gStopTime : GStopTime.from(GTFSDataBase.selectStopTimes(GIDs.getStrings(routeTripsIntIds), null, null))) {
-			List<GStopTime> tripIdStopTimes = routeTripIdStopTimes.get(gStopTime.getTripIdInt());
-			if (tripIdStopTimes == null) {
-				tripIdStopTimes = new ArrayList<>();
+		for (GStopTime gStopTime : GStopTime.from(GTFSDataBase.selectStopTimes(GIDs.getStrings(routeGTripsIntIds), null, null))) {
+			List<GStopTime> gTripIdIntGStopTimes = routeGTripIdIntIdGStopTimes.get(gStopTime.getTripIdInt());
+			if (gTripIdIntGStopTimes == null) {
+				gTripIdIntGStopTimes = new ArrayList<>();
 			}
-			tripIdStopTimes.add(gStopTime);
-			routeTripIdStopTimes.put(gStopTime.getTripIdInt(), tripIdStopTimes);
+			gTripIdIntGStopTimes.add(gStopTime);
+			routeGTripIdIntIdGStopTimes.put(gStopTime.getTripIdInt(), gTripIdIntGStopTimes);
 		}
-		for (GTripStop gTripStop : DBUtils.selectTripStops(null, routeTripsIntIds, null, null)) {
-			List<GTripStop> tripIdTripStops = routeTripIdTripStops.get(gTripStop.getTripIdInt());
-			if (tripIdTripStops == null) {
-				tripIdTripStops = new ArrayList<>();
+		for (GTripStop gTripStop : DBUtils.selectTripStops(null, routeGTripsIntIds, null, null)) {
+			List<GTripStop> gTripIdIntGTripStops = routeGTripIdIntGTripStops.get(gTripStop.getTripIdInt());
+			if (gTripIdIntGTripStops == null) {
+				gTripIdIntGTripStops = new ArrayList<>();
 			}
-			tripIdTripStops.add(gTripStop);
-			routeTripIdTripStops.put(gTripStop.getTripIdInt(), tripIdTripStops);
+			gTripIdIntGTripStops.add(gTripStop);
+			routeGTripIdIntGTripStops.put(gTripStop.getTripIdInt(), gTripIdIntGTripStops);
 		}
 		MAgency mAgency;
 		for (GAgency gAgency : routeGTFS.getAllAgencies()) {
@@ -137,10 +137,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mFrequencies,
 				mAgencies,
 				mRoutes,
-				mTrips,
+				mDirections,
 				mStops,
-				allMTripStops,
-				tripStopIds,
+				allMDirectionStops,
+				directionStopIds,
 				serviceIdInts,
 				routeGTFS
 		);
@@ -199,11 +199,11 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 			}
 		}
-		MTrip mTrip;
+		MDirection mDirection;
 		for (MSchedule mSchedule : mSchedules.values()) {
-			mTrip = mTrips.get(mSchedule.getTripId());
-			if (mTrip.getHeadsignType() == mSchedule.getHeadsignType() //
-					&& StringUtils.equals(mTrip.getHeadsignValue(), mSchedule.getHeadsignValue())) {
+			mDirection = mDirections.get(mSchedule.getDirectionId());
+			if (mDirection.getHeadsignType() == mSchedule.getHeadsignType() //
+					&& StringUtils.equals(mDirection.getHeadsignValue(), mSchedule.getHeadsignValue())) {
 				mSchedule.clearHeadsign();
 			}
 		}
@@ -213,11 +213,11 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Collections.sort(mStopsList);
 		ArrayList<MRoute> mRoutesList = new ArrayList<>(mRoutes.values());
 		Collections.sort(mRoutesList);
-		ArrayList<MTrip> mTripsList = new ArrayList<>(mTrips.values());
-		Collections.sort(mTripsList);
-		ArrayList<MTripStop> mTripStopsList = new ArrayList<>(allMTripStops.values());
-		Collections.sort(mTripStopsList);
-		setTripStopNoPickup(mTripStopsList, mSchedules.values());
+		ArrayList<MDirection> mDirectionsList = new ArrayList<>(mDirections.values());
+		Collections.sort(mDirectionsList);
+		ArrayList<MDirectionStop> mDirectionStopsList = new ArrayList<>(allMDirectionStops.values());
+		Collections.sort(mDirectionStopsList);
+		setDirectionStopNoPickup(mDirectionStopsList, mSchedules.values());
 		ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
 		Collections.sort(mServiceDatesList);
 		ArrayList<MFrequency> mFrequenciesList = new ArrayList<>(mFrequencies.values());
@@ -304,8 +304,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mAgenciesList,
 				mStopsList,
 				mRoutesList,
-				mTripsList,
-				mTripStopsList,
+				mDirectionsList,
+				mDirectionStopsList,
 				mServiceDatesList,
 				mRouteFrequencies,
 				firstTimestamp,
@@ -321,31 +321,31 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						  HashMap<String, MFrequency> mFrequencies,
 						  HashMap<Integer, MAgency> mAgencies,
 						  HashMap<Long, MRoute> mRoutes,
-						  HashMap<Long, MTrip> mTrips,
+						  HashMap<Long, MDirection> mDirections,
 						  HashMap<Integer, MStop> mStops,
-						  HashMap<String, MTripStop> allMTripStops,
-						  HashSet<Integer> tripStopIds,
+						  HashMap<String, MDirectionStop> allMDirectionStops,
+						  HashSet<Integer> directionStopIds,
 						  HashSet<Integer> serviceIdInts,
 						  GSpec routeGTFS) {
 		boolean mergeSuccessful;
-		HashMap<Long, String> mTripStopTimesHeadsign;
-		HashMap<Long, ArrayList<MTripStop>> tripIdToMTripStops = new HashMap<>();
-		HashSet<String> mTripHeadsignStrings;
+		HashMap<Long, String> mDirectionStopTimesHeadsign;
+		HashMap<Long, ArrayList<MDirectionStop>> directionIdToMDirectionStops = new HashMap<>();
+		HashSet<String> mDirectionHeadsignStrings;
 		boolean headsignTypeString;
-		boolean tripKeptNonDescriptiveHeadsign;
+		boolean directionKeptNonDescriptiveHeadsign;
 		final List<GRoute> gRoutes = routeGTFS.getRoutes(this.routeId);
 		Map<Integer, String> gDirectionHeadSigns = null;
 		if (this.agencyTools.directionSplitterEnabled(this.routeId)) {
 			MDirectionSplitter.splitDirection(this.routeId, gRoutes, routeGTFS, this.agencyTools);
 		}
 		if (this.agencyTools.directionFinderEnabled()) {
-			List<GTrip> gRouteTrips = new ArrayList<>();
+			List<GTrip> routeGTrips = new ArrayList<>();
 			for (GRoute gRoute : gRoutes) {
 				if (this.agencyTools.directionFinderEnabled(this.routeId, gRoute)) {
-					gRouteTrips.addAll(routeGTFS.getRouteTrips(gRoute.getRouteIdInt()));
+					routeGTrips.addAll(routeGTFS.getRouteTrips(gRoute.getRouteIdInt()));
 				}
 			}
-			gDirectionHeadSigns = MDirectionHeadSignFinder.findDirectionHeadSigns(this.routeId, gRouteTrips, routeGTFS, this.agencyTools);
+			gDirectionHeadSigns = MDirectionHeadSignFinder.findDirectionHeadSigns(this.routeId, routeGTrips, routeGTFS, this.agencyTools);
 			MTLog.log("%s: Found GTFS direction head sign: %s.", this.routeId, gDirectionHeadSigns);
 		}
 		for (GRoute gRoute : gRoutes) {
@@ -379,78 +379,78 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 			}
 			mRoutes.put(mRoute.getId(), mRoute);
-			mTripStopTimesHeadsign = new HashMap<>();
-			parseTrips(
+			mDirectionStopTimesHeadsign = new HashMap<>();
+			parseGTrips(
 					mSchedules,
 					mFrequencies,
-					mTrips,
+					mDirections,
 					mStops,
 					serviceIdInts,
 					mRoute,
-					mTripStopTimesHeadsign,
-					tripIdToMTripStops,
+					mDirectionStopTimesHeadsign,
+					directionIdToMDirectionStops,
 					gRoute,
 					gDirectionHeadSigns,
 					routeGTFS
 			);
-			mTripHeadsignStrings = new HashSet<>();
+			mDirectionHeadsignStrings = new HashSet<>();
 			headsignTypeString = false;
-			for (MTrip mTrip : mTrips.values()) {
-				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
-					mTripHeadsignStrings.add(mTrip.getHeadsignValue());
+			for (MDirection mDirection : mDirections.values()) {
+				if (mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING) {
+					mDirectionHeadsignStrings.add(mDirection.getHeadsignValue());
 					headsignTypeString = true;
 				}
 			}
-			tripKeptNonDescriptiveHeadsign = false; // 1 trip can keep the same non descriptive head sign
-			if (headsignTypeString && mTripHeadsignStrings.size() != mTrips.size()) {
-				MTLog.log("%s: Non descriptive trip headsigns (%s different headsign(s) for %s trips)", this.routeId, mTripHeadsignStrings.size(), mTrips.size());
-				for (MTrip mTrip : mTrips.values()) {
-					MTLog.log("%s: mTrip: %s", this.routeId, mTrip);
-					if (mTripStopTimesHeadsign.containsKey(mTrip.getId()) //
-							&& !mTrip.getHeadsignValue().equals(mTripStopTimesHeadsign.get(mTrip.getId()))) {
-						MTLog.log("%s: Replace trip headsign '%s' with stop times headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(),
-								mTripStopTimesHeadsign.get(mTrip.getId()), mTrip);
-						mTrip.setHeadsignString(mTripStopTimesHeadsign.get(mTrip.getId()), mTrip.getHeadsignId());
+			directionKeptNonDescriptiveHeadsign = false; // 1 direction can keep the same non descriptive head sign
+			if (headsignTypeString && mDirectionHeadsignStrings.size() != mDirections.size()) {
+				MTLog.log("%s: Non descriptive direction headsigns (%s different headsign(s) for %s directions)", this.routeId, mDirectionHeadsignStrings.size(), mDirections.size());
+				for (MDirection mDirection : mDirections.values()) {
+					MTLog.log("%s: mDirection: %s", this.routeId, mDirection);
+					if (mDirectionStopTimesHeadsign.containsKey(mDirection.getId()) //
+							&& !mDirection.getHeadsignValue().equals(mDirectionStopTimesHeadsign.get(mDirection.getId()))) {
+						MTLog.log("%s: Replace direction headsign '%s' with stop times headsign '%s' (%s)", this.routeId, mDirection.getHeadsignValue(),
+								mDirectionStopTimesHeadsign.get(mDirection.getId()), mDirection);
+						mDirection.setHeadsignString(mDirectionStopTimesHeadsign.get(mDirection.getId()), mDirection.getHeadsignId());
 					} else {
-						if (tripKeptNonDescriptiveHeadsign
+						if (directionKeptNonDescriptiveHeadsign
 								&& !agencyTools.allowNonDescriptiveHeadSigns(this.routeId)) {
-							MTLog.log("%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
-							MTLog.log("%s: trip headsigns: %s", this.routeId, mTripHeadsignStrings);
-							MTLog.log("%s: trips: %s", this.routeId, mTrips);
+							MTLog.log("%s: Direction headsign string '%s' non descriptive! (%s)", this.routeId, mDirection.getHeadsignValue(), mDirection);
+							MTLog.log("%s: direction headsigns: %s", this.routeId, mDirectionHeadsignStrings);
+							MTLog.log("%s: direction: %s", this.routeId, mDirections);
 							throw new MTLog.Fatal("");
 						}
-						MTLog.log("%s: Keeping non-descriptive trip headsign '%s' (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
-						tripKeptNonDescriptiveHeadsign = true; // last trip that can keep same head sign
+						MTLog.log("%s: Keeping non-descriptive direction headsign '%s' (%s)", this.routeId, mDirection.getHeadsignValue(), mDirection);
+						directionKeptNonDescriptiveHeadsign = true; // last direction that can keep same head sign
 					}
 				}
 			}
-			for (MTrip mTrip : mTrips.values()) {
-				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING //
-						&& StringUtils.isEmpty(mTrip.getHeadsignValue())) {
-					MTLog.log("%s: Trip headsign string '%s' non descriptive! (%s)", this.routeId, mTrip.getHeadsignValue(), mTrip);
-					MTLog.log("%s: %s", this.routeId, mTripHeadsignStrings);
-					MTLog.log("%s: %s", this.routeId, mTrips);
+			for (MDirection mDirection : mDirections.values()) {
+				if (mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING //
+						&& StringUtils.isEmpty(mDirection.getHeadsignValue())) {
+					MTLog.log("%s: Direction headsign string '%s' non descriptive! (%s)", this.routeId, mDirection.getHeadsignValue(), mDirection);
+					MTLog.log("%s: %s", this.routeId, mDirectionHeadsignStrings);
+					MTLog.log("%s: %s", this.routeId, mDirections);
 					throw new MTLog.Fatal("");
 				}
 			}
 		}
-		for (ArrayList<MTripStop> mTripStops : tripIdToMTripStops.values()) {
-			setMTripStopSequence(mTripStops);
-			for (MTripStop mTripStop : mTripStops) {
-				if (allMTripStops.containsKey(mTripStop.getUID())
-						&& !allMTripStops.get(mTripStop.getUID()).equals(mTripStop)) {
-					MTLog.log("%s: Different trip stop '%s' already in route list (%s != %s)!", this.routeId, mTripStop.getUID(), mTripStop.toString(),
-							allMTripStops.get(mTripStop.getUID()).toString());
+		for (ArrayList<MDirectionStop> mDirectionStops : directionIdToMDirectionStops.values()) {
+			setMDirectionStopSequence(mDirectionStops);
+			for (MDirectionStop mDirectionStop : mDirectionStops) {
+				if (allMDirectionStops.containsKey(mDirectionStop.getUID())
+						&& !allMDirectionStops.get(mDirectionStop.getUID()).equals(mDirectionStop)) {
+					MTLog.log("%s: Different direction stop '%s' already in route list (%s != %s)!", this.routeId, mDirectionStop.getUID(), mDirectionStop.toString(),
+							allMDirectionStops.get(mDirectionStop.getUID()).toString());
 					continue;
 				}
-				allMTripStops.put(mTripStop.getUID(), mTripStop);
-				tripStopIds.add(mTripStop.getStopId());
+				allMDirectionStops.put(mDirectionStop.getUID(), mDirectionStop);
+				directionStopIds.add(mDirectionStop.getStopId());
 			}
 		}
-		fixRouteLongName(mRoutes, mTrips);
+		fixRouteLongName(mRoutes, mDirections);
 	}
 
-	private void fixRouteLongName(HashMap<Long, MRoute> mRoutes, HashMap<Long, MTrip> mTrips) {
+	private void fixRouteLongName(HashMap<Long, MRoute> mRoutes, HashMap<Long, MDirection> mDirections) {
 		if (!this.agencyTools.defaultRouteLongNameEnabled()) {
 			return;
 		}
@@ -459,13 +459,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				continue;
 			}
 			StringBuilder sb = new StringBuilder();
-			for (MTrip mTrip : mTrips.values()) {
-				if (mTrip.getRouteId() == mRoute.getId()) {
-					if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
+			for (MDirection mDirection : mDirections.values()) {
+				if (mDirection.getRouteId() == mRoute.getId()) {
+					if (mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING) {
 						if (sb.length() > 0) {
 							sb.append(" <> ");
 						}
-						sb.append(mTrip.getHeadsignValue());
+						sb.append(mDirection.getHeadsignValue());
 					}
 				}
 			}
@@ -490,193 +490,193 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 	}
 
-	private void parseTrips(HashMap<String, MSchedule> mSchedules,
-							HashMap<String, MFrequency> mFrequencies,
-							HashMap<Long, MTrip> mTrips,
-							HashMap<Integer, MStop> mStops,
-							HashSet<Integer> serviceIdInts,
-							MRoute mRoute,
-							HashMap<Long, String> mTripStopTimesHeadsign,
-							HashMap<Long, ArrayList<MTripStop>> tripIdToMTripStops,
-							GRoute gRoute,
-							Map<Integer, String> gDirectionHeadSigns,
-							GSpec routeGTFS) {
+	private void parseGTrips(HashMap<String, MSchedule> mSchedules,
+							 HashMap<String, MFrequency> mFrequencies,
+							 HashMap<Long, MDirection> mDirections,
+							 HashMap<Integer, MStop> mStops,
+							 HashSet<Integer> serviceIdInts,
+							 MRoute mRoute,
+							 HashMap<Long, String> mDirectionStopTimesHeadsign,
+							 HashMap<Long, ArrayList<MDirectionStop>> directionIdToMDirectionStops,
+							 GRoute gRoute,
+							 Map<Integer, String> gDirectionHeadSigns,
+							 GSpec routeGTFS) {
 		boolean mergeSuccessful;
-		HashMap<Long, HashSet<String>> mergedTripIdToMTripStops = new HashMap<>();
-		HashMap<Long, Pair<Integer, String>> originalTripHeadsign;
-		ArrayList<MTrip> splitTrips;
-		HashMap<Long, HashMap<String, MTripStop>> splitTripStops;
-		ArrayList<MTripStop> cTripStopsList;
-		ArrayList<MTripStop> mTripStopsList;
-		Integer tripServiceIdInt;
-		HashMap<Long, String> splitTripStopTimesHeadsign;
-		final List<GTrip> gRouteTrips = GTrip.longestFirst(
+		HashMap<Long, HashSet<String>> mergedDirectionIdToMDirectionStops = new HashMap<>();
+		HashMap<Long, Pair<Integer, String>> originalDirectionHeadsign;
+		ArrayList<MDirection> splitDirections;
+		HashMap<Long, HashMap<String, MDirectionStop>> splitDirectionStops;
+		ArrayList<MDirectionStop> cDirectionStopsList;
+		ArrayList<MDirectionStop> mDirectionStopsList;
+		Integer serviceIdInt;
+		HashMap<Long, String> splitDirectionStopTimesHeadsign;
+		final List<GTrip> routeGTrips = GTrip.longestFirst(
 				routeGTFS.getRouteTrips(gRoute.getRouteIdInt()),
-				this.routeTripIdTripStops::get
+				this.routeGTripIdIntGTripStops::get
 		);
 		///noinspection DiscouragedApi
 		final String gRouteId = gRoute.getRouteId();
-		MTLog.log("%s: parsing %d trips for route ID '%s'... ", this.routeId, gRouteTrips.size(), gRouteId);
+		MTLog.log("%s: parsing %d trips for route ID '%s'... ", this.routeId, routeGTrips.size(), gRouteId);
 		int g = 0;
-		for (GTrip gTrip : gRouteTrips) {
+		for (GTrip gTrip : routeGTrips) {
 			if (gTrip.getRouteIdInt() != gRoute.getRouteIdInt()) {
 				throw new MTLog.Fatal("%s: Should not happen!", this.routeId); // continue; // SKIP
 			}
-			splitTrips = new ArrayList<>(Collections.singleton(new MTrip(mRoute.getId())));
-			originalTripHeadsign = new HashMap<>();
-			for (MTrip mTrip : splitTrips) {
-				this.agencyTools.setTripHeadsign(mRoute, mTrip, gTrip, routeGTFS);
-				Pair<Integer, String> originalTripHeadSignTypeAndValue = new Pair<>(mTrip.getHeadsignType(), mTrip.getHeadsignValue());
-				long originalTripHeadSignId = mTrip.getId();
-				if (splitTrips.size() == 1 // not split-ed
+			splitDirections = new ArrayList<>(Collections.singleton(new MDirection(mRoute.getId())));
+			originalDirectionHeadsign = new HashMap<>();
+			for (MDirection mDirection : splitDirections) {
+				this.agencyTools.setDirectionHeadsign(mRoute, mDirection, gTrip, routeGTFS);
+				Pair<Integer, String> originalDirectionHeadSignTypeAndValue = new Pair<>(mDirection.getHeadsignType(), mDirection.getHeadsignValue());
+				long originalDirectionHeadSignId = mDirection.getId();
+				if (splitDirections.size() == 1 // not split-ed
 						&& gDirectionHeadSigns != null) { // direction finder enabled
 					final String directionHeadSign = gDirectionHeadSigns.get(gTrip.getDirectionIdOrDefault());
-					if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING) {
+					if (mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING) {
 						if (directionHeadSign != null && !directionHeadSign.isEmpty()) {
-							mTrip.setHeadsignString(directionHeadSign, mTrip.getHeadsignId());
-							originalTripHeadSignId = mTrip.getId();
+							mDirection.setHeadsignString(directionHeadSign, mDirection.getHeadsignId());
+							originalDirectionHeadSignId = mDirection.getId();
 						}
 					}
-					if (this.agencyTools.getDirectionTypes().contains(MTrip.HEADSIGN_TYPE_DIRECTION)) {
-						final MDirectionType direction = this.agencyTools.convertDirection(directionHeadSign);
+					if (this.agencyTools.getDirectionTypes().contains(MDirection.HEADSIGN_TYPE_DIRECTION)) {
+						final MDirectionCardinalType direction = this.agencyTools.convertDirection(directionHeadSign);
 						if (direction != null) {
-							mTrip.setHeadsignDirection(direction);
-							originalTripHeadSignId = mTrip.getId();
-							if (StringUtils.equals(directionHeadSign, originalTripHeadSignTypeAndValue.second)) {
-								originalTripHeadSignTypeAndValue = new Pair<>(mTrip.getHeadsignType(), mTrip.getHeadsignValue());
+							mDirection.setHeadsignDirection(direction);
+							originalDirectionHeadSignId = mDirection.getId();
+							if (StringUtils.equals(directionHeadSign, originalDirectionHeadSignTypeAndValue.second)) {
+								originalDirectionHeadSignTypeAndValue = new Pair<>(mDirection.getHeadsignType(), mDirection.getHeadsignValue());
 							}
 						}
 					}
 				}
-				originalTripHeadsign.put(originalTripHeadSignId, originalTripHeadSignTypeAndValue);
+				originalDirectionHeadsign.put(originalDirectionHeadSignId, originalDirectionHeadSignTypeAndValue);
 			}
-			for (MTrip mTrip : splitTrips) {
-				final MTrip currentTrip = mTrips.get(mTrip.getId());
-				if (currentTrip != null && !currentTrip.equals(mTrip)) {
+			for (MDirection mDirection : splitDirections) {
+				final MDirection currentDirection = mDirections.get(mDirection.getId());
+				if (currentDirection != null && !currentDirection.equals(mDirection)) {
 					mergeSuccessful = false;
-					if (mTrip.equalsExceptHeadsignValue(currentTrip)) {
-						mergeSuccessful = this.agencyTools.mergeHeadsign(mTrip, currentTrip, gRoute);
+					if (mDirection.equalsExceptHeadsignValue(currentDirection)) {
+						mergeSuccessful = this.agencyTools.mergeHeadsign(mDirection, currentDirection, gRoute);
 					}
 					if (!mergeSuccessful) {
-						throw new MTLog.Fatal("%s: Different trip %s already in list (%s != %s)", this.routeId, mTrip.getId(), mTrip, currentTrip);
+						throw new MTLog.Fatal("%s: Different direction %s already in list (%s != %s)", this.routeId, mDirection.getId(), mDirection, currentDirection);
 					}
 				}
 			}
-			tripServiceIdInt = gTrip.getServiceIdInt();
-			parseFrequencies(mFrequencies, gTrip, splitTrips, tripServiceIdInt, routeGTFS);
-			splitTripStops = new HashMap<>();
-			splitTripStopTimesHeadsign = parseTripStops(
+			serviceIdInt = gTrip.getServiceIdInt();
+			parseFrequencies(mFrequencies, gTrip, splitDirections, serviceIdInt, routeGTFS);
+			splitDirectionStops = new HashMap<>();
+			splitDirectionStopTimesHeadsign = parseGTripStops(
 					mSchedules,
 					serviceIdInts,
 					mStops,
 					gRoute,
 					gTrip,
-					originalTripHeadsign,
-					splitTrips,
-					tripServiceIdInt,
-					splitTripStops,
+					originalDirectionHeadsign,
+					splitDirections,
+					serviceIdInt,
+					splitDirectionStops,
 					routeGTFS
 			);
-			for (MTrip mTrip : splitTrips) {
-				if (!splitTripStops.containsKey(mTrip.getId())) {
+			for (MDirection mDirection : splitDirections) {
+				if (!splitDirectionStops.containsKey(mDirection.getId())) {
 					continue;
 				}
-				mTripStopsList = new ArrayList<>(splitTripStops.get(mTrip.getId()).values());
-				Collections.sort(mTripStopsList);
-				setMTripStopSequence(mTripStopsList);
-				String mTripStopListString = mTripStopsList.toString();
-				if (mergedTripIdToMTripStops.containsKey(mTrip.getId())
-						&& mergedTripIdToMTripStops.get(mTrip.getId()).contains(mTripStopListString)) {
+				mDirectionStopsList = new ArrayList<>(splitDirectionStops.get(mDirection.getId()).values());
+				Collections.sort(mDirectionStopsList);
+				setMDirectionStopSequence(mDirectionStopsList);
+				String mDirectionStopListString = mDirectionStopsList.toString();
+				if (mergedDirectionIdToMDirectionStops.containsKey(mDirection.getId())
+						&& mergedDirectionIdToMDirectionStops.get(mDirection.getId()).contains(mDirectionStopListString)) {
 					continue;
 				}
-				cTripStopsList = tripIdToMTripStops.get(mTrip.getId());
-				if (cTripStopsList != null) {
-					if (!CollectionUtils.equalsList(mTripStopsList, cTripStopsList)) {
-						if (MTripStop.containsStopIds(cTripStopsList, mTripStopsList)) {
-							MTLog.logDebug("%s: Skip merge because current trip stops list contains other list.", this.routeId, MTripStop.printTripStops(cTripStopsList));
+				cDirectionStopsList = directionIdToMDirectionStops.get(mDirection.getId());
+				if (cDirectionStopsList != null) {
+					if (!CollectionUtils.equalsList(mDirectionStopsList, cDirectionStopsList)) {
+						if (MDirectionStop.containsStopIds(cDirectionStopsList, mDirectionStopsList)) {
+							MTLog.logDebug("%s: Skip merge because current direction stops list contains other list.", this.routeId, MDirectionStop.printDirectionStops(cDirectionStopsList));
 						} else {
-							MTLog.log("%s: Need to merge trip ID '%s' stops lists (sizes: %d in %d).", this.routeId, mTrip.getId(), mTripStopsList.size(), cTripStopsList.size());
+							MTLog.log("%s: Need to merge direction ID '%s' stops lists (sizes: %d in %d).", this.routeId, mDirection.getId(), mDirectionStopsList.size(), cDirectionStopsList.size());
 							if (Constants.DEBUG) {
-								MTLog.logDebug("%s: - current stops list > %s.", this.routeId, MTripStop.printTripStops(cTripStopsList));
-								MTLog.logDebug("%s: - new stops list > %s.", this.routeId, MTripStop.printTripStops(mTripStopsList));
+								MTLog.logDebug("%s: - current stops list > %s.", this.routeId, MDirectionStop.printDirectionStops(cDirectionStopsList));
+								MTLog.logDebug("%s: - new stops list > %s.", this.routeId, MDirectionStop.printDirectionStops(mDirectionStopsList));
 							}
-							final ArrayList<MTripStop> resultTripStopsList = setMTripStopSequence(
-									mergeMyTripStopLists(mTrip.getId(), mTripStopsList, cTripStopsList)
+							final ArrayList<MDirectionStop> resultDirectionStopsList = setMDirectionStopSequence(
+									mergeMyDirectionStopLists(mDirection.getId(), mDirectionStopsList, cDirectionStopsList)
 							);
-							tripIdToMTripStops.put(mTrip.getId(), resultTripStopsList);
+							directionIdToMDirectionStops.put(mDirection.getId(), resultDirectionStopsList);
 							if (Constants.DEBUG) {
-								MTLog.logDebug("%s: - result stops list > %s.", this.routeId, MTripStop.printTripStops(resultTripStopsList));
+								MTLog.logDebug("%s: - result stops list > %s.", this.routeId, MDirectionStop.printDirectionStops(resultDirectionStopsList));
 							}
 						}
 					}
 				} else { // just use it
-					tripIdToMTripStops.put(mTrip.getId(), mTripStopsList);
+					directionIdToMDirectionStops.put(mDirection.getId(), mDirectionStopsList);
 				}
-				if (!mergedTripIdToMTripStops.containsKey(mTrip.getId())) {
-					mergedTripIdToMTripStops.put(mTrip.getId(), new HashSet<>());
+				if (!mergedDirectionIdToMDirectionStops.containsKey(mDirection.getId())) {
+					mergedDirectionIdToMDirectionStops.put(mDirection.getId(), new HashSet<>());
 				}
-				mergedTripIdToMTripStops.get(mTrip.getId()).add(mTripStopListString);
+				mergedDirectionIdToMDirectionStops.get(mDirection.getId()).add(mDirectionStopListString);
 			}
-			for (MTrip mTrip : splitTrips) {
-				if (!splitTripStops.containsKey(mTrip.getId())) {
+			for (MDirection mDirection : splitDirections) {
+				if (!splitDirectionStops.containsKey(mDirection.getId())) {
 					continue;
 				}
-				String tripStopTimesHeadsign = splitTripStopTimesHeadsign.get(mTrip.getId());
-				if (mTrip.getHeadsignType() == MTrip.HEADSIGN_TYPE_STRING
-						&& tripStopTimesHeadsign != null
-						&& !tripStopTimesHeadsign.isEmpty()) {
-					if (mTripStopTimesHeadsign.containsKey(mTrip.getId())) {
-						if (!mTripStopTimesHeadsign.get(mTrip.getId()).equals(tripStopTimesHeadsign)) {
-							if (!mTripStopTimesHeadsign.get(mTrip.getId()).contains(tripStopTimesHeadsign)) {
-								MTLog.log("%s: Trip stop times head-sign different for same trip ID ('%s'!='%s')", this.routeId,
-										tripStopTimesHeadsign, mTripStopTimesHeadsign.get(mTrip.getId()));
+				String directionStopTimesHeadsign = splitDirectionStopTimesHeadsign.get(mDirection.getId());
+				if (mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING
+						&& directionStopTimesHeadsign != null
+						&& !directionStopTimesHeadsign.isEmpty()) {
+					if (mDirectionStopTimesHeadsign.containsKey(mDirection.getId())) {
+						if (!mDirectionStopTimesHeadsign.get(mDirection.getId()).equals(directionStopTimesHeadsign)) {
+							if (!mDirectionStopTimesHeadsign.get(mDirection.getId()).contains(directionStopTimesHeadsign)) {
+								MTLog.log("%s: Trip stop times head-sign different for same direction ID ('%s'!='%s')", this.routeId,
+										directionStopTimesHeadsign, mDirectionStopTimesHeadsign.get(mDirection.getId()));
 							}
-							mTripStopTimesHeadsign.put(mTrip.getId(),
-									MTrip.mergeHeadsignValue(
-											mTripStopTimesHeadsign.get(mTrip.getId()),
-											tripStopTimesHeadsign));
+							mDirectionStopTimesHeadsign.put(mDirection.getId(),
+									MDirection.mergeHeadsignValue(
+											mDirectionStopTimesHeadsign.get(mDirection.getId()),
+											directionStopTimesHeadsign));
 						}
 					} else {
-						mTripStopTimesHeadsign.put(mTrip.getId(), tripStopTimesHeadsign);
+						mDirectionStopTimesHeadsign.put(mDirection.getId(), directionStopTimesHeadsign);
 					}
 				}
 			}
-			for (MTrip mTrip : splitTrips) {
-				if (!splitTripStops.containsKey(mTrip.getId())) {
+			for (MDirection mDirection : splitDirections) {
+				if (!splitDirectionStops.containsKey(mDirection.getId())) {
 					continue;
 				}
-				mTrips.put(mTrip.getId(), mTrip);
+				mDirections.put(mDirection.getId(), mDirection);
 			}
 			if (g++ % 10 == 0) { // LOG
 				MTLog.logPOINT(); // LOG
 			} // LOG
 		}
-		MTLog.log("%s: parsing %d trips for route ID '%s'... DONE", this.routeId, gRouteTrips.size(), gRouteId);
+		MTLog.log("%s: parsing %d trips for route ID '%s'... DONE", this.routeId, routeGTrips.size(), gRouteId);
 	}
 
-	private HashMap<Long, String> parseTripStops(HashMap<String, MSchedule> mSchedules,
-												 HashSet<Integer> serviceIdInts,
-												 HashMap<Integer, MStop> mStops,
-												 GRoute gRoute,
-												 GTrip gTrip,
-												 HashMap<Long, Pair<Integer, String>> originalTripHeadsign,
-												 ArrayList<MTrip> splitTrips,
-												 Integer tripServiceIdInt,
-												 HashMap<Long, HashMap<String, MTripStop>> splitTripStops,
-												 GSpec routeGTFS) {
-		HashMap<Long, String> splitTripStopTimesHeadSign = new HashMap<>();
+	private HashMap<Long, String> parseGTripStops(HashMap<String, MSchedule> mSchedules,
+												  HashSet<Integer> serviceIdInts,
+												  HashMap<Integer, MStop> mStops,
+												  GRoute gRoute,
+												  GTrip gTrip,
+												  HashMap<Long, Pair<Integer, String>> originalDirectionHeadsign,
+												  ArrayList<MDirection> splitDirections,
+												  Integer serviceIdInt,
+												  HashMap<Long, HashMap<String, MDirectionStop>> splitDirectionStops,
+												  GSpec routeGTFS) {
+		HashMap<Long, String> splitDirectionStopTimesHeadSign = new HashMap<>();
 		int mStopId;
 		GStop gStop;
-		MTripStop mTripStop;
-		long mTripId;
-		String tripStopTimesHeadsign;
-		Pair<Long[], Integer[]> mTripsAndStopSequences;
-		HashMap<String, Integer> addedMTripIdAndGStopIds = new HashMap<>();
-		final List<GTripStop> tripStops = this.routeTripIdTripStops.get(gTrip.getTripIdInt());
-		if (tripStops == null) {
-			return splitTripStopTimesHeadSign;
+		MDirectionStop mDirectionStop;
+		long mDirectionId;
+		String directionStopTimesHeadsign;
+		Pair<Long[], Integer[]> mDirectionsAndStopSequences;
+		HashMap<String, Integer> addedMDirectionIdAndGStopIds = new HashMap<>();
+		final List<GTripStop> gTripStops = this.routeGTripIdIntGTripStops.get(gTrip.getTripIdInt());
+		if (gTripStops == null) {
+			return splitDirectionStopTimesHeadSign;
 		}
-		for (GTripStop gTripStop : tripStops) {
+		for (GTripStop gTripStop : gTripStops) {
 			if (gTripStop.getTripIdInt() != gTrip.getTripIdInt()) {
 				continue;
 			}
@@ -691,56 +691,56 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				throw new MTLog.Fatal("%s: Can't find GTFS stop ID (%s) '%s' from trip ID '%s' (%s)", this.routeId, mStopId, gTripStop.getStopIdInt(),
 						gTripStop.getTripId(), gStop.toStringPlus(true));
 			}
-			mTripsAndStopSequences = new Pair<>(
-					new Long[]{splitTrips.get(0).getId()},
+			mDirectionsAndStopSequences = new Pair<>(
+					new Long[]{splitDirections.get(0).getId()},
 					new Integer[]{gTripStop.getStopSequence()}
 			);
-			for (int i = 0; i < mTripsAndStopSequences.first.length; i++) {
-				mTripId = mTripsAndStopSequences.first[i];
-				mTripStop = new MTripStop(mTripId, mStopId, mTripsAndStopSequences.second[i]);
-				if (!splitTripStops.containsKey(mTripId)) {
-					splitTripStops.put(mTripId, new HashMap<>());
+			for (int i = 0; i < mDirectionsAndStopSequences.first.length; i++) {
+				mDirectionId = mDirectionsAndStopSequences.first[i];
+				mDirectionStop = new MDirectionStop(mDirectionId, mStopId, mDirectionsAndStopSequences.second[i]);
+				if (!splitDirectionStops.containsKey(mDirectionId)) {
+					splitDirectionStops.put(mDirectionId, new HashMap<>());
 				}
-				final HashMap<String, MTripStop> uuidToTripStops = splitTripStops.get(mTripId);
-				final MTripStop sameUuidTripStop = uuidToTripStops.get(mTripStop.getUID());
-				if (sameUuidTripStop != null) {
-					if (!sameUuidTripStop.equalsExceptStopSequence(mTripStop)) {
-						throw new MTLog.Fatal("%s: Different trip '%s' stop '%s' already in list (%s != %s)!",
+				final HashMap<String, MDirectionStop> uuidToDirectionStops = splitDirectionStops.get(mDirectionId);
+				final MDirectionStop sameUuidDirectionStop = uuidToDirectionStops.get(mDirectionStop.getUID());
+				if (sameUuidDirectionStop != null) {
+					if (!sameUuidDirectionStop.equalsExceptStopSequence(mDirectionStop)) {
+						throw new MTLog.Fatal("%s: Different direction '%s' stop '%s' already in list (%s != %s)!",
 								this.routeId,
-								mTripStop.getTripId(),
-								mTripStop.getStopId(),
-								mTripStop.toString(),
-								sameUuidTripStop.toString());
+								mDirectionStop.getDirectionId(),
+								mDirectionStop.getStopId(),
+								mDirectionStop.toString(),
+								sameUuidDirectionStop.toString());
 					} else {
-						MTLog.logDebug("%s: Same trip '%s' stop '%s' already in list (sequence %s != %s).",
+						MTLog.logDebug("%s: Same direction '%s' stop '%s' already in list (sequence %s != %s).",
 								this.routeId,
-								mTripStop.getTripId(),
-								mTripStop.getStopId(),
-								mTripStop.getStopSequence(),
-								sameUuidTripStop.getStopSequence());
+								mDirectionStop.getDirectionId(),
+								mDirectionStop.getStopId(),
+								mDirectionStop.getStopSequence(),
+								sameUuidDirectionStop.getStopSequence());
 					}
 				} else {
-					uuidToTripStops.put(mTripStop.getUID(), mTripStop);
+					uuidToDirectionStops.put(mDirectionStop.getUID(), mDirectionStop);
 				}
-				tripStopTimesHeadsign = splitTripStopTimesHeadSign.get(mTripId);
-				if (!originalTripHeadsign.containsKey(mTripId)) {
-					throw new MTLog.Fatal("%s: Unexpected trip head-sign ID '%s'! (%s)", this.routeId, mTripId, originalTripHeadsign);
+				directionStopTimesHeadsign = splitDirectionStopTimesHeadSign.get(mDirectionId);
+				if (!originalDirectionHeadsign.containsKey(mDirectionId)) {
+					throw new MTLog.Fatal("%s: Unexpected direction head-sign ID '%s'! (%s)", this.routeId, mDirectionId, originalDirectionHeadsign);
 				}
-				tripStopTimesHeadsign = parseStopTimes(
+				directionStopTimesHeadsign = parseGStopTimes(
 						mSchedules,
-						mTripId,
-						tripServiceIdInt,
-						originalTripHeadsign.get(mTripId).first,
-						originalTripHeadsign.get(mTripId).second,
-						tripStopTimesHeadsign,
+						mDirectionId,
+						serviceIdInt,
+						originalDirectionHeadsign.get(mDirectionId).first,
+						originalDirectionHeadsign.get(mDirectionId).second,
+						directionStopTimesHeadsign,
 						gRoute,
 						gTrip,
 						gTripStop,
 						mStopId,
-						addedMTripIdAndGStopIds
+						addedMDirectionIdAndGStopIds
 				);
-				splitTripStopTimesHeadSign.put(mTripId, tripStopTimesHeadsign);
-				serviceIdInts.add(tripServiceIdInt);
+				splitDirectionStopTimesHeadSign.put(mDirectionId, directionStopTimesHeadsign);
+				serviceIdInts.add(serviceIdInt);
 			}
 			if (!mStops.containsKey(mStopId)) {
 				//noinspection DiscouragedApi
@@ -757,27 +757,27 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						));
 			}
 		}
-		return splitTripStopTimesHeadSign;
+		return splitDirectionStopTimesHeadSign;
 	}
 
 	private final SimpleDateFormat TIME_FORMAT = GFieldTypes.makeTimeFormat();
 
-	private String parseStopTimes(HashMap<String, MSchedule> mSchedules,
-								  long mTripId,
-								  Integer tripServiceIdInt,
-								  int originalTripHeadsignType,
-								  @Nullable String originalTripHeadsignValue,
-								  String tripStopTimesHeadsign,
-								  @NotNull GRoute gRoute,
-								  @NotNull GTrip gTrip,
-								  @NotNull GTripStop gTripStop,
-								  int mStopId,
-								  HashMap<String, Integer> addedMTripIdAndGStopIds) {
+	private String parseGStopTimes(HashMap<String, MSchedule> mSchedules,
+								   long mDirectionId,
+								   Integer serviceIdInt,
+								   int originalDirectionHeadsignType,
+								   @Nullable String originalDirectionHeadsignValue,
+								   String directionStopTimesHeadsign,
+								   @NotNull GRoute gRoute,
+								   @NotNull GTrip gTrip,
+								   @NotNull GTripStop gTripStop,
+								   int mStopId,
+								   HashMap<String, Integer> addedMDirectionIdAndGStopIds) {
 		MSchedule mSchedule;
 		String stopHeadsign;
 		boolean noPickup;
-		String tripIdStopId;
-		List<GStopTime> gTripStopTimes = getTripStopTimes(gTripStop.getTripIdInt());
+		String directionIdStopId;
+		List<GStopTime> gTripStopTimes = getTripGStopTimes(gTripStop.getTripIdInt());
 		int lastStopSequence = -1;
 		GStopTime lastStopTime = null;
 		for (int i = 0; i < gTripStopTimes.size(); i++) {
@@ -797,17 +797,17 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			if (gStopTime.getPickupType() == GPickupType.NO_PICKUP) { // last stop of the trip
 				noPickup = true;
 			}
-			tripIdStopId = String.valueOf(mTripId) + gStopTime.getTripIdInt() + gStopTime.getStopIdInt();
+			directionIdStopId = String.valueOf(mDirectionId) + gStopTime.getTripIdInt() + gStopTime.getStopIdInt();
 			if (noPickup) {
-				if (addedMTripIdAndGStopIds.containsKey(tripIdStopId) //
-						&& addedMTripIdAndGStopIds.get(tripIdStopId) != gStopTime.getStopSequence()) {
+				if (addedMDirectionIdAndGStopIds.containsKey(directionIdStopId) //
+						&& addedMDirectionIdAndGStopIds.get(directionIdStopId) != gStopTime.getStopSequence()) {
 					// TODO later, when UI can display multiple times same stop/POI & schedules are affected to a specific sequence, keep both
 				}
 			}
 			mSchedule = new MSchedule(
 					this.routeId,
-					tripServiceIdInt,
-					mTripId,
+					serviceIdInt,
+					mDirectionId,
 					mStopId,
 					this.agencyTools.getTimes(
 							gStopTime,
@@ -827,47 +827,36 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						mSchedules.get(mSchedule.getUID()).toStringPlus());
 			}
 			if (noPickup) {
-				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_NO_PICKUP, null);
+				mSchedule.setHeadsign(MDirection.HEADSIGN_TYPE_NO_PICKUP, null);
 			} else if (gStopTime.hasStopHeadsign()) {
 				stopHeadsign = this.agencyTools.cleanStopHeadSign(gRoute, gTrip, gStopTime, gStopTime.getStopHeadsignOrDefault());
-				mSchedule.setHeadsign(MTrip.HEADSIGN_TYPE_STRING, stopHeadsign);
-				tripStopTimesHeadsign = setTripStopTimesHeadsign(tripStopTimesHeadsign, stopHeadsign);
+				mSchedule.setHeadsign(MDirection.HEADSIGN_TYPE_STRING, stopHeadsign);
+				directionStopTimesHeadsign = setDirectionStopTimesHeadsign(directionStopTimesHeadsign, stopHeadsign);
 			} else {
-				if (!StringUtils.isBlank(originalTripHeadsignValue)) {
-					mSchedule.setHeadsign(originalTripHeadsignType, originalTripHeadsignValue);
+				if (!StringUtils.isBlank(originalDirectionHeadsignValue)) {
+					mSchedule.setHeadsign(originalDirectionHeadsignType, originalDirectionHeadsignValue);
 				}
 			}
 			mSchedules.put(mSchedule.getUID(), mSchedule);
-			addedMTripIdAndGStopIds.put(tripIdStopId, gStopTime.getStopSequence());
+			addedMDirectionIdAndGStopIds.put(directionIdStopId, gStopTime.getStopSequence());
 		}
-		return tripStopTimesHeadsign;
-	}
-
-	private static String setTripStopTimesHeadsign(String tripStopTimesHeadsign, String stopHeadSign) {
-		if (tripStopTimesHeadsign == null) {
-			tripStopTimesHeadsign = stopHeadSign;
-		} else if (Constants.EMPTY.equals(tripStopTimesHeadsign)) { // disabled
-			// nothing to do
-		} else if (!tripStopTimesHeadsign.equals(stopHeadSign)) {
-			tripStopTimesHeadsign = Constants.EMPTY; // disable
-		}
-		return tripStopTimesHeadsign;
+		return directionStopTimesHeadsign;
 	}
 
 	private void parseFrequencies(HashMap<String, MFrequency> mFrequencies,
 								  GTrip gTrip,
-								  ArrayList<MTrip> splitTrips,
-								  Integer tripServiceIdInt,
+								  ArrayList<MDirection> splitDirections,
+								  Integer serviceIdInt,
 								  GSpec routeGTFS) {
 		MFrequency mFrequency;
 		for (GFrequency gFrequency : routeGTFS.getFrequencies(gTrip.getTripIdInt())) {
 			if (gFrequency.getTripIdInt() != gTrip.getTripIdInt()) {
 				continue;
 			}
-			for (MTrip mTrip : splitTrips) {
+			for (MDirection mDirection : splitDirections) {
 				mFrequency = new MFrequency(
-						tripServiceIdInt,
-						mTrip.getId(),
+						serviceIdInt,
+						mDirection.getId(),
 						this.agencyTools.getStartTime(gFrequency),
 						this.agencyTools.getEndTime(gFrequency),
 						gFrequency.getHeadwaySecs()
@@ -881,71 +870,82 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 	}
 
-	private void setTripStopNoPickup(@NotNull ArrayList<MTripStop> mTripStopsList,
-									 @NotNull Collection<MSchedule> mSchedules) {
-		for (MTripStop tripStop : mTripStopsList) {
-			boolean isDescentOnly = false;
+	private static String setDirectionStopTimesHeadsign(String directionStopTimesHeadsign, String stopHeadSign) {
+		if (directionStopTimesHeadsign == null) {
+			directionStopTimesHeadsign = stopHeadSign;
+		} else if (Constants.EMPTY.equals(directionStopTimesHeadsign)) { // disabled
+			// nothing to do
+		} else if (!directionStopTimesHeadsign.equals(stopHeadSign)) {
+			directionStopTimesHeadsign = Constants.EMPTY; // disable
+		}
+		return directionStopTimesHeadsign;
+	}
+
+	private void setDirectionStopNoPickup(@NotNull ArrayList<MDirectionStop> mDirectionStopsList,
+										  @NotNull Collection<MSchedule> mSchedules) {
+		for (MDirectionStop directionStop : mDirectionStopsList) {
+			boolean noPickup = false;
 			for (MSchedule schedule : mSchedules) {
-				if (schedule.getTripId() != tripStop.getTripId()) {
+				if (schedule.getDirectionId() != directionStop.getDirectionId()) {
 					continue;
 				}
-				if (schedule.getStopId() != tripStop.getStopId()) {
+				if (schedule.getStopId() != directionStop.getStopId()) {
 					continue;
 				}
 				if (schedule.isNoPickup()) {
-					isDescentOnly = true;
+					noPickup = true;
 					//noinspection UnnecessaryContinue
 					continue;
 				} else {
-					isDescentOnly = false;
+					noPickup = false;
 					break;
 				}
 			}
-			tripStop.setNoPickup(isDescentOnly);
+			directionStop.setNoPickup(noPickup);
 		}
 		// SKIP (descent only set on the stop time schedule level
 	}
 
 	@NotNull
-	private ArrayList<MTripStop> mergeMyTripStopLists(long tripId, @NotNull ArrayList<MTripStop> list1, @NotNull ArrayList<MTripStop> list2) {
-		final String logTag = this.routeId + ": " + tripId;
-		ArrayList<MTripStop> newList = new ArrayList<>();
+	private ArrayList<MDirectionStop> mergeMyDirectionStopLists(long directionId, @NotNull ArrayList<MDirectionStop> list1, @NotNull ArrayList<MDirectionStop> list2) {
+		final String logTag = this.routeId + ": " + directionId;
+		ArrayList<MDirectionStop> newList = new ArrayList<>();
 		HashSet<Integer> newListStopIds = new HashSet<>();
 		HashSet<Integer> list1StopIds = new HashSet<>();
-		for (MTripStop ts1 : list1) {
+		for (MDirectionStop ts1 : list1) {
 			list1StopIds.add(ts1.getStopId());
 		}
 		HashSet<Integer> list2StopIds = new HashSet<>();
-		for (MTripStop ts2 : list2) {
+		for (MDirectionStop ts2 : list2) {
 			list2StopIds.add(ts2.getStopId());
 		}
-		MTripStop ts1, ts2;
+		MDirectionStop ts1, ts2;
 		boolean s2InL1, s1InL2;
 		boolean lastInL1, lastInL2;
 		GStop lastGStop, ts1GStop, ts2GStop;
 		GStop commonGStop, previousTs1GStop, previousTs2GStop;
 		double ts1Distance, ts2Distance;
 		double previousTs1Distance, previousTs2Distance;
-		MTripStop[] commonStopAndPrevious;
+		MDirectionStop[] commonStopAndPrevious;
 		int i1 = 0, i2 = 0;
-		MTripStop last = null;
+		MDirectionStop last = null;
 		//noinspection ForLoopReplaceableByWhile
 		for (; i1 < list1.size() && i2 < list2.size(); ) {
 			ts1 = list1.get(i1);
 			ts2 = list2.get(i2);
 			if (newListStopIds.contains(ts1.getStopId())) {
-				MTLog.logDebug("%s: Skipped %s because already in the merged list (1).", logTag, ts1.toStringSameTrip());
+				MTLog.logDebug("%s: Skipped %s because already in the merged list (1).", logTag, ts1.toStringSameDirection());
 				i1++; // skip this stop because already in the merged list
 				continue;
 			}
 			if (newListStopIds.contains(ts2.getStopId())) {
-				MTLog.logDebug("%s: Skipped %s because already in the merged list (2).", logTag, ts2.toStringSameTrip());
+				MTLog.logDebug("%s: Skipped %s because already in the merged list (2).", logTag, ts2.toStringSameDirection());
 				i2++; // skip this stop because already in the merged list
 				continue;
 			}
 			if (ts1.getStopId() == ts2.getStopId()) {
 				if (!ts1.equalsExceptStopSequence(ts2)) { // not loosing no pickup info (TODO really? added 2022-12-03)
-					throw new MTLog.Fatal("%s: Trying to merge different trip stop for same stop %s VS %s.", logTag, ts1.toStringSameTrip(), ts2.toStringSameTrip());
+					throw new MTLog.Fatal("%s: Trying to merge different direction stop for same stop %s VS %s.", logTag, ts1.toStringSameDirection(), ts2.toStringSameDirection());
 				}
 				// MTLog.logDebug("%s: Merged same stop %s (1=2).", logTag, ts1.toStringSimple());
 				newList.add(ts1);
@@ -960,7 +960,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			s2InL1 = list1StopIds.contains(ts2.getStopId());
 			s1InL2 = list2StopIds.contains(ts1.getStopId());
 			if (s2InL1 && !s1InL2) {
-				MTLog.logDebug("%s: Merged stop %s from 1st list NOT present in 2nd list (1).", logTag, ts1.toStringSameTrip());
+				MTLog.logDebug("%s: Merged stop %s from 1st list NOT present in 2nd list (1).", logTag, ts1.toStringSameDirection());
 				newList.add(ts1);
 				newListStopIds.add(ts1.getStopId());
 				last = ts1;
@@ -968,7 +968,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				continue;
 			}
 			if (!s2InL1 && s1InL2) {
-				MTLog.logDebug("%s: Merged stop %s from 2nd list NOT present in 1st list (2).", logTag, ts2.toStringSameTrip());
+				MTLog.logDebug("%s: Merged stop %s from 2nd list NOT present in 1st list (2).", logTag, ts2.toStringSameDirection());
 				newList.add(ts2);
 				newListStopIds.add(ts2.getStopId());
 				last = ts2;
@@ -981,9 +981,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				lastInL2 = list2StopIds.contains(last.getStopId());
 				if (lastInL1 && !lastInL2) {
 					MTLog.log(this.routeId
-							+ ": pick t:" + ts1.getTripId() + ">s:" + ts1.getStopId()
+							+ ": pick t:" + ts1.getDirectionId() + ">s:" + ts1.getStopId()
 							+ " in same list w/ s:" + last.getStopId()
-							+ " instead of t:" + ts2.getTripId() + ">s:" + ts2.getStopId());
+							+ " instead of t:" + ts2.getDirectionId() + ">s:" + ts2.getStopId());
 					newList.add(ts1);
 					newListStopIds.add(ts1.getStopId());
 					last = ts1;
@@ -992,9 +992,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				}
 				if (!lastInL1 && lastInL2) {
 					MTLog.log(this.routeId
-							+ ": pick t:" + ts2.getTripId() + ">s:" + ts2.getStopId()
+							+ ": pick t:" + ts2.getDirectionId() + ">s:" + ts2.getStopId()
 							+ " in same list w/ s:" + last.getStopId()
-							+ " instead of t:" + ts1.getTripId() + ">s:" + ts1.getStopId());
+							+ " instead of t:" + ts1.getDirectionId() + ">s:" + ts1.getStopId());
 					newList.add(ts2);
 					newListStopIds.add(ts2.getStopId());
 					last = ts2;
@@ -1012,18 +1012,18 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				ts2Distance = findDistance(lastGStop.getStopLat(), lastGStop.getStopLong(), ts2GStop.getStopLat(), ts2GStop.getStopLong());
 				if (ts1Distance < ts2Distance) {
 					MTLog.log(this.routeId
-							+ ": pick t:" + ts1.getTripId() + ">" + ts1GStop.toStringPlus()
+							+ ": pick t:" + ts1.getDirectionId() + ">" + ts1GStop.toStringPlus()
 							+ " closest (" + (ts2Distance - ts1Distance) + ") to " + lastGStop.toStringPlus()
-							+ " instead of t:" + ts2.getTripId() + ">" + ts2GStop.toStringPlus());
+							+ " instead of t:" + ts2.getDirectionId() + ">" + ts2GStop.toStringPlus());
 					newList.add(ts1);
 					newListStopIds.add(ts1.getStopId());
 					last = ts1;
 					i1++;
 				} else {
 					MTLog.log(this.routeId
-							+ ": pick t:" + ts2.getTripId() + ">" + ts2GStop.toStringPlus()
+							+ ": pick t:" + ts2.getDirectionId() + ">" + ts2GStop.toStringPlus()
 							+ " closest (" + (ts1Distance - ts2Distance) + ") to " + lastGStop.toStringPlus()
-							+ " instead of t:" + ts1.getTripId() + ">" + ts1GStop.toStringPlus());
+							+ " instead of t:" + ts1.getDirectionId() + ">" + ts1GStop.toStringPlus());
 					newList.add(ts2);
 					newListStopIds.add(ts2.getStopId());
 					last = ts2;
@@ -1041,7 +1041,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						previousTs1GStop.getStopLong());
 				previousTs2Distance = findDistance(commonGStop.getStopLat(), commonGStop.getStopLong(), previousTs2GStop.getStopLat(),
 						previousTs2GStop.getStopLong());
-				MTLog.log(this.routeId + ": Resolved using 1st common stop trip ID:" + ts1.getTripId() + ", stop IDs:"
+				MTLog.log(this.routeId + ": Resolved using 1st common stop direction ID:" + ts1.getDirectionId() + ", stop IDs:"
 						+ ts1.getStopId() + "," + ts2.getStopId() + " ("
 						+ commonStopAndPrevious[1].getStopId() + ":" + previousTs1Distance + ", "
 						+ commonStopAndPrevious[2].getStopId() + ":" + previousTs2Distance + ")");
@@ -1060,13 +1060,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 
 			if (ts1GStop.getStopLat() < ts2GStop.getStopLat() || ts1GStop.getStopLong() < ts2GStop.getStopLong()) {
-				MTLog.logDebug("%s: Merged stop %s using arbitrary lat long (1).", logTag, ts1.toStringSameTrip());
+				MTLog.logDebug("%s: Merged stop %s using arbitrary lat long (1).", logTag, ts1.toStringSameDirection());
 				newList.add(ts1);
 				newListStopIds.add(ts1.getStopId());
 				last = ts1;
 				i1++;
 			} else {
-				MTLog.logDebug("%s: Merged stop %s using arbitrary lat long (2).", logTag, ts2.toStringSameTrip());
+				MTLog.logDebug("%s: Merged stop %s using arbitrary lat long (2).", logTag, ts2.toStringSameDirection());
 				newList.add(ts2);
 				newListStopIds.add(ts2.getStopId());
 				last = ts2;
@@ -1094,31 +1094,31 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	}
 
 	@NotNull
-	private ArrayList<MTripStop> setMTripStopSequence(@NotNull ArrayList<MTripStop> mTripStops) {
-		for (int i = 0; i < mTripStops.size(); i++) {
+	private ArrayList<MDirectionStop> setMDirectionStopSequence(@NotNull ArrayList<MDirectionStop> mDirectionStops) {
+		for (int i = 0; i < mDirectionStops.size(); i++) {
 			final int newSequence = i + 1;
-			final MTripStop mTripStop = mTripStops.get(i);
-			if (mTripStop.getStopSequence() == newSequence) {
+			final MDirectionStop mDirectionStop = mDirectionStops.get(i);
+			if (mDirectionStop.getStopSequence() == newSequence) {
 				continue;
 			}
-			mTripStop.setStopSequence(newSequence);
+			mDirectionStop.setStopSequence(newSequence);
 		}
-		return mTripStops;
+		return mDirectionStops;
 	}
 
-	private MTripStop[] findFirstCommonStop(ArrayList<MTripStop> l1, ArrayList<MTripStop> l2) {
-		MTripStop previousTs1 = null;
-		MTripStop previousTs2;
-		MTripStop[] commonStopAndPrevious;
-		for (MTripStop tts1 : l1) {
+	private MDirectionStop[] findFirstCommonStop(ArrayList<MDirectionStop> l1, ArrayList<MDirectionStop> l2) {
+		MDirectionStop previousTs1 = null;
+		MDirectionStop previousTs2;
+		MDirectionStop[] commonStopAndPrevious;
+		for (MDirectionStop tts1 : l1) {
 			previousTs2 = null;
-			for (MTripStop tts2 : l2) {
+			for (MDirectionStop tts2 : l2) {
 				if (tts1.getStopId() == tts2.getStopId()) {
 					if (previousTs1 == null || previousTs2 == null) {
 						MTLog.log(this.routeId + ": findFirstCommonStop() > Common stop found '" + tts1.getStopId()
 								+ "' but no previous stop! Looking for next common stop...");
 					} else {
-						commonStopAndPrevious = new MTripStop[3];
+						commonStopAndPrevious = new MDirectionStop[3];
 						commonStopAndPrevious[0] = tts1;
 						commonStopAndPrevious[1] = previousTs1;
 						commonStopAndPrevious[2] = previousTs2;
@@ -1129,7 +1129,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			previousTs1 = tts1;
 		}
-		return new MTripStop[0];
+		return new MDirectionStop[0];
 	}
 
 	private final float[] results = new float[2];
