@@ -132,7 +132,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			mAgencies.put(mAgency.getIdInt(), mAgency);
 		}
-		parseRTS(
+		parseRDS(
 				mSchedules,
 				mFrequencies,
 				mAgencies,
@@ -317,7 +317,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return mRouteSpec;
 	}
 
-	private void parseRTS(HashMap<String, MSchedule> mSchedules,
+	private void parseRDS(HashMap<String, MSchedule> mSchedules,
 						  HashMap<String, MFrequency> mFrequencies,
 						  HashMap<Integer, MAgency> mAgencies,
 						  HashMap<Long, MRoute> mRoutes,
@@ -818,7 +818,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					gTrip.getWheelchairAccessible().getId()
 			);
 			if (mSchedules.containsKey(mSchedule.getUID()) //
-					&& !mSchedules.get(mSchedule.getUID()).isSameServiceRTSDeparture(mSchedule)) {
+					&& !mSchedules.get(mSchedule.getUID()).isSameServiceRDSDeparture(mSchedule)) {
 				throw new MTLog.Fatal("%s: Different schedule %s (%s) already in list (%s != %s)!",
 						this.routeId,
 						mSchedule.getUID(),

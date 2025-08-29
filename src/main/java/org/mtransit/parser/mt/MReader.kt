@@ -42,10 +42,10 @@ object MReader {
 
     // region first/last departures
 
-    private const val GTFS_RDS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml" // do not rename to avoid breaking change
+    private const val GTFS_RDS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml" // do not change to avoid breaking compat w/ old modules
 
-    private const val GTFS_RDS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec" // do not rename to avoid breaking change
-    private const val GTFS_RDS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec" // do not rename to avoid breaking change
+    private const val GTFS_RDS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec" // do not change to avoid breaking compat w/ old modules
+    private const val GTFS_RDS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec" // do not change to avoid breaking compat w/ old modules
 
     private fun makeFirstDepartureRegex(fileBase: String) =
         Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase$GTFS_RDS_FIRST_DEPARTURE_IN_SEC\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
@@ -53,52 +53,52 @@ object MReader {
     private fun makeLastDepartureRegex(fileBase: String) =
         Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase$GTFS_RDS_LAST_DEPARTURE_IN_SEC\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
 
-    private const val GTFS_RTS_TIMEZONE = "gtfs_rts_timezone" // do not rename to avoid breaking change
+    private const val GTFS_RDS_TIMEZONE = "gtfs_rts_timezone" // do not change to avoid breaking compat w/ old modules
 
     private fun makeTimeZoneRegex() =
-        Regex(any(WHITESPACE_CAR) + "<string name=\"$GTFS_RTS_TIMEZONE\">${group(oneOrMore(ALPHA_NUM_CAR) + "/" + oneOrMore(ALPHA_NUM_CAR))}</string>")
+        Regex(any(WHITESPACE_CAR) + "<string name=\"$GTFS_RDS_TIMEZONE\">${group(oneOrMore(ALPHA_NUM_CAR) + "/" + oneOrMore(ALPHA_NUM_CAR))}</string>")
 
     @Suppress("unused") // TODO removed
     @JvmStatic
     fun readFirstLastDepartures(fileBase: String): Pair<Int?, Int?>? {
         try {
-            val gtfsRtsValuesGenXml = getResDirName(fileBase) + "/$VALUES/${fileBase}$GTFS_RDS_VALUES_GEN_XML"
-            val gtfsRtsValuesGenXmlFile = File(gtfsRtsValuesGenXml)
-            if (!gtfsRtsValuesGenXmlFile.exists()) {
-                MTLog.log("File not found '$gtfsRtsValuesGenXml'!")
+            val gtfsRdsValuesGenXml = getResDirName(fileBase) + "/$VALUES/${fileBase}$GTFS_RDS_VALUES_GEN_XML"
+            val gtfsRdsValuesGenXmlFile = File(gtfsRdsValuesGenXml)
+            if (!gtfsRdsValuesGenXmlFile.exists()) {
+                MTLog.log("File not found '$gtfsRdsValuesGenXml'!")
                 return null
             }
-            val commonRtsValuesGenXml = getResDirName() + "/$VALUES/$GTFS_RDS_VALUES_GEN_XML"
-            val commonRtsValuesGenXmlFile = File(commonRtsValuesGenXml)
-            if (!commonRtsValuesGenXmlFile.exists()) {
-                MTLog.log("File not found '$commonRtsValuesGenXml'!")
+            val commonRdsValuesGenXml = getResDirName() + "/$VALUES/$GTFS_RDS_VALUES_GEN_XML"
+            val commonRdsValuesGenXmlFile = File(commonRdsValuesGenXml)
+            if (!commonRdsValuesGenXmlFile.exists()) {
+                MTLog.log("File not found '$commonRdsValuesGenXml'!")
                 return null
             }
             val firstDepartureRegex = makeFirstDepartureRegex(fileBase)
             val lastDepartureRegex = makeLastDepartureRegex(fileBase)
-            val gtfsRtsValuesGenXmlFileLines = gtfsRtsValuesGenXmlFile.readLines()
-            val firstDepartureInSec = gtfsRtsValuesGenXmlFileLines
+            val gtfsRdsValuesGenXmlFileLines = gtfsRdsValuesGenXmlFile.readLines()
+            val firstDepartureInSec = gtfsRdsValuesGenXmlFileLines
                 .firstOrNull { firstDepartureRegex.matches(it) }
                 ?.let { firstDepartureRegex.find(it) }
                 ?.let { it.groupValues[1] }
                 ?.toIntOrNull()
-            val lastDepartureInSec = gtfsRtsValuesGenXmlFileLines
+            val lastDepartureInSec = gtfsRdsValuesGenXmlFileLines
                 .firstOrNull { lastDepartureRegex.matches(it) }
                 ?.let { lastDepartureRegex.find(it) }
                 ?.let { it.groupValues[1] }
                 ?.toIntOrNull()
             if (firstDepartureInSec == null || lastDepartureInSec == null) {
-                MTLog.log("First ($firstDepartureInSec) or last ($lastDepartureInSec) departure not found in '$gtfsRtsValuesGenXml'!")
+                MTLog.log("First ($firstDepartureInSec) or last ($lastDepartureInSec) departure not found in '$gtfsRdsValuesGenXml'!")
                 return null
             }
             val commonTimeZoneRegex = makeTimeZoneRegex()
-            val commonRtsValuesGenXmlFileLines = commonRtsValuesGenXmlFile.readLines()
-            val timeZone = commonRtsValuesGenXmlFileLines
+            val commonRdsValuesGenXmlFileLines = commonRdsValuesGenXmlFile.readLines()
+            val timeZone = commonRdsValuesGenXmlFileLines
                 .firstOrNull { commonTimeZoneRegex.matches(it) }
                 ?.let { commonTimeZoneRegex.find(it) }
                 ?.let { it.groupValues[1] }
             if (timeZone.isNullOrBlank()) {
-                MTLog.log("Time zone not found in '$commonRtsValuesGenXml'!")
+                MTLog.log("Time zone not found in '$commonRdsValuesGenXml'!")
                 return null
             }
             val dateFormat = GFieldTypes.makeDateFormat().apply {
