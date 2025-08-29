@@ -202,11 +202,11 @@ public class MGenerator {
 	private static final String GTFS_SCHEDULE_STOP = GTFS_SCHEDULE + "_stop_"; // file
 	private static final String GTFS_FREQUENCY = "gtfs_frequency";
 	private static final String GTFS_FREQUENCY_ROUTE = GTFS_FREQUENCY + "_route_"; // file
-	private static final String GTFS_RTS = "gtfs_rts";
-	private static final String GTFS_RTS_ROUTES = GTFS_RTS + "_routes"; // DB
-	private static final String GTFS_RTS_TRIPS = GTFS_RTS + "_trips"; // DB
-	private static final String GTFS_RTS_TRIP_STOPS = GTFS_RTS + "_trip_stops"; // DB
-	private static final String GTFS_RTS_STOPS = GTFS_RTS + "_stops"; // DB
+	private static final String GTFS_RDS = "gtfs_rts"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_ROUTES = GTFS_RDS + "_routes"; // DB
+	private static final String GTFS_RDS_DIRECTIONS = GTFS_RDS + "_trips"; // do not change to avoid breaking compat w/ old modules // DB
+	private static final String GTFS_RDS_DIRECTION_STOPS = GTFS_RDS + "_trip_stops"; // do not change to avoid breaking compat w/ old modules // DB
+	private static final String GTFS_RDS_STOPS = GTFS_RDS + "_stops"; // DB
 
 	private static final int FILE_WRITER_LOG = 10;
 
@@ -260,14 +260,14 @@ public class MGenerator {
 			DumpDbUtils.init(dbConnection); // create tables (clean)
 		}
 		// ROUTES
-		dumpRTSRoutes(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
-		// TRIPS
-		dumpRTSTrips(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
-		// TRIP STOPS
-		dumpRTSTripStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		dumpRDSRoutes(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		// DIRECTIONS
+		dumpRDSDirections(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		// DIRECTION STOPS
+		dumpRDSDirectionStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// STOPS
 		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng =
-				dumpRTSStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+				dumpRDSStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// SCHEDULE SERVICE DATES
 		Pair<Integer, Integer> minMaxDates =
 				dumpScheduleServiceDates(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
@@ -294,7 +294,7 @@ public class MGenerator {
 		DBUtils.printStats();
 	}
 
-	private static void dumpRTSRoutes(@Nullable MSpec mSpec,
+	private static void dumpRDSRoutes(@Nullable MSpec mSpec,
 									  @NotNull String fileBase,
 									  boolean deleteAll,
 									  @NotNull File dataDirF,
@@ -307,9 +307,9 @@ public class MGenerator {
 		File file;
 		BufferedWriter ow = null;
 		if (F_PRE_FILLED_DB) {
-			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RTS_ROUTES)); // migration from src/main/res/raw to data
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_ROUTES)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RTS_ROUTES);
+		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_ROUTES);
 		FileUtils.deleteIfExist(file); // delete previous
 		try {
 			if (!deleteAll) {
@@ -344,12 +344,12 @@ public class MGenerator {
 		}
 	}
 
-	private static void dumpRTSTrips(@Nullable MSpec mSpec,
-									 @NotNull String fileBase,
-									 boolean deleteAll,
-									 @NotNull File dataDirF,
-									 @NotNull File rawDirF,
-									 @Nullable Connection dbConnection) {
+	private static void dumpRDSDirections(@Nullable MSpec mSpec,
+										  @NotNull String fileBase,
+										  boolean deleteAll,
+										  @NotNull File dataDirF,
+										  @NotNull File rawDirF,
+										  @Nullable Connection dbConnection) {
 		if (!deleteAll
 				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
@@ -357,9 +357,9 @@ public class MGenerator {
 		File file;
 		BufferedWriter ow = null;
 		if (F_PRE_FILLED_DB) {
-			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RTS_TRIPS)); // migration from src/main/res/raw to data
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_DIRECTIONS)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RTS_TRIPS);
+		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_DIRECTIONS);
 		FileUtils.deleteIfExist(file); // delete previous
 		try {
 			if (!deleteAll) {
@@ -394,12 +394,12 @@ public class MGenerator {
 		}
 	}
 
-	private static void dumpRTSTripStops(@Nullable MSpec mSpec,
-										 @NotNull String fileBase,
-										 boolean deleteAll,
-										 @NotNull File dataDirF,
-										 @NotNull File rawDirF,
-										 @Nullable Connection dbConnection) {
+	private static void dumpRDSDirectionStops(@Nullable MSpec mSpec,
+											  @NotNull String fileBase,
+											  boolean deleteAll,
+											  @NotNull File dataDirF,
+											  @NotNull File rawDirF,
+											  @Nullable Connection dbConnection) {
 		if (!deleteAll
 				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
@@ -407,9 +407,9 @@ public class MGenerator {
 		File file;
 		BufferedWriter ow = null;
 		if (F_PRE_FILLED_DB) {
-			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RTS_TRIP_STOPS)); // migration from src/main/res/raw to data
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_DIRECTION_STOPS)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RTS_TRIP_STOPS);
+		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_DIRECTION_STOPS);
 		FileUtils.deleteIfExist(file); // delete previous
 		try {
 			if (!deleteAll) {
@@ -445,7 +445,7 @@ public class MGenerator {
 	}
 
 	@NotNull
-	private static Pair<Pair<Double, Double>, Pair<Double, Double>> dumpRTSStops(@Nullable MSpec mSpec,
+	private static Pair<Pair<Double, Double>, Pair<Double, Double>> dumpRDSStops(@Nullable MSpec mSpec,
 																				 @NotNull String fileBase,
 																				 boolean deleteAll,
 																				 @NotNull File dataDirF,
@@ -458,9 +458,9 @@ public class MGenerator {
 		BufferedWriter ow = null;
 		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng = new Pair<>(new Pair<>(null, null), new Pair<>(null, null));
 		if (F_PRE_FILLED_DB) {
-			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RTS_STOPS)); // migration from src/main/res/raw to data
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_STOPS)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RTS_STOPS);
+		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_STOPS);
 		FileUtils.deleteIfExist(file); // delete previous
 		try {
 			if (!deleteAll) {
@@ -725,13 +725,15 @@ public class MGenerator {
 		}
 	}
 
-	private static final String GTFS_RTS_VALUES_XML = "gtfs_rts_values.xml";
+	private static final String GTFS_RDS_VALUES_XML = "gtfs_rts_values.xml"; // do not change to avoid breaking compat w/ old modules
 
 	private static final SimpleDateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
-	private static final Pattern RTS_DB_VERSION_REGEX = Pattern.compile("((<integer name=\"gtfs_rts_db_version\">)(\\d+)(</integer>))",
-			Pattern.CASE_INSENSITIVE);
-	private static final String RTS_DB_VERSION_REPLACEMENT = "$2%s$4";
+	private static final Pattern RDS_DB_VERSION_REGEX = Pattern.compile(
+			"((<integer name=\"gtfs_rts_db_version\">)(\\d+)(</integer>))", // do not change to avoid breaking compat w/ old modules
+			Pattern.CASE_INSENSITIVE
+	);
+	private static final String RDS_DB_VERSION_REPLACEMENT = "$2%s$4";
 
 	private static void bumpDBVersion(File dumpDirF, String gtfsDir) {
 		MTLog.log("Bumping DB version...");
@@ -746,26 +748,26 @@ public class MGenerator {
 			File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
 			File dumpDirResF = new File(dumpDirRootF, RES);
 			File valuesDirF = new File(dumpDirResF, VALUES);
-			File gtfsRtsValuesXmlF = new File(valuesDirF, GTFS_RTS_VALUES_XML); // shared between different schedule (current, next...)
-			String content = new String(Files.readAllBytes(gtfsRtsValuesXmlF.toPath()), StandardCharsets.UTF_8);
-			final Matcher matcher = RTS_DB_VERSION_REGEX.matcher(content);
+			File gtfsRdsValuesXmlF = new File(valuesDirF, GTFS_RDS_VALUES_XML); // shared between different schedule (current, next...)
+			String content = new String(Files.readAllBytes(gtfsRdsValuesXmlF.toPath()), StandardCharsets.UTF_8);
+			final Matcher matcher = RDS_DB_VERSION_REGEX.matcher(content);
 			if (!matcher.find() || matcher.groupCount() < 4) {
 				MTLog.log("Bumping DB version... SKIP (error while reading current DB version)");
 				return;
 			}
-			String currentRtsDbVersion = matcher.group(3);
-			String currentLastModifiedTimeS = currentRtsDbVersion.substring(0, 8);
+			String currentRdsDbVersion = matcher.group(3);
+			String currentLastModifiedTimeS = currentRdsDbVersion.substring(0, 8);
 			final int currentLastModifiedTimeI = Integer.parseInt(currentLastModifiedTimeS);
 			if (lastModifiedTimeDateI <= currentLastModifiedTimeI) {
-				MTLog.log("Bumping DB version... SKIP (current DB version '%s' NOT older than last modified date '%s')", currentRtsDbVersion,
+				MTLog.log("Bumping DB version... SKIP (current DB version '%s' NOT older than last modified date '%s')", currentRdsDbVersion,
 						lastModifiedTimeDateS);
 				return;
 			}
-			if (currentRtsDbVersion.length() > lastModifiedTimeDateS.length()) {
+			if (currentRdsDbVersion.length() > lastModifiedTimeDateS.length()) {
 				lastModifiedTimeDateS = lastModifiedTimeDateS + "0";
 			}
-			String newContent = RTS_DB_VERSION_REGEX.matcher(content).replaceAll(String.format(RTS_DB_VERSION_REPLACEMENT, lastModifiedTimeDateS));
-			ow = new BufferedWriter(new FileWriter(gtfsRtsValuesXmlF));
+			String newContent = RDS_DB_VERSION_REGEX.matcher(content).replaceAll(String.format(RDS_DB_VERSION_REPLACEMENT, lastModifiedTimeDateS));
+			ow = new BufferedWriter(new FileWriter(gtfsRdsValuesXmlF));
 			MTLog.logPOINT(); // LOG
 			ow.write(newContent);
 			MTLog.log("Bumping DB version... DONE (new current DB version '%s')", lastModifiedTimeDateS);
@@ -794,26 +796,26 @@ public class MGenerator {
 	private static final String RES = "res";
 	private static final String RAW = "raw";
 	private static final String VALUES = "values";
-	private static final String GTFS_RTS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml";
+	private static final String GTFS_RDS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml"; // do not change to avoid breaking compat w/ old modules
 
-	private static final String GTFS_RTS_SOURCE_LABEL = "gtfs_rts_source_label";
-	private static final String GTFS_RTS_AGENCY_ID = "gtfs_rts_agency_id";
-	private static final String GTFS_RTS_AGENCY_TYPE = "gtfs_rts_agency_type";
-	private static final String GTFS_RTS_AGENCY_EXTENDED_TYPE = "gtfs_rts_agency_extended_type";
-	private static final String GTFS_RTS_TIMEZONE = "gtfs_rts_timezone";
-	private static final String GTFS_RTS_COLOR = "gtfs_rts_color";
-	private static final String GTFS_RTS_ROUTE_ID_CLEANUP_REGEX = "gtfs_rts_route_id_cleanup_regex";
-	private static final String GTFS_RTS_TRIP_ID_CLEANUP_REGEX = "gtfs_rts_trip_id_cleanup_regex";
-	private static final String GTFS_RTS_STOP_ID_CLEANUP_REGEX = "gtfs_rts_stop_id_cleanup_regex";
+	private static final String GTFS_RDS_SOURCE_LABEL = "gtfs_rts_source_label"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_AGENCY_ID = "gtfs_rts_agency_id"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_AGENCY_TYPE = "gtfs_rts_agency_type"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_AGENCY_EXTENDED_TYPE = "gtfs_rts_agency_extended_type"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_TIMEZONE = "gtfs_rts_timezone"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_COLOR = "gtfs_rts_color"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_ROUTE_ID_CLEANUP_REGEX = "gtfs_rts_route_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_TRIP_ID_CLEANUP_REGEX = "gtfs_rts_trip_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_STOP_ID_CLEANUP_REGEX = "gtfs_rts_stop_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
 
-	private static final String GTFS_RTS_SCHEDULE_AVAILABLE = "gtfs_rts_schedule_available";
-	private static final String GTFS_RTS_FREQUENCY_AVAILABLE = "gtfs_rts_frequency_available";
-	private static final String GTFS_RTS_AREA_MIN_LAT = "gtfs_rts_area_min_lat";
-	private static final String GTFS_RTS_AREA_MAX_LAT = "gtfs_rts_area_max_lat";
-	private static final String GTFS_RTS_AREA_MIN_LNG = "gtfs_rts_area_min_lng";
-	private static final String GTFS_RTS_AREA_MAX_LNG = "gtfs_rts_area_max_lng";
-	private static final String GTFS_RTS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec";
-	private static final String GTFS_RTS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec";
+	private static final String GTFS_RDS_SCHEDULE_AVAILABLE = "gtfs_rts_schedule_available"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_FREQUENCY_AVAILABLE = "gtfs_rts_frequency_available"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_AREA_MIN_LAT = "gtfs_rts_area_min_lat"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_AREA_MAX_LAT = "gtfs_rts_area_max_lat"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_AREA_MIN_LNG = "gtfs_rts_area_min_lng"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_AREA_MAX_LNG = "gtfs_rts_area_max_lng"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec"; // do not change to avoid breaking compat w/ old modules
 	// TODO later max integer = 2147483647 = Tuesday, January 19, 2038 3:14:07 AM GMT
 
 	private static void dumpCommonValues(File dumpDirF, GAgencyTools gAgencyTools, MSpec mSpec, @Nullable String inputUrl) {
@@ -821,7 +823,7 @@ public class MGenerator {
 		File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
 		File dumpDirResF = new File(dumpDirRootF, RES);
 		File valuesDirF = new File(dumpDirResF, VALUES);
-		File file = new File(valuesDirF, GTFS_RTS_VALUES_GEN_XML);
+		File file = new File(valuesDirF, GTFS_RDS_VALUES_GEN_XML);
 		FileUtils.deleteIfExist(file); // delete previous
 		MTLog.log("Generated values file: '%s'.", file);
 		try {
@@ -835,32 +837,32 @@ public class MGenerator {
 			ow.write(Constants.NEW_LINE);
 			final String sourceLabel = SourceUtils.getSourceLabel(inputUrl);
 			if (sourceLabel != null && !sourceLabel.isEmpty()) {
-				ow.write(getRESOURCES_STRING(GTFS_RTS_SOURCE_LABEL, sourceLabel));
+				ow.write(getRESOURCES_STRING(GTFS_RDS_SOURCE_LABEL, sourceLabel));
 				ow.write(Constants.NEW_LINE);
 			}
 			//noinspection deprecation
-			ow.write(getRESOURCES_STRING(GTFS_RTS_AGENCY_ID, mSpec.getFirstAgency().getId()));
+			ow.write(getRESOURCES_STRING(GTFS_RDS_AGENCY_ID, mSpec.getFirstAgency().getId()));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_INTEGER(GTFS_RTS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
+			ow.write(getRESOURCES_INTEGER(GTFS_RDS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
 			ow.write(Constants.NEW_LINE);
 			if (gAgencyTools.getAgencyExtendedRouteType() != null) {
-				ow.write(getRESOURCES_INTEGER(GTFS_RTS_AGENCY_EXTENDED_TYPE, gAgencyTools.getAgencyExtendedRouteType()));
+				ow.write(getRESOURCES_INTEGER(GTFS_RDS_AGENCY_EXTENDED_TYPE, gAgencyTools.getAgencyExtendedRouteType()));
 				ow.write(Constants.NEW_LINE);
 			}
-			ow.write(getRESOURCES_STRING(GTFS_RTS_TIMEZONE, mSpec.getFirstAgency().getTimezone()));
+			ow.write(getRESOURCES_STRING(GTFS_RDS_TIMEZONE, mSpec.getFirstAgency().getTimezone()));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_STRING(GTFS_RTS_COLOR, mSpec.getFirstAgency().getColor()));
+			ow.write(getRESOURCES_STRING(GTFS_RDS_COLOR, mSpec.getFirstAgency().getColor()));
 			ow.write(Constants.NEW_LINE);
 			if (gAgencyTools.getRouteIdCleanupRegex() != null) {
-				ow.write(getRESOURCES_STRING(GTFS_RTS_ROUTE_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getRouteIdCleanupRegex())));
+				ow.write(getRESOURCES_STRING(GTFS_RDS_ROUTE_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getRouteIdCleanupRegex())));
 				ow.write(Constants.NEW_LINE);
 			}
 			if (gAgencyTools.getTripIdCleanupRegex() != null) {
-				ow.write(getRESOURCES_STRING(GTFS_RTS_TRIP_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getTripIdCleanupRegex())));
+				ow.write(getRESOURCES_STRING(GTFS_RDS_TRIP_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getTripIdCleanupRegex())));
 				ow.write(Constants.NEW_LINE);
 			}
 			if (gAgencyTools.getStopIdCleanupRegex() != null) {
-				ow.write(getRESOURCES_STRING(GTFS_RTS_STOP_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getStopIdCleanupRegex())));
+				ow.write(getRESOURCES_STRING(GTFS_RDS_STOP_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getStopIdCleanupRegex())));
 				ow.write(Constants.NEW_LINE);
 			}
 			ow.write(RESOURCES_END);
@@ -903,7 +905,7 @@ public class MGenerator {
 		if (!valuesDirF.exists()) {
 			FileUtils.mkdir(valuesDirF);
 		}
-		file = new File(valuesDirF, fileBase + GTFS_RTS_VALUES_GEN_XML);
+		file = new File(valuesDirF, fileBase + GTFS_RDS_VALUES_GEN_XML);
 		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) {
 			return;
@@ -921,38 +923,38 @@ public class MGenerator {
 			if (StringUtils.isEmpty(fileBase)) {
 				final String sourceLabel = SourceUtils.getSourceLabel(inputUrl);
 				if (sourceLabel != null && !sourceLabel.isEmpty()) {
-					ow.write(getRESOURCES_STRING(GTFS_RTS_SOURCE_LABEL, sourceLabel));
+					ow.write(getRESOURCES_STRING(GTFS_RDS_SOURCE_LABEL, sourceLabel));
 					ow.write(Constants.NEW_LINE);
 				}
 				//noinspection deprecation
-				ow.write(getRESOURCES_STRING(GTFS_RTS_AGENCY_ID, mSpec.getFirstAgency().getId()));
+				ow.write(getRESOURCES_STRING(GTFS_RDS_AGENCY_ID, mSpec.getFirstAgency().getId()));
 				ow.write(Constants.NEW_LINE);
-				ow.write(getRESOURCES_INTEGER(GTFS_RTS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
+				ow.write(getRESOURCES_INTEGER(GTFS_RDS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
 				ow.write(Constants.NEW_LINE);
 			}
-			ow.write(getRESOURCES_BOOL(fileBase + GTFS_RTS_SCHEDULE_AVAILABLE, mSpec.hasStopSchedules()));
+			ow.write(getRESOURCES_BOOL(fileBase + GTFS_RDS_SCHEDULE_AVAILABLE, mSpec.hasStopSchedules()));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_BOOL(fileBase + GTFS_RTS_FREQUENCY_AVAILABLE, mSpec.hasRouteFrequencies()));
+			ow.write(getRESOURCES_BOOL(fileBase + GTFS_RDS_FREQUENCY_AVAILABLE, mSpec.hasRouteFrequencies()));
 			ow.write(Constants.NEW_LINE);
 			if (StringUtils.isEmpty(fileBase)) {
-				ow.write(getRESOURCES_STRING(GTFS_RTS_TIMEZONE, mSpec.getFirstAgency().getTimezone()));
+				ow.write(getRESOURCES_STRING(GTFS_RDS_TIMEZONE, mSpec.getFirstAgency().getTimezone()));
 				ow.write(Constants.NEW_LINE);
 			}
-			ow.write(getRESOURCES_STRING(fileBase + GTFS_RTS_AREA_MIN_LAT, minLat));
+			ow.write(getRESOURCES_STRING(fileBase + GTFS_RDS_AREA_MIN_LAT, minLat));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_STRING(fileBase + GTFS_RTS_AREA_MAX_LAT, maxLat));
+			ow.write(getRESOURCES_STRING(fileBase + GTFS_RDS_AREA_MAX_LAT, maxLat));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_STRING(fileBase + GTFS_RTS_AREA_MIN_LNG, minLng));
+			ow.write(getRESOURCES_STRING(fileBase + GTFS_RDS_AREA_MIN_LNG, minLng));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_STRING(fileBase + GTFS_RTS_AREA_MAX_LNG, maxLng));
+			ow.write(getRESOURCES_STRING(fileBase + GTFS_RDS_AREA_MAX_LNG, maxLng));
 			ow.write(Constants.NEW_LINE);
 			if (StringUtils.isEmpty(fileBase)) {
-				ow.write(getRESOURCES_STRING(GTFS_RTS_COLOR, mSpec.getFirstAgency().getColor()));
+				ow.write(getRESOURCES_STRING(GTFS_RDS_COLOR, mSpec.getFirstAgency().getColor()));
 				ow.write(Constants.NEW_LINE);
 			}
-			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_FIRST_DEPARTURE_IN_SEC, firstTimestampInSec) + getCommentedDateTime(firstTimestampInSec, mSpec));
+			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RDS_FIRST_DEPARTURE_IN_SEC, firstTimestampInSec) + getCommentedDateTime(firstTimestampInSec, mSpec));
 			ow.write(Constants.NEW_LINE);
-			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RTS_LAST_DEPARTURE_IN_SEC, lastTimestampInSec) + getCommentedDateTime(lastTimestampInSec, mSpec));
+			ow.write(getRESOURCES_INTEGER(fileBase + GTFS_RDS_LAST_DEPARTURE_IN_SEC, lastTimestampInSec) + getCommentedDateTime(lastTimestampInSec, mSpec));
 			ow.write(Constants.NEW_LINE);
 			ow.write(RESOURCES_END);
 			ow.write(Constants.NEW_LINE);

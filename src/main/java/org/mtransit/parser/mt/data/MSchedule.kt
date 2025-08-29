@@ -174,7 +174,7 @@ data class MSchedule(
                 && lastSchedule.directionId == directionId
     }
 
-    fun isSameServiceRTSDeparture(ts: MSchedule): Boolean {
+    fun isSameServiceRDSDeparture(ts: MSchedule): Boolean {
         if (ts.serviceIdInt != serviceIdInt) {
             return false
         }
