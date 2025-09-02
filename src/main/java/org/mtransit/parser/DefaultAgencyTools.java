@@ -353,7 +353,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public long getRouteId(@NotNull GRoute gRoute) {
 		try {
 			//noinspection DiscouragedApi
-			final String routeIdS = useRouteShortNameForRouteId() ? cleanRouteShortName(getRouteShortName(gRoute)) : gRoute.getRouteId();
+			final String routeIdS =
+					useRouteShortNameForRouteId() ? cleanRouteShortName(getRouteShortName(gRoute))
+							: gRoute.getRouteId();
 			if (defaultRouteIdEnabled()
 					&& !CharUtils.isDigitsOnly(routeIdS)) {
 				return MRouteSNToIDConverter.convert(
@@ -397,6 +399,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return Configs.getRouteConfig().getUseRouteShortNameForRouteId();
 	}
 
+	@Override
+	public boolean useRouteIdForRouteShortName() {
+		return Configs.getRouteConfig().getUseRouteIdForRouteShortName();
+	}
+
 	@Nullable
 	@Override
 	public String getRouteIdCleanupRegex() {
@@ -420,7 +427,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String getRouteShortName(@NotNull GRoute gRoute) {
-		final String routeShortName = gRoute.getRouteShortName();
+		//noinspection DiscouragedApi
+		final String routeShortName =
+				useRouteIdForRouteShortName() ? gRoute.getRouteId()
+				: gRoute.getRouteShortName();
 		if (org.mtransit.commons.StringUtils.isEmpty(routeShortName)) {
 			return provideMissingRouteShortName(gRoute);
 		}

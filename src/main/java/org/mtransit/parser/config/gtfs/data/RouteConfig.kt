@@ -14,6 +14,8 @@ data class RouteConfig(
     val routeIdCleanupRegex: String? = null, // optional
     @SerialName("use_route_short_name_for_route_id")
     val useRouteShortNameForRouteId: Boolean = false, // OPT-IN feature
+    @SerialName("use_route_id_for_route_short_name")
+    val useRouteIdForRouteShortName: Boolean = false, // OPT-IN feature
     @SerialName("route_short_name_to_route_id_configs")
     val routeShortNameToRouteIdConfigs: List<RouteShortNameToRouteIdConfig> = emptyList(),
     // short-name

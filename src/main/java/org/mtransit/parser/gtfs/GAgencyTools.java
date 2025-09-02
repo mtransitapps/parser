@@ -109,6 +109,8 @@ public interface GAgencyTools {
 
 	boolean useRouteShortNameForRouteId();
 
+	boolean useRouteIdForRouteShortName();
+
 	@Nullable
 	String getRouteIdCleanupRegex();
 
