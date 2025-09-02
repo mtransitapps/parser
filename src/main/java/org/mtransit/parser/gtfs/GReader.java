@@ -24,6 +24,7 @@ import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
+import org.mtransit.parser.gtfs.data.GWheelchairBoardingType;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -423,8 +424,18 @@ public class GReader {
 			}
 			if (agencyTools.getStopIdCleanupRegex() != null) { // IF stop ID cleanup regex set DO
 				final GStop previousStop = gSpec.getStop(gStop.getStopIdInt());
-				if (previousStop != null && previousStop.considerEqual(gStop)) {
+				if (previousStop != null && previousStop.equals(gStop)) {
 					return; // ignore if stop already exists with same values
+				}
+				if (previousStop != null && previousStop.equalsExceptLatLongWheelchair(gStop)) {
+					final double mergedLat = GStop.mergeLocation(previousStop.getStopLat(), gStop.getStopLat());
+					final double mergedLng = GStop.mergeLocation(previousStop.getStopLong(), gStop.getStopLong());
+					final GWheelchairBoardingType mergedWheelchairBoarding = GWheelchairBoardingType.merge(previousStop.getWheelchairBoarding(), gStop.getWheelchairBoarding());
+					gSpec.addStop(previousStop.clone(mergedLat, mergedLng, mergedWheelchairBoarding), true);
+					return;
+				}
+				if (previousStop != null) {
+					MTLog.log("Duplicate stop ID!\n-%s\n-%s", gStop.toStringPlus(), previousStop.toStringPlus());
 				}
 			}
 			gSpec.addStop(gStop);

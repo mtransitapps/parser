@@ -189,9 +189,9 @@ object GTFSDataBase {
 
     @JvmOverloads
     @JvmStatic
-    fun insertStop(stop: Stop, preparedStatement: PreparedStatement? = null) {
+    fun insertStop(stop: Stop, allowUpdate: Boolean = false, preparedStatement: PreparedStatement? = null) {
         connection.createStatement().use { statement ->
-            StopSQL.insertIntoMainTable(stop, statement, preparedStatement)
+            StopSQL.insertIntoMainTable(stop, statement, preparedStatement, allowUpdate)
         }
     }
 

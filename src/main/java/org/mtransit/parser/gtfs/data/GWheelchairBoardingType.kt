@@ -23,5 +23,11 @@ enum class GWheelchairBoardingType(val id: Int) {
         fun parse(id: String?): GWheelchairBoardingType {
             return parse(id?.toInt())
         }
+
+        @JvmStatic
+        fun merge(type1: GWheelchairBoardingType, type2: GWheelchairBoardingType): GWheelchairBoardingType {
+            if (type1 == type2) return type1
+            return NO_INFO
+        }
     }
 }

@@ -267,7 +267,11 @@ public class GSpec {
 	}
 
 	public void addStop(@NotNull GStop gStop) {
-		GTFSDataBase.insertStop(gStop.to());
+		addStop(gStop, false);
+	}
+
+	public void addStop(@NotNull GStop gStop, boolean allowUpdate) {
+		GTFSDataBase.insertStop(gStop.to(), allowUpdate);
 		this.stopsCache.put(gStop.getStopIdInt(), gStop);
 	}
 

@@ -5,9 +5,9 @@ import org.mtransit.commons.StringUtils.EMPTY
 import org.mtransit.commons.gtfs.data.Stop
 import org.mtransit.commons.gtfs.data.StopId
 import org.mtransit.parser.Constants
-import org.mtransit.parser.LocationUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
+import kotlin.math.floor
 
 // https://developers.google.com/transit/gtfs/reference#stops_fields
 // https://gtfs.org/schedule/reference/#stopstxt
@@ -78,33 +78,15 @@ data class GStop(
         }
     }
 
-    fun considerEqual(other: GStop) : Boolean {
-        if (stopIdInt != other.stopIdInt) {
-            return false
+    fun equalsExceptLatLongWheelchair(o: GStop): Boolean {
+        return when {
+            stopIdInt != o.stopIdInt -> false // not equal
+            stopCode != o.stopCode -> false // not equal
+            stopName != o.stopName -> false // not equal
+            locationType != o.locationType -> false // not equal
+            parentStationIdInt != o.parentStationIdInt -> false // not equal
+            else -> true // mostly equal
         }
-        if (stopCode != other.stopCode) {
-            return false
-        }
-        if (stopName != other.stopName) {
-            return false
-        }
-        if (locationType != other.locationType) {
-            return false
-        }
-        if (parentStationIdInt != other.parentStationIdInt) {
-            return false
-        }
-        if (wheelchairBoarding != other.wheelchairBoarding) {
-            return false
-        }
-        if (stopLat == other.stopLat && stopLong == other.stopLong) {
-            return true
-        }
-        val distanceInMeters = LocationUtils.findDistance(
-            stopLat, stopLong,
-            other.stopLat, other.stopLong
-        )
-        return distanceInMeters < 100.0f
     }
 
     fun to() = Stop(
@@ -117,6 +99,16 @@ data class GStop(
         locationType = locationType.id,
         parentStationId = _parentStationId,
         wheelchairBoarding = wheelchairBoarding.id,
+    )
+
+    fun clone(
+        stopLat: Double,
+        stopLong: Double,
+        wheelchairBoarding: GWheelchairBoardingType,
+    ) = this.copy(
+        stopLat = stopLat,
+        stopLong = stopLong,
+        wheelchairBoarding = wheelchairBoarding,
     )
 
     companion object {
@@ -160,6 +152,11 @@ data class GStop(
                 parentStationId = it.parentStationId,
                 wheelchairBoarding = it.wheelchairBoarding,
             )
+        }
+
+        @JvmStatic
+        fun mergeLocation(loc1: Double, loc2: Double): Double {
+            return floor((loc1 + loc2) / 2.00)
         }
     }
 }
