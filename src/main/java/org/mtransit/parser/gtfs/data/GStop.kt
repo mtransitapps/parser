@@ -5,6 +5,7 @@ import org.mtransit.commons.StringUtils.EMPTY
 import org.mtransit.commons.gtfs.data.Stop
 import org.mtransit.commons.gtfs.data.StopId
 import org.mtransit.parser.Constants
+import org.mtransit.parser.LocationUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
 
@@ -75,6 +76,35 @@ data class GStop(
                 }
             }}"
         }
+    }
+
+    fun considerEqual(other: GStop) : Boolean {
+        if (stopIdInt != other.stopIdInt) {
+            return false
+        }
+        if (stopCode != other.stopCode) {
+            return false
+        }
+        if (stopName != other.stopName) {
+            return false
+        }
+        if (locationType != other.locationType) {
+            return false
+        }
+        if (parentStationIdInt != other.parentStationIdInt) {
+            return false
+        }
+        if (wheelchairBoarding != other.wheelchairBoarding) {
+            return false
+        }
+        if (stopLat == other.stopLat && stopLong == other.stopLong) {
+            return true
+        }
+        val distanceInMeters = LocationUtils.findDistance(
+            stopLat, stopLong,
+            other.stopLat, other.stopLong
+        )
+        return distanceInMeters < 100.0f
     }
 
     fun to() = Stop(

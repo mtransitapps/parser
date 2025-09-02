@@ -423,7 +423,7 @@ public class GReader {
 			}
 			if (agencyTools.getStopIdCleanupRegex() != null) { // IF stop ID cleanup regex set DO
 				final GStop previousStop = gSpec.getStop(gStop.getStopIdInt());
-				if (previousStop != null && previousStop.equals(gStop)) {
+				if (previousStop != null && previousStop.considerEqual(gStop)) {
 					return; // ignore if stop already exists with same values
 				}
 			}

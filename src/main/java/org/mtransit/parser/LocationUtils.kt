@@ -17,7 +17,7 @@ object LocationUtils {
         return results[0]
     }
 
-    // https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/location/java/android/location/Location.java
+    // https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/location/Location.java
     private fun computeDistanceAndBearing(oLat1: Double, oLon1: Double, oLat2: Double, oLon2: Double, results: FloatArray) {
         // Based on https://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
         // using the "Inverse Formula" (section 4)
