@@ -2,12 +2,9 @@ package org.mtransit.parser.mt
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.junit.MockitoJUnitRunner
 import org.mtransit.parser.gtfs.data.GIDs
 
 
-@RunWith(MockitoJUnitRunner::class)
 class MDirectionSplitterTest {
 
     companion object {

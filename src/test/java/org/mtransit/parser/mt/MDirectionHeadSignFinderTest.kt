@@ -3,14 +3,12 @@ package org.mtransit.parser.mt
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
-import org.mockito.junit.MockitoJUnitRunner
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GDirectionId
 import org.mtransit.parser.gtfs.data.GDropOffType
@@ -25,7 +23,6 @@ import org.mtransit.parser.gtfs.data.GTimePoint
 import org.mtransit.parser.gtfs.data.GTrip
 import org.mtransit.parser.gtfs.data.GWheelchairBoardingType
 
-@RunWith(MockitoJUnitRunner::class)
 class MDirectionHeadSignFinderTest {
 
     companion object {
@@ -37,11 +34,9 @@ class MDirectionHeadSignFinderTest {
         val A11Y = GWheelchairBoardingType.NO_INFO
     }
 
-    @Mock
-    private lateinit var routeGTFS: GSpec
+    private val routeGTFS: GSpec = mock()
 
-    @Mock
-    private lateinit var agencyTools: GAgencyTools
+    private val agencyTools: GAgencyTools = mock()
 
     @Suppress("DEPRECATION")
     @Before

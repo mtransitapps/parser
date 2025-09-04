@@ -4,6 +4,7 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnitRunner
 import org.mtransit.parser.gtfs.data.GAgency
@@ -11,7 +12,6 @@ import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GRoute
 import org.mtransit.parser.gtfs.data.GSpec
 
-@RunWith(MockitoJUnitRunner::class)
 class MAgencyTests {
 
     companion object {
@@ -27,8 +27,7 @@ class MAgencyTests {
         const val ROUTE_TYPE = 0
     }
 
-    @Mock
-    private lateinit var routeGTFS: GSpec
+    private val routeGTFS: GSpec = mock()
 
     @Test
     fun pickColorFromRoutes_Simple() {
