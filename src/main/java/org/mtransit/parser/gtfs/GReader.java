@@ -470,15 +470,16 @@ public class GReader {
 				if (previousRoute != null && previousRoute.equals(gRoute)) {
 					return; // ignore if route already exists with same values
 				}
-				if (previousRoute != null && previousRoute.equalsExceptLongNameAndUrl(gRoute)) {
+				if (previousRoute != null && previousRoute.equalsExceptMergeable(gRoute)) {
 					final String mergedRouteLongName = GRoute.mergeRouteLongNames(previousRoute.getRouteLongName(), gRoute.getRouteLongName());
-					if (mergedRouteLongName != null) { // merge successful
-						gSpec.addRoute(previousRoute.clone(mergedRouteLongName), true);
+					final String mergedRouteColor = GRoute.mergeRouteColors(previousRoute.getRouteColor(), gRoute.getRouteColor());
+					if (mergedRouteLongName != null && mergedRouteColor != null) { // merge successful
+						gSpec.addRoute(previousRoute.clone(mergedRouteLongName, mergedRouteColor), true);
 						return;
 					}
 				}
 				if (previousRoute != null) {
-					MTLog.log("Duplicate route ID!\n-%s\n-%s", gRoute.toStringPlus(), previousRoute.toStringPlus());
+					MTLog.log("Duplicate route ID!\n - %s\n - %s", gRoute.toStringPlus(), previousRoute.toStringPlus());
 				}
 			}
 			gSpec.addRoute(gRoute);

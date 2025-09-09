@@ -3,6 +3,7 @@ package org.mtransit.parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CharUtils;
+import org.mtransit.commons.CleanUtils;
 import org.mtransit.commons.CollectionUtils;
 import org.mtransit.commons.CommonsApp;
 import org.mtransit.commons.GTFSCommons;
@@ -346,6 +347,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanRouteOriginalId(@NotNull String gRouteId) {
+		if (Configs.getRouteConfig().getRouteIdCleanMerged()) {
+			gRouteId = CleanUtils.cleanMergedID(gRouteId);
+		}
 		return GTFSCommons.cleanOriginalId(gRouteId, getRouteIdCleanupPattern());
 	}
 

@@ -12,6 +12,8 @@ data class RouteConfig(
     val defaultRouteIdEnabled: Boolean = false, // OPT-IN feature
     @SerialName("route_id_cleanup_regex")
     val routeIdCleanupRegex: String? = null, // optional
+    @SerialName("route_id_clean_merged")
+    val routeIdCleanMerged: Boolean = false, // OPT-IN feature
     @SerialName("use_route_short_name_for_route_id")
     val useRouteShortNameForRouteId: Boolean = false, // OPT-IN feature
     @SerialName("use_route_id_for_route_short_name")

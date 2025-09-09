@@ -4,6 +4,7 @@ import androidx.annotation.Discouraged
 import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.commons.gtfs.data.Route
 import org.mtransit.commons.gtfs.data.RouteId
+import org.mtransit.parser.ColorUtils
 import org.mtransit.parser.Constants.EMPTY
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -138,22 +139,22 @@ data class GRoute(
         routeSortOrder = routeSortOrder,
     )
 
-    fun equalsExceptLongNameAndUrl(o: GRoute): Boolean {
+    fun equalsExceptMergeable(o: GRoute): Boolean {
         return when {
             agencyIdInt != o.agencyIdInt -> false // not equal
             routeIdInt != o.routeIdInt -> false // not equal
             routeShortName != o.routeShortName -> false // not equal
             routeDesc != o.routeDesc -> false // not equal
             routeType != o.routeType -> false // not equal
-            routeColor != o.routeColor -> false // not equal
             routeTextColor != o.routeTextColor -> false // not equal
             routeSortOrder != o.routeSortOrder -> false // not equal
             else -> true // mostly equal
         }
     }
 
-    fun clone(routeLongName: String?) = this.copy(
+    fun clone(routeLongName: String?, routeColor: String?) = this.copy(
         routeLongName = routeLongName,
+        routeColor = routeColor,
     )
 
     companion object {
@@ -244,6 +245,22 @@ data class GRoute(
             } else {
                 routeLongName1 + SLASH_ + routeLongName2
             }
+        }
+
+        @JvmStatic
+        fun mergeRouteColors(routeColor1: String?, routeColor2: String?): String? {
+            if (routeColor2.isNullOrEmpty()) {
+                return routeColor1
+            } else if (routeColor1.isNullOrEmpty()) {
+                return routeColor2
+            } else if (routeColor1 == routeColor2) {
+                return routeColor1
+            }
+            val routeColor1Int = ColorUtils.convertFromHEX(routeColor1)
+            val routeColor2Int = ColorUtils.convertFromHEX(routeColor2)
+            val mergedColorInt = ColorUtils.blendColors(routeColor1Int, routeColor2Int, 0.5f)
+            val mergedColorHex = ColorUtils.convertToHEX(mergedColorInt)
+            return mergedColorHex
         }
     }
 }

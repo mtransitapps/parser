@@ -53,6 +53,23 @@ public final class ColorUtils {
 		return String.format("%06X", (0xFFFFFF & color));
 	}
 
+	public static int convertFromHEX(@NotNull String hex) {
+		return AColor.parseColor(hex);
+	}
+
+	public static int blendColors(int color1, int color2, float ratio) {
+		// Ensure ratio is within valid range [0.0f, 1.0f]
+		if (ratio < 0.0f) ratio = 0.0f;
+		if (ratio > 1.0f) ratio = 1.0f;
+
+		int r = (int) (AColor.red(color1) * (1.0f - ratio) + AColor.red(color2) * ratio);
+		int g = (int) (AColor.green(color1) * (1.0f - ratio) + AColor.green(color2) * ratio);
+		int b = (int) (AColor.blue(color1) * (1.0f - ratio) + AColor.blue(color2) * ratio);
+		int a = (int) (AColor.alpha(color1) * (1.0f - ratio) + AColor.alpha(color2) * ratio);
+
+		return AColor.argb(a, r, g, b);
+	}
+
 	public static int manipulateColor(int color, float factor) {
 		int a = AColor.alpha(color);
 		int r = Math.round(AColor.red(color) * factor);
