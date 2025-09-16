@@ -473,7 +473,7 @@ public class GReader {
 				if (previousRoute != null && previousRoute.equalsExceptMergeable(gRoute)) {
 					final String mergedRouteLongName = GRoute.mergeRouteLongNames(previousRoute.getRouteLongName(), gRoute.getRouteLongName());
 					final String mergedRouteColor = GRoute.mergeRouteColors(previousRoute.getRouteColor(), gRoute.getRouteColor());
-					if (mergedRouteLongName != null && mergedRouteColor != null) { // merge successful
+					if (mergedRouteLongName != null) { // merge successful
 						gSpec.addRoute(previousRoute.clone(mergedRouteLongName, mergedRouteColor), true);
 						return;
 					}
