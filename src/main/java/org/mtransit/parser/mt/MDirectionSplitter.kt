@@ -20,6 +20,7 @@ object MDirectionSplitter {
     // private const val LOG_NUMBERS = true // DEBUG
 
     private const val ALMOST_A_MATCH = 0.70f
+    private const val MAYBE_A_MATCH = ALMOST_A_MATCH / 2.0f
 
     @JvmStatic
     fun splitDirection(
@@ -144,11 +145,11 @@ object MDirectionSplitter {
                 logNumbers("$routeId: match0: $match0")
                 val match1 = directionsCandidates[1].stopIdInts.matchList(gStopIdInts)
                 logNumbers("$routeId: match1: $match1")
-                if (match0 > match1 && match0 > ALMOST_A_MATCH) {
+                if (match0 > match1 && match0 > MAYBE_A_MATCH) {
                     MTLog.logDebug("$routeId: matches $match0 for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
                     directionsCandidates[0].tripIdInts.add(gTripIdInt)
                     continue
-                } else if (match1 > match0 && match1 > ALMOST_A_MATCH) {
+                } else if (match1 > match0 && match1 > MAYBE_A_MATCH) {
                     MTLog.logDebug("$routeId: matches $match1 for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
                     directionsCandidates[1].tripIdInts.add(gTripIdInt)
                     continue
