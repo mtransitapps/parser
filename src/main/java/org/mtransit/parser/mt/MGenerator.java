@@ -93,13 +93,13 @@ public class MGenerator {
 		for (Future<MSpec> future : list) {
 			try {
 				MSpec mRouteSpec = future.get();
-				MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging...)", mRouteSpec.getFirstRoute().getId());
+				MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging...)", mRouteSpec.getFirstRoute().getId());
 				if (mRouteSpec.hasStops() && mRouteSpec.hasServiceDates()) {
 					mAgencies.addAll(mRouteSpec.getAgencies());
 					mRoutes.addAll(mRouteSpec.getRoutes());
 					mDirections.addAll(mRouteSpec.getDirections());
 					mDirectionStops.addAll(mRouteSpec.getDirectionStops());
-					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging stops...)", mRouteSpec.getFirstRoute().getId());
+					MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging stops...)", mRouteSpec.getFirstRoute().getId());
 					for (MStop mStop : mRouteSpec.getStops()) {
 						if (mStops.containsKey(mStop.getId())) {
 							if (!mStops.get(mStop.getId()).equals(mStop)) {
@@ -109,15 +109,15 @@ public class MGenerator {
 						}
 						mStops.put(mStop.getId(), mStop);
 					}
-					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging stops... DONE)", mRouteSpec.getFirstRoute()
+					MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging stops... DONE)", mRouteSpec.getFirstRoute()
 							.getId());
-					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging service dates...)", mRouteSpec.getFirstRoute()
+					MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging service dates...)", mRouteSpec.getFirstRoute()
 							.getId());
 					mServiceDates.addAll(mRouteSpec.getServiceDates());
-					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging service dates... DONE)", mRouteSpec
+					MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging service dates... DONE)", mRouteSpec
 							.getFirstRoute().getId());
 					if (mRouteSpec.hasStopSchedules()) {
-						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules...)", mRouteSpec
+						MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules...)", mRouteSpec
 								.getFirstRoute().getId());
 						if (mRouteSpec.getSchedules() != null) {
 							DBUtils.setAutoCommit(false);
@@ -127,11 +127,11 @@ public class MGenerator {
 							DBUtils.setAutoCommit(true); // true => commit()
 						}
 						mRouteSpec.setSchedules(null); // clear
-						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules... DONE)", mRouteSpec
+						MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules... DONE)", mRouteSpec
 								.getFirstRoute().getId());
 					}
 					if (mRouteSpec.hasRouteFrequencies()) {
-						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies...)", mRouteSpec
+						MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies...)", mRouteSpec
 								.getFirstRoute().getId());
 						for (Entry<Long, List<MFrequency>> routeFrequenciesEntry : mRouteSpec.getRouteFrequencies().entrySet()) {
 							if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().isEmpty()) {
@@ -142,7 +142,7 @@ public class MGenerator {
 							}
 							mRouteFrequencies.get(routeFrequenciesEntry.getKey()).addAll(routeFrequenciesEntry.getValue());
 						}
-						MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies... DONE)", mRouteSpec
+						MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies... DONE)", mRouteSpec
 								.getFirstRoute().getId());
 					}
 					if (firstTimestamp < 0L || mRouteSpec.getFirstTimestamp() < firstTimestamp) {
@@ -152,9 +152,9 @@ public class MGenerator {
 						lastTimestamp = mRouteSpec.getLastTimestamp();
 					}
 				} else {
-					MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (EMPTY)", mRouteSpec.getFirstRoute().getId());
+					MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (EMPTY)", mRouteSpec.getFirstRoute().getId());
 				}
-				MTLog.log("%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
+				MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
 			} catch (Throwable t) {
 				threadPoolExecutor.shutdownNow();
 				throw new MTLog.Fatal(t, t.getMessage());

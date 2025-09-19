@@ -220,7 +220,7 @@ object MDirectionHeadSignFinder {
             }
         // 0 - check if merge necessary at all
         if (gTripsHeadSignAndStopTimes.isEmpty()) {
-            MTLog.log("$routeId: $directionId: no trips -> no head-sign.")
+            MTLog.logDebug("$routeId: $directionId: no trips -> no head-sign.")
             return null
         }
         val tripHeadSignAndLastStopIdInt = gTripsHeadSignAndStopTimes
