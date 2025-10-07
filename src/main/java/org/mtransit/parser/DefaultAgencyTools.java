@@ -969,12 +969,25 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public int getStopId(@NotNull GStop gStop) {
 		try {
 			//noinspection DiscouragedApi
-			final String stopIdS = useStopCodeForStopId() ? getStopCode(gStop) : gStop.getStopId();
-			//noinspection DiscouragedApi
+			final String stopIdS =
+					useStopCodeForStopId() ? cleanStopOriginalId(getStopCode(gStop))
+							: gStop.getStopId();
+			if (!CharUtils.isDigitsOnly(stopIdS)) {
+				final Integer stopIdSInt = convertStopIdFromCodeNotSupported(stopIdS);
+				if (stopIdSInt != null) {
+					return stopIdSInt;
+				}
+			}
 			return Integer.parseInt(stopIdS);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while extracting stop ID from %s!", gStop.toStringPlus());
 		}
+	}
+
+	@Nullable
+	@Override
+	public Integer convertStopIdFromCodeNotSupported(@NotNull String stopCode) {
+		return Configs.getRouteConfig().convertStopIdFromCodeNotSupported(stopCode);
 	}
 
 	@Override

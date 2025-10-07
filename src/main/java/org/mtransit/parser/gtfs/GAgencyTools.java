@@ -248,6 +248,9 @@ public interface GAgencyTools {
 	// STOP
 	int getStopId(@NotNull GStop gStop);
 
+	@Nullable
+	Integer convertStopIdFromCodeNotSupported(@NotNull String stopCode);
+
 	boolean useStopCodeForStopId();
 
 	@Nullable

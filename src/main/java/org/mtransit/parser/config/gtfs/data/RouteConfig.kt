@@ -50,7 +50,8 @@ data class RouteConfig(
     val stopIdCleanupRegex: String? = null, // optional
     @SerialName("use_stop_code_for_stop_id")
     val useStopCodeForStopId: Boolean = false, // OPT-IN feature
-
+    @SerialName("stop_code_to_stop_id_configs")
+    val stopCodeToStopIdConfigs: List<StopCodeToStopIdConfig> = emptyList(),
 ) {
 
     @Serializable
@@ -72,6 +73,14 @@ data class RouteConfig(
     )
 
     @Serializable
+    data class StopCodeToStopIdConfig(
+        @SerialName("stop_code")
+        val stopCode: String,
+        @SerialName("stop_id")
+        val stopId: Integer,
+    )
+
+    @Serializable
     data class Cleaner(
         @SerialName("regex")
         val regex: String,
@@ -81,14 +90,9 @@ data class RouteConfig(
         val replacement: String = "",
     )
 
-    fun convertRouteIdFromShortNameNotSupported(routeShortName: String): Long? {
+    fun convertRouteIdFromShortNameNotSupported(routeShortName: String) =
         this.routeShortNameToRouteIdConfigs
-            .singleOrNull { it.routeShortName == routeShortName }
-            ?.let { routeShortNameToRouteIdConfig ->
-                return routeShortNameToRouteIdConfig.routeId
-            }
-        return null
-    }
+            .singleOrNull { it.routeShortName == routeShortName }?.routeId
 
     @JvmOverloads
     fun getRouteColor(gRoute: GRoute, override: Boolean = false): String? {
@@ -111,6 +115,10 @@ data class RouteConfig(
 
     fun cleanDirectionHeadsign(directionHeadsign: String) =
         cleanString(directionHeadsign, this.directionHeadsignCleaners)
+
+    fun convertStopIdFromCodeNotSupported(stopCode: String) =
+        this.stopCodeToStopIdConfigs
+            .singleOrNull { it.stopCode == stopCode }?.stopId
 
     private fun cleanString(originalString: String, cleaners: List<Cleaner>): String {
         if (cleaners.isEmpty()) return originalString
