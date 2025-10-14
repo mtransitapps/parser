@@ -35,8 +35,10 @@ import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("RedundantSuppression")
@@ -49,6 +51,9 @@ public class GReader {
 
 	private static final boolean USE_PREPARED_STATEMENT = true;
 	// private static final boolean USE_PREPARED_STATEMENT = false;
+
+	@NotNull
+	private static final Set<String> stopTimesOriginalStopIdInts = new HashSet<>();
 
 	@NotNull
 	public static GSpec readGtfsZipFile(@NotNull String gtfsDir,
@@ -70,11 +75,11 @@ public class GReader {
 						processAgency(agencyTools, gSpec, line)
 				);
 			}
-			// CALENDAR DATES
+			// CALENDAR DATES (-> non-excluded service IDs)
 			boolean hasCalendarDates = readFile(gtfsDir, GCalendarDate.FILENAME, false, line ->
 					processCalendarDate(agencyTools, gSpec, line)
 			);
-			// CALENDAR
+			// CALENDAR (-> non-excluded service IDs)
 			boolean hasCalendars = readFile(gtfsDir, GCalendar.FILENAME, false, line ->
 					processCalendar(agencyTools, gSpec, line)
 			);
@@ -82,7 +87,7 @@ public class GReader {
 			if (!hasCalendar) {
 				throw new MTLog.Fatal("'%s' & '%s' file do not exist!", GCalendar.FILENAME, GCalendarDate.FILENAME);
 			}
-			// ROUTES
+			// ROUTES (before trips)
 			if (!calendarsOnly) {
 				final GAgency singleAgency = gSpec.getSingleAgency();
 				//noinspection DiscouragedApi
@@ -91,7 +96,7 @@ public class GReader {
 						processRoute(agencyTools, gSpec, line, defaultAgencyId)
 				);
 			}
-			// TRIPS
+			// TRIPS (after calendar* -> using service IDs)
 			if (!calendarsOnly) {
 				GTFSDataBase.setAutoCommit(false);
 				final PreparedStatement insertTripsPrepared = USE_PREPARED_STATEMENT ? GTFSDataBase.prepareInsertTrip(agencyTools.allowDuplicateKeyError()) : null;
@@ -104,22 +109,16 @@ public class GReader {
 				GTFSDataBase.commit();
 				GTFSDataBase.setAutoCommit(true); // true => commit()
 			}
-			// DIRECTIONS (ext)
+			// DIRECTIONS (ext) (after route)
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				readFile(gtfsDir, GDirection.FILENAME, false, line ->
 						processDirection(agencyTools, gSpec, line)
 				);
 			}
-			// FREQUENCIES
+			// FREQUENCIES (after calendar* -> using service IDs)
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				readFile(gtfsDir, GFrequency.FILENAME, false, line ->
 						processFrequency(agencyTools, gSpec, line)
-				);
-			}
-			// STOPS
-			if (!calendarsOnly && !routeTripCalendarsOnly) {
-				readFile(gtfsDir, GStop.FILENAME, true, line ->
-						processStop(agencyTools, gSpec, line)
 				);
 			}
 			// STOP TIMES
@@ -148,6 +147,12 @@ public class GReader {
 				}
 				GTFSDataBase.commit();
 				GTFSDataBase.setAutoCommit(true); // true => commit()
+			}
+			// STOPS (after stop times)
+			if (!calendarsOnly && !routeTripCalendarsOnly) {
+				readFile(gtfsDir, GStop.FILENAME, true, line ->
+						processStop(agencyTools, gSpec, line)
+				);
 			}
 			// TODO OTHER FILES TYPE
 		} catch (Exception ioe) {
@@ -291,7 +296,8 @@ public class GReader {
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
 				return;
 			}
-			if (agencyTools.excludeStopNullable(gSpec.getStop(gStopTime.getStopIdInt()))) {
+			//noinspection PointlessBooleanExpression STOP not parsed yet
+			if (false && agencyTools.excludeStopNullable(gSpec.getStop(gStopTime.getStopIdInt()))) {
 				return;
 			}
 			if (gStopTime.getPickupType() != GPickupType.REGULAR) {
@@ -308,6 +314,7 @@ public class GReader {
 			} else {
 				gSpec.addStopTime(gStopTime, false);
 			}
+			stopTimesOriginalStopIdInts.add(line.get(GStopTime.STOP_ID));
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while parsing: '%s'!", line);
 		}
@@ -422,12 +429,16 @@ public class GReader {
 			if (agencyTools.excludeStop(gStop)) {
 				return;
 			}
+			final boolean hasStopTimes = stopTimesOriginalStopIdInts.contains(line.get(GStop.STOP_ID));
+			if (!hasStopTimes) {
+				return;
+			}
 			if (agencyTools.getStopIdCleanupRegex() != null) { // IF stop ID cleanup regex set DO
 				final GStop previousStop = gSpec.getStop(gStop.getStopIdInt());
 				if (previousStop != null && previousStop.equals(gStop)) {
 					return; // ignore if stop already exists with same values
 				}
-				if (previousStop != null && previousStop.equalsExceptLatLongWheelchair(gStop)) {
+				if (previousStop != null && previousStop.equalsExceptMergeable(gStop)) {
 					final double mergedLat = GStop.mergeLocation(previousStop.getStopLat(), gStop.getStopLat());
 					final double mergedLng = GStop.mergeLocation(previousStop.getStopLong(), gStop.getStopLong());
 					final GWheelchairBoardingType mergedWheelchairBoarding = GWheelchairBoardingType.merge(previousStop.getWheelchairBoarding(), gStop.getWheelchairBoarding());

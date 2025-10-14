@@ -78,7 +78,7 @@ data class GStop(
         }
     }
 
-    fun equalsExceptLatLongWheelchair(o: GStop): Boolean {
+    fun equalsExceptMergeable(o: GStop): Boolean {
         return when {
             stopIdInt != o.stopIdInt -> false // not equal
             stopCode != o.stopCode -> false // not equal
