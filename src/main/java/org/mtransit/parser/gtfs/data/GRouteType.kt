@@ -16,6 +16,7 @@ enum class GRouteType(
     // 7: Funicular. Used for any rail system that moves on steep inclines with a cable traction system.
 
     // EXTENDED: // https://developers.google.com/transit/gtfs/reference/extended-route-types
+    EX_URBAN_RAILWAY_SERVICE(400), // Urban Railway Service
     EX_BUS_SERVICE(700), // Bus Service
     EX_DEMAND_AND_RESPONSE_BUS_SERVICE(715), // Demand and Response Bus Service
     EX_SHARE_TAXI_SERVICE(717), // Share Taxi Service // REMOVED
@@ -46,6 +47,11 @@ enum class GRouteType(
             }
             if (agencyRouteType == LIGHT_RAIL.id) {
                 if (routeType == EX_TRAM_SERVICE.id) {
+                    return true
+                }
+            }
+            if (agencyRouteType == SUBWAY.id) {
+                if (routeType == EX_URBAN_RAILWAY_SERVICE.id) {
                     return true
                 }
             }
