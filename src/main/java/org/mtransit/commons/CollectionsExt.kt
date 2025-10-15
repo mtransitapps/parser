@@ -193,7 +193,11 @@ fun <T> Iterable<T>.matchList(
     }).toFloat().div(otherLength) + ignoredMatchPt
 }
 
-fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>): Int {
+fun <T> Iterable<T>.hasItemsGoingIntoSameOrder(otherIt: Iterable<T>): Boolean {
+    return this.countItemsGoingIntoSameOrder(otherIt, firstItemsOnly = true) > 0
+}
+
+fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>, firstItemsOnly: Boolean = false): Int {
     val thisList = this.toMutableList()
     val otherList = otherIt.toMutableList()
     var count = 0
@@ -221,6 +225,7 @@ fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>): Int {
                 matched = true
             }
             count++
+            if (firstItemsOnly) return count
             thisList.removeFirst()
             otherList.removeFirst()
             intersect.remove(nextItemInOrderIt)

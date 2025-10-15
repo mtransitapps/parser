@@ -1,7 +1,7 @@
 package org.mtransit.parser.mt
 
 import org.mtransit.commons.containsExactList
-import org.mtransit.commons.countItemsGoingIntoSameOrder
+import org.mtransit.commons.hasItemsGoingIntoSameOrder
 import org.mtransit.commons.intersectWithOrder
 import org.mtransit.commons.matchList
 import org.mtransit.commons.overlap
@@ -130,7 +130,7 @@ object MDirectionSplitter {
             }
             // LOOK FOR SAME STOPS DIRECTIONS
             if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
-                    rStopIdInts.countItemsGoingIntoSameOrder(gStopIdInts) > 0
+                    rStopIdInts.hasItemsGoingIntoSameOrder(gStopIdInts)
                 }?.let { (rTripIdInts, _) ->
                     MTLog.logDebug("$routeId: Same stop directions for: '${GIDs.toStringPlus(gTripIdInt)}': \n - ${GIDs.toStringPlus(gStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)

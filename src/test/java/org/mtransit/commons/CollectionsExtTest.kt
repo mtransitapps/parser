@@ -307,6 +307,29 @@ class CollectionsExtTest {
     }
 
     @Test
+    fun test_hasItemsGoingIntoSameOrder_Yes() {
+        // Arrange
+        val mainList = listOf(
+            "09149", "00460", // ==
+            "00464", "00465", "00843", "00487", "S09047", // !=
+            "09339", "S00503", "02052", "00367", "00369", "03065", "00242", "00241", "00240", "00238", "09229", "03038", // ==
+            "00832" // ->
+        )
+        val otherList = listOf(
+            "09149", "00460", // ==
+            "00461", "S00451", "00855", "00450", "00447", "09083", "02056", "00488", // !=
+            "00486", "00484", "00481", "00471", "00479", "00477", "00498", "00474", "00473", // !=
+            "09339", "S00503", "02052", "00367", "00369", "03065", "00242", "00241", "00240", "00238", "09229", "03038", // ==
+            "00746", "S09056", // !=
+        )
+        // Act
+        val result = mainList.hasItemsGoingIntoSameOrder(otherList)
+        print(result)
+        // Assert
+        assertEquals(true, result)
+    }
+
+    @Test
     fun test_countItemsGoingIntoSameOrder_No() {
         // Arrange
         val mainList = listOf(
@@ -323,10 +346,32 @@ class CollectionsExtTest {
             "09149" // ->
         )
         // Act
-        // 09149, 00487, 00832
         val result = mainList.countItemsGoingIntoSameOrder(otherList)
         print(result)
         // Assert
         assertEquals(0, result)
+    }
+
+    @Test
+    fun test_hasItemsGoingIntoSameOrder_No() {
+        // Arrange
+        val mainList = listOf(
+            "09149", // ->
+            "00460", "00464", "00465", "00843", // !=
+            "00487", // <>
+            "S09047", "09339", "S00503", "02052", "00367", "00369", "03065", "00242", "00241", "00240", "00238", "09229", "03038", // !=
+            "00832" // ->
+        )
+        val otherList = listOf(
+            "00832", // ->
+            "09242", "00237", "00239", "00860", "00861", "00863", "09155", "00762", "00368", "00366", "S00502", "09340", "00472", "00475", "02059", // !=
+            "00476", "00478", "00480", "00482", "00483", "00485", "00487", "00489", "00445", "00448", "00449", "00454", "S00800", "00452", "09163", // !=
+            "09149" // ->
+        )
+        // Act
+        val result = mainList.hasItemsGoingIntoSameOrder(otherList)
+        print(result)
+        // Assert
+        assertEquals(false, result)
     }
 }
