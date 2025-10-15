@@ -192,3 +192,52 @@ fun <T> Iterable<T>.matchList(
         else -> thisSuffixLength
     }).toFloat().div(otherLength) + ignoredMatchPt
 }
+
+fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>): Int {
+    val thisList = this.toMutableList()
+    val otherList = otherIt.toMutableList()
+    var count = 0
+    val intersect = thisList.intersect(otherList).toMutableSet()
+    var commonItem = intersect.firstOrNull()
+        ?.apply { intersect -= this }
+    var matched = false
+    var nextItemInOrderThis: T?
+    var nextItemInOrderIt: T?
+    while(thisList.isNotEmpty() && thisList.firstOrNull() != commonItem) {
+        thisList.removeFirst()
+    }
+    thisList.removeFirstOrNull()
+    while(otherList.isNotEmpty() && otherList.firstOrNull() != commonItem) {
+        otherList.removeFirst()
+    }
+    otherList.removeFirstOrNull()
+    while (commonItem != null && intersect.isNotEmpty()) {
+        nextItemInOrderThis = thisList.firstOrNull()
+        nextItemInOrderIt = otherList.firstOrNull()
+        while (nextItemInOrderIt != null && nextItemInOrderThis != null
+            && nextItemInOrderIt == nextItemInOrderThis) {
+            if (!matched) {
+                count++
+                matched = true
+            }
+            count++
+            thisList.removeFirst()
+            otherList.removeFirst()
+            intersect.remove(nextItemInOrderIt)
+            nextItemInOrderThis = thisList.firstOrNull()
+            nextItemInOrderIt = otherList.firstOrNull()
+        }
+        commonItem = intersect.firstOrNull() // next
+            ?.apply { intersect -= this }
+        matched = false
+        while(thisList.isNotEmpty() && thisList.firstOrNull() != commonItem) {
+            thisList.removeFirst()
+        }
+        thisList.removeFirstOrNull()
+        while(otherList.isNotEmpty() && otherList.firstOrNull() != commonItem) {
+            otherList.removeFirst()
+        }
+        otherList.removeFirstOrNull()
+    }
+    return count
+}
