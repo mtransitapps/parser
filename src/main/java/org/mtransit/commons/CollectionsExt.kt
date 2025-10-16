@@ -197,6 +197,34 @@ fun <T> Iterable<T>.hasItemsGoingIntoSameOrder(otherIt: Iterable<T>): Boolean {
     return this.countItemsGoingIntoSameOrder(otherIt, firstItemsOnly = true) > 0
 }
 
+fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>, firstItemsOnly: Boolean = false): Int {
+    val thisList = this.toList()
+    val otherList = otherIt.toList()
+    var count = 0
+    var thisIndex = 0
+    var otherStartIndex = 0
+    while (thisIndex < thisList.size) {
+        val otherMatchIndex = otherList.indexOf(thisList[thisIndex], otherStartIndex)
+        if (otherMatchIndex != -1) {
+            var len = 1
+            while (thisIndex + len < thisList.size &&
+                otherMatchIndex + len < otherList.size &&
+                thisList[thisIndex + len] == otherList[otherMatchIndex + len]) {
+                len++
+            }
+            if (len > 1) {
+                count += len
+                if (firstItemsOnly) return count
+                thisIndex += len
+                otherStartIndex = otherMatchIndex + len
+                continue
+            }
+        }
+        thisIndex++
+    }
+    return count
+}
+
 fun <T> List<T>.indexOf(element: T, startIndex: Int): Int {
     for (i in startIndex until this.size) {
         if (this[i] == element) {
@@ -204,47 +232,4 @@ fun <T> List<T>.indexOf(element: T, startIndex: Int): Int {
         }
     }
     return -1
-}
-
-fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>, firstItemsOnly: Boolean = false): Int {
-    val thisList = this.toList()
-    val otherList = otherIt.toList()
-    val intersect = thisList.intersect(otherList.toSet()).toMutableSet()
-
-    var count = 0
-    var thisIndex = 0
-    var otherIndex = 0
-
-    while (intersect.isNotEmpty()) {
-        val commonItem = intersect.first().also { intersect.remove(it) }
-
-        val newThisIndex = thisList.indexOf(commonItem, startIndex = thisIndex)
-        if (newThisIndex == -1) continue
-        thisIndex = newThisIndex + 1
-
-        val newOtherIndex = otherList.indexOf(commonItem, startIndex = otherIndex)
-        if (newOtherIndex == -1) continue
-        otherIndex = newOtherIndex + 1
-
-        var matched = false
-        while (thisIndex < thisList.size && otherIndex < otherList.size) {
-            val thisItem = thisList[thisIndex]
-            val otherItem = otherList[otherIndex]
-            if (thisItem == otherItem) {
-                if (matched) {
-                    count++ // Continuing a sequence
-                } else {
-                    count += 2 // Start of a new sequence (commonItem + thisItem)
-                    matched = true
-                }
-                if (firstItemsOnly) return count
-                intersect.remove(thisItem)
-                thisIndex++
-                otherIndex++
-            } else {
-                break
-            }
-        }
-    }
-    return count
 }
