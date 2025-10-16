@@ -147,7 +147,6 @@ class CollectionsExtTest {
         )
         // Act
         val matchList = mainList.matchList(otherList, ignoreRepeat = true, ignoreFirstAndLast = true)
-        print(matchList)
         val result = matchList >= 0.75f
         // Assert
         assertEquals(true, result)
@@ -301,7 +300,6 @@ class CollectionsExtTest {
         )
         // Act
         val result = mainList.countItemsGoingIntoSameOrder(otherList)
-        print(result)
         // Assert
         assertEquals(14, result)
     }
@@ -324,7 +322,6 @@ class CollectionsExtTest {
         )
         // Act
         val result = mainList.hasItemsGoingIntoSameOrder(otherList)
-        print(result)
         // Assert
         assertEquals(true, result)
     }
@@ -347,7 +344,6 @@ class CollectionsExtTest {
         )
         // Act
         val result = mainList.countItemsGoingIntoSameOrder(otherList)
-        print(result)
         // Assert
         assertEquals(0, result)
     }
@@ -370,7 +366,6 @@ class CollectionsExtTest {
         )
         // Act
         val result = mainList.hasItemsGoingIntoSameOrder(otherList)
-        print(result)
         // Assert
         assertEquals(false, result)
     }

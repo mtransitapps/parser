@@ -197,6 +197,15 @@ fun <T> Iterable<T>.hasItemsGoingIntoSameOrder(otherIt: Iterable<T>): Boolean {
     return this.countItemsGoingIntoSameOrder(otherIt, firstItemsOnly = true) > 0
 }
 
+fun <T> List<T>.indexOf(element: T, startIndex: Int): Int {
+    for (i in startIndex until this.size) {
+        if (this[i] == element) {
+            return i
+        }
+    }
+    return -1
+}
+
 fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>, firstItemsOnly: Boolean = false): Int {
     val thisList = this.toList()
     val otherList = otherIt.toList()
@@ -206,23 +215,14 @@ fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>, firstItem
     var thisIndex = 0
     var otherIndex = 0
 
-    fun findNext(list: List<T>, item: T, startIndex: Int): Int {
-        for (i in startIndex until list.size) {
-            if (list[i] == item) {
-                return i
-            }
-        }
-        return -1
-    }
-
     while (intersect.isNotEmpty()) {
         val commonItem = intersect.first().also { intersect.remove(it) }
 
-        val newThisIndex = findNext(thisList, commonItem, thisIndex)
+        val newThisIndex = thisList.indexOf(commonItem, startIndex = thisIndex)
         if (newThisIndex == -1) continue
         thisIndex = newThisIndex + 1
 
-        val newOtherIndex = findNext(otherList, commonItem, otherIndex)
+        val newOtherIndex = otherList.indexOf(commonItem, startIndex = otherIndex)
         if (newOtherIndex == -1) continue
         otherIndex = newOtherIndex + 1
 
@@ -231,11 +231,12 @@ fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>, firstItem
             val thisItem = thisList[thisIndex]
             val otherItem = otherList[otherIndex]
             if (thisItem == otherItem) {
-                if (!matched) {
-                    count++
+                if (matched) {
+                    count++ // Continuing a sequence
+                } else {
+                    count += 2 // Start of a new sequence (commonItem + thisItem)
                     matched = true
                 }
-                count++
                 if (firstItemsOnly) return count
                 intersect.remove(thisItem)
                 thisIndex++
