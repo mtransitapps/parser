@@ -198,51 +198,52 @@ fun <T> Iterable<T>.hasItemsGoingIntoSameOrder(otherIt: Iterable<T>): Boolean {
 }
 
 fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>, firstItemsOnly: Boolean = false): Int {
-    val thisList = this.toMutableList()
-    val otherList = otherIt.toMutableList()
+    val thisList = this.toList()
+    val otherList = otherIt.toList()
+    val intersect = thisList.intersect(otherList.toSet()).toMutableSet()
+
     var count = 0
-    val intersect = thisList.intersect(otherList).toMutableSet()
-    var commonItem = intersect.firstOrNull()
-        ?.apply { intersect -= this }
-    var matched = false
-    var nextItemInOrderThis: T?
-    var nextItemInOrderIt: T?
-    while(thisList.isNotEmpty() && thisList.firstOrNull() != commonItem) {
-        thisList.removeFirst()
-    }
-    thisList.removeFirstOrNull()
-    while(otherList.isNotEmpty() && otherList.firstOrNull() != commonItem) {
-        otherList.removeFirst()
-    }
-    otherList.removeFirstOrNull()
-    while (commonItem != null && intersect.isNotEmpty()) {
-        nextItemInOrderThis = thisList.firstOrNull()
-        nextItemInOrderIt = otherList.firstOrNull()
-        while (nextItemInOrderIt != null && nextItemInOrderThis != null
-            && nextItemInOrderIt == nextItemInOrderThis) {
-            if (!matched) {
-                count++
-                matched = true
+    var thisIndex = 0
+    var otherIndex = 0
+
+    fun findNext(list: List<T>, item: T, startIndex: Int): Int {
+        for (i in startIndex until list.size) {
+            if (list[i] == item) {
+                return i
             }
-            count++
-            if (firstItemsOnly) return count
-            thisList.removeFirst()
-            otherList.removeFirst()
-            intersect.remove(nextItemInOrderIt)
-            nextItemInOrderThis = thisList.firstOrNull()
-            nextItemInOrderIt = otherList.firstOrNull()
         }
-        commonItem = intersect.firstOrNull() // next
-            ?.apply { intersect -= this }
-        matched = false
-        while(thisList.isNotEmpty() && thisList.firstOrNull() != commonItem) {
-            thisList.removeFirst()
+        return -1
+    }
+
+    while (intersect.isNotEmpty()) {
+        val commonItem = intersect.first().also { intersect.remove(it) }
+
+        val newThisIndex = findNext(thisList, commonItem, thisIndex)
+        if (newThisIndex == -1) continue
+        thisIndex = newThisIndex + 1
+
+        val newOtherIndex = findNext(otherList, commonItem, otherIndex)
+        if (newOtherIndex == -1) continue
+        otherIndex = newOtherIndex + 1
+
+        var matched = false
+        while (thisIndex < thisList.size && otherIndex < otherList.size) {
+            val thisItem = thisList[thisIndex]
+            val otherItem = otherList[otherIndex]
+            if (thisItem == otherItem) {
+                if (!matched) {
+                    count++
+                    matched = true
+                }
+                count++
+                if (firstItemsOnly) return count
+                intersect.remove(thisItem)
+                thisIndex++
+                otherIndex++
+            } else {
+                break
+            }
         }
-        thisList.removeFirstOrNull()
-        while(otherList.isNotEmpty() && otherList.firstOrNull() != commonItem) {
-            otherList.removeFirst()
-        }
-        otherList.removeFirstOrNull()
     }
     return count
 }

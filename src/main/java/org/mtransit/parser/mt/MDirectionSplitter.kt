@@ -128,11 +128,11 @@ object MDirectionSplitter {
                 } == true) {
                 continue
             }
-            // LOOK FOR SAME STOPS DIRECTIONS
+            // LOOK FOR SAME STOPS DIRECTION
             if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
                     rStopIdInts.hasItemsGoingIntoSameOrder(gStopIdInts)
                 }?.let { (rTripIdInts, _) ->
-                    MTLog.logDebug("$routeId: Same stop directions for: '${GIDs.toStringPlus(gTripIdInt)}': \n - ${GIDs.toStringPlus(gStopIdInts)}")
+                    MTLog.logDebug("$routeId: Same stops direction for: '${GIDs.toStringPlus(gTripIdInt)}': \n - ${GIDs.toStringPlus(gStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)
                     true
                 } == true) {
