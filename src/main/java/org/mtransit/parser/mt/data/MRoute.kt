@@ -43,7 +43,7 @@ data class MRoute(
         append(Constants.COLUMN_SEPARATOR) //
         append(longName.quotesEscape()) // long name
         append(Constants.COLUMN_SEPARATOR) //
-        append((color ?: Constants.EMPTY).quotes()) // color
+        append((color?.uppercase() ?: Constants.EMPTY).quotes()) // color
         if (FeatureFlags.F_EXPORT_GTFS_ID_HASH_INT) {
             append(Constants.COLUMN_SEPARATOR) //
             originalIdHash?.let { append(it) } // original ID hash
