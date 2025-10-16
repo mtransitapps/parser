@@ -198,8 +198,8 @@ fun <T> Iterable<T>.hasItemsGoingIntoSameOrder(otherIt: Iterable<T>): Boolean {
 }
 
 fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>, firstItemsOnly: Boolean = false): Int {
-    val thisList = this.toList()
-    val otherList = otherIt.toList()
+    val thisList = this as? List<T> ?: this.toList()
+    val otherList = otherIt as? List<T> ?: otherIt.toList()
     var count = 0
     var thisIndex = 0
     var otherStartIndex = 0
