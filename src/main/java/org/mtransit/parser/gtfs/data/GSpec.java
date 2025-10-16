@@ -528,7 +528,7 @@ public class GSpec {
 			MTLog.log("- StopTimes: %d", readStopTimesCount());
 			MTLog.log("- Frequencies: %d", readFrequenciesCount());
 			MTLog.log("- IDs: %d", GIDs.count());
-			MTLog.log("- GTFS DB size: %s)", FileUtils.sizeToDiplayString(GTFSDataBase.getDBSize()));
+			MTLog.log("- GTFS DB size: %s", FileUtils.sizeToDiplayString(GTFSDataBase.getDBSize()));
 		}
 	}
 
