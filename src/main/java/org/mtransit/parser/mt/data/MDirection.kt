@@ -4,7 +4,6 @@ import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 
-@Suppress("unused")
 data class MDirection(
     val routeId: Long,
     var headsignId: Int = 0, // >= 0 (almost = direction ID)
@@ -50,15 +49,16 @@ data class MDirection(
         setHeadsignStop(stop)
     }
 
-    private var _id: Long = -1
+    private var _id: Long = -1L
     val id: Long
         get() {
-            if (_id < 0) {
+            if (_id < 0L) {
                 _id = getNewId(routeId, headsignId)
             }
             return _id
         }
 
+    @Suppress("unused")
     fun setHeadsignStringNotEmpty(
         headsignString: String,
         headsignId: Int
@@ -112,6 +112,7 @@ data class MDirection(
         return this
     }
 
+    @Suppress("unused")
     fun setHeadsignDescentOnly(): MDirection {
         headsignType = HEADSIGN_TYPE_NO_PICKUP
         headsignValue = Constants.EMPTY // null;
@@ -201,13 +202,11 @@ data class MDirection(
         const val HEADSIGN_TYPE_STOP_ID = 3
         const val HEADSIGN_TYPE_NO_PICKUP = 4
 
-        private const val ZERO = "0"
-
         @JvmStatic
-        fun getNewId(routeId: Long, headsignId: Int): Long {
-            return "$routeId$ZERO$headsignId".toLong()
-        }
+        fun getNewId(routeId: Long, headsignId: Int) =
+            "${routeId}0${headsignId}".toLong()
 
+        @Suppress("unused")
         @JvmStatic
         fun mergeEmpty(
             mDirection: MDirection,
