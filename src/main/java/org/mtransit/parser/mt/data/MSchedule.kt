@@ -1,7 +1,6 @@
 package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
-import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
@@ -128,10 +127,8 @@ data class MSchedule(
         append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
         append(Constants.COLUMN_SEPARATOR) //
         append((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
-        if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
-            append(Constants.COLUMN_SEPARATOR) //
-            append(accessible)
-        }
+        append(Constants.COLUMN_SEPARATOR) //
+        append(accessible)
     }
 
     fun toFileSameServiceIdAndDirectionId(lastSchedule: MSchedule?) = buildString {
@@ -162,10 +159,8 @@ data class MSchedule(
             append(Constants.COLUMN_SEPARATOR) //
             append((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
         }
-        if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
-            append(Constants.COLUMN_SEPARATOR) //
-            append(accessible)
-        }
+        append(Constants.COLUMN_SEPARATOR) //
+        append(accessible)
         return toString()
     }
 
