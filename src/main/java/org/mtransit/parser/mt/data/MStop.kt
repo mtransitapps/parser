@@ -54,10 +54,8 @@ data class MStop(
         append(MDataChangedManager.avoidLatLngChanged(lat)) // latitude
         append(Constants.COLUMN_SEPARATOR) //
         append(MDataChangedManager.avoidLatLngChanged(lng)) // longitude
-        if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
-            append(Constants.COLUMN_SEPARATOR) //
-            append(accessible)
-        }
+        append(Constants.COLUMN_SEPARATOR) //
+        append(accessible)
         if (FeatureFlags.F_EXPORT_GTFS_ID_HASH_INT) {
             append(Constants.COLUMN_SEPARATOR) //
             originalIdHash?.let { append(it) } // original ID hash
