@@ -161,7 +161,6 @@ data class MSchedule(
         }
         append(Constants.COLUMN_SEPARATOR) //
         append(accessible)
-        return toString()
     }
 
     fun isSameServiceAndDirection(lastSchedule: MSchedule?): Boolean {
