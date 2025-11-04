@@ -222,7 +222,7 @@ object MDataChangedManager {
             //noinspection DiscouragedApi
             val originalServiceIdInt = newGCalendarDates.firstOrNull { it.serviceId.escape() == removedServiceDate.serviceId }?.serviceIdInt
             val missingCalendarDate = removedServiceDate.toCalendarDate(overrideServiceIdInt = originalServiceIdInt)
-            MTLog.log("> Optimising data changed by adding ${missingCalendarDate?.toStringPlus()}...")
+            MTLog.log("> Optimising data changed by adding ${missingCalendarDate.toStringPlus()}...")
             newGCalendarDates.add(missingCalendarDate)
             dataChanged = true
         }

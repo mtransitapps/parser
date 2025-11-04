@@ -1,7 +1,6 @@
 package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
-import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.db.SQLUtils.unquotes
@@ -44,9 +43,7 @@ data class MServiceDate(
     fun toFile(agencyTools: GAgencyTools) = buildList {
         add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
         add(calendarDate.toString()) // calendar date
-        if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-            add(exceptionType.toString()) // exception type
-        }
+        add(exceptionType.toString())
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     @Suppress("unused")
@@ -56,27 +53,17 @@ data class MServiceDate(
                 "+(exception:$exceptionType)"
     }
 
-    fun toCalendarDate(overrideServiceIdInt: Int? = null): GCalendarDate? {
-        if (!FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE
-            && this.exceptionType == MCalendarExceptionType.REMOVED.id
-        ) {
-            return null // removed
-        }
-        return GCalendarDate(
+    fun toCalendarDate(overrideServiceIdInt: Int? = null) =
+        GCalendarDate(
             serviceIdInt = overrideServiceIdInt ?: this.serviceIdInt,
             date = calendarDate,
-            exceptionType = if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-                when (this.exceptionType) {
-                    MCalendarExceptionType.ADDED.id -> GCalendarDatesExceptionType.SERVICE_ADDED
-                    MCalendarExceptionType.REMOVED.id -> GCalendarDatesExceptionType.SERVICE_REMOVED
-                    MCalendarExceptionType.DEFAULT.id -> GCalendarDatesExceptionType.SERVICE_DEFAULT
-                    else -> GCalendarDatesExceptionType.SERVICE_ADDED // default
-                }
-            } else {
-                GCalendarDatesExceptionType.SERVICE_ADDED // default
+            exceptionType = when (this.exceptionType) {
+                MCalendarExceptionType.ADDED.id -> GCalendarDatesExceptionType.SERVICE_ADDED
+                MCalendarExceptionType.REMOVED.id -> GCalendarDatesExceptionType.SERVICE_REMOVED
+                MCalendarExceptionType.DEFAULT.id -> GCalendarDatesExceptionType.SERVICE_DEFAULT
+                else -> GCalendarDatesExceptionType.SERVICE_ADDED // default
             }
         )
-    }
 
     companion object {
         @Suppress("unused")
@@ -86,16 +73,12 @@ data class MServiceDate(
         }
 
         fun fromFileLine(line: String) = line.split(Constants.COLUMN_SEPARATOR)
-            .takeIf { it.size == if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) 3 else 2 }
+            .takeIf { it.size == 3 }
             ?.let { columns ->
                 MServiceDate(
                     serviceIdInt = GIDs.getInt(columns[0].unquotes()), // service ID
                     calendarDate = columns[1].toInt(), // calendar date
-                    exceptionType = if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-                        columns[2].toInt() // exception type
-                    } else {
-                        MCalendarExceptionType.DEFAULT.id
-                    }
+                    exceptionType = columns[2].toInt()
                 )
             }
 
