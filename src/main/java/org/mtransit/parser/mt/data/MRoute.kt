@@ -44,13 +44,11 @@ data class MRoute(
         append(longName.quotesEscape()) // long name
         append(Constants.COLUMN_SEPARATOR) //
         append((color?.uppercase() ?: Constants.EMPTY).quotes()) // color
-        if (FeatureFlags.F_EXPORT_GTFS_ID_HASH_INT) {
+        append(Constants.COLUMN_SEPARATOR) //
+        originalIdHash?.let { append(it) } // original ID hash
+        if (FeatureFlags.F_EXPORT_ORIGINAL_ROUTE_TYPE) {
             append(Constants.COLUMN_SEPARATOR) //
-            originalIdHash?.let { append(it) } // original ID hash
-            if (FeatureFlags.F_EXPORT_ORIGINAL_ROUTE_TYPE) {
-                append(Constants.COLUMN_SEPARATOR) //
-                type?.let { append(it) } // route type
-            }
+            type?.let { append(it) } // route type
         }
     }
 

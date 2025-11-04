@@ -1,6 +1,5 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils.quotesEscape
@@ -56,10 +55,8 @@ data class MStop(
         append(MDataChangedManager.avoidLatLngChanged(lng)) // longitude
         append(Constants.COLUMN_SEPARATOR) //
         append(accessible)
-        if (FeatureFlags.F_EXPORT_GTFS_ID_HASH_INT) {
-            append(Constants.COLUMN_SEPARATOR) //
-            originalIdHash?.let { append(it) } // original ID hash
-        }
+        append(Constants.COLUMN_SEPARATOR) //
+        originalIdHash?.let { append(it) } // original ID hash
     }
 
     override fun compareTo(other: MStop): Int {
