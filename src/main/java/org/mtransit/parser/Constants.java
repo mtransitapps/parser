@@ -24,6 +24,8 @@ public final class Constants {
 
 	public static final char COLUMN_SEPARATOR = ',';
 
+	public static final String COLUMN_SEPARATOR_ = ",";
+
 	public static final char STRING_DELIMITER = '\'';
 
 	public static final String EMPTY = "";

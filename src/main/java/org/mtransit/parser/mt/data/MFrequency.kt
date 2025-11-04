@@ -29,17 +29,13 @@ data class MFrequency(
 
     val uID by lazy { getNewUID(serviceIdInt, directionId, startTime, endTime) }
 
-    fun toFile(agencyTools: GAgencyTools) = buildString {
-        append(getCleanServiceId(agencyTools).quotesEscape()) // service ID
-        append(Constants.COLUMN_SEPARATOR) //
-        append(directionId) // direction ID
-        append(Constants.COLUMN_SEPARATOR) //
-        append(startTime) // start time
-        append(Constants.COLUMN_SEPARATOR) //
-        append(endTime) // end time
-        append(Constants.COLUMN_SEPARATOR) //
-        append(headwayInSec) // headway in seconds
-    }
+    fun toFile(agencyTools: GAgencyTools) = listOf(
+        getCleanServiceId(agencyTools).quotesEscape(), // service ID
+        directionId.toString(), // direction ID
+        startTime.toString(), // start time
+        endTime.toString(), // end time
+        headwayInSec.toString(), // headway in seconds
+    ).joinToString(Constants.COLUMN_SEPARATOR_)
 
     override fun compareTo(other: MFrequency?): Int {
         return when {

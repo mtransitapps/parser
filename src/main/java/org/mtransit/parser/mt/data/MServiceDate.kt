@@ -35,25 +35,19 @@ data class MServiceDate(
             return GIDs.getString(serviceIdInt)
         }
 
-    private fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(_serviceId)
-    }
-
     override fun compareTo(other: MServiceDate): Int = compareBy(
         MServiceDate::calendarDate,
         MServiceDate::_serviceId,
         MServiceDate::exceptionType,
     ).compare(this, other)
 
-    fun toFile(agencyTools: GAgencyTools) = buildString {
-        append(getCleanServiceId(agencyTools).quotesEscape()) // service ID
-        append(Constants.COLUMN_SEPARATOR)
-        append(calendarDate) // calendar date
+    fun toFile(agencyTools: GAgencyTools) = buildList {
+        add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
+        add(calendarDate.toString()) // calendar date
         if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-            append(Constants.COLUMN_SEPARATOR) //
-            append(exceptionType) // exception type
+            add(exceptionType.toString()) // exception type
         }
-    }
+    }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     @Suppress("unused")
     fun toStringPlus(): String {
