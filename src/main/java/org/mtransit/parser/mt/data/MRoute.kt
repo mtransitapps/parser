@@ -1,6 +1,5 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils.quotes
@@ -14,7 +13,7 @@ data class MRoute(
     var longName: String,
     private val color: String?,
     private val originalIdHash: Int,
-    private val type: Int?,
+    private val type: Int,
 ) : Comparable<MRoute> {
 
     constructor(
@@ -23,7 +22,7 @@ data class MRoute(
         longName: String,
         color: String?,
         originalId: String,
-        type: Int?,
+        type: Int,
         agencyTools: GAgencyTools? = null,
     ) : this(
         id,
@@ -42,9 +41,7 @@ data class MRoute(
         add(longName.quotesEscape()) // long name
         add((color?.uppercase() ?: Constants.EMPTY).quotes()) // color
         add(originalIdHash.toString()) // original ID hash
-        if (FeatureFlags.F_EXPORT_ORIGINAL_ROUTE_TYPE) {
-            type?.let { add(it.toString()) } // route type
-        }
+        add(type.toString())
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     override fun compareTo(other: MRoute): Int {

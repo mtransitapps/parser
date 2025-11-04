@@ -3,7 +3,6 @@ package org.mtransit.parser.mt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CollectionUtils;
-import org.mtransit.commons.FeatureFlags;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.MTLog;
@@ -144,28 +143,23 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				serviceIdInts,
 				routeGTFS
 		);
-		final HashSet<Long> gCalendarDateServiceRemoved = new HashSet<>();
 		for (GCalendarDate gCalendarDate : routeGTFS.getAllCalendarDates()) {
 			if (!serviceIdInts.contains(gCalendarDate.getServiceIdInt())) {
 				continue;
 			}
 			switch (gCalendarDate.getExceptionType()) {
 			case SERVICE_REMOVED: // keep list of removed service for calendars processing
-				if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-					mServiceDates.add(new MServiceDate(
-							gCalendarDate.getServiceIdInt(),
-							gCalendarDate.getDate(),
-							MCalendarExceptionType.REMOVED
-					));
-				} else {
-					gCalendarDateServiceRemoved.add(gCalendarDate.getUID());
-				}
+				mServiceDates.add(new MServiceDate(
+						gCalendarDate.getServiceIdInt(),
+						gCalendarDate.getDate(),
+						MCalendarExceptionType.REMOVED
+				));
 				break;
 			case SERVICE_ADDED:
 				mServiceDates.add(new MServiceDate(
 						gCalendarDate.getServiceIdInt(),
 						gCalendarDate.getDate(),
-						FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE ? MCalendarExceptionType.ADDED : MCalendarExceptionType.DEFAULT
+						MCalendarExceptionType.ADDED
 				));
 				break;
 			case SERVICE_DEFAULT:
@@ -186,11 +180,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					continue;
 				}
 				for (GCalendarDate gCalendarDate : gCalendar.getDates()) {
-					if (!FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-						if (gCalendarDateServiceRemoved.contains(gCalendarDate.getUID())) {
-							continue; // service REMOVED at this date
-						}
-					}
 					mServiceDates.add(new MServiceDate(
 							gCalendarDate.getServiceIdInt(),
 							gCalendarDate.getDate(),
