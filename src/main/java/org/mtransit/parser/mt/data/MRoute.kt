@@ -30,7 +30,7 @@ data class MRoute(
         shortName,
         longName,
         color,
-        GTFSCommons.stringIdToHashIfEnabled(originalId),
+        GTFSCommons.stringIdToHash(originalId),
         type,
     )
 

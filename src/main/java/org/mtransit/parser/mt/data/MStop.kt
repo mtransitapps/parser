@@ -32,7 +32,7 @@ data class MStop(
         lat,
         lng,
         accessible,
-        GTFSCommons.stringIdToHashIfEnabled(originalId),
+        GTFSCommons.stringIdToHash(originalId),
     )
 
     fun hasLat(): Boolean {
