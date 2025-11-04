@@ -43,7 +43,7 @@ data class MRoute(
         add((color?.uppercase() ?: Constants.EMPTY).quotes()) // color
         add(originalIdHash.toString()) // original ID hash
         if (FeatureFlags.F_EXPORT_ORIGINAL_ROUTE_TYPE) {
-            type?.let { add(it) } // route type
+            type?.let { add(it.toString()) } // route type
         }
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 

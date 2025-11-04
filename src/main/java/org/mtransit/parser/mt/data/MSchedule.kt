@@ -110,7 +110,7 @@ data class MSchedule(
             if (arrivalBeforeDeparture > 0) {
                 // TODO ?
             }
-            add(arrivalBeforeDeparture.takeIf { it > 0 } ?: Constants.EMPTY) // arrival before departure
+            add(arrivalBeforeDeparture.takeIf { it > 0 }?.toString() ?: Constants.EMPTY) // arrival before departure
         }
         if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             add(_tripId.quotesEscape())
@@ -143,7 +143,7 @@ data class MSchedule(
             add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY) // HEADSIGN TYPE
             add((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
         }
-        add(accessible)
+        add(accessible.toString())
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     fun isSameServiceAndDirection(lastSchedule: MSchedule?): Boolean {
