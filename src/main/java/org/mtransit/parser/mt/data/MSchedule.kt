@@ -119,11 +119,7 @@ data class MSchedule(
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     fun toFileSameServiceIdAndDirectionId(lastSchedule: MSchedule?) = buildList {
-        if (lastSchedule == null) {
-            add(departure.toString()) // departure
-        } else {
-            add((departure - lastSchedule.departure).toString()) // departure
-        }
+        add((departure - (lastSchedule?.departure ?: 0)).toString()) // departure
         if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             @Suppress("ControlFlowWithEmptyBody")
             if (arrivalBeforeDeparture > 0) {
