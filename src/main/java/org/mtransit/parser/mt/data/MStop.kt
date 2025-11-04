@@ -43,15 +43,15 @@ data class MStop(
         return lng != 0.0
     }
 
-    fun toFile() = buildList {
-        add(id.toString()) // ID
-        add(code.quotesEscape()) // code
-        add(name.quotesEscape()) // name
-        add(MDataChangedManager.avoidLatLngChanged(lat)) // latitude
-        add(MDataChangedManager.avoidLatLngChanged(lng)) // longitude
-        add(accessible.toString())
-        add(originalIdHash.toString()) // original ID hash
-    }.joinToString(Constants.COLUMN_SEPARATOR_)
+    fun toFile() = listOf(
+        id.toString(), // ID
+        code.quotesEscape(), // code
+        name.quotesEscape(), // name
+        MDataChangedManager.avoidLatLngChanged(lat), // latitude
+        MDataChangedManager.avoidLatLngChanged(lng), // longitude
+        accessible.toString(),
+        originalIdHash.toString(), // original ID hash
+    ).joinToString(Constants.COLUMN_SEPARATOR_)
 
     override fun compareTo(other: MStop): Int {
         return id - other.id
