@@ -34,12 +34,12 @@ data class MDirectionStop(
         return true
     }
 
-    fun toFile() = buildList {
-        add(directionId.toString()) // DIRECTION ID
-        add(stopId.toString()) // STOP ID
-        add(stopSequence.toString()) // STOP SEQUENCE
-        add((if (isNoPickup) 1 else 0).toString()) // DROP OFF ONLY
-    }.joinToString(Constants.COLUMN_SEPARATOR_)
+    fun toFile() = listOf(
+        directionId.toString(), // DIRECTION ID
+        stopId.toString(), // STOP ID
+        stopSequence.toString(), // STOP SEQUENCE
+        (if (isNoPickup) 1 else 0).toString(), // DROP OFF ONLY
+    ).joinToString(Constants.COLUMN_SEPARATOR_)
 
     override fun compareTo(other: MDirectionStop): Int {
         // sort by direction_id => stop_sequence
