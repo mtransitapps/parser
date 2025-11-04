@@ -111,8 +111,6 @@ data class MSchedule(
                 // TODO ?
             }
             add(arrivalBeforeDeparture.takeIf { it > 0 }?.toString() ?: Constants.EMPTY) // arrival before departure
-        }
-        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             add(_tripId.quotesEscape())
         }
         add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY) // HEADSIGN TYPE
@@ -132,8 +130,6 @@ data class MSchedule(
                 // TODO ?
             }
             add(arrivalBeforeDeparture.takeIf { it > 0 }?.toString() ?: Constants.EMPTY) // arrival before departure
-        }
-        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             add(_tripId.quotesEscape())
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
