@@ -13,7 +13,7 @@ data class MRoute(
     val shortName: String?,
     var longName: String,
     private val color: String?,
-    private val originalIdHash: Int?,
+    private val originalIdHash: Int,
     private val type: Int?,
 ) : Comparable<MRoute> {
 
@@ -36,21 +36,16 @@ data class MRoute(
 
     val shortNameOrDefault: String = shortName ?: Constants.EMPTY
 
-    fun toFile() = buildString {
-        append(id.toString()) // ID
-        append(Constants.COLUMN_SEPARATOR) //
-        append((shortName ?: Constants.EMPTY).quotesEscape()) // short name
-        append(Constants.COLUMN_SEPARATOR) //
-        append(longName.quotesEscape()) // long name
-        append(Constants.COLUMN_SEPARATOR) //
-        append((color?.uppercase() ?: Constants.EMPTY).quotes()) // color
-        append(Constants.COLUMN_SEPARATOR) //
-        originalIdHash?.let { append(it) } // original ID hash
+    fun toFile() = buildList {
+        add(id.toString()) // ID
+        add((shortName ?: Constants.EMPTY).quotesEscape()) // short name
+        add(longName.quotesEscape()) // long name
+        add((color?.uppercase() ?: Constants.EMPTY).quotes()) // color
+        add(originalIdHash.toString()) // original ID hash
         if (FeatureFlags.F_EXPORT_ORIGINAL_ROUTE_TYPE) {
-            append(Constants.COLUMN_SEPARATOR) //
-            type?.let { append(it) } // route type
+            type?.let { add(it) } // route type
         }
-    }
+    }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     override fun compareTo(other: MRoute): Int {
         return id.compareTo(other.id)

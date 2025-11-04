@@ -62,10 +62,6 @@ data class MSchedule(
             return GIDs.getString(tripIdInt)
         }
 
-    private fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(_serviceId)
-    }
-
     fun setHeadsign(newHeadsignType: Int, newHeadsignValue: String?) {
         if (newHeadsignValue.isNullOrBlank()
             && newHeadsignType != MDirection.HEADSIGN_TYPE_NO_PICKUP
@@ -104,64 +100,51 @@ data class MSchedule(
                 "+(uID:$uID)"
     }
 
-    fun toFileNewServiceIdAndDirectionId(agencyTools: GAgencyTools) = buildString {
-        append(getCleanServiceId(agencyTools).quotesEscape()) // service ID
-        append(Constants.COLUMN_SEPARATOR) //
+    fun toFileNewServiceIdAndDirectionId(agencyTools: GAgencyTools) = buildList {
+        add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
         // no route ID, just for file split
-        append(directionId) // direction ID
-        append(Constants.COLUMN_SEPARATOR) //
-        append(departure) // departure
-        append(Constants.COLUMN_SEPARATOR) //
+        add(directionId.toString()) // direction ID
+        add(departure.toString()) // departure
         if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             @Suppress("ControlFlowWithEmptyBody")
             if (arrivalBeforeDeparture > 0) {
                 // TODO ?
             }
-            append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
-            append(Constants.COLUMN_SEPARATOR) //
+            add(arrivalBeforeDeparture.takeIf { it > 0 } ?: Constants.EMPTY) // arrival before departure
         }
         if (DefaultAgencyTools.EXPORT_TRIP_ID) {
-            append(_tripId.quotesEscape())
-            append(Constants.COLUMN_SEPARATOR) //
+            add(_tripId.quotesEscape())
         }
-        append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
-        append(Constants.COLUMN_SEPARATOR) //
-        append((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
-        append(Constants.COLUMN_SEPARATOR) //
-        append(accessible)
-    }
+        add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY) // HEADSIGN TYPE
+        add((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
+        add(accessible.toString())
+    }.joinToString(Constants.COLUMN_SEPARATOR_)
 
-    fun toFileSameServiceIdAndDirectionId(lastSchedule: MSchedule?) = buildString {
+    fun toFileSameServiceIdAndDirectionId(lastSchedule: MSchedule?) = buildList {
         if (lastSchedule == null) {
-            append(departure) // departure
+            add(departure.toString()) // departure
         } else {
-            append(departure - lastSchedule.departure) // departure
+            add((departure - lastSchedule.departure).toString()) // departure
         }
-        append(Constants.COLUMN_SEPARATOR) //
         if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             @Suppress("ControlFlowWithEmptyBody")
             if (arrivalBeforeDeparture > 0) {
                 // TODO ?
             }
-            append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
-            append(Constants.COLUMN_SEPARATOR) //
+            add(arrivalBeforeDeparture.takeIf { it > 0 }?.toString() ?: Constants.EMPTY) // arrival before departure
         }
         if (DefaultAgencyTools.EXPORT_TRIP_ID) {
-            append(_tripId)
-            append(Constants.COLUMN_SEPARATOR) //
+            add(_tripId.quotesEscape())
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
-            append(MDirection.HEADSIGN_TYPE_NO_PICKUP) // HEADSIGN TYPE
-            append(Constants.COLUMN_SEPARATOR) //
-            append(Constants.EMPTY.quotes()) // HEADSIGN STRING
+            add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString()) // HEADSIGN TYPE
+            add(Constants.EMPTY.quotes()) // HEADSIGN STRING
         } else {
-            append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
-            append(Constants.COLUMN_SEPARATOR) //
-            append((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
+            add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY) // HEADSIGN TYPE
+            add((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
         }
-        append(Constants.COLUMN_SEPARATOR) //
-        append(accessible)
-    }
+        add(accessible)
+    }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     fun isSameServiceAndDirection(lastSchedule: MSchedule?): Boolean {
         return lastSchedule?.serviceIdInt == serviceIdInt

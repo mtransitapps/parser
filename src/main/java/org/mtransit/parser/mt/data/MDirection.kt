@@ -174,16 +174,12 @@ data class MDirection(
         }
     }
 
-    @Suppress("SameReturnValue")
-    fun toFile() = buildString {
-        append(id) // ID
-        append(Constants.COLUMN_SEPARATOR) //
-        append(headsignType) // HEADSIGN TYPE
-        append(Constants.COLUMN_SEPARATOR) //
-        append(headsignValue.quotesEscape()) // HEADSIGN STRING
-        append(Constants.COLUMN_SEPARATOR) //
-        append(routeId) // ROUTE ID
-    }
+    fun toFile() = buildList {
+        add(id.toString()) // ID
+        add(headsignType.toString()) // HEADSIGN TYPE
+        add(headsignValue.quotesEscape()) // HEADSIGN STRING
+        add(routeId.toString()) // ROUTE ID
+    }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     override fun compareTo(other: MDirection): Int {
         // sort by direction's route id => direction id
