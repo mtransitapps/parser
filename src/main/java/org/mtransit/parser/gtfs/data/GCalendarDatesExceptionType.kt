@@ -2,7 +2,7 @@ package org.mtransit.parser.gtfs.data
 
 import org.mtransit.commons.GTFSCommons
 
-// https://developers.google.com/transit/gtfs/reference#calendar_dates_exception_type_field
+// https://gtfs.org/documentation/schedule/reference/#calendar_datestxt
 enum class GCalendarDatesExceptionType(val id: Int) {
 
     SERVICE_DEFAULT(GTFSCommons.EXCEPTION_TYPE_DEFAULT), // from calendar (added by MT)

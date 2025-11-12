@@ -91,6 +91,9 @@ object MDataChangedManager {
         }
     }
 
+    // private const val ALL_CALENDARS_IN_CALENDAR_DATES = GSpec.ALL_CALENDARS_STORED_IN_CALENDAR_DATES
+    private const val ALL_CALENDARS_IN_CALENDAR_DATES = false
+
     @JvmStatic
     fun avoidCalendarDatesDataChanged(
         lastServiceDates: MutableList<MServiceDate>?,
@@ -103,10 +106,10 @@ object MDataChangedManager {
         val c = Calendar.getInstance()
         val todayStringInt = GFieldTypes.fromDateToInt(dateFormat, c.time)
         val (lastCalendarsServiceDates, lastCalendarDatesServiceDates) =
-            if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) emptyList<MServiceDate>() to lastServiceDates // calendar dates only
+            if (ALL_CALENDARS_IN_CALENDAR_DATES) emptyList<MServiceDate>() to lastServiceDates // calendar dates only
             else lastServiceDates.partition { it.exceptionType == MCalendarExceptionType.DEFAULT.id }
         @Suppress("DEPRECATION")
-        val allCalendarsWithDays = if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) emptyList() else gtfs.allCalendars.filter { it.hasDays() }
+        val allCalendarsWithDays = if (ALL_CALENDARS_IN_CALENDAR_DATES) emptyList() else gtfs.allCalendars.filter { it.hasDays() }
         MTLog.log("> Service IDS from '${GCalendar.FILENAME}':")
         //noinspection DiscouragedApi
         MTLog.log("> - Last: ${lastCalendarsServiceDates.map { it.serviceId }.distinct().sorted().joinToString(limit = 50)}")
@@ -152,11 +155,11 @@ object MDataChangedManager {
         var dataChanged = false
 
         @Suppress("DEPRECATION")
-        val newGCalendars = if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) mutableListOf() else gtfs.allCalendars.toMutableList()
+        val newGCalendars = if (ALL_CALENDARS_IN_CALENDAR_DATES) mutableListOf() else gtfs.allCalendars.toMutableList()
         val newGCalendarDates = gtfs.allCalendarDates.toMutableList()
 
         @Suppress("DEPRECATION")
-        val gCalendarsDates = if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) emptyList() else gtfs.allCalendars.flatMap { it.dates }.map { it.date }.distinct()
+        val gCalendarsDates = if (ALL_CALENDARS_IN_CALENDAR_DATES) emptyList() else gtfs.allCalendars.flatMap { it.dates }.map { it.date }.distinct()
         val gCalendarDatesDates = gtfs.allCalendarDates.map { it.date }
         val removedCalendarsServiceDates = lastCalendarsServiceDates.filter { it.calendarDate !in gCalendarsDates }
         val removedCalendarDatesServiceDates = lastCalendarDatesServiceDates.filter { it.calendarDate !in gCalendarDatesDates }
@@ -187,7 +190,7 @@ object MDataChangedManager {
         @Suppress("LocalVariableName")
         val DATE_FORMAT = GFieldTypes.makeDateFormat()
         removedCalendarsServiceDates.sortedDescending().forEach { removedServiceDate ->
-            if (GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) {
+            if (ALL_CALENDARS_IN_CALENDAR_DATES) {
                 return
             }
             if (!gCalendarsEscapedServiceIdInts.contains(removedServiceDate.serviceIdInt)) {
@@ -295,7 +298,7 @@ object MDataChangedManager {
         if (dataChanged) {
             MTLog.log(buildString {
                 append("> Optimised data changed: ")
-                if (!GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) {
+                if (!ALL_CALENDARS_IN_CALENDAR_DATES) {
                     @Suppress("DEPRECATION")
                     append("`${GCalendar.FILENAME}`: ${gtfs.allCalendars.flatMap { it.dates }.size} -> ${newGCalendars.flatMap { it.dates }.size} | ")
                     append("& ")

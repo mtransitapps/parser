@@ -38,7 +38,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -182,8 +181,8 @@ public class MGenerator {
 		MTLog.log("- Stops: %d", mStopsList.size());
 		MTLog.log("- Service Dates: %d", mServiceDatesList.size());
 		MTLog.log("- Route with Frequencies: %d", mRouteFrequencies.size());
-		MTLog.log("- First timestamp: %d", firstTimestamp);
-		MTLog.log("- Last timestamp: %d", lastTimestamp);
+		MTLog.log("- First timestamp: %s", MTLog.formatDateTime(firstTimestamp));
+		MTLog.log("- Last timestamp: %s", MTLog.formatDateTime(lastTimestamp));
 		return new MSpec(
 				mAgenciesList,
 				mStopsList,
@@ -749,7 +748,7 @@ public class MGenerator {
 			File dumpDirResF = new File(dumpDirRootF, RES);
 			File valuesDirF = new File(dumpDirResF, VALUES);
 			File gtfsRdsValuesXmlF = new File(valuesDirF, GTFS_RDS_VALUES_XML); // shared between different schedule (current, next...)
-			String content = new String(Files.readAllBytes(gtfsRdsValuesXmlF.toPath()), StandardCharsets.UTF_8);
+			String content = Files.readString(gtfsRdsValuesXmlF.toPath());
 			final Matcher matcher = RDS_DB_VERSION_REGEX.matcher(content);
 			if (!matcher.find() || matcher.groupCount() < 4) {
 				MTLog.log("Bumping DB version... SKIP (error while reading current DB version)");
@@ -835,12 +834,12 @@ public class MGenerator {
 			ow.write(Constants.NEW_LINE);
 			ow.write(RESOURCES_START);
 			ow.write(Constants.NEW_LINE);
-			final String sourceLabel = SourceUtils.getSourceLabel(inputUrl);
+			final String sourceLabel = inputUrl == null ? null : SourceUtils.getSourceLabel(inputUrl);
 			if (sourceLabel != null && !sourceLabel.isEmpty()) {
 				ow.write(getRESOURCES_STRING(GTFS_RDS_SOURCE_LABEL, sourceLabel));
 				ow.write(Constants.NEW_LINE);
 			}
-			//noinspection deprecation
+			//noinspection DiscouragedApi
 			ow.write(getRESOURCES_STRING(GTFS_RDS_AGENCY_ID, mSpec.getFirstAgency().getId()));
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_INTEGER(GTFS_RDS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
@@ -921,12 +920,12 @@ public class MGenerator {
 			ow.write(RESOURCES_START);
 			ow.write(Constants.NEW_LINE);
 			if (StringUtils.isEmpty(fileBase)) {
-				final String sourceLabel = SourceUtils.getSourceLabel(inputUrl);
+				final String sourceLabel = inputUrl == null ? null : SourceUtils.getSourceLabel(inputUrl);
 				if (sourceLabel != null && !sourceLabel.isEmpty()) {
 					ow.write(getRESOURCES_STRING(GTFS_RDS_SOURCE_LABEL, sourceLabel));
 					ow.write(Constants.NEW_LINE);
 				}
-				//noinspection deprecation
+				//noinspection DiscouragedApi
 				ow.write(getRESOURCES_STRING(GTFS_RDS_AGENCY_ID, mSpec.getFirstAgency().getId()));
 				ow.write(Constants.NEW_LINE);
 				ow.write(getRESOURCES_INTEGER(GTFS_RDS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
@@ -1016,7 +1015,9 @@ public class MGenerator {
 
 	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du ([0-9]{1,2} \\w+ [0-9]{4}) au ([0-9]{1,2} \\w+ [0-9]{4})(\\.)?)",
 			Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+	@SuppressWarnings("SpellCheckingInspection")
 	private static final String SCHEDULE_FROM_TO_FR = "Horaires du %1$s au %2$s.";
+	@SuppressWarnings("SpellCheckingInspection")
 	private static final String SCHEDULE_KEEP_FROM_TO_FR = "Horaires du $2 au %2$s.";
 
 	private static void dumpStoreListing(File dumpDirF, String fileBase, Integer minDate, Integer maxDate) {
