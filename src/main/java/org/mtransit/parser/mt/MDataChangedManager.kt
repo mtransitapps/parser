@@ -299,13 +299,11 @@ object MDataChangedManager {
             MTLog.log(buildString {
                 append("> Optimised data changed: ")
                 if (!ALL_CALENDARS_IN_CALENDAR_DATES) {
-                    @Suppress("DEPRECATION")
                     append("`${GCalendar.FILENAME}`: ${gtfs.allCalendars.flatMap { it.dates }.size} -> ${newGCalendars.flatMap { it.dates }.size} | ")
                     append("& ")
                 }
                 append("'${GCalendarDate.FILENAME}': ${gtfs.allCalendarDates.size} -> ${newGCalendarDates.size}.")
-            }
-            )
+            })
             gtfs.replaceCalendarsSameServiceIds(newGCalendars, newGCalendarDates)
         } else {
             MTLog.log("> No optimization for date changed required for calendars & calendar dates.")

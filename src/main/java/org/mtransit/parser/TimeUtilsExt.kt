@@ -1,6 +1,8 @@
 package org.mtransit.parser
 
-import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
@@ -15,7 +17,10 @@ fun formatSimpleDuration(durationInMs: Long) = buildString {
     }
 }
 
-fun formatShortDateTime(dateInMs: Long) = formatShortDateTime(Date(dateInMs))
+private val shortDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH)
+    .withZone(ZoneId.systemDefault())
 
-fun formatShortDateTime(date: Date): String =
-    SimpleDateFormat("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH).format(date)
+fun formatShortDateTime(date: Date): String = formatShortDateTime(date.toInstant())
+
+fun formatShortDateTime(date: Instant): String =
+    shortDateTimeFormatter.format(date)

@@ -189,7 +189,7 @@ public class GSpec {
 	}
 
 	public void replaceCalendarsSameServiceIds(@Nullable Collection<GCalendar> gCalendars, @Nullable Collection<GCalendarDate> gCalendarDates) {
-		deleteAllCalendars();
+		deleteAllCalendarsAndCalendarDates();
 		if (gCalendars != null) {
 			addCalendars(gCalendars);
 		}
@@ -198,8 +198,13 @@ public class GSpec {
 		}
 	}
 
-	private void deleteAllCalendars() {
-		GTFSDataBase.deleteCalendarDate(); // ALL
+	private void deleteAllCalendarsAndCalendarDates() {
+		if (ALL_CALENDARS_STORED_IN_CALENDAR_DATES) {
+			GTFSDataBase.deleteCalendarDate(); // ALL
+		} else {
+			throw new MTLog.Fatal("deleteAllCalendars() > need to filter out flatten calendars");
+		}
+		this.calendarsCache.clear();
 		this.calendarDatesCache.clear();
 	}
 
