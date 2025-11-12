@@ -1216,9 +1216,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (agencyFilter) {
 			gtfs.cleanupExcludedServiceIds();
 		}
-		//noinspection deprecation // using calendar flatten into calendar dates only should output same result as calendar + calendar dates
-		List<GCalendar> gCalendars = GSpec.ALL_CALENDARS_IN_CALENDAR_DATES ? Collections.emptyList() : gtfs.getAllCalendars();
-		List<GCalendarDate> gCalendarDates = gtfs.getAllCalendarDates();
+		final List<GCalendar> gCalendars = gtfs.getAllCalendars();
+		final List<GCalendarDate> gCalendarDates = gtfs.getAllCalendarDates();
 		final Period entirePeriod = getEntirePeriodMinMaxDate(gCalendars, gCalendarDates);
 		MTLog.log("* Schedule available from %s to %s.", entirePeriod.getStartDate(), entirePeriod.getEndDate());
 		MTLog.log("------------------------------");

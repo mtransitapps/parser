@@ -1,7 +1,12 @@
 package org.mtransit.parser;
 
+import androidx.annotation.NonNull;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Calendar;
+import java.util.Date;
 
 @SuppressWarnings({"unused", "WeakerAccess", "CallToPrintStackTrace"})
 public final class MTLog {
@@ -118,6 +123,41 @@ public final class MTLog {
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while waiting for Enter!");
 		}
+	}
+
+	@Nullable
+	public static String formatDuration(@Nullable Long durationInMs) {
+		return durationInMs == null ? null : formatDuration(durationInMs.longValue());
+	}
+
+	@NonNull
+	public static String formatDuration(long durationInMs) {
+		return "[" + durationInMs + " - " + TimeUtilsExtKt.formatSimpleDuration(durationInMs) + "]";
+	}
+
+	@Nullable
+	public static String formatDateTime(@Nullable Calendar calendar) {
+		return calendar == null ? null : formatDateTime(calendar.getTimeInMillis());
+	}
+
+	@Nullable
+	public static String formatDateTime(@Nullable Long timeInMs) {
+		return timeInMs == null ? null : formatDateTime(timeInMs.longValue());
+	}
+
+	@NonNull
+	public static String formatDateTime(long timeInMs) {
+		return "[" + timeInMs + " - " + TimeUtilsExtKt.formatShortDateTime(new Date(timeInMs)) + "]";
+	}
+
+	@Nullable
+	public static String formatDateTimeN(@Nullable Date date) {
+		return date == null ? null : formatDateTime(date);
+	}
+
+	@NonNull
+	public static String formatDateTime(@NonNull Date date) {
+		return "[" + date.getTime() + " - " + TimeUtilsExtKt.formatShortDateTime(date) + "]";
 	}
 
 	public static class Fatal extends RuntimeException {

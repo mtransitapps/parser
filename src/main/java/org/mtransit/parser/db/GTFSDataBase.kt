@@ -4,6 +4,7 @@ import androidx.annotation.Discouraged
 import org.mtransit.commons.gtfs.data.Agency
 import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.commons.gtfs.data.CalendarDate
+import org.mtransit.commons.gtfs.data.CalendarExceptionType
 import org.mtransit.commons.gtfs.data.Direction
 import org.mtransit.commons.gtfs.data.DirectionId
 import org.mtransit.commons.gtfs.data.Frequency
@@ -240,9 +241,9 @@ object GTFSDataBase {
 
     @JvmOverloads
     @JvmStatic
-    fun selectCalendarDates(serviceId: ServiceId? = null): List<CalendarDate> {
+    fun selectCalendarDates(serviceId: ServiceId? = null, exceptionTypes: Collection<CalendarExceptionType>? = null): List<CalendarDate> {
         connection.createStatement().use { statement ->
-            return CalendarDateSQL.select(serviceId, statement)
+            return CalendarDateSQL.select(serviceId, exceptionTypes, statement)
         }
     }
 

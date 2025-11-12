@@ -173,19 +173,16 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				throw new MTLog.Fatal("%s: Unexpected calendar date exception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
 			}
 		}
-		if (!GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) {
-			//noinspection deprecation
-			for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
-				if (!serviceIdInts.contains(gCalendar.getServiceIdInt())) {
-					continue;
-				}
-				for (GCalendarDate gCalendarDate : gCalendar.getDates()) {
-					mServiceDates.add(new MServiceDate(
-							gCalendarDate.getServiceIdInt(),
-							gCalendarDate.getDate(),
-							MCalendarExceptionType.DEFAULT
-					));
-				}
+		for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
+			if (!serviceIdInts.contains(gCalendar.getServiceIdInt())) {
+				continue;
+			}
+			for (GCalendarDate gCalendarDate : gCalendar.getDates()) {
+				mServiceDates.add(new MServiceDate(
+						gCalendarDate.getServiceIdInt(),
+						gCalendarDate.getDate(),
+						MCalendarExceptionType.DEFAULT
+				));
 			}
 		}
 		MDirection mDirection;
