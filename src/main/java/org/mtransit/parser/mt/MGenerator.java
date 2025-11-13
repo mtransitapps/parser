@@ -518,19 +518,18 @@ public class MGenerator {
 		return minMaxLatLng;
 	}
 
-	@NotNull
-	private static Pair<Integer, Integer> dumpScheduleServiceIds(@NotNull GAgencyTools gAgencyTools,
-																   @Nullable MSpec mSpec,
-																   @NotNull String fileBase,
-																   boolean deleteAll,
-																   @NotNull File dataDirF,
-																   @NotNull File rawDirF,
-																   @Nullable Connection dbConnection) {
+	private static void dumpScheduleServiceIds(
+			@NotNull GAgencyTools gAgencyTools,
+			@Nullable MSpec mSpec,
+			@NotNull String fileBase,
+			boolean deleteAll,
+			@NotNull File dataDirF,
+			@NotNull File rawDirF,
+			@Nullable Connection dbConnection) {
 		if (!deleteAll
 				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
-		Pair<Integer, Integer> minMaxDates = new Pair<>(null, null);
 		if (F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_IDS)); // migration from src/main/res/raw to data
 		}
@@ -541,7 +540,6 @@ public class MGenerator {
 			if (!deleteAll) {
 				ow = new BufferedWriter(new FileWriter(file));
 				MTLog.logPOINT(); // LOG
-				Integer minDate = null, maxDate = null;
 				Statement dbStatement = null;
 				String sqlInsert = null;
 				if (F_PRE_FILLED_DB) {
@@ -551,6 +549,7 @@ public class MGenerator {
 				}
 				for (MServiceId mServiceId : GServiceIds.getAll()) { // TODO? mSpec.getServiceIds()
 					final String serviceIdsInsert = mServiceId.toFile();
+					// gAgencyTools
 					if (F_PRE_FILLED_DB) {
 						SQLUtils.executeUpdate(
 								dbStatement,
@@ -559,24 +558,16 @@ public class MGenerator {
 					}
 					ow.write(serviceIdsInsert);
 					ow.write(Constants.NEW_LINE);
-					if (minDate == null || minDate > mServiceDate.getCalendarDate()) {
-						minDate = mServiceDate.getCalendarDate();
-					}
-					if (maxDate == null || maxDate.doubleValue() < mServiceDate.getCalendarDate()) {
-						maxDate = mServiceDate.getCalendarDate();
-					}
 				}
 				if (F_PRE_FILLED_DB) {
 					SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 				}
-				minMaxDates = new Pair<>(minDate, maxDate);
 			}
 		} catch (Exception ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while writing service dates file!");
 		} finally {
 			CloseableUtils.closeQuietly(ow);
 		}
-		return minMaxDates;
 	}
 
 	@NotNull
