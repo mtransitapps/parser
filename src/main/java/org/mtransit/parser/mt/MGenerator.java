@@ -23,12 +23,14 @@ import org.mtransit.parser.db.SQLUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GFieldTypes;
+import org.mtransit.parser.gtfs.data.GServiceIds;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSchedule;
 import org.mtransit.parser.mt.data.MServiceDate;
+import org.mtransit.parser.mt.data.MServiceId;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MStop;
 import org.mtransit.parser.mt.data.MDirection;
@@ -198,6 +200,7 @@ public class MGenerator {
 
 	private static final String GTFS_SCHEDULE = "gtfs_schedule";
 	private static final String GTFS_SCHEDULE_SERVICE_DATES = GTFS_SCHEDULE + "_service_dates"; // DB
+	private static final String GTFS_SCHEDULE_SERVICE_IDS = GTFS_SCHEDULE + "_service_ids"; // DB
 	private static final String GTFS_SCHEDULE_STOP = GTFS_SCHEDULE + "_stop_"; // file
 	private static final String GTFS_FREQUENCY = "gtfs_frequency";
 	private static final String GTFS_FREQUENCY_ROUTE = GTFS_FREQUENCY + "_route_"; // file
@@ -267,6 +270,8 @@ public class MGenerator {
 		// STOPS
 		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng =
 				dumpRDSStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		// SERVICE IDS
+		dumpScheduleServiceIds(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// SCHEDULE SERVICE DATES
 		Pair<Integer, Integer> minMaxDates =
 				dumpScheduleServiceDates(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
@@ -511,6 +516,67 @@ public class MGenerator {
 			CloseableUtils.closeQuietly(ow);
 		}
 		return minMaxLatLng;
+	}
+
+	@NotNull
+	private static Pair<Integer, Integer> dumpScheduleServiceIds(@NotNull GAgencyTools gAgencyTools,
+																   @Nullable MSpec mSpec,
+																   @NotNull String fileBase,
+																   boolean deleteAll,
+																   @NotNull File dataDirF,
+																   @NotNull File rawDirF,
+																   @Nullable Connection dbConnection) {
+		if (!deleteAll
+				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
+		}
+		Pair<Integer, Integer> minMaxDates = new Pair<>(null, null);
+		if (F_PRE_FILLED_DB) {
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_IDS)); // migration from src/main/res/raw to data
+		}
+		File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_IDS);
+		FileUtils.deleteIfExist(file); // delete previous
+		BufferedWriter ow = null;
+		try {
+			if (!deleteAll) {
+				ow = new BufferedWriter(new FileWriter(file));
+				MTLog.logPOINT(); // LOG
+				Integer minDate = null, maxDate = null;
+				Statement dbStatement = null;
+				String sqlInsert = null;
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
+					dbStatement = dbConnection.createStatement();
+					sqlInsert = GTFSCommons.getT_SERVICE_DATES_SQL_INSERT();
+				}
+				for (MServiceId mServiceId : GServiceIds.getAll()) { // TODO? mSpec.getServiceIds()
+					final String serviceIdsInsert = mServiceId.toFile();
+					if (F_PRE_FILLED_DB) {
+						SQLUtils.executeUpdate(
+								dbStatement,
+								String.format(sqlInsert, serviceIdsInsert)
+						);
+					}
+					ow.write(serviceIdsInsert);
+					ow.write(Constants.NEW_LINE);
+					if (minDate == null || minDate > mServiceDate.getCalendarDate()) {
+						minDate = mServiceDate.getCalendarDate();
+					}
+					if (maxDate == null || maxDate.doubleValue() < mServiceDate.getCalendarDate()) {
+						maxDate = mServiceDate.getCalendarDate();
+					}
+				}
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
+				}
+				minMaxDates = new Pair<>(minDate, maxDate);
+			}
+		} catch (Exception ioe) {
+			throw new MTLog.Fatal(ioe, "I/O Error while writing service dates file!");
+		} finally {
+			CloseableUtils.closeQuietly(ow);
+		}
+		return minMaxDates;
 	}
 
 	@NotNull

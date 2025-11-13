@@ -9,6 +9,7 @@ import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
+import org.mtransit.parser.gtfs.data.GServiceIds
 
 data class MSchedule(
     val routeId: Long,
@@ -49,9 +50,7 @@ data class MSchedule(
     val serviceId = _serviceId
 
     private val _serviceId: String
-        get() {
-            return GIDs.getString(serviceIdInt)
-        }
+        get() = GServiceIds.getId(serviceIdInt)
 
     @Discouraged(message = "Not memory efficient")
     @Suppress("unused")

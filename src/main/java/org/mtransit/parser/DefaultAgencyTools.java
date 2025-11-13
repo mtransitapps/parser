@@ -22,6 +22,7 @@ import org.mtransit.parser.gtfs.data.GIDs;
 import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GRouteType;
+import org.mtransit.parser.gtfs.data.GServiceIds;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
@@ -35,6 +36,7 @@ import org.mtransit.parser.mt.data.MDirectionCardinalType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MRouteSNToIDConverter;
 import org.mtransit.parser.mt.data.MServiceDate;
+import org.mtransit.parser.mt.data.MServiceId;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MDirection;
 
@@ -147,6 +149,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		MTLog.log("Generating data...");
 		MTLog.logDebug("Args [%d]: %s.", args.length, Arrays.asList(args));
 		final List<MServiceDate> lastServiceDates = MReader.loadServiceDates(args[2]);
+		final List<MServiceId> lastServiceIds = MReader.loadServiceIds(args[2]);
+		GServiceIds.addAll(lastServiceIds);
 		this.serviceIdInts = extractUsefulServiceIdInts(args, this, true, lastServiceDates);
 		final String inputUrl = args.length >= 5 ? args[4] : null;
 		if (excludingAll()) {

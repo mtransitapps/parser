@@ -37,7 +37,7 @@ data class GTrip(
         tripIdInt = GIDs.getInt(tripId),
         routeIdInt = GIDs.getInt(routeId),
         originalRouteIdInt = GIDs.getInt(originalRouteId),
-        serviceIdInt = GIDs.getInt(serviceId),
+        serviceIdInt = GServiceIds.getInt(serviceId),
         tripHeadsign = tripHeadsign,
         tripShortName = tripShortName,
         directionIdE = GDirectionId.parse(directionId),
@@ -94,9 +94,7 @@ data class GTrip(
     val serviceId = _serviceId
 
     private val _serviceId: String
-        get() {
-            return GIDs.getString(serviceIdInt)
-        }
+        get() = GServiceIds.getId(serviceIdInt)
 
     @Suppress("unused")
     private fun getCleanServiceId(agencyTools: GAgencyTools): String {

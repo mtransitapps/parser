@@ -73,9 +73,7 @@ data class GCalendar(
     val serviceId = _serviceId
 
     private val _serviceId: String
-        get() {
-            return GIDs.getString(serviceIdInt)
-        }
+        get() = GServiceIds.getId(serviceIdInt)
 
     val escapedServiceId: String
         get() = _serviceId.escape()

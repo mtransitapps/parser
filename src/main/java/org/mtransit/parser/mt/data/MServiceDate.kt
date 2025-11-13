@@ -7,7 +7,7 @@ import org.mtransit.parser.db.SQLUtils.unquotes
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GCalendarDate
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType
-import org.mtransit.parser.gtfs.data.GIDs
+import org.mtransit.parser.gtfs.data.GServiceIds
 
 data class MServiceDate(
     val serviceIdInt: Int,
@@ -30,9 +30,7 @@ data class MServiceDate(
     val serviceId = _serviceId
 
     private val _serviceId: String
-        get() {
-            return GIDs.getString(serviceIdInt)
-        }
+        get() = GServiceIds.getId(serviceIdInt)
 
     override fun compareTo(other: MServiceDate): Int = compareBy(
         MServiceDate::calendarDate,
@@ -76,7 +74,7 @@ data class MServiceDate(
             .takeIf { it.size == 3 }
             ?.let { columns ->
                 MServiceDate(
-                    serviceIdInt = GIDs.getInt(columns[0].unquotes()), // service ID
+                    serviceIdInt = GServiceIds.getInt(columns[0].unquotes()), // service ID
                     calendarDate = columns[1].toInt(), // calendar date
                     exceptionType = columns[2].toInt()
                 )

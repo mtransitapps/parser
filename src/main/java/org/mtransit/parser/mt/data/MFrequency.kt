@@ -5,6 +5,7 @@ import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
+import org.mtransit.parser.gtfs.data.GServiceIds
 
 data class MFrequency(
     val serviceIdInt: Int,
@@ -19,9 +20,7 @@ data class MFrequency(
     val serviceId = _serviceId
 
     private val _serviceId: String
-        get() {
-            return GIDs.getString(serviceIdInt)
-        }
+        get() = GServiceIds.getId(serviceIdInt)
 
     private fun getCleanServiceId(agencyTools: GAgencyTools): String {
         return agencyTools.cleanServiceId(_serviceId)
