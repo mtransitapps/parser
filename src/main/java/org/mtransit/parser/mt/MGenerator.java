@@ -525,7 +525,7 @@ public class MGenerator {
 			@NotNull File dataDirF,
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection) {
-		if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) return;
+		if (!FeatureFlags.F_EXPORT_SERVICE_ID_INTS) return;
 		if (!deleteAll
 				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
@@ -860,6 +860,7 @@ public class MGenerator {
 	private static final String GTFS_RDS_AGENCY_EXTENDED_TYPE = "gtfs_rts_agency_extended_type"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_TIMEZONE = "gtfs_rts_timezone"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_COLOR = "gtfs_rts_color"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_SERVICE_ID_CLEANUP_REGEX = "gtfs_rts_service_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_ROUTE_ID_CLEANUP_REGEX = "gtfs_rts_route_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_TRIP_ID_CLEANUP_REGEX = "gtfs_rts_trip_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_STOP_ID_CLEANUP_REGEX = "gtfs_rts_stop_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
@@ -909,6 +910,10 @@ public class MGenerator {
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_STRING(GTFS_RDS_COLOR, mSpec.getFirstAgency().getColor()));
 			ow.write(Constants.NEW_LINE);
+			if (gAgencyTools.getServiceIdCleanupRegex() != null) {
+				ow.write(getRESOURCES_STRING(GTFS_RDS_SERVICE_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getServiceIdCleanupRegex())));
+				ow.write(Constants.NEW_LINE);
+			}
 			if (gAgencyTools.getRouteIdCleanupRegex() != null) {
 				ow.write(getRESOURCES_STRING(GTFS_RDS_ROUTE_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getRouteIdCleanupRegex())));
 				ow.write(Constants.NEW_LINE);

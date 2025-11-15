@@ -71,30 +71,30 @@ data class GTrip(
 
     val uID by lazy { getNewUID(routeIdInt, tripIdInt) }
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val routeId = _routeId
+    @get:Discouraged(message = "Not memory efficient")
+    val routeId: String get() = _routeId
 
     private val _routeId: String
         get() = GIDs.getString(routeIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val originalRouteId = _originalRouteId
+    @get:Discouraged(message = "Not memory efficient")
+    val originalRouteId: String get() = _originalRouteId
 
     private val _originalRouteId: String
         get() = GIDs.getString(originalRouteIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val serviceId = _serviceId
+    @get:Discouraged(message = "Not memory efficient")
+    val serviceId: String get() = _serviceId
 
     private val _serviceId: String
         get() = GIDs.getString(serviceIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val tripId = _tripId
+    @get:Discouraged(message = "Not memory efficient")
+    val tripId: String get() = _tripId
 
     @Suppress("unused")
     private val _tripId: String

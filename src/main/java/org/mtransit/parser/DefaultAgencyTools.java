@@ -353,7 +353,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public String getServiceIdCleanupRegex() {
-		return null; // opt-in
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getServiceIdCleanupRegex();
+		}
+		return null; // OPT-IN feature
 	}
 
 	@Nullable

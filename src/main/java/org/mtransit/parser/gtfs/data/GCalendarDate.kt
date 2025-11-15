@@ -40,9 +40,9 @@ data class GCalendarDate(
         GCalendarDatesExceptionType.parse(exceptionTypeInt)
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val serviceId = _serviceId
+    @get:Discouraged(message = "Not memory efficient")
+    val serviceId: String get() = _serviceId
 
     private val _serviceId: String
         get() = GIDs.getString(serviceIdInt)

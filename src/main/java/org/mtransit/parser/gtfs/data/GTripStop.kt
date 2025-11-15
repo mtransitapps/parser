@@ -49,17 +49,17 @@ data class GTripStop(
 
     val uID by lazy { getNewUID(routeIdInt, tripIdInt, stopIdInt, stopSequence) }
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val tripId = _tripId
+    @get:Discouraged(message = "Not memory efficient")
+    val tripId: String get() = _tripId
 
     @Suppress("unused")
     private val _tripId: String
         get() = GIDs.getString(tripIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val stopId = _stopId
+    @get:Discouraged(message = "Not memory efficient")
+    val stopId: String get() = _stopId
 
     private val _stopId: String
         get() = GIDs.getString(stopIdInt)

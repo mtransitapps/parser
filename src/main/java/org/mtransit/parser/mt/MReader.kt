@@ -147,23 +147,18 @@ object MReader {
     private const val GTFS_SCHEDULE_SERVICE_IDS = "gtfs_schedule_service_ids"
 
     @JvmStatic
-    fun loadServiceIds(fileBase: String): List<MServiceId>? {
-        try {
-            val gtfsScheduleServiceIds = getResDirName(fileBase) + "/$RAW/${fileBase}$GTFS_SCHEDULE_SERVICE_IDS"
-            val gtfsScheduleServiceIdsFile = File(gtfsScheduleServiceIds)
-            if (!gtfsScheduleServiceIdsFile.exists()) {
-                MTLog.log("File not found '$gtfsScheduleServiceIds'!")
-                return null
+    fun loadServiceIds(fileBase: String) = try {
+        File(getResDirName(fileBase) + "/$RAW/${fileBase}$GTFS_SCHEDULE_SERVICE_IDS")
+            .takeIf { it.exists() }
+            .also {
+                if (it == null) MTLog.log("File not found '$it'!")
             }
-            val gtfsScheduleServiceIdsFileLines = gtfsScheduleServiceIdsFile.readLines()
-            val serviceIds = gtfsScheduleServiceIdsFileLines.mapNotNull { line ->
+            ?.readLines()?.mapNotNull { line ->
                 MServiceId.fromFileLine(line)
             }
-            return serviceIds
-        } catch (e: Exception) {
-            MTLog.logNonFatal(e, "Error while reading '$fileBase' service ids!")
-            return null
-        }
+    } catch (e: Exception) {
+        MTLog.logNonFatal(e, "Error while reading '$fileBase' service ids!")
+        null
     }
 
     // endregion

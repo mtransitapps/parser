@@ -30,7 +30,7 @@ object MServiceIds {
 
     @Suppress("unused")
     @JvmStatic
-    fun getId(serviceIdInt: Int): String {
+    fun getString(serviceIdInt: Int): String {
         return intToString[serviceIdInt] ?: throw MTLog.Fatal("Unexpected Service ID integer $serviceIdInt!")
     }
 
@@ -44,5 +44,5 @@ object MServiceIds {
         stringToInt.forEach { id, idInt ->
             add(MServiceId(id, idInt))
         }
-    }
+    }.sorted()
 }

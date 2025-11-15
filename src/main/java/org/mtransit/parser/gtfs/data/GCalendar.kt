@@ -67,9 +67,9 @@ data class GCalendar(
         endDate
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val serviceId = _serviceId
+    @get:Discouraged(message = "Not memory efficient")
+    val serviceId: String get() = _serviceId
 
     private val _serviceId: String
         get() = GIDs.getString(serviceIdInt)
@@ -256,7 +256,7 @@ data class GCalendar(
             sunday: Boolean,
             startDate: Int,
             endDate: Int,
-            exceptionType: GCalendarDatesExceptionType = GCalendarDatesExceptionType.SERVICE_ADDED,
+            exceptionType: GCalendarDatesExceptionType = GCalendarDatesExceptionType.SERVICE_DEFAULT,
         ) = buildList {
             try {
                 val dateFormat = GFieldTypes.makeDateFormat()

@@ -16,7 +16,7 @@ data class MServiceDate(
     val exceptionType: Int,
 ) : Comparable<MServiceDate> {
 
-    constructor(
+    private constructor(
         serviceIdInt: Int,
         calendarDate: Int,
         exceptionType: MCalendarExceptionType
@@ -26,9 +26,9 @@ data class MServiceDate(
         exceptionType.id
     )
 
-    @Discouraged(message = "Not memory efficient")
+    @get:Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val serviceId = _serviceId
+    val serviceId: String get() = _serviceId
 
     private val _serviceId: String
         get() = GIDs.getString(serviceIdInt)
@@ -75,15 +75,28 @@ data class MServiceDate(
             return serviceDates.joinToString { it.toStringPlus() }
         }
 
-        fun fromFileLine(line: String) = line.split(Constants.COLUMN_SEPARATOR)
-            .takeIf { it.size == 3 }
-            ?.let { columns ->
-                MServiceDate(
-                    serviceIdInt = GIDs.getInt(columns[0].unquotes()),
-                    calendarDate = columns[1].toInt(),
-                    exceptionType = columns[2].toInt(),
-                )
-            }
+        @JvmStatic
+        fun fromCalendarDate(calendarDate: GCalendarDate) =
+            MServiceDate(
+                serviceIdInt = calendarDate.serviceIdInt,
+                calendarDate = calendarDate.date,
+                exceptionType = when (calendarDate.exceptionType) {
+                    GCalendarDatesExceptionType.SERVICE_ADDED -> MCalendarExceptionType.ADDED
+                    GCalendarDatesExceptionType.SERVICE_REMOVED -> MCalendarExceptionType.REMOVED
+                    GCalendarDatesExceptionType.SERVICE_DEFAULT -> MCalendarExceptionType.DEFAULT
+                }
+            )
+
+        fun fromFileLine(line: String) =
+            line.split(Constants.COLUMN_SEPARATOR)
+                .takeIf { it.size == 3 }
+                ?.let { columns ->
+                    MServiceDate(
+                        serviceIdInt = MServiceIds.getInt(columns[0].unquotes()),
+                        calendarDate = columns[1].toInt(),
+                        exceptionType = columns[2].toInt(),
+                    )
+                }
 
         @Suppress("unused")
         @JvmStatic

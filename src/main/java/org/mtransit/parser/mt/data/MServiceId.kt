@@ -10,13 +10,13 @@ data class MServiceId(
 ) : Comparable<MServiceId> {
 
     fun toFile() = buildList {
-        add(serviceId.quotesEscape()) // service ID // already agencyTools.cleanServiceId(serviceId) before
-        add(serviceIdInt.toString()) //  service ID Int
+        add(serviceIdInt.toString())
+        add(serviceId.quotesEscape()) // already agencyTools.cleanServiceId(serviceId) before
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     override fun compareTo(other: MServiceId) = compareBy(
-        MServiceId::serviceId,
         MServiceId::serviceIdInt,
+        MServiceId::serviceId,
     ).compare(this, other)
 
     companion object {
