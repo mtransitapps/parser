@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.Cleaner;
 import org.mtransit.commons.CloseableUtils;
+import org.mtransit.commons.FeatureFlags;
 import org.mtransit.commons.GTFSCommons;
 import org.mtransit.commons.SourceUtils;
 import org.mtransit.commons.StringUtils;
@@ -270,7 +271,7 @@ public class MGenerator {
 		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng =
 				dumpRDSStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// SERVICE IDS
-		dumpScheduleServiceIds(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		dumpServiceIds(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// SCHEDULE SERVICE DATES
 		Pair<Integer, Integer> minMaxDates =
 				dumpScheduleServiceDates(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
@@ -517,14 +518,14 @@ public class MGenerator {
 		return minMaxLatLng;
 	}
 
-	private static void dumpScheduleServiceIds(
-			@NotNull GAgencyTools gAgencyTools,
+	private static void dumpServiceIds(
 			@Nullable MSpec mSpec,
 			@NotNull String fileBase,
 			boolean deleteAll,
 			@NotNull File dataDirF,
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection) {
+		if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) return;
 		if (!deleteAll
 				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);

@@ -26,9 +26,9 @@ data class MFrequency(
 
     fun toFile(agencyTools: GAgencyTools) = buildList {
         if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-            add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
-        } else {
             add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId))) // service ID int
+        } else {
+            add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
         }
         add(directionId.toString()) // direction ID
         add(startTime.toString()) // start time

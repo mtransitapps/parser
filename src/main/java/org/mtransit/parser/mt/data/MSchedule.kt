@@ -98,10 +98,10 @@ data class MSchedule(
     }
 
     fun toFileNewServiceIdAndDirectionId(agencyTools: GAgencyTools) = buildList {
-       if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-            add(agencyTools.cleanServiceId(_serviceId).quotesEscape())
+        if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
+            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId))) // service ID int
         } else {
-            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId)))
+            add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
         }
         // no route ID, just for file split
         add(directionId.toString())
