@@ -67,34 +67,30 @@ data class GRoute(
     @Suppress("unused")
     fun isDifferentAgency(otherAgencyId: String): Boolean = isDifferentAgency(GIDs.getInt(otherAgencyId))
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val agencyIdOrDefault: AgencyId = _agencyId
+    @get:Discouraged(message = "Not memory efficient")
+    val agencyIdOrDefault: AgencyId get() = _agencyId
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val agencyId: AgencyId = _agencyId
+    @get:Discouraged(message = "Not memory efficient")
+    val agencyId: AgencyId get() = _agencyId
 
     private val _agencyId: AgencyId
         get() = GIDs.getString(agencyIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val routeId = _routeId
+    @get:Discouraged(message = "Not memory efficient")
+    val routeId: RouteId get() = _routeId
 
     private val _routeId: RouteId
-        get() {
-            return GIDs.getString(routeIdInt)
-        }
+        get() = GIDs.getString(routeIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val originalRouteId = _originalRouteId
+    @get:Discouraged(message = "Not memory efficient")
+    val originalRouteId: String get() = _originalRouteId
 
     private val _originalRouteId: String
-        get() {
-            return GIDs.getString(originalRouteIdInt)
-        }
+        get() = GIDs.getString(originalRouteIdInt)
 
     @Suppress("unused")
     val shortestRouteName = routeShortName.ifEmpty { routeLongName }

@@ -108,7 +108,6 @@ object MDataChangedManager {
         val (lastCalendarsServiceDates, lastCalendarDatesServiceDates) =
             if (ALL_CALENDARS_IN_CALENDAR_DATES) emptyList<MServiceDate>() to lastServiceDates // calendar dates only
             else lastServiceDates.partition { it.exceptionType == MCalendarExceptionType.DEFAULT.id }
-        @Suppress("DEPRECATION")
         val allCalendarsWithDays = if (ALL_CALENDARS_IN_CALENDAR_DATES) emptyList() else gtfs.allCalendars.filter { it.hasDays() }
         MTLog.log("> Service IDS from '${GCalendar.FILENAME}':")
         //noinspection DiscouragedApi

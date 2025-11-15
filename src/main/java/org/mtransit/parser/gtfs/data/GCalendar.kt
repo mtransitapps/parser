@@ -3,7 +3,6 @@ package org.mtransit.parser.gtfs.data
 import androidx.annotation.Discouraged
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.escape
-import org.mtransit.parser.gtfs.GAgencyTools
 import java.util.Calendar
 
 // https://developers.google.com/transit/gtfs/reference#calendar_fields
@@ -68,25 +67,18 @@ data class GCalendar(
         endDate
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val serviceId = _serviceId
+    @get:Discouraged(message = "Not memory efficient")
+    val serviceId: String get() = _serviceId
 
     private val _serviceId: String
-        get() {
-            return GIDs.getString(serviceIdInt)
-        }
+        get() = GIDs.getString(serviceIdInt)
 
     val escapedServiceId: String
         get() = _serviceId.escape()
 
     val escapedServiceIdInt: Int
         get() = escapedServiceId.toGIDInt()
-
-    @Suppress("unused")
-    fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(_serviceId)
-    }
 
     val dates: List<GCalendarDate> by lazy {
         initAllDates(
@@ -264,7 +256,7 @@ data class GCalendar(
             sunday: Boolean,
             startDate: Int,
             endDate: Int,
-            exceptionType: GCalendarDatesExceptionType = GCalendarDatesExceptionType.SERVICE_ADDED,
+            exceptionType: GCalendarDatesExceptionType = GCalendarDatesExceptionType.SERVICE_DEFAULT,
         ) = buildList {
             try {
                 val dateFormat = GFieldTypes.makeDateFormat()

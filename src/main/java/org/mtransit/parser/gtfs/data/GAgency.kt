@@ -38,14 +38,12 @@ data class GAgency(
         agencyEmail,
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val agencyId = _agencyId
+    @get:Discouraged(message = "Not memory efficient")
+    val agencyId: AgencyId get() = _agencyId
 
     private val _agencyId: AgencyId
-        get() {
-            return GIDs.getString(agencyIdInt)
-        }
+        get() = GIDs.getString(agencyIdInt)
 
     @Suppress("unused")
     fun isDifferentAgency(otherAgencyIdInt: Int): Boolean = agencyIdInt != otherAgencyIdInt

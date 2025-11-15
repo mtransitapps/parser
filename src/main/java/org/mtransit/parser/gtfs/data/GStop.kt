@@ -42,23 +42,19 @@ data class GStop(
         GWheelchairBoardingType.parse(wheelchairBoarding),
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val stopId = _stopId
+    @get:Discouraged(message = "Not memory efficient")
+    val stopId: StopId get() = _stopId
 
     private val _stopId: StopId
-        get() {
-            return GIDs.getString(stopIdInt)
-        }
+        get() = GIDs.getString(stopIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val parentStationId = _parentStationId
+    @get:Discouraged(message = "Not memory efficient")
+    val parentStationId: StopId? get() = _parentStationId
 
     private val _parentStationId: StopId?
-        get() {
-            return parentStationIdInt?.let { GIDs.getString(it) }
-        }
+        get() = parentStationIdInt?.let { GIDs.getString(it) }
 
     @JvmOverloads
     @Suppress("unused")

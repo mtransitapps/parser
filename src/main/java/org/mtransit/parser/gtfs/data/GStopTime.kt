@@ -88,23 +88,19 @@ data class GStopTime(
         timePoint = timePoint,
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val tripId = _tripId
+    @get:Discouraged(message = "Not memory efficient")
+    val tripId: String get() = _tripId
 
     private val _tripId: String
-        get() {
-            return GIDs.getString(tripIdInt)
-        }
+        get() = GIDs.getString(tripIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val stopId = _stopId
+    @get:Discouraged(message = "Not memory efficient")
+    val stopId: String get() = _stopId
 
     private val _stopId: String
-        get() {
-            return GIDs.getString(stopIdInt)
-        }
+        get() = GIDs.getString(stopIdInt)
 
     val arrivalTime: Int = _arrivalTime
 
@@ -112,30 +108,22 @@ data class GStopTime(
 
     @Suppress("unused")
     val arrivalTimeMs: Long
-        get() {
-            return GTime.toMs(_arrivalTime)
-        }
+        get() = GTime.toMs(_arrivalTime)
 
     @Suppress("unused")
     val arrivalTimeDate: Date
-        get() {
-            return GTime.toDate(_arrivalTime)
-        }
+        get() = GTime.toDate(_arrivalTime)
 
     val departureTime: Int = _departureTime
 
     fun hasDepartureTime() = _departureTime >= 0
 
     val departureTimeMs: Long
-        get() {
-            return GTime.toMs(_departureTime)
-        }
+        get() = GTime.toMs(_departureTime)
 
     @Suppress("unused")
     val departureTimeDate: Date
-        get() {
-            return GTime.toDate(_departureTime)
-        }
+        get() = GTime.toDate(_departureTime)
 
     val uID by lazy { getNewUID(tripIdInt, stopIdInt, stopSequence) }
 

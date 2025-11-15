@@ -1,6 +1,7 @@
 package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
@@ -44,23 +45,19 @@ data class MSchedule(
         accessible = accessible,
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val serviceId = _serviceId
+    @get:Discouraged(message = "Not memory efficient")
+    val serviceId: String get() = _serviceId
 
     private val _serviceId: String
-        get() {
-            return GIDs.getString(serviceIdInt)
-        }
+        get() = GIDs.getString(serviceIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val tripId = _tripId
+    @get:Discouraged(message = "Not memory efficient")
+    val tripId: String get() = _tripId
 
     private val _tripId: String
-        get() {
-            return GIDs.getString(tripIdInt)
-        }
+        get() = GIDs.getString(tripIdInt)
 
     fun setHeadsign(newHeadsignType: Int, newHeadsignValue: String?) {
         if (newHeadsignValue.isNullOrBlank()
@@ -101,10 +98,14 @@ data class MSchedule(
     }
 
     fun toFileNewServiceIdAndDirectionId(agencyTools: GAgencyTools) = buildList {
-        add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
+        if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
+            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId))) // service ID int
+        } else {
+            add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
+        }
         // no route ID, just for file split
-        add(directionId.toString()) // direction ID
-        add(departure.toString()) // departure
+        add(directionId.toString())
+        add(departure.toString())
         if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             @Suppress("ControlFlowWithEmptyBody")
             if (arrivalBeforeDeparture > 0) {
@@ -113,13 +114,13 @@ data class MSchedule(
             add(arrivalBeforeDeparture.takeIf { it > 0 }?.toString() ?: Constants.EMPTY) // arrival before departure
             add(_tripId.quotesEscape())
         }
-        add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY) // HEADSIGN TYPE
-        add((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
+        add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY)
+        add((headsignValue ?: Constants.EMPTY).quotesEscape())
         add(accessible.toString())
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     fun toFileSameServiceIdAndDirectionId(lastSchedule: MSchedule?) = buildList {
-        add((departure - (lastSchedule?.departure ?: 0)).toString()) // departure
+        add((departure - (lastSchedule?.departure ?: 0)).toString())
         if (DefaultAgencyTools.EXPORT_TRIP_ID) {
             @Suppress("ControlFlowWithEmptyBody")
             if (arrivalBeforeDeparture > 0) {
@@ -129,11 +130,11 @@ data class MSchedule(
             add(_tripId.quotesEscape())
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
-            add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString()) // HEADSIGN TYPE
-            add(Constants.EMPTY.quotes()) // HEADSIGN STRING
+            add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString())
+            add(Constants.EMPTY.quotes())
         } else {
-            add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY) // HEADSIGN TYPE
-            add((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
+            add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY)
+            add((headsignValue ?: Constants.EMPTY).quotesEscape())
         }
         add(accessible.toString())
     }.joinToString(Constants.COLUMN_SEPARATOR_)
