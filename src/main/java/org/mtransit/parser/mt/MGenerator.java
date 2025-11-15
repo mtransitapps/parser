@@ -23,7 +23,6 @@ import org.mtransit.parser.db.SQLUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GFieldTypes;
-import org.mtransit.parser.gtfs.data.GServiceIds;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MFrequency;
@@ -31,6 +30,7 @@ import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSchedule;
 import org.mtransit.parser.mt.data.MServiceDate;
 import org.mtransit.parser.mt.data.MServiceId;
+import org.mtransit.parser.mt.data.MServiceIds;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MStop;
 import org.mtransit.parser.mt.data.MDirection;
@@ -94,32 +94,29 @@ public class MGenerator {
 		for (Future<MSpec> future : list) {
 			try {
 				MSpec mRouteSpec = future.get();
-				MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging...)", mRouteSpec.getFirstRoute().getId());
+				final long mRouteId = mRouteSpec.getFirstRoute().getId();
+				MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging...)", mRouteId);
 				if (mRouteSpec.hasStops() && mRouteSpec.hasServiceDates()) {
 					mAgencies.addAll(mRouteSpec.getAgencies());
 					mRoutes.addAll(mRouteSpec.getRoutes());
 					mDirections.addAll(mRouteSpec.getDirections());
 					mDirectionStops.addAll(mRouteSpec.getDirectionStops());
-					MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging stops...)", mRouteSpec.getFirstRoute().getId());
+					logMerging("stops...", mRouteId);
 					for (MStop mStop : mRouteSpec.getStops()) {
 						if (mStops.containsKey(mStop.getId())) {
 							if (!mStops.get(mStop.getId()).equals(mStop)) {
-								MTLog.log("Stop ID '%s' already in list! (%s instead of %s)", mStop.getId(), mStops.get(mStop.getId()), mStop);
+								MTLog.log("%s: Stop ID '%s' already in list! (%s instead of %s)", mRouteId, mStop.getId(), mStops.get(mStop.getId()), mStop);
 							}
 							continue;
 						}
 						mStops.put(mStop.getId(), mStop);
 					}
-					MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging stops... DONE)", mRouteSpec.getFirstRoute()
-							.getId());
-					MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging service dates...)", mRouteSpec.getFirstRoute()
-							.getId());
+					logMerging("stops... DONE", mRouteId);
+					logMerging("service dates...", mRouteId);
 					mServiceDates.addAll(mRouteSpec.getServiceDates());
-					MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging service dates... DONE)", mRouteSpec
-							.getFirstRoute().getId());
+					logMerging("service dates... DONE", mRouteId);
 					if (mRouteSpec.hasStopSchedules()) {
-						MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules...)", mRouteSpec
-								.getFirstRoute().getId());
+						logMerging("stop schedules...", mRouteId);
 						if (mRouteSpec.getSchedules() != null) {
 							DBUtils.setAutoCommit(false);
 							for (MSchedule mSchedule : mRouteSpec.getSchedules()) {
@@ -128,12 +125,10 @@ public class MGenerator {
 							DBUtils.setAutoCommit(true); // true => commit()
 						}
 						mRouteSpec.setSchedules(null); // clear
-						MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging stop schedules... DONE)", mRouteSpec
-								.getFirstRoute().getId());
+						logMerging("stop schedules... DONE", mRouteId);
 					}
 					if (mRouteSpec.hasRouteFrequencies()) {
-						MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies...)", mRouteSpec
-								.getFirstRoute().getId());
+						logMerging("route frequencies...", mRouteId);
 						for (Entry<Long, List<MFrequency>> routeFrequenciesEntry : mRouteSpec.getRouteFrequencies().entrySet()) {
 							if (routeFrequenciesEntry.getValue() == null || routeFrequenciesEntry.getValue().isEmpty()) {
 								continue;
@@ -143,8 +138,7 @@ public class MGenerator {
 							}
 							mRouteFrequencies.get(routeFrequenciesEntry.getKey()).addAll(routeFrequenciesEntry.getValue());
 						}
-						MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging route frequencies... DONE)", mRouteSpec
-								.getFirstRoute().getId());
+						logMerging("route frequencies... DONE", mRouteId);
 					}
 					if (firstTimestamp < 0L || mRouteSpec.getFirstTimestamp() < firstTimestamp) {
 						firstTimestamp = mRouteSpec.getFirstTimestamp();
@@ -153,9 +147,9 @@ public class MGenerator {
 						lastTimestamp = mRouteSpec.getLastTimestamp();
 					}
 				} else {
-					MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (EMPTY)", mRouteSpec.getFirstRoute().getId());
+					MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (EMPTY)", mRouteId);
 				}
-				MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteSpec.getFirstRoute().getId());
+				MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging... DONE)", mRouteId);
 			} catch (Throwable t) {
 				threadPoolExecutor.shutdownNow();
 				throw new MTLog.Fatal(t, t.getMessage());
@@ -163,17 +157,17 @@ public class MGenerator {
 		}
 		MTLog.log("Generating routes, trips, trip stops & stops objects... (all routes completed)");
 		threadPoolExecutor.shutdown();
-		ArrayList<MAgency> mAgenciesList = new ArrayList<>(mAgencies);
+		final ArrayList<MAgency> mAgenciesList = new ArrayList<>(mAgencies);
 		Collections.sort(mAgenciesList);
-		ArrayList<MStop> mStopsList = new ArrayList<>(mStops.values());
+		final ArrayList<MStop> mStopsList = new ArrayList<>(mStops.values());
 		Collections.sort(mStopsList);
-		ArrayList<MRoute> mRoutesList = new ArrayList<>(mRoutes);
+		final ArrayList<MRoute> mRoutesList = new ArrayList<>(mRoutes);
 		Collections.sort(mRoutesList);
-		ArrayList<MDirection> mTripsList = new ArrayList<>(mDirections);
+		final ArrayList<MDirection> mTripsList = new ArrayList<>(mDirections);
 		Collections.sort(mTripsList);
-		ArrayList<MDirectionStop> mDirectionStopsList = new ArrayList<>(mDirectionStops);
+		final ArrayList<MDirectionStop> mDirectionStopsList = new ArrayList<>(mDirectionStops);
 		Collections.sort(mDirectionStopsList);
-		ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
+		final ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
 		Collections.sort(mServiceDatesList);
 		MTLog.log("Generating routes, trips, trip stops & stops objects... DONE");
 		MTLog.log("- Agencies: %d", mAgenciesList.size());
@@ -196,6 +190,11 @@ public class MGenerator {
 				firstTimestamp,
 				lastTimestamp
 		);
+	}
+
+	private static void logMerging(@NotNull String msg, long routeId) {
+		if (true) return; // DEBUG
+		MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging %s)", routeId, msg);
 	}
 
 	private static final String GTFS_SCHEDULE = "gtfs_schedule";
@@ -545,9 +544,9 @@ public class MGenerator {
 				if (F_PRE_FILLED_DB) {
 					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 					dbStatement = dbConnection.createStatement();
-					sqlInsert = GTFSCommons.getT_SERVICE_DATES_SQL_INSERT();
+					sqlInsert = GTFSCommons.getT_SERVICE_IDS_SQL_INSERT();
 				}
-				for (MServiceId mServiceId : GServiceIds.getAll()) { // TODO? mSpec.getServiceIds()
+				for (MServiceId mServiceId : MServiceIds.getAll()) { // TODO? mSpec.getServiceIds()
 					final String serviceIdsInsert = mServiceId.toFile();
 					// gAgencyTools
 					if (F_PRE_FILLED_DB) {

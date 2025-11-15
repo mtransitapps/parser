@@ -5,21 +5,19 @@ import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.db.SQLUtils.unquotes
 
 data class MServiceId(
-    val serviceId: String,
+    val serviceId: String, // already agencyTools.cleanServiceId(serviceId) before
     val serviceIdInt: Int,
 ) : Comparable<MServiceId> {
 
     fun toFile() = buildList {
-        add(serviceId.quotesEscape()) // service ID
+        add(serviceId.quotesEscape()) // service ID // already agencyTools.cleanServiceId(serviceId) before
         add(serviceIdInt.toString()) //  service ID Int
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 
-    override fun compareTo(other: MServiceId): Int =
-        // sort by service_id => service_id_int
-        when {
-            serviceId != other.serviceId -> serviceId.compareTo(other.serviceId)
-            else -> serviceIdInt.compareTo(other.serviceIdInt)
-        }
+    override fun compareTo(other: MServiceId) = compareBy(
+        MServiceId::serviceId,
+        MServiceId::serviceIdInt,
+    ).compare(this, other)
 
     companion object {
         fun fromFileLine(line: String) = line.split(Constants.COLUMN_SEPARATOR)

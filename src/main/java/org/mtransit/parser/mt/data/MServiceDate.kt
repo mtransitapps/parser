@@ -1,13 +1,14 @@
 package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.db.SQLUtils.unquotes
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GCalendarDate
 import org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType
-import org.mtransit.parser.gtfs.data.GServiceIds
+import org.mtransit.parser.gtfs.data.GIDs
 
 data class MServiceDate(
     val serviceIdInt: Int,
@@ -30,7 +31,7 @@ data class MServiceDate(
     val serviceId = _serviceId
 
     private val _serviceId: String
-        get() = GServiceIds.getId(serviceIdInt)
+        get() = GIDs.getString(serviceIdInt)
 
     override fun compareTo(other: MServiceDate): Int = compareBy(
         MServiceDate::calendarDate,
@@ -39,8 +40,12 @@ data class MServiceDate(
     ).compare(this, other)
 
     fun toFile(agencyTools: GAgencyTools) = buildList {
-        add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
-        add(calendarDate.toString()) // calendar date
+        if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
+            add(agencyTools.cleanServiceId(_serviceId).quotesEscape())
+        } else {
+            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId)))
+        }
+        add(calendarDate.toString())
         add(exceptionType.toString())
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 
@@ -74,9 +79,9 @@ data class MServiceDate(
             .takeIf { it.size == 3 }
             ?.let { columns ->
                 MServiceDate(
-                    serviceIdInt = GServiceIds.getInt(columns[0].unquotes()), // service ID
-                    calendarDate = columns[1].toInt(), // calendar date
-                    exceptionType = columns[2].toInt()
+                    serviceIdInt = GIDs.getInt(columns[0].unquotes()),
+                    calendarDate = columns[1].toInt(),
+                    exceptionType = columns[2].toInt(),
                 )
             }
 

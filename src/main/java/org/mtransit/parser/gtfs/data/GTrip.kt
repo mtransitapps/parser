@@ -37,7 +37,7 @@ data class GTrip(
         tripIdInt = GIDs.getInt(tripId),
         routeIdInt = GIDs.getInt(routeId),
         originalRouteIdInt = GIDs.getInt(originalRouteId),
-        serviceIdInt = GServiceIds.getInt(serviceId),
+        serviceIdInt = GIDs.getInt(serviceId),
         tripHeadsign = tripHeadsign,
         tripShortName = tripShortName,
         directionIdE = GDirectionId.parse(directionId),
@@ -76,30 +76,21 @@ data class GTrip(
     val routeId = _routeId
 
     private val _routeId: String
-        get() {
-            return GIDs.getString(routeIdInt)
-        }
+        get() = GIDs.getString(routeIdInt)
 
     @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val originalRouteId = _originalRouteId
 
     private val _originalRouteId: String
-        get() {
-            return GIDs.getString(originalRouteIdInt)
-        }
+        get() = GIDs.getString(originalRouteIdInt)
 
     @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val serviceId = _serviceId
 
     private val _serviceId: String
-        get() = GServiceIds.getId(serviceIdInt)
-
-    @Suppress("unused")
-    private fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(_serviceId)
-    }
+        get() = GIDs.getString(serviceIdInt)
 
     @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
@@ -107,9 +98,7 @@ data class GTrip(
 
     @Suppress("unused")
     private val _tripId: String
-        get() {
-            return GIDs.getString(tripIdInt)
-        }
+        get() = GIDs.getString(tripIdInt)
 
     fun isServiceIdInts(serviceIdInts: Collection<Int?>): Boolean {
         return serviceIdInts.contains(serviceIdInt)

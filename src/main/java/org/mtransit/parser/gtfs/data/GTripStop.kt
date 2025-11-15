@@ -2,7 +2,6 @@ package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
 
-// https://developers.google.com/transit/gtfs/reference#stop_timestxt
 // https://gtfs.org/reference/static#stop_timestxt
 // -_trip_id field
 // - stop_id field
@@ -56,18 +55,14 @@ data class GTripStop(
 
     @Suppress("unused")
     private val _tripId: String
-        get() {
-            return GIDs.getString(tripIdInt)
-        }
+        get() = GIDs.getString(tripIdInt)
 
     @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
     val stopId = _stopId
 
     private val _stopId: String
-        get() {
-            return GIDs.getString(stopIdInt)
-        }
+        get() = GIDs.getString(stopIdInt)
 
     @Suppress("unused")
     fun toStringPlus(): String {

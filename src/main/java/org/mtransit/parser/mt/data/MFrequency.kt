@@ -1,11 +1,11 @@
 package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.Constants
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
-import org.mtransit.parser.gtfs.data.GServiceIds
 
 data class MFrequency(
     val serviceIdInt: Int,
@@ -20,21 +20,21 @@ data class MFrequency(
     val serviceId = _serviceId
 
     private val _serviceId: String
-        get() = GServiceIds.getId(serviceIdInt)
-
-    private fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(_serviceId)
-    }
+        get() = GIDs.getString(serviceIdInt)
 
     val uID by lazy { getNewUID(serviceIdInt, directionId, startTime, endTime) }
 
-    fun toFile(agencyTools: GAgencyTools) = listOf(
-        getCleanServiceId(agencyTools).quotesEscape(), // service ID
-        directionId.toString(), // direction ID
-        startTime.toString(), // start time
-        endTime.toString(), // end time
-        headwayInSec.toString(), // headway in seconds
-    ).joinToString(Constants.COLUMN_SEPARATOR_)
+    fun toFile(agencyTools: GAgencyTools) = buildList {
+        if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
+            add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
+        } else {
+            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId))) // service ID int
+        }
+        add(directionId.toString()) // direction ID
+        add(startTime.toString()) // start time
+        add(endTime.toString()) // end time
+        add(headwayInSec.toString()) // headway in seconds
+    }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     override fun compareTo(other: MFrequency?): Int {
         return when {

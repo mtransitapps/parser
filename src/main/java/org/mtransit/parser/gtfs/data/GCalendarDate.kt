@@ -45,18 +45,13 @@ data class GCalendarDate(
     val serviceId = _serviceId
 
     private val _serviceId: String
-        get() = GServiceIds.getId(serviceIdInt)
+        get() = GIDs.getString(serviceIdInt)
 
     val escapedServiceId: String
         get() = _serviceId.escape()
 
     val escapedServiceIdInt: Int
         get() = escapedServiceId.toGIDInt()
-
-    @Suppress("unused")
-    fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(_serviceId)
-    }
 
     val uID by lazy { getNewUID(date, serviceIdInt) }
 

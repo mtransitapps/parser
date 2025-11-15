@@ -1,11 +1,10 @@
-package org.mtransit.parser.gtfs.data
+package org.mtransit.parser.mt.data
 
 import androidx.collection.SparseArrayCompat
 import androidx.collection.mutableScatterMapOf
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.mt.data.MServiceId
 
-object GServiceIds {
+object MServiceIds {
 
     private var increment = 0
     private val intToString = SparseArrayCompat<String>()
@@ -29,6 +28,7 @@ object GServiceIds {
         return newServiceId.serviceIdInt
     }
 
+    @Suppress("unused")
     @JvmStatic
     fun getId(serviceIdInt: Int): String {
         return intToString[serviceIdInt] ?: throw MTLog.Fatal("Unexpected Service ID integer $serviceIdInt!")
