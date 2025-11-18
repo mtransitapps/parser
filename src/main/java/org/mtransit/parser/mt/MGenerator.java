@@ -270,8 +270,6 @@ public class MGenerator {
 		// STOPS
 		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng =
 				dumpRDSStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
-		// SERVICE IDS
-		dumpServiceIds(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// SCHEDULE SERVICE DATES
 		Pair<Integer, Integer> minMaxDates =
 				dumpScheduleServiceDates(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
@@ -279,6 +277,8 @@ public class MGenerator {
 		dumpScheduleStops(gAgencyTools, mSpec, fileBase, deleteAll, rawDirF);
 		// FREQUENCY ROUTES
 		dumpFrequencyRoutes(gAgencyTools, mSpec, fileBase, deleteAll, rawDirF);
+		// SERVICE IDS
+		dumpServiceIds(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection); // AFTER SCHEDULE STOPS & FREQUENCY ROUTES
 		if (deleteAll) {
 			dumpValues(rawDirF, fileBase, null, null, null, null, null, -1, -1, null, true);
 		} else {
@@ -547,7 +547,7 @@ public class MGenerator {
 					dbStatement = dbConnection.createStatement();
 					sqlInsert = GTFSCommons.getT_SERVICE_IDS_SQL_INSERT();
 				}
-				for (MServiceId mServiceId : MServiceIds.getAll()) { // TODO? mSpec.getServiceIds()
+				for (MServiceId mServiceId : MServiceIds.getAll()) {
 					final String serviceIdsInsert = mServiceId.toFile();
 					// gAgencyTools
 					if (F_PRE_FILLED_DB) {
