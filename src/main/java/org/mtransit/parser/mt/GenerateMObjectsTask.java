@@ -330,7 +330,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					mergeSuccessful = this.agencyTools.mergeRouteLongName(mRoute, otherRoute);
 				}
 				if (!mergeSuccessful) {
-					MTLog.log("%s: Route %s already in list!", this.routeId, mRoute.getId());
+					MTLog.log("%s: Route '%s' already in list!", this.routeId, mRoute.getId());
 					MTLog.log("%s: %s", this.routeId, mRoute.toString());
 					throw new MTLog.Fatal("%s: %s.", this.routeId, otherRoute.toString());
 				}

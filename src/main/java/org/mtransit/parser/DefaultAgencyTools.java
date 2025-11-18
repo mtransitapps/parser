@@ -131,6 +131,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final SimpleDateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
+	@SuppressWarnings("unused")
+	public int getTodayDateInt() {
+		return Integer.parseInt(DATE_FORMAT.format(Calendar.getInstance().getTime()));
+	}
+
 	public static void main(@NotNull String[] args) {
 		new DefaultAgencyTools().start(args);
 		// throw new MTLog.Fatal("NEED TO IMPLEMENT MAIN METHOD"); // UNTIL WE HAVE FULLY MIGRATED TO JSON CONFIG FILE
@@ -447,7 +452,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private boolean routeIdCleanupPatternSet = false;
 
-	private @Nullable Pattern getRouteIdCleanupPattern() {
+	@Nullable
+	private Pattern getRouteIdCleanupPattern() {
 		if (this.routeIdCleanupPattern == null && !routeIdCleanupPatternSet) {
 			this.routeIdCleanupPattern = GTFSCommons.makeIdCleanupPattern(getRouteIdCleanupRegex());
 			this.routeIdCleanupPatternSet = true;
@@ -654,7 +660,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private boolean tripIdCleanupPatternSet = false;
 
-	private @Nullable Pattern getTripIdCleanupPattern() {
+	@Nullable
+	private Pattern getTripIdCleanupPattern() {
 		if (this.tripIdCleanupPattern == null && !tripIdCleanupPatternSet) {
 			this.tripIdCleanupPattern = GTFSCommons.makeIdCleanupPattern(getTripIdCleanupRegex());
 			this.tripIdCleanupPatternSet = true;
@@ -1031,7 +1038,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private boolean stopIdCleanupPatternSet = false;
 
-	private @Nullable Pattern getStopIdCleanupPattern() {
+	@Nullable
+	private Pattern getStopIdCleanupPattern() {
 		if (this.stopIdCleanupPattern == null && !stopIdCleanupPatternSet) {
 			this.stopIdCleanupPattern = GTFSCommons.makeIdCleanupPattern(getStopIdCleanupRegex());
 			this.stopIdCleanupPatternSet = true;
