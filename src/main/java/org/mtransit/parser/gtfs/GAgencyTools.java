@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public interface GAgencyTools {
@@ -88,7 +87,10 @@ public interface GAgencyTools {
 	boolean excludeAgency(@NotNull GAgency gAgency);
 
 	@NotNull
-	String cleanServiceId(@NotNull String serviceIdString);
+	String cleanServiceId(@NotNull String serviceIdString); // currently only used in "mt.data.M..." classes before exporting to file
+
+	@Nullable
+	String getServiceIdCleanupRegex();
 
 	// ROUTE
 	@NotNull
@@ -113,9 +115,6 @@ public interface GAgencyTools {
 
 	@Nullable
 	String getRouteIdCleanupRegex();
-
-	@Nullable
-	Pattern getRouteIdCleanupPattern();
 
 	@NotNull
 	String getRouteShortName(@NotNull GRoute gRoute);
@@ -163,9 +162,6 @@ public interface GAgencyTools {
 
 	@Nullable
 	String getTripIdCleanupRegex();
-
-	@Nullable
-	Pattern getTripIdCleanupPattern();
 
 	@NotNull String cleanTripOriginalId(@NotNull String gTripId);
 
@@ -255,9 +251,6 @@ public interface GAgencyTools {
 
 	@Nullable
 	String getStopIdCleanupRegex();
-
-	@Nullable
-	Pattern getStopIdCleanupPattern();
 
 	@NotNull
 	String cleanStopName(@NotNull String gStopName);
