@@ -5,8 +5,8 @@ import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.db.SQLUtils.unquotes
 
 data class MServiceId(
-    val serviceId: String, // already agencyTools.cleanServiceId(serviceId) before
     val serviceIdInt: Int,
+    val serviceId: String, // already agencyTools.cleanServiceId(serviceId) before
 ) : Comparable<MServiceId> {
 
     fun toFile() = buildList {
@@ -24,8 +24,8 @@ data class MServiceId(
             .takeIf { it.size == 2 }
             ?.let { columns ->
                 MServiceId(
-                    serviceId = columns[0].unquotes(),
-                    serviceIdInt = columns[1].toInt(),
+                    serviceIdInt = columns[0].toInt(),
+                    serviceId = columns[1].unquotes(),
                 )
             }
     }

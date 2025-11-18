@@ -92,9 +92,9 @@ data class MServiceDate(
                 .takeIf { it.size == 3 }
                 ?.let { columns ->
                     MServiceDate(
-                        serviceIdInt = MServiceIds.getInt(columns[0].unquotes()),
-                        calendarDate = columns[1].toInt(),
-                        exceptionType = columns[2].toInt(),
+                        serviceIdInt = GIDs.getInt(columns[0].unquotes()), // service ID
+                        calendarDate = columns[1].toInt(), // calendar date
+                        exceptionType = columns[2].toInt()
                     )
                 }
 
