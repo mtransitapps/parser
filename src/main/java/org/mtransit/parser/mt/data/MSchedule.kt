@@ -99,9 +99,9 @@ data class MSchedule(
 
     fun toFileNewServiceIdAndDirectionId(agencyTools: GAgencyTools) = buildList {
         if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId))) // service ID int
+            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId)))
         } else {
-            add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
+            add(agencyTools.cleanServiceId(_serviceId).quotesEscape())
         }
         // no route ID, just for file split
         add(directionId.toString())
@@ -165,25 +165,11 @@ data class MSchedule(
     override fun compareTo(other: MSchedule): Int {
         // sort by route_id => service_id => direction_id => stop_id => departure
         return when {
-            routeId != other.routeId -> {
-                routeId.compareTo(other.routeId)
-            }
-
-            serviceIdInt != other.serviceIdInt -> {
-                _serviceId.compareTo(other._serviceId)
-            }
-
-            directionId != other.directionId -> {
-                directionId.compareTo(other.directionId)
-            }
-
-            stopId != other.stopId -> {
-                stopId - other.stopId
-            }
-
-            else -> {
-                departure - other.departure
-            }
+            routeId != other.routeId -> routeId.compareTo(other.routeId)
+            serviceIdInt != other.serviceIdInt -> _serviceId.compareTo(other._serviceId)
+            directionId != other.directionId -> directionId.compareTo(other.directionId)
+            stopId != other.stopId -> stopId - other.stopId
+            else -> departure - other.departure
         }
     }
 

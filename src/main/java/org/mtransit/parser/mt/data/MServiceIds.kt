@@ -36,14 +36,15 @@ object MServiceIds {
 
     @Suppress("unused")
     @JvmStatic
-    fun getString(serviceIdInt: Int): String {
-        return idIntToId[serviceIdInt] ?: throw MTLog.Fatal("Unexpected Service ID integer $serviceIdInt!")
-    }
+    fun getString(serviceIdInt: Int) =
+        idIntToId[serviceIdInt] ?: throw MTLog.Fatal("Unexpected Service ID integer $serviceIdInt!")
 
     @JvmStatic
-    fun getInt(serviceId: String): Int {
-        return idToIdInt[serviceId] ?: add(serviceId)
-    }
+    fun getInt(serviceId: String): Int =
+        idToIdInt[serviceId]
+            ?: synchronized(incrementLock) {
+                return idToIdInt[serviceId] ?: add(serviceId)
+            }
 
     @JvmStatic
     fun getAll() = buildList {

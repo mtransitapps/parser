@@ -26,41 +26,24 @@ data class MFrequency(
 
     fun toFile(agencyTools: GAgencyTools) = buildList {
         if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId))) // service ID int
+            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId)))
         } else {
-            add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
+            add(agencyTools.cleanServiceId(_serviceId).quotesEscape())
         }
-        add(directionId.toString()) // direction ID
-        add(startTime.toString()) // start time
-        add(endTime.toString()) // end time
-        add(headwayInSec.toString()) // headway in seconds
+        add(directionId.toString())
+        add(startTime.toString())
+        add(endTime.toString())
+        add(headwayInSec.toString())
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 
     override fun compareTo(other: MFrequency?): Int {
         return when {
-            other !is MFrequency -> {
-                +1
-            }
-
-            serviceIdInt != other.serviceIdInt -> {
-                _serviceId.compareTo(other._serviceId)
-            }
-
-            directionId != other.directionId -> {
-                directionId.compareTo(other.directionId)
-            }
-
-            startTime != other.startTime -> {
-                startTime - other.startTime
-            }
-
-            endTime != other.endTime -> {
-                endTime - other.endTime
-            }
-
-            else -> {
-                headwayInSec - other.headwayInSec
-            }
+            other !is MFrequency -> +1
+            serviceIdInt != other.serviceIdInt -> _serviceId.compareTo(other._serviceId)
+            directionId != other.directionId -> directionId.compareTo(other.directionId)
+            startTime != other.startTime -> startTime - other.startTime
+            endTime != other.endTime -> endTime - other.endTime
+            else -> headwayInSec - other.headwayInSec
         }
     }
 

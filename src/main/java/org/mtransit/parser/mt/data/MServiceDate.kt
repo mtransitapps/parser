@@ -41,9 +41,9 @@ data class MServiceDate(
 
     fun toFile(agencyTools: GAgencyTools) = buildList {
         if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId))) // service ID int
+            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId)))
         } else {
-            add(agencyTools.cleanServiceId(_serviceId).quotesEscape()) // service ID
+            add(agencyTools.cleanServiceId(_serviceId).quotesEscape())
         }
         add(calendarDate.toString())
         add(exceptionType.toString())
@@ -92,8 +92,8 @@ data class MServiceDate(
                 .takeIf { it.size == 3 }
                 ?.let { columns ->
                     MServiceDate(
-                        serviceIdInt = GIDs.getInt(columns[0].unquotes()), // service ID
-                        calendarDate = columns[1].toInt(), // calendar date
+                        serviceIdInt = GIDs.getInt(columns[0].unquotes()),
+                        calendarDate = columns[1].toInt(),
                         exceptionType = columns[2].toInt()
                     )
                 }
