@@ -1,6 +1,7 @@
 package org.mtransit.parser.mt.data
 
 import org.mtransit.parser.Constants
+import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.db.SQLUtils.unquotes
 
@@ -20,13 +21,14 @@ data class MServiceId(
     ).compare(this, other)
 
     companion object {
-        fun fromFileLine(line: String) = line.split(Constants.COLUMN_SEPARATOR)
-            .takeIf { it.size == 2 }
-            ?.let { columns ->
-                MServiceId(
-                    serviceIdInt = columns[0].toInt(),
-                    serviceId = columns[1].unquotes(),
-                )
-            }
+        fun fromFileLine(line: String) =
+            line.split(Constants.COLUMN_SEPARATOR)
+                .takeIf { it.size == 2 }
+                ?.let { columns ->
+                    MServiceId(
+                        serviceIdInt = columns[0].toInt(),
+                        serviceId = columns[1].unquotes(),
+                    )
+                } ?: run { MTLog.log("Invalid service ID line: '$line'!") }
     }
 }

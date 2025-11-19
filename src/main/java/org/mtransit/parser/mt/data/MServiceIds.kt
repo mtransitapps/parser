@@ -6,6 +6,8 @@ import org.mtransit.parser.MTLog
 
 object MServiceIds {
 
+    private val incrementLock = Any()
+
     private var increment = 0
     private val idIntToId = SparseArrayCompat<String>()
     private val idToIdInt = mutableScatterMapOf<String, Int>()
@@ -16,16 +18,20 @@ object MServiceIds {
     }
 
     fun add(serviceId: MServiceId) {
-        idIntToId.put(serviceId.serviceIdInt, serviceId.serviceId)
-        idToIdInt[serviceId.serviceId] = serviceId.serviceIdInt
-        increment = maxOf(increment, serviceId.serviceIdInt)
+        synchronized(incrementLock) {
+            idIntToId.put(serviceId.serviceIdInt, serviceId.serviceId)
+            idToIdInt[serviceId.serviceId] = serviceId.serviceIdInt
+            increment = maxOf(increment, serviceId.serviceIdInt)
+        }
     }
 
     fun add(serviceId: String): Int {
-        increment++ // move to next
-        val newServiceId = MServiceId(increment, serviceId)
-        add(newServiceId)
-        return newServiceId.serviceIdInt
+        synchronized(incrementLock) {
+            increment++ // move to next
+            val newServiceId = MServiceId(increment, serviceId)
+            add(newServiceId)
+            return newServiceId.serviceIdInt
+        }
     }
 
     @Suppress("unused")
