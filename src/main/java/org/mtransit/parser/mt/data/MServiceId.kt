@@ -10,6 +10,9 @@ data class MServiceId(
     val serviceId: String, // already agencyTools.cleanServiceId(serviceId) before
 ) : Comparable<MServiceId> {
 
+    /**
+     * same order as [org.mtransit.commons.GTFSCommons.T_SERVICE_IDS_SQL_INSERT]
+     */
     fun toFile() = buildList {
         add(serviceIdInt.toString())
         add(serviceId.quotesEscape()) // already agencyTools.cleanServiceId(serviceId) before
