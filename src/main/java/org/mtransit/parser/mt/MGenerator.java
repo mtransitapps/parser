@@ -176,6 +176,7 @@ public class MGenerator {
 		MTLog.log("- Trips: %d", mTripsList.size());
 		MTLog.log("- Trip stops: %d", mDirectionStopsList.size());
 		MTLog.log("- Stops: %d", mStopsList.size());
+		MTLog.log("- Service Ids: %d", MServiceIds.getAll().size());
 		MTLog.log("- Service Dates: %d", mServiceDatesList.size());
 		MTLog.log("- Route with Frequencies: %d", mRouteFrequencies.size());
 		MTLog.log("- First timestamp: %s", MTLog.formatDateTime(firstTimestamp));
@@ -549,7 +550,6 @@ public class MGenerator {
 				}
 				for (MServiceId mServiceId : MServiceIds.getAll()) {
 					final String serviceIdsInsert = mServiceId.toFile();
-					// gAgencyTools
 					if (F_PRE_FILLED_DB) {
 						SQLUtils.executeUpdate(
 								dbStatement,
