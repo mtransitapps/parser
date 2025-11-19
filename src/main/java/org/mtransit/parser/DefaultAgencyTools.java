@@ -35,6 +35,8 @@ import org.mtransit.parser.mt.data.MDirectionCardinalType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MRouteSNToIDConverter;
 import org.mtransit.parser.mt.data.MServiceDate;
+import org.mtransit.parser.mt.data.MServiceId;
+import org.mtransit.parser.mt.data.MServiceIds;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MDirection;
 
@@ -151,6 +153,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		MTLog.log("Generating data...");
 		MTLog.logDebug("Args [%d]: %s.", args.length, Arrays.asList(args));
 		final List<MServiceDate> lastServiceDates = MReader.loadServiceDates(args[2]);
+		final List<MServiceId> lastServiceIds = MReader.loadServiceIds(args[2]);
+		MServiceIds.addAll(lastServiceIds);
 		this.serviceIdInts = extractUsefulServiceIdInts(args, this, true, lastServiceDates);
 		final String inputUrl = args.length >= 5 ? args[4] : null;
 		if (excludingAll()) {
@@ -1317,7 +1321,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			MTLog.log("* Generated on %s | NEXT Schedules from %s to %s.", usefulPeriod.getTodayStringInt(), usefulPeriod.getStartDate(), usefulPeriod.getEndDate());
 			MTLog.log("------------------------------");
 		}
-		HashSet<Integer> serviceIds = getPeriodServiceIds(usefulPeriod.getStartDate(), usefulPeriod.getEndDate(), gCalendars, gCalendarDates);
+		final HashSet<Integer> serviceIds = getPeriodServiceIds(usefulPeriod.getStartDate(), usefulPeriod.getEndDate(), gCalendars, gCalendarDates);
 		improveUsefulPeriod(usefulPeriod, c, gCalendars, gCalendarDates);
 		MTLog.log("Extracting useful service IDs... DONE");
 		//noinspection UnusedAssignment // FIXME
@@ -1448,7 +1452,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static boolean refreshStartEndDatesFromCalendarDates(
 			Period p,
 			HashSet<Integer> serviceIds,
-			List<GCalendarDate> gCalendarDates) {
+			List<GCalendarDate> gCalendarDates
+	) {
 		boolean newDates = false;
 		for (GCalendarDate gCalendarDate : gCalendarDates) {
 			if (gCalendarDate.isServiceIdInts(serviceIds)) {

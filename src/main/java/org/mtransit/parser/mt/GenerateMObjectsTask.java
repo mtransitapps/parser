@@ -24,16 +24,15 @@ import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MAgency;
-import org.mtransit.parser.mt.data.MCalendarExceptionType;
+import org.mtransit.parser.mt.data.MDirection;
 import org.mtransit.parser.mt.data.MDirectionCardinalType;
+import org.mtransit.parser.mt.data.MDirectionStop;
 import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSchedule;
 import org.mtransit.parser.mt.data.MServiceDate;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MStop;
-import org.mtransit.parser.mt.data.MDirection;
-import org.mtransit.parser.mt.data.MDirectionStop;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -147,42 +146,14 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			if (!serviceIdInts.contains(gCalendarDate.getServiceIdInt())) {
 				continue;
 			}
-			switch (gCalendarDate.getExceptionType()) {
-			case SERVICE_REMOVED: // keep list of removed service for calendars processing
-				mServiceDates.add(new MServiceDate(
-						gCalendarDate.getServiceIdInt(),
-						gCalendarDate.getDate(),
-						MCalendarExceptionType.REMOVED
-				));
-				break;
-			case SERVICE_ADDED:
-				mServiceDates.add(new MServiceDate(
-						gCalendarDate.getServiceIdInt(),
-						gCalendarDate.getDate(),
-						MCalendarExceptionType.ADDED
-				));
-				break;
-			case SERVICE_DEFAULT:
-				mServiceDates.add(new MServiceDate(
-						gCalendarDate.getServiceIdInt(),
-						gCalendarDate.getDate(),
-						MCalendarExceptionType.DEFAULT
-				));
-				break;
-			default:
-				throw new MTLog.Fatal("%s: Unexpected calendar date exception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
-			}
+			mServiceDates.add(MServiceDate.fromCalendarDate(gCalendarDate));
 		}
 		for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
 			if (!serviceIdInts.contains(gCalendar.getServiceIdInt())) {
 				continue;
 			}
 			for (GCalendarDate gCalendarDate : gCalendar.getDates()) {
-				mServiceDates.add(new MServiceDate(
-						gCalendarDate.getServiceIdInt(),
-						gCalendarDate.getDate(),
-						MCalendarExceptionType.DEFAULT
-				));
+				mServiceDates.add(MServiceDate.fromCalendarDate(gCalendarDate));
 			}
 		}
 		MDirection mDirection;

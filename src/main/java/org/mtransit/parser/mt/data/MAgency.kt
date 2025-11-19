@@ -29,9 +29,9 @@ data class MAgency(
         agencyTools.agencyRouteType,
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val id = _id
+    @get:Discouraged(message = "Not memory efficient")
+    val id: String get() = _id
 
     private val _id: String
         get() {
