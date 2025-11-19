@@ -21,7 +21,7 @@ data class MServiceId(
     ).compare(this, other)
 
     companion object {
-        fun fromFileLine(line: String) =
+        fun fromFileLine(line: String): MServiceId? =
             line.split(Constants.COLUMN_SEPARATOR)
                 .takeIf { it.size == 2 }
                 ?.let { columns ->
@@ -29,6 +29,10 @@ data class MServiceId(
                         serviceIdInt = columns[0].toInt(),
                         serviceId = columns[1].unquotes(),
                     )
-                } ?: run { MTLog.log("Invalid service ID line: '$line'!") }
+                }
+                ?: run {
+                    MTLog.log("Invalid service ID line: '$line'!")
+                    null
+                }
     }
 }

@@ -537,10 +537,8 @@ public class MGenerator {
 		}
 		File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_IDS);
 		FileUtils.deleteIfExist(file); // delete previous
-		BufferedWriter ow = null;
-		try {
+		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
 			if (!deleteAll) {
-				ow = new BufferedWriter(new FileWriter(file));
 				MTLog.logPOINT(); // LOG
 				Statement dbStatement = null;
 				String sqlInsert = null;
@@ -567,8 +565,6 @@ public class MGenerator {
 			}
 		} catch (Exception ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while writing service IDs file!");
-		} finally {
-			CloseableUtils.closeQuietly(ow);
 		}
 	}
 

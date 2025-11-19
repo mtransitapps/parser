@@ -150,11 +150,13 @@ object MReader {
     fun loadServiceIds(fileBase: String) = try {
         File(getResDirName(fileBase) + "/$RAW/${fileBase}$GTFS_SCHEDULE_SERVICE_IDS")
             .takeIf { it.exists() }
-            .also {
-                if (it == null) MTLog.log("File not found '$it'!")
-            }
-            ?.readLines()?.mapNotNull { line ->
+            ?.readLines()
+            ?.mapNotNull { line ->
                 MServiceId.fromFileLine(line)
+            }
+            ?: run {
+                MTLog.log("File not found '${"/$RAW/${fileBase}$GTFS_SCHEDULE_SERVICE_IDS"}'!")
+                null
             }
     } catch (e: Exception) {
         MTLog.logNonFatal(e, "Error while reading '$fileBase' service ids!")
