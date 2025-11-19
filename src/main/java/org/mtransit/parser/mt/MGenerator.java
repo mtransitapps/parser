@@ -193,8 +193,10 @@ public class MGenerator {
 		);
 	}
 
+	private static final boolean DEBUG_LOG_MERGING = false; // Set to true to enable merging logs
+
 	private static void logMerging(@NotNull String msg, long routeId) {
-		if (true) return; // DEBUG
+		if (!DEBUG_LOG_MERGING) return;
 		MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging %s)", routeId, msg);
 	}
 
@@ -564,7 +566,7 @@ public class MGenerator {
 				}
 			}
 		} catch (Exception ioe) {
-			throw new MTLog.Fatal(ioe, "I/O Error while writing service dates file!");
+			throw new MTLog.Fatal(ioe, "I/O Error while writing service IDs file!");
 		} finally {
 			CloseableUtils.closeQuietly(ow);
 		}
