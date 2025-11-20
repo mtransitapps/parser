@@ -115,7 +115,7 @@ data class MSchedule(
             add(_tripId.quotesEscape())
         }
         add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY)
-        add((headsignValue ?: Constants.EMPTY).quotesEscape())
+        add(headsignValue.orEmpty().toStringIds().toStringIds().quotesEscape())
         add(accessible.toString())
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 
@@ -134,7 +134,7 @@ data class MSchedule(
             add(Constants.EMPTY.quotes())
         } else {
             add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY)
-            add((headsignValue ?: Constants.EMPTY).quotesEscape())
+            add(headsignValue.orEmpty().toStringIds().quotesEscape())
         }
         add(accessible.toString())
     }.joinToString(Constants.COLUMN_SEPARATOR_)

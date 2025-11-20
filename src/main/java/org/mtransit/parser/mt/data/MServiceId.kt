@@ -24,7 +24,7 @@ data class MServiceId(
     ).compare(this, other)
 
     companion object {
-        fun fromFileLine(line: String): MServiceId? =
+        fun fromFileLine(line: String) =
             line.split(Constants.COLUMN_SEPARATOR)
                 .takeIf { it.size == 2 }
                 ?.let { columns ->

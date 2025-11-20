@@ -36,6 +36,8 @@ import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MStop;
 import org.mtransit.parser.mt.data.MDirection;
 import org.mtransit.parser.mt.data.MDirectionStop;
+import org.mtransit.parser.mt.data.MString;
+import org.mtransit.parser.mt.data.MStrings;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -176,7 +178,8 @@ public class MGenerator {
 		MTLog.log("- Trips: %d", mTripsList.size());
 		MTLog.log("- Trip stops: %d", mDirectionStopsList.size());
 		MTLog.log("- Stops: %d", mStopsList.size());
-		MTLog.log("- Service Ids: %d", MServiceIds.getAll().size());
+		MTLog.log("- Service Ids: %d", MServiceIds.count());
+		MTLog.log("- Strings: %d", MStrings.count());
 		MTLog.log("- Service Dates: %d", mServiceDatesList.size());
 		MTLog.log("- Route with Frequencies: %d", mRouteFrequencies.size());
 		MTLog.log("- First timestamp: %s", MTLog.formatDateTime(firstTimestamp));
@@ -201,6 +204,7 @@ public class MGenerator {
 		MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging %s)", routeId, msg);
 	}
 
+	private static final String GTFS_STRINGS = "gtfs_strings";
 	private static final String GTFS_SCHEDULE = "gtfs_schedule";
 	private static final String GTFS_SCHEDULE_SERVICE_DATES = GTFS_SCHEDULE + "_service_dates"; // DB
 	private static final String GTFS_SCHEDULE_SERVICE_IDS = GTFS_SCHEDULE + "_service_ids"; // DB
@@ -282,6 +286,8 @@ public class MGenerator {
 		dumpFrequencyRoutes(gAgencyTools, mSpec, fileBase, deleteAll, rawDirF);
 		// SERVICE IDS
 		dumpServiceIds(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection); // AFTER SCHEDULE STOPS & FREQUENCY ROUTES
+		// STRINGS
+		dumpStrings(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection); // AFTER ALL OTHER TABLE W/ STRINGS
 		if (deleteAll) {
 			dumpValues(rawDirF, fileBase, null, null, null, null, null, -1, -1, null, true);
 		} else {
@@ -565,6 +571,53 @@ public class MGenerator {
 			}
 		} catch (Exception ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while writing service IDs file!");
+		}
+	}
+
+	private static void dumpStrings(
+			@Nullable MSpec mSpec,
+			@NotNull String fileBase,
+			boolean deleteAll,
+			@NotNull File dataDirF,
+			@NotNull File rawDirF,
+			@Nullable Connection dbConnection) {
+		if (!FeatureFlags.F_EXPORT_SERVICE_ID_INTS) return;
+		if (!deleteAll
+				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
+		}
+		if (F_PRE_FILLED_DB) {
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_STRINGS)); // migration from src/main/res/raw to data
+		}
+		File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_STRINGS);
+		FileUtils.deleteIfExist(file); // delete previous
+		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
+			if (!deleteAll) {
+				MTLog.logPOINT(); // LOG
+				Statement dbStatement = null;
+				String sqlInsert = null;
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
+					dbStatement = dbConnection.createStatement();
+					sqlInsert = GTFSCommons.getT_SERVICE_IDS_SQL_INSERT();
+				}
+				for (MString mString : MStrings.getAll()) {
+					final String stringInsert = mString.toFile();
+					if (F_PRE_FILLED_DB) {
+						SQLUtils.executeUpdate(
+								dbStatement,
+								String.format(sqlInsert, stringInsert)
+						);
+					}
+					ow.write(stringInsert);
+					ow.write(Constants.NEW_LINE);
+				}
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
+				}
+			}
+		} catch (Exception ioe) {
+			throw new MTLog.Fatal(ioe, "I/O Error while writing strings file!");
 		}
 	}
 

@@ -46,7 +46,7 @@ data class MStop(
     fun toFile() = listOf(
         id.toString(), // ID
         code.quotesEscape(), // code
-        name.quotesEscape(), // name
+        name.toStringIds().quotesEscape(), // name
         MDataChangedManager.avoidLatLngChanged(lat), // latitude
         MDataChangedManager.avoidLatLngChanged(lng), // longitude
         accessible.toString(),
