@@ -98,11 +98,13 @@ data class MSchedule(
     }
 
     fun toFileNewServiceIdAndDirectionId(agencyTools: GAgencyTools) = buildList {
-        if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId)))
-        } else {
-            add(agencyTools.cleanServiceId(_serviceId).quotesEscape())
-        }
+        add(
+            if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
+                MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId))
+            } else {
+                agencyTools.cleanServiceId(_serviceId).quotesEscape()
+            }
+        )
         // no route ID, just for file split
         add(directionId.toString())
         add(departure.toString())
@@ -115,7 +117,7 @@ data class MSchedule(
             add(_tripId.quotesEscape())
         }
         add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY)
-        add(headsignValue.orEmpty().toStringIds().toStringIds().quotesEscape())
+        add(headsignValue.orEmpty().toStringIds().quotesEscape())
         add(accessible.toString())
     }.joinToString(Constants.COLUMN_SEPARATOR_)
 
