@@ -177,7 +177,7 @@ data class MDirection(
     fun toFile() = listOf(
         id.toString(), // ID
         headsignType.toString(), // HEADSIGN TYPE
-        headsignValue.quotesEscape(), // HEADSIGN STRING
+        headsignValue.toStringIds().quotesEscape(), // HEADSIGN STRING
         routeId.toString(), // ROUTE ID
     ).joinToString(Constants.COLUMN_SEPARATOR_)
 

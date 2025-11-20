@@ -47,6 +47,9 @@ object MServiceIds {
             }
 
     @JvmStatic
+    fun count() = idIntToId.size()
+
+    @JvmStatic
     fun getAll() = buildList {
         idToIdInt.forEach { id, idInt ->
             add(MServiceId(idInt, id))

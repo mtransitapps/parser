@@ -37,8 +37,8 @@ data class MRoute(
 
     fun toFile() = buildList {
         add(id.toString()) // ID
-        add((shortName ?: Constants.EMPTY).quotesEscape()) // short name
-        add(longName.quotesEscape()) // long name
+        add(shortName.orEmpty().toStringIds().quotesEscape()) // short name
+        add(longName.toStringIds().quotesEscape()) // long name
         add((color?.uppercase() ?: Constants.EMPTY).quotes()) // color
         add(originalIdHash.toString()) // original ID hash
         add(type.toString())

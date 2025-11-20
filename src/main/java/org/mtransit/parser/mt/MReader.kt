@@ -14,6 +14,7 @@ import org.mtransit.parser.Pair
 import org.mtransit.parser.gtfs.data.GFieldTypes
 import org.mtransit.parser.mt.data.MServiceDate
 import org.mtransit.parser.mt.data.MServiceId
+import org.mtransit.parser.mt.data.MString
 import java.io.File
 import java.util.TimeZone
 
@@ -160,6 +161,29 @@ object MReader {
             }
     } catch (e: Exception) {
         MTLog.logNonFatal(e, "Error while reading '$fileBase' service ids!")
+        null
+    }
+
+    // endregion
+
+    // region strings
+
+    private const val GTFS_STRINGS = "gtfs_strings"
+
+    @JvmStatic
+    fun loadStrings(fileBase: String) = try {
+        File(getResDirName(fileBase) + "/$RAW/${fileBase}$GTFS_STRINGS")
+            .takeIf { it.exists() }
+            ?.readLines()
+            ?.mapNotNull { line ->
+                MString.fromFileLine(line)
+            }
+            ?: run {
+                MTLog.log("File not found '${"/$RAW/${fileBase}$GTFS_STRINGS"}'!")
+                null
+            }
+    } catch (e: Exception) {
+        MTLog.logNonFatal(e, "Error while reading '$fileBase' strings!")
         null
     }
 
