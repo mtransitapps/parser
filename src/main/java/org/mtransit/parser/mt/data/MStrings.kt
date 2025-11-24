@@ -3,6 +3,7 @@ package org.mtransit.parser.mt.data
 import androidx.collection.SparseArrayCompat
 import androidx.collection.mutableScatterMapOf
 import org.mtransit.commons.FeatureFlags
+import org.mtransit.commons.GTFSCommons
 import org.mtransit.parser.MTLog
 
 object MStrings {
@@ -20,8 +21,6 @@ object MStrings {
         add("&")
         add("@")
     }
-
-    private const val SPACE = " "
 
     @JvmStatic
     fun addAll(lastStrings: List<MString>?) {
@@ -72,9 +71,9 @@ object MStrings {
         if (!FeatureFlags.F_EXPORT_STRINGS) return strings
         if (strings.isEmpty()) return strings
         return strings
-            .split(SPACE)
+            .split(GTFSCommons.STRINGS_SEPARATOR)
             .map { getInt(it) }
-            .joinToString(separator = SPACE)
+            .joinToString(GTFSCommons.STRINGS_SEPARATOR)
     }
 }
 
