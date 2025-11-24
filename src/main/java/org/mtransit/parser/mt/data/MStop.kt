@@ -1,7 +1,7 @@
 package org.mtransit.parser.mt.data
 
 import org.mtransit.commons.GTFSCommons
-import org.mtransit.parser.Constants
+import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.mt.MDataChangedManager
@@ -51,7 +51,7 @@ data class MStop(
         MDataChangedManager.avoidLatLngChanged(lng), // longitude
         accessible.toString(),
         originalIdHash.toString(), // original ID hash
-    ).joinToString(Constants.COLUMN_SEPARATOR_)
+    ).joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     override fun compareTo(other: MStop): Int {
         return id - other.id

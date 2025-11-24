@@ -2,7 +2,7 @@ package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
 import org.mtransit.commons.FeatureFlags
-import org.mtransit.parser.Constants
+import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.db.SQLUtils.unquotes
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -47,7 +47,7 @@ data class MServiceDate(
         }
         add(calendarDate.toString())
         add(exceptionType.toString())
-    }.joinToString(Constants.COLUMN_SEPARATOR_)
+    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     @Suppress("unused")
     fun toStringPlus(): String {
@@ -88,7 +88,7 @@ data class MServiceDate(
             )
 
         fun fromFileLine(line: String) =
-            line.split(Constants.COLUMN_SEPARATOR)
+            line.split(SQLUtils.COLUMN_SEPARATOR)
                 .takeIf { it.size == 3 }
                 ?.let { columns ->
                     MServiceDate(

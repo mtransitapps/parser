@@ -21,6 +21,8 @@ object SQLUtils {
     private const val QUOTE_ = '\''
     private const val QUOTE = SQLUtilsCommons.STRING_DELIMITER
 
+    const val COLUMN_SEPARATOR = SQLUtilsCommons.COLUMN_SEPARATOR
+
     private const val UNDERSCORE = "_"
 
     @JvmStatic

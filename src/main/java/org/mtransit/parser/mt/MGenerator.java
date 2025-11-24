@@ -751,7 +751,7 @@ public class MGenerator {
 							MSchedule lastSchedule = null;
 							for (MSchedule mSchedule : mStopSchedules) {
 								if (mSchedule.isSameServiceAndDirection(lastSchedule)) {
-									ow.write(Constants.COLUMN_SEPARATOR);
+									ow.write(SQLUtils.COLUMN_SEPARATOR);
 									ow.write(mSchedule.toFileSameServiceIdAndDirectionId(lastSchedule));
 								} else {
 									if (!empty) {

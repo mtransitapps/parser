@@ -1,6 +1,6 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.parser.Constants
+import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.db.SQLUtils.unquotes
@@ -16,7 +16,7 @@ data class MServiceId(
     fun toFile() = buildList {
         add(serviceIdInt.toString())
         add(serviceId.quotesEscape()) // already agencyTools.cleanServiceId(serviceId) before
-    }.joinToString(Constants.COLUMN_SEPARATOR_)
+    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     override fun compareTo(other: MServiceId) = compareBy(
         MServiceId::serviceIdInt,
@@ -25,7 +25,7 @@ data class MServiceId(
 
     companion object {
         fun fromFileLine(line: String) =
-            line.split(Constants.COLUMN_SEPARATOR)
+            line.split(SQLUtils.COLUMN_SEPARATOR)
                 .takeIf { it.size == 2 }
                 ?.let { columns ->
                     MServiceId(

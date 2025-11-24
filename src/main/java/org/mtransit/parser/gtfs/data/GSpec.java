@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CollectionUtils;
 import org.mtransit.commons.gtfs.data.CalendarDate;
-import org.mtransit.parser.Constants;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.FileUtils;
 import org.mtransit.parser.MTLog;
@@ -532,15 +531,15 @@ public class GSpec {
 	@Override
 	public String toString() {
 		return GSpec.class.getSimpleName() + '[' + //
-				AGENCIES + readAgenciesCount() + Constants.COLUMN_SEPARATOR + //
-				CALENDARS + readCalendarsCount() + Constants.COLUMN_SEPARATOR + //
-				CALENDAR_DATES + readCalendarDatesCount() + Constants.COLUMN_SEPARATOR + //
-				ROUTES + readRoutesCount() + Constants.COLUMN_SEPARATOR + //
-				TRIPS + readTripsCount() + Constants.COLUMN_SEPARATOR + //
-				STOPS + readStopsCount() + Constants.COLUMN_SEPARATOR + //
-				STOP_TIMES + readStopTimesCount() + Constants.COLUMN_SEPARATOR + //
-				FREQUENCIES + readFrequenciesCount() + Constants.COLUMN_SEPARATOR + //
-				TRIP_STOPS + readTripStopsCount() + Constants.COLUMN_SEPARATOR + //
+				AGENCIES + readAgenciesCount() + "," + //
+				CALENDARS + readCalendarsCount() + "," + //
+				CALENDAR_DATES + readCalendarDatesCount() + "," + //
+				ROUTES + readRoutesCount() + "," + //
+				TRIPS + readTripsCount() + "," + //
+				STOPS + readStopsCount() + "," + //
+				STOP_TIMES + readStopTimesCount() + "," + //
+				FREQUENCIES + readFrequenciesCount() + "," + //
+				TRIP_STOPS + readTripStopsCount() + "," + //
 				']';
 	}
 
