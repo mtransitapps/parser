@@ -24,22 +24,22 @@ object MStrings {
 
     @JvmStatic
     fun addAll(lastStrings: List<MString>?) {
-        lastStrings?.forEach { add(it) }
+        synchronized(incrementLock) {
+            lastStrings?.forEach { addSynchronized(it) }
+        }
     }
 
-    fun add(string: MString) {
-        synchronized(incrementLock) {
-            idIntToId.put(string.id, string.string)
-            idToIdInt[string.string] = string.id
-            increment = maxOf(increment, string.id)
-        }
+    private fun addSynchronized(string: MString) {
+        idIntToId.put(string.id, string.string)
+        idToIdInt[string.string] = string.id
+        increment = maxOf(increment, string.id)
     }
 
     fun add(string: String): Int {
         synchronized(incrementLock) {
             increment++ // move to next
             return MString(increment, string)
-                .apply { add(this) }
+                .apply { addSynchronized(this) }
                 .id
         }
     }
@@ -52,9 +52,7 @@ object MStrings {
     @JvmStatic
     fun getInt(string: String): Int =
         idToIdInt[string]
-            ?: synchronized(incrementLock) {
-                return idToIdInt[string] ?: add(string)
-            }
+            ?: synchronized(incrementLock) { idToIdInt[string] ?: add(string) }
 
     @JvmStatic
     fun count() = idIntToId.size()

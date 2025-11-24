@@ -133,7 +133,7 @@ data class MSchedule(
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
             add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString())
-            add("".quotes())
+            add(MDirection.HEADSIGN_DEFAULT_VALUE.quotes())
         } else {
             add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
             add(headsignValue.orEmpty().toStringIds().quotesEscape())
