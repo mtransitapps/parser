@@ -39,9 +39,9 @@ object MStrings {
     fun add(string: String): Int {
         synchronized(incrementLock) {
             increment++ // move to next
-            val newstring = MString(increment, string)
-            add(newstring)
-            return newstring.id
+            return MString(increment, string)
+                .apply { add(this) }
+                .id
         }
     }
 
