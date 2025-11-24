@@ -581,7 +581,7 @@ public class MGenerator {
 			@NotNull File dataDirF,
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection) {
-		if (!FeatureFlags.F_EXPORT_SERVICE_ID_INTS) return;
+		if (!FeatureFlags.F_EXPORT_STRINGS) return;
 		if (!deleteAll
 				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
