@@ -599,7 +599,7 @@ public class MGenerator {
 				if (F_PRE_FILLED_DB) {
 					SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 					dbStatement = dbConnection.createStatement();
-					sqlInsert = GTFSCommons.getT_SERVICE_IDS_SQL_INSERT();
+					sqlInsert = GTFSCommons.getT_STRINGS_SQL_INSERT();
 				}
 				for (MString mString : MStrings.getAll()) {
 					final String stringInsert = mString.toFile();
