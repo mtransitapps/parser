@@ -1,6 +1,6 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.parser.Constants
+import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 
@@ -8,7 +8,7 @@ data class MDirection(
     val routeId: Long,
     var headsignId: Int = 0, // >= 0 (almost = direction ID)
     var headsignType: Int = HEADSIGN_TYPE_STRING, // 0=string, 1=direction, 2=inbound, 3=stopId, 4=descent-only
-    var headsignValue: String = Constants.EMPTY,
+    var headsignValue: String = HEADSIGN_DEFAULT_VALUE,
 ) : Comparable<MDirection> {
 
     constructor(
@@ -17,7 +17,7 @@ data class MDirection(
         routeId = routeId,
         headsignId = 0,
         headsignType = HEADSIGN_TYPE_STRING,
-        headsignValue = Constants.EMPTY,
+        headsignValue = HEADSIGN_DEFAULT_VALUE,
     )
 
     constructor(
@@ -115,7 +115,7 @@ data class MDirection(
     @Suppress("unused")
     fun setHeadsignDescentOnly(): MDirection {
         headsignType = HEADSIGN_TYPE_NO_PICKUP
-        headsignValue = Constants.EMPTY // null;
+        headsignValue = HEADSIGN_DEFAULT_VALUE // null
         headsignId = 0
         _id = -1 // reset
         return this
@@ -177,9 +177,9 @@ data class MDirection(
     fun toFile() = listOf(
         id.toString(), // ID
         headsignType.toString(), // HEADSIGN TYPE
-        headsignValue.quotesEscape(), // HEADSIGN STRING
+        headsignValue.toStringIds().quotesEscape(), // HEADSIGN STRING
         routeId.toString(), // ROUTE ID
-    ).joinToString(Constants.COLUMN_SEPARATOR_)
+    ).joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     override fun compareTo(other: MDirection): Int {
         // sort by direction's route id => direction id
@@ -191,6 +191,8 @@ data class MDirection(
     }
 
     companion object {
+
+        const val HEADSIGN_DEFAULT_VALUE = ""
 
         const val HEADSIGN_TYPE_STRING = 0
         const val HEADSIGN_TYPE_DIRECTION = 1

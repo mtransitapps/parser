@@ -1,7 +1,7 @@
 package org.mtransit.parser.mt.data
 
 import org.mtransit.commons.GTFSCommons
-import org.mtransit.parser.Constants
+import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -33,16 +33,16 @@ data class MRoute(
         type,
     )
 
-    val shortNameOrDefault: String = shortName ?: Constants.EMPTY
+    val shortNameOrDefault: String = shortName.orEmpty()
 
     fun toFile() = buildList {
         add(id.toString()) // ID
-        add((shortName ?: Constants.EMPTY).quotesEscape()) // short name
-        add(longName.quotesEscape()) // long name
-        add((color?.uppercase() ?: Constants.EMPTY).quotes()) // color
+        add(shortName.orEmpty().toStringIds().quotesEscape()) // short name
+        add(longName.toStringIds().quotesEscape()) // long name
+        add((color?.uppercase().orEmpty()).quotes()) // color
         add(originalIdHash.toString()) // original ID hash
         add(type.toString())
-    }.joinToString(Constants.COLUMN_SEPARATOR_)
+    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     override fun compareTo(other: MRoute): Int {
         return id.compareTo(other.id)

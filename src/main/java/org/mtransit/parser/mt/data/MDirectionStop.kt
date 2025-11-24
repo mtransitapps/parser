@@ -1,6 +1,6 @@
 package org.mtransit.parser.mt.data
 
-import org.mtransit.parser.Constants
+import org.mtransit.commons.sql.SQLUtils
 
 data class MDirectionStop(
     val directionId: Long,
@@ -39,7 +39,7 @@ data class MDirectionStop(
         stopId.toString(), // STOP ID
         stopSequence.toString(), // STOP SEQUENCE
         (if (isNoPickup) 1 else 0).toString(), // DROP OFF ONLY
-    ).joinToString(Constants.COLUMN_SEPARATOR_)
+    ).joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     override fun compareTo(other: MDirectionStop): Int {
         // sort by direction_id => stop_sequence

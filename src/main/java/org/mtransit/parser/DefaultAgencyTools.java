@@ -39,6 +39,8 @@ import org.mtransit.parser.mt.data.MServiceId;
 import org.mtransit.parser.mt.data.MServiceIds;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MDirection;
+import org.mtransit.parser.mt.data.MString;
+import org.mtransit.parser.mt.data.MStrings;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -154,7 +156,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		MTLog.logDebug("Args [%d]: %s.", args.length, Arrays.asList(args));
 		final List<MServiceDate> lastServiceDates = MReader.loadServiceDates(args[2]);
 		final List<MServiceId> lastServiceIds = MReader.loadServiceIds(args[2]);
+		final List<MString> lastStrings = MReader.loadStrings(args[2]);
 		MServiceIds.addAll(lastServiceIds);
+		MStrings.addAll(lastStrings);
 		this.serviceIdInts = extractUsefulServiceIdInts(args, this, true, lastServiceDates);
 		final String inputUrl = args.length >= 5 ? args[4] : null;
 		if (excludingAll()) {

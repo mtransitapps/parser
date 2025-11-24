@@ -2,7 +2,7 @@ package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
 import org.mtransit.commons.FeatureFlags
-import org.mtransit.parser.Constants
+import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
@@ -98,11 +98,13 @@ data class MSchedule(
     }
 
     fun toFileNewServiceIdAndDirectionId(agencyTools: GAgencyTools) = buildList {
-        if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId)))
-        } else {
-            add(agencyTools.cleanServiceId(_serviceId).quotesEscape())
-        }
+        add(
+            if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
+                MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId))
+            } else {
+                agencyTools.cleanServiceId(_serviceId).quotesEscape()
+            }
+        )
         // no route ID, just for file split
         add(directionId.toString())
         add(departure.toString())
@@ -111,13 +113,13 @@ data class MSchedule(
             if (arrivalBeforeDeparture > 0) {
                 // TODO ?
             }
-            add(arrivalBeforeDeparture.takeIf { it > 0 }?.toString() ?: Constants.EMPTY) // arrival before departure
+            add(arrivalBeforeDeparture.takeIf { it > 0 }?.toString().orEmpty()) // arrival before departure
             add(_tripId.quotesEscape())
         }
-        add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY)
-        add((headsignValue ?: Constants.EMPTY).quotesEscape())
+        add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
+        add(headsignValue.orEmpty().toStringIds().quotesEscape())
         add(accessible.toString())
-    }.joinToString(Constants.COLUMN_SEPARATOR_)
+    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     fun toFileSameServiceIdAndDirectionId(lastSchedule: MSchedule?) = buildList {
         add((departure - (lastSchedule?.departure ?: 0)).toString())
@@ -126,18 +128,18 @@ data class MSchedule(
             if (arrivalBeforeDeparture > 0) {
                 // TODO ?
             }
-            add(arrivalBeforeDeparture.takeIf { it > 0 }?.toString() ?: Constants.EMPTY) // arrival before departure
+            add(arrivalBeforeDeparture.takeIf { it > 0 }?.toString().orEmpty()) // arrival before departure
             add(_tripId.quotesEscape())
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
             add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString())
-            add(Constants.EMPTY.quotes())
+            add(MDirection.HEADSIGN_DEFAULT_VALUE.quotes())
         } else {
-            add(headsignType.takeIf { it >= 0 }?.toString() ?: Constants.EMPTY)
-            add((headsignValue ?: Constants.EMPTY).quotesEscape())
+            add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
+            add(headsignValue.orEmpty().toStringIds().quotesEscape())
         }
         add(accessible.toString())
-    }.joinToString(Constants.COLUMN_SEPARATOR_)
+    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     fun isSameServiceAndDirection(lastSchedule: MSchedule?): Boolean {
         return lastSchedule?.serviceIdInt == serviceIdInt

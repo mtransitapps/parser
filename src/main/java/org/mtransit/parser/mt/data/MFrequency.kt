@@ -2,7 +2,7 @@ package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
 import org.mtransit.commons.FeatureFlags
-import org.mtransit.parser.Constants
+import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
@@ -34,7 +34,7 @@ data class MFrequency(
         add(startTime.toString())
         add(endTime.toString())
         add(headwayInSec.toString())
-    }.joinToString(Constants.COLUMN_SEPARATOR_)
+    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     override fun compareTo(other: MFrequency?): Int {
         return when {
