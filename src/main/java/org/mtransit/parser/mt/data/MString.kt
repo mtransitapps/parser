@@ -1,9 +1,9 @@
 package org.mtransit.parser.mt.data
 
 import org.mtransit.commons.sql.SQLUtils
+import org.mtransit.commons.sql.SQLUtils.unquotesUnescape
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.quotesEscape
-import org.mtransit.parser.db.SQLUtils.unquotes
 
 data class MString(
     val id: Int,
@@ -30,7 +30,7 @@ data class MString(
                 ?.let { columns ->
                     MString(
                         id = columns[0].toInt(),
-                        string = columns[1].unquotes(),
+                        string = columns[1].unquotesUnescape(),
                     )
                 }
                 ?: run {

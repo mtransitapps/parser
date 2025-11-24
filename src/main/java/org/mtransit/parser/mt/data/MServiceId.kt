@@ -1,9 +1,9 @@
 package org.mtransit.parser.mt.data
 
 import org.mtransit.commons.sql.SQLUtils
+import org.mtransit.commons.sql.SQLUtils.unquotesUnescape
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.quotesEscape
-import org.mtransit.parser.db.SQLUtils.unquotes
 
 data class MServiceId(
     val serviceIdInt: Int,
@@ -30,7 +30,7 @@ data class MServiceId(
                 ?.let { columns ->
                     MServiceId(
                         serviceIdInt = columns[0].toInt(),
-                        serviceId = columns[1].unquotes(),
+                        serviceId = columns[1].unquotesUnescape(),
                     )
                 }
                 ?: run {
