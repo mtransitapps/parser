@@ -94,21 +94,12 @@ data class MSchedule(
                 "+(uID:$uID)"
     }
 
-    fun toFileNew(agencyTools: GAgencyTools) = buildList {
-        add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
-        // no route ID, just for file split
-        add(directionId.toString())
-        add(departure.toString())
-        if (FeatureFlags.F_EXPORT_TRIP_ID_ARRIVAL) {
-            add((departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }?.toString().orEmpty())
-            add(MTripIds.convert(_tripId))
+    fun toFile(agencyTools: GAgencyTools, lastSchedule: MSchedule?) = buildList {
+        if (lastSchedule == null) { // NEW
+            add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+            // no route ID, just for file split
+            add(directionId.toString())
         }
-        add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
-        add(headsignValue.orEmpty().toStringIds().quotesEscape())
-        add(accessible.toString())
-    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
-
-    fun toFileSame(lastSchedule: MSchedule?) = buildList {
         val lastDeparture = lastSchedule?.departure ?: 0
         add((departure - lastDeparture).toString())
         if (FeatureFlags.F_EXPORT_TRIP_ID_ARRIVAL) {

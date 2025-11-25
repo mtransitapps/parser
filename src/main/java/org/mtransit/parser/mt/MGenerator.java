@@ -795,15 +795,15 @@ public class MGenerator {
 						} // LOG
 						MSchedule lastSchedule = null;
 						for (MSchedule mSchedule : mStopSchedules) {
-							if (mSchedule.isSameServiceAndDirection(lastSchedule)) {
-								ow.write(SQLUtils.COLUMN_SEPARATOR);
-								ow.write(mSchedule.toFileSame(lastSchedule));
-							} else {
+							if (!mSchedule.isSameServiceAndDirection(lastSchedule)) {
+								lastSchedule = null;
 								if (!empty) {
 									ow.write(Constants.NEW_LINE);
 								}
-								ow.write(mSchedule.toFileNew(gAgencyTools));
+							} else {
+								ow.write(SQLUtils.COLUMN_SEPARATOR);
 							}
+							ow.write(mSchedule.toFile(gAgencyTools, lastSchedule));
 							empty = false;
 							lastSchedule = mSchedule;
 						}
