@@ -38,7 +38,7 @@ object MTripIds {
 
     @Suppress("unused")
     @JvmStatic
-    fun getString(tripIdInt: Int) =
+    fun getId(tripIdInt: Int) =
         idIntToId[tripIdInt] ?: throw MTLog.Fatal("Unexpected Trip ID integer $tripIdInt!")
 
     @JvmStatic
