@@ -8,10 +8,7 @@ import org.mtransit.parser.Pair
 import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
-import org.mtransit.parser.gtfs.data.GFieldTypes
 import org.mtransit.parser.gtfs.data.GIDs
-import java.text.SimpleDateFormat
-import kotlin.time.Duration.Companion.milliseconds
 
 data class MSchedule(
     val routeId: Long,
@@ -25,8 +22,6 @@ data class MSchedule(
     var headsignType: Int = -1,
     var headsignValue: String? = null,
 ) : Comparable<MSchedule> {
-
-    private val arrivalBeforeDeparture get() = (departure - arrival) > 0
 
     constructor(
         routeId: Long,
@@ -99,44 +94,26 @@ data class MSchedule(
                 "+(uID:$uID)"
     }
 
-    fun toFileNew(agencyTools: GAgencyTools, tineFormat: SimpleDateFormat) = buildList {
-        add(
-            if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-                MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId))
-            } else {
-                agencyTools.cleanServiceId(_serviceId).quotesEscape()
-            }
-        )
+    fun toFileNew(agencyTools: GAgencyTools) = buildList {
+        add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
         // no route ID, just for file split
         add(directionId.toString())
         add(departure.toString())
-        if (FeatureFlags.F_EXPORT_TRIP_ID) {
+        if (FeatureFlags.F_EXPORT_TRIP_ID_ARRIVAL) {
             add((departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }?.toString().orEmpty())
-            add(MTripIds.getInt(_tripId).toString())
+            add(MTripIds.convert(_tripId))
         }
         add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
         add(headsignValue.orEmpty().toStringIds().quotesEscape())
         add(accessible.toString())
     }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
-    fun makeArrivalDiffInSec(tineFormat: SimpleDateFormat): Int? {
-        if (!arrivalBeforeDeparture) return null
-        val arrivalDate = tineFormat.parse(GFieldTypes.cleanTime(arrival.toString()))
-        val departureDate = tineFormat.parse(GFieldTypes.cleanTime(departure.toString()))
-        val arrivalDiffInMs = departureDate.time - arrivalDate.time
-        arrivalDiffInMs.takeIf { it > MIN_ARRIVAL_DIFF_IN_MS } ?: return null
-        return arrivalDiffInMs.milliseconds.inWholeSeconds.toInt()
-            .also {
-                MTLog.logDebug("makeArrivalDiffInSec() > [s:$stopId|d:$directionId|t:$_tripId|a:$arrival|d:$departure] = $it sec ($arrivalDiffInMs ms).")
-            }
-    }
-
-    fun toFileSame(lastSchedule: MSchedule?, tineFormat: SimpleDateFormat) = buildList {
+    fun toFileSame(lastSchedule: MSchedule?) = buildList {
         val lastDeparture = lastSchedule?.departure ?: 0
         add((departure - lastDeparture).toString())
-        if (FeatureFlags.F_EXPORT_TRIP_ID) {
+        if (FeatureFlags.F_EXPORT_TRIP_ID_ARRIVAL) {
             add((departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }?.toString().orEmpty())
-            add(MTripIds.getInt(_tripId).toString())
+            add(MTripIds.convert(_tripId))
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
             add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString())
@@ -204,8 +181,6 @@ data class MSchedule(
             departure: Int
         ) = "${serviceIdInt}$UID_SEPARATOR${directionId}$UID_SEPARATOR${stopId}$UID_SEPARATOR${departure}"
 
-        const val MIN_ARRIVAL_DIFF_IN_HH_MM_SS = 100
-        const val MIN_ARRIVAL_DIFF_IN_SEC = 60 // 1 minute
-        const val MIN_ARRIVAL_DIFF_IN_MS = MIN_ARRIVAL_DIFF_IN_SEC * 1000
+        const val MIN_ARRIVAL_DIFF_IN_HH_MM_SS = 100 // 1 minute
     }
 }

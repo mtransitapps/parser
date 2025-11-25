@@ -2,7 +2,9 @@ package org.mtransit.parser.mt.data
 
 import androidx.collection.SparseArrayCompat
 import androidx.collection.mutableScatterMapOf
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.MTLog
+import org.mtransit.parser.db.SQLUtils.quotesEscape
 
 object MTripIds {
 
@@ -55,4 +57,12 @@ object MTripIds {
             add(MTripId(idInt, id))
         }
     }.sorted()
+
+     @JvmStatic
+    fun convert(tripId: String) =
+        if (FeatureFlags.F_EXPORT_TRIP_ID_INTS) {
+            getInt(tripId).toString()
+        } else {
+            tripId.quotesEscape()
+        }
 }

@@ -1,9 +1,7 @@
 package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
-import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.sql.SQLUtils
-import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 
@@ -25,11 +23,7 @@ data class MFrequency(
     val uID by lazy { getNewUID(serviceIdInt, directionId, startTime, endTime) }
 
     fun toFile(agencyTools: GAgencyTools) = buildList {
-        if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId)))
-        } else {
-            add(agencyTools.cleanServiceId(_serviceId).quotesEscape())
-        }
+        add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
         add(directionId.toString())
         add(startTime.toString())
         add(endTime.toString())

@@ -536,7 +536,7 @@ public class MGenerator {
 			@NotNull File dataDirF,
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection) {
-		if (!FeatureFlags.F_EXPORT_TRIP_ID) return;
+		if (!FeatureFlags.F_EXPORT_TRIP_ID_INTS) return;
 		if (!deleteAll
 				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
@@ -755,7 +755,6 @@ public class MGenerator {
 		for (MStop mStop : mSpec.getStops()) {
 			stopIds.add(mStop.getId());
 		}
-		final SimpleDateFormat timeFormat = GFieldTypes.makeTimeFormat();
 		List<Integer> stopIdsFilter;
 		List<MSchedule> mStopsSchedules;
 		while (offset < stopIds.size()) {
@@ -798,12 +797,12 @@ public class MGenerator {
 						for (MSchedule mSchedule : mStopSchedules) {
 							if (mSchedule.isSameServiceAndDirection(lastSchedule)) {
 								ow.write(SQLUtils.COLUMN_SEPARATOR);
-								ow.write(mSchedule.toFileSame(lastSchedule, timeFormat));
+								ow.write(mSchedule.toFileSame(lastSchedule));
 							} else {
 								if (!empty) {
 									ow.write(Constants.NEW_LINE);
 								}
-								ow.write(mSchedule.toFileNew(gAgencyTools, timeFormat));
+								ow.write(mSchedule.toFileNew(gAgencyTools));
 							}
 							empty = false;
 							lastSchedule = mSchedule;
