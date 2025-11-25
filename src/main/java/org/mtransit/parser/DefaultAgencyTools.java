@@ -80,8 +80,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final int MIN_PREVIOUS_NEXT_ADDED_DAYS = 2;
 
 	public static final boolean EXPORT_TRIP_ID;
-	@Deprecated
-	public static final boolean EXPORT_ORIGINAL_ID = false;
 
 	static {
 		EXPORT_TRIP_ID = false;
