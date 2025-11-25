@@ -15,6 +15,7 @@ import org.mtransit.parser.gtfs.data.GFieldTypes
 import org.mtransit.parser.mt.data.MServiceDate
 import org.mtransit.parser.mt.data.MServiceId
 import org.mtransit.parser.mt.data.MString
+import org.mtransit.parser.mt.data.MTripId
 import java.io.File
 import java.util.TimeZone
 
@@ -139,6 +140,29 @@ object MReader {
             MTLog.logNonFatal(e, "Error while reading '$fileBase' service dates!")
             return null
         }
+    }
+
+    // endregion
+
+    // region trip IDs
+
+    private const val GTFS_SCHEDULE_TRIP_IDS = "gtfs_schedule_trip_ids"
+
+    @JvmStatic
+    fun loadTripIds(fileBase: String) = try {
+        File(getResDirName(fileBase) + "/$RAW/${fileBase}$GTFS_SCHEDULE_TRIP_IDS")
+            .takeIf { it.exists() }
+            ?.readLines()
+            ?.mapNotNull { line ->
+                MTripId.fromFileLine(line)
+            }
+            ?: run {
+                MTLog.log("File not found '${"/$RAW/${fileBase}$GTFS_SCHEDULE_TRIP_IDS"}'!")
+                null
+            }
+    } catch (e: Exception) {
+        MTLog.logNonFatal(e, "Error while reading '$fileBase' trip ids!")
+        null
     }
 
     // endregion

@@ -41,6 +41,8 @@ import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MDirection;
 import org.mtransit.parser.mt.data.MString;
 import org.mtransit.parser.mt.data.MStrings;
+import org.mtransit.parser.mt.data.MTripId;
+import org.mtransit.parser.mt.data.MTripIds;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -78,12 +80,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final long MAX_CALENDAR_DATE_COVERAGE_RATIO = 3;
 
 	private static final int MIN_PREVIOUS_NEXT_ADDED_DAYS = 2;
-
-	public static final boolean EXPORT_TRIP_ID;
-
-	static {
-		EXPORT_TRIP_ID = false;
-	}
 
 	@SuppressWarnings("WeakerAccess")
 	public static final boolean GOOD_ENOUGH_ACCEPTED;
@@ -153,9 +149,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 		MTLog.log("Generating data...");
 		MTLog.logDebug("Args [%d]: %s.", args.length, Arrays.asList(args));
 		final List<MServiceDate> lastServiceDates = MReader.loadServiceDates(args[2]);
+		final List<MTripId> lastTripIds = MReader.loadTripIds(args[2]);
 		final List<MServiceId> lastServiceIds = MReader.loadServiceIds(args[2]);
 		final List<MString> lastStrings = MReader.loadStrings(args[2]);
 		MServiceIds.addAll(lastServiceIds);
+		MTripIds.addAll(lastTripIds);
 		MStrings.addAll(lastStrings);
 		this.serviceIdInts = extractUsefulServiceIdInts(args, this, true, lastServiceDates);
 		final String inputUrl = args.length >= 5 ? args[4] : null;

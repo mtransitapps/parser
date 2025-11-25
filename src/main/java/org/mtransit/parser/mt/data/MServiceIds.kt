@@ -36,7 +36,7 @@ object MServiceIds {
 
     @Suppress("unused")
     @JvmStatic
-    fun getString(serviceIdInt: Int) =
+    fun getId(serviceIdInt: Int) =
         idIntToId[serviceIdInt] ?: throw MTLog.Fatal("Unexpected Service ID integer $serviceIdInt!")
 
     @JvmStatic

@@ -38,6 +38,8 @@ import org.mtransit.parser.mt.data.MDirection;
 import org.mtransit.parser.mt.data.MDirectionStop;
 import org.mtransit.parser.mt.data.MString;
 import org.mtransit.parser.mt.data.MStrings;
+import org.mtransit.parser.mt.data.MTripId;
+import org.mtransit.parser.mt.data.MTripIds;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -175,10 +177,11 @@ public class MGenerator {
 		MTLog.log("Generating routes, trips, trip stops & stops objects... DONE");
 		MTLog.log("- Agencies: %d", mAgenciesList.size());
 		MTLog.log("- Routes: %d", mRoutesList.size());
-		MTLog.log("- Trips: %d", mTripsList.size());
-		MTLog.log("- Trip stops: %d", mDirectionStopsList.size());
+		MTLog.log("- Directions: %d", mTripsList.size());
+		MTLog.log("- Direction stops: %d", mDirectionStopsList.size());
 		MTLog.log("- Stops: %d", mStopsList.size());
 		MTLog.log("- Service Ids: %d", MServiceIds.count());
+		MTLog.log("- Trip Ids: %d", MTripIds.count());
 		MTLog.log("- Strings: %d", MStrings.count());
 		MTLog.log("- Service Dates: %d", mServiceDatesList.size());
 		MTLog.log("- Route with Frequencies: %d", mRouteFrequencies.size());
@@ -208,6 +211,7 @@ public class MGenerator {
 	private static final String GTFS_SCHEDULE = "gtfs_schedule";
 	private static final String GTFS_SCHEDULE_SERVICE_DATES = GTFS_SCHEDULE + "_service_dates"; // DB
 	private static final String GTFS_SCHEDULE_SERVICE_IDS = GTFS_SCHEDULE + "_service_ids"; // DB
+	private static final String GTFS_SCHEDULE_TRIP_IDS = GTFS_SCHEDULE + "_trip_ids"; // DB
 	private static final String GTFS_SCHEDULE_STOP = GTFS_SCHEDULE + "_stop_"; // file
 	private static final String GTFS_FREQUENCY = "gtfs_frequency";
 	private static final String GTFS_FREQUENCY_ROUTE = GTFS_FREQUENCY + "_route_"; // file
@@ -284,6 +288,8 @@ public class MGenerator {
 		dumpScheduleStops(gAgencyTools, mSpec, fileBase, deleteAll, rawDirF);
 		// FREQUENCY ROUTES
 		dumpFrequencyRoutes(gAgencyTools, mSpec, fileBase, deleteAll, rawDirF);
+		// TRIP IDS
+		dumpTripIds(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// SERVICE IDS
 		dumpServiceIds(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection); // AFTER SCHEDULE STOPS & FREQUENCY ROUTES
 		// STRINGS
@@ -523,6 +529,52 @@ public class MGenerator {
 		return minMaxLatLng;
 	}
 
+	private static void dumpTripIds(
+			@Nullable MSpec mSpec,
+			@NotNull String fileBase,
+			boolean deleteAll,
+			@NotNull File dataDirF,
+			@NotNull File rawDirF,
+			@Nullable Connection dbConnection) {
+		if (!FeatureFlags.F_EXPORT_TRIP_ID) return;
+		if (!deleteAll
+				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
+		}
+		if (F_PRE_FILLED_DB) {
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_TRIP_IDS)); // migration from src/main/res/raw to data
+		}
+		final File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_TRIP_IDS);
+		FileUtils.deleteIfExist(file); // delete previous
+		if (deleteAll) return;
+		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
+			MTLog.logPOINT(); // LOG
+			Statement dbStatement = null;
+			String sqlInsert = null;
+			if (F_PRE_FILLED_DB) {
+				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
+				dbStatement = dbConnection.createStatement();
+				sqlInsert = GTFSCommons.getT_TRIP_IDS_SQL_INSERT();
+			}
+			for (MTripId mTripId : MTripIds.getAll()) {
+				final String tripIdsInsert = mTripId.toFile();
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.executeUpdate(
+							dbStatement,
+							String.format(sqlInsert, tripIdsInsert)
+					);
+				}
+				ow.write(tripIdsInsert);
+				ow.write(Constants.NEW_LINE);
+			}
+			if (F_PRE_FILLED_DB) {
+				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
+			}
+		} catch (Exception ioe) {
+			throw new MTLog.Fatal(ioe, "I/O Error while writing trip IDs file!");
+		}
+	}
+
 	private static void dumpServiceIds(
 			@Nullable MSpec mSpec,
 			@NotNull String fileBase,
@@ -703,6 +755,7 @@ public class MGenerator {
 		for (MStop mStop : mSpec.getStops()) {
 			stopIds.add(mStop.getId());
 		}
+		final SimpleDateFormat timeFormat = GFieldTypes.makeTimeFormat();
 		List<Integer> stopIdsFilter;
 		List<MSchedule> mStopsSchedules;
 		while (offset < stopIds.size()) {
@@ -745,12 +798,12 @@ public class MGenerator {
 						for (MSchedule mSchedule : mStopSchedules) {
 							if (mSchedule.isSameServiceAndDirection(lastSchedule)) {
 								ow.write(SQLUtils.COLUMN_SEPARATOR);
-								ow.write(mSchedule.toFileSameServiceIdAndDirectionId(lastSchedule));
+								ow.write(mSchedule.toFileSame(lastSchedule, timeFormat));
 							} else {
 								if (!empty) {
 									ow.write(Constants.NEW_LINE);
 								}
-								ow.write(mSchedule.toFileNewServiceIdAndDirectionId(gAgencyTools));
+								ow.write(mSchedule.toFileNew(gAgencyTools, timeFormat));
 							}
 							empty = false;
 							lastSchedule = mSchedule;
