@@ -168,8 +168,8 @@ public class MGenerator {
 		Collections.sort(mStopsList);
 		final ArrayList<MRoute> mRoutesList = new ArrayList<>(mRoutes);
 		Collections.sort(mRoutesList);
-		final ArrayList<MDirection> mTripsList = new ArrayList<>(mDirections);
-		Collections.sort(mTripsList);
+		final ArrayList<MDirection> mDirectionsList = new ArrayList<>(mDirections);
+		Collections.sort(mDirectionsList);
 		final ArrayList<MDirectionStop> mDirectionStopsList = new ArrayList<>(mDirectionStops);
 		Collections.sort(mDirectionStopsList);
 		final ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
@@ -177,7 +177,7 @@ public class MGenerator {
 		MTLog.log("Generating routes, trips, trip stops & stops objects... DONE");
 		MTLog.log("- Agencies: %d", mAgenciesList.size());
 		MTLog.log("- Routes: %d", mRoutesList.size());
-		MTLog.log("- Directions: %d", mTripsList.size());
+		MTLog.log("- Directions: %d", mDirectionsList.size());
 		MTLog.log("- Direction stops: %d", mDirectionStopsList.size());
 		MTLog.log("- Stops: %d", mStopsList.size());
 		MTLog.log("- Service Ids: %d", MServiceIds.count());
@@ -191,7 +191,7 @@ public class MGenerator {
 				mAgenciesList,
 				mStopsList,
 				mRoutesList,
-				mTripsList,
+				mDirectionsList,
 				mDirectionStopsList,
 				mServiceDatesList,
 				mRouteFrequencies,
