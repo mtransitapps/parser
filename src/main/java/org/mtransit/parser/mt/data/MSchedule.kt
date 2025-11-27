@@ -100,18 +100,44 @@ data class MSchedule(
             // no route ID, just for file split
             add(directionId.toString())
         }
-        val lastDeparture = lastSchedule?.departure ?: 0
-        add((departure - lastDeparture).toString())
+        val lastDeparture = if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
+            lastSchedule?.departure?.div(100)?.times(100)
+        } else {
+            lastSchedule?.departure
+        } ?: 0
+        if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
+            add((departure - lastDeparture).div(100).toString()) // truncates the time to an minute that is closer to 0
+        } else {
+            add((departure - lastDeparture).toString())
+        }
         if (FeatureFlags.F_EXPORT_TRIP_ID_ARRIVAL) {
-            add((departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }?.toString().orEmpty())
+            if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
+                add(
+                    (departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }?.div(100) // truncates the time to an minute that is closer to 0
+                        ?.toString().orEmpty()
+                )
+            } else {
+                add(
+                    (departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }
+                        ?.toString().orEmpty()
+                )
+            }
             add(MTripIds.convert(_tripId))
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
             add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString())
-            add(MDirection.HEADSIGN_DEFAULT_VALUE.quotes())
+            if (FeatureFlags.F_SCHEDULE_NO_QUOTES) {
+                add(MDirection.HEADSIGN_DEFAULT_VALUE)
+            } else {
+                add(MDirection.HEADSIGN_DEFAULT_VALUE.quotes())
+            }
         } else {
             add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
-            add(headsignValue.orEmpty().toStringIds().quotesEscape())
+            if (FeatureFlags.F_SCHEDULE_NO_QUOTES) {
+                add(headsignValue.orEmpty().toStringIds())
+            } else {
+                add(headsignValue.orEmpty().toStringIds().quotesEscape())
+            }
         }
         add(accessible.toString())
     }.joinToString(SQLUtils.COLUMN_SEPARATOR)

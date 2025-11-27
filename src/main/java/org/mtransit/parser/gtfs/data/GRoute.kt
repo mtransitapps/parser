@@ -119,6 +119,7 @@ data class GRoute(
             append(routeShortName)
             append(")")
         }
+        append("}")
     }
 
     fun to() = Route(

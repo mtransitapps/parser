@@ -2,16 +2,18 @@ package org.mtransit.parser;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.FeatureFlags;
 
 import java.util.Locale;
 
 @SuppressWarnings("WeakerAccess")
 public final class TimeUtils {
 
-	private static final int PRECISION_IN_SECONDS = 10;
+	private static final int PRECISION_IN_SECONDS = FeatureFlags.F_SCHEDULE_IN_MINUTES ? 1 : 10;
 
 	@Nullable
 	public static Integer cleanExtraSeconds(@Nullable Integer time) {
+		if (PRECISION_IN_SECONDS <= 1) return time;
 		int extraSeconds = time == null ? 0 : time % PRECISION_IN_SECONDS;
 		if (extraSeconds > 0) { // IF too precise DO
 			return cleanTime(time, extraSeconds);
