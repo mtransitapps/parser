@@ -43,12 +43,14 @@ import org.mtransit.parser.mt.data.MString;
 import org.mtransit.parser.mt.data.MStrings;
 import org.mtransit.parser.mt.data.MTripId;
 import org.mtransit.parser.mt.data.MTripIds;
+import org.mtransit.parser.mt.data.MVerify;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -178,6 +180,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return; // DEBUG
 		}
 		MGenerator.dumpFiles(this, mSpec, args[0], args[1], args[2], inputUrl, false);
+		MVerify.verify(mSpec, this); // after dump files to have all values
 		MTLog.log("Generating data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
@@ -349,10 +352,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return KEEP;
 	}
 
+	private final Map<String, String> serviceIdToCleanupServiceId = new HashMap<>();
+
 	@NotNull
 	@Override
 	public String cleanServiceId(@NotNull String gServiceId) {
-		return GTFSCommons.cleanOriginalId(gServiceId, getServiceIdCleanupPattern());
+		final String cleanServiceId = GTFSCommons.cleanOriginalId(gServiceId, getServiceIdCleanupPattern());
+		serviceIdToCleanupServiceId.put(gServiceId, cleanServiceId);
+		return cleanServiceId;
 	}
 
 	@Nullable
@@ -377,13 +384,30 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return this.serviceIdCleanupPattern;
 	}
 
+	@Override
+	public boolean verifyServiceIdsUniqueness() {
+		if (Configs.getAgencyConfig() != null) {
+			if (Configs.getAgencyConfig().getServiceIdNotUniqueAllowed()) return false;
+		}
+		return getServiceIdCleanupRegex() != null; // OPT-IN feature
+	}
+
+	@NotNull
+	public Map<String, String> getServiceIdToCleanupServiceId() {
+		return serviceIdToCleanupServiceId;
+	}
+
+	private final Map<String, String> routeIdToCleanupRouteId = new HashMap<>();
+
 	@NotNull
 	@Override
 	public String cleanRouteOriginalId(@NotNull String gRouteId) {
 		if (Configs.getRouteConfig().getRouteIdCleanMerged()) {
 			gRouteId = CleanUtils.cleanMergedID(gRouteId);
 		}
-		return GTFSCommons.cleanOriginalId(gRouteId, getRouteIdCleanupPattern());
+		final String cleanRouteId = GTFSCommons.cleanOriginalId(gRouteId, getRouteIdCleanupPattern());
+		this.routeIdToCleanupRouteId.put(gRouteId, cleanRouteId);
+		return cleanRouteId;
 	}
 
 	@Override
@@ -445,6 +469,17 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String getRouteIdCleanupRegex() {
 		return Configs.getRouteConfig().getRouteIdCleanupRegex();
+	}
+
+	@Override
+	public boolean verifyRouteIdsUniqueness() {
+		if (Configs.getRouteConfig().getRouteIdNotUniqueAllowed()) return false;
+		return getRouteIdCleanupRegex() != null; // OPT-IN feature
+	}
+
+	@NotNull
+	public Map<String, String> getRouteIdToCleanupRouteId() {
+		return this.routeIdToCleanupRouteId;
 	}
 
 	@Nullable
@@ -655,6 +690,17 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return Configs.getRouteConfig().getTripIdCleanupRegex();
 	}
 
+	@Override
+	public boolean verifyTripIdsUniqueness() {
+		if (Configs.getRouteConfig().getTripIdNotUniqueAllowed()) return false;
+		return getTripIdCleanupRegex() != null; // OPT-IN feature
+	}
+
+	@NotNull
+	public Map<String, String> getTripIdToCleanupTripId() {
+		return this.tripIdToCleanupTripId;
+	}
+
 	@Nullable
 	private Pattern tripIdCleanupPattern = null;
 
@@ -669,9 +715,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return this.tripIdCleanupPattern;
 	}
 
+	private final Map<String, String> tripIdToCleanupTripId = new HashMap<>();
+
 	@Override
 	public @NotNull String cleanTripOriginalId(@NotNull String gTripId) {
-		return GTFSCommons.cleanOriginalId(gTripId, getTripIdCleanupPattern());
+		final String cleanTripId = GTFSCommons.cleanOriginalId(gTripId, getTripIdCleanupPattern());
+		this.tripIdToCleanupTripId.put(gTripId, cleanTripId);
+		return cleanTripId;
 	}
 
 	@Override
@@ -1033,6 +1083,17 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return Configs.getRouteConfig().getStopIdCleanupRegex();
 	}
 
+	@Override
+	public boolean verifyStopIdsUniqueness() {
+		if (Configs.getRouteConfig().getStopIdNotUniqueAllowed()) return false;
+		return getStopIdCleanupRegex() != null; // OPT-IN feature
+	}
+
+	@NotNull
+	public Map<String, String> getStopIdToCleanupStopId() {
+		return this.stopIdToCleanupStopId;
+	}
+
 	@Nullable
 	private Pattern stopIdCleanupPattern = null;
 
@@ -1047,10 +1108,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return this.stopIdCleanupPattern;
 	}
 
+	private final Map<String, String> stopIdToCleanupStopId = new HashMap<>();
+
 	@NotNull
 	@Override
 	public String cleanStopOriginalId(@NotNull String gStopId) {
-		return GTFSCommons.cleanOriginalId(gStopId, getStopIdCleanupPattern());
+		final String cleanStopId = GTFSCommons.cleanOriginalId(gStopId, getStopIdCleanupPattern());
+		this.stopIdToCleanupStopId.put(gStopId, cleanStopId);
+		return cleanStopId;
 	}
 
 	@Override
