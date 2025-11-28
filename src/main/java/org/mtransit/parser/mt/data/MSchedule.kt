@@ -136,9 +136,9 @@ data class MSchedule(
         } else {
             add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
             if (FeatureFlags.F_SCHEDULE_NO_QUOTES) {
-                add(headsignValue.orEmpty().toStringIds())
+                add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS))
             } else {
-                add(headsignValue.orEmpty().toStringIds().quotesEscape())
+                add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS).quotesEscape())
             }
         }
         add(accessible.toString())

@@ -15,7 +15,7 @@ fun formatSimpleDuration(durationInMs: Long) = buildString {
         seconds.takeIf { it > 0 }?.let { append(seconds).append("s ") }
         nanoseconds.takeIf { it > 0 }?.let { append(nanoseconds).append("ns ") }
     }
-}
+}.trim()
 
 private val shortDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH)
     .withZone(ZoneId.systemDefault())

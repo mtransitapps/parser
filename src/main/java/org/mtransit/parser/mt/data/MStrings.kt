@@ -2,7 +2,6 @@ package org.mtransit.parser.mt.data
 
 import androidx.collection.SparseArrayCompat
 import androidx.collection.mutableScatterMapOf
-import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.parser.MTLog
 
@@ -65,8 +64,8 @@ object MStrings {
     }.sorted()
 
     @JvmStatic
-    fun convert(strings: String): String {
-        if (!FeatureFlags.F_EXPORT_STRINGS) return strings
+    fun convert(strings: String, enabled: Boolean): String {
+        if (!enabled) return strings
         if (strings.isEmpty()) return strings
         return strings
             .split(GTFSCommons.STRINGS_SEPARATOR)
@@ -75,4 +74,4 @@ object MStrings {
     }
 }
 
-fun String.toStringIds() = MStrings.convert(this)
+fun String.toStringIds(enabled: Boolean) = MStrings.convert(this, enabled)
