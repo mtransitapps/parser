@@ -111,19 +111,11 @@ data class MSchedule(
             add((departure - lastDeparture).toString())
         }
         if (FeatureFlags.F_EXPORT_TRIP_ID) {
-            if (FeatureFlags.F_EXPORT_ARRIVAL_W_TRIP_ID) {
-                if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
-                    add(
-                        (departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }?.div(100) // truncates the time to an minute that is closer to 0
-                            ?.toString().orEmpty()
-                    )
-                } else {
-                    add(
-                        (departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }
-                            ?.toString().orEmpty()
-                    )
-                }
+            var arrivalDiff = (departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }
+            if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
+                arrivalDiff = arrivalDiff?.div(100) // truncates the time to an minute that is closer to 0
             }
+            add(arrivalDiff?.toString().orEmpty())
             add(MTripIds.convert(_tripId))
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
