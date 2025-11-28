@@ -5,16 +5,20 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.nanoseconds
 
 fun formatSimpleDuration(durationInMs: Long) = buildString {
-    durationInMs.milliseconds.toComponents { days, hours, minutes, seconds, nanoseconds ->
-        days.takeIf { it > 0 }?.let { append(days).append("d ") }
-        hours.takeIf { it > 0 }?.let { append(hours).append("h ") }
-        minutes.takeIf { it > 0 }?.let { append(minutes).append("m ") }
-        seconds.takeIf { it > 0 }?.let { append(seconds).append("s ") }
-        nanoseconds.takeIf { it > 0 }?.let { append(nanoseconds).append("ns ") }
+    val negative = durationInMs < 0
+    abs(durationInMs).milliseconds.toComponents { days, hours, minutes, seconds, nanoseconds ->
+        days.takeIf { it > 0 }?.let { append(it).append("d ") }
+        hours.takeIf { it > 0 }?.let { append(it).append("h ") }
+        minutes.takeIf { it > 0 }?.let { append(it).append("m ") }
+        seconds.takeIf { it > 0 }?.let { append(it).append("s ") }
+        nanoseconds.takeIf { it > 0 }?.nanoseconds?.inWholeMilliseconds?.let { append(it).append("ms ") }
     }
+    if (negative) insert(0, "-")
 }.trim()
 
 private val shortDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH)
