@@ -92,6 +92,8 @@ public interface GAgencyTools {
 	@Nullable
 	String getServiceIdCleanupRegex();
 
+	boolean verifyServiceIdsUniqueness();
+
 	// ROUTE
 	@NotNull
 	String cleanRouteOriginalId(@NotNull String routeId);
@@ -115,6 +117,8 @@ public interface GAgencyTools {
 
 	@Nullable
 	String getRouteIdCleanupRegex();
+
+	boolean verifyRouteIdsUniqueness();
 
 	@NotNull
 	String getRouteShortName(@NotNull GRoute gRoute);
@@ -162,6 +166,8 @@ public interface GAgencyTools {
 
 	@Nullable
 	String getTripIdCleanupRegex();
+
+	boolean verifyTripIdsUniqueness();
 
 	@NotNull String cleanTripOriginalId(@NotNull String gTripId);
 
@@ -251,6 +257,8 @@ public interface GAgencyTools {
 
 	@Nullable
 	String getStopIdCleanupRegex();
+
+	boolean verifyStopIdsUniqueness();
 
 	@NotNull
 	String cleanStopName(@NotNull String gStopName);
