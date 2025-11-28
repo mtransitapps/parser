@@ -11,6 +11,7 @@ import java.util.Locale
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 object GFieldTypes {
 
+    @Suppress("SpellCheckingInspection")
     const val TIME_FORMAT_PATTERN = "HHmmss"
 
     const val DATE_FORMAT_PATTERN = "yyyyMMdd"

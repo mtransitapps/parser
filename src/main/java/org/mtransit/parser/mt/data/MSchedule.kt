@@ -3,7 +3,6 @@ package org.mtransit.parser.mt.data
 import androidx.annotation.Discouraged
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.sql.SQLUtils
-import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
 import org.mtransit.parser.db.SQLUtils.quotes
@@ -16,15 +15,13 @@ data class MSchedule(
     val serviceIdInt: Int,
     val directionId: Long,
     val stopId: Int,
-    val arrival: Int,
-    val departure: Int,
+    val arrival: Int, // HHmmss
+    val departure: Int, // HHmmss
     val tripIdInt: Int,
     val accessible: Int,
     var headsignType: Int = -1,
     var headsignValue: String? = null,
 ) : Comparable<MSchedule> {
-
-    private val arrivalBeforeDeparture: Int = departure - arrival
 
     constructor(
         routeId: Long,
@@ -97,46 +94,44 @@ data class MSchedule(
                 "+(uID:$uID)"
     }
 
-    fun toFileNewServiceIdAndDirectionId(agencyTools: GAgencyTools) = buildList {
-        add(
-            if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-                MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId))
-            } else {
-                agencyTools.cleanServiceId(_serviceId).quotesEscape()
-            }
-        )
-        // no route ID, just for file split
-        add(directionId.toString())
-        add(departure.toString())
-        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
-            @Suppress("ControlFlowWithEmptyBody")
-            if (arrivalBeforeDeparture > 0) {
-                // TODO ?
-            }
-            add(arrivalBeforeDeparture.takeIf { it > 0 }?.toString().orEmpty()) // arrival before departure
-            add(_tripId.quotesEscape())
+    fun toFile(agencyTools: GAgencyTools, lastSchedule: MSchedule?) = buildList {
+        if (lastSchedule == null) { // NEW
+            add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+            // no route ID, just for file split
+            add(directionId.toString())
         }
-        add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
-        add(headsignValue.orEmpty().toStringIds().quotesEscape())
-        add(accessible.toString())
-    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
-
-    fun toFileSameServiceIdAndDirectionId(lastSchedule: MSchedule?) = buildList {
-        add((departure - (lastSchedule?.departure ?: 0)).toString())
-        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
-            @Suppress("ControlFlowWithEmptyBody")
-            if (arrivalBeforeDeparture > 0) {
-                // TODO ?
+        val lastDeparture = if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
+            lastSchedule?.departure?.div(100)?.times(100)
+        } else {
+            lastSchedule?.departure
+        } ?: 0
+        if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
+            add((departure - lastDeparture).div(100).toString()) // truncates the time to an minute that is closer to 0
+        } else {
+            add((departure - lastDeparture).toString())
+        }
+        if (FeatureFlags.F_EXPORT_TRIP_ID) {
+            var arrivalDiff = (departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }
+            if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
+                arrivalDiff = arrivalDiff?.div(100) // truncates the time to an minute that is closer to 0
             }
-            add(arrivalBeforeDeparture.takeIf { it > 0 }?.toString().orEmpty()) // arrival before departure
-            add(_tripId.quotesEscape())
+            add(arrivalDiff?.toString().orEmpty())
+            add(MTripIds.convert(_tripId))
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
             add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString())
-            add(MDirection.HEADSIGN_DEFAULT_VALUE.quotes())
+            if (FeatureFlags.F_SCHEDULE_NO_QUOTES) {
+                add(MDirection.HEADSIGN_DEFAULT_VALUE)
+            } else {
+                add(MDirection.HEADSIGN_DEFAULT_VALUE.quotes())
+            }
         } else {
             add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
-            add(headsignValue.orEmpty().toStringIds().quotesEscape())
+            if (FeatureFlags.F_SCHEDULE_NO_QUOTES) {
+                add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS))
+            } else {
+                add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS).quotesEscape())
+            }
         }
         add(accessible.toString())
     }.joinToString(SQLUtils.COLUMN_SEPARATOR)
@@ -196,5 +191,7 @@ data class MSchedule(
             stopId: Int,
             departure: Int
         ) = "${serviceIdInt}$UID_SEPARATOR${directionId}$UID_SEPARATOR${stopId}$UID_SEPARATOR${departure}"
+
+        const val MIN_ARRIVAL_DIFF_IN_HH_MM_SS = 100 // 1 minute
     }
 }

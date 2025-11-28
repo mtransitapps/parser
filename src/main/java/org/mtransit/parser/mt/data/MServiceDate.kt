@@ -1,9 +1,7 @@
 package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
-import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.sql.SQLUtils
-import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.db.SQLUtils.unquotes
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GCalendarDate
@@ -40,11 +38,7 @@ data class MServiceDate(
     ).compare(this, other)
 
     fun toFile(agencyTools: GAgencyTools) = buildList {
-        if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-            add(MServiceIds.getInt(agencyTools.cleanServiceId(_serviceId)))
-        } else {
-            add(agencyTools.cleanServiceId(_serviceId).quotesEscape())
-        }
+        add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
         add(calendarDate.toString())
         add(exceptionType.toString())
     }.joinToString(SQLUtils.COLUMN_SEPARATOR)

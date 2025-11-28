@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.quotesEscape
@@ -35,18 +36,14 @@ data class MStop(
         GTFSCommons.stringIdToHash(originalId),
     )
 
-    fun hasLat(): Boolean {
-        return lat != 0.0
-    }
+    fun hasLat() = lat != 0.0
 
-    fun hasLng(): Boolean {
-        return lng != 0.0
-    }
+    fun hasLng() = lng != 0.0
 
     fun toFile() = listOf(
         id.toString(), // ID
         code.quotesEscape(), // code
-        name.toStringIds().quotesEscape(), // name
+        name.toStringIds(FeatureFlags.F_EXPORT_STRINGS).quotesEscape(), // name
         MDataChangedManager.avoidLatLngChanged(lat), // latitude
         MDataChangedManager.avoidLatLngChanged(lng), // longitude
         accessible.toString(),

@@ -342,6 +342,14 @@ public class GSpec {
 		this.tripIdIntsUIDs.put(gTrip.getTripIdInt(), gTrip.getUID());
 	}
 
+	@NotNull
+	private Collection<Integer> getAllTripRouteIdInts() {
+		if (USE_DB_ONLY) {
+			return GIDs.getInts(GTFSDataBase.selectTripRouteIds());
+		}
+		return this.routeIdIntTripsCache.keySet();
+	}
+
 	public int readTripsCount() {
 		if (USE_DB_ONLY) {
 			return GTFSDataBase.countTrips();
@@ -805,9 +813,7 @@ public class GSpec {
 		int r = 0;
 		try {
 			final Collection<Integer> allRouteIdsInt = getAllRouteIdInts(); // this agency & type & not excluded only
-			final Collection<Integer> allTripRouteIdInts =
-					USE_DB_ONLY ? GIDs.getInts(GTFSDataBase.selectTripRouteIds())
-							: this.routeIdIntTripsCache.keySet();
+			final Collection<Integer> allTripRouteIdInts = getAllTripRouteIdInts();
 			for (Integer tripRouteIdInt : allTripRouteIdInts) {
 				if (!allRouteIdsInt.contains(tripRouteIdInt)) {
 					final List<GTrip> routeTrips = getRouteTrips(tripRouteIdInt);
@@ -886,19 +892,19 @@ public class GSpec {
 		int r = 0;
 		try {
 			final Collection<Integer> allRouteIdsInt = getAllRouteIdInts();
-			final Collection<Integer> allTripIdsInt = getAllRouteIdInts();
-			HashSet<Integer> routeTripServiceIdInts = new HashSet<>();
+			final Collection<Integer> allTripRouteIdInts = getAllTripRouteIdInts();
+			final HashSet<Integer> notExcludedRouteTripServiceIdInts = new HashSet<>();
 			for (Integer gRouteIdInt : allRouteIdsInt) {
-				if (allTripIdsInt.contains(gRouteIdInt)) {
+				if (allTripRouteIdInts.contains(gRouteIdInt)) {
 					for (GTrip gTrip : getRouteTrips(gRouteIdInt)) {
-						routeTripServiceIdInts.add(gTrip.getServiceIdInt());
+						notExcludedRouteTripServiceIdInts.add(gTrip.getServiceIdInt());
 					}
 				}
 			}
 			final Iterator<GCalendar> itGCalendar = getAllCalendars().iterator();
 			while (itGCalendar.hasNext()) {
 				final GCalendar gCalendar = itGCalendar.next();
-				if (!routeTripServiceIdInts.contains(gCalendar.getServiceIdInt())) {
+				if (!notExcludedRouteTripServiceIdInts.contains(gCalendar.getServiceIdInt())) {
 					itGCalendar.remove();
 					if (ALL_CALENDARS_STORED_IN_CALENDAR_DATES) {
 						for (GCalendarDate gCalendarDate : gCalendar.flattenToCalendarDates()) {
@@ -917,7 +923,7 @@ public class GSpec {
 			Iterator<GCalendarDate> itGCalendarDate = getAllCalendarDates().iterator();
 			while (itGCalendarDate.hasNext()) {
 				GCalendarDate gCalendarDate = itGCalendarDate.next();
-				if (!routeTripServiceIdInts.contains(gCalendarDate.getServiceIdInt())) {
+				if (!notExcludedRouteTripServiceIdInts.contains(gCalendarDate.getServiceIdInt())) {
 					itGCalendarDate.remove();
 					GTFSDataBase.deleteCalendarDate(gCalendarDate.to());
 					logRemoved("Removed calendar date (or calendar): %s.", gCalendarDate.toStringPlus());
