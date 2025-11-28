@@ -135,7 +135,7 @@ object MReader {
             ?.readLines()
             ?.mapNotNull { transform(it) }
             ?: run {
-                MTLog.log("File not found '${"/$RAW/${fileBase}$$fileName"}'!")
+                MTLog.log("File not found for '$type' with fileBase '$fileBase' and fileName '$fileName'!")
                 null
             }
     } catch (e: Exception) {
