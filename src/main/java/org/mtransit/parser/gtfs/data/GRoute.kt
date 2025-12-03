@@ -176,7 +176,7 @@ data class GRoute(
             routeId = line[ROUTE_ID]?.trim()?.let { agencyTools.cleanRouteOriginalId(it) }
                 ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
             originalRouteId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
-            routeShortName = line[ROUTE_SHORT_NAME]?.trim()
+            routeShortName = line[ROUTE_SHORT_NAME]?.trim()?.let { agencyTools.cleanRouteShortName(it) }
                 ?.takeUnless { agencyTools.useRouteIdForRouteShortName() }
                 ?: line[ROUTE_ID]?.trim()?.let { agencyTools.cleanRouteOriginalId(it) }
                 ?: EMPTY,
@@ -232,9 +232,9 @@ data class GRoute(
             }
             val suffix = routeLongName1.commonSuffixWith(routeLongName2)
             if (suffix.length > maxLength / 2) {
-                return routeLongName1.substring(0, routeLongName1.length - suffix.length) +
+                return routeLongName1.dropLast(suffix.length) +
                         SLASH_ +
-                        routeLongName2.substring(0, routeLongName2.length - suffix.length) +
+                        routeLongName2.dropLast(suffix.length) +
                         suffix
             }
             return if (routeLongName1 > routeLongName2) {
