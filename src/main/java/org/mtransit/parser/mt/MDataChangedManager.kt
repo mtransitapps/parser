@@ -188,7 +188,7 @@ object MDataChangedManager {
         }
         @Suppress("LocalVariableName")
         val DATE_FORMAT = GFieldTypes.makeDateFormat()
-        removedCalendarsServiceDates.sortedDescending().forEach { removedServiceDate ->
+        removedCalendarsServiceDates.sortedWith(MServiceDate.COMPARATOR_BY_CALENDAR_DATE).reversed().forEach { removedServiceDate ->
             if (ALL_CALENDARS_IN_CALENDAR_DATES) {
                 return
             }

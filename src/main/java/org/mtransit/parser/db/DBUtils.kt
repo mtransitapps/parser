@@ -151,17 +151,17 @@ object DBUtils {
     @JvmStatic
     fun insertStopTime(gStopTime: GStopTime, preparedStatement: PreparedStatement) {
         try {
-            var idx = 1
+            var idx = 0
             with(preparedStatement) {
-                setInt(idx++, gStopTime.tripIdInt)
-                setInt(idx++, gStopTime.stopIdInt)
-                setInt(idx++, gStopTime.stopSequence)
-                setInt(idx++, gStopTime.arrivalTime)
-                setInt(idx++, gStopTime.departureTime)
-                setString(idx++, gStopTime.stopHeadsign?.quotesEscape())
-                setInt(idx++, gStopTime.pickupType.id)
-                setInt(idx++, gStopTime.dropOffType.id)
-                setInt(idx++, gStopTime.timePoint.id)
+                setInt(++idx, gStopTime.tripIdInt)
+                setInt(++idx, gStopTime.stopIdInt)
+                setInt(++idx, gStopTime.stopSequence)
+                setInt(++idx, gStopTime.arrivalTime)
+                setInt(++idx, gStopTime.departureTime)
+                setString(++idx, gStopTime.stopHeadsign?.quotesEscape())
+                setInt(++idx, gStopTime.pickupType.id)
+                setInt(++idx, gStopTime.dropOffType.id)
+                setInt(++idx, gStopTime.timePoint.id)
                 addBatch()
             }
             insertRowCount++
@@ -434,21 +434,11 @@ object DBUtils {
         // SERVICE ID
         serviceIdInt?.let {
             @Suppress("KotlinConstantConditions")
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.SERVICE_ID} = $serviceIdInt"
         }
         serviceIdInts?.let {
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.SERVICE_ID} IN ${
                 serviceIdInts
                     .distinct()
@@ -458,26 +448,15 @@ object DBUtils {
                         postfix = ")"
                     ) { "$it" }
             }"
-            whereAdded = true
         }
         // DIRECTION ID
         directionId?.let {
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.DIRECTION_ID} = $directionId"
 
         }
         directionIds?.let {
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.DIRECTION_ID} IN ${
                 directionIds
                     .distinct()
@@ -487,26 +466,15 @@ object DBUtils {
                         postfix = ")"
                     ) { "$it" }
             }"
-            whereAdded = true
         }
         // STOP ID
         stopIdInt?.let {
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.STOP_ID} = $stopIdInt"
 
         }
         stopIdInts?.let {
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.STOP_ID} IN ${
                 stopIdInts
                     .distinct()
@@ -516,25 +484,14 @@ object DBUtils {
                         postfix = ")"
                     ) { "$it" }
             }"
-            whereAdded = true
         }
         // ARRIVAL & DEPARTURE
         arrival?.let {
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.ARRIVAL} = $arrival"
         }
         departure?.let {
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
             query += " ${MSchedule.DEPARTURE} = $departure"
         }
         query += " ORDER BY " +
@@ -587,52 +544,27 @@ object DBUtils {
         var whereAdded = false
         serviceIdInt?.let {
             @Suppress("KotlinConstantConditions")
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.SERVICE_ID} = $serviceIdInt"
         }
         directionId?.let {
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.DIRECTION_ID} = $directionId"
 
         }
         // STOP ID
         stopIdInt?.let {
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.STOP_ID} = $stopIdInt"
 
         }
         // ARRIVAL & DEPARTURE
         arrival?.let {
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.ARRIVAL} = $arrival"
         }
         departure?.let {
-            query += if (whereAdded) {
-                " AND"
-            } else {
-                " WHERE"
-            }
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
             query += " ${MSchedule.DEPARTURE} = $departure"
         }
         deleteCount++
