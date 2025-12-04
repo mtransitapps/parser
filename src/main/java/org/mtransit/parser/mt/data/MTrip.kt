@@ -29,7 +29,7 @@ data class MTrip(
         get() = GIDs.getString(tripIdInt)
 
     fun toStringPlus() =
-        "${toString()}+(serviceId:$_serviceId)+(_tripId:$tripId)"
+        "${toString()}+(serviceId:$_serviceId)+(_tripId:$_tripId)"
 
     /**
      * see [org.mtransit.commons.GTFSCommons.T_TRIP_SQL_INSERT]
@@ -47,16 +47,13 @@ data class MTrip(
     fun isSameRouteDirectionService(other: MTrip?) =
         routeId == other?.routeId && directionId == other.directionId && serviceIdInt == other.serviceIdInt
 
-    override fun compareTo(other: MTrip): Int {
-        // sort by route_id => service_id => direction_id => trip_id
-        return when {
-            routeId != other.routeId -> routeId.compareTo(other.routeId)
-            directionId != other.directionId -> directionId.compareTo(other.directionId)
-            serviceIdInt != other.serviceIdInt -> _serviceId.compareTo(other._serviceId)
-            tripIdInt != other.tripIdInt -> tripIdInt.compareTo(other.tripIdInt)
-            else -> 0
-        }
-    }
+    override fun compareTo(other: MTrip) =
+        compareBy(
+            MTrip::routeId,
+            MTrip::directionId,
+            MTrip::_serviceId,
+            MTrip::_tripId,
+        ).compare(this, other)
 
     companion object {
 

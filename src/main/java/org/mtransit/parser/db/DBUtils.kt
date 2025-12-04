@@ -416,6 +416,7 @@ object DBUtils {
         }
     }
 
+    @Suppress("AssignedValueIsNeverRead")
     @JvmStatic
     fun selectSchedules(
         serviceIdInt: Int? = null,
@@ -491,7 +492,7 @@ object DBUtils {
             query += " ${MSchedule.ARRIVAL} = $arrival"
         }
         departure?.let {
-            query += if (whereAdded) " AND" else " WHERE"
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.DEPARTURE} = $departure"
         }
         query += " ORDER BY " +
@@ -531,7 +532,7 @@ object DBUtils {
         }
     }
 
-    @Suppress("unused")
+    @Suppress("unused", "AssignedValueIsNeverRead")
     @JvmStatic
     fun deleteSchedules(
         serviceIdInt: Int? = null,
@@ -564,7 +565,7 @@ object DBUtils {
             query += " ${MSchedule.ARRIVAL} = $arrival"
         }
         departure?.let {
-            query += if (whereAdded) " AND" else " WHERE"
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.DEPARTURE} = $departure"
         }
         deleteCount++
