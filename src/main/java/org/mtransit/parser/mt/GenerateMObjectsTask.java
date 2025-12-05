@@ -33,6 +33,7 @@ import org.mtransit.parser.mt.data.MSchedule;
 import org.mtransit.parser.mt.data.MServiceDate;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MStop;
+import org.mtransit.parser.mt.data.MTrip;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -92,6 +93,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		HashMap<Long, MRoute> mRoutes = new HashMap<>();
 		HashMap<Long, MDirection> mDirections = new HashMap<>();
 		HashMap<String, MDirectionStop> allMDirectionStops = new HashMap<>();
+		HashMap<Integer, MTrip> mTrips = new HashMap<>();
 		HashMap<Integer, MStop> mStops = new HashMap<>();
 		HashSet<Integer> directionStopIds = new HashSet<>(); // the list of stop IDs used by directions
 		HashSet<Integer> serviceIdInts = new HashSet<>();
@@ -136,6 +138,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				mAgencies,
 				mRoutes,
 				mDirections,
+				mTrips,
 				mStops,
 				allMDirectionStops,
 				directionStopIds,
@@ -168,6 +171,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Collections.sort(mAgenciesList);
 		ArrayList<MStop> mStopsList = new ArrayList<>(mStops.values());
 		Collections.sort(mStopsList);
+		ArrayList<MTrip> mTripsList = new ArrayList<>(mTrips.values());
+		Collections.sort(mTripsList);
 		ArrayList<MRoute> mRoutesList = new ArrayList<>(mRoutes.values());
 		Collections.sort(mRoutesList);
 		ArrayList<MDirection> mDirectionsList = new ArrayList<>(mDirections.values());
@@ -176,7 +181,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Collections.sort(mDirectionStopsList);
 		setDirectionStopNoPickup(mDirectionStopsList, mSchedules.values());
 		ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
-		Collections.sort(mServiceDatesList);
+		mServiceDatesList.sort(MServiceDate.getCOMPARATOR_BY_CALENDAR_DATE());
 		ArrayList<MFrequency> mFrequenciesList = new ArrayList<>(mFrequencies.values());
 		Collections.sort(mFrequenciesList);
 		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<>();
@@ -257,12 +262,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				throw new MTLog.Fatal(e, "Error while parsing dates '%s %s'!", lastCalendarDate, lastDeparture);
 			}
 		}
-		MSpec mRouteSpec = new MSpec(
+		final MSpec mRouteSpec = new MSpec(
 				mAgenciesList,
 				mStopsList,
 				mRoutesList,
 				mDirectionsList,
 				mDirectionStopsList,
+				mTripsList,
 				mServiceDatesList,
 				mRouteFrequencies,
 				firstTimestamp,
@@ -279,6 +285,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 						  HashMap<Integer, MAgency> mAgencies,
 						  HashMap<Long, MRoute> mRoutes,
 						  HashMap<Long, MDirection> mDirections,
+						  HashMap<Integer, MTrip> mTrips,
 						  HashMap<Integer, MStop> mStops,
 						  HashMap<String, MDirectionStop> allMDirectionStops,
 						  HashSet<Integer> directionStopIds,
@@ -341,6 +348,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					mSchedules,
 					mFrequencies,
 					mDirections,
+					mTrips,
 					mStops,
 					serviceIdInts,
 					mRoute,
@@ -450,6 +458,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	private void parseGTrips(HashMap<String, MSchedule> mSchedules,
 							 HashMap<String, MFrequency> mFrequencies,
 							 HashMap<Long, MDirection> mDirections,
+							 HashMap<Integer, MTrip> mTrips,
 							 HashMap<Integer, MStop> mStops,
 							 HashSet<Integer> serviceIdInts,
 							 MRoute mRoute,
@@ -603,6 +612,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					continue;
 				}
 				mDirections.put(mDirection.getId(), mDirection);
+				mTrips.put(gTrip.getTripIdInt(), MTrip.from(routeId, mDirection.getId(), gTrip));
 			}
 			if (g++ % 10 == 0) { // LOG
 				MTLog.logPOINT(); // LOG
