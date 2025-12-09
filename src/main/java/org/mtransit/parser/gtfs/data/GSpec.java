@@ -66,6 +66,8 @@ public class GSpec {
 	private final HashMap<Long, List<Integer>> mRouteIdToGRouteIdInts = new HashMap<>();
 	@NotNull
 	private final HashMap<Integer, Integer> tripIdIntRouteIdInt = new HashMap<>();
+	@NotNull
+	private final Set<Integer> tripOriginalRouteIdInt = new HashSet<>();
 
 	@NotNull
 	private final Map<Integer, List<GDirection>> routeIdIntDirectionsCache = new HashMap<>();
@@ -339,6 +341,7 @@ public class GSpec {
 		GTFSDataBase.insertTrip(gTrip.to(), insertStopTimePrepared);
 		CollectionUtils.addMapListValue(this.routeIdIntTripsCache, gTrip.getRouteIdInt(), gTrip);
 		this.tripIdIntRouteIdInt.put(gTrip.getTripIdInt(), gTrip.getRouteIdInt());
+		this.tripOriginalRouteIdInt.add(gTrip.getOriginalRouteIdInt());
 		this.tripIdIntsUIDs.put(gTrip.getTripIdInt(), gTrip.getUID());
 	}
 
@@ -396,6 +399,10 @@ public class GSpec {
 	@Nullable
 	private Integer getTripRouteId(Integer tripIdInt) {
 		return this.tripIdIntRouteIdInt.get(tripIdInt);
+	}
+
+	public boolean hasTripsOriginalRouteId(@NotNull Integer routeIdInt) {
+		return this.tripOriginalRouteIdInt.contains(routeIdInt);
 	}
 
 	@Deprecated

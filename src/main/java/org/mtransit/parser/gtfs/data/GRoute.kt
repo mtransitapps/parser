@@ -168,17 +168,18 @@ data class GRoute(
         private const val ROUTE_TEXT_COLOR = "route_text_color"
         private const val ROUTE_SORT_ORDER = "route_sort_order"
 
+        @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, defaultAgencyId: String?, agencyTools: GAgencyTools) = GRoute(
+        fun fromLine(line: Map<String, String>, defaultAgencyId: String?, agencyTools: GAgencyTools? = null) = GRoute(
             agencyId = line[AGENCY_ID]?.takeIf { it.isNotBlank() }
                 ?: defaultAgencyId
                 ?: throw MTLog.Fatal("Invalid GRoute.$AGENCY_ID from $line!"),
-            routeId = line[ROUTE_ID]?.trim()?.let { agencyTools.cleanRouteOriginalId(it) }
+            routeId = line[ROUTE_ID]?.trim()?.let { agencyTools?.cleanRouteOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
             originalRouteId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
-            routeShortName = line[ROUTE_SHORT_NAME]?.trim()?.takeIf { it.isNotEmpty() }?.let { agencyTools.cleanRouteShortName(it) }
-                ?.takeUnless { agencyTools.useRouteIdForRouteShortName() }
-                ?: line[ROUTE_ID]?.trim()?.let { agencyTools.cleanRouteOriginalId(it) }
+            routeShortName = line[ROUTE_SHORT_NAME]?.trim()?.takeIf { it.isNotEmpty() }?.let { agencyTools?.cleanRouteShortName(it) ?: it }
+                ?.takeUnless { agencyTools?.useRouteIdForRouteShortName() == true }
+                ?: line[ROUTE_ID]?.trim()?.let { agencyTools?.cleanRouteOriginalId(it) ?: it }
                 ?: EMPTY,
             routeLongName = line[ROUTE_LONG_NAME],
             routeDesc = line[ROUTE_DESC],

@@ -55,12 +55,13 @@ public class GReader {
 	@NotNull
 	private static final Set<String> stopTimesOriginalStopIdInts = new HashSet<>();
 
+	@SuppressWarnings("ConstantValue")
 	@NotNull
 	public static GSpec readGtfsZipFile(@NotNull String gtfsDir,
 										@NotNull final GAgencyTools agencyTools,
 										boolean calendarsOnly,
 										boolean routeTripCalendarsOnly) {
-		MTLog.log("Reading GTFS file '%s'...", gtfsDir);
+		MTLog.log("Reading GTFS file '%s'... (calendarsOnly:%s|routeTripCalendarsOnly:%s)", gtfsDir, calendarsOnly, routeTripCalendarsOnly);
 		long start = System.currentTimeMillis();
 		final GSpec gSpec = new GSpec();
 		GTFSDataBase.reset();
@@ -69,6 +70,7 @@ public class GReader {
 			throw new MTLog.Fatal("'%s' GTFS directory does not exist!", gtfsDirF);
 		}
 		try {
+			final boolean skipDataCleanup = calendarsOnly || routeTripCalendarsOnly;
 			// AGENCY
 			if (!calendarsOnly) {
 				readFile(gtfsDir, GAgency.FILENAME, true, line ->
@@ -87,21 +89,12 @@ public class GReader {
 			if (!hasCalendar) {
 				throw new MTLog.Fatal("'%s' & '%s' file do not exist!", GCalendar.FILENAME, GCalendarDate.FILENAME);
 			}
-			// ROUTES (before trips)
-			if (!calendarsOnly) {
-				final GAgency singleAgency = gSpec.getSingleAgency();
-				//noinspection DiscouragedApi
-				final String defaultAgencyId = singleAgency == null ? null : singleAgency.getAgencyId();
-				readFile(gtfsDir, GRoute.FILENAME, true, line ->
-						processRoute(agencyTools, gSpec, line, defaultAgencyId)
-				);
-			}
 			// TRIPS (after calendar* -> using service IDs)
 			if (!calendarsOnly) {
 				GTFSDataBase.setAutoCommit(false);
 				final PreparedStatement insertTripsPrepared = USE_PREPARED_STATEMENT ? GTFSDataBase.prepareInsertTrip(agencyTools.allowDuplicateKeyError()) : null;
 				readFile(gtfsDir, GTrip.FILENAME, true, line ->
-						processTrip(agencyTools, gSpec, line, insertTripsPrepared)
+						processTrip(agencyTools, gSpec, line, insertTripsPrepared, skipDataCleanup)
 				);
 				if (insertTripsPrepared != null) {
 					GTFSDataBase.executePreparedStatement(insertTripsPrepared);
@@ -109,16 +102,25 @@ public class GReader {
 				GTFSDataBase.commit();
 				GTFSDataBase.setAutoCommit(true); // true => commit()
 			}
+			// ROUTES (after trips)
+			if (!calendarsOnly) {
+				final GAgency singleAgency = gSpec.getSingleAgency();
+				//noinspection DiscouragedApi
+				final String defaultAgencyId = singleAgency == null ? null : singleAgency.getAgencyId();
+				readFile(gtfsDir, GRoute.FILENAME, true, line ->
+						processRoute(agencyTools, gSpec, line, defaultAgencyId, skipDataCleanup)
+				);
+			}
 			// DIRECTIONS (ext) (after route)
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				readFile(gtfsDir, GDirection.FILENAME, false, line ->
-						processDirection(agencyTools, gSpec, line)
+						processDirection(agencyTools, gSpec, line, skipDataCleanup)
 				);
 			}
 			// FREQUENCIES (after calendar* -> using service IDs)
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				readFile(gtfsDir, GFrequency.FILENAME, false, line ->
-						processFrequency(agencyTools, gSpec, line)
+						processFrequency(agencyTools, gSpec, line, skipDataCleanup)
 				);
 			}
 			// STOP TIMES
@@ -126,7 +128,7 @@ public class GReader {
 				GTFSDataBase.setAutoCommit(false);
 				final PreparedStatement insertStopTimePrepared = USE_PREPARED_STATEMENT ? GTFSDataBase.prepareInsertStopTime(agencyTools.allowDuplicateKeyError()) : null;
 				readFile(gtfsDir, GStopTime.FILENAME, true,
-						line -> processStopTime(agencyTools, gSpec, line, insertStopTimePrepared),
+						line -> processStopTime(agencyTools, gSpec, line, insertStopTimePrepared, skipDataCleanup),
 						columnNames -> {
 							if (!columnNames.contains(GStopTime.PICKUP_TYPE)) {
 								agencyTools.setForceStopTimeLastNoPickupType(true); // pickup types not provided
@@ -151,7 +153,7 @@ public class GReader {
 			// STOPS (after stop times)
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
 				readFile(gtfsDir, GStop.FILENAME, true, line ->
-						processStop(agencyTools, gSpec, line)
+						processStop(agencyTools, gSpec, line, skipDataCleanup)
 				);
 			}
 			// TODO OTHER FILES TYPE
@@ -290,9 +292,9 @@ public class GReader {
 	}
 
 	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line,
-										@Nullable PreparedStatement insertStopTimePrepared) {
+										@Nullable PreparedStatement insertStopTimePrepared, boolean skipDataCleanup) {
 		try {
-			final GStopTime gStopTime = GStopTime.fromLine(line, agencyTools);
+			final GStopTime gStopTime = skipDataCleanup ? GStopTime.fromLine(line) : GStopTime.fromLine(line, agencyTools);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
 				return;
 			}
@@ -320,11 +322,13 @@ public class GReader {
 		}
 	}
 
-	private static void processFrequency(GAgencyTools agencyTools,
-										 GSpec gSpec,
-										 HashMap<String, String> line) {
+	private static void processFrequency(
+			GAgencyTools agencyTools,
+			GSpec gSpec,
+			HashMap<String, String> line,
+			boolean skipDataCleanup) {
 		try {
-			final GFrequency gFrequency = GFrequency.fromLine(line, agencyTools);
+			final GFrequency gFrequency = skipDataCleanup ? GFrequency.fromLine(line) : GFrequency.fromLine(line, agencyTools);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gFrequency.getTripIdInt()))) {
 				return;
 			}
@@ -378,9 +382,9 @@ public class GReader {
 		}
 	}
 
-	private static void processDirection(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
+	private static void processDirection(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line, boolean skipDataCleanup) {
 		try {
-			final GDirection gDirection = GDirection.fromLine(line, agencyTools);
+			final GDirection gDirection = skipDataCleanup ? GDirection.fromLine(line) : GDirection.fromLine(line, agencyTools);
 			final GRoute gRoute = gSpec.getRoute(gDirection.getRouteIdInt());
 			if (agencyTools.excludeRouteNullable(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute == null ? null : gRoute.toStringPlus());
@@ -399,14 +403,15 @@ public class GReader {
 	}
 
 	private static void processTrip(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line,
-									@Nullable PreparedStatement insertStopTimePrepared) {
+									@Nullable PreparedStatement insertStopTimePrepared, boolean skipDataCleanup) {
 		try {
-			final GTrip gTrip = GTrip.fromLine(line, agencyTools);
+			final GTrip gTrip = skipDataCleanup ? GTrip.fromLine(line) : GTrip.fromLine(line, agencyTools);
 			if (agencyTools.excludeTrip(gTrip)) {
 				logExclude("Exclude trip: %s.", gTrip.toStringPlus());
 				return;
 			}
-			if (agencyTools.excludeRouteNullable(gSpec.getRoute(gTrip.getRouteIdInt()))) {
+			//noinspection PointlessBooleanExpression route parse after trips
+			if (false && agencyTools.excludeRouteNullable(gSpec.getRoute(gTrip.getRouteIdInt()))) {
 				logExclude("Exclude trip (!route): %s.", gTrip.toStringPlus());
 				return;
 			}
@@ -423,9 +428,9 @@ public class GReader {
 		}
 	}
 
-	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line) {
+	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line, boolean skipDataCleanup) {
 		try {
-			final GStop gStop = GStop.fromLine(line, agencyTools);
+			final GStop gStop = skipDataCleanup ? GStop.fromLine(line) : GStop.fromLine(line, agencyTools);
 			if (agencyTools.excludeStop(gStop)) {
 				return;
 			}
@@ -455,9 +460,9 @@ public class GReader {
 		}
 	}
 
-	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line, @Nullable String defaultAgencyId) {
+	private static void processRoute(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line, @Nullable String defaultAgencyId, boolean skipDataCleanup) {
 		try {
-			final GRoute gRoute = GRoute.fromLine(line, defaultAgencyId, agencyTools);
+			final GRoute gRoute = skipDataCleanup ? GRoute.fromLine(line, defaultAgencyId) : GRoute.fromLine(line, defaultAgencyId, agencyTools);
 			final GAgency routeAgency = gSpec.getAgency(gRoute.getAgencyIdInt());
 			if (agencyTools.excludeRoute(gRoute)) {
 				logExclude("Exclude route: %s.", gRoute.toStringPlus());
@@ -474,6 +479,10 @@ public class GReader {
 						|| (!gRoute.hasAgencyId() && routeAgency == null)) {
 					gSpec.addOtherRoute(gRoute);
 				}
+				return;
+			}
+			if (!gSpec.hasTripsOriginalRouteId(gRoute.getOriginalRouteIdInt())) {
+				logExclude("Exclude original route (no trips): %s.", gRoute.toStringPlus());
 				return;
 			}
 			if (agencyTools.getRouteIdCleanupRegex() != null) { // IF route ID cleanup regex set DO
