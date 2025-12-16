@@ -171,6 +171,8 @@ public interface GAgencyTools {
 
 	@NotNull String cleanTripOriginalId(@NotNull String gTripId);
 
+	void forgetOriginalTripId(@NotNull String gTripOriginalId);
+
 	boolean directionSplitterEnabled(long routeId);
 
 	boolean directionOverrideId(long routeId);

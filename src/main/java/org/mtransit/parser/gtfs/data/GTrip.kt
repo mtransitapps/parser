@@ -132,7 +132,7 @@ data class GTrip(
 
         internal const val TRIP_ID = "trip_id"
         private const val ROUTE_ID = GRoute.ROUTE_ID
-        private const val SERVICE_ID = "service_id"
+        internal const val SERVICE_ID = "service_id"
         private const val TRIP_HEADSIGN = "trip_headsign"
         private const val TRIP_SHORT_NAME = "trip_short_name"
         private const val DIRECTION_ID = "direction_id"

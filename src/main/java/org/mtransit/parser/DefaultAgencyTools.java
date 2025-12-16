@@ -718,10 +718,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private final Map<String, String> tripIdToCleanupTripId = new HashMap<>();
 
 	@Override
-	public @NotNull String cleanTripOriginalId(@NotNull String gTripId) {
-		final String cleanTripId = GTFSCommons.cleanOriginalId(gTripId, getTripIdCleanupPattern());
-		this.tripIdToCleanupTripId.put(gTripId, cleanTripId);
+	public @NotNull String cleanTripOriginalId(@NotNull String gOriginalTripId) {
+		final String cleanTripId = GTFSCommons.cleanOriginalId(gOriginalTripId, getTripIdCleanupPattern());
+		this.tripIdToCleanupTripId.put(gOriginalTripId, cleanTripId);
 		return cleanTripId;
+	}
+
+	@Override
+	public void forgetOriginalTripId(@NotNull String gOriginalTripId) {
+		this.tripIdToCleanupTripId.remove(gOriginalTripId);
 	}
 
 	@Override

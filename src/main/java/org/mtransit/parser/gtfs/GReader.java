@@ -53,7 +53,11 @@ public class GReader {
 	// private static final boolean USE_PREPARED_STATEMENT = false;
 
 	@NotNull
+	private static final Set<String> serviceOriginalIds = new HashSet<>();
+	@NotNull
 	private static final Set<String> stopTimesOriginalStopIds = new HashSet<>();
+	@NotNull
+	private static final Set<String> tripOriginalIds = new HashSet<>();
 
 	@SuppressWarnings("ConstantValue")
 	@NotNull
@@ -65,6 +69,9 @@ public class GReader {
 		long start = System.currentTimeMillis();
 		final GSpec gSpec = new GSpec();
 		GTFSDataBase.reset();
+		serviceOriginalIds.clear();
+		stopTimesOriginalStopIds.clear();
+		tripOriginalIds.clear();
 		File gtfsDirF = new File(gtfsDir);
 		if (!gtfsDirF.exists()) {
 			throw new MTLog.Fatal("'%s' GTFS directory does not exist!", gtfsDirF);
@@ -296,13 +303,22 @@ public class GReader {
 		try {
 			final GStopTime gStopTime = skipDataCleanup ? GStopTime.fromLine(line) : GStopTime.fromLine(line, agencyTools);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
-				// logExclude("Exclude stop time (!trip): %s.", gStopTime.toStringPlus());
-				agencyTools.forgetOriginalStopId(line.get(GStop.STOP_ID));
+				// logExclude("Exclude stop time (!trip): %s.", line.get(GStopTime.TRIP_ID));
+				agencyTools.forgetOriginalStopId(line.get(GStopTime.STOP_ID));
+				agencyTools.forgetOriginalTripId(line.get(GStopTime.TRIP_ID));
+				return;
+			}
+			if (!tripOriginalIds.contains(line.get(GStopTime.TRIP_ID))) {
+				// logExclude("Exclude stop time (!trip ID): %s.", line.get(GStopTime.TRIP_ID));
+				agencyTools.forgetOriginalStopId(line.get(GStopTime.STOP_ID));
+				agencyTools.forgetOriginalTripId(line.get(GStopTime.TRIP_ID));
 				return;
 			}
 			//noinspection PointlessBooleanExpression STOP not parsed yet
 			if (false && agencyTools.excludeStopNullable(gSpec.getStop(gStopTime.getStopIdInt()))) {
-				agencyTools.forgetOriginalStopId(line.get(GStop.STOP_ID));
+				// logExclude("Exclude stop time (!stop): %s.", line.get(GStopTime.STOP_ID));
+				agencyTools.forgetOriginalStopId(line.get(GStopTime.STOP_ID));
+				agencyTools.forgetOriginalTripId(line.get(GStopTime.TRIP_ID));
 				return;
 			}
 			if (gStopTime.getPickupType() != GPickupType.REGULAR) {
@@ -312,8 +328,9 @@ public class GReader {
 				agencyTools.setStopTimesHasDropOffTypeNotRegular(true);
 			}
 			if (agencyTools.excludeStopTime(gStopTime)) {
-				// logExclude("Exclude stop time (agency): %s.", gStopTime.toStringPlus());
-				agencyTools.forgetOriginalStopId(line.get(GStop.STOP_ID));
+				// logExclude("Exclude stop time (agency): %s.", gStopTime.toStringPlus(false));
+				agencyTools.forgetOriginalStopId(line.get(GStopTime.STOP_ID));
+				agencyTools.forgetOriginalTripId(line.get(GStopTime.TRIP_ID));
 				return;
 			}
 			if (insertStopTimePrepared != null) {
@@ -321,7 +338,7 @@ public class GReader {
 			} else {
 				gSpec.addStopTime(gStopTime, false);
 			}
-			stopTimesOriginalStopIds.add(line.get(GStopTime.STOP_ID));
+			stopTimesOriginalStopIds.add(line.get(GStopTime.STOP_ID)); // stops AFTER stop times
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while parsing: '%s'!", line);
 		}
@@ -335,6 +352,7 @@ public class GReader {
 		try {
 			final GFrequency gFrequency = skipDataCleanup ? GFrequency.fromLine(line) : GFrequency.fromLine(line, agencyTools);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gFrequency.getTripIdInt()))) {
+				agencyTools.forgetOriginalTripId(line.get(GFrequency.TRIP_ID));
 				return;
 			}
 			gSpec.addFrequency(gFrequency);
@@ -369,6 +387,7 @@ public class GReader {
 			if (agencyTools.excludeCalendarDate(gCalendarDate)) {
 				return;
 			}
+			serviceOriginalIds.add(line.get(GCalendarDate.SERVICE_ID));
 			gSpec.addCalendarDate(gCalendarDate);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while processing calendar date: '%s'!", line);
@@ -381,6 +400,7 @@ public class GReader {
 			if (agencyTools.excludeCalendar(gCalendar)) {
 				return;
 			}
+			serviceOriginalIds.add(line.get(GCalendar.SERVICE_ID));
 			gSpec.addCalendar(gCalendar);
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while processing calendar: %s!", line);
@@ -415,12 +435,20 @@ public class GReader {
 			if (agencyTools.excludeTrip(gTrip)) {
 				//noinspection DiscouragedApi
 				logExclude("Exclude trip: %s.", line.get(GTrip.TRIP_ID));
+				agencyTools.forgetOriginalTripId(line.get(GTrip.TRIP_ID));
+				return;
+			}
+			if (!serviceOriginalIds.contains(line.get(GTrip.SERVICE_ID))) {
+				//noinspection DiscouragedApi
+				logExclude("Exclude trip (!service): %s.", line.get(GTrip.SERVICE_ID));
+				agencyTools.forgetOriginalTripId(line.get(GTrip.TRIP_ID));
 				return;
 			}
 			//noinspection PointlessBooleanExpression route parse after trips
 			if (false && agencyTools.excludeRouteNullable(gSpec.getRoute(gTrip.getRouteIdInt()))) {
 				//noinspection DiscouragedApi
 				logExclude("Exclude trip (!route): %s.", line.get(GTrip.TRIP_ID));
+				agencyTools.forgetOriginalTripId(line.get(GTrip.TRIP_ID));
 				return;
 			}
 			if (StringUtils.isEmpty(gTrip.getTripHeadsign())) {
@@ -431,6 +459,7 @@ public class GReader {
 				gTrip.setTripHeadsign(agencyTools.provideMissingTripHeadSign(gTrip));
 			}
 			gSpec.addTrip(gTrip, insertStopTimePrepared);
+			tripOriginalIds.add(line.get(GTrip.TRIP_ID)); // trips BEFORE stop times
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while processing trip: %s", line);
 		}

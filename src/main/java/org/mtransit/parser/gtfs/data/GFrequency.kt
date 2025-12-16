@@ -77,7 +77,7 @@ data class GFrequency(
     companion object {
         const val FILENAME = "frequencies.txt"
 
-        private const val TRIP_ID = GTrip.TRIP_ID
+        internal const val TRIP_ID = GTrip.TRIP_ID
         private const val START_TIME = "start_time"
         private const val END_TIME = "end_time"
         private const val HEADWAY_SECS = "headway_secs"

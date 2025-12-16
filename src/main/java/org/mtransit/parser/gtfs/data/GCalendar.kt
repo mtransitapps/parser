@@ -205,7 +205,7 @@ data class GCalendar(
     companion object {
         const val FILENAME = "calendar.txt"
 
-        private const val SERVICE_ID = "service_id"
+        internal const val SERVICE_ID = "service_id"
         private const val MONDAY = "monday"
         private const val TUESDAY = "tuesday"
         private const val WEDNESDAY = "wednesday"
