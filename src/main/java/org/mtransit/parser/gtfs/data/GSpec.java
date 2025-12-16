@@ -821,26 +821,27 @@ public class GSpec {
 		try {
 			final Collection<Integer> allRouteIdsInt = getAllRouteIdInts(); // this agency & type & not excluded only
 			final Collection<Integer> allTripRouteIdInts = getAllTripRouteIdInts();
-			for (Integer tripRouteIdInt : allTripRouteIdInts) {
-				if (!allRouteIdsInt.contains(tripRouteIdInt)) {
-					final List<GTrip> routeTrips = getRouteTrips(tripRouteIdInt);
-					for (GTrip gTrip : routeTrips) {
-						if (this.tripIdIntsUIDs.remove(gTrip.getTripIdInt()) != null) {
-							r++;
-						}
-						if (GTFSDataBase.deleteStopTimes(GIDs.getString(gTrip.getTripIdInt())) > 0) {
-							r++;
-						}
-						if (this.tripIdIntFrequenciesCache.remove(gTrip.getTripIdInt()) != null) {
-							r++;
-						}
-						GTFSDataBase.deleteFrequency(GIDs.getString(gTrip.getTripIdInt()));
-					}
-					this.routeIdIntTripsCache.remove(tripRouteIdInt);
-					GTFSDataBase.deleteTrips(GIDs.getString(tripRouteIdInt));
-					r++;
-					MTLog.logPOINT();
+			for (Iterator<Integer> iterator = allTripRouteIdInts.iterator(); iterator.hasNext(); ) {
+				final Integer tripRouteIdInt = iterator.next();
+				if (allRouteIdsInt.contains(tripRouteIdInt)) {
+					continue;
 				}
+				for (GTrip gTrip : getRouteTrips(tripRouteIdInt)) {
+					if (this.tripIdIntsUIDs.remove(gTrip.getTripIdInt()) != null) {
+						r++;
+					}
+					if (GTFSDataBase.deleteStopTimes(GIDs.getString(gTrip.getTripIdInt())) > 0) {
+						r++;
+					}
+					if (this.tripIdIntFrequenciesCache.remove(gTrip.getTripIdInt()) != null) {
+						r++;
+					}
+					GTFSDataBase.deleteFrequency(GIDs.getString(gTrip.getTripIdInt()));
+				}
+				iterator.remove(); // this.routeIdIntTripsCache.remove(tripRouteIdInt);
+				GTFSDataBase.deleteTrips(GIDs.getString(tripRouteIdInt));
+				r++;
+				MTLog.logPOINT();
 			}
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while removing more excluded data!");
