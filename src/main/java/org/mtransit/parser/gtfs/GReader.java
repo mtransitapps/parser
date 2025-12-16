@@ -53,7 +53,7 @@ public class GReader {
 	// private static final boolean USE_PREPARED_STATEMENT = false;
 
 	@NotNull
-	private static final Set<String> stopTimesOriginalStopIdInts = new HashSet<>();
+	private static final Set<String> stopTimesOriginalStopIds = new HashSet<>();
 
 	@SuppressWarnings("ConstantValue")
 	@NotNull
@@ -296,10 +296,13 @@ public class GReader {
 		try {
 			final GStopTime gStopTime = skipDataCleanup ? GStopTime.fromLine(line) : GStopTime.fromLine(line, agencyTools);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
+				// logExclude("Exclude stop time (!trip): %s.", gStopTime.toStringPlus());
+				agencyTools.forgetOriginalStopId(line.get(GStop.STOP_ID));
 				return;
 			}
 			//noinspection PointlessBooleanExpression STOP not parsed yet
 			if (false && agencyTools.excludeStopNullable(gSpec.getStop(gStopTime.getStopIdInt()))) {
+				agencyTools.forgetOriginalStopId(line.get(GStop.STOP_ID));
 				return;
 			}
 			if (gStopTime.getPickupType() != GPickupType.REGULAR) {
@@ -309,6 +312,8 @@ public class GReader {
 				agencyTools.setStopTimesHasDropOffTypeNotRegular(true);
 			}
 			if (agencyTools.excludeStopTime(gStopTime)) {
+				// logExclude("Exclude stop time (agency): %s.", gStopTime.toStringPlus());
+				agencyTools.forgetOriginalStopId(line.get(GStop.STOP_ID));
 				return;
 			}
 			if (insertStopTimePrepared != null) {
@@ -316,7 +321,7 @@ public class GReader {
 			} else {
 				gSpec.addStopTime(gStopTime, false);
 			}
-			stopTimesOriginalStopIdInts.add(line.get(GStopTime.STOP_ID));
+			stopTimesOriginalStopIds.add(line.get(GStopTime.STOP_ID));
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while parsing: '%s'!", line);
 		}
@@ -387,13 +392,14 @@ public class GReader {
 			final GDirection gDirection = skipDataCleanup ? GDirection.fromLine(line) : GDirection.fromLine(line, agencyTools);
 			final GRoute gRoute = gSpec.getRoute(gDirection.getRouteIdInt());
 			if (agencyTools.excludeRouteNullable(gRoute)) {
-				logExclude("Exclude route: %s.", gRoute == null ? null : gRoute.toStringPlus());
+				//noinspection DiscouragedApi
+				logExclude("Exclude direction (!route): %s | %s.", gRoute == null ? null : gRoute.getRouteId(), gDirection.getDirectionId());
 				return;
 			}
 			final GDirection existingDirection = gSpec.getDirection(gDirection.getRouteIdInt(), gDirection.getDirectionId());
 			if (existingDirection != null) {
 				//noinspection DiscouragedApi
-				MTLog.logDebug("Duplicate direction ID for route ID! (new:%s|old:%s)", gDirection, existingDirection);
+				MTLog.logDebug("Duplicate direction ID for route ID! (new:%s|old:%s)", gDirection.getDirectionId(), existingDirection.getDirectionId());
 				return; // SKIP last declared (KEEP 1st declared)
 			}
 			gSpec.addDirection(gDirection);
@@ -407,12 +413,14 @@ public class GReader {
 		try {
 			final GTrip gTrip = skipDataCleanup ? GTrip.fromLine(line) : GTrip.fromLine(line, agencyTools);
 			if (agencyTools.excludeTrip(gTrip)) {
-				logExclude("Exclude trip: %s.", gTrip.toStringPlus());
+				//noinspection DiscouragedApi
+				logExclude("Exclude trip: %s.", line.get(GTrip.TRIP_ID));
 				return;
 			}
 			//noinspection PointlessBooleanExpression route parse after trips
 			if (false && agencyTools.excludeRouteNullable(gSpec.getRoute(gTrip.getRouteIdInt()))) {
-				logExclude("Exclude trip (!route): %s.", gTrip.toStringPlus());
+				//noinspection DiscouragedApi
+				logExclude("Exclude trip (!route): %s.", line.get(GTrip.TRIP_ID));
 				return;
 			}
 			if (StringUtils.isEmpty(gTrip.getTripHeadsign())) {
@@ -432,15 +440,21 @@ public class GReader {
 		try {
 			final GStop gStop = skipDataCleanup ? GStop.fromLine(line) : GStop.fromLine(line, agencyTools);
 			if (agencyTools.excludeStop(gStop)) {
+				//noinspection DiscouragedApi
+				logExclude("Exclude stop: %s.", line.get(GStop.STOP_ID));
+				agencyTools.forgetOriginalStopId(line.get(GStop.STOP_ID));
 				return;
 			}
-			final boolean hasStopTimes = stopTimesOriginalStopIdInts.contains(line.get(GStop.STOP_ID));
-			if (!hasStopTimes) {
+			if (!stopTimesOriginalStopIds.contains(line.get(GStop.STOP_ID))) {
+				//noinspection DiscouragedApi
+				logExclude("Exclude stop (!stop times): %s.", line.get(GStop.STOP_ID));
+				agencyTools.forgetOriginalStopId(line.get(GStop.STOP_ID));
 				return;
 			}
 			if (agencyTools.getStopIdCleanupRegex() != null) { // IF stop ID cleanup regex set DO
 				final GStop previousStop = gSpec.getStop(gStop.getStopIdInt());
 				if (previousStop != null && previousStop.equals(gStop)) {
+					agencyTools.forgetOriginalStopId(line.get(GStop.STOP_ID));
 					return; // ignore if stop already exists with same values
 				}
 				if (previousStop != null && previousStop.equalsExceptMergeable(gStop)) {
@@ -465,7 +479,8 @@ public class GReader {
 			final GRoute gRoute = skipDataCleanup ? GRoute.fromLine(line, defaultAgencyId) : GRoute.fromLine(line, defaultAgencyId, agencyTools);
 			final GAgency routeAgency = gSpec.getAgency(gRoute.getAgencyIdInt());
 			if (agencyTools.excludeRoute(gRoute)) {
-				logExclude("Exclude route: %s.", gRoute.toStringPlus());
+				//noinspection DiscouragedApi
+				logExclude("Exclude route: %s.", line.get(GRoute.ROUTE_ID));
 				if ((gRoute.hasAgencyId() && routeAgency != null)
 						|| (!gRoute.hasAgencyId() && routeAgency == null)) {
 					gSpec.addOtherRoute(gRoute);
@@ -474,7 +489,8 @@ public class GReader {
 			}
 			if (gRoute.hasAgencyId()
 					&& agencyTools.excludeAgencyNullable(routeAgency)) {
-				logExclude("Exclude route (!agency): %s.", gRoute.toStringPlus());
+				//noinspection DiscouragedApi
+				logExclude("Exclude route (!agency): %s.", line.get(GRoute.ROUTE_ID));
 				if ((gRoute.hasAgencyId() && routeAgency != null)
 						|| (!gRoute.hasAgencyId() && routeAgency == null)) {
 					gSpec.addOtherRoute(gRoute);
@@ -482,7 +498,8 @@ public class GReader {
 				return;
 			}
 			if (!gSpec.hasTripsOriginalRouteId(gRoute.getOriginalRouteIdInt())) {
-				logExclude("Exclude original route (no trips): %s.", gRoute.toStringPlus());
+				//noinspection DiscouragedApi
+				logExclude("Exclude original route (!trips): %s.", line.get(GRoute.ROUTE_ID));
 				return;
 			}
 			if (agencyTools.getRouteIdCleanupRegex() != null) { // IF route ID cleanup regex set DO

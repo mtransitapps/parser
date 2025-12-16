@@ -1112,10 +1112,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@NotNull
 	@Override
-	public String cleanStopOriginalId(@NotNull String gStopId) {
-		final String cleanStopId = GTFSCommons.cleanOriginalId(gStopId, getStopIdCleanupPattern());
-		this.stopIdToCleanupStopId.put(gStopId, cleanStopId);
+	public String cleanStopOriginalId(@NotNull String gStopOriginalId) {
+		final String cleanStopId = GTFSCommons.cleanOriginalId(gStopOriginalId, getStopIdCleanupPattern());
+		this.stopIdToCleanupStopId.put(gStopOriginalId, cleanStopId);
 		return cleanStopId;
+	}
+
+	@Override
+	public void forgetOriginalStopId(@NotNull String gStopOriginalId) {
+		this.stopIdToCleanupStopId.remove(gStopOriginalId);
 	}
 
 	@Override

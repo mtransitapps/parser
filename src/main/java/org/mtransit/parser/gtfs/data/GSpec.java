@@ -283,7 +283,7 @@ public class GSpec {
 	@NotNull
 	private Collection<Integer> getAllRouteIdInts() {
 		if (USE_DB_ONLY) {
-			return GIDs.getInts(GTFSDataBase.selectRoutesIds());
+			return GIDs.getInts(GTFSDataBase.selectRouteIds());
 		}
 		return this.routesCache.keySet();
 	}
@@ -324,6 +324,14 @@ public class GSpec {
 			return GStop.from(GTFSDataBase.selectStops());
 		}
 		return this.stopsCache.values();
+	}
+
+	@NotNull
+	private Collection<String> getAllStopIds() {
+		if (USE_DB_ONLY) {
+			return GTFSDataBase.selectStopIds();
+		}
+		return GIDs.getStrings(this.stopsCache.keySet());
 	}
 
 	private int readStopsCount() {
@@ -590,9 +598,9 @@ public class GSpec {
 		MTLog.log("Cleanup GTFS stops...");
 		final int originalStopCount = readStopsCount();
 		int su = 0;
-		Collection<GStop> allStops = getAllStops();
+		final Collection<GStop> allStops = getAllStops();
 		for (GStop gStop : allStops) {
-			Integer parentStationIdInt = gStop.getParentStationIdInt();
+			final Integer parentStationIdInt = gStop.getParentStationIdInt();
 			if (parentStationIdInt != null) {
 				final GStop parentStation = getStop(parentStationIdInt);
 				if (parentStation != null && parentStation.getWheelchairBoarding() != GWheelchairBoardingType.NO_INFO) {
@@ -604,7 +612,7 @@ public class GSpec {
 			}
 		}
 		GTFSDataBase.deleteStops(GLocationType.STOP_PLATFORM.getId());
-		int sr = originalStopCount - readStopsCount();
+		final int sr = originalStopCount - readStopsCount();
 		MTLog.log("Cleanup GTFS stops... DONE");
 		MTLog.log("- Stops: %d (%d removed | %d updated)", readStopsCount(), sr, su);
 	}
