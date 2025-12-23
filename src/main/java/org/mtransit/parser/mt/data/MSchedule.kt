@@ -2,8 +2,7 @@ package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
 import org.mtransit.commons.FeatureFlags
-import org.mtransit.parser.Constants
-import org.mtransit.parser.DefaultAgencyTools
+import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
 import org.mtransit.parser.db.SQLUtils.quotes
@@ -16,15 +15,13 @@ data class MSchedule(
     val serviceIdInt: Int,
     val directionId: Long,
     val stopId: Int,
-    val arrival: Int,
-    val departure: Int,
+    val arrival: Int, // HHmmss
+    val departure: Int, // HHmmss
     val tripIdInt: Int,
     val accessible: Int,
     var headsignType: Int = -1,
     var headsignValue: String? = null,
 ) : Comparable<MSchedule> {
-
-    private val arrivalBeforeDeparture: Int = departure - arrival
 
     constructor(
         routeId: Long,
@@ -45,27 +42,19 @@ data class MSchedule(
         accessible = accessible,
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val serviceId = _serviceId
+    @get:Discouraged(message = "Not memory efficient")
+    val serviceId: String get() = _serviceId
 
     private val _serviceId: String
-        get() {
-            return GIDs.getString(serviceIdInt)
-        }
+        get() = GIDs.getString(serviceIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val tripId = _tripId
+    @get:Discouraged(message = "Not memory efficient")
+    val tripId: String get() = _tripId
 
     private val _tripId: String
-        get() {
-            return GIDs.getString(tripIdInt)
-        }
-
-    private fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(_serviceId)
-    }
+        get() = GIDs.getString(tripIdInt)
 
     fun setHeadsign(newHeadsignType: Int, newHeadsignValue: String?) {
         if (newHeadsignValue.isNullOrBlank()
@@ -105,68 +94,47 @@ data class MSchedule(
                 "+(uID:$uID)"
     }
 
-    fun toFileNewServiceIdAndDirectionId(agencyTools: GAgencyTools) = buildString {
-        append(getCleanServiceId(agencyTools).quotesEscape()) // service ID
-        append(Constants.COLUMN_SEPARATOR) //
-        // no route ID, just for file split
-        append(directionId) // direction ID
-        append(Constants.COLUMN_SEPARATOR) //
-        append(departure) // departure
-        append(Constants.COLUMN_SEPARATOR) //
-        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
-            @Suppress("ControlFlowWithEmptyBody")
-            if (arrivalBeforeDeparture > 0) {
-                // TODO ?
-            }
-            append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
-            append(Constants.COLUMN_SEPARATOR) //
+    fun toFile(agencyTools: GAgencyTools, lastSchedule: MSchedule?) = buildList {
+        if (lastSchedule == null) { // NEW
+            add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+            // no route ID, just for file split
+            add(directionId.toString())
         }
-        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
-            append(_tripId.quotesEscape())
-            append(Constants.COLUMN_SEPARATOR) //
-        }
-        append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
-        append(Constants.COLUMN_SEPARATOR) //
-        append((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
-        if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
-            append(Constants.COLUMN_SEPARATOR) //
-            append(accessible)
-        }
-    }
-
-    fun toFileSameServiceIdAndDirectionId(lastSchedule: MSchedule?) = buildString {
-        if (lastSchedule == null) {
-            append(departure) // departure
+        val lastDeparture = if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
+            lastSchedule?.departure?.div(100)?.times(100)
         } else {
-            append(departure - lastSchedule.departure) // departure
+            lastSchedule?.departure
+        } ?: 0
+        if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
+            add((departure - lastDeparture).div(100).toString()) // truncates the time to an minute that is closer to 0
+        } else {
+            add((departure - lastDeparture).toString())
         }
-        append(Constants.COLUMN_SEPARATOR) //
-        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
-            @Suppress("ControlFlowWithEmptyBody")
-            if (arrivalBeforeDeparture > 0) {
-                // TODO ?
+        if (FeatureFlags.F_EXPORT_TRIP_ID) {
+            var arrivalDiff = (departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }
+            if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
+                arrivalDiff = arrivalDiff?.div(100) // truncates the time to an minute that is closer to 0
             }
-            append(if (arrivalBeforeDeparture <= 0) Constants.EMPTY else arrivalBeforeDeparture) // arrival before departure
-            append(Constants.COLUMN_SEPARATOR) //
-        }
-        if (DefaultAgencyTools.EXPORT_TRIP_ID) {
-            append(_tripId)
-            append(Constants.COLUMN_SEPARATOR) //
+            add(arrivalDiff?.toString().orEmpty())
+            add(MTripIds.convert(_tripId))
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
-            append(MDirection.HEADSIGN_TYPE_NO_PICKUP) // HEADSIGN TYPE
-            append(Constants.COLUMN_SEPARATOR) //
-            append(Constants.EMPTY.quotes()) // HEADSIGN STRING
+            add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString())
+            if (FeatureFlags.F_SCHEDULE_NO_QUOTES) {
+                add(MDirection.HEADSIGN_DEFAULT_VALUE)
+            } else {
+                add(MDirection.HEADSIGN_DEFAULT_VALUE.quotes())
+            }
         } else {
-            append(if (headsignType < 0) Constants.EMPTY else headsignType) // HEADSIGN TYPE
-            append(Constants.COLUMN_SEPARATOR) //
-            append((headsignValue ?: Constants.EMPTY).quotesEscape()) // HEADSIGN STRING
+            add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
+            if (FeatureFlags.F_SCHEDULE_NO_QUOTES) {
+                add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS))
+            } else {
+                add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS).quotesEscape())
+            }
         }
-        if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
-            append(Constants.COLUMN_SEPARATOR) //
-            append(accessible)
-        }
-    }
+        add(accessible.toString())
+    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     fun isSameServiceAndDirection(lastSchedule: MSchedule?): Boolean {
         return lastSchedule?.serviceIdInt == serviceIdInt
@@ -194,25 +162,11 @@ data class MSchedule(
     override fun compareTo(other: MSchedule): Int {
         // sort by route_id => service_id => direction_id => stop_id => departure
         return when {
-            routeId != other.routeId -> {
-                routeId.compareTo(other.routeId)
-            }
-
-            serviceIdInt != other.serviceIdInt -> {
-                _serviceId.compareTo(other._serviceId)
-            }
-
-            directionId != other.directionId -> {
-                directionId.compareTo(other.directionId)
-            }
-
-            stopId != other.stopId -> {
-                stopId - other.stopId
-            }
-
-            else -> {
-                departure - other.departure
-            }
+            routeId != other.routeId -> routeId.compareTo(other.routeId)
+            serviceIdInt != other.serviceIdInt -> _serviceId.compareTo(other._serviceId)
+            directionId != other.directionId -> directionId.compareTo(other.directionId)
+            stopId != other.stopId -> stopId - other.stopId
+            else -> departure - other.departure
         }
     }
 
@@ -237,5 +191,7 @@ data class MSchedule(
             stopId: Int,
             departure: Int
         ) = "${serviceIdInt}$UID_SEPARATOR${directionId}$UID_SEPARATOR${stopId}$UID_SEPARATOR${departure}"
+
+        const val MIN_ARRIVAL_DIFF_IN_HH_MM_SS = 100 // 1 minute
     }
 }

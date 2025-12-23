@@ -31,46 +31,34 @@ data class GFrequency(
         exactTimes,
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val tripId = _tripId
+    @get:Discouraged(message = "Not memory efficient")
+    val tripId: String get() = _tripId
 
     @Suppress("unused")
     private val _tripId: String
-        get() {
-            return GIDs.getString(tripIdInt)
-        }
+        get() = GIDs.getString(tripIdInt)
 
     val startTime: Int = _startTime
 
     @Suppress("unused")
     val startTimeDate: Date
-        get() {
-            return GTime.toDate(_startTime)
-        }
+        get() = GTime.toDate(_startTime)
 
     val startTimeMs: Long
-        get() {
-            return GTime.toMs(_startTime)
-        }
+        get() = GTime.toMs(_startTime)
 
     val endTime: Int = _endTime
 
     @Suppress("unused")
     val endTimeDate: Date
-        get() {
-            return GTime.toDate(_endTime)
-        }
+        get() = GTime.toDate(_endTime)
 
     val endTimeMs: Long
-        get() {
-            return GTime.toMs(_endTime)
-        }
+        get() = GTime.toMs(_endTime)
 
     val headwayMs: Long
-        get() {
-            return TimeUnit.SECONDS.toMillis(headwaySecs.toLong())
-        }
+        get() = TimeUnit.SECONDS.toMillis(headwaySecs.toLong())
 
     @Suppress("unused")
     fun toStringPlus(): String {
@@ -89,7 +77,7 @@ data class GFrequency(
     companion object {
         const val FILENAME = "frequencies.txt"
 
-        private const val TRIP_ID = GTrip.TRIP_ID
+        internal const val TRIP_ID = GTrip.TRIP_ID
         private const val START_TIME = "start_time"
         private const val END_TIME = "end_time"
         private const val HEADWAY_SECS = "headway_secs"
@@ -101,10 +89,11 @@ data class GFrequency(
         @Suppress("unused")
         val DEFAULT_DROP_OFF_TYPE = GDropOffType.REGULAR // Regularly scheduled drop off
 
+        @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GFrequency(
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools? = null) = GFrequency(
             tripId = line[TRIP_ID]?.trim()
-                ?.let { agencyTools.cleanTripOriginalId(it) }
+                ?.let { agencyTools?.cleanTripOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
             startTime = line[START_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
             endTime = line[END_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),

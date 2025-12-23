@@ -2,7 +2,7 @@ package org.mtransit.parser.mt.data
 
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
-import org.mtransit.parser.Constants
+import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -13,8 +13,8 @@ data class MRoute(
     val shortName: String?,
     var longName: String,
     private val color: String?,
-    private val originalIdHash: Int?,
-    private val type: Int?,
+    private val originalIdHash: Int,
+    private val type: Int,
 ) : Comparable<MRoute> {
 
     constructor(
@@ -23,36 +23,27 @@ data class MRoute(
         longName: String,
         color: String?,
         originalId: String,
-        type: Int?,
+        type: Int,
         agencyTools: GAgencyTools? = null,
     ) : this(
         id,
         shortName,
         longName,
         color,
-        GTFSCommons.stringIdToHashIfEnabled(originalId),
+        GTFSCommons.stringIdToHash(originalId),
         type,
     )
 
-    val shortNameOrDefault: String = shortName ?: Constants.EMPTY
+    val shortNameOrDefault: String = shortName.orEmpty()
 
-    fun toFile() = buildString {
-        append(id.toString()) // ID
-        append(Constants.COLUMN_SEPARATOR) //
-        append((shortName ?: Constants.EMPTY).quotesEscape()) // short name
-        append(Constants.COLUMN_SEPARATOR) //
-        append(longName.quotesEscape()) // long name
-        append(Constants.COLUMN_SEPARATOR) //
-        append((color ?: Constants.EMPTY).quotes()) // color
-        if (FeatureFlags.F_EXPORT_GTFS_ID_HASH_INT) {
-            append(Constants.COLUMN_SEPARATOR) //
-            originalIdHash?.let { append(it) } // original ID hash
-            if (FeatureFlags.F_EXPORT_ORIGINAL_ROUTE_TYPE) {
-                append(Constants.COLUMN_SEPARATOR) //
-                type?.let { append(it) } // route type
-            }
-        }
-    }
+    fun toFile() = buildList {
+        add(id.toString()) // ID
+        add(shortName.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS).quotesEscape()) // short name
+        add(longName.toStringIds(FeatureFlags.F_EXPORT_STRINGS).quotesEscape()) // long name
+        add((color?.uppercase().orEmpty()).quotes()) // color
+        add(originalIdHash.toString()) // original ID hash
+        add(type.toString())
+    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     override fun compareTo(other: MRoute): Int {
         return id.compareTo(other.id)

@@ -8,7 +8,7 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
+import org.mockito.kotlin.whenever
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GDirectionId
 import org.mtransit.parser.gtfs.data.GDropOffType
@@ -41,20 +41,20 @@ class MDirectionHeadSignFinderTest {
     @Suppress("DEPRECATION")
     @Before
     fun setUp() {
-        `when`(agencyTools.cleanDirectionHeadsign(anyInt(), anyBoolean(), anyString()))
+        whenever(agencyTools.cleanDirectionHeadsign(anyInt(), anyBoolean(), anyString()))
             .then {
                 it.arguments[2]
             }
-        `when`(agencyTools.cleanStopHeadSign(any(), any(), any(), anyString()))
+        whenever(agencyTools.cleanStopHeadSign(any(), any(), any(), anyString()))
             .then {
                 it.arguments[3]
             }
-        `when`(routeGTFS.getTrip(anyInt()))
+        whenever(routeGTFS.getTrip(anyInt()))
             .then {
                 val tripIdInt: Int = it.arguments[0] as Int? ?: 1
                 makeGTrip(GIDs.getInt(RIDS), GIDs.getInt("service_id"), tripIdInt, GDirectionId.NONE, "trip head-sign", TSN, A11Y)
             }
-        `when`(routeGTFS.getRoute(anyInt()))
+        whenever(routeGTFS.getRoute(anyInt()))
             .then {
                 val routeId = it.arguments[0] as? String ?: ""
                 GRoute(
@@ -96,15 +96,15 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id2", tripId2, directionId, sameHeadSign, TSN, A11Y.id),
             makeGTrip(RIDS, "service_id3", tripId3, directionId, sameHeadSign, TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 3)
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 1, 3)
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId3, 1, 3)
             )
@@ -124,11 +124,11 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign 1", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign 2", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 3)
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 1, 5)
             )
@@ -148,11 +148,11 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign 2", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 5)
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 3, 5)
             )
@@ -172,11 +172,11 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId1, directionId, "1 trip head-sign", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId2, directionId, "2 trip head-sign", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 5)
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 1, 5)
             )
@@ -196,11 +196,11 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign 1", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign 2", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 5)
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 1, 5)
             )
@@ -222,15 +222,15 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign S", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 3) // stops before 4
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 5, 7) // starts after 4
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId3, 1, 7)
             )
@@ -252,15 +252,15 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign S", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 3)
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 4, 9)
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId3, 1, 5)
             )
@@ -282,7 +282,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id), // most common
             makeGTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN, A11Y.id) // most common
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 2, lastPickupType = GPickupType.NO_PICKUP)
                     .toMutableList()
@@ -290,11 +290,11 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId1, 9, pickupType = GPickupType.NO_PICKUP)) // same last stop
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 4, 9) // same last stop
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId3, 1, 4, lastPickupType = GPickupType.NO_PICKUP)
                     .toMutableList()
@@ -320,7 +320,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -329,7 +329,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId1, 7, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -338,7 +338,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId2, 9, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId3, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -375,7 +375,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId7, directionId, "trip head-sign", TSN, A11Y.id), // just 1 more than fod // not a winner
             makeGTrip(RIDS, "service_id", tripId8, directionId, "other trip", TSN, A11Y.id) // similar
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -384,7 +384,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId1, 7, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -393,7 +393,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId2, 7, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId3, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -402,7 +402,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId3, 7, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId4), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId4), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId4, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -411,7 +411,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId4, 9, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId5), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId5), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId5, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -420,7 +420,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId5, 9, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId6), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId6), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId6, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -429,7 +429,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId6, 9, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId7), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId7), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId7, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -438,7 +438,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId7, 9, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId8), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId8), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId8, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -470,27 +470,27 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId5, directionId, "foo foo", TSN, A11Y.id), // GOOD: shortest
             makeGTrip(RIDS, "service_id", tripId6, directionId, "foo foo", TSN, A11Y.id) // GOOD: shortest
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId5, 1, 7) // GOOD: longest
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId5, 1, 7) // GOOD: longest
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId3, 1, 7)  // WRONG data: should be 5 stops OR other "trip head-sign",
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId4), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId4), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId4, 1, 7)  // WRONG data: should be 5 stops OR other "trip head-sign",
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId5), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId5), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 1, 5) // GOOD: shortest
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId6), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId6), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 1, 5) // GOOD: shortest
             )
@@ -517,7 +517,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId3, directionId, "foo foo", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId4, directionId, "foo foo", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 3, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -528,7 +528,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId1, 7, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 1, 3, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -536,7 +536,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId2, 9, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId3, 1, 3, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -544,7 +544,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId3, 9, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId4), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId4), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId4, 1, 3, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -570,7 +570,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId3, directionId, "trip head-sign", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -578,11 +578,11 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId1, 7, pickupType = GPickupType.NO_PICKUP, dropOffType = GDropOffType.MUST_COORDINATE_WITH_DRIVER)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 1, 5) // common
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId3, 1, 5) // common
             )
@@ -602,7 +602,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId1, directionId, "foo foo", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId1, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -610,7 +610,7 @@ class MDirectionHeadSignFinderTest {
                         add(makeGStopTime(tripId1, 7, pickupType = GPickupType.NO_PICKUP)) // distinct
                     }
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 makeGStopTimeList(tripId2, 1, 5, lastPickupType = GPickupType.NO_PICKUP) // common
                     .toMutableList()
@@ -634,7 +634,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId1, 1, arrivalTime = "00:00:01", departureTime = "00:00:01", dropOffType = GDropOffType.NO_DROP_OFF),
@@ -642,7 +642,7 @@ class MDirectionHeadSignFinderTest {
                     makeGStopTime(tripId1, 3, arrivalTime = "00:00:03", departureTime = "00:00:03", pickupType = GPickupType.NO_PICKUP)
                 )
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId2, 1, arrivalTime = "00:10:01", departureTime = "00:10:01", dropOffType = GDropOffType.NO_DROP_OFF),
@@ -666,7 +666,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId1, 1, arrivalTime = "20:00:01", departureTime = "20:00:01", dropOffType = GDropOffType.NO_DROP_OFF),
@@ -674,7 +674,7 @@ class MDirectionHeadSignFinderTest {
                     makeGStopTime(tripId1, 3, arrivalTime = "20:00:03", departureTime = "20:00:03", pickupType = GPickupType.NO_PICKUP)
                 )
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId2, 1, arrivalTime = "20:10:01", departureTime = "20:10:01", dropOffType = GDropOffType.NO_DROP_OFF),
@@ -698,7 +698,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId1, 1, arrivalTime = "00:00:01", departureTime = "00:00:01", dropOffType = GDropOffType.NO_DROP_OFF),
@@ -706,7 +706,7 @@ class MDirectionHeadSignFinderTest {
                     makeGStopTime(tripId1, 3, arrivalTime = "00:00:03", departureTime = "00:00:03", pickupType = GPickupType.NO_PICKUP)
                 )
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId2, 1, arrivalTime = "20:10:01", departureTime = "20:10:01", dropOffType = GDropOffType.NO_DROP_OFF),
@@ -731,7 +731,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId1, 1, arrivalTime = "20:00:01", departureTime = "20:00:01", dropOffType = GDropOffType.NO_DROP_OFF),
@@ -739,7 +739,7 @@ class MDirectionHeadSignFinderTest {
                     makeGStopTime(tripId1, 3, arrivalTime = "20:00:03", departureTime = "20:00:03", pickupType = GPickupType.NO_PICKUP)
                 )
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId2, 1, arrivalTime = "00:10:01", departureTime = "00:10:01", dropOffType = GDropOffType.NO_DROP_OFF),
@@ -764,7 +764,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId2, directionId, "trip head-sign", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId1, 1, arrivalTime = "00:00:01", departureTime = "00:00:01", dropOffType = GDropOffType.NO_DROP_OFF),
@@ -772,7 +772,7 @@ class MDirectionHeadSignFinderTest {
                     makeGStopTime(tripId1, 3, arrivalTime = "20:00:03", departureTime = "20:00:03", pickupType = GPickupType.NO_PICKUP)
                 )
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId2, 1, arrivalTime = "00:10:01", departureTime = "00:10:01", dropOffType = GDropOffType.NO_DROP_OFF),
@@ -797,7 +797,7 @@ class MDirectionHeadSignFinderTest {
             makeGTrip(RIDS, "service_id", tripId1, directionId, "trip head-sign", TSN, A11Y.id),
             makeGTrip(RIDS, "service_id", tripId2, directionId, "foo foo", TSN, A11Y.id)
         )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId1), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId1, 1, arrivalTime = "00:00:01", departureTime = "00:00:01", dropOffType = GDropOffType.NO_DROP_OFF),
@@ -805,7 +805,7 @@ class MDirectionHeadSignFinderTest {
                     makeGStopTime(tripId1, 3, arrivalTime = "00:00:03", departureTime = "00:00:03", pickupType = GPickupType.NO_PICKUP)
                 )
             )
-        `when`(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
+        whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId2), null, null))
             .thenReturn(
                 listOf(
                     makeGStopTime(tripId2, 1, arrivalTime = "20:10:01", departureTime = "20:10:01", dropOffType = GDropOffType.NO_DROP_OFF),

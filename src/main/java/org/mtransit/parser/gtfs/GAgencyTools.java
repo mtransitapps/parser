@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public interface GAgencyTools {
@@ -88,7 +87,12 @@ public interface GAgencyTools {
 	boolean excludeAgency(@NotNull GAgency gAgency);
 
 	@NotNull
-	String cleanServiceId(@NotNull String serviceIdString);
+	String cleanServiceId(@NotNull String serviceIdString); // currently only used in "mt.data.M..." classes before exporting to file
+
+	@Nullable
+	String getServiceIdCleanupRegex();
+
+	boolean verifyServiceIdsUniqueness();
 
 	// ROUTE
 	@NotNull
@@ -114,8 +118,7 @@ public interface GAgencyTools {
 	@Nullable
 	String getRouteIdCleanupRegex();
 
-	@Nullable
-	Pattern getRouteIdCleanupPattern();
+	boolean verifyRouteIdsUniqueness();
 
 	@NotNull
 	String getRouteShortName(@NotNull GRoute gRoute);
@@ -164,10 +167,11 @@ public interface GAgencyTools {
 	@Nullable
 	String getTripIdCleanupRegex();
 
-	@Nullable
-	Pattern getTripIdCleanupPattern();
+	boolean verifyTripIdsUniqueness();
 
 	@NotNull String cleanTripOriginalId(@NotNull String gTripId);
+
+	void forgetOriginalTripId(@NotNull String gTripOriginalId);
 
 	boolean directionSplitterEnabled(long routeId);
 
@@ -256,8 +260,7 @@ public interface GAgencyTools {
 	@Nullable
 	String getStopIdCleanupRegex();
 
-	@Nullable
-	Pattern getStopIdCleanupPattern();
+	boolean verifyStopIdsUniqueness();
 
 	@NotNull
 	String cleanStopName(@NotNull String gStopName);
@@ -281,6 +284,8 @@ public interface GAgencyTools {
 
 	@NotNull
 	String cleanStopOriginalId(@NotNull String gStopIdString);
+
+	void forgetOriginalStopId(@NotNull String gStopOriginalId);
 
 	// CALENDAR
 	boolean excludeCalendar(@NotNull GCalendar gCalendar);

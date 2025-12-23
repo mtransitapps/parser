@@ -12,6 +12,8 @@ data class RouteConfig(
     val defaultRouteIdEnabled: Boolean = false, // OPT-IN feature
     @SerialName("route_id_cleanup_regex")
     val routeIdCleanupRegex: String? = null, // optional
+    @SerialName("route_id_not_unique_allowed")
+    val routeIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
     @SerialName("route_id_clean_merged")
     val routeIdCleanMerged: Boolean = false, // OPT-IN feature
     @SerialName("use_route_short_name_for_route_id")
@@ -41,6 +43,8 @@ data class RouteConfig(
     // DIRECTION
     @SerialName("trip_id_cleanup_regex")
     val tripIdCleanupRegex: String? = null, // optional
+    @SerialName("trip_id_not_unique_allowed")
+    val tripIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
     @SerialName("direction_headsign_cleaners")
     val directionHeadsignCleaners: List<Cleaner> = emptyList(),
     @SerialName("direction_finder_enabled")
@@ -48,6 +52,8 @@ data class RouteConfig(
     // STOP
     @SerialName("stop_id_cleanup_regex")
     val stopIdCleanupRegex: String? = null, // optional
+    @SerialName("stop_id_not_unique_allowed")
+    val stopIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
     @SerialName("use_stop_code_for_stop_id")
     val useStopCodeForStopId: Boolean = false, // OPT-IN feature
     @SerialName("stop_code_to_stop_id_configs")

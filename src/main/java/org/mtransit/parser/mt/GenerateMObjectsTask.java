@@ -3,7 +3,6 @@ package org.mtransit.parser.mt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CollectionUtils;
-import org.mtransit.commons.FeatureFlags;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.Constants;
 import org.mtransit.parser.MTLog;
@@ -25,16 +24,15 @@ import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MAgency;
-import org.mtransit.parser.mt.data.MCalendarExceptionType;
+import org.mtransit.parser.mt.data.MDirection;
 import org.mtransit.parser.mt.data.MDirectionCardinalType;
+import org.mtransit.parser.mt.data.MDirectionStop;
 import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSchedule;
 import org.mtransit.parser.mt.data.MServiceDate;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MStop;
-import org.mtransit.parser.mt.data.MDirection;
-import org.mtransit.parser.mt.data.MDirectionStop;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -144,59 +142,18 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				serviceIdInts,
 				routeGTFS
 		);
-		final HashSet<Long> gCalendarDateServiceRemoved = new HashSet<>();
 		for (GCalendarDate gCalendarDate : routeGTFS.getAllCalendarDates()) {
 			if (!serviceIdInts.contains(gCalendarDate.getServiceIdInt())) {
 				continue;
 			}
-			switch (gCalendarDate.getExceptionType()) {
-			case SERVICE_REMOVED: // keep list of removed service for calendars processing
-				if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-					mServiceDates.add(new MServiceDate(
-							gCalendarDate.getServiceIdInt(),
-							gCalendarDate.getDate(),
-							MCalendarExceptionType.REMOVED
-					));
-				} else {
-					gCalendarDateServiceRemoved.add(gCalendarDate.getUID());
-				}
-				break;
-			case SERVICE_ADDED:
-				mServiceDates.add(new MServiceDate(
-						gCalendarDate.getServiceIdInt(),
-						gCalendarDate.getDate(),
-						FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE ? MCalendarExceptionType.ADDED : MCalendarExceptionType.DEFAULT
-				));
-				break;
-			case SERVICE_DEFAULT:
-				mServiceDates.add(new MServiceDate(
-						gCalendarDate.getServiceIdInt(),
-						gCalendarDate.getDate(),
-						MCalendarExceptionType.DEFAULT
-				));
-				break;
-			default:
-				throw new MTLog.Fatal("%s: Unexpected calendar date exception type '%s'!", this.routeId, gCalendarDate.getExceptionType());
-			}
+			mServiceDates.add(MServiceDate.fromCalendarDate(gCalendarDate));
 		}
-		if (!GSpec.ALL_CALENDARS_IN_CALENDAR_DATES) {
-			//noinspection deprecation
-			for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
-				if (!serviceIdInts.contains(gCalendar.getServiceIdInt())) {
-					continue;
-				}
-				for (GCalendarDate gCalendarDate : gCalendar.getDates()) {
-					if (!FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-						if (gCalendarDateServiceRemoved.contains(gCalendarDate.getUID())) {
-							continue; // service REMOVED at this date
-						}
-					}
-					mServiceDates.add(new MServiceDate(
-							gCalendarDate.getServiceIdInt(),
-							gCalendarDate.getDate(),
-							MCalendarExceptionType.DEFAULT
-					));
-				}
+		for (GCalendar gCalendar : routeGTFS.getAllCalendars()) {
+			if (!serviceIdInts.contains(gCalendar.getServiceIdInt())) {
+				continue;
+			}
+			for (GCalendarDate gCalendarDate : gCalendar.getDates()) {
+				mServiceDates.add(MServiceDate.fromCalendarDate(gCalendarDate));
 			}
 		}
 		MDirection mDirection;
@@ -373,7 +330,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					mergeSuccessful = this.agencyTools.mergeRouteLongName(mRoute, otherRoute);
 				}
 				if (!mergeSuccessful) {
-					MTLog.log("%s: Route %s already in list!", this.routeId, mRoute.getId());
+					MTLog.log("%s: Route '%s' already in list!", this.routeId, mRoute.getId());
 					MTLog.log("%s: %s", this.routeId, mRoute.toString());
 					throw new MTLog.Fatal("%s: %s.", this.routeId, otherRoute.toString());
 				}

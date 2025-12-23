@@ -3,7 +3,6 @@ package org.mtransit.parser.gtfs.data
 import androidx.annotation.Discouraged
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.escape
-import org.mtransit.parser.gtfs.GAgencyTools
 import java.util.Calendar
 
 // https://developers.google.com/transit/gtfs/reference#calendar_fields
@@ -68,25 +67,18 @@ data class GCalendar(
         endDate
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val serviceId = _serviceId
+    @get:Discouraged(message = "Not memory efficient")
+    val serviceId: String get() = _serviceId
 
     private val _serviceId: String
-        get() {
-            return GIDs.getString(serviceIdInt)
-        }
+        get() = GIDs.getString(serviceIdInt)
 
     val escapedServiceId: String
         get() = _serviceId.escape()
 
     val escapedServiceIdInt: Int
         get() = escapedServiceId.toGIDInt()
-
-    @Suppress("unused")
-    fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(_serviceId)
-    }
 
     val dates: List<GCalendarDate> by lazy {
         initAllDates(
@@ -103,8 +95,11 @@ data class GCalendar(
         )
     }
 
-    fun flattenToCalendarDates(exceptionType: GCalendarDatesExceptionType): List<GCalendarDate> {
-        return initAllDates(
+    @JvmOverloads
+    fun flattenToCalendarDates(
+        exceptionType: GCalendarDatesExceptionType = GCalendarDatesExceptionType.SERVICE_DEFAULT,
+    ) =
+        initAllDates(
             serviceIdInt,
             monday,
             tuesday,
@@ -117,7 +112,6 @@ data class GCalendar(
             endDate,
             exceptionType
         )
-    }
 
     fun hasDays(): Boolean {
         return monday || tuesday || wednesday || thursday || friday || saturday || sunday
@@ -211,7 +205,7 @@ data class GCalendar(
     companion object {
         const val FILENAME = "calendar.txt"
 
-        private const val SERVICE_ID = "service_id"
+        internal const val SERVICE_ID = "service_id"
         private const val MONDAY = "monday"
         private const val TUESDAY = "tuesday"
         private const val WEDNESDAY = "wednesday"
@@ -239,80 +233,61 @@ data class GCalendar(
         )
 
         fun isRunningOnDay(calendar: GCalendar, dayString: String): Boolean =
-            calendar.isRunningOnCalendarDayOfWeek(Calendar.getInstance()
-                .apply { time = GFieldTypes.makeDateFormat().parse(dayString) }
-                .get(Calendar.DAY_OF_WEEK))
+            calendar.isRunningOnCalendarDayOfWeek(
+                Calendar.getInstance()
+                    .apply { time = GFieldTypes.makeDateFormat().parse(dayString) }
+                    .get(Calendar.DAY_OF_WEEK))
+
+        @JvmStatic
+        @JvmOverloads
+        fun flattenToCalendarDates(
+            calendars: Collection<GCalendar>,
+            exceptionType: GCalendarDatesExceptionType = GCalendarDatesExceptionType.SERVICE_DEFAULT,
+        ) = calendars.flatMap { it.flattenToCalendarDates(exceptionType) }
 
         private fun initAllDates(
-            _serviceId: Int,
-            _monday: Boolean,
-            _tuesday: Boolean,
-            _wednesday: Boolean,
-            _thursday: Boolean,
-            _friday: Boolean,
-            _saturday: Boolean,
-            _sunday: Boolean,
-            _startDate: Int,
-            _endDate: Int,
-            exceptionType: GCalendarDatesExceptionType = GCalendarDatesExceptionType.SERVICE_ADDED,
-        ): List<GCalendarDate> {
-            val newAllDates: MutableList<GCalendarDate> = ArrayList()
+            serviceId: Int,
+            monday: Boolean,
+            tuesday: Boolean,
+            wednesday: Boolean,
+            thursday: Boolean,
+            friday: Boolean,
+            saturday: Boolean,
+            sunday: Boolean,
+            startDate: Int,
+            endDate: Int,
+            exceptionType: GCalendarDatesExceptionType = GCalendarDatesExceptionType.SERVICE_DEFAULT,
+        ) = buildList {
             try {
-                @Suppress("LocalVariableName")
-                val DATE_FORMAT = GFieldTypes.makeDateFormat()
-                val startDate = Calendar.getInstance()
-                startDate.time = DATE_FORMAT.parse(_startDate.toString())
-                val endDate = Calendar.getInstance()
-                endDate.time = DATE_FORMAT.parse(_endDate.toString())
-                @Suppress("UnnecessaryVariable")
-                val c = startDate // no need to clone because not re-using startDate later
-                // starting yesterday because increment done at the beginning of the loop
-                c.add(Calendar.DAY_OF_MONTH, -1)
-                var date: Int
-                while (c.before(endDate)) {
-                    c.add(Calendar.DAY_OF_MONTH, +1)
+                val dateFormat = GFieldTypes.makeDateFormat()
+                val startDateCal = Calendar.getInstance().apply {
+                    time = dateFormat.parse(startDate.toString())
+                }
+                val endDateCal = Calendar.getInstance().apply {
+                    time = dateFormat.parse(endDate.toString())
+                }
+                val c = startDateCal // no need to clone because not re-using startDate later
+                c.add(Calendar.DAY_OF_MONTH, -1) // starting yesterday because increment done at the beginning of the loop
+                while (c.before(endDateCal)) {
+                    c.add(Calendar.DAY_OF_MONTH, +1) // beginning of the loop
                     try {
-                        date = Integer.valueOf(DATE_FORMAT.format(c.time))
+                        val date = Integer.valueOf(dateFormat.format(c.time))
                         when (c[Calendar.DAY_OF_WEEK]) {
-                            Calendar.MONDAY -> if (_monday) {
-                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
-                            }
-
-                            Calendar.TUESDAY -> if (_tuesday) {
-                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
-                            }
-
-                            Calendar.WEDNESDAY -> if (_wednesday) {
-                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
-                            }
-
-                            Calendar.THURSDAY -> if (_thursday) {
-                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
-                            }
-
-                            Calendar.FRIDAY -> if (_friday) {
-                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
-                            }
-
-                            Calendar.SATURDAY -> if (_saturday) {
-                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
-                            }
-
-                            Calendar.SUNDAY -> if (_sunday) {
-                                newAllDates.add(GCalendarDate(_serviceId, date, exceptionType))
-                            }
+                            Calendar.MONDAY -> if (monday) add(GCalendarDate(serviceId, date, exceptionType))
+                            Calendar.TUESDAY -> if (tuesday) add(GCalendarDate(serviceId, date, exceptionType))
+                            Calendar.WEDNESDAY -> if (wednesday) add(GCalendarDate(serviceId, date, exceptionType))
+                            Calendar.THURSDAY -> if (thursday) add(GCalendarDate(serviceId, date, exceptionType))
+                            Calendar.FRIDAY -> if (friday) add(GCalendarDate(serviceId, date, exceptionType))
+                            Calendar.SATURDAY -> if (saturday) add(GCalendarDate(serviceId, date, exceptionType))
+                            Calendar.SUNDAY -> if (sunday) add(GCalendarDate(serviceId, date, exceptionType))
                         }
                     } catch (e: Exception) {
                         throw MTLog.Fatal(e, "Error while parsing date '$c'!")
                     }
                 }
             } catch (e: Exception) {
-                throw MTLog.Fatal(
-                    e,
-                    "Error while parsing dates between '$_startDate' and '$_endDate'!"
-                )
+                throw MTLog.Fatal(e, "Error while parsing dates between '$startDate' and '$endDate'!")
             }
-            return newAllDates
         }
     }
 }

@@ -42,23 +42,19 @@ data class GStop(
         GWheelchairBoardingType.parse(wheelchairBoarding),
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val stopId = _stopId
+    @get:Discouraged(message = "Not memory efficient")
+    val stopId: StopId get() = _stopId
 
     private val _stopId: StopId
-        get() {
-            return GIDs.getString(stopIdInt)
-        }
+        get() = GIDs.getString(stopIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val parentStationId = _parentStationId
+    @get:Discouraged(message = "Not memory efficient")
+    val parentStationId: StopId? get() = _parentStationId
 
     private val _parentStationId: StopId?
-        get() {
-            return parentStationIdInt?.let { GIDs.getString(it) }
-        }
+        get() = parentStationIdInt?.let { GIDs.getString(it) }
 
     @JvmOverloads
     @Suppress("unused")
@@ -78,7 +74,7 @@ data class GStop(
         }
     }
 
-    fun equalsExceptLatLongWheelchair(o: GStop): Boolean {
+    fun equalsExceptMergeable(o: GStop): Boolean {
         return when {
             stopIdInt != o.stopIdInt -> false // not equal
             stopCode != o.stopCode -> false // not equal
@@ -123,10 +119,11 @@ data class GStop(
         private const val PARENT_STATION = "parent_station"
         private const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
 
+        @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GStop(
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools? = null) = GStop(
             stopId = line[STOP_ID]?.trim()
-                ?.let { agencyTools.cleanStopOriginalId(it) }
+                ?.let { agencyTools?.cleanStopOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GStop from $line!"),
             stopName = line[STOP_NAME] ?: throw MTLog.Fatal("Invalid GStop from $line!"),
             stopLat = line[STOP_LAT]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),

@@ -2,7 +2,6 @@ package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.Constants.EMPTY
 import org.mtransit.parser.MTLog
-import java.lang.Exception
 import java.util.Calendar
 import java.util.Date
 

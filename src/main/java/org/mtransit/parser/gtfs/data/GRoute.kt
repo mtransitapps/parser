@@ -67,34 +67,30 @@ data class GRoute(
     @Suppress("unused")
     fun isDifferentAgency(otherAgencyId: String): Boolean = isDifferentAgency(GIDs.getInt(otherAgencyId))
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val agencyIdOrDefault: AgencyId = _agencyId
+    @get:Discouraged(message = "Not memory efficient")
+    val agencyIdOrDefault: AgencyId get() = _agencyId
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val agencyId: AgencyId = _agencyId
+    @get:Discouraged(message = "Not memory efficient")
+    val agencyId: AgencyId get() = _agencyId
 
     private val _agencyId: AgencyId
         get() = GIDs.getString(agencyIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val routeId = _routeId
+    @get:Discouraged(message = "Not memory efficient")
+    val routeId: RouteId get() = _routeId
 
     private val _routeId: RouteId
-        get() {
-            return GIDs.getString(routeIdInt)
-        }
+        get() = GIDs.getString(routeIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val originalRouteId = _originalRouteId
+    @get:Discouraged(message = "Not memory efficient")
+    val originalRouteId: String get() = _originalRouteId
 
     private val _originalRouteId: String
-        get() {
-            return GIDs.getString(originalRouteIdInt)
-        }
+        get() = GIDs.getString(originalRouteIdInt)
 
     @Suppress("unused")
     val shortestRouteName = routeShortName.ifEmpty { routeLongName }
@@ -123,6 +119,7 @@ data class GRoute(
             append(routeShortName)
             append(")")
         }
+        append("}")
     }
 
     fun to() = Route(
@@ -171,17 +168,19 @@ data class GRoute(
         private const val ROUTE_TEXT_COLOR = "route_text_color"
         private const val ROUTE_SORT_ORDER = "route_sort_order"
 
+        @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, defaultAgencyId: String?, agencyTools: GAgencyTools) = GRoute(
+        fun fromLine(line: Map<String, String>, defaultAgencyId: String?, agencyTools: GAgencyTools? = null) = GRoute(
             agencyId = line[AGENCY_ID]?.takeIf { it.isNotBlank() }
                 ?: defaultAgencyId
                 ?: throw MTLog.Fatal("Invalid GRoute.$AGENCY_ID from $line!"),
-            routeId = line[ROUTE_ID]?.trim()?.let { agencyTools.cleanRouteOriginalId(it) }
+            routeId = line[ROUTE_ID]?.trim()?.let { agencyTools?.cleanRouteOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
             originalRouteId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
             routeShortName = line[ROUTE_SHORT_NAME]?.trim()
-                ?.takeUnless { agencyTools.useRouteIdForRouteShortName() }
-                ?: line[ROUTE_ID]?.trim()?.let { agencyTools.cleanRouteOriginalId(it) }
+                ?.let { it.takeIf { it.isNotEmpty() }?.let { agencyTools?.cleanRouteShortName(it) } ?: it }
+                ?.takeUnless { agencyTools?.useRouteIdForRouteShortName() == true }
+                ?: line[ROUTE_ID]?.trim()?.let { agencyTools?.cleanRouteOriginalId(it) ?: it }
                 ?: EMPTY,
             routeLongName = line[ROUTE_LONG_NAME],
             routeDesc = line[ROUTE_DESC],
@@ -235,9 +234,9 @@ data class GRoute(
             }
             val suffix = routeLongName1.commonSuffixWith(routeLongName2)
             if (suffix.length > maxLength / 2) {
-                return routeLongName1.substring(0, routeLongName1.length - suffix.length) +
+                return routeLongName1.dropLast(suffix.length) +
                         SLASH_ +
-                        routeLongName2.substring(0, routeLongName2.length - suffix.length) +
+                        routeLongName2.dropLast(suffix.length) +
                         suffix
             }
             return if (routeLongName1 > routeLongName2) {

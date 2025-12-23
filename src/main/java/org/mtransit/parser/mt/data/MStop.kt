@@ -2,7 +2,7 @@ package org.mtransit.parser.mt.data
 
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
-import org.mtransit.parser.Constants
+import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.mt.MDataChangedManager
@@ -14,7 +14,7 @@ data class MStop(
     val lat: Double,
     val lng: Double,
     val accessible: Int,
-    private val originalIdHash: Int?,
+    private val originalIdHash: Int,
 ) : Comparable<MStop> {
 
     constructor(
@@ -33,36 +33,22 @@ data class MStop(
         lat,
         lng,
         accessible,
-        GTFSCommons.stringIdToHashIfEnabled(originalId),
+        GTFSCommons.stringIdToHash(originalId),
     )
 
-    fun hasLat(): Boolean {
-        return lat != 0.0
-    }
+    fun hasLat() = lat != 0.0
 
-    fun hasLng(): Boolean {
-        return lng != 0.0
-    }
+    fun hasLng() = lng != 0.0
 
-    fun toFile() = buildString {
-        append(id) // ID
-        append(Constants.COLUMN_SEPARATOR) //
-        append(code.quotesEscape()) // code
-        append(Constants.COLUMN_SEPARATOR) //
-        append(name.quotesEscape()) // name
-        append(Constants.COLUMN_SEPARATOR) //
-        append(MDataChangedManager.avoidLatLngChanged(lat)) // latitude
-        append(Constants.COLUMN_SEPARATOR) //
-        append(MDataChangedManager.avoidLatLngChanged(lng)) // longitude
-        if (FeatureFlags.F_ACCESSIBILITY_PRODUCER) {
-            append(Constants.COLUMN_SEPARATOR) //
-            append(accessible)
-        }
-        if (FeatureFlags.F_EXPORT_GTFS_ID_HASH_INT) {
-            append(Constants.COLUMN_SEPARATOR) //
-            originalIdHash?.let { append(it) } // original ID hash
-        }
-    }
+    fun toFile() = listOf(
+        id.toString(), // ID
+        code.quotesEscape(), // code
+        name.toStringIds(FeatureFlags.F_EXPORT_STRINGS).quotesEscape(), // name
+        MDataChangedManager.avoidLatLngChanged(lat), // latitude
+        MDataChangedManager.avoidLatLngChanged(lng), // longitude
+        accessible.toString(),
+        originalIdHash.toString(), // original ID hash
+    ).joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     override fun compareTo(other: MStop): Int {
         return id - other.id

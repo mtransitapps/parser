@@ -13,6 +13,9 @@ import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
 import org.mtransit.parser.gtfs.data.GFieldTypes
 import org.mtransit.parser.mt.data.MServiceDate
+import org.mtransit.parser.mt.data.MServiceId
+import org.mtransit.parser.mt.data.MString
+import org.mtransit.parser.mt.data.MTripId
 import java.io.File
 import java.util.TimeZone
 
@@ -28,14 +31,16 @@ object MReader {
     private const val RAW = "raw"
     private const val VALUES = "values"
 
+    private const val CURRENT_ = "current_"
+    private const val NEXT_ = "next_"
+
     private fun getResDirName(fileBase: String? = null): String {
-        return "$MAIN_SRC_DIR/" + if ("current_".equals(fileBase, ignoreCase = true)) {
-            "$RES-current"
-        } else if ("next_".equals(fileBase, ignoreCase = true)) {
-            "$RES-next"
-        } else {
-            RES
-        }
+        return "$MAIN_SRC_DIR/" +
+                when {
+                    CURRENT_.equals(fileBase, ignoreCase = true) -> "$RES-current"
+                    NEXT_.equals(fileBase, ignoreCase = true) -> "$RES-next"
+                    else -> RES
+                }
     }
 
     // endregion
@@ -120,24 +125,53 @@ object MReader {
     private const val GTFS_SCHEDULE_SERVICE_DATES = "gtfs_schedule_service_dates"
 
     @JvmStatic
-    fun loadServiceDates(fileBase: String): List<MServiceDate>? {
-        try {
-            val gtfsScheduleServiceDates = getResDirName(fileBase) + "/$RAW/${fileBase}$GTFS_SCHEDULE_SERVICE_DATES"
-            val gtfsScheduleServiceDatesFile = File(gtfsScheduleServiceDates)
-            if (!gtfsScheduleServiceDatesFile.exists()) {
-                MTLog.log("File not found '$gtfsScheduleServiceDates'!")
-                return null
+    fun loadServiceDates(fileBase: String) =
+        readFile("service dates", fileBase, GTFS_SCHEDULE_SERVICE_DATES) { MServiceDate.fromFileLine(it) }
+
+    private fun <T> readFile(type: String, fileBase: String, fileName: String, transform: (String) -> T?): List<T>? = try {
+        (File("${getResDirName(fileBase)}/$RAW/${fileBase}$fileName").takeIf { it.exists() }
+            ?: CURRENT_.takeIf { NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() }
+            ?: "".takeIf { CURRENT_ == fileBase || NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() })
+            ?.readLines()
+            ?.mapNotNull { transform(it) }
+            ?: run {
+                MTLog.log("File not found for '$type' with fileBase '$fileBase' and fileName '$fileName'!")
+                null
             }
-            val gtfsScheduleServiceDatesFileLines = gtfsScheduleServiceDatesFile.readLines()
-            val serviceDates = gtfsScheduleServiceDatesFileLines.mapNotNull { line ->
-                MServiceDate.fromFileLine(line)
-            }
-            return serviceDates
-        } catch (e: Exception) {
-            MTLog.logNonFatal(e, "Error while reading '$fileBase' service dates!")
-            return null
-        }
+    } catch (e: Exception) {
+        MTLog.logNonFatal(e, "Error while reading '$fileBase' $type!")
+        null
     }
+
+    // endregion
+
+    // region trip IDs
+
+    private const val GTFS_SCHEDULE_TRIP_IDS = "gtfs_schedule_trip_ids"
+
+    @JvmStatic
+    fun loadTripIds(fileBase: String) =
+        readFile("trip ids", fileBase, GTFS_SCHEDULE_TRIP_IDS) { MTripId.fromFileLine(it) }
+
+    // endregion
+
+    // region service IDs
+
+    private const val GTFS_SCHEDULE_SERVICE_IDS = "gtfs_schedule_service_ids"
+
+    @JvmStatic
+    fun loadServiceIds(fileBase: String) =
+        readFile("service ids", fileBase, GTFS_SCHEDULE_SERVICE_IDS) { MServiceId.fromFileLine(it) }
+
+    // endregion
+
+    // region strings
+
+    private const val GTFS_STRINGS = "gtfs_strings"
+
+    @JvmStatic
+    fun loadStrings(fileBase: String) =
+        readFile("strings", fileBase, GTFS_STRINGS) { MString.fromFileLine(it) }
 
     // endregion
 }

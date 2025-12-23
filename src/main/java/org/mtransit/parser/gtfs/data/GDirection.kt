@@ -25,14 +25,12 @@ data class GDirection(
         destination = destination,
     )
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val routeId = _routeId
+    @get:Discouraged(message = "Not memory efficient")
+    val routeId: String get() = _routeId
 
     private val _routeId: String
-        get() {
-            return GIDs.getString(routeIdInt)
-        }
+        get() = GIDs.getString(routeIdInt)
 
     @Suppress("unused")
     fun toStringPlus(): String {
@@ -58,10 +56,11 @@ data class GDirection(
         private const val DESTINATION_DIRECTION_NAME = "direction_name"
         // TODO other alternatives
 
+        @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GDirection(
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools? = null) = GDirection(
             routeId = line[ROUTE_ID]?.trim()
-                ?.let { agencyTools.cleanRouteOriginalId(it) }
+                ?.let { agencyTools?.cleanRouteOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GDirection from $line!"),
             directionIdInt = line[DIRECTION_ID]?.toIntOrNull() ?: throw MTLog.Fatal("Invalid GDirection from $line!"),
             directionTypeValue = line[DIRECTION]?.trim(),

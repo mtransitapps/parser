@@ -1,9 +1,7 @@
 package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
-import org.mtransit.commons.FeatureFlags
-import org.mtransit.parser.Constants
-import org.mtransit.parser.db.SQLUtils.quotesEscape
+import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.unquotes
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GCalendarDate
@@ -16,7 +14,7 @@ data class MServiceDate(
     val exceptionType: Int,
 ) : Comparable<MServiceDate> {
 
-    constructor(
+    private constructor(
         serviceIdInt: Int,
         calendarDate: Int,
         exceptionType: MCalendarExceptionType
@@ -26,18 +24,12 @@ data class MServiceDate(
         exceptionType.id
     )
 
-    @Discouraged(message = "Not memory efficient")
+    @get:Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val serviceId = _serviceId
+    val serviceId: String get() = _serviceId
 
     private val _serviceId: String
-        get() {
-            return GIDs.getString(serviceIdInt)
-        }
-
-    private fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(_serviceId)
-    }
+        get() = GIDs.getString(serviceIdInt)
 
     override fun compareTo(other: MServiceDate): Int = compareBy(
         MServiceDate::calendarDate,
@@ -45,15 +37,11 @@ data class MServiceDate(
         MServiceDate::exceptionType,
     ).compare(this, other)
 
-    fun toFile(agencyTools: GAgencyTools) = buildString {
-        append(getCleanServiceId(agencyTools).quotesEscape()) // service ID
-        append(Constants.COLUMN_SEPARATOR)
-        append(calendarDate) // calendar date
-        if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-            append(Constants.COLUMN_SEPARATOR) //
-            append(exceptionType) // exception type
-        }
-    }
+    fun toFile(agencyTools: GAgencyTools) = buildList {
+        add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+        add(calendarDate.toString())
+        add(exceptionType.toString())
+    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     @Suppress("unused")
     fun toStringPlus(): String {
@@ -62,27 +50,17 @@ data class MServiceDate(
                 "+(exception:$exceptionType)"
     }
 
-    fun toCalendarDate(overrideServiceIdInt: Int? = null): GCalendarDate? {
-        if (!FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE
-            && this.exceptionType == MCalendarExceptionType.REMOVED.id
-        ) {
-            return null // removed
-        }
-        return GCalendarDate(
+    fun toCalendarDate(overrideServiceIdInt: Int? = null) =
+        GCalendarDate(
             serviceIdInt = overrideServiceIdInt ?: this.serviceIdInt,
             date = calendarDate,
-            exceptionType = if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-                when (this.exceptionType) {
-                    MCalendarExceptionType.ADDED.id -> GCalendarDatesExceptionType.SERVICE_ADDED
-                    MCalendarExceptionType.REMOVED.id -> GCalendarDatesExceptionType.SERVICE_REMOVED
-                    MCalendarExceptionType.DEFAULT.id -> GCalendarDatesExceptionType.SERVICE_DEFAULT
-                    else -> GCalendarDatesExceptionType.SERVICE_ADDED // default
-                }
-            } else {
-                GCalendarDatesExceptionType.SERVICE_ADDED // default
+            exceptionType = when (this.exceptionType) {
+                MCalendarExceptionType.ADDED.id -> GCalendarDatesExceptionType.SERVICE_ADDED
+                MCalendarExceptionType.REMOVED.id -> GCalendarDatesExceptionType.SERVICE_REMOVED
+                MCalendarExceptionType.DEFAULT.id -> GCalendarDatesExceptionType.SERVICE_DEFAULT
+                else -> GCalendarDatesExceptionType.SERVICE_ADDED // default
             }
         )
-    }
 
     companion object {
         @Suppress("unused")
@@ -91,19 +69,28 @@ data class MServiceDate(
             return serviceDates.joinToString { it.toStringPlus() }
         }
 
-        fun fromFileLine(line: String) = line.split(Constants.COLUMN_SEPARATOR)
-            .takeIf { it.size == if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) 3 else 2 }
-            ?.let { columns ->
-                MServiceDate(
-                    serviceIdInt = GIDs.getInt(columns[0].unquotes()), // service ID
-                    calendarDate = columns[1].toInt(), // calendar date
-                    exceptionType = if (FeatureFlags.F_EXPORT_SERVICE_EXCEPTION_TYPE) {
-                        columns[2].toInt() // exception type
-                    } else {
-                        MCalendarExceptionType.DEFAULT.id
-                    }
-                )
-            }
+        @JvmStatic
+        fun fromCalendarDate(calendarDate: GCalendarDate) =
+            MServiceDate(
+                serviceIdInt = calendarDate.serviceIdInt,
+                calendarDate = calendarDate.date,
+                exceptionType = when (calendarDate.exceptionType) {
+                    GCalendarDatesExceptionType.SERVICE_ADDED -> MCalendarExceptionType.ADDED
+                    GCalendarDatesExceptionType.SERVICE_REMOVED -> MCalendarExceptionType.REMOVED
+                    GCalendarDatesExceptionType.SERVICE_DEFAULT -> MCalendarExceptionType.DEFAULT
+                }
+            )
+
+        fun fromFileLine(line: String) =
+            line.split(SQLUtils.COLUMN_SEPARATOR)
+                .takeIf { it.size == 3 }
+                ?.let { columns ->
+                    MServiceDate(
+                        serviceIdInt = GIDs.getInt(columns[0].unquotes()),
+                        calendarDate = columns[1].toInt(),
+                        exceptionType = columns[2].toInt()
+                    )
+                }
 
         @Suppress("unused")
         @JvmStatic

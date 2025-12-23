@@ -58,6 +58,7 @@ data class GTrip(
     val directionIdOrOriginal: Int?
         get() = directionIdE.originalId()
 
+    @Suppress("unused")
     @Discouraged(message = "Should not be changed")
     fun setDirectionId(newDirectionId: Int?) {
         this.directionIdE = GDirectionId.parse(newDirectionId)
@@ -71,47 +72,34 @@ data class GTrip(
 
     val uID by lazy { getNewUID(routeIdInt, tripIdInt) }
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val routeId = _routeId
+    @get:Discouraged(message = "Not memory efficient")
+    val routeId: String get() = _routeId
 
     private val _routeId: String
-        get() {
-            return GIDs.getString(routeIdInt)
-        }
+        get() = GIDs.getString(routeIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val originalRouteId = _originalRouteId
+    @get:Discouraged(message = "Not memory efficient")
+    val originalRouteId: String get() = _originalRouteId
 
     private val _originalRouteId: String
-        get() {
-            return GIDs.getString(originalRouteIdInt)
-        }
+        get() = GIDs.getString(originalRouteIdInt)
 
-    @Discouraged(message = "Not memory efficient")
     @Suppress("unused")
-    val serviceId = _serviceId
+    @get:Discouraged(message = "Not memory efficient")
+    val serviceId: String get() = _serviceId
 
     private val _serviceId: String
-        get() {
-            return GIDs.getString(serviceIdInt)
-        }
+        get() = GIDs.getString(serviceIdInt)
 
     @Suppress("unused")
-    private fun getCleanServiceId(agencyTools: GAgencyTools): String {
-        return agencyTools.cleanServiceId(_serviceId)
-    }
-
-    @Discouraged(message = "Not memory efficient")
-    @Suppress("unused")
-    val tripId = _tripId
+    @get:Discouraged(message = "Not memory efficient")
+    val tripId: String get() = _tripId
 
     @Suppress("unused")
     private val _tripId: String
-        get() {
-            return GIDs.getString(tripIdInt)
-        }
+        get() = GIDs.getString(tripIdInt)
 
     fun isServiceIdInts(serviceIdInts: Collection<Int?>): Boolean {
         return serviceIdInts.contains(serviceIdInt)
@@ -144,7 +132,7 @@ data class GTrip(
 
         internal const val TRIP_ID = "trip_id"
         private const val ROUTE_ID = GRoute.ROUTE_ID
-        private const val SERVICE_ID = "service_id"
+        internal const val SERVICE_ID = "service_id"
         private const val TRIP_HEADSIGN = "trip_headsign"
         private const val TRIP_SHORT_NAME = "trip_short_name"
         private const val DIRECTION_ID = "direction_id"
@@ -153,13 +141,14 @@ data class GTrip(
         private const val WHEELCHAIR_ACCESSIBLE = "wheelchair_accessible"
         private const val BIKES_ALLOWED = "bikes_allowed"
 
+        @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GTrip(
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools? = null) = GTrip(
             tripId = line[TRIP_ID]?.trim()
-                ?.let { agencyTools.cleanTripOriginalId(it) }
+                ?.let { agencyTools?.cleanTripOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
             routeId = line[ROUTE_ID]?.trim()
-                ?.let { agencyTools.cleanRouteOriginalId(it) }
+                ?.let { agencyTools?.cleanRouteOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
             originalRouteId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
             serviceId = line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),

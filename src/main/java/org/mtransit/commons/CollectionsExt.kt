@@ -192,3 +192,44 @@ fun <T> Iterable<T>.matchList(
         else -> thisSuffixLength
     }).toFloat().div(otherLength) + ignoredMatchPt
 }
+
+fun <T> Iterable<T>.hasItemsGoingIntoSameOrder(otherIt: Iterable<T>): Boolean {
+    return this.countItemsGoingIntoSameOrder(otherIt, firstItemsOnly = true) > 0
+}
+
+fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>, firstItemsOnly: Boolean = false): Int {
+    val thisList = this as? List<T> ?: this.toList()
+    val otherList = otherIt as? List<T> ?: otherIt.toList()
+    var count = 0
+    var thisIndex = 0
+    var otherStartIndex = 0
+    while (thisIndex < thisList.size) {
+        val otherMatchIndex = otherList.indexOf(thisList[thisIndex], otherStartIndex)
+        if (otherMatchIndex != -1) {
+            var len = 1
+            while (thisIndex + len < thisList.size &&
+                otherMatchIndex + len < otherList.size &&
+                thisList[thisIndex + len] == otherList[otherMatchIndex + len]) {
+                len++
+            }
+            if (len > 1) {
+                count += len
+                if (firstItemsOnly) return count
+                thisIndex += len
+                otherStartIndex = otherMatchIndex + len
+                continue
+            }
+        }
+        thisIndex++
+    }
+    return count
+}
+
+fun <T> List<T>.indexOf(element: T, startIndex: Int): Int {
+    for (i in startIndex until this.size) {
+        if (this[i] == element) {
+            return i
+        }
+    }
+    return -1
+}

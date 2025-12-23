@@ -1,6 +1,7 @@
 package org.mtransit.parser.mt
 
 import org.mtransit.commons.containsExactList
+import org.mtransit.commons.hasItemsGoingIntoSameOrder
 import org.mtransit.commons.intersectWithOrder
 import org.mtransit.commons.matchList
 import org.mtransit.commons.overlap
@@ -86,6 +87,7 @@ object MDirectionSplitter {
                     routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, directionsCandidates[0].tripIdInts)
                 }
             }
+
             2 -> {
                 // TODO check if directions candidates group match existing split to keep original direction IDs
                 val (direction0, direction1) = if (directionsCandidates[0].stopIdInts.sum() > directionsCandidates[1].stopIdInts.sum()) {
@@ -96,6 +98,7 @@ object MDirectionSplitter {
                 routeGTFS.updateTripDirectionId(direction0, directionsCandidates[0].tripIdInts)
                 routeGTFS.updateTripDirectionId(direction1, directionsCandidates[1].tripIdInts)
             }
+
             else -> {
                 throw MTLog.Fatal("$routeId: Unexpected number (${directionsCandidates.size}) of results !")
             }
@@ -120,6 +123,16 @@ object MDirectionSplitter {
                     rStopIdInts.containsExactList(gStopIdInts)
                 }?.let { (rTripIdInts, _) ->
                     MTLog.logDebug("$routeId: Exact match for: '${GIDs.toStringPlus(gTripIdInt)}': \n - ${GIDs.toStringPlus(gStopIdInts)}")
+                    rTripIdInts.add(gTripIdInt)
+                    true
+                } == true) {
+                continue
+            }
+            // LOOK FOR SAME STOPS DIRECTION
+            if (directionsCandidates.singleOrNull { (_, rStopIdInts) ->
+                    rStopIdInts.hasItemsGoingIntoSameOrder(gStopIdInts)
+                }?.let { (rTripIdInts, _) ->
+                    MTLog.logDebug("$routeId: Same stops direction for: '${GIDs.toStringPlus(gTripIdInt)}': \n - ${GIDs.toStringPlus(gStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)
                     true
                 } == true) {
@@ -160,7 +173,7 @@ object MDirectionSplitter {
                     (rStopIdInts.first() == gStopIdInts.last())
                         .xor(rStopIdInts.last() == gStopIdInts.first())
                 }?.takeIf { (_, rStopIdInts) ->
-                    gStopIdInts.size.toFloat().div(rStopIdInts.size) < 0.50f
+                    gStopIdInts.size.toFloat() / rStopIdInts.size < 0.50f
                 }?.let { (rTripIdInts, rStopIdInts) ->
                     MTLog.logDebug("$routeId: continuation: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
                     if (rStopIdInts.first() == gStopIdInts.last()) {
