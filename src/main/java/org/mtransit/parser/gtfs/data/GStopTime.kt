@@ -193,15 +193,16 @@ data class GStopTime(
         const val DROP_OFF_TYPE = "drop_off_type"
         const val TIME_POINT = "timepoint"
 
+        @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GStopTime(
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools? = null) = GStopTime(
             tripId = line[TRIP_ID]?.trim()
-                ?.let { agencyTools.cleanTripOriginalId(it) }
+                ?.let { agencyTools?.cleanTripOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
             arrivalTime = line[ARRIVAL_TIME]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
             departureTime = line[DEPARTURE_TIME]?.trim() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
             stopId = line[STOP_ID]?.trim()
-                ?.let { agencyTools.cleanStopOriginalId(it) }
+                ?.let { agencyTools?.cleanStopOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
             stopSequence = line[STOP_SEQUENCE]?.trim()?.toInt() ?: throw MTLog.Fatal("Invalid GStopTime from $line!"),
             stopHeadsign = line[STOP_HEADSIGN]?.takeIf { it.isNotBlank() },

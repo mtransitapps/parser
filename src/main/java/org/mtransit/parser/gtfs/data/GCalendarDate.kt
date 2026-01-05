@@ -87,7 +87,7 @@ data class GCalendarDate(
     companion object {
         const val FILENAME = "calendar_dates.txt"
 
-        private const val SERVICE_ID = "service_id"
+        internal const val SERVICE_ID = "service_id"
         private const val DATE = "date"
         private const val EXCEPTION_DATE = "exception_type"
 

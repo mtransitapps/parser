@@ -513,7 +513,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String cleanRouteShortName(@NotNull String routeShortName) {
 		if (org.mtransit.commons.StringUtils.isEmpty(routeShortName)) {
-			throw new MTLog.Fatal("No default route short name for %s!", routeShortName);
+			throw new MTLog.Fatal("No default route short name for '%s'!", routeShortName);
 		}
 		routeShortName = Configs.getRouteConfig().cleanRouteShortName(routeShortName);
 		return routeShortName.trim();
@@ -718,10 +718,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private final Map<String, String> tripIdToCleanupTripId = new HashMap<>();
 
 	@Override
-	public @NotNull String cleanTripOriginalId(@NotNull String gTripId) {
-		final String cleanTripId = GTFSCommons.cleanOriginalId(gTripId, getTripIdCleanupPattern());
-		this.tripIdToCleanupTripId.put(gTripId, cleanTripId);
+	public @NotNull String cleanTripOriginalId(@NotNull String gOriginalTripId) {
+		final String cleanTripId = GTFSCommons.cleanOriginalId(gOriginalTripId, getTripIdCleanupPattern());
+		this.tripIdToCleanupTripId.put(gOriginalTripId, cleanTripId);
 		return cleanTripId;
+	}
+
+	@Override
+	public void forgetOriginalTripId(@NotNull String gOriginalTripId) {
+		this.tripIdToCleanupTripId.remove(gOriginalTripId);
 	}
 
 	@Override
@@ -1112,10 +1117,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@NotNull
 	@Override
-	public String cleanStopOriginalId(@NotNull String gStopId) {
-		final String cleanStopId = GTFSCommons.cleanOriginalId(gStopId, getStopIdCleanupPattern());
-		this.stopIdToCleanupStopId.put(gStopId, cleanStopId);
+	public String cleanStopOriginalId(@NotNull String gStopOriginalId) {
+		final String cleanStopId = GTFSCommons.cleanOriginalId(gStopOriginalId, getStopIdCleanupPattern());
+		this.stopIdToCleanupStopId.put(gStopOriginalId, cleanStopId);
 		return cleanStopId;
+	}
+
+	@Override
+	public void forgetOriginalStopId(@NotNull String gStopOriginalId) {
+		this.stopIdToCleanupStopId.remove(gStopOriginalId);
 	}
 
 	@Override

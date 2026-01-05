@@ -83,7 +83,7 @@ data class RouteConfig(
         @SerialName("stop_code")
         val stopCode: String,
         @SerialName("stop_id")
-        val stopId: Integer,
+        val stopId: Int,
     )
 
     @Serializable

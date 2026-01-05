@@ -119,10 +119,11 @@ data class GStop(
         private const val PARENT_STATION = "parent_station"
         private const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
 
+        @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GStop(
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools? = null) = GStop(
             stopId = line[STOP_ID]?.trim()
-                ?.let { agencyTools.cleanStopOriginalId(it) }
+                ?.let { agencyTools?.cleanStopOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GStop from $line!"),
             stopName = line[STOP_NAME] ?: throw MTLog.Fatal("Invalid GStop from $line!"),
             stopLat = line[STOP_LAT]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),

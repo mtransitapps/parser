@@ -175,7 +175,7 @@ object GTFSDataBase {
     }
 
     @JvmStatic
-    fun selectRoutesIds(): List<RouteId> {
+    fun selectRouteIds(): List<RouteId> {
         connection.createStatement().use { statement ->
             return RouteSQL.selectRouteIds(statement)
         }
@@ -204,6 +204,13 @@ object GTFSDataBase {
     fun selectStops(stopId: StopId? = null): List<Stop> {
         connection.createStatement().use { statement ->
             return StopSQL.select(stopId, statement)
+        }
+    }
+
+    @JvmStatic
+    fun selectStopIds(): List<StopId> {
+        connection.createStatement().use { statement ->
+            return StopSQL.selectStopIds(statement)
         }
     }
 

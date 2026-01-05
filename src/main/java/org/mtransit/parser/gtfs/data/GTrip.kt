@@ -58,6 +58,7 @@ data class GTrip(
     val directionIdOrOriginal: Int?
         get() = directionIdE.originalId()
 
+    @Suppress("unused")
     @Discouraged(message = "Should not be changed")
     fun setDirectionId(newDirectionId: Int?) {
         this.directionIdE = GDirectionId.parse(newDirectionId)
@@ -131,7 +132,7 @@ data class GTrip(
 
         internal const val TRIP_ID = "trip_id"
         private const val ROUTE_ID = GRoute.ROUTE_ID
-        private const val SERVICE_ID = "service_id"
+        internal const val SERVICE_ID = "service_id"
         private const val TRIP_HEADSIGN = "trip_headsign"
         private const val TRIP_SHORT_NAME = "trip_short_name"
         private const val DIRECTION_ID = "direction_id"
@@ -140,13 +141,14 @@ data class GTrip(
         private const val WHEELCHAIR_ACCESSIBLE = "wheelchair_accessible"
         private const val BIKES_ALLOWED = "bikes_allowed"
 
+        @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GTrip(
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools? = null) = GTrip(
             tripId = line[TRIP_ID]?.trim()
-                ?.let { agencyTools.cleanTripOriginalId(it) }
+                ?.let { agencyTools?.cleanTripOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
             routeId = line[ROUTE_ID]?.trim()
-                ?.let { agencyTools.cleanRouteOriginalId(it) }
+                ?.let { agencyTools?.cleanRouteOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
             originalRouteId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),
             serviceId = line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GTrip from $line!"),

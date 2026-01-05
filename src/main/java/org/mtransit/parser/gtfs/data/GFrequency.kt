@@ -77,7 +77,7 @@ data class GFrequency(
     companion object {
         const val FILENAME = "frequencies.txt"
 
-        private const val TRIP_ID = GTrip.TRIP_ID
+        internal const val TRIP_ID = GTrip.TRIP_ID
         private const val START_TIME = "start_time"
         private const val END_TIME = "end_time"
         private const val HEADWAY_SECS = "headway_secs"
@@ -89,10 +89,11 @@ data class GFrequency(
         @Suppress("unused")
         val DEFAULT_DROP_OFF_TYPE = GDropOffType.REGULAR // Regularly scheduled drop off
 
+        @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools) = GFrequency(
+        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools? = null) = GFrequency(
             tripId = line[TRIP_ID]?.trim()
-                ?.let { agencyTools.cleanTripOriginalId(it) }
+                ?.let { agencyTools?.cleanTripOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
             startTime = line[START_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
             endTime = line[END_TIME] ?: throw MTLog.Fatal("Invalid GFrequency from $line!"),
