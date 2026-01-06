@@ -37,13 +37,29 @@ object SQLUtils {
         )
     }
 
+    private val ESCAPE_ID: CharSequenceTranslator by lazy {
+        LookupTranslator(
+            mapOf(
+                QUOTE to "$QUOTE$QUOTE",
+            )
+        )
+    }
+
     @JvmStatic
     fun escape(string: String): String {
         return ESCAPE.translate(string)
     }
 
+    @JvmStatic
+    fun escapeId(string: String): String {
+        return ESCAPE_ID.translate(string)
+    }
+
     @JvmName("escapeExt")
     fun String.escape() = escape(this)
+
+    @JvmName("escapeIdExt")
+    fun String.escapeId() = escapeId(this)
 
     @JvmStatic
     fun quotes(string: String): String {
@@ -54,6 +70,8 @@ object SQLUtils {
     fun String.quotes() = quotes(this)
 
     fun String.quotesEscape() = escape(this).quotes()
+
+    fun String.quotesEscapeId() = escapeId(this).quotes()
 
     @JvmStatic
     fun unquotes(string: String): String {

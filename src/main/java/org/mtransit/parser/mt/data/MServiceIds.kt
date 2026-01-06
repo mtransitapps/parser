@@ -4,7 +4,7 @@ import androidx.collection.SparseArrayCompat
 import androidx.collection.mutableScatterMapOf
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.db.SQLUtils.quotesEscape
+import org.mtransit.parser.db.SQLUtils.quotesEscapeId
 
 object MServiceIds {
 
@@ -63,6 +63,6 @@ object MServiceIds {
         if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
             getInt(serviceId).toString()
         } else {
-            serviceId.quotesEscape()
+            serviceId.quotesEscapeId()
         }
 }
