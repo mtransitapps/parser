@@ -129,7 +129,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final SimpleDateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "WeakerAccess"})
 	public int getTodayDateInt() {
 		return Integer.parseInt(DATE_FORMAT.format(Calendar.getInstance().getTime()));
 	}
@@ -357,7 +357,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanServiceId(@NotNull String gServiceId) {
-		final String cleanServiceId = GTFSCommons.cleanOriginalId(gServiceId, getServiceIdCleanupPattern());
+		String cleanServiceId = GTFSCommons.cleanOriginalId(gServiceId, getServiceIdCleanupPattern());
+		if (Configs.getAgencyConfig() != null && Configs.getAgencyConfig().getServiceIdCleanMerged()) {
+			cleanServiceId = CleanUtils.cleanMergedID(cleanServiceId);
+		}
 		serviceIdToCleanupServiceId.put(gServiceId, cleanServiceId);
 		return cleanServiceId;
 	}
@@ -653,10 +656,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 			//noinspection DiscouragedApi
 			throw new MTLog.Fatal("Trying to set direction head-sign w/o valid GTFS route (ID: %s)", gTrip.getRouteId());
 		}
-		boolean fromStopName = mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STOP_ID;
+		final boolean fromStopName = mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STOP_ID;
 		if (directionFinderEnabled(mRoute.getId(), gRoute)) {
 			mDirection.setHeadsignString(
-					cleanDirectionHeadsign(gTrip.getDirectionIdOrDefault(), fromStopName, gTrip.getTripHeadsignOrDefault()),
+					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, gTrip.getTripHeadsignOrDefault()),
 					gTrip.getDirectionIdOrDefault()
 			);
 			return;
@@ -666,7 +669,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		try {
 			mDirection.setHeadsignString(
-					cleanDirectionHeadsign(gTrip.getDirectionIdOrDefault(), fromStopName, gTrip.getTripHeadsignOrDefault()),
+					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, gTrip.getTripHeadsignOrDefault()),
 					gTrip.getDirectionIdOrDefault()
 			);
 		} catch (NumberFormatException nfe) {
@@ -739,9 +742,27 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return false;
 	}
 
+	@Override
+	public boolean removeRouteLongNameFromDirectionHeadsign() {
+		return Configs.getRouteConfig().getDirectionHeadsignRemoveRouteLongName();
+	}
+
 	/**
 	 * @param directionId {@link org.mtransit.parser.gtfs.data.GDirectionId} (0 or 1 or missing/generated)
 	 */
+	@Override
+	public @NotNull String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
+		if (gRoute != null && removeRouteLongNameFromDirectionHeadsign()
+				&& directionHeadSign.equals(gRoute.getRouteLongNameOrDefault())) {
+			//noinspection deprecation
+			return cleanDirectionHeadsign(directionId, fromStopName, "");
+		}
+		//noinspection deprecation
+		return cleanDirectionHeadsign(directionId, fromStopName, directionHeadSign);
+	}
+
+	@SuppressWarnings("DeprecatedIsStillUsed")
+	@Deprecated
 	@NotNull
 	@Override
 	public String cleanDirectionHeadsign(int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
@@ -1028,9 +1049,25 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return org.mtransit.commons.CleanUtils.cleanLabel(getFirstLanguageNN(), gStopName);
 	}
 
+	@Override
+	public boolean removeTripHeadsignFromStopHeadsign() {
+		return Configs.getRouteConfig().getStopHeadsignRemoveTripHeadsign();
+	}
+
+	@Override
+	public boolean removeRouteLongNameFromStopHeadsign() {
+		return Configs.getRouteConfig().getStopHeadsignRemoveRouteLongName();
+	}
+
 	@NotNull
 	@Override
 	public String cleanStopHeadSign(@NotNull GRoute gRoute, @NotNull GTrip gTrip, @NotNull GStopTime gStopTime, @NotNull String stopHeadsign) {
+		if (removeTripHeadsignFromStopHeadsign() && stopHeadsign.equals(gTrip.getTripHeadsignOrDefault())) {
+			return cleanStopHeadSign("");
+		}
+		if (removeRouteLongNameFromStopHeadsign() && stopHeadsign.equals(gRoute.getRouteLongNameOrDefault())) {
+			return cleanStopHeadSign("");
+		}
 		return cleanStopHeadSign(stopHeadsign);
 	}
 
@@ -1118,7 +1155,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopOriginalId(@NotNull String gStopOriginalId) {
-		final String cleanStopId = GTFSCommons.cleanOriginalId(gStopOriginalId, getStopIdCleanupPattern());
+		String cleanStopId = GTFSCommons.cleanOriginalId(gStopOriginalId, getStopIdCleanupPattern());
+		if (Configs.getRouteConfig().getStopIdCleanMerged()) {
+			cleanStopId = CleanUtils.cleanMergedID(cleanStopId);
+		}
 		this.stopIdToCleanupStopId.put(gStopOriginalId, cleanStopId);
 		return cleanStopId;
 	}
