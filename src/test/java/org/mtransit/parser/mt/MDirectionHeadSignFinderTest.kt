@@ -8,6 +8,7 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GDirectionId
@@ -41,9 +42,9 @@ class MDirectionHeadSignFinderTest {
     @Suppress("DEPRECATION")
     @Before
     fun setUp() {
-        whenever(agencyTools.cleanDirectionHeadsign(anyInt(), anyBoolean(), anyString()))
+        whenever(agencyTools.cleanDirectionHeadsign(anyOrNull<GRoute>(), anyInt(), anyBoolean(), anyString()))
             .then {
-                it.arguments[2]
+                it.arguments[3]
             }
         whenever(agencyTools.cleanStopHeadSign(any(), any(), any(), anyString()))
             .then {

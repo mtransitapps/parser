@@ -532,20 +532,20 @@ public class GReader {
 				return;
 			}
 			if (agencyTools.getRouteIdCleanupRegex() != null) { // IF route ID cleanup regex set DO
-				final GRoute previousRoute = gSpec.getRoute(gRoute.getRouteIdInt());
-				if (previousRoute != null && previousRoute.equals(gRoute)) {
+				final GRoute previousGRoute = gSpec.getRoute(gRoute.getRouteIdInt());
+				if (previousGRoute != null && previousGRoute.equals(gRoute)) {
 					return; // ignore if route already exists with same values
 				}
-				if (previousRoute != null && previousRoute.equalsExceptMergeable(gRoute)) {
-					final String mergedRouteLongName = GRoute.mergeRouteLongNames(previousRoute.getRouteLongName(), gRoute.getRouteLongName());
-					final String mergedRouteColor = GRoute.mergeRouteColors(previousRoute.getRouteColor(), gRoute.getRouteColor());
+				if (previousGRoute != null && previousGRoute.equalsExceptMergeable(gRoute)) {
+					final String mergedRouteLongName = GRoute.mergeRouteLongNames(previousGRoute.getRouteLongName(), gRoute.getRouteLongName());
+					final String mergedRouteColor = GRoute.mergeRouteColors(previousGRoute.getRouteColor(), gRoute.getRouteColor());
 					if (mergedRouteLongName != null) { // merge successful
-						gSpec.addRoute(previousRoute.clone(mergedRouteLongName, mergedRouteColor), true);
+						gSpec.addRoute(previousGRoute.clone(mergedRouteLongName, mergedRouteColor), true);
 						return;
 					}
 				}
-				if (previousRoute != null) {
-					MTLog.log("Duplicate route ID!\n - %s\n - %s", gRoute.toStringPlus(), previousRoute.toStringPlus());
+				if (previousGRoute != null) {
+					MTLog.log("Duplicate route ID!\n - %s\n - %s", gRoute.toStringPlus(), previousGRoute.toStringPlus());
 				}
 			}
 			gSpec.addRoute(gRoute);
