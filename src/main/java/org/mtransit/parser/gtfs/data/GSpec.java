@@ -248,7 +248,7 @@ public class GSpec {
 		if (optMRouteId != null) {
 			final List<GRoute> routes = new ArrayList<>();
 			for (Integer gRouteIdInt : this.mRouteIdToGRouteIdInts.get(optMRouteId)) {
-				GRoute gRoute = getRoute(gRouteIdInt);
+				final GRoute gRoute = getRoute(gRouteIdInt);
 				if (gRoute != null) {
 					routes.add(gRoute);
 				}

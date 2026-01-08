@@ -37,8 +37,8 @@ public interface GAgencyTools {
 
 	int getThreadPoolSize();
 
-	@Deprecated // TO BE REMOVED
-	boolean defaultExcludeEnabled();
+	@Deprecated
+	boolean defaultExcludeEnabled(); // TO BE REMOVED
 
 	boolean defaultStringsCleanerEnabled();
 
@@ -52,12 +52,12 @@ public interface GAgencyTools {
 	@Nullable
 	List<Locale> getSupportedLanguages();
 
-	@Deprecated // TO BE REMOVED
-	void setAgencyName(@Nullable String agencyName);
+	@Deprecated
+	void setAgencyName(@Nullable String agencyName); // TO BE REMOVED
 
-	@Deprecated // TO BE REMOVED
+	@Deprecated
 	@NotNull
-	String getAgencyName();
+	String getAgencyName(); // TO BE REMOVED
 
 	@NotNull
 	String getAgencyColor();
@@ -177,6 +177,12 @@ public interface GAgencyTools {
 
 	boolean directionOverrideId(long routeId);
 
+	boolean removeRouteLongNameFromDirectionHeadsign();
+
+	@NotNull
+	String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, @NotNull String directionHeadSign);
+
+	@Deprecated
 	@NotNull
 	String cleanDirectionHeadsign(int directionId, boolean fromStopName, @NotNull String directionHeadSign);
 
@@ -264,6 +270,10 @@ public interface GAgencyTools {
 
 	@NotNull
 	String cleanStopName(@NotNull String gStopName);
+
+	boolean removeTripHeadsignFromStopHeadsign();
+
+	boolean removeRouteLongNameFromStopHeadsign();
 
 	@NotNull
 	String cleanStopHeadSign(@NotNull GRoute gRoute, @NotNull GTrip gTrip, @NotNull GStopTime gStopTime, @NotNull String stopHeadsign);

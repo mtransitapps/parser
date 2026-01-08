@@ -40,13 +40,15 @@ data class RouteConfig(
     val tripHeadsignCleaners: List<Cleaner> = emptyList(),
     @SerialName("trip_headsign_remove_via")
     val tripHeadsignRemoveVia: Boolean = false, // OPT-IN feature
-    // DIRECTION
     @SerialName("trip_id_cleanup_regex")
     val tripIdCleanupRegex: String? = null, // optional
     @SerialName("trip_id_not_unique_allowed")
     val tripIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
+    // DIRECTION
     @SerialName("direction_headsign_cleaners")
     val directionHeadsignCleaners: List<Cleaner> = emptyList(),
+    @SerialName("direction_headsign_remove_route_long_name")
+    val directionHeadsignRemoveRouteLongName: Boolean = false, // OPT-IN feature
     @SerialName("direction_finder_enabled")
     val directionFinderEnabled: Boolean = false, // OPT-IN feature
     // STOP
@@ -58,6 +60,11 @@ data class RouteConfig(
     val useStopCodeForStopId: Boolean = false, // OPT-IN feature
     @SerialName("stop_code_to_stop_id_configs")
     val stopCodeToStopIdConfigs: List<StopCodeToStopIdConfig> = emptyList(),
+    @SerialName("stop_headsign_remove_trip_headsign")
+    val stopHeadsignRemoveTripHeadsign: Boolean = false, // OPT-IN feature
+    @SerialName("stop_headsign_remove_route_long_name")
+    val stopHeadsignRemoveRouteLongName: Boolean = false, // OPT-IN feature
+
 ) {
 
     @Serializable
