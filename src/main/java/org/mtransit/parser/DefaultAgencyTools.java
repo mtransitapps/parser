@@ -749,10 +749,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	 */
 	@Override
 	public @NotNull String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
-		if (gRoute != null && removeRouteLongNameFromDirectionHeadsign()) {
-			if (directionHeadSign.equals(gRoute.getRouteLongNameOrDefault())) {
-				directionHeadSign = "";
-			}
+		if (gRoute != null && removeRouteLongNameFromDirectionHeadsign()
+				&& directionHeadSign.equals(gRoute.getRouteLongNameOrDefault())) {
+			//noinspection deprecation
+			return cleanDirectionHeadsign(directionId, fromStopName, "");
 		}
 		//noinspection deprecation
 		return cleanDirectionHeadsign(directionId, fromStopName, directionHeadSign);
@@ -1059,15 +1059,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopHeadSign(@NotNull GRoute gRoute, @NotNull GTrip gTrip, @NotNull GStopTime gStopTime, @NotNull String stopHeadsign) {
-		if (removeTripHeadsignFromStopHeadsign()) {
-			if (stopHeadsign.equals(gTrip.getTripHeadsignOrDefault())) {
-				stopHeadsign = "";
-			}
+		if (removeTripHeadsignFromStopHeadsign() && stopHeadsign.equals(gTrip.getTripHeadsignOrDefault())) {
+			return cleanStopHeadSign("");
 		}
-		if (removeRouteLongNameFromStopHeadsign()) {
-			if (stopHeadsign.equals(gRoute.getRouteLongNameOrDefault())) {
-				stopHeadsign = "";
-			}
+		if (removeRouteLongNameFromStopHeadsign() && stopHeadsign.equals(gRoute.getRouteLongNameOrDefault())) {
+			return cleanStopHeadSign("");
 		}
 		return cleanStopHeadSign(stopHeadsign);
 	}
