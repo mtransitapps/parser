@@ -15,6 +15,7 @@ data class MSpec(
     val routes: List<MRoute>,
     val directions: List<MDirection>,
     val directionStops: List<MDirectionStop>,
+    val trips: List<MTrip>,
     val serviceDates: List<MServiceDate>,
     val routeFrequencies: TreeMap<Long, List<MFrequency>>,
     val firstTimestamp: Long,
