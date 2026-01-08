@@ -15,6 +15,8 @@ data class AgencyConfig(
     val defaultColor: String, // REQUIRED
     @SerialName("service_id_cleanup_regex")
     val serviceIdCleanupRegex: String? = null, // optional
+    @SerialName("service_id_clean_merged")
+    val serviceIdCleanMerged: Boolean = false, // OPT-IN feature
     @SerialName("service_id_not_unique_allowed")
     val serviceIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
 )

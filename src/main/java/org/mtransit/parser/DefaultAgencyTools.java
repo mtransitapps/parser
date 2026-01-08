@@ -357,7 +357,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanServiceId(@NotNull String gServiceId) {
-		final String cleanServiceId = GTFSCommons.cleanOriginalId(gServiceId, getServiceIdCleanupPattern());
+		String cleanServiceId = GTFSCommons.cleanOriginalId(gServiceId, getServiceIdCleanupPattern());
+		if (Configs.getAgencyConfig() != null && Configs.getAgencyConfig().getServiceIdCleanMerged()) {
+			cleanServiceId = CleanUtils.cleanMergedID(cleanServiceId);
+		}
 		serviceIdToCleanupServiceId.put(gServiceId, cleanServiceId);
 		return cleanServiceId;
 	}
@@ -1152,7 +1155,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopOriginalId(@NotNull String gStopOriginalId) {
-		final String cleanStopId = GTFSCommons.cleanOriginalId(gStopOriginalId, getStopIdCleanupPattern());
+		String cleanStopId = GTFSCommons.cleanOriginalId(gStopOriginalId, getStopIdCleanupPattern());
+		if (Configs.getRouteConfig().getStopIdCleanMerged()) {
+			cleanStopId = CleanUtils.cleanMergedID(cleanStopId);
+		}
 		this.stopIdToCleanupStopId.put(gStopOriginalId, cleanStopId);
 		return cleanStopId;
 	}

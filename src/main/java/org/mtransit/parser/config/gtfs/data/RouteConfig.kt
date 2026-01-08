@@ -54,6 +54,8 @@ data class RouteConfig(
     // STOP
     @SerialName("stop_id_cleanup_regex")
     val stopIdCleanupRegex: String? = null, // optional
+    @SerialName("stop_id_clean_merged")
+    val stopIdCleanMerged: Boolean = false, // OPT-IN feature
     @SerialName("stop_id_not_unique_allowed")
     val stopIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
     @SerialName("use_stop_code_for_stop_id")
