@@ -64,6 +64,8 @@ data class GTrip(
         this.directionIdE = GDirectionId.parse(newDirectionId)
     }
 
+    fun hasTripHeadsign() = !this.tripHeadsign.isNullOrBlank()
+
     @Suppress("unused")
     val tripHeadsignOrDefault: String = tripHeadsign ?: StringUtils.EMPTY
 
