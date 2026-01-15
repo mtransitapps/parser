@@ -173,7 +173,7 @@ public class MGenerator {
 		final ArrayList<MDirectionStop> mDirectionStopsList = new ArrayList<>(mDirectionStops);
 		Collections.sort(mDirectionStopsList);
 		final ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
-		Collections.sort(mServiceDatesList);
+		mServiceDatesList.sort(MServiceDate.getCOMPARATOR_FOR_FILE());
 		MTLog.log("Generating routes, trips, trip stops & stops objects... DONE");
 		MTLog.log("- Agencies: %d", mAgenciesList.size());
 		MTLog.log("- Routes: %d", mRoutesList.size());
@@ -279,11 +279,9 @@ public class MGenerator {
 		// DIRECTION STOPS
 		dumpRDSDirectionStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// STOPS
-		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng =
-				dumpRDSStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng = dumpRDSStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// SCHEDULE SERVICE DATES
-		Pair<Integer, Integer> minMaxDates =
-				dumpScheduleServiceDates(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		final Pair<Integer, Integer> minMaxDates = dumpScheduleServiceDates(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// SCHEDULE STOPS
 		dumpScheduleStops(gAgencyTools, mSpec, fileBase, deleteAll, rawDirF);
 		// FREQUENCY ROUTES
@@ -683,12 +681,12 @@ public class MGenerator {
 		if (F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES)); // migration from src/main/res/raw to data
 		}
-		File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
+		final File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
+		boolean empty;
 		FileUtils.deleteIfExist(file); // delete previous
-		BufferedWriter ow = null;
 		if (deleteAll) return minMaxDates;
-		try {
-			ow = new BufferedWriter(new FileWriter(file));
+		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
+			empty = true;
 			MTLog.logPOINT(); // LOG
 			Integer minDate = null, maxDate = null;
 			Statement dbStatement = null;
@@ -698,8 +696,17 @@ public class MGenerator {
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_SERVICE_DATES_SQL_INSERT();
 			}
+			MServiceDate lastServiceDate = null;
 			for (MServiceDate mServiceDate : mSpec.getServiceDates()) {
-				final String serviceDatesInsert = mServiceDate.toFile(gAgencyTools);
+				if (!FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES || !mServiceDate.isSameServiceId(lastServiceDate)) {
+					lastServiceDate = null;
+					if (!empty) {
+						ow.write(Constants.NEW_LINE);
+					}
+				} else {
+					ow.write(SQLUtils.COLUMN_SEPARATOR);
+				}
+				final String serviceDatesInsert = mServiceDate.toFile(gAgencyTools, lastServiceDate);
 				if (F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
@@ -707,13 +714,21 @@ public class MGenerator {
 					);
 				}
 				ow.write(serviceDatesInsert);
-				ow.write(Constants.NEW_LINE);
+				empty = false;
 				if (minDate == null || minDate > mServiceDate.getCalendarDate()) {
 					minDate = mServiceDate.getCalendarDate();
 				}
 				if (maxDate == null || maxDate.doubleValue() < mServiceDate.getCalendarDate()) {
 					maxDate = mServiceDate.getCalendarDate();
 				}
+				if (FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES) {
+					lastServiceDate = mServiceDate;
+				}
+			}
+			if (empty) {
+				FileUtils.delete(file);
+			} else {
+				ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
 			}
 			if (F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
@@ -721,8 +736,6 @@ public class MGenerator {
 			minMaxDates = new Pair<>(minDate, maxDate);
 		} catch (Exception ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while writing service dates file!");
-		} finally {
-			CloseableUtils.closeQuietly(ow);
 		}
 		return minMaxDates;
 	}
@@ -779,44 +792,41 @@ public class MGenerator {
 				}
 				mStopScheduleMap.get(schedule.getStopId()).add(schedule);
 			}
-			BufferedWriter ow = null;
 			int fw = 0;
 			for (Integer stopId : mStopScheduleMap.keySet()) {
-				try {
-					mStopSchedules = mStopScheduleMap.get(stopId);
-					Collections.sort(mStopSchedules); // DB sort uses IntId instead of id string
-					if (!mStopSchedules.isEmpty()) {
-						fileName = fileBaseScheduleStop + stopId;
-						file = new File(rawDirF, fileName);
-						empty = true;
-						ow = new BufferedWriter(new FileWriter(file));
-						if (fw++ % FILE_WRITER_LOG == 0) { // LOG
-							MTLog.logPOINT(); // LOG
-						} // LOG
-						MSchedule lastSchedule = null;
-						for (MSchedule mSchedule : mStopSchedules) {
-							if (!mSchedule.isSameServiceAndDirection(lastSchedule)) {
-								lastSchedule = null;
-								if (!empty) {
-									ow.write(Constants.NEW_LINE);
-								}
-							} else {
-								ow.write(SQLUtils.COLUMN_SEPARATOR);
+				mStopSchedules = mStopScheduleMap.get(stopId);
+				Collections.sort(mStopSchedules); // DB sort uses IntId instead of id string
+				if (mStopSchedules.isEmpty()) {
+					continue;
+				}
+				fileName = fileBaseScheduleStop + stopId;
+				file = new File(rawDirF, fileName);
+				try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
+					empty = true;
+					if (fw++ % FILE_WRITER_LOG == 0) { // LOG
+						MTLog.logPOINT(); // LOG
+					} // LOG
+					MSchedule lastStopSchedule = null;
+					for (MSchedule mStopSchedule : mStopSchedules) {
+						if (!mStopSchedule.isSameServiceAndDirection(lastStopSchedule)) {
+							lastStopSchedule = null;
+							if (!empty) {
+								ow.write(Constants.NEW_LINE);
 							}
-							ow.write(mSchedule.toFile(gAgencyTools, lastSchedule));
-							empty = false;
-							lastSchedule = mSchedule;
-						}
-						if (empty) {
-							FileUtils.delete(file);
 						} else {
-							ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
+							ow.write(SQLUtils.COLUMN_SEPARATOR);
 						}
+						ow.write(mStopSchedule.toFile(gAgencyTools, lastStopSchedule));
+						empty = false;
+						lastStopSchedule = mStopSchedule;
+					}
+					if (empty) {
+						FileUtils.delete(file);
+					} else {
+						ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
 					}
 				} catch (IOException ioe) {
 					throw new MTLog.Fatal(ioe, "I/O Error while writing schedule file for stop '%s'!", stopId);
-				} finally {
-					CloseableUtils.closeQuietly(ow);
 				}
 			}
 		}

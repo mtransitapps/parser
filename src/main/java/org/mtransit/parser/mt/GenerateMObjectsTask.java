@@ -176,7 +176,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		Collections.sort(mDirectionStopsList);
 		setDirectionStopNoPickup(mDirectionStopsList, mSchedules.values());
 		ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
-		Collections.sort(mServiceDatesList);
+		mServiceDatesList.sort(MServiceDate.getCOMPARATOR_BY_CALENDAR_DATE());
 		ArrayList<MFrequency> mFrequenciesList = new ArrayList<>(mFrequencies.values());
 		Collections.sort(mFrequenciesList);
 		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<>();
@@ -257,7 +257,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				throw new MTLog.Fatal(e, "Error while parsing dates '%s %s'!", lastCalendarDate, lastDeparture);
 			}
 		}
-		MSpec mRouteSpec = new MSpec(
+		final MSpec mRouteSpec = new MSpec(
 				mAgenciesList,
 				mStopsList,
 				mRoutesList,

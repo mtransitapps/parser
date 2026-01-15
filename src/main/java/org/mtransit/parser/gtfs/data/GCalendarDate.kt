@@ -3,8 +3,7 @@ package org.mtransit.parser.gtfs.data
 import androidx.annotation.Discouraged
 import org.mtransit.commons.gtfs.data.CalendarDate
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.db.SQLUtils.escape
-import org.mtransit.parser.gtfs.GAgencyTools
+import org.mtransit.parser.db.SQLUtils.escapeId
 import org.mtransit.parser.gtfs.data.GFieldTypes.isAfter
 import org.mtransit.parser.gtfs.data.GFieldTypes.isBefore
 import org.mtransit.parser.gtfs.data.GFieldTypes.isBetween
@@ -48,7 +47,7 @@ data class GCalendarDate(
         get() = GIDs.getString(serviceIdInt)
 
     val escapedServiceId: String
-        get() = _serviceId.escape()
+        get() = _serviceId.escapeId()
 
     val escapedServiceIdInt: Int
         get() = escapedServiceId.toGIDInt()

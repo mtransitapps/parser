@@ -1,6 +1,7 @@
 package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.unquotes
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -12,7 +13,7 @@ data class MServiceDate(
     val serviceIdInt: Int,
     val calendarDate: Int,
     val exceptionType: Int,
-) : Comparable<MServiceDate> {
+) {
 
     private constructor(
         serviceIdInt: Int,
@@ -31,17 +32,19 @@ data class MServiceDate(
     private val _serviceId: String
         get() = GIDs.getString(serviceIdInt)
 
-    override fun compareTo(other: MServiceDate): Int = compareBy(
-        MServiceDate::calendarDate,
-        MServiceDate::_serviceId,
-        MServiceDate::exceptionType,
-    ).compare(this, other)
-
-    fun toFile(agencyTools: GAgencyTools) = buildList {
-        add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+    /**
+     * see [org.mtransit.commons.GTFSCommons.T_SERVICE_DATES_SQL_INSERT]
+     */
+    fun toFile(agencyTools: GAgencyTools, lastServiceDate: MServiceDate? = null) = buildList {
+        if (!FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES || lastServiceDate == null) { // new
+            add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+        }
         add(calendarDate.toString())
         add(exceptionType.toString())
     }.joinToString(SQLUtils.COLUMN_SEPARATOR)
+
+    fun isSameServiceId(other: MServiceDate?) =
+        this.serviceIdInt == other?.serviceIdInt
 
     @Suppress("unused")
     fun toStringPlus(): String {
@@ -63,6 +66,22 @@ data class MServiceDate(
         )
 
     companion object {
+
+        @JvmStatic
+        val COMPARATOR_BY_CALENDAR_DATE = compareBy(
+            MServiceDate::calendarDate,
+            MServiceDate::_serviceId,
+            MServiceDate::exceptionType,
+        )
+
+        @JvmStatic
+        val COMPARATOR_FOR_FILE = if (FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES)
+            compareBy(
+                MServiceDate::_serviceId,
+                MServiceDate::calendarDate,
+                MServiceDate::exceptionType,
+            ) else COMPARATOR_BY_CALENDAR_DATE
+
         @Suppress("unused")
         @JvmStatic
         fun toStringPlus(serviceDates: Iterable<MServiceDate>): String {
