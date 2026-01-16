@@ -36,7 +36,7 @@ class MServiceDateTest {
         serviceDates.shuffle()
         val listSize = serviceDates.size
 
-        val result = serviceDates.sorted();
+        val result = serviceDates.sortedWith(MServiceDate.COMPARATOR_BY_CALENDAR_DATE)
 
         assertEquals(listSize, result.size)
         var idx = 0

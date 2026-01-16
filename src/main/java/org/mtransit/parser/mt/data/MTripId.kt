@@ -3,7 +3,7 @@ package org.mtransit.parser.mt.data
 import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.commons.sql.SQLUtils.unquotesUnescape
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.db.SQLUtils.quotesEscape
+import org.mtransit.parser.db.SQLUtils.quotesEscapeId
 
 data class MTripId(
     val tripIdInt: Int,
@@ -15,7 +15,7 @@ data class MTripId(
      */
     fun toFile() = buildList {
         add(tripIdInt.toString())
-        add(tripId.quotesEscape()) // already agencyTools.cleanTripId(tripId) before
+        add(tripId.quotesEscapeId()) // already agencyTools.cleanTripId(tripId) before
     }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     override fun compareTo(other: MTripId) = compareBy(

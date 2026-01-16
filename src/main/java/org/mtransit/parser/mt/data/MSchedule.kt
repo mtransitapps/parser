@@ -96,9 +96,16 @@ data class MSchedule(
 
     fun toFile(agencyTools: GAgencyTools, lastSchedule: MSchedule?) = buildList {
         if (lastSchedule == null) { // NEW
-            add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
-            // no route ID, just for file split
-            add(directionId.toString())
+            // no stop ID, just for file split
+            if (FeatureFlags.F_EXPORT_SCHEDULE_SORTED_BY_ROUTE_DIRECTION) {
+                // no route ID, just for logs
+                add(directionId.toString())
+                add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+            } else {
+                add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+                // no route ID, just for logs
+                add(directionId.toString())
+            }
         }
         val lastDeparture = if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
             lastSchedule?.departure?.div(100)?.times(100)
@@ -111,11 +118,13 @@ data class MSchedule(
             add((departure - lastDeparture).toString())
         }
         if (FeatureFlags.F_EXPORT_TRIP_ID) {
-            var arrivalDiff = (departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }
-            if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
-                arrivalDiff = arrivalDiff?.div(100) // truncates the time to an minute that is closer to 0
+            if (FeatureFlags.F_EXPORT_ARRIVAL_W_TRIP_ID) {
+                var arrivalDiff = (departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }
+                if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
+                    arrivalDiff = arrivalDiff?.div(100) // truncates the time to an minute that is closer to 0
+                }
+                add(arrivalDiff?.toString().orEmpty())
             }
-            add(arrivalDiff?.toString().orEmpty())
             add(MTripIds.convert(_tripId))
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
@@ -136,10 +145,9 @@ data class MSchedule(
         add(accessible.toString())
     }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
-    fun isSameServiceAndDirection(lastSchedule: MSchedule?): Boolean {
-        return lastSchedule?.serviceIdInt == serviceIdInt
+    fun isSameServiceAndDirection(lastSchedule: MSchedule?) =
+        lastSchedule?.serviceIdInt == serviceIdInt
                 && lastSchedule.directionId == directionId
-    }
 
     fun isSameServiceRDSDeparture(ts: MSchedule): Boolean {
         if (ts.serviceIdInt != serviceIdInt) {
@@ -159,16 +167,21 @@ data class MSchedule(
         return true
     }
 
-    override fun compareTo(other: MSchedule): Int {
-        // sort by route_id => service_id => direction_id => stop_id => departure
-        return when {
-            routeId != other.routeId -> routeId.compareTo(other.routeId)
-            serviceIdInt != other.serviceIdInt -> _serviceId.compareTo(other._serviceId)
-            directionId != other.directionId -> directionId.compareTo(other.directionId)
-            stopId != other.stopId -> stopId - other.stopId
-            else -> departure - other.departure
-        }
-    }
+    override fun compareTo(other: MSchedule) =
+        if (FeatureFlags.F_EXPORT_SCHEDULE_SORTED_BY_ROUTE_DIRECTION) compareBy(
+            MSchedule::routeId,
+            MSchedule::directionId,
+            MSchedule::stopId,
+            MSchedule::_serviceId,
+            MSchedule::departure
+        ).compare(this, other)
+        else compareBy(
+            MSchedule::routeId,
+            MSchedule::_serviceId,
+            MSchedule::directionId,
+            MSchedule::stopId,
+            MSchedule::departure
+        ).compare(this, other)
 
     companion object {
         const val ROUTE_ID = "route_id"

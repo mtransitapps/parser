@@ -38,6 +38,7 @@ import org.mtransit.parser.mt.data.MDirection;
 import org.mtransit.parser.mt.data.MDirectionStop;
 import org.mtransit.parser.mt.data.MString;
 import org.mtransit.parser.mt.data.MStrings;
+import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripId;
 import org.mtransit.parser.mt.data.MTripIds;
 
@@ -80,6 +81,7 @@ public class MGenerator {
 		HashSet<MRoute> mRoutes = new HashSet<>(); // use set to avoid duplicates
 		HashSet<MDirection> mDirections = new HashSet<>(); // use set to avoid duplicates
 		HashSet<MDirectionStop> mDirectionStops = new HashSet<>(); // use set to avoid duplicates
+		HashSet<MTrip> mTrips = new HashSet<>(); // use set to avoid duplicates
 		HashMap<Integer, MStop> mStops = new HashMap<>();
 		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<>();
 		HashSet<MServiceDate> mServiceDates = new HashSet<>(); // use set to avoid duplicates
@@ -106,6 +108,7 @@ public class MGenerator {
 					mRoutes.addAll(mRouteSpec.getRoutes());
 					mDirections.addAll(mRouteSpec.getDirections());
 					mDirectionStops.addAll(mRouteSpec.getDirectionStops());
+					mTrips.addAll(mRouteSpec.getTrips());
 					logMerging("stops...", mRouteId);
 					for (MStop mStop : mRouteSpec.getStops()) {
 						if (mStops.containsKey(mStop.getId())) {
@@ -168,17 +171,20 @@ public class MGenerator {
 		Collections.sort(mStopsList);
 		final ArrayList<MRoute> mRoutesList = new ArrayList<>(mRoutes);
 		Collections.sort(mRoutesList);
+		final ArrayList<MTrip> mTripsList = new ArrayList<>(mTrips);
+		Collections.sort(mTripsList);
 		final ArrayList<MDirection> mDirectionsList = new ArrayList<>(mDirections);
 		Collections.sort(mDirectionsList);
 		final ArrayList<MDirectionStop> mDirectionStopsList = new ArrayList<>(mDirectionStops);
 		Collections.sort(mDirectionStopsList);
 		final ArrayList<MServiceDate> mServiceDatesList = new ArrayList<>(mServiceDates);
-		Collections.sort(mServiceDatesList);
+		mServiceDatesList.sort(MServiceDate.getCOMPARATOR_FOR_FILE());
 		MTLog.log("Generating routes, trips, trip stops & stops objects... DONE");
 		MTLog.log("- Agencies: %d", mAgenciesList.size());
 		MTLog.log("- Routes: %d", mRoutesList.size());
 		MTLog.log("- Directions: %d", mDirectionsList.size());
 		MTLog.log("- Direction stops: %d", mDirectionStopsList.size());
+		MTLog.log("- Trips: %d", mTripsList.size());
 		MTLog.log("- Stops: %d", mStopsList.size());
 		MTLog.log("- Service Ids: %d", MServiceIds.count());
 		MTLog.log("- Trip Ids: %d", MTripIds.count());
@@ -193,6 +199,7 @@ public class MGenerator {
 				mRoutesList,
 				mDirectionsList,
 				mDirectionStopsList,
+				mTripsList,
 				mServiceDatesList,
 				mRouteFrequencies,
 				firstTimestamp,
@@ -211,7 +218,7 @@ public class MGenerator {
 	private static final String GTFS_SCHEDULE = "gtfs_schedule";
 	private static final String GTFS_SCHEDULE_SERVICE_DATES = GTFS_SCHEDULE + "_service_dates"; // DB
 	private static final String GTFS_SCHEDULE_SERVICE_IDS = GTFS_SCHEDULE + "_service_ids"; // DB
-	private static final String GTFS_SCHEDULE_TRIP_IDS = GTFS_SCHEDULE + "_trip_ids"; // DB
+	private static final String GTFS_SCHEDULE_TRIP_IDS = GTFS_SCHEDULE + "_path_ids"; // do not change to avoid breaking compat w/ old modules // DB
 	private static final String GTFS_SCHEDULE_STOP = GTFS_SCHEDULE + "_stop_"; // file
 	private static final String GTFS_FREQUENCY = "gtfs_frequency";
 	private static final String GTFS_FREQUENCY_ROUTE = GTFS_FREQUENCY + "_route_"; // file
@@ -219,6 +226,7 @@ public class MGenerator {
 	private static final String GTFS_RDS_ROUTES = GTFS_RDS + "_routes"; // DB
 	private static final String GTFS_RDS_DIRECTIONS = GTFS_RDS + "_trips"; // do not change to avoid breaking compat w/ old modules // DB
 	private static final String GTFS_RDS_DIRECTION_STOPS = GTFS_RDS + "_trip_stops"; // do not change to avoid breaking compat w/ old modules // DB
+	private static final String GTFS_RDS_TRIPS = GTFS_RDS + "_paths"; // do not change to avoid breaking compat w/ old modules // DB
 	private static final String GTFS_RDS_STOPS = GTFS_RDS + "_stops"; // DB
 
 	private static final int FILE_WRITER_LOG = 10;
@@ -278,12 +286,12 @@ public class MGenerator {
 		dumpRDSDirections(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// DIRECTION STOPS
 		dumpRDSDirectionStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		// TRIPS
+		dumpRDSTrips(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection); // after ROUTE & DIRECTION (FK)
 		// STOPS
-		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng =
-				dumpRDSStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng = dumpRDSStops(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// SCHEDULE SERVICE DATES
-		Pair<Integer, Integer> minMaxDates =
-				dumpScheduleServiceDates(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
+		final Pair<Integer, Integer> minMaxDates = dumpScheduleServiceDates(gAgencyTools, mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection);
 		// SCHEDULE STOPS
 		dumpScheduleStops(gAgencyTools, mSpec, fileBase, deleteAll, rawDirF);
 		// FREQUENCY ROUTES
@@ -457,6 +465,72 @@ public class MGenerator {
 			throw new MTLog.Fatal(ioe, "I/O Error while writing trip stops file!");
 		} finally {
 			CloseableUtils.closeQuietly(ow);
+		}
+	}
+
+	private static void dumpRDSTrips(
+			@NotNull GAgencyTools gAgencyTools,
+			@Nullable MSpec mSpec,
+			@NotNull String fileBase,
+			boolean deleteAll,
+			@NotNull File dataDirF,
+			@NotNull File rawDirF,
+			@Nullable Connection dbConnection
+	) {
+		if (!FeatureFlags.F_EXPORT_TRIP_ID) return;
+		if (!deleteAll
+				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
+		}
+		File file;
+		boolean empty;
+		if (F_PRE_FILLED_DB) {
+			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_TRIPS)); // migration from src/main/res/raw to data
+		}
+		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_TRIPS);
+		FileUtils.deleteIfExist(file); // delete previous
+		if (deleteAll) return;
+		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
+			empty = true;
+			MTLog.logPOINT(); // LOG
+			Statement dbStatement = null;
+			String sqlInsert = null;
+			if (F_PRE_FILLED_DB) {
+				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
+				dbStatement = dbConnection.createStatement();
+				sqlInsert = GTFSCommons.getT_TRIP_SQL_INSERT();
+			}
+			MTrip lastTrip = null;
+			for (MTrip mTrip : mSpec.getTrips()) {
+				if (!mTrip.isSameRouteDirectionService(lastTrip)) {
+					lastTrip = null;
+					if (!empty) {
+						ow.write(Constants.NEW_LINE);
+					}
+				} else {
+					ow.write(SQLUtils.COLUMN_SEPARATOR);
+				}
+				final String tripInsert = mTrip.toFile(gAgencyTools, lastTrip);
+				if (F_PRE_FILLED_DB) {
+					SQLUtils.executeUpdate(
+							dbStatement,
+							String.format(sqlInsert, tripInsert)
+					);
+				}
+				ow.write(tripInsert);
+				empty = false;
+				lastTrip = mTrip;
+			}
+			if (empty) {
+				FileUtils.delete(file);
+			} else {
+				ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
+			}
+			if (F_PRE_FILLED_DB) {
+				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
+			}
+		} catch (Exception ioe) {
+			throw new MTLog.Fatal(ioe, "I/O Error while writing trip stops file!");
 		}
 	}
 
@@ -683,12 +757,12 @@ public class MGenerator {
 		if (F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES)); // migration from src/main/res/raw to data
 		}
-		File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
+		final File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
+		boolean empty;
 		FileUtils.deleteIfExist(file); // delete previous
-		BufferedWriter ow = null;
 		if (deleteAll) return minMaxDates;
-		try {
-			ow = new BufferedWriter(new FileWriter(file));
+		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
+			empty = true;
 			MTLog.logPOINT(); // LOG
 			Integer minDate = null, maxDate = null;
 			Statement dbStatement = null;
@@ -698,8 +772,17 @@ public class MGenerator {
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_SERVICE_DATES_SQL_INSERT();
 			}
+			MServiceDate lastServiceDate = null;
 			for (MServiceDate mServiceDate : mSpec.getServiceDates()) {
-				final String serviceDatesInsert = mServiceDate.toFile(gAgencyTools);
+				if (!FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES || !mServiceDate.isSameServiceId(lastServiceDate)) {
+					lastServiceDate = null;
+					if (!empty) {
+						ow.write(Constants.NEW_LINE);
+					}
+				} else {
+					ow.write(SQLUtils.COLUMN_SEPARATOR);
+				}
+				final String serviceDatesInsert = mServiceDate.toFile(gAgencyTools, lastServiceDate);
 				if (F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
@@ -707,13 +790,21 @@ public class MGenerator {
 					);
 				}
 				ow.write(serviceDatesInsert);
-				ow.write(Constants.NEW_LINE);
+				empty = false;
 				if (minDate == null || minDate > mServiceDate.getCalendarDate()) {
 					minDate = mServiceDate.getCalendarDate();
 				}
 				if (maxDate == null || maxDate.doubleValue() < mServiceDate.getCalendarDate()) {
 					maxDate = mServiceDate.getCalendarDate();
 				}
+				if (FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES) {
+					lastServiceDate = mServiceDate;
+				}
+			}
+			if (empty) {
+				FileUtils.delete(file);
+			} else {
+				ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
 			}
 			if (F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
@@ -721,8 +812,6 @@ public class MGenerator {
 			minMaxDates = new Pair<>(minDate, maxDate);
 		} catch (Exception ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while writing service dates file!");
-		} finally {
-			CloseableUtils.closeQuietly(ow);
 		}
 		return minMaxDates;
 	}
@@ -779,44 +868,41 @@ public class MGenerator {
 				}
 				mStopScheduleMap.get(schedule.getStopId()).add(schedule);
 			}
-			BufferedWriter ow = null;
 			int fw = 0;
 			for (Integer stopId : mStopScheduleMap.keySet()) {
-				try {
-					mStopSchedules = mStopScheduleMap.get(stopId);
-					Collections.sort(mStopSchedules); // DB sort uses IntId instead of id string
-					if (!mStopSchedules.isEmpty()) {
-						fileName = fileBaseScheduleStop + stopId;
-						file = new File(rawDirF, fileName);
-						empty = true;
-						ow = new BufferedWriter(new FileWriter(file));
-						if (fw++ % FILE_WRITER_LOG == 0) { // LOG
-							MTLog.logPOINT(); // LOG
-						} // LOG
-						MSchedule lastSchedule = null;
-						for (MSchedule mSchedule : mStopSchedules) {
-							if (!mSchedule.isSameServiceAndDirection(lastSchedule)) {
-								lastSchedule = null;
-								if (!empty) {
-									ow.write(Constants.NEW_LINE);
-								}
-							} else {
-								ow.write(SQLUtils.COLUMN_SEPARATOR);
+				mStopSchedules = mStopScheduleMap.get(stopId);
+				Collections.sort(mStopSchedules); // DB sort uses IntId instead of id string
+				if (mStopSchedules.isEmpty()) {
+					continue;
+				}
+				fileName = fileBaseScheduleStop + stopId;
+				file = new File(rawDirF, fileName);
+				try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
+					empty = true;
+					if (fw++ % FILE_WRITER_LOG == 0) { // LOG
+						MTLog.logPOINT(); // LOG
+					} // LOG
+					MSchedule lastStopSchedule = null;
+					for (MSchedule mStopSchedule : mStopSchedules) {
+						if (!mStopSchedule.isSameServiceAndDirection(lastStopSchedule)) {
+							lastStopSchedule = null;
+							if (!empty) {
+								ow.write(Constants.NEW_LINE);
 							}
-							ow.write(mSchedule.toFile(gAgencyTools, lastSchedule));
-							empty = false;
-							lastSchedule = mSchedule;
-						}
-						if (empty) {
-							FileUtils.delete(file);
 						} else {
-							ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
+							ow.write(SQLUtils.COLUMN_SEPARATOR);
 						}
+						ow.write(mStopSchedule.toFile(gAgencyTools, lastStopSchedule));
+						empty = false;
+						lastStopSchedule = mStopSchedule;
+					}
+					if (empty) {
+						FileUtils.delete(file);
+					} else {
+						ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
 					}
 				} catch (IOException ioe) {
 					throw new MTLog.Fatal(ioe, "I/O Error while writing schedule file for stop '%s'!", stopId);
-				} finally {
-					CloseableUtils.closeQuietly(ow);
 				}
 			}
 		}
