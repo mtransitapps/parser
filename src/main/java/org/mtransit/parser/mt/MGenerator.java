@@ -519,7 +519,6 @@ public class MGenerator {
 				}
 				ow.write(tripInsert);
 				empty = false;
-				// ow.write(Constants.NEW_LINE);
 				lastTrip = mTrip;
 			}
 			if (empty) {
@@ -869,7 +868,6 @@ public class MGenerator {
 				}
 				mStopScheduleMap.get(schedule.getStopId()).add(schedule);
 			}
-			// BufferedWriter ow = null;
 			int fw = 0;
 			for (Integer stopId : mStopScheduleMap.keySet()) {
 				mStopSchedules = mStopScheduleMap.get(stopId);
@@ -903,7 +901,6 @@ public class MGenerator {
 					} else {
 						ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
 					}
-
 				} catch (IOException ioe) {
 					throw new MTLog.Fatal(ioe, "I/O Error while writing schedule file for stop '%s'!", stopId);
 				}
