@@ -519,7 +519,6 @@ public class MGenerator {
 				}
 				ow.write(tripInsert);
 				empty = false;
-				// ow.write(Constants.NEW_LINE);
 				lastTrip = mTrip;
 			}
 			if (empty) {
