@@ -13,16 +13,10 @@ java {
     targetCompatibility = rootProject.javaVersion
     toolchain.languageVersion = JavaLanguageVersion.of(rootProject.javaToolchainVersion.toString())
 }
-compileKotlin {
-    kotlinOptions {
+kotlin {
+    compilerOptions {
         jvmTarget = rootProject.javaVersion
-        allWarningsAsErrors = true
-    }
-}
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = rootProject.javaVersion
-        allWarningsAsErrors = true
+        allWarningsAsErrors = true // replaced by "DeprecatedCall" in lint
     }
 }
 
