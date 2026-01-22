@@ -16,7 +16,7 @@ java {
 kotlin {
     compilerOptions {
         jvmTarget = rootProject.javaVersion
-        allWarningsAsErrors = true // replaced by "DeprecatedCall" in lint
+        allWarningsAsErrors = true
     }
 }
 
