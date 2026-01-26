@@ -80,7 +80,7 @@ object GIDs {
     @JvmOverloads
     @JvmStatic
     fun toStringPlus(integers: Iterable<Int?>?, limit: Int = 50): String {
-        return integers?.joinToString(limit = limit) { toStringPlus(it) }?.takeIf { it.isNotBlank() } ?: "{ empty list }"
+        return integers?.map { toStringPlus(it) }?.sorted()?.joinToString(limit = limit) ?: "{ empty list }"
     }
 
     @Suppress("unused")
