@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CharUtils;
 import org.mtransit.commons.CleanUtils;
-import org.mtransit.commons.CollectionUtils;
 import org.mtransit.commons.CommonsApp;
 import org.mtransit.commons.GTFSCommons;
 import org.mtransit.commons.StringsCleaner;
@@ -31,6 +30,7 @@ import org.mtransit.parser.mt.MDataChangedManager;
 import org.mtransit.parser.mt.MGenerator;
 import org.mtransit.parser.mt.MReader;
 import org.mtransit.parser.mt.data.MAgency;
+import org.mtransit.parser.mt.data.MDirection;
 import org.mtransit.parser.mt.data.MDirectionCardinalType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MRouteSNToIDConverter;
@@ -38,7 +38,6 @@ import org.mtransit.parser.mt.data.MServiceDate;
 import org.mtransit.parser.mt.data.MServiceId;
 import org.mtransit.parser.mt.data.MServiceIds;
 import org.mtransit.parser.mt.data.MSpec;
-import org.mtransit.parser.mt.data.MDirection;
 import org.mtransit.parser.mt.data.MString;
 import org.mtransit.parser.mt.data.MStrings;
 import org.mtransit.parser.mt.data.MTripId;
@@ -1855,7 +1854,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 			}
 		}
-		MTLog.log("[period-service-ids] > Service IDs [%d]: %s.", serviceIdInts.size(), GIDs.toStringPlus(CollectionUtils.sorted(serviceIdInts)));
+		MTLog.log("[period-service-ids] > Service IDs [%d]: %s.", serviceIdInts.size(), GIDs.toStringPlus(serviceIdInts));
 		return serviceIdInts;
 	}
 
