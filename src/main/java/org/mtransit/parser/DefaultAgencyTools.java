@@ -353,11 +353,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private final Map<String, String> serviceIdToCleanupServiceId = new HashMap<>();
 
+	@Override
+	public boolean cleanMergedServiceIds() {
+		return Configs.getAgencyConfig() != null && Configs.getAgencyConfig().getServiceIdCleanMerged();
+	}
+
 	@NotNull
 	@Override
 	public String cleanServiceId(@NotNull String gServiceId) {
 		String cleanServiceId = GTFSCommons.cleanOriginalId(gServiceId, getServiceIdCleanupPattern());
-		if (Configs.getAgencyConfig() != null && Configs.getAgencyConfig().getServiceIdCleanMerged()) {
+		if (cleanMergedServiceIds()) {
 			cleanServiceId = CleanUtils.cleanMergedID(cleanServiceId);
 		}
 		serviceIdToCleanupServiceId.put(gServiceId, cleanServiceId);
@@ -388,10 +393,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean verifyServiceIdsUniqueness() {
-		if (Configs.getAgencyConfig() != null) {
-			if (Configs.getAgencyConfig().getServiceIdNotUniqueAllowed()) return false;
-		}
-		return getServiceIdCleanupRegex() != null; // OPT-IN feature
+		if (Configs.getAgencyConfig() != null && Configs.getAgencyConfig().getServiceIdNotUniqueAllowed()) return false;
+		return getServiceIdCleanupRegex() != null || cleanMergedServiceIds(); // OPT-IN feature
 	}
 
 	@NotNull
@@ -401,10 +404,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private final Map<String, String> routeIdToCleanupRouteId = new HashMap<>();
 
+	@Override
+	public boolean cleanMergedRouteIds() {
+		return Configs.getRouteConfig().getRouteIdCleanMerged();
+	}
+
 	@NotNull
 	@Override
 	public String cleanRouteOriginalId(@NotNull String gRouteId) {
-		if (Configs.getRouteConfig().getRouteIdCleanMerged()) {
+		if (cleanMergedRouteIds()) {
 			gRouteId = CleanUtils.cleanMergedID(gRouteId);
 		}
 		final String cleanRouteId = GTFSCommons.cleanOriginalId(gRouteId, getRouteIdCleanupPattern());
@@ -476,7 +484,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean verifyRouteIdsUniqueness() {
 		if (Configs.getRouteConfig().getRouteIdNotUniqueAllowed()) return false;
-		return getRouteIdCleanupRegex() != null; // OPT-IN feature
+		return getRouteIdCleanupRegex() != null || cleanMergedRouteIds(); // OPT-IN feature
 	}
 
 	@NotNull
@@ -695,7 +703,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean verifyTripIdsUniqueness() {
 		if (Configs.getRouteConfig().getTripIdNotUniqueAllowed()) return false;
-		return getTripIdCleanupRegex() != null; // OPT-IN feature
+		return getTripIdCleanupRegex() != null || cleanMergedTripIds(); // OPT-IN feature
 	}
 
 	@NotNull
@@ -720,8 +728,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private final Map<String, String> tripIdToCleanupTripId = new HashMap<>();
 
 	@Override
+	public boolean cleanMergedTripIds() {
+		return Configs.getRouteConfig().getTripIdCleanMerged();
+	}
+
+	@Override
 	public @NotNull String cleanTripOriginalId(@NotNull String gOriginalTripId) {
-		final String cleanTripId = GTFSCommons.cleanOriginalId(gOriginalTripId, getTripIdCleanupPattern());
+		String cleanTripId = GTFSCommons.cleanOriginalId(gOriginalTripId, getTripIdCleanupPattern());
+		if (cleanMergedTripIds()) {
+			cleanTripId = CleanUtils.cleanMergedID(cleanTripId);
+		}
 		this.tripIdToCleanupTripId.put(gOriginalTripId, cleanTripId);
 		return cleanTripId;
 	}
@@ -1127,7 +1143,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean verifyStopIdsUniqueness() {
 		if (Configs.getRouteConfig().getStopIdNotUniqueAllowed()) return false;
-		return getStopIdCleanupRegex() != null; // OPT-IN feature
+		return getStopIdCleanupRegex() != null || cleanMergedStopIds(); // OPT-IN feature
 	}
 
 	@NotNull
@@ -1151,11 +1167,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private final Map<String, String> stopIdToCleanupStopId = new HashMap<>();
 
+	@Override
+	public boolean cleanMergedStopIds() {
+		return Configs.getRouteConfig().getStopIdCleanMerged();
+	}
+
 	@NotNull
 	@Override
 	public String cleanStopOriginalId(@NotNull String gStopOriginalId) {
 		String cleanStopId = GTFSCommons.cleanOriginalId(gStopOriginalId, getStopIdCleanupPattern());
-		if (Configs.getRouteConfig().getStopIdCleanMerged()) {
+		if (cleanMergedStopIds()) {
 			cleanStopId = CleanUtils.cleanMergedID(cleanStopId);
 		}
 		this.stopIdToCleanupStopId.put(gStopOriginalId, cleanStopId);
