@@ -13,14 +13,8 @@ java {
     targetCompatibility = rootProject.javaVersion
     toolchain.languageVersion = JavaLanguageVersion.of(rootProject.javaToolchainVersion.toString())
 }
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = rootProject.javaVersion
-        allWarningsAsErrors = true
-    }
-}
-compileTestKotlin {
-    kotlinOptions {
+kotlin {
+    compilerOptions {
         jvmTarget = rootProject.javaVersion
         allWarningsAsErrors = true
     }
