@@ -59,6 +59,10 @@ object MServiceIds {
     }.sorted()
 
     @JvmStatic
+    fun containsAllIdInts(idInts: Iterable<Int>)
+        = idInts.all { idIntToId.containsKey(it) }
+
+    @JvmStatic
     fun convert(serviceId: String) =
         if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
             getInt(serviceId).toString()

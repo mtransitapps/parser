@@ -139,5 +139,9 @@ data class MServiceDate(
         @Suppress("unused")
         @JvmStatic
         fun findServiceIdInts(lastServiceDates: Collection<MServiceDate>) = lastServiceDates.map { it.serviceIdInt }.distinct()
+
+        @JvmStatic
+        fun containsAllServiceIdInts(serviceDates: Iterable<MServiceDate>?, serviceIdInts: Collection<Int>) =
+            serviceDates?.map { it.serviceIdInt }?.containsAll(serviceIdInts) ?: serviceIdInts.isEmpty()
     }
 }
