@@ -36,6 +36,7 @@ data class MServiceDate(
      * see [org.mtransit.commons.GTFSCommons.T_SERVICE_DATES_SQL_INSERT]
      */
     fun toFile(agencyTools: GAgencyTools, lastServiceDate: MServiceDate? = null) = buildList {
+        @Suppress("SimplifyBooleanWithConstants")
         if (!FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES || lastServiceDate == null) { // new
             add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
         }
@@ -100,14 +101,30 @@ data class MServiceDate(
                 }
             )
 
-        fun fromFileLine(line: String) =
-            line.split(SQLUtils.COLUMN_SEPARATOR)
+        fun fromFileLine(line: String): List<MServiceDate>? =
+            if (FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES)
+                line.split(SQLUtils.COLUMN_SEPARATOR)
+                    .takeIf { it.size >= 3 }
+                    ?.toMutableList()
+                    ?.let { columns ->
+                        val serviceIdInt = GIDs.getInt(columns.removeFirst().unquotes())
+                        columns.chunked(2).map {
+                            MServiceDate(
+                                serviceIdInt = serviceIdInt,
+                                calendarDate = it[0].toInt(),
+                                exceptionType = it[1].toInt()
+                            )
+                        }
+                    }
+            else line.split(SQLUtils.COLUMN_SEPARATOR)
                 .takeIf { it.size == 3 }
                 ?.let { columns ->
-                    MServiceDate(
-                        serviceIdInt = GIDs.getInt(columns[0].unquotes()),
-                        calendarDate = columns[1].toInt(),
-                        exceptionType = columns[2].toInt()
+                    listOf(
+                        MServiceDate(
+                            serviceIdInt = GIDs.getInt(columns[0].unquotes()),
+                            calendarDate = columns[1].toInt(),
+                            exceptionType = columns[2].toInt()
+                        )
                     )
                 }
 
