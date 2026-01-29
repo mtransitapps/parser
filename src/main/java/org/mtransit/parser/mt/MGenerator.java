@@ -1,7 +1,6 @@
 package org.mtransit.parser.mt;
 
 import static org.mtransit.commons.Constants.EMPTY;
-import static org.mtransit.commons.FeatureFlags.F_PRE_FILLED_DB;
 
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
@@ -262,7 +261,7 @@ public class MGenerator {
 		}
 		String dataDir = rootDir + "data" + "/" + resDirName;
 		final File dataDirF = new File(dataDir);
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			if (!dataDirF.getParentFile().exists()) {
 				FileUtils.mkdir(dataDirF.getParentFile());
 			}
@@ -273,7 +272,7 @@ public class MGenerator {
 		MTLog.log("Writing MT files (%s)...", rawDirF.toURI());
 		String dbFilePath = rawDir + "/" + GTFSCommons.getDBFileName(fileBase);
 		Connection dbConnection;
-		if (deleteAll || !F_PRE_FILLED_DB) {
+		if (deleteAll || !FeatureFlags.F_PRE_FILLED_DB) {
 			DumpDbUtils.delete(dbFilePath);
 			dbConnection = null;
 		} else {
@@ -328,15 +327,15 @@ public class MGenerator {
 									  @NotNull File rawDirF,
 									  @Nullable Connection dbConnection) {
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
 		File file;
 		BufferedWriter ow = null;
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_ROUTES)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_ROUTES);
+		file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_ROUTES);
 		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) return;
 		try {
@@ -344,14 +343,14 @@ public class MGenerator {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_ROUTE_SQL_INSERT();
 			}
 			for (MRoute mRoute : mSpec.getRoutes()) {
 				final String routeInsert = mRoute.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, routeInsert)
@@ -360,7 +359,7 @@ public class MGenerator {
 				ow.write(routeInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -377,15 +376,15 @@ public class MGenerator {
 										  @NotNull File rawDirF,
 										  @Nullable Connection dbConnection) {
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
 		File file;
 		BufferedWriter ow = null;
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_DIRECTIONS)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_DIRECTIONS);
+		file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_DIRECTIONS);
 		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) return;
 		try {
@@ -393,14 +392,14 @@ public class MGenerator {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_DIRECTION_SQL_INSERT();
 			}
 			for (MDirection mDirection : mSpec.getDirections()) {
 				final String tripInsert = mDirection.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, tripInsert)
@@ -409,7 +408,7 @@ public class MGenerator {
 				ow.write(tripInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -426,15 +425,15 @@ public class MGenerator {
 											  @NotNull File rawDirF,
 											  @Nullable Connection dbConnection) {
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
 		File file;
 		BufferedWriter ow = null;
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_DIRECTION_STOPS)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_DIRECTION_STOPS);
+		file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_DIRECTION_STOPS);
 		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) return;
 		try {
@@ -442,14 +441,14 @@ public class MGenerator {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_DIRECTION_STOPS_SQL_INSERT();
 			}
 			for (MDirectionStop mDirectionStop : mSpec.getDirectionStops()) {
 				final String tripStopInsert = mDirectionStop.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, tripStopInsert)
@@ -458,7 +457,7 @@ public class MGenerator {
 				ow.write(tripStopInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -477,25 +476,25 @@ public class MGenerator {
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection
 	) {
-		if (!FeatureFlags.F_EXPORT_TRIP_ID) return;
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
 		File file;
 		boolean empty;
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_TRIPS)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_TRIPS);
+		file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_TRIPS);
 		FileUtils.deleteIfExist(file); // delete previous
+		if (!FeatureFlags.F_EXPORT_TRIP_ID) return;
 		if (deleteAll) return;
 		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
 			empty = true;
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_TRIP_SQL_INSERT();
@@ -511,7 +510,7 @@ public class MGenerator {
 					ow.write(SQLUtils.COLUMN_SEPARATOR);
 				}
 				final String tripInsert = mTrip.toFile(gAgencyTools, lastTrip);
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, tripInsert)
@@ -526,7 +525,7 @@ public class MGenerator {
 			} else {
 				ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -547,10 +546,10 @@ public class MGenerator {
 		File file;
 		BufferedWriter ow = null;
 		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng = new Pair<>(new Pair<>(null, null), new Pair<>(null, null));
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_STOPS)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_STOPS);
+		file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_STOPS);
 		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) return minMaxLatLng;
 		try {
@@ -559,14 +558,14 @@ public class MGenerator {
 			Double minLat = null, maxLat = null, minLng = null, maxLng = null;
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_STOP_SQL_INSERT();
 			}
 			for (MStop mStop : mSpec.getStops()) {
 				final String stopInsert = mStop.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, stopInsert)
@@ -591,7 +590,7 @@ public class MGenerator {
 					}
 				}
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 			minMaxLatLng = new Pair<>(new Pair<>(minLat, minLng), new Pair<>(maxLat, maxLng));
@@ -610,29 +609,29 @@ public class MGenerator {
 			@NotNull File dataDirF,
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection) {
-		if (!FeatureFlags.F_EXPORT_TRIP_ID_INTS) return;
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_TRIP_IDS)); // migration from src/main/res/raw to data
 		}
-		final File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_TRIP_IDS);
+		final File file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_TRIP_IDS);
 		FileUtils.deleteIfExist(file); // delete previous
+		if (!FeatureFlags.F_EXPORT_TRIP_ID_INTS) return;
 		if (deleteAll) return;
 		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_TRIP_IDS_SQL_INSERT();
 			}
 			for (MTripId mTripId : MTripIds.getAll()) {
 				final String tripIdsInsert = mTripId.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, tripIdsInsert)
@@ -641,7 +640,7 @@ public class MGenerator {
 				ow.write(tripIdsInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -656,29 +655,29 @@ public class MGenerator {
 			@NotNull File dataDirF,
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection) {
-		if (!FeatureFlags.F_EXPORT_SERVICE_ID_INTS) return;
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_IDS)); // migration from src/main/res/raw to data
 		}
-		final File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_IDS);
+		final File file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_IDS);
 		FileUtils.deleteIfExist(file); // delete previous
+		if (!FeatureFlags.F_EXPORT_SERVICE_ID_INTS) return;
 		if (deleteAll) return;
 		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_SERVICE_IDS_SQL_INSERT();
 			}
 			for (MServiceId mServiceId : MServiceIds.getAll()) {
 				final String serviceIdsInsert = mServiceId.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, serviceIdsInsert)
@@ -687,7 +686,7 @@ public class MGenerator {
 				ow.write(serviceIdsInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -702,29 +701,29 @@ public class MGenerator {
 			@NotNull File dataDirF,
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection) {
-		if (!FeatureFlags.F_EXPORT_STRINGS && !FeatureFlags.F_EXPORT_SCHEDULE_STRINGS) return;
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_STRINGS)); // migration from src/main/res/raw to data
 		}
-		final File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_STRINGS);
+		final File file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_STRINGS);
 		FileUtils.deleteIfExist(file); // delete previous
+		if (!FeatureFlags.F_EXPORT_STRINGS && !FeatureFlags.F_EXPORT_SCHEDULE_STRINGS) return;
 		if (deleteAll) return;
 		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_STRINGS_SQL_INSERT();
 			}
 			for (MString mString : MStrings.getAll()) {
 				final String stringInsert = mString.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, stringInsert)
@@ -733,7 +732,7 @@ public class MGenerator {
 				ow.write(stringInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -750,14 +749,14 @@ public class MGenerator {
 																   @NotNull File rawDirF,
 																   @Nullable Connection dbConnection) {
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
 		Pair<Integer, Integer> minMaxDates = new Pair<>(null, null);
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES)); // migration from src/main/res/raw to data
 		}
-		final File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
+		final File file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
 		boolean empty;
 		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) return minMaxDates;
@@ -767,7 +766,7 @@ public class MGenerator {
 			Integer minDate = null, maxDate = null;
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_SERVICE_DATES_SQL_INSERT();
@@ -783,7 +782,7 @@ public class MGenerator {
 					ow.write(SQLUtils.COLUMN_SEPARATOR);
 				}
 				final String serviceDatesInsert = mServiceDate.toFile(gAgencyTools, lastServiceDate);
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, serviceDatesInsert)
@@ -806,7 +805,7 @@ public class MGenerator {
 			} else {
 				ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 			minMaxDates = new Pair<>(minDate, maxDate);
