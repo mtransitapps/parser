@@ -126,7 +126,7 @@ object MReader {
 
     @JvmStatic
     fun loadServiceDates(fileBase: String) =
-        readFile("service dates", fileBase, GTFS_SCHEDULE_SERVICE_DATES) { MServiceDate.fromFileLine(it) }
+        readFileMerge("service dates", fileBase, GTFS_SCHEDULE_SERVICE_DATES) { MServiceDate.fromFileLine(it) }
 
     private fun <T> readFile(type: String, fileBase: String, fileName: String, transform: (String) -> T?): List<T>? = try {
         (File("${getResDirName(fileBase)}/$RAW/${fileBase}$fileName").takeIf { it.exists() }
@@ -140,6 +140,23 @@ object MReader {
             }
     } catch (e: Exception) {
         MTLog.logNonFatal(e, "Error while reading '$fileBase' $type!")
+        null
+    }
+
+    @Suppress("SameParameterValue")
+    private fun <T> readFileMerge(type: String, fileBase: String, fileName: String, transform: (String) -> List<T>?): List<T>? = try {
+        (File("${getResDirName(fileBase)}/$RAW/${fileBase}$fileName").takeIf { it.exists() }
+            ?: CURRENT_.takeIf { NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() }
+            ?: "".takeIf { CURRENT_ == fileBase || NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() })
+            ?.readLines()
+            ?.mapNotNull { transform(it) }
+            ?.flatten()
+            ?: run {
+                MTLog.log("File not found for merge '$type' with fileBase '$fileBase' and fileName '$fileName'!")
+                null
+            }
+    } catch (e: Exception) {
+        MTLog.logNonFatal(e, "Error while reading '$fileBase' $type (merge)!")
         null
     }
 
