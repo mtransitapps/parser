@@ -3,7 +3,6 @@ package org.mtransit.parser.mt.data
 import androidx.annotation.Discouraged
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.sql.SQLUtils
-import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
 import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.db.SQLUtils.quotesEscape
@@ -60,7 +59,8 @@ data class MSchedule(
         if (newHeadsignValue.isNullOrBlank()
             && newHeadsignType != MDirection.HEADSIGN_TYPE_NO_PICKUP
         ) {
-            MTLog.logDebug("Setting '$newHeadsignValue' head-sign! (type:$newHeadsignType)")
+            clearHeadsign()
+            return
         }
         this.headsignType = newHeadsignType
         this.headsignValue = newHeadsignValue
@@ -137,8 +137,10 @@ data class MSchedule(
         } else {
             add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
             if (FeatureFlags.F_SCHEDULE_NO_QUOTES) {
+                @Suppress("SimplifyBooleanWithConstants")
                 add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS))
             } else {
+                @Suppress("SimplifyBooleanWithConstants")
                 add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS).quotesEscape())
             }
         }
