@@ -51,6 +51,7 @@ object MTripIds {
         return removedCount
     }
 
+    @Suppress("unused")
     @JvmStatic
     fun remove(tripId: MTripId) {
         synchronized(incrementLock) {
