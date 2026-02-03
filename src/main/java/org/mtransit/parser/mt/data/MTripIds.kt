@@ -5,6 +5,7 @@ import androidx.collection.mutableScatterMapOf
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.escapeId
+import org.mtransit.parser.db.SQLUtils.quotes
 
 object MTripIds {
 
@@ -59,12 +60,15 @@ object MTripIds {
     }.sorted()
 
      @JvmStatic
-    fun convert(tripId: String) =
+    fun convert(tripId: String, quotesString: Boolean = false) =
         if (FeatureFlags.F_EXPORT_TRIP_ID_INTS) {
             getInt(tripId).toString()
         } else {
             tripId.escapeId()
+                .let {
+                    if (quotesString) it.quotes() else it
+                }
         }
 }
 
-fun String.convertTripId() = MTripIds.convert(this)
+fun String.convertTripId(quotesString: Boolean = false) = MTripIds.convert(this, quotesString)

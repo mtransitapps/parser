@@ -100,9 +100,9 @@ data class MSchedule(
             if (FeatureFlags.F_EXPORT_SCHEDULE_SORTED_BY_ROUTE_DIRECTION) {
                 // no route ID, just for logs
                 add(directionId.toString())
-                add(_serviceId.convertServiceId(agencyTools).quotes())
+                add(_serviceId.convertServiceId(agencyTools, quotesString = true))
             } else {
-                add(_serviceId.convertServiceId(agencyTools).quotes())
+                add(_serviceId.convertServiceId(agencyTools, quotesString = true))
                 // no route ID, just for logs
                 add(directionId.toString())
             }
@@ -125,7 +125,7 @@ data class MSchedule(
                 }
                 add(arrivalDiff?.toString().orEmpty())
             }
-            add(_tripId.convertTripId().quotes())
+            add(_tripId.convertTripId(quotesString = true))
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
             add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString())

@@ -3,7 +3,6 @@ package org.mtransit.parser.mt.data
 import androidx.annotation.Discouraged
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.sql.SQLUtils
-import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.db.SQLUtils.unquotes
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GCalendarDate
@@ -39,7 +38,7 @@ data class MServiceDate(
     fun toFile(agencyTools: GAgencyTools, lastServiceDate: MServiceDate? = null) = buildList {
         @Suppress("SimplifyBooleanWithConstants")
         if (!FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES || lastServiceDate == null) { // new
-            add(_serviceId.convertServiceId(agencyTools).quotes())
+            add(_serviceId.convertServiceId(agencyTools, quotesString = true))
         }
         add(calendarDate.toString())
         add(exceptionType.toString())
