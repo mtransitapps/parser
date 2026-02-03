@@ -5,7 +5,6 @@ import org.mtransit.parser.Constants
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.Period
-import org.mtransit.parser.db.SQLUtils.escapeId
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GCalendar
 import org.mtransit.parser.gtfs.data.GCalendarDate
@@ -31,6 +30,7 @@ object MDataChangedManager {
     fun ignoreCalendarDateToAvoidDataChanged(
         lastServiceDates: Iterable<MServiceDate>?,
         gCalendarDateToAdd: GCalendarDate,
+        agencyTools: GAgencyTools,
         p: Period,
     ): Boolean {
         if (!FeatureFlags.F_AVOID_DATA_CHANGED) return false
@@ -52,7 +52,7 @@ object MDataChangedManager {
         //noinspection DiscouragedApi
         val lastServiceIds = lastServiceDates.map { it.serviceId }.distinct()
         //noinspection DiscouragedApi
-        if (gCalendarDateToAdd.serviceId.escapeId() !in lastServiceIds) {
+        if (gCalendarDateToAdd.serviceId.convertServiceId(agencyTools) !in lastServiceIds) {
             return false // new service ID not in last service dates
         }
         //noinspection DiscouragedApi
@@ -65,6 +65,7 @@ object MDataChangedManager {
     fun addMissingDateToAvoidDataChanged(
         lastServiceDates: List<MServiceDate>?,
         gCalendarDates: List<GCalendarDate>,
+        agencyTools: GAgencyTools,
         p: Period,
     ) {
         if (!FeatureFlags.F_AVOID_DATA_CHANGED) return
@@ -72,7 +73,7 @@ object MDataChangedManager {
         val pStartDate = p.startDate ?: return
         val pEndDate = p.endDate ?: return
         val pServiceIds = DefaultAgencyTools.getPeriodServiceIds(pStartDate, pEndDate, null, gCalendarDates)
-            .map { GIDs.getString(it).escapeId() }
+            .map { GIDs.getString(it).convertServiceId(agencyTools) }
         val lastStartDate = lastServiceDates.minOf { it.calendarDate }
         val lastEndDate = lastServiceDates.maxOf { it.calendarDate }
         if (lastStartDate >= pStartDate && lastEndDate <= pEndDate) {
@@ -220,7 +221,7 @@ object MDataChangedManager {
                 MTLog.log("> Cannot re-add removed dates because of removed service ID '${removedServiceDate.toStringPlus()}'")
                 return
             }
-            val originalServiceIdInt = newGCalendarDates.firstOrNull { it.serviceId.escapeId() == removedServiceDate.serviceId }?.serviceIdInt
+            val originalServiceIdInt = newGCalendarDates.firstOrNull { it.serviceId.convertServiceId(agencyTools) == removedServiceDate.serviceId }?.serviceIdInt
             val missingCalendarDate = removedServiceDate.toCalendarDate(overrideServiceIdInt = originalServiceIdInt)
             MTLog.log("> Optimising data changed by adding ${missingCalendarDate.toStringPlus()}...")
             newGCalendarDates.add(missingCalendarDate)
@@ -259,7 +260,7 @@ object MDataChangedManager {
             var dayAfterRemovedDate = DefaultAgencyTools.incDateDays(DATE_FORMAT, c, removedDate, +1)
             var tryCount = 0
             while (tryCount <= 7 && !GCalendar.isRunningOnDay(originalCalendar, dayAfterRemovedDate.toString())) {
-                dayAfterRemovedDate = DefaultAgencyTools.incDateDays(DATE_FORMAT, c, removedDate, +1)
+                dayAfterRemovedDate = DefaultAgencyTools.incDateDays(DATE_FORMAT, c, dayAfterRemovedDate, +1)
                 tryCount++
             }
             val updatedCalendar = originalCalendar.copy(startDate = dayAfterRemovedDate)
@@ -299,7 +300,7 @@ object MDataChangedManager {
             var dayBeforeRemovedDate = DefaultAgencyTools.incDateDays(DATE_FORMAT, c, removedDate, -1)
             var tryCount = 0
             while (tryCount <= 7 && !GCalendar.isRunningOnDay(originalCalendar, dayBeforeRemovedDate.toString())) {
-                dayBeforeRemovedDate = DefaultAgencyTools.incDateDays(DATE_FORMAT, c, removedDate, -1)
+                dayBeforeRemovedDate = DefaultAgencyTools.incDateDays(DATE_FORMAT, c, dayBeforeRemovedDate, -1)
                 tryCount++
             }
             val updatedCalendar = originalCalendar.copy(endDate = dayBeforeRemovedDate)
