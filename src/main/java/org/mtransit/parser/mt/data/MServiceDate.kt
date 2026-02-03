@@ -38,7 +38,7 @@ data class MServiceDate(
     fun toFile(agencyTools: GAgencyTools, lastServiceDate: MServiceDate? = null) = buildList {
         @Suppress("SimplifyBooleanWithConstants")
         if (!FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES || lastServiceDate == null) { // new
-            add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+            add(_serviceId.convertServiceId(agencyTools, quotesString = true))
         }
         add(calendarDate.toString())
         add(exceptionType.toString())
