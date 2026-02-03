@@ -326,6 +326,7 @@ public class GSpec {
 		return this.stopsCache.values();
 	}
 
+	@SuppressWarnings("unused")
 	@NotNull
 	private Collection<String> getAllStopIds() {
 		if (USE_DB_ONLY) {

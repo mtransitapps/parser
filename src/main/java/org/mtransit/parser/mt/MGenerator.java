@@ -23,6 +23,7 @@ import org.mtransit.parser.db.SQLUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GFieldTypes;
+import org.mtransit.parser.gtfs.data.GIDs;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MFrequency;
@@ -80,8 +81,8 @@ public class MGenerator {
 		HashSet<MRoute> mRoutes = new HashSet<>(); // use set to avoid duplicates
 		HashSet<MDirection> mDirections = new HashSet<>(); // use set to avoid duplicates
 		HashSet<MDirectionStop> mDirectionStops = new HashSet<>(); // use set to avoid duplicates
-		HashSet<MTrip> mTrips = new HashSet<>(); // use set to avoid duplicates
-		HashMap<Integer, MStop> mStops = new HashMap<>();
+		HashMap<Integer, MTrip> mTrips = new HashMap<>(); // map key unique -> avoid duplicates
+		HashMap<Integer, MStop> mStops = new HashMap<>(); // map key unique -> avoid duplicates
 		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<>();
 		HashSet<MServiceDate> mServiceDates = new HashSet<>(); // use set to avoid duplicates
 		long firstTimestamp = -1L;
@@ -107,16 +108,21 @@ public class MGenerator {
 					mRoutes.addAll(mRouteSpec.getRoutes());
 					mDirections.addAll(mRouteSpec.getDirections());
 					mDirectionStops.addAll(mRouteSpec.getDirectionStops());
-					mTrips.addAll(mRouteSpec.getTrips());
+					logMerging("trips...", mRouteId);
+					for (MTrip mTrip : mRouteSpec.getTrips()) {
+						final MTrip existing = mTrips.putIfAbsent(mTrip.getTripIdInt(), mTrip);
+						if (existing != null && !existing.equals(mTrip)) {
+							//noinspection DiscouragedApi
+							MTLog.log("%s: Trip ID '%s' already in list! (%s instead of %s)", mRouteId, mTrip.getTripId(), existing.toStringPlus(), mTrip.toStringPlus());
+						}
+					}
+					logMerging("trips... DONE", mRouteId);
 					logMerging("stops...", mRouteId);
 					for (MStop mStop : mRouteSpec.getStops()) {
-						if (mStops.containsKey(mStop.getId())) {
-							if (!mStops.get(mStop.getId()).equals(mStop)) {
-								MTLog.log("%s: Stop ID '%s' already in list! (%s instead of %s)", mRouteId, mStop.getId(), mStops.get(mStop.getId()), mStop);
-							}
-							continue;
+						final MStop existing = mStops.putIfAbsent(mStop.getId(), mStop);
+						if (existing != null && !existing.equals(mStop)) {
+							MTLog.log("%s: Stop ID '%s' already in list! (%s instead of %s)", mRouteId, mStop.getId(), existing, mStop);
 						}
-						mStops.put(mStop.getId(), mStop);
 					}
 					logMerging("stops... DONE", mRouteId);
 					logMerging("service dates...", mRouteId);
@@ -164,13 +170,21 @@ public class MGenerator {
 		}
 		MTLog.log("Generating routes, trips, trip stops & stops objects... (all routes completed)");
 		threadPoolExecutor.shutdown();
+		MTLog.log("Removing unused IDs...");
+		int r;
+		try {
+			r = MTripIds.prune(new HashSet<>(GIDs.getStrings(mTrips.keySet())));
+		} catch (Exception e) {
+			throw new MTLog.Fatal(e, "Error while removing unused IDs!");
+		}
+		MTLog.log("Removing unused IDs... DONE (%d removed objects)", r);
 		final ArrayList<MAgency> mAgenciesList = new ArrayList<>(mAgencies);
 		Collections.sort(mAgenciesList);
 		final ArrayList<MStop> mStopsList = new ArrayList<>(mStops.values());
 		Collections.sort(mStopsList);
 		final ArrayList<MRoute> mRoutesList = new ArrayList<>(mRoutes);
 		Collections.sort(mRoutesList);
-		final ArrayList<MTrip> mTripsList = new ArrayList<>(mTrips);
+		final ArrayList<MTrip> mTripsList = new ArrayList<>(mTrips.values());
 		Collections.sort(mTripsList);
 		final ArrayList<MDirection> mDirectionsList = new ArrayList<>(mDirections);
 		Collections.sort(mDirectionsList);
@@ -629,7 +643,7 @@ public class MGenerator {
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_TRIP_IDS_SQL_INSERT();
 			}
-			for (MTripId mTripId : MTripIds.getAll()) {
+			for (MTripId mTripId : MTripIds.getAllSorted()) {
 				final String tripIdsInsert = mTripId.toFile();
 				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
