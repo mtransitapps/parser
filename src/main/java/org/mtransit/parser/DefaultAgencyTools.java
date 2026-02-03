@@ -169,6 +169,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		gtfs.cleanupStops();
 		gtfs.cleanupExcludedData();
 		gtfs.cleanupStopTimesPickupDropOffTypes(this);
+		gtfs.cleanupIds();
 		gtfs.generateTripStops();
 		if (args.length >= 4 && Boolean.parseBoolean(args[3])) {
 			gtfs.generateStopTimesFromFrequencies(this);

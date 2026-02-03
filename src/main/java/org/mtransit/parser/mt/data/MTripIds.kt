@@ -36,6 +36,14 @@ object MTripIds {
         }
     }
 
+    @JvmStatic
+    fun remove(tripId: MTripId) {
+        synchronized(incrementLock) {
+            idIntToId.remove(tripId.tripIdInt)
+            idToIdInt.remove(tripId.tripId)
+        }
+    }
+
     @Suppress("unused")
     @JvmStatic
     fun getId(tripIdInt: Int) =
@@ -58,7 +66,7 @@ object MTripIds {
         }
     }.sorted()
 
-     @JvmStatic
+    @JvmStatic
     fun convert(tripId: String) =
         if (FeatureFlags.F_EXPORT_TRIP_ID_INTS) {
             getInt(tripId).toString()
