@@ -23,7 +23,7 @@ data class MFrequency(
     val uID by lazy { getNewUID(serviceIdInt, directionId, startTime, endTime) }
 
     fun toFile(agencyTools: GAgencyTools) = buildList {
-        add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+        add(_serviceId.convertServiceId(agencyTools, quotesString = true))
         add(directionId.toString())
         add(startTime.toString())
         add(endTime.toString())
