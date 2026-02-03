@@ -173,7 +173,7 @@ public class MGenerator {
 		MTLog.log("Removing unused IDs...");
 		int r;
 		try {
-			r = MTripIds.prune(GIDs.getStrings(mTrips.keySet()));
+			r = MTripIds.prune(new HashSet<>(GIDs.getStrings(mTrips.keySet())));
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while removing unused IDs!");
 		}

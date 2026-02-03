@@ -37,16 +37,18 @@ object MTripIds {
     }
 
     @JvmStatic
-    fun prune(usedTripIds: Iterable<String>): Int {
+    fun prune(usedTripIds: Set<String>): Int {
         var removedCount = 0
         synchronized(incrementLock) {
-            idToIdInt.asMap()
-                .filter { (tripId, _) -> tripId !in usedTripIds }
-                .forEach { (unusedTripId, unusedTripIdInt) ->
-                    idIntToId.remove(unusedTripIdInt)
-                    idToIdInt.remove(unusedTripId)
+            val iterator = idToIdInt.asMutableMap().entries.iterator()
+            while (iterator.hasNext()) {
+                val (tripId,tripIdInt) = iterator.next()
+                if (tripId !in usedTripIds) {
+                    idIntToId.remove(tripIdInt)
+                    iterator.remove()
                     removedCount++
                 }
+            }
         }
         return removedCount
     }
