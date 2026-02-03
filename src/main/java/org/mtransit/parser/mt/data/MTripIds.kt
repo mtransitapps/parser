@@ -41,10 +41,10 @@ object MTripIds {
         var removedCount = 0
         synchronized(incrementLock) {
             idToIdInt.asMap()
-                .filter { it.key !in usedTripIds }
-                .forEach { (tripId, tripIdInt) ->
-                    idIntToId.remove(tripIdInt)
-                    idToIdInt.remove(tripId)
+                .filter { (tripId, _) -> tripId !in usedTripIds }
+                .forEach { (unusedTripId, unusedTripIdInt) ->
+                    idIntToId.remove(unusedTripIdInt)
+                    idToIdInt.remove(unusedTripId)
                     removedCount++
                 }
         }
