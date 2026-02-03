@@ -6,7 +6,6 @@ import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
 import org.mtransit.parser.db.SQLUtils.quotes
-import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 
@@ -100,9 +99,9 @@ data class MSchedule(
             if (FeatureFlags.F_EXPORT_SCHEDULE_SORTED_BY_ROUTE_DIRECTION) {
                 // no route ID, just for logs
                 add(directionId.toString())
-                add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+                add(_serviceId.convertServiceId(agencyTools).quotes())
             } else {
-                add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+                add(_serviceId.convertServiceId(agencyTools).quotes())
                 // no route ID, just for logs
                 add(directionId.toString())
             }
@@ -125,7 +124,7 @@ data class MSchedule(
                 }
                 add(arrivalDiff?.toString().orEmpty())
             }
-            add(MTripIds.convert(_tripId))
+            add(_tripId.convertTripId().quotes())
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
             add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString())
@@ -137,9 +136,11 @@ data class MSchedule(
         } else {
             add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
             if (FeatureFlags.F_SCHEDULE_NO_QUOTES) {
+                @Suppress("SimplifyBooleanWithConstants")
                 add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS))
             } else {
-                add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS).quotesEscape())
+                @Suppress("SimplifyBooleanWithConstants")
+                add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS).quotes())
             }
         }
         add(accessible.toString())

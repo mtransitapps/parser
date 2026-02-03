@@ -6,14 +6,17 @@ import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.Period
 import org.mtransit.parser.db.SQLUtils.escapeId
+import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GCalendar
 import org.mtransit.parser.gtfs.data.GCalendarDate
 import org.mtransit.parser.gtfs.data.GFieldTypes
 import org.mtransit.parser.gtfs.data.GFieldTypes.isAfter
 import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GSpec
+import org.mtransit.parser.gtfs.data.toGIDInt
 import org.mtransit.parser.mt.data.MCalendarExceptionType
 import org.mtransit.parser.mt.data.MServiceDate
+import org.mtransit.parser.mt.data.convertServiceId
 import java.util.Calendar
 import java.util.Locale
 
@@ -94,10 +97,12 @@ object MDataChangedManager {
     // private const val ALL_CALENDARS_IN_CALENDAR_DATES = GSpec.ALL_CALENDARS_STORED_IN_CALENDAR_DATES
     private const val ALL_CALENDARS_IN_CALENDAR_DATES = false
 
+    @Suppress("DiscouragedApi")
     @JvmStatic
     fun avoidCalendarDatesDataChanged(
         lastServiceDates: MutableList<MServiceDate>?,
         gtfs: GSpec,
+        agencyTools: GAgencyTools,
     ) {
         if (!FeatureFlags.F_AVOID_DATA_CHANGED) return
         lastServiceDates ?: return
@@ -110,19 +115,15 @@ object MDataChangedManager {
             else lastServiceDates.partition { it.exceptionType == MCalendarExceptionType.DEFAULT.id }
         val allCalendarsWithDays = if (ALL_CALENDARS_IN_CALENDAR_DATES) emptyList() else gtfs.allCalendars.filter { it.hasDays() }
         MTLog.log("> Service IDS from '${GCalendar.FILENAME}':")
-        //noinspection DiscouragedApi
         MTLog.log("> - Last: ${lastCalendarsServiceDates.map { it.serviceId }.distinct().sorted().joinToString(limit = 50)}")
-        //noinspection DiscouragedApi
-        MTLog.log("> - New : ${allCalendarsWithDays.map { it.serviceId.escapeId() }.distinct().sorted().joinToString(limit = 50)}")
+        MTLog.log("> - New : ${allCalendarsWithDays.map { it.serviceId.convertServiceId(agencyTools) }.distinct().sorted().joinToString(limit = 50)}")
         MTLog.log("> Service IDS from '${GCalendarDate.FILENAME}':")
-        //noinspection DiscouragedApi
         MTLog.log("> - Last: ${lastCalendarDatesServiceDates.map { it.serviceId }.distinct().sorted().joinToString(limit = 50)}")
-        //noinspection DiscouragedApi
-        MTLog.log("> - New : ${gtfs.allCalendarDates.map { it.serviceId.escapeId() }.distinct().sorted().joinToString(limit = 50)}")
+        MTLog.log("> - New : ${gtfs.allCalendarDates.map { it.serviceId.convertServiceId(agencyTools) }.distinct().sorted().joinToString(limit = 50)}")
 
         // 0 - check service IDs available in last/new data
         val lastCalendarsServiceIdInts = lastCalendarsServiceDates.map { it.serviceIdInt }.distinct().sorted()
-        val gCalendarsEscapedServiceIdInts = allCalendarsWithDays.map { it.escapedServiceIdInt }.distinct().sorted()
+        val gCalendarsEscapedServiceIdInts = allCalendarsWithDays.map { it.serviceId.convertServiceId(agencyTools).toGIDInt() }.distinct().sorted()
         if (lastCalendarsServiceIdInts != gCalendarsEscapedServiceIdInts) {
             val removed = lastCalendarsServiceIdInts.filter { it !in gCalendarsEscapedServiceIdInts }
             val added = gCalendarsEscapedServiceIdInts.filter { it !in lastCalendarsServiceIdInts }
@@ -136,7 +137,7 @@ object MDataChangedManager {
             MTLog.log("> Calendars service IDs NOT changed (${GIDs.toStringPlus(lastCalendarsServiceIdInts)}).")
         }
         val lastCalendarDatesServiceIdInts = lastCalendarDatesServiceDates.map { it.serviceIdInt }.distinct().sorted()
-        val gCalendarDatesEscapedServiceIdInts = gtfs.allCalendarDates.map { it.escapedServiceIdInt }.distinct().sorted()
+        val gCalendarDatesEscapedServiceIdInts = gtfs.allCalendarDates.map { it.serviceId.convertServiceId(agencyTools).toGIDInt() }.distinct().sorted()
         if (lastCalendarDatesServiceIdInts != gCalendarDatesEscapedServiceIdInts) {
             val removed = lastCalendarDatesServiceIdInts.filter { it !in gCalendarDatesEscapedServiceIdInts }
             val added = gCalendarDatesEscapedServiceIdInts.filter { it !in lastCalendarDatesServiceIdInts }
@@ -165,7 +166,6 @@ object MDataChangedManager {
         MTLog.logDebug("> Removed calendars service: ${removedCalendarsServiceDates.size}")
         if (Constants.DEBUG) {
             removedCalendarsServiceDates.forEach {
-                //noinspection DiscouragedApi
                 MTLog.logDebug("> - ${it.calendarDate}: '${it.serviceId}'.")
             }
         }
@@ -177,7 +177,6 @@ object MDataChangedManager {
         MTLog.logDebug("> Removed calendars dates service: ${removedCalendarDatesServiceDates.size}")
         if (Constants.DEBUG) {
             removedCalendarDatesServiceDates.forEach {
-                //noinspection DiscouragedApi
                 MTLog.logDebug("> - ${it.calendarDate}: '${it.serviceId}'.")
             }
         }
@@ -196,7 +195,6 @@ object MDataChangedManager {
                 MTLog.log("> Cannot re-add removed dates because of removed service ID '${removedServiceDate.toStringPlus()}'")
                 return
             }
-            //noinspection DiscouragedApi
             val originalCalendar = newGCalendars.firstOrNull { it.serviceId.escapeId() == removedServiceDate.serviceId }
             if (originalCalendar == null) {
                 MTLog.log("> Cannot find original calendar for '${removedServiceDate.toStringPlus()}'!")
@@ -221,7 +219,6 @@ object MDataChangedManager {
                 MTLog.log("> Cannot re-add removed dates because of removed service ID '${removedServiceDate.toStringPlus()}'")
                 return
             }
-            //noinspection DiscouragedApi
             val originalServiceIdInt = newGCalendarDates.firstOrNull { it.serviceId.escapeId() == removedServiceDate.serviceId }?.serviceIdInt
             val missingCalendarDate = removedServiceDate.toCalendarDate(overrideServiceIdInt = originalServiceIdInt)
             MTLog.log("> Optimising data changed by adding ${missingCalendarDate.toStringPlus()}...")
@@ -236,7 +233,6 @@ object MDataChangedManager {
         MTLog.logDebug("> Added calendars service: ${addedGCalendarsDates.size}")
         // if (Constants.DEBUG) {
         // addedGCalendarsDates.forEach {
-        // //noinspection DiscouragedApi
         // MTLog.logDebug("> - ${it.date}: '${it.serviceId}'.")
         // }
         // }
@@ -245,11 +241,10 @@ object MDataChangedManager {
                 MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")
                 return
             }
-            if (!lastCalendarsServiceIdInts.contains(addedGCalendarDate.escapedServiceIdInt)) {
+            if (!lastCalendarsServiceIdInts.contains(addedGCalendarDate.serviceId.convertServiceId(agencyTools).toGIDInt())) {
                 MTLog.log("> Cannot remove added date because of new service ID '${addedGCalendarDate.toStringPlus()}'")
                 return
             }
-            //noinspection DiscouragedApi
             val originalCalendar = newGCalendars.firstOrNull { it.serviceId == addedGCalendarDate.serviceId }
             if (originalCalendar == null) {
                 MTLog.log("> Cannot find original calendar for '${addedGCalendarDate.toStringPlus()}'!")
@@ -277,7 +272,6 @@ object MDataChangedManager {
         MTLog.logDebug("> Added calendars dates service: ${addedGCalendarDatesDates.size}")
         // if (Constants.DEBUG) {
         // addedGCalendarDatesDates.forEach {
-        // //noinspection DiscouragedApi
         // MTLog.logDebug("> - ${it.date}: '${it.serviceId}'.")
         // }
         // }
@@ -286,7 +280,7 @@ object MDataChangedManager {
                 MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")
                 return
             }
-            if (!lastCalendarDatesServiceIdInts.contains(addedGCalendarDate.escapedServiceIdInt)) {
+            if (!lastCalendarDatesServiceIdInts.contains(addedGCalendarDate.serviceId.convertServiceId(agencyTools).toGIDInt())) {
                 MTLog.log("> Cannot remove new date because of new service ID '${addedGCalendarDate.toStringPlus()}'")
                 return
             }

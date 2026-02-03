@@ -3,6 +3,7 @@ package org.mtransit.parser.mt.data
 import androidx.annotation.Discouraged
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.sql.SQLUtils
+import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GTrip
@@ -39,9 +40,9 @@ data class MTrip(
         if (lastTrip == null) { // NEW
             add(routeId.toString())
             add(directionId.toString())
-            add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+            add(_serviceId.convertServiceId(agencyTools).quotes())
         }
-        add(MTripIds.convert(_tripId))
+        add(_tripId.convertTripId().quotes())
     }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     fun isSameRouteDirectionService(other: MTrip?) =

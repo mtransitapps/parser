@@ -3,6 +3,7 @@ package org.mtransit.parser.mt.data
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.commons.sql.SQLUtils
+import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.mt.MDataChangedManager
@@ -43,7 +44,7 @@ data class MStop(
     fun toFile() = listOf(
         id.toString(), // ID
         code.quotesEscape(), // code
-        name.toStringIds(FeatureFlags.F_EXPORT_STRINGS).quotesEscape(), // name
+        name.toStringIds(FeatureFlags.F_EXPORT_STRINGS).quotes(), // name
         MDataChangedManager.avoidLatLngChanged(lat), // latitude
         MDataChangedManager.avoidLatLngChanged(lng), // longitude
         accessible.toString(),

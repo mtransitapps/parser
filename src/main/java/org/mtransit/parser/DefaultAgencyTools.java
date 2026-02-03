@@ -165,7 +165,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		final long start = System.currentTimeMillis();
 		final GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false, false);
-		MDataChangedManager.avoidCalendarDatesDataChanged(lastServiceDates, gtfs);
+		MDataChangedManager.avoidCalendarDatesDataChanged(lastServiceDates, gtfs, this);
 		gtfs.cleanupStops();
 		gtfs.cleanupExcludedData();
 		gtfs.cleanupStopTimesPickupDropOffTypes(this);
@@ -1381,7 +1381,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			usefulPeriod.setTodayStringInt(OVERRIDE_DATE);
 		}
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, !agencyFilter, agencyFilter);
-		MDataChangedManager.avoidCalendarDatesDataChanged(lastServiceDates, gtfs);
+		MDataChangedManager.avoidCalendarDatesDataChanged(lastServiceDates, gtfs, agencyTools);
 		if (agencyFilter) {
 			gtfs.cleanupExcludedServiceIds();
 		}

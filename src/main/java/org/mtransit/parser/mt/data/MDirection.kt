@@ -3,7 +3,7 @@ package org.mtransit.parser.mt.data
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.db.SQLUtils.quotesEscape
+import org.mtransit.parser.db.SQLUtils.quotes
 
 data class MDirection(
     val routeId: Long,
@@ -178,7 +178,7 @@ data class MDirection(
     fun toFile() = listOf(
         id.toString(), // ID
         headsignType.toString(), // HEADSIGN TYPE
-        headsignValue.toStringIds(FeatureFlags.F_EXPORT_STRINGS).quotesEscape(), // HEADSIGN STRING
+        headsignValue.toStringIds(FeatureFlags.F_EXPORT_STRINGS).quotes(), // HEADSIGN STRING
         routeId.toString(), // ROUTE ID
     ).joinToString(SQLUtils.COLUMN_SEPARATOR)
 
