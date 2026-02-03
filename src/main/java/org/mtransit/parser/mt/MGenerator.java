@@ -111,7 +111,8 @@ public class MGenerator {
 					for (MTrip mTrip : mRouteSpec.getTrips()) {
 						if (mTrips.containsKey(mTrip.getTripIdInt())) {
 							if (!mTrips.get(mTrip.getTripIdInt()).equals(mTrip)) {
-								MTLog.log("%s: Trip ID '%s' already in list! (%s instead of %s)", mRouteId, mTrip.getTripId(), mTrips.get(mTrip.getTripId()), mTrip);
+								//noinspection DiscouragedApi
+								MTLog.log("%s: Trip ID '%s' already in list! (%s instead of %s)", mRouteId, mTrip.getTripId(), mTrips.get(mTrip.getTripIdInt()), mTrip);
 							}
 							continue;
 						}
