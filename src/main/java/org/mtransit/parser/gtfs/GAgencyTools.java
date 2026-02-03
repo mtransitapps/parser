@@ -88,8 +88,12 @@ public interface GAgencyTools {
 
 	boolean cleanMergedServiceIds();
 
+	@Deprecated
 	@NotNull
 	String cleanServiceId(@NotNull String serviceIdString); // currently only used in "mt.data.M..." classes before exporting to file
+
+	@NotNull
+	String cleanServiceId(@NotNull String serviceIdString, boolean keep); // currently only used in "mt.data.M..." classes before exporting to file
 
 	@Nullable
 	String getServiceIdCleanupRegex();

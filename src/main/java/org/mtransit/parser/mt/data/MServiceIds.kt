@@ -66,15 +66,21 @@ object MServiceIds {
         = idInts.all { idIntToId.containsKey(it) }
 
     @JvmStatic
-    fun convert(agencyTools: GAgencyTools, serviceId: String, quotesString: Boolean = false) : String =
+    fun convert(agencyTools: GAgencyTools, serviceId: String, keep: Boolean = true, quotesString: Boolean = false): String =
         if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-            getInt(agencyTools.cleanServiceId(serviceId)).toString()
+            getInt(agencyTools.cleanServiceId(serviceId, keep)).toString()
         } else {
-            agencyTools.cleanServiceId(serviceId).escapeId()
+            agencyTools.cleanServiceId(serviceId, keep).escapeId()
                 .let {
                     if (quotesString) it.quotes() else it
                 }
         }
 }
 
-fun String.convertServiceId(agencyTools: GAgencyTools, quotesString: Boolean = false) = MServiceIds.convert(agencyTools, this, quotesString)
+fun String.convertServiceId(agencyTools: GAgencyTools, keep: Boolean = true, quotesString: Boolean = false) =
+    MServiceIds.convert(
+        agencyTools = agencyTools,
+        serviceId = this,
+        keep = keep,
+        quotesString = quotesString,
+    )

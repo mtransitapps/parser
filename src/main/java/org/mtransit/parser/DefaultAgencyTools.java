@@ -359,14 +359,21 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return Configs.getAgencyConfig() != null && Configs.getAgencyConfig().getServiceIdCleanMerged();
 	}
 
+	@Deprecated
 	@NotNull
 	@Override
 	public String cleanServiceId(@NotNull String gServiceId) {
+		return cleanServiceId(gServiceId, true);
+	}
+
+	@NotNull
+	@Override
+	public String cleanServiceId(@NotNull String gServiceId, boolean keep) {
 		String cleanServiceId = GTFSCommons.cleanOriginalId(gServiceId, getServiceIdCleanupPattern());
 		if (cleanMergedServiceIds()) {
 			cleanServiceId = CleanUtils.cleanMergedID(cleanServiceId);
 		}
-		serviceIdToCleanupServiceId.put(gServiceId, cleanServiceId);
+		if (keep) serviceIdToCleanupServiceId.put(gServiceId, cleanServiceId);
 		return cleanServiceId;
 	}
 
