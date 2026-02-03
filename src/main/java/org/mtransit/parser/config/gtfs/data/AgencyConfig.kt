@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AgencyConfig(
+    @SerialName("agency_id")
+    val agencyId: String? = null, // OPT-IN filter
     @SerialName("target_route_type_id")
     val targetRouteTypeId: Int, // REQUIRED
     @SerialName("default_strings_cleaner_enabled")

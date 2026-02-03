@@ -312,7 +312,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public String getAgencyId() {
-		return null; // no filter
+		return Configs.getAgencyConfig() == null ? null : Configs.getAgencyConfig().getAgencyId(); // OPT-IN filter
 	}
 
 	@NotNull

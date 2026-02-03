@@ -213,11 +213,11 @@ public class MGenerator {
 		MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging %s)", routeId, msg);
 	}
 
-	private static final String GTFS_STRINGS = "gtfs_strings";
+	public static final String GTFS_STRINGS = "gtfs_strings";
 	private static final String GTFS_SCHEDULE = "gtfs_schedule";
-	private static final String GTFS_SCHEDULE_SERVICE_DATES = GTFS_SCHEDULE + "_service_dates"; // DB
-	private static final String GTFS_SCHEDULE_SERVICE_IDS = GTFS_SCHEDULE + "_service_ids"; // DB
-	private static final String GTFS_SCHEDULE_TRIP_IDS = GTFS_SCHEDULE + "_path_ids"; // do not change to avoid breaking compat w/ old modules // DB
+	public static final String GTFS_SCHEDULE_SERVICE_DATES = GTFS_SCHEDULE + "_service_dates"; // DB
+	public static final String GTFS_SCHEDULE_SERVICE_IDS = GTFS_SCHEDULE + "_service_ids"; // DB
+	public static final String GTFS_SCHEDULE_TRIP_IDS = GTFS_SCHEDULE + "_path_ids"; // do not change to avoid breaking compat w/ old modules // DB
 	private static final String GTFS_SCHEDULE_STOP = GTFS_SCHEDULE + "_stop_"; // file
 	private static final String GTFS_FREQUENCY = "gtfs_frequency";
 	private static final String GTFS_FREQUENCY_ROUTE = GTFS_FREQUENCY + "_route_"; // file
@@ -1031,13 +1031,13 @@ public class MGenerator {
 	private static final String RES = "res";
 	private static final String RAW = "raw";
 	private static final String VALUES = "values";
-	private static final String GTFS_RDS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml"; // do not change to avoid breaking compat w/ old modules
+	public static final String GTFS_RDS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml"; // do not change to avoid breaking compat w/ old modules
 
 	private static final String GTFS_RDS_SOURCE_LABEL = "gtfs_rts_source_label"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_AGENCY_ID = "gtfs_rts_agency_id"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_AGENCY_TYPE = "gtfs_rts_agency_type"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_AGENCY_EXTENDED_TYPE = "gtfs_rts_agency_extended_type"; // do not change to avoid breaking compat w/ old modules
-	private static final String GTFS_RDS_TIMEZONE = "gtfs_rts_timezone"; // do not change to avoid breaking compat w/ old modules
+	public static final String GTFS_RDS_TIMEZONE = "gtfs_rts_timezone"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_COLOR = "gtfs_rts_color"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_SERVICE_ID_CLEANUP_REGEX = "gtfs_rts_service_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_ROUTE_ID_CLEANUP_REGEX = "gtfs_rts_route_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
@@ -1050,8 +1050,8 @@ public class MGenerator {
 	private static final String GTFS_RDS_AREA_MAX_LAT = "gtfs_rts_area_max_lat"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_AREA_MIN_LNG = "gtfs_rts_area_min_lng"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_AREA_MAX_LNG = "gtfs_rts_area_max_lng"; // do not change to avoid breaking compat w/ old modules
-	private static final String GTFS_RDS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec"; // do not change to avoid breaking compat w/ old modules
-	private static final String GTFS_RDS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec"; // do not change to avoid breaking compat w/ old modules
+	public static final String GTFS_RDS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec"; // do not change to avoid breaking compat w/ old modules
+	public static final String GTFS_RDS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec"; // do not change to avoid breaking compat w/ old modules
 	// TODO later max integer = 2147483647 = Tuesday, January 19, 2038 3:14:07 AM GMT
 
 	private static void dumpCommonValues(File dumpDirF, GAgencyTools gAgencyTools, MSpec mSpec, @Nullable String inputUrl) {
