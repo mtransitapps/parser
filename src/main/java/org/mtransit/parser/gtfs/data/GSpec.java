@@ -12,8 +12,6 @@ import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.db.GTFSDataBase;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.mt.GenerateMObjectsTask;
-import org.mtransit.parser.mt.data.MTripId;
-import org.mtransit.parser.mt.data.MTripIds;
 
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
@@ -824,22 +822,6 @@ public class GSpec {
 	@NotNull
 	public GSpec getRouteGTFS(@SuppressWarnings("unused") @NotNull Long mRouteId) {
 		return this;
-	}
-
-	public void cleanupIds() {
-		MTLog.log("Removing unused IDs...");
-		int r = 0;
-		try {
-			for (MTripId mTripId : MTripIds.getAll()) {
-				if (getTripRouteId(GIDs.getInt(mTripId.getTripId())) == null) {
-					MTripIds.remove(mTripId);
-					r++;
-				}
-			}
-		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while removing unused IDs!");
-		}
-		MTLog.log("Removing unused IDs... DONE (%d removed objects)", r);
 	}
 
 	public void cleanupExcludedData() {

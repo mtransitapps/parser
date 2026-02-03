@@ -64,7 +64,10 @@ object MTripIds {
         idToIdInt.forEach { id, idInt ->
             add(MTripId(idInt, id))
         }
-    }.sorted()
+    }
+
+    @JvmStatic
+    fun getAllSorted() = getAll().sorted()
 
     @JvmStatic
     fun convert(tripId: String) =
