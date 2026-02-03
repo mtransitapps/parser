@@ -108,25 +108,21 @@ public class MGenerator {
 					mRoutes.addAll(mRouteSpec.getRoutes());
 					mDirections.addAll(mRouteSpec.getDirections());
 					mDirectionStops.addAll(mRouteSpec.getDirectionStops());
+					logMerging("trips...", mRouteId);
 					for (MTrip mTrip : mRouteSpec.getTrips()) {
-						if (mTrips.containsKey(mTrip.getTripIdInt())) {
-							if (!mTrips.get(mTrip.getTripIdInt()).equals(mTrip)) {
-								//noinspection DiscouragedApi
-								MTLog.log("%s: Trip ID '%s' already in list! (%s instead of %s)", mRouteId, mTrip.getTripId(), mTrips.get(mTrip.getTripIdInt()), mTrip);
-							}
-							continue;
+						final MTrip existing = mTrips.putIfAbsent(mTrip.getTripIdInt(), mTrip);
+						if (existing != null && !existing.equals(mTrip)) {
+							//noinspection DiscouragedApi
+							MTLog.log("%s: Trip ID '%s' already in list! (%s instead of %s)", mRouteId, mTrip.getTripId(), existing.toStringPlus(), mTrip.toStringPlus());
 						}
-						mTrips.put(mTrip.getTripIdInt(), mTrip);
 					}
+					logMerging("trips... DONE", mRouteId);
 					logMerging("stops...", mRouteId);
 					for (MStop mStop : mRouteSpec.getStops()) {
-						if (mStops.containsKey(mStop.getId())) {
-							if (!mStops.get(mStop.getId()).equals(mStop)) {
-								MTLog.log("%s: Stop ID '%s' already in list! (%s instead of %s)", mRouteId, mStop.getId(), mStops.get(mStop.getId()), mStop);
-							}
-							continue;
+						final MStop existing = mStops.putIfAbsent(mStop.getId(), mStop);
+						if (existing != null && !existing.equals(mStop)) {
+							MTLog.log("%s: Stop ID '%s' already in list! (%s instead of %s)", mRouteId, mStop.getId(), existing, mStop);
 						}
-						mStops.put(mStop.getId(), mStop);
 					}
 					logMerging("stops... DONE", mRouteId);
 					logMerging("service dates...", mRouteId);
