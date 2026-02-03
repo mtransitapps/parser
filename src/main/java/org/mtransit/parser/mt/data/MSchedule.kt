@@ -6,6 +6,7 @@ import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
 import org.mtransit.parser.db.SQLUtils.quotes
+import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 
@@ -140,7 +141,7 @@ data class MSchedule(
                 add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS))
             } else {
                 @Suppress("SimplifyBooleanWithConstants")
-                add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS).quotes())
+                add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS).quotesEscape())
             }
         }
         add(accessible.toString())
