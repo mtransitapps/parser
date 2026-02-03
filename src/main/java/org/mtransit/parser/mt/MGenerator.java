@@ -174,15 +174,10 @@ public class MGenerator {
 		}
 		MTLog.log("Generating routes, trips, trip stops & stops objects... (all routes completed)");
 		threadPoolExecutor.shutdown();
-		MTLog.log("Removing unsued IDs...");
-		int r = 0;
+		MTLog.log("Removing unused IDs...");
+		int r;
 		try {
-			for (MTripId mTripId : MTripIds.getAll()) {
-				if (!mTrips.containsKey(GIDs.getInt(mTripId.getTripId()))) {
-					MTripIds.remove(mTripId);
-					r++;
-				}
-			}
+			r = MTripIds.prune(GIDs.getStrings(mTrips.keySet()));
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while removing unused IDs!");
 		}

@@ -37,6 +37,21 @@ object MTripIds {
     }
 
     @JvmStatic
+    fun prune(usedTripIds: Iterable<String>): Int {
+        var removedCount = 0
+        synchronized(incrementLock) {
+            idToIdInt.asMap()
+                .filter { it.key !in usedTripIds }
+                .forEach { (tripId, tripIdInt) ->
+                    idIntToId.remove(tripIdInt)
+                    idToIdInt.remove(tripId)
+                    removedCount++
+                }
+        }
+        return removedCount
+    }
+
+    @JvmStatic
     fun remove(tripId: MTripId) {
         synchronized(incrementLock) {
             idIntToId.remove(tripId.tripIdInt)
