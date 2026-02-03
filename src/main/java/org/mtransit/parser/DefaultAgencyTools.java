@@ -1928,10 +1928,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	private static long diffInMs(@NotNull SimpleDateFormat dateFormat,
-								 @NotNull Calendar calendar,
-								 @Nullable Integer startDateInt,
-								 @Nullable Integer endDateInt) {
+	@SuppressWarnings("WeakerAccess")
+	public static long diffInMs(
+			@NotNull SimpleDateFormat dateFormat,
+			@NotNull Calendar calendar,
+			@Nullable Integer startDateInt,
+			@Nullable Integer endDateInt
+	) {
 		try {
 			calendar.setTime(dateFormat.parse(String.valueOf(startDateInt)));
 			long startDateInMs = calendar.getTimeInMillis();
