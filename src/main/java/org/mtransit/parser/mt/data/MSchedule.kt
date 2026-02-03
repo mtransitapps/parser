@@ -3,7 +3,6 @@ package org.mtransit.parser.mt.data
 import androidx.annotation.Discouraged
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.sql.SQLUtils
-import org.mtransit.parser.MTLog
 import org.mtransit.parser.Pair
 import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.db.SQLUtils.quotesEscape
@@ -60,7 +59,8 @@ data class MSchedule(
         if (newHeadsignValue.isNullOrBlank()
             && newHeadsignType != MDirection.HEADSIGN_TYPE_NO_PICKUP
         ) {
-            MTLog.logDebug("Setting '$newHeadsignValue' head-sign! (type:$newHeadsignType)")
+            clearHeadsign()
+            return
         }
         this.headsignType = newHeadsignType
         this.headsignValue = newHeadsignValue
@@ -100,9 +100,9 @@ data class MSchedule(
             if (FeatureFlags.F_EXPORT_SCHEDULE_SORTED_BY_ROUTE_DIRECTION) {
                 // no route ID, just for logs
                 add(directionId.toString())
-                add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+                add(_serviceId.convertServiceId(agencyTools, quotesString = true))
             } else {
-                add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+                add(_serviceId.convertServiceId(agencyTools, quotesString = true))
                 // no route ID, just for logs
                 add(directionId.toString())
             }
@@ -125,7 +125,7 @@ data class MSchedule(
                 }
                 add(arrivalDiff?.toString().orEmpty())
             }
-            add(MTripIds.convert(_tripId))
+            add(_tripId.convertTripId(quotesString = true))
         }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
             add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString())
@@ -137,8 +137,10 @@ data class MSchedule(
         } else {
             add(headsignType.takeIf { it >= 0 }?.toString().orEmpty())
             if (FeatureFlags.F_SCHEDULE_NO_QUOTES) {
+                @Suppress("SimplifyBooleanWithConstants")
                 add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS))
             } else {
+                @Suppress("SimplifyBooleanWithConstants")
                 add(headsignValue.orEmpty().toStringIds(FeatureFlags.F_EXPORT_STRINGS || FeatureFlags.F_EXPORT_SCHEDULE_STRINGS).quotesEscape())
             }
         }

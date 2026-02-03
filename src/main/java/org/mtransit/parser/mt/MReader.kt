@@ -47,33 +47,26 @@ object MReader {
 
     // region first/last departures
 
-    private const val GTFS_RDS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml" // do not change to avoid breaking compat w/ old modules
-
-    private const val GTFS_RDS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec" // do not change to avoid breaking compat w/ old modules
-    private const val GTFS_RDS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec" // do not change to avoid breaking compat w/ old modules
-
     private fun makeFirstDepartureRegex(fileBase: String) =
-        Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase$GTFS_RDS_FIRST_DEPARTURE_IN_SEC\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
+        Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase${MGenerator.GTFS_RDS_FIRST_DEPARTURE_IN_SEC}\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
 
     private fun makeLastDepartureRegex(fileBase: String) =
-        Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase$GTFS_RDS_LAST_DEPARTURE_IN_SEC\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
-
-    private const val GTFS_RDS_TIMEZONE = "gtfs_rts_timezone" // do not change to avoid breaking compat w/ old modules
+        Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase${MGenerator.GTFS_RDS_LAST_DEPARTURE_IN_SEC}\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
 
     private fun makeTimeZoneRegex() =
-        Regex(any(WHITESPACE_CAR) + "<string name=\"$GTFS_RDS_TIMEZONE\">${group(oneOrMore(ALPHA_NUM_CAR) + "/" + oneOrMore(ALPHA_NUM_CAR))}</string>")
+        Regex(any(WHITESPACE_CAR) + "<string name=\"${MGenerator.GTFS_RDS_TIMEZONE}\">${group(oneOrMore(ALPHA_NUM_CAR) + "/" + oneOrMore(ALPHA_NUM_CAR))}</string>")
 
     @Suppress("unused") // TODO removed
     @JvmStatic
     fun readFirstLastDepartures(fileBase: String): Pair<Int?, Int?>? {
         try {
-            val gtfsRdsValuesGenXml = getResDirName(fileBase) + "/$VALUES/${fileBase}$GTFS_RDS_VALUES_GEN_XML"
+            val gtfsRdsValuesGenXml = getResDirName(fileBase) + "/$VALUES/${fileBase}${MGenerator.GTFS_RDS_VALUES_GEN_XML}"
             val gtfsRdsValuesGenXmlFile = File(gtfsRdsValuesGenXml)
             if (!gtfsRdsValuesGenXmlFile.exists()) {
                 MTLog.log("File not found '$gtfsRdsValuesGenXml'!")
                 return null
             }
-            val commonRdsValuesGenXml = getResDirName() + "/$VALUES/$GTFS_RDS_VALUES_GEN_XML"
+            val commonRdsValuesGenXml = getResDirName() + "/$VALUES/${MGenerator.GTFS_RDS_VALUES_GEN_XML}"
             val commonRdsValuesGenXmlFile = File(commonRdsValuesGenXml)
             if (!commonRdsValuesGenXmlFile.exists()) {
                 MTLog.log("File not found '$commonRdsValuesGenXml'!")
@@ -122,11 +115,9 @@ object MReader {
 
     // region service dates
 
-    private const val GTFS_SCHEDULE_SERVICE_DATES = "gtfs_schedule_service_dates"
-
     @JvmStatic
     fun loadServiceDates(fileBase: String) =
-        readFile("service dates", fileBase, GTFS_SCHEDULE_SERVICE_DATES) { MServiceDate.fromFileLine(it) }
+        readFileMerge("service dates", fileBase, MGenerator.GTFS_SCHEDULE_SERVICE_DATES) { MServiceDate.fromFileLine(it) }
 
     private fun <T> readFile(type: String, fileBase: String, fileName: String, transform: (String) -> T?): List<T>? = try {
         (File("${getResDirName(fileBase)}/$RAW/${fileBase}$fileName").takeIf { it.exists() }
@@ -143,35 +134,46 @@ object MReader {
         null
     }
 
+    @Suppress("SameParameterValue")
+    private fun <T> readFileMerge(type: String, fileBase: String, fileName: String, transform: (String) -> List<T>?): List<T>? = try {
+        (File("${getResDirName(fileBase)}/$RAW/${fileBase}$fileName").takeIf { it.exists() }
+            ?: CURRENT_.takeIf { NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() }
+            ?: "".takeIf { CURRENT_ == fileBase || NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() })
+            ?.readLines()
+            ?.mapNotNull { transform(it) }
+            ?.flatten()
+            ?: run {
+                MTLog.log("File not found for merge '$type' with fileBase '$fileBase' and fileName '$fileName'!")
+                null
+            }
+    } catch (e: Exception) {
+        MTLog.logNonFatal(e, "Error while reading '$fileBase' $type (merge)!")
+        null
+    }
+
     // endregion
 
     // region trip IDs
 
-    private const val GTFS_SCHEDULE_TRIP_IDS = "gtfs_schedule_trip_ids"
-
     @JvmStatic
     fun loadTripIds(fileBase: String) =
-        readFile("trip ids", fileBase, GTFS_SCHEDULE_TRIP_IDS) { MTripId.fromFileLine(it) }
+        readFile("trip ids", fileBase, MGenerator.GTFS_SCHEDULE_TRIP_IDS) { MTripId.fromFileLine(it) }
 
     // endregion
 
     // region service IDs
 
-    private const val GTFS_SCHEDULE_SERVICE_IDS = "gtfs_schedule_service_ids"
-
     @JvmStatic
     fun loadServiceIds(fileBase: String) =
-        readFile("service ids", fileBase, GTFS_SCHEDULE_SERVICE_IDS) { MServiceId.fromFileLine(it) }
+        readFile("service ids", fileBase, MGenerator.GTFS_SCHEDULE_SERVICE_IDS) { MServiceId.fromFileLine(it) }
 
     // endregion
 
     // region strings
 
-    private const val GTFS_STRINGS = "gtfs_strings"
-
     @JvmStatic
     fun loadStrings(fileBase: String) =
-        readFile("strings", fileBase, GTFS_STRINGS) { MString.fromFileLine(it) }
+        readFile("strings", fileBase, MGenerator.GTFS_STRINGS) { MString.fromFileLine(it) }
 
     // endregion
 }

@@ -86,8 +86,14 @@ public interface GAgencyTools {
 
 	boolean excludeAgency(@NotNull GAgency gAgency);
 
+	boolean cleanMergedServiceIds();
+
+	@Deprecated
 	@NotNull
 	String cleanServiceId(@NotNull String serviceIdString); // currently only used in "mt.data.M..." classes before exporting to file
+
+	@NotNull
+	String cleanServiceId(@NotNull String serviceIdString, boolean keep); // currently only used in "mt.data.M..." classes before exporting to file
 
 	@Nullable
 	String getServiceIdCleanupRegex();
@@ -95,6 +101,8 @@ public interface GAgencyTools {
 	boolean verifyServiceIdsUniqueness();
 
 	// ROUTE
+	boolean cleanMergedRouteIds();
+
 	@NotNull
 	String cleanRouteOriginalId(@NotNull String routeId);
 
@@ -168,6 +176,8 @@ public interface GAgencyTools {
 	String getTripIdCleanupRegex();
 
 	boolean verifyTripIdsUniqueness();
+
+	boolean cleanMergedTripIds();
 
 	@NotNull String cleanTripOriginalId(@NotNull String gTripId);
 
@@ -291,6 +301,8 @@ public interface GAgencyTools {
 	boolean excludeStopNullable(@Nullable GStop gStop);
 
 	boolean excludeStop(@NotNull GStop gStop);
+
+	boolean cleanMergedStopIds();
 
 	@NotNull
 	String cleanStopOriginalId(@NotNull String gStopIdString);

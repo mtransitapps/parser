@@ -4,7 +4,8 @@ import androidx.collection.SparseArrayCompat
 import androidx.collection.mutableScatterMapOf
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.db.SQLUtils.quotesEscapeId
+import org.mtransit.parser.db.SQLUtils.escapeId
+import org.mtransit.parser.db.SQLUtils.quotes
 
 object MTripIds {
 
@@ -36,6 +37,32 @@ object MTripIds {
         }
     }
 
+    @JvmStatic
+    fun prune(usedTripIds: Set<String>): Int {
+        var removedCount = 0
+        synchronized(incrementLock) {
+            val iterator = idToIdInt.asMutableMap().entries.iterator()
+            while (iterator.hasNext()) {
+                val (tripId,tripIdInt) = iterator.next()
+                if (tripId !in usedTripIds) {
+                    idIntToId.remove(tripIdInt)
+                    iterator.remove()
+                    removedCount++
+                }
+            }
+        }
+        return removedCount
+    }
+
+    @Suppress("unused")
+    @JvmStatic
+    fun remove(tripId: MTripId) {
+        synchronized(incrementLock) {
+            idIntToId.remove(tripId.tripIdInt)
+            idToIdInt.remove(tripId.tripId)
+        }
+    }
+
     @Suppress("unused")
     @JvmStatic
     fun getId(tripIdInt: Int) =
@@ -56,13 +83,21 @@ object MTripIds {
         idToIdInt.forEach { id, idInt ->
             add(MTripId(idInt, id))
         }
-    }.sorted()
+    }
 
-     @JvmStatic
-    fun convert(tripId: String) =
+    @JvmStatic
+    fun getAllSorted() = getAll().sorted()
+
+    @JvmStatic
+    fun convert(tripId: String, quotesString: Boolean = false) =
         if (FeatureFlags.F_EXPORT_TRIP_ID_INTS) {
             getInt(tripId).toString()
         } else {
-            tripId.quotesEscapeId()
+            tripId.escapeId()
+                .let {
+                    if (quotesString) it.quotes() else it
+                }
         }
 }
+
+fun String.convertTripId(quotesString: Boolean = false) = MTripIds.convert(this, quotesString)

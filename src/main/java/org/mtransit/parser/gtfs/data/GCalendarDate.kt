@@ -59,7 +59,7 @@ data class GCalendarDate(
         return this.serviceIdInt == serviceIdInt
     }
 
-    fun isServiceIdInts(serviceIdInts: Collection<Int?>): Boolean {
+    fun isServiceIdInts(serviceIdInts: Collection<Int>): Boolean {
         return serviceIdInts.contains(serviceIdInt)
     }
 

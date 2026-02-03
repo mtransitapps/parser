@@ -1,7 +1,6 @@
 package org.mtransit.parser.mt;
 
 import static org.mtransit.commons.Constants.EMPTY;
-import static org.mtransit.commons.FeatureFlags.F_PRE_FILLED_DB;
 
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +23,7 @@ import org.mtransit.parser.db.SQLUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GFieldTypes;
+import org.mtransit.parser.gtfs.data.GIDs;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MFrequency;
@@ -81,8 +81,8 @@ public class MGenerator {
 		HashSet<MRoute> mRoutes = new HashSet<>(); // use set to avoid duplicates
 		HashSet<MDirection> mDirections = new HashSet<>(); // use set to avoid duplicates
 		HashSet<MDirectionStop> mDirectionStops = new HashSet<>(); // use set to avoid duplicates
-		HashSet<MTrip> mTrips = new HashSet<>(); // use set to avoid duplicates
-		HashMap<Integer, MStop> mStops = new HashMap<>();
+		HashMap<Integer, MTrip> mTrips = new HashMap<>(); // map key unique -> avoid duplicates
+		HashMap<Integer, MStop> mStops = new HashMap<>(); // map key unique -> avoid duplicates
 		TreeMap<Long, List<MFrequency>> mRouteFrequencies = new TreeMap<>();
 		HashSet<MServiceDate> mServiceDates = new HashSet<>(); // use set to avoid duplicates
 		long firstTimestamp = -1L;
@@ -108,16 +108,21 @@ public class MGenerator {
 					mRoutes.addAll(mRouteSpec.getRoutes());
 					mDirections.addAll(mRouteSpec.getDirections());
 					mDirectionStops.addAll(mRouteSpec.getDirectionStops());
-					mTrips.addAll(mRouteSpec.getTrips());
+					logMerging("trips...", mRouteId);
+					for (MTrip mTrip : mRouteSpec.getTrips()) {
+						final MTrip existing = mTrips.putIfAbsent(mTrip.getTripIdInt(), mTrip);
+						if (existing != null && !existing.equals(mTrip)) {
+							//noinspection DiscouragedApi
+							MTLog.log("%s: Trip ID '%s' already in list! (%s instead of %s)", mRouteId, mTrip.getTripId(), existing.toStringPlus(), mTrip.toStringPlus());
+						}
+					}
+					logMerging("trips... DONE", mRouteId);
 					logMerging("stops...", mRouteId);
 					for (MStop mStop : mRouteSpec.getStops()) {
-						if (mStops.containsKey(mStop.getId())) {
-							if (!mStops.get(mStop.getId()).equals(mStop)) {
-								MTLog.log("%s: Stop ID '%s' already in list! (%s instead of %s)", mRouteId, mStop.getId(), mStops.get(mStop.getId()), mStop);
-							}
-							continue;
+						final MStop existing = mStops.putIfAbsent(mStop.getId(), mStop);
+						if (existing != null && !existing.equals(mStop)) {
+							MTLog.log("%s: Stop ID '%s' already in list! (%s instead of %s)", mRouteId, mStop.getId(), existing, mStop);
 						}
-						mStops.put(mStop.getId(), mStop);
 					}
 					logMerging("stops... DONE", mRouteId);
 					logMerging("service dates...", mRouteId);
@@ -165,13 +170,21 @@ public class MGenerator {
 		}
 		MTLog.log("Generating routes, trips, trip stops & stops objects... (all routes completed)");
 		threadPoolExecutor.shutdown();
+		MTLog.log("Removing unused IDs...");
+		int r;
+		try {
+			r = MTripIds.prune(new HashSet<>(GIDs.getStrings(mTrips.keySet())));
+		} catch (Exception e) {
+			throw new MTLog.Fatal(e, "Error while removing unused IDs!");
+		}
+		MTLog.log("Removing unused IDs... DONE (%d removed objects)", r);
 		final ArrayList<MAgency> mAgenciesList = new ArrayList<>(mAgencies);
 		Collections.sort(mAgenciesList);
 		final ArrayList<MStop> mStopsList = new ArrayList<>(mStops.values());
 		Collections.sort(mStopsList);
 		final ArrayList<MRoute> mRoutesList = new ArrayList<>(mRoutes);
 		Collections.sort(mRoutesList);
-		final ArrayList<MTrip> mTripsList = new ArrayList<>(mTrips);
+		final ArrayList<MTrip> mTripsList = new ArrayList<>(mTrips.values());
 		Collections.sort(mTripsList);
 		final ArrayList<MDirection> mDirectionsList = new ArrayList<>(mDirections);
 		Collections.sort(mDirectionsList);
@@ -214,11 +227,11 @@ public class MGenerator {
 		MTLog.logDebug("%s: Generating routes, trips, trip stops & stops objects... (merging %s)", routeId, msg);
 	}
 
-	private static final String GTFS_STRINGS = "gtfs_strings";
+	public static final String GTFS_STRINGS = "gtfs_strings";
 	private static final String GTFS_SCHEDULE = "gtfs_schedule";
-	private static final String GTFS_SCHEDULE_SERVICE_DATES = GTFS_SCHEDULE + "_service_dates"; // DB
-	private static final String GTFS_SCHEDULE_SERVICE_IDS = GTFS_SCHEDULE + "_service_ids"; // DB
-	private static final String GTFS_SCHEDULE_TRIP_IDS = GTFS_SCHEDULE + "_path_ids"; // do not change to avoid breaking compat w/ old modules // DB
+	public static final String GTFS_SCHEDULE_SERVICE_DATES = GTFS_SCHEDULE + "_service_dates"; // DB
+	public static final String GTFS_SCHEDULE_SERVICE_IDS = GTFS_SCHEDULE + "_service_ids"; // DB
+	public static final String GTFS_SCHEDULE_TRIP_IDS = GTFS_SCHEDULE + "_path_ids"; // do not change to avoid breaking compat w/ old modules // DB
 	private static final String GTFS_SCHEDULE_STOP = GTFS_SCHEDULE + "_stop_"; // file
 	private static final String GTFS_FREQUENCY = "gtfs_frequency";
 	private static final String GTFS_FREQUENCY_ROUTE = GTFS_FREQUENCY + "_route_"; // file
@@ -262,7 +275,7 @@ public class MGenerator {
 		}
 		String dataDir = rootDir + "data" + "/" + resDirName;
 		final File dataDirF = new File(dataDir);
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			if (!dataDirF.getParentFile().exists()) {
 				FileUtils.mkdir(dataDirF.getParentFile());
 			}
@@ -273,7 +286,7 @@ public class MGenerator {
 		MTLog.log("Writing MT files (%s)...", rawDirF.toURI());
 		String dbFilePath = rawDir + "/" + GTFSCommons.getDBFileName(fileBase);
 		Connection dbConnection;
-		if (deleteAll || !F_PRE_FILLED_DB) {
+		if (deleteAll || !FeatureFlags.F_PRE_FILLED_DB) {
 			DumpDbUtils.delete(dbFilePath);
 			dbConnection = null;
 		} else {
@@ -328,15 +341,15 @@ public class MGenerator {
 									  @NotNull File rawDirF,
 									  @Nullable Connection dbConnection) {
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
 		File file;
 		BufferedWriter ow = null;
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_ROUTES)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_ROUTES);
+		file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_ROUTES);
 		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) return;
 		try {
@@ -344,14 +357,14 @@ public class MGenerator {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_ROUTE_SQL_INSERT();
 			}
 			for (MRoute mRoute : mSpec.getRoutes()) {
 				final String routeInsert = mRoute.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, routeInsert)
@@ -360,7 +373,7 @@ public class MGenerator {
 				ow.write(routeInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -377,15 +390,15 @@ public class MGenerator {
 										  @NotNull File rawDirF,
 										  @Nullable Connection dbConnection) {
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
 		File file;
 		BufferedWriter ow = null;
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_DIRECTIONS)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_DIRECTIONS);
+		file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_DIRECTIONS);
 		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) return;
 		try {
@@ -393,14 +406,14 @@ public class MGenerator {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_DIRECTION_SQL_INSERT();
 			}
 			for (MDirection mDirection : mSpec.getDirections()) {
 				final String tripInsert = mDirection.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, tripInsert)
@@ -409,7 +422,7 @@ public class MGenerator {
 				ow.write(tripInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -426,15 +439,15 @@ public class MGenerator {
 											  @NotNull File rawDirF,
 											  @Nullable Connection dbConnection) {
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
 		File file;
 		BufferedWriter ow = null;
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_DIRECTION_STOPS)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_DIRECTION_STOPS);
+		file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_DIRECTION_STOPS);
 		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) return;
 		try {
@@ -442,14 +455,14 @@ public class MGenerator {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_DIRECTION_STOPS_SQL_INSERT();
 			}
 			for (MDirectionStop mDirectionStop : mSpec.getDirectionStops()) {
 				final String tripStopInsert = mDirectionStop.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, tripStopInsert)
@@ -458,7 +471,7 @@ public class MGenerator {
 				ow.write(tripStopInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -477,25 +490,25 @@ public class MGenerator {
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection
 	) {
-		if (!FeatureFlags.F_EXPORT_TRIP_ID) return;
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
 		File file;
 		boolean empty;
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_TRIPS)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_TRIPS);
+		file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_TRIPS);
 		FileUtils.deleteIfExist(file); // delete previous
+		if (!FeatureFlags.F_EXPORT_TRIP_ID) return;
 		if (deleteAll) return;
 		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
 			empty = true;
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_TRIP_SQL_INSERT();
@@ -511,7 +524,7 @@ public class MGenerator {
 					ow.write(SQLUtils.COLUMN_SEPARATOR);
 				}
 				final String tripInsert = mTrip.toFile(gAgencyTools, lastTrip);
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, tripInsert)
@@ -526,7 +539,7 @@ public class MGenerator {
 			} else {
 				ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -547,10 +560,10 @@ public class MGenerator {
 		File file;
 		BufferedWriter ow = null;
 		Pair<Pair<Double, Double>, Pair<Double, Double>> minMaxLatLng = new Pair<>(new Pair<>(null, null), new Pair<>(null, null));
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_RDS_STOPS)); // migration from src/main/res/raw to data
 		}
-		file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_STOPS);
+		file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_RDS_STOPS);
 		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) return minMaxLatLng;
 		try {
@@ -559,14 +572,14 @@ public class MGenerator {
 			Double minLat = null, maxLat = null, minLng = null, maxLng = null;
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_STOP_SQL_INSERT();
 			}
 			for (MStop mStop : mSpec.getStops()) {
 				final String stopInsert = mStop.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, stopInsert)
@@ -591,7 +604,7 @@ public class MGenerator {
 					}
 				}
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 			minMaxLatLng = new Pair<>(new Pair<>(minLat, minLng), new Pair<>(maxLat, maxLng));
@@ -610,29 +623,29 @@ public class MGenerator {
 			@NotNull File dataDirF,
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection) {
-		if (!FeatureFlags.F_EXPORT_TRIP_ID_INTS) return;
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_TRIP_IDS)); // migration from src/main/res/raw to data
 		}
-		final File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_TRIP_IDS);
+		final File file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_TRIP_IDS);
 		FileUtils.deleteIfExist(file); // delete previous
+		if (!FeatureFlags.F_EXPORT_TRIP_ID_INTS) return;
 		if (deleteAll) return;
 		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_TRIP_IDS_SQL_INSERT();
 			}
-			for (MTripId mTripId : MTripIds.getAll()) {
+			for (MTripId mTripId : MTripIds.getAllSorted()) {
 				final String tripIdsInsert = mTripId.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, tripIdsInsert)
@@ -641,7 +654,7 @@ public class MGenerator {
 				ow.write(tripIdsInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -656,29 +669,29 @@ public class MGenerator {
 			@NotNull File dataDirF,
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection) {
-		if (!FeatureFlags.F_EXPORT_SERVICE_ID_INTS) return;
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_IDS)); // migration from src/main/res/raw to data
 		}
-		final File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_IDS);
+		final File file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_IDS);
 		FileUtils.deleteIfExist(file); // delete previous
+		if (!FeatureFlags.F_EXPORT_SERVICE_ID_INTS) return;
 		if (deleteAll) return;
 		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_SERVICE_IDS_SQL_INSERT();
 			}
 			for (MServiceId mServiceId : MServiceIds.getAll()) {
 				final String serviceIdsInsert = mServiceId.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, serviceIdsInsert)
@@ -687,7 +700,7 @@ public class MGenerator {
 				ow.write(serviceIdsInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -702,29 +715,29 @@ public class MGenerator {
 			@NotNull File dataDirF,
 			@NotNull File rawDirF,
 			@Nullable Connection dbConnection) {
-		if (!FeatureFlags.F_EXPORT_STRINGS && !FeatureFlags.F_EXPORT_SCHEDULE_STRINGS) return;
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_STRINGS)); // migration from src/main/res/raw to data
 		}
-		final File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_STRINGS);
+		final File file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_STRINGS);
 		FileUtils.deleteIfExist(file); // delete previous
+		if (!FeatureFlags.F_EXPORT_STRINGS && !FeatureFlags.F_EXPORT_SCHEDULE_STRINGS) return;
 		if (deleteAll) return;
 		try (BufferedWriter ow = new BufferedWriter(new FileWriter(file))) {
 			MTLog.logPOINT(); // LOG
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_STRINGS_SQL_INSERT();
 			}
 			for (MString mString : MStrings.getAll()) {
 				final String stringInsert = mString.toFile();
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, stringInsert)
@@ -733,7 +746,7 @@ public class MGenerator {
 				ow.write(stringInsert);
 				ow.write(Constants.NEW_LINE);
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 		} catch (Exception ioe) {
@@ -750,14 +763,14 @@ public class MGenerator {
 																   @NotNull File rawDirF,
 																   @Nullable Connection dbConnection) {
 		if (!deleteAll
-				&& (mSpec == null || !mSpec.isValid() || (F_PRE_FILLED_DB && dbConnection == null))) {
+				&& (mSpec == null || !mSpec.isValid() || (FeatureFlags.F_PRE_FILLED_DB && dbConnection == null))) {
 			throw new MTLog.Fatal("Generated data invalid (agencies: %s)!", mSpec);
 		}
 		Pair<Integer, Integer> minMaxDates = new Pair<>(null, null);
-		if (F_PRE_FILLED_DB) {
+		if (FeatureFlags.F_PRE_FILLED_DB) {
 			FileUtils.deleteIfExist(new File(rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES)); // migration from src/main/res/raw to data
 		}
-		final File file = new File(F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
+		final File file = new File(FeatureFlags.F_PRE_FILLED_DB ? dataDirF : rawDirF, fileBase + GTFS_SCHEDULE_SERVICE_DATES);
 		boolean empty;
 		FileUtils.deleteIfExist(file); // delete previous
 		if (deleteAll) return minMaxDates;
@@ -767,7 +780,7 @@ public class MGenerator {
 			Integer minDate = null, maxDate = null;
 			Statement dbStatement = null;
 			String sqlInsert = null;
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, false); // START TRANSACTION
 				dbStatement = dbConnection.createStatement();
 				sqlInsert = GTFSCommons.getT_SERVICE_DATES_SQL_INSERT();
@@ -783,7 +796,7 @@ public class MGenerator {
 					ow.write(SQLUtils.COLUMN_SEPARATOR);
 				}
 				final String serviceDatesInsert = mServiceDate.toFile(gAgencyTools, lastServiceDate);
-				if (F_PRE_FILLED_DB) {
+				if (FeatureFlags.F_PRE_FILLED_DB) {
 					SQLUtils.executeUpdate(
 							dbStatement,
 							String.format(sqlInsert, serviceDatesInsert)
@@ -806,7 +819,7 @@ public class MGenerator {
 			} else {
 				ow.write(Constants.NEW_LINE); // GIT convention for easier diff (ELSE unchanged line might appear as changed when not)
 			}
-			if (F_PRE_FILLED_DB) {
+			if (FeatureFlags.F_PRE_FILLED_DB) {
 				SQLUtils.setAutoCommit(dbConnection, true); // END TRANSACTION == commit()
 			}
 			minMaxDates = new Pair<>(minDate, maxDate);
@@ -1032,13 +1045,13 @@ public class MGenerator {
 	private static final String RES = "res";
 	private static final String RAW = "raw";
 	private static final String VALUES = "values";
-	private static final String GTFS_RDS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml"; // do not change to avoid breaking compat w/ old modules
+	public static final String GTFS_RDS_VALUES_GEN_XML = "gtfs_rts_values_gen.xml"; // do not change to avoid breaking compat w/ old modules
 
 	private static final String GTFS_RDS_SOURCE_LABEL = "gtfs_rts_source_label"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_AGENCY_ID = "gtfs_rts_agency_id"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_AGENCY_TYPE = "gtfs_rts_agency_type"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_AGENCY_EXTENDED_TYPE = "gtfs_rts_agency_extended_type"; // do not change to avoid breaking compat w/ old modules
-	private static final String GTFS_RDS_TIMEZONE = "gtfs_rts_timezone"; // do not change to avoid breaking compat w/ old modules
+	public static final String GTFS_RDS_TIMEZONE = "gtfs_rts_timezone"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_COLOR = "gtfs_rts_color"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_SERVICE_ID_CLEANUP_REGEX = "gtfs_rts_service_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_ROUTE_ID_CLEANUP_REGEX = "gtfs_rts_route_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
@@ -1051,8 +1064,8 @@ public class MGenerator {
 	private static final String GTFS_RDS_AREA_MAX_LAT = "gtfs_rts_area_max_lat"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_AREA_MIN_LNG = "gtfs_rts_area_min_lng"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_AREA_MAX_LNG = "gtfs_rts_area_max_lng"; // do not change to avoid breaking compat w/ old modules
-	private static final String GTFS_RDS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec"; // do not change to avoid breaking compat w/ old modules
-	private static final String GTFS_RDS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec"; // do not change to avoid breaking compat w/ old modules
+	public static final String GTFS_RDS_FIRST_DEPARTURE_IN_SEC = "gtfs_rts_first_departure_in_sec"; // do not change to avoid breaking compat w/ old modules
+	public static final String GTFS_RDS_LAST_DEPARTURE_IN_SEC = "gtfs_rts_last_departure_in_sec"; // do not change to avoid breaking compat w/ old modules
 	// TODO later max integer = 2147483647 = Tuesday, January 19, 2038 3:14:07 AM GMT
 
 	private static void dumpCommonValues(File dumpDirF, GAgencyTools gAgencyTools, MSpec mSpec, @Nullable String inputUrl) {

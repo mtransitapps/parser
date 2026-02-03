@@ -44,6 +44,8 @@ data class RouteConfig(
     val tripIdCleanupRegex: String? = null, // optional
     @SerialName("trip_id_not_unique_allowed")
     val tripIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
+    @SerialName("trip_id_clean_merged")
+    val tripIdCleanMerged: Boolean = false, // OPT-IN feature
     // DIRECTION
     @SerialName("direction_headsign_cleaners")
     val directionHeadsignCleaners: List<Cleaner> = emptyList(),

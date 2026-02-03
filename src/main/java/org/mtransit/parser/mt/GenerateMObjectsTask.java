@@ -803,10 +803,8 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				stopHeadsign = this.agencyTools.cleanStopHeadSign(gRoute, gTrip, gStopTime, gTrip.getTripHeadsignOrDefault());
 				mSchedule.setHeadsign(MDirection.HEADSIGN_TYPE_STRING, stopHeadsign);
 				directionStopTimesHeadsign = setDirectionStopTimesHeadsign(directionStopTimesHeadsign, stopHeadsign);
-			} else {
-				if (!StringUtils.isBlank(originalDirectionHeadsignValue)) {
-					mSchedule.setHeadsign(originalDirectionHeadsignType, originalDirectionHeadsignValue);
-				}
+			} else if (!StringUtils.isBlank(originalDirectionHeadsignValue)) {
+				mSchedule.setHeadsign(originalDirectionHeadsignType, originalDirectionHeadsignValue);
 			}
 			mSchedules.put(mSchedule.getUID(), mSchedule);
 			addedMDirectionIdAndGStopIds.put(directionIdStopId, gStopTime.getStopSequence());

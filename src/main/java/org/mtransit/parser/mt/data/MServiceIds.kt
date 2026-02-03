@@ -4,7 +4,9 @@ import androidx.collection.SparseArrayCompat
 import androidx.collection.mutableScatterMapOf
 import org.mtransit.commons.FeatureFlags
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.db.SQLUtils.quotesEscapeId
+import org.mtransit.parser.db.SQLUtils.escapeId
+import org.mtransit.parser.db.SQLUtils.quotes
+import org.mtransit.parser.gtfs.GAgencyTools
 
 object MServiceIds {
 
@@ -58,11 +60,27 @@ object MServiceIds {
         }
     }.sorted()
 
+    @Suppress("unused")
     @JvmStatic
-    fun convert(serviceId: String) =
+    fun containsAllIdInts(idInts: Iterable<Int>)
+        = idInts.all { idIntToId.containsKey(it) }
+
+    @JvmStatic
+    fun convert(agencyTools: GAgencyTools, serviceId: String, keep: Boolean = true, quotesString: Boolean = false): String =
         if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
-            getInt(serviceId).toString()
+            getInt(agencyTools.cleanServiceId(serviceId, keep)).toString()
         } else {
-            serviceId.quotesEscapeId()
+            agencyTools.cleanServiceId(serviceId, keep).escapeId()
+                .let {
+                    if (quotesString) it.quotes() else it
+                }
         }
 }
+
+fun String.convertServiceId(agencyTools: GAgencyTools, keep: Boolean = true, quotesString: Boolean = false) =
+    MServiceIds.convert(
+        agencyTools = agencyTools,
+        serviceId = this,
+        keep = keep,
+        quotesString = quotesString,
+    )

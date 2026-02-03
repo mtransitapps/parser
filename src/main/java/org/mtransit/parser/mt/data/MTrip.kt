@@ -39,9 +39,9 @@ data class MTrip(
         if (lastTrip == null) { // NEW
             add(routeId.toString())
             add(directionId.toString())
-            add(MServiceIds.convert(agencyTools.cleanServiceId(_serviceId)))
+            add(_serviceId.convertServiceId(agencyTools, quotesString = true))
         }
-        add(MTripIds.convert(_tripId))
+        add(_tripId.convertTripId(quotesString = true))
     }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     fun isSameRouteDirectionService(other: MTrip?) =

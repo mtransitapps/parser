@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CharUtils;
 import org.mtransit.commons.CleanUtils;
-import org.mtransit.commons.CollectionUtils;
 import org.mtransit.commons.CommonsApp;
 import org.mtransit.commons.GTFSCommons;
 import org.mtransit.commons.StringsCleaner;
@@ -31,6 +30,7 @@ import org.mtransit.parser.mt.MDataChangedManager;
 import org.mtransit.parser.mt.MGenerator;
 import org.mtransit.parser.mt.MReader;
 import org.mtransit.parser.mt.data.MAgency;
+import org.mtransit.parser.mt.data.MDirection;
 import org.mtransit.parser.mt.data.MDirectionCardinalType;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MRouteSNToIDConverter;
@@ -38,7 +38,6 @@ import org.mtransit.parser.mt.data.MServiceDate;
 import org.mtransit.parser.mt.data.MServiceId;
 import org.mtransit.parser.mt.data.MServiceIds;
 import org.mtransit.parser.mt.data.MSpec;
-import org.mtransit.parser.mt.data.MDirection;
 import org.mtransit.parser.mt.data.MString;
 import org.mtransit.parser.mt.data.MStrings;
 import org.mtransit.parser.mt.data.MTripId;
@@ -49,6 +48,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -165,7 +165,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		final long start = System.currentTimeMillis();
 		final GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false, false);
-		MDataChangedManager.avoidCalendarDatesDataChanged(lastServiceDates, gtfs);
+		MDataChangedManager.avoidCalendarDatesDataChanged(lastServiceDates, gtfs, this);
 		gtfs.cleanupStops();
 		gtfs.cleanupExcludedData();
 		gtfs.cleanupStopTimesPickupDropOffTypes(this);
@@ -312,7 +312,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public String getAgencyId() {
-		return null; // no filter
+		return Configs.getAgencyConfig() == null ? null : Configs.getAgencyConfig().getAgencyId(); // OPT-IN filter
 	}
 
 	@NotNull
@@ -354,14 +354,26 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private final Map<String, String> serviceIdToCleanupServiceId = new HashMap<>();
 
+	@Override
+	public boolean cleanMergedServiceIds() {
+		return Configs.getAgencyConfig() != null && Configs.getAgencyConfig().getServiceIdCleanMerged();
+	}
+
+	@Deprecated
 	@NotNull
 	@Override
 	public String cleanServiceId(@NotNull String gServiceId) {
+		return cleanServiceId(gServiceId, true);
+	}
+
+	@NotNull
+	@Override
+	public String cleanServiceId(@NotNull String gServiceId, boolean keep) {
 		String cleanServiceId = GTFSCommons.cleanOriginalId(gServiceId, getServiceIdCleanupPattern());
-		if (Configs.getAgencyConfig() != null && Configs.getAgencyConfig().getServiceIdCleanMerged()) {
+		if (cleanMergedServiceIds()) {
 			cleanServiceId = CleanUtils.cleanMergedID(cleanServiceId);
 		}
-		serviceIdToCleanupServiceId.put(gServiceId, cleanServiceId);
+		if (keep) serviceIdToCleanupServiceId.put(gServiceId, cleanServiceId);
 		return cleanServiceId;
 	}
 
@@ -389,10 +401,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean verifyServiceIdsUniqueness() {
-		if (Configs.getAgencyConfig() != null) {
-			if (Configs.getAgencyConfig().getServiceIdNotUniqueAllowed()) return false;
-		}
-		return getServiceIdCleanupRegex() != null; // OPT-IN feature
+		if (Configs.getAgencyConfig() != null && Configs.getAgencyConfig().getServiceIdNotUniqueAllowed()) return false;
+		return getServiceIdCleanupRegex() != null || cleanMergedServiceIds(); // OPT-IN feature
 	}
 
 	@NotNull
@@ -402,10 +412,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private final Map<String, String> routeIdToCleanupRouteId = new HashMap<>();
 
+	@Override
+	public boolean cleanMergedRouteIds() {
+		return Configs.getRouteConfig().getRouteIdCleanMerged();
+	}
+
 	@NotNull
 	@Override
 	public String cleanRouteOriginalId(@NotNull String gRouteId) {
-		if (Configs.getRouteConfig().getRouteIdCleanMerged()) {
+		if (cleanMergedRouteIds()) {
 			gRouteId = CleanUtils.cleanMergedID(gRouteId);
 		}
 		final String cleanRouteId = GTFSCommons.cleanOriginalId(gRouteId, getRouteIdCleanupPattern());
@@ -477,7 +492,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean verifyRouteIdsUniqueness() {
 		if (Configs.getRouteConfig().getRouteIdNotUniqueAllowed()) return false;
-		return getRouteIdCleanupRegex() != null; // OPT-IN feature
+		return getRouteIdCleanupRegex() != null || cleanMergedRouteIds(); // OPT-IN feature
 	}
 
 	@NotNull
@@ -696,7 +711,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean verifyTripIdsUniqueness() {
 		if (Configs.getRouteConfig().getTripIdNotUniqueAllowed()) return false;
-		return getTripIdCleanupRegex() != null; // OPT-IN feature
+		return getTripIdCleanupRegex() != null || cleanMergedTripIds(); // OPT-IN feature
 	}
 
 	@NotNull
@@ -721,8 +736,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private final Map<String, String> tripIdToCleanupTripId = new HashMap<>();
 
 	@Override
+	public boolean cleanMergedTripIds() {
+		return Configs.getRouteConfig().getTripIdCleanMerged();
+	}
+
+	@Override
 	public @NotNull String cleanTripOriginalId(@NotNull String gOriginalTripId) {
-		final String cleanTripId = GTFSCommons.cleanOriginalId(gOriginalTripId, getTripIdCleanupPattern());
+		String cleanTripId = GTFSCommons.cleanOriginalId(gOriginalTripId, getTripIdCleanupPattern());
+		if (cleanMergedTripIds()) {
+			cleanTripId = CleanUtils.cleanMergedID(cleanTripId);
+		}
 		this.tripIdToCleanupTripId.put(gOriginalTripId, cleanTripId);
 		return cleanTripId;
 	}
@@ -1128,7 +1151,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean verifyStopIdsUniqueness() {
 		if (Configs.getRouteConfig().getStopIdNotUniqueAllowed()) return false;
-		return getStopIdCleanupRegex() != null; // OPT-IN feature
+		return getStopIdCleanupRegex() != null || cleanMergedStopIds(); // OPT-IN feature
 	}
 
 	@NotNull
@@ -1152,11 +1175,16 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private final Map<String, String> stopIdToCleanupStopId = new HashMap<>();
 
+	@Override
+	public boolean cleanMergedStopIds() {
+		return Configs.getRouteConfig().getStopIdCleanMerged();
+	}
+
 	@NotNull
 	@Override
 	public String cleanStopOriginalId(@NotNull String gStopOriginalId) {
 		String cleanStopId = GTFSCommons.cleanOriginalId(gStopOriginalId, getStopIdCleanupPattern());
-		if (Configs.getRouteConfig().getStopIdCleanMerged()) {
+		if (cleanMergedStopIds()) {
 			cleanStopId = CleanUtils.cleanMergedID(cleanStopId);
 		}
 		this.stopIdToCleanupStopId.put(gStopOriginalId, cleanStopId);
@@ -1360,7 +1388,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			usefulPeriod.setTodayStringInt(OVERRIDE_DATE);
 		}
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, !agencyFilter, agencyFilter);
-		MDataChangedManager.avoidCalendarDatesDataChanged(lastServiceDates, gtfs);
+		MDataChangedManager.avoidCalendarDatesDataChanged(lastServiceDates, gtfs, agencyTools);
 		if (agencyFilter) {
 			gtfs.cleanupExcludedServiceIds();
 		}
@@ -1374,7 +1402,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (!gCalendars.isEmpty()) {
 			parseCalendars(gCalendars, gCalendarDates, DATE_FORMAT, c, usefulPeriod, isCurrentOrNext); // CURRENT
 		} else if (!gCalendarDates.isEmpty()) {
-			parseCalendarDates(gCalendarDates, c, usefulPeriod, isCurrentOrNext); // CURRENT
+			parseCalendarDates(gCalendarDates, c, usefulPeriod, isCurrentOrNext, lastServiceDates); // CURRENT
 		} else {
 			throw new MTLog.Fatal("NO schedule available for %s! (1)", usefulPeriod.getTodayStringInt());
 		}
@@ -1422,7 +1450,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (!gCalendars.isEmpty()) {
 				parseCalendars(gCalendars, gCalendarDates, DATE_FORMAT, c, usefulPeriod, false); // NEXT
 			} else if (!gCalendarDates.isEmpty()) {
-				parseCalendarDates(gCalendarDates, c, usefulPeriod, false); // NEXT
+				parseCalendarDates(gCalendarDates, c, usefulPeriod, false, lastServiceDates); // NEXT
 			}
 			if (usefulPeriod.getStartDate() == null || usefulPeriod.getEndDate() == null) {
 				MTLog.log("* NO NEXT schedule available for %s. (start:%s|end:%s)", usefulPeriod.getTodayStringInt(), usefulPeriod.getStartDate(), usefulPeriod.getEndDate());
@@ -1479,10 +1507,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	static void parseCalendarDates(List<GCalendarDate> gCalendarDates,
-								   Calendar c,
-								   Period p,
-								   boolean lookBackward) {
+	static void parseCalendarDates(
+			List<GCalendarDate> gCalendarDates,
+			Calendar c,
+			Period p,
+			boolean lookBackward,
+			@Nullable List<MServiceDate> lastServiceDates
+	) {
 		HashSet<Integer> todayServiceIds = findCalendarDatesTodayServiceIds(gCalendarDates, c, p, lookBackward, 1, true);
 		if (todayServiceIds.isEmpty()) {
 			MTLog.log("NO schedule available for %s in calendar dates.", p.getTodayStringInt());
@@ -1492,12 +1523,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 		while (true) {
 			MTLog.log("> Schedules from %s to %s... ", p.getStartDate(), p.getEndDate());
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
-				if (gCalendarDate.isBetween(p.getStartDate(), p.getEndDate())) {
-					if (!gCalendarDate.isServiceIdInts(todayServiceIds)) {
-						//noinspection DiscouragedApi
-						MTLog.log("> new service ID from calendar date active on %s between %s and %s: '%s'", gCalendarDate.getDate(), p.getStartDate(), p.getEndDate(), gCalendarDate.getServiceId());
-						todayServiceIds.add(gCalendarDate.getServiceIdInt());
-					}
+				if (gCalendarDate.isBetween(p.getStartDate(), p.getEndDate())
+						&& !gCalendarDate.isServiceIdInts(todayServiceIds)) {
+					//noinspection DiscouragedApi
+					MTLog.log("> new service ID from calendar date active on %s between %s and %s: '%s'", gCalendarDate.getDate(), p.getStartDate(), p.getEndDate(), gCalendarDate.getServiceId());
+					todayServiceIds.add(gCalendarDate.getServiceIdInt());
 				}
 			}
 			boolean newDates = refreshStartEndDatesFromCalendarDates(p, todayServiceIds, gCalendarDates);
@@ -1512,7 +1542,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (pNext.getStartDate() != null && pNext.getEndDate() != null
 					&& diffLowerThan(DATE_FORMAT, c, pNext.getStartDate(), pNext.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
 				p.setEndDate(pNext.getEndDate());
-				MTLog.log("> new end date '%s' because next %s day has own service ID(s)", p.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS);
+				MTLog.log("> new end date '%s' because next %d day has own service ID(s)", p.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS);
 				continue;
 			}
 			Period pPrevious = new Period();
@@ -1521,9 +1551,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 			refreshStartEndDatesFromCalendarDates(pPrevious, previousDayServiceIds, gCalendarDates);
 			if (lookBackward // NOT next schedule, only current schedule can look behind
 					&& pPrevious.getStartDate() != null && pPrevious.getEndDate() != null
-					&& diffLowerThan(DATE_FORMAT, c, pPrevious.getStartDate(), pPrevious.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS)) {
+					&& diffLowerThan(DATE_FORMAT, c, pPrevious.getStartDate(), pPrevious.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS)
+					&& MServiceDate.containsAllServiceIdInts(lastServiceDates, previousDayServiceIds) // 2026-01-29: only look backward if min calendar date coverage is not reached or in previous schedule
+			) {
 				p.setStartDate(pPrevious.getStartDate());
-				MTLog.log("> new start date '%s' because previous %s day has own service ID(s)", p.getStartDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS);
+				MTLog.log("> new start date '%s' because previous %d day has own service ID(s)", p.getStartDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS);
 				continue;
 			}
 			if (diffLowerThan(DATE_FORMAT, c, p.getStartDate(), p.getEndDate(), MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS)) {
@@ -1565,23 +1597,20 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	private static boolean refreshStartEndDatesFromCalendarDates(
-			Period p,
-			HashSet<Integer> serviceIds,
-			List<GCalendarDate> gCalendarDates
+			@NotNull Period p,
+			@NotNull Collection<Integer> serviceIds,
+			@NotNull List<GCalendarDate> gCalendarDates
 	) {
 		boolean newDates = false;
 		for (GCalendarDate gCalendarDate : gCalendarDates) {
-			if (gCalendarDate.isServiceIdInts(serviceIds)) {
-				if ((p.getStartDate() == null || gCalendarDate.isBefore(p.getStartDate()))
-				) {
-					p.setStartDate(gCalendarDate.getDate());
-					newDates = true;
-				}
-				if ((p.getEndDate() == null || gCalendarDate.isAfter(p.getEndDate()))
-				) {
-					p.setEndDate(gCalendarDate.getDate());
-					newDates = true;
-				}
+			if (!gCalendarDate.isServiceIdInts(serviceIds)) continue;
+			if (p.getStartDate() == null || gCalendarDate.isBefore(p.getStartDate())) {
+				p.setStartDate(gCalendarDate.getDate());
+				newDates = true;
+			}
+			if (p.getEndDate() == null || gCalendarDate.isAfter(p.getEndDate())) {
+				p.setEndDate(gCalendarDate.getDate());
+				newDates = true;
 			}
 		}
 		return newDates;
@@ -1594,14 +1623,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 																	 boolean lookBackward,
 																	 int minTodayServiceIdsSize,
 																	 boolean canIncDays) {
-		HashSet<Integer> todayServiceIds = new HashSet<>();
+		final HashSet<Integer> todayServiceIds = new HashSet<>();
 		final Integer initialTodayStringInt = p.getTodayStringInt();
 		while (true) {
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
-				if (gCalendarDate.isDate(p.getTodayStringInt())) {
-					if (!gCalendarDate.isServiceIdInts(todayServiceIds)) {
-						todayServiceIds.add(gCalendarDate.getServiceIdInt());
-					}
+				if (gCalendarDate.isDate(p.getTodayStringInt())
+						&& !gCalendarDate.isServiceIdInts(todayServiceIds)) {
+					todayServiceIds.add(gCalendarDate.getServiceIdInt());
 				}
 			}
 			if (canIncDays) {
@@ -1841,9 +1869,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (gCalendarDates != null) {
 			for (GCalendarDate gCalendarDate : gCalendarDates) {
 				if (gCalendarDate.isBetween(startDate, endDate)) {
-					if (gCalendarDate.isServiceIdInts(serviceIdInts)) {
-						continue;
-					}
+					if (gCalendarDate.isServiceIdInts(serviceIdInts)) continue;
 					if (gCalendarDate.getExceptionType() == GCalendarDatesExceptionType.SERVICE_REMOVED) {
 						//noinspection DiscouragedApi
 						MTLog.log("[period-service-ids] > ignored service ID from calendar date active between %s and %s: %s (SERVICE REMOVED)", startDate, endDate, gCalendarDate.getServiceId());
@@ -1855,7 +1881,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				}
 			}
 		}
-		MTLog.log("[period-service-ids] > Service IDs [%d]: %s.", serviceIdInts.size(), GIDs.toStringPlus(CollectionUtils.sorted(serviceIdInts)));
+		MTLog.log("[period-service-ids] > Service IDs [%d]: %s.", serviceIdInts.size(), GIDs.toStringPlus(serviceIdInts));
 		return serviceIdInts;
 	}
 
@@ -1909,10 +1935,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	private static long diffInMs(@NotNull SimpleDateFormat dateFormat,
-								 @NotNull Calendar calendar,
-								 @Nullable Integer startDateInt,
-								 @Nullable Integer endDateInt) {
+	@SuppressWarnings("WeakerAccess")
+	public static long diffInMs(
+			@NotNull SimpleDateFormat dateFormat,
+			@NotNull Calendar calendar,
+			@Nullable Integer startDateInt,
+			@Nullable Integer endDateInt
+	) {
 		try {
 			calendar.setTime(dateFormat.parse(String.valueOf(startDateInt)));
 			long startDateInMs = calendar.getTimeInMillis();
