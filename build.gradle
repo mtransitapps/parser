@@ -13,15 +13,9 @@ java {
     targetCompatibility = rootProject.javaVersion
     toolchain.languageVersion = JavaLanguageVersion.of(rootProject.javaToolchainVersion.toString())
 }
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = rootProject.javaVersion
-        allWarningsAsErrors = true
-    }
-}
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = rootProject.javaVersion
+kotlin {
+    compilerOptions {
+        jvmTarget = rootProject.kotlinJvmTarget
         allWarningsAsErrors = true
     }
 }
