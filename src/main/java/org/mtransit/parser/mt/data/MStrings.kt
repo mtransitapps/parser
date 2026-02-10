@@ -72,6 +72,12 @@ object MStrings {
             .map { getInt(it) }
             .joinToString(GTFSCommons.STRINGS_SEPARATOR)
     }
+
+    @Suppress("unused")
+    @JvmStatic
+    fun printCurrentState(logStart: String = "") {
+        MTLog.log("$logStart MStrings[${count()}]: ${getAll().map { "${it.id}:\"${it.string}\"" }}")
+    }
 }
 
 fun String.toStringIds(enabled: Boolean) = MStrings.convert(this, enabled)
