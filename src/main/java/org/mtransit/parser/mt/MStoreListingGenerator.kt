@@ -93,33 +93,19 @@ object MStoreListingGenerator {
                 MTLog.log("Created directory: '%s'.", dumpDirReleaseNotesLangF)
             }
             val dumpFileReleaseNotesLang = File(dumpDirReleaseNotesLangF, DEFAULT_TXT)
-            if (dumpFileReleaseNotesLang.exists()) {
-                MTLog.log("Update store release notes file: %s.", dumpFileReleaseNotesLang)
-                try {
-                    val content = dumpFileReleaseNotesLang.readText().replace(
-                        regex = regex,
-                        replacement = String.format(
-                            if (isNext) formatKeepFromTo else formatFromTo,
-                            dateFormat.format(toDate(MGenerator.DATE_FORMAT, minDate)),
-                            dateFormat.format(toDate(MGenerator.DATE_FORMAT, maxDate))
-                        )
-                    )
-                    dumpFileReleaseNotesLang.writeText(content)
-                } catch (ioe: Exception) {
-                    throw Fatal(ioe, "Error while writing store release notes files!")
+            try {
+                val minDateS = dateFormat.format(toDate(MGenerator.DATE_FORMAT, minDate))
+                val maxDateS = dateFormat.format(toDate(MGenerator.DATE_FORMAT, maxDate))
+                val content = if (dumpFileReleaseNotesLang.exists()) {
+                    MTLog.log("Update store release notes file: %s.", dumpFileReleaseNotesLang)
+                    dumpFileReleaseNotesLang.readText().replace(regex, (if (isNext) formatKeepFromTo else formatFromTo).format(minDateS, maxDateS))
+                } else {
+                    MTLog.log("Generate new store release notes file: %s.", dumpFileReleaseNotesLang)
+                    formatFromTo.format(minDateS, maxDateS)
                 }
-            } else {
-                MTLog.log("Generate new store release notes file: %s.", dumpFileReleaseNotesLang)
-                try {
-                    val content = String.format(
-                        formatFromTo,
-                        dateFormat.format(toDate(MGenerator.DATE_FORMAT, minDate)),
-                        dateFormat.format(toDate(MGenerator.DATE_FORMAT, maxDate))
-                    )
-                    dumpFileReleaseNotesLang.writeText(content)
-                } catch (ioe: Exception) {
-                    throw Fatal(ioe, "Error while writing new store release notes files!")
-                }
+                dumpFileReleaseNotesLang.writeText(content)
+            } catch (ioe: Exception) {
+                throw Fatal(ioe, "Error while writing new store release notes files!")
             }
         } else {
             MTLog.log("Do not generate store release notes file in '%s' (listing '%s' does not exist).", dumpDirReleaseNotesLangF, dirListingLangF)
