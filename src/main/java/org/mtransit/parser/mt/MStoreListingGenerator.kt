@@ -1,12 +1,9 @@
 package org.mtransit.parser.mt
 
-import org.apache.commons.io.IOUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.MTLog.Fatal
-import org.mtransit.parser.gtfs.GReader
 import org.mtransit.parser.gtfs.data.GFieldTypes.toDate
 import java.io.File
-import java.nio.file.Files
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -23,11 +20,15 @@ object MStoreListingGenerator {
 
     private const val EN_US = "en-US"
 
-    private val SCHEDULE_EN: Pattern = Pattern.compile(
+    private val DATE_FORMAT_EN: DateFormat get() = SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH) // NOT thread-safe
+
+    private val SCHEDULE_EN = Pattern.compile(
         "(Schedule from ([A-Za-z]+ [0-9]{1,2}, [0-9]{4}) to ([A-Za-z]+ [0-9]{1,2}, [0-9]{4})(\\.)?)",
         Pattern.CASE_INSENSITIVE
-    )
+    ).toRegex()
+
     private const val SCHEDULE_EN_FROM_TO = $$"Schedule from %1$s to %2$s."
+
     private const val SCHEDULE_EN_KEEP_FROM_TO = $$"Schedule from $2 to %2$s."
 
     // endregion
@@ -35,10 +36,13 @@ object MStoreListingGenerator {
     // region fr-FR
 
     private const val FR_FR = "fr-FR"
-    private val SCHEDULE_FR: Pattern = Pattern.compile(
+
+    private val DATE_FORMAT_FR: DateFormat get() = SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH) // NOT thread-safe
+
+    private val SCHEDULE_FR = Pattern.compile(
         "(Horaires du ([0-9]{1,2} \\w+ [0-9]{4}) au ([0-9]{1,2} \\w+ [0-9]{4})(\\.)?)",
         Pattern.CASE_INSENSITIVE or Pattern.UNICODE_CHARACTER_CLASS
-    )
+    ).toRegex()
 
     @Suppress("SpellCheckingInspection")
     private const val SCHEDULE_FROM_TO_FR = $$"Horaires du %1$s au %2$s."
@@ -62,11 +66,11 @@ object MStoreListingGenerator {
         val isNext = "next_".equals(fileBase, ignoreCase = true)
         dumpStoreReleaseNote(
             dirListingF, dumpDirReleaseNotesF, isNext, minDate, maxDate,
-            EN_US, SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH), SCHEDULE_EN, SCHEDULE_EN_FROM_TO, SCHEDULE_EN_KEEP_FROM_TO
+            EN_US, DATE_FORMAT_EN, SCHEDULE_EN, SCHEDULE_EN_FROM_TO, SCHEDULE_EN_KEEP_FROM_TO
         )
         dumpStoreReleaseNote(
             dirListingF, dumpDirReleaseNotesF, isNext, minDate, maxDate,
-            FR_FR, SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH), SCHEDULE_FR, SCHEDULE_FROM_TO_FR, SCHEDULE_KEEP_FROM_TO_FR
+            FR_FR, DATE_FORMAT_FR, SCHEDULE_FR, SCHEDULE_FROM_TO_FR, SCHEDULE_KEEP_FROM_TO_FR
         )
     }
 
@@ -78,7 +82,7 @@ object MStoreListingGenerator {
         maxDate: Int,
         lang: String,
         dateFormat: DateFormat,
-        regex: Pattern,
+        regex: Regex,
         formatFromTo: String,
         formatKeepFromTo: String,
     ) {
@@ -92,16 +96,15 @@ object MStoreListingGenerator {
             if (dumpFileReleaseNotesLang.exists()) {
                 MTLog.log("Update store release notes file: %s.", dumpFileReleaseNotesLang)
                 try {
-                    val content = regex.matcher(
-                        IOUtils.toString(Files.newInputStream(dumpFileReleaseNotesLang.toPath()), GReader.UTF_8)
-                    ).replaceAll(
-                        String.format(
+                    val content = dumpFileReleaseNotesLang.readText().replace(
+                        regex = regex,
+                        replacement = String.format(
                             if (isNext) formatKeepFromTo else formatFromTo,
                             dateFormat.format(toDate(MGenerator.DATE_FORMAT, minDate)),
                             dateFormat.format(toDate(MGenerator.DATE_FORMAT, maxDate))
                         )
                     )
-                    IOUtils.write(content, Files.newOutputStream(dumpFileReleaseNotesLang.toPath()), GReader.UTF_8)
+                    dumpFileReleaseNotesLang.writeText(content)
                 } catch (ioe: Exception) {
                     throw Fatal(ioe, "Error while writing store release notes files!")
                 }
@@ -113,7 +116,7 @@ object MStoreListingGenerator {
                         dateFormat.format(toDate(MGenerator.DATE_FORMAT, minDate)),
                         dateFormat.format(toDate(MGenerator.DATE_FORMAT, maxDate))
                     )
-                    IOUtils.write(content, Files.newOutputStream(dumpFileReleaseNotesLang.toPath()), GReader.UTF_8)
+                    dumpFileReleaseNotesLang.writeText(content)
                 } catch (ioe: Exception) {
                     throw Fatal(ioe, "Error while writing new store release notes files!")
                 }
