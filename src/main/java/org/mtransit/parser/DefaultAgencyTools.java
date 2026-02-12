@@ -44,7 +44,7 @@ import org.mtransit.parser.mt.data.MTripId;
 import org.mtransit.parser.mt.data.MTripIds;
 import org.mtransit.parser.mt.data.MVerify;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -127,7 +127,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		TOMORROW = false;
 	}
 
-	private static final SimpleDateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
+	private static final DateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
 	@SuppressWarnings({"unused", "WeakerAccess"})
 	public int getTodayDateInt() {
@@ -142,6 +142,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	private HashSet<Integer> serviceIdInts;
 
+	@SuppressWarnings("WeakerAccess")
 	public void start(@NotNull String[] args) {
 		if (args.length < 3) {
 			throw new MTLog.Fatal("Invalid number(%d) of arguments! (%s)", args.length, Arrays.asList(args));
@@ -1223,7 +1224,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime,
 										   @NotNull List<GStopTime> tripStopTimes,
-										   @NotNull SimpleDateFormat timeFormat) {
+										   @NotNull DateFormat timeFormat) {
 		if (!gStopTime.hasArrivalTime() || !gStopTime.hasDepartureTime()) {
 			return extractTimes(gStopTime, tripStopTimes, timeFormat);
 		} else {
@@ -1236,7 +1237,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	private static Pair<Integer, Integer> extractTimes(GStopTime gStopTime,
 													   @NotNull List<GStopTime> tripStopTimes,
-													   SimpleDateFormat timeFormat) {
+													   DateFormat timeFormat) {
 		try {
 			Pair<Long, Long> timesInMs = extractTimeInMs(gStopTime, tripStopTimes);
 			long arrivalTimeInMs = timesInMs.first;
@@ -1650,7 +1651,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return todayServiceIds;
 	}
 
-	static void parseCalendars(@NotNull List<GCalendar> gCalendars, @Nullable List<GCalendarDate> gCalendarDates, SimpleDateFormat DATE_FORMAT, Calendar c, Period p, boolean lookBackward) {
+	static void parseCalendars(@NotNull List<GCalendar> gCalendars, @Nullable List<GCalendarDate> gCalendarDates, DateFormat DATE_FORMAT, Calendar c, Period p, boolean lookBackward) {
 		findCalendarsTodayPeriod(gCalendars, gCalendarDates, p, lookBackward);
 		if (p.getStartDate() == null || p.getEndDate() == null) {
 			MTLog.log("[parse-calendars] > NO schedule available for %s in calendars. (start:%s|end:%s)", p.getTodayStringInt(), p.getStartDate(), p.getEndDate());
@@ -1910,7 +1911,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return p;
 	}
 
-	public static int incDateDays(@NotNull SimpleDateFormat dateFormat,
+	public static int incDateDays(@NotNull DateFormat dateFormat,
 								  @NotNull Calendar calendar,
 								  @Nullable Integer dateInt,
 								  int numberOfDays) {
@@ -1923,7 +1924,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	public static boolean diffLowerThan(@NotNull SimpleDateFormat dateFormat,
+	@SuppressWarnings("WeakerAccess")
+	public static boolean diffLowerThan(@NotNull DateFormat dateFormat,
 										@NotNull Calendar calendar,
 										@Nullable Integer startDateInt,
 										@Nullable Integer endDateInt,
@@ -1937,7 +1939,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@SuppressWarnings("WeakerAccess")
 	public static long diffInMs(
-			@NotNull SimpleDateFormat dateFormat,
+			@NotNull DateFormat dateFormat,
 			@NotNull Calendar calendar,
 			@Nullable Integer startDateInt,
 			@Nullable Integer endDateInt

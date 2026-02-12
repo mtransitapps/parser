@@ -35,7 +35,7 @@ import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MStop;
 import org.mtransit.parser.mt.data.MTrip;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -192,7 +192,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		long lastTimestamp = -1L;
 		if (!mServiceDatesList.isEmpty()) {
 			MServiceDate firstServiceDate = mServiceDatesList.get(0);
-			final int maxCalendarDate = GFieldTypes.fromDateToInt(new Date()) + 10 * 10_000; // max 10 years IN THE FUTURE
+			final int maxCalendarDate = GFieldTypes.fromDateToInt(DATE_FORMAT, new Date()) + 10 * 10_000; // max 10 years IN THE FUTURE
 			mServiceDatesList.removeIf(serviceDate ->
 					serviceDate.getCalendarDate() > maxCalendarDate
 			);
@@ -249,7 +249,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					&& (lastDeparture < -1 || lastDeparture < lastFrequency.getEndTime())) {
 				lastDeparture = lastFrequency.getEndTime();
 			}
-			final SimpleDateFormat DATE_TIME_FORMAT = GFieldTypes.makeDateAndTimeFormat();
 			DATE_TIME_FORMAT.setTimeZone(TimeZone.getTimeZone(mAgenciesList.get(0).getTimezone()));
 			try {
 				firstTimestamp = GFieldTypes.toTimeStamp(DATE_TIME_FORMAT, firstCalendarDate, firstDeparture);
@@ -727,7 +726,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return splitDirectionStopTimesHeadSign;
 	}
 
-	private final SimpleDateFormat TIME_FORMAT = GFieldTypes.makeTimeFormat();
+	private final DateFormat TIME_FORMAT = GFieldTypes.makeTimeFormat();
+	private final DateFormat DATE_TIME_FORMAT = GFieldTypes.makeDateAndTimeFormat();
+	private final DateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
 	private String parseGStopTimes(HashMap<String, MSchedule> mSchedules,
 								   long mDirectionId,

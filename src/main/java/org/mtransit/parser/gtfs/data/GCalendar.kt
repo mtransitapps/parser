@@ -2,7 +2,6 @@ package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
 import org.mtransit.parser.MTLog
-import org.mtransit.parser.db.SQLUtils.escapeId
 import java.util.Calendar
 
 // https://developers.google.com/transit/gtfs/reference#calendar_fields
@@ -73,12 +72,6 @@ data class GCalendar(
 
     private val _serviceId: String
         get() = GIDs.getString(serviceIdInt)
-
-    val escapedServiceId: String
-        get() = _serviceId.escapeId()
-
-    val escapedServiceIdInt: Int
-        get() = escapedServiceId.toGIDInt()
 
     val dates: List<GCalendarDate> by lazy {
         initAllDates(

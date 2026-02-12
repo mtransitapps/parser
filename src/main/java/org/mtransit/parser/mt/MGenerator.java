@@ -2,7 +2,6 @@ package org.mtransit.parser.mt;
 
 import static org.mtransit.commons.Constants.EMPTY;
 
-import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.Cleaner;
@@ -21,11 +20,12 @@ import org.mtransit.parser.db.DBUtils;
 import org.mtransit.parser.db.DumpDbUtils;
 import org.mtransit.parser.db.SQLUtils;
 import org.mtransit.parser.gtfs.GAgencyTools;
-import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GFieldTypes;
 import org.mtransit.parser.gtfs.data.GIDs;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.mt.data.MAgency;
+import org.mtransit.parser.mt.data.MDirection;
+import org.mtransit.parser.mt.data.MDirectionStop;
 import org.mtransit.parser.mt.data.MFrequency;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MSchedule;
@@ -34,8 +34,6 @@ import org.mtransit.parser.mt.data.MServiceId;
 import org.mtransit.parser.mt.data.MServiceIds;
 import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MStop;
-import org.mtransit.parser.mt.data.MDirection;
-import org.mtransit.parser.mt.data.MDirectionStop;
 import org.mtransit.parser.mt.data.MString;
 import org.mtransit.parser.mt.data.MStrings;
 import org.mtransit.parser.mt.data.MTrip;
@@ -52,6 +50,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -325,7 +324,7 @@ public class MGenerator {
 					mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds(), inputUrl,
 					false
 			);
-			dumpStoreListing(rawDirF, fileBase, minMaxDates.first, minMaxDates.second);
+			MStoreListingGenerator.dumpStoreReleaseNotes(rawDirF, fileBase, minMaxDates.first, minMaxDates.second);
 			bumpDBVersion(rawDirF, gtfsDir);
 		}
 		MTLog.log("Writing files (%s)... DONE in %s.",
@@ -976,7 +975,7 @@ public class MGenerator {
 
 	private static final String GTFS_RDS_VALUES_XML = "gtfs_rts_values.xml"; // do not change to avoid breaking compat w/ old modules
 
-	private static final SimpleDateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
+	private static final DateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
 	private static final Pattern RDS_DB_VERSION_REGEX = Pattern.compile(
 			"((<integer name=\"gtfs_rts_db_version\">)(\\d+)(</integer>))", // do not change to avoid breaking compat w/ old modules
@@ -1220,7 +1219,7 @@ public class MGenerator {
 	@NotNull
 	private static String getCommentedDateTime(int timestampInSec, @NotNull MSpec mSpec) {
 		try {
-			final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH);
+			final DateFormat dateTimeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH);
 			try {
 				dateTimeFormat.setTimeZone(TimeZone.getTimeZone(mSpec.getFirstAgency().getTimezone()));
 			} catch (Exception e) {
@@ -1253,74 +1252,6 @@ public class MGenerator {
 
 	private static String getRESOURCES_STRING(@NotNull String resName, @Nullable Object resValue) {
 		return String.format(RESOURCE_STRING_AND_NAME_VALUE, resName, resValue);
-	}
-
-	private static final String PLAY = "play";
-	private static final String RELEASE_NOTES = "release-notes";
-	private static final String EN_US = "en-US";
-	private static final String FR_FR = "fr-FR";
-	private static final String DEFAULT_TXT = "default.txt";
-
-	private static final Pattern SCHEDULE = Pattern.compile("(Schedule from ([A-Za-z]+ [0-9]{1,2}, [0-9]{4}) to ([A-Za-z]+ [0-9]{1,2}, [0-9]{4})(\\.)?)",
-			Pattern.CASE_INSENSITIVE);
-	private static final String SCHEDULE_FROM_TO = "Schedule from %1$s to %2$s.";
-	private static final String SCHEDULE_KEEP_FROM_TO = "Schedule from $2 to %2$s.";
-
-	private static final Pattern SCHEDULE_FR = Pattern.compile("(Horaires du ([0-9]{1,2} \\w+ [0-9]{4}) au ([0-9]{1,2} \\w+ [0-9]{4})(\\.)?)",
-			Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
-	@SuppressWarnings("SpellCheckingInspection")
-	private static final String SCHEDULE_FROM_TO_FR = "Horaires du %1$s au %2$s.";
-	@SuppressWarnings("SpellCheckingInspection")
-	private static final String SCHEDULE_KEEP_FROM_TO_FR = "Horaires du $2 au %2$s.";
-
-	private static void dumpStoreListing(File dumpDirF, String fileBase, Integer minDate, Integer maxDate) {
-		SimpleDateFormat SCHEDULE_DATE = new SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH);
-		SimpleDateFormat SCHEDULE_DATE_FR = new SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH);
-		File file;
-		File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
-		File dumpDirPlayF = new File(dumpDirRootF, PLAY);
-		File dumpDirReleaseNotesF = new File(dumpDirPlayF, RELEASE_NOTES);
-		File dumpDirReleaseNotesEnUsF = new File(dumpDirReleaseNotesF, EN_US);
-		file = new File(dumpDirReleaseNotesEnUsF, DEFAULT_TXT);
-		boolean isNext = "next_".equalsIgnoreCase(fileBase);
-		if (file.exists()) {
-			MTLog.log("Generated store listing file: '%s'.", file);
-			try {
-				String content = IOUtils.toString(Files.newInputStream(file.toPath()), GReader.UTF_8);
-				content = SCHEDULE.matcher(content).replaceAll(
-						String.format(
-								isNext ? SCHEDULE_KEEP_FROM_TO : SCHEDULE_FROM_TO, //
-								SCHEDULE_DATE.format(GFieldTypes.toDate(DATE_FORMAT, minDate)),
-								SCHEDULE_DATE.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
-						)
-				);
-				IOUtils.write(content, Files.newOutputStream(file.toPath()), GReader.UTF_8);
-			} catch (Exception ioe) {
-				throw new MTLog.Fatal(ioe, "Error while writing store listing files!");
-			}
-		} else {
-			MTLog.log("Do not generate store listing file: %s.", file);
-		}
-		File dumpDirReleaseNotesFrFrF = new File(dumpDirReleaseNotesF, FR_FR);
-		file = new File(dumpDirReleaseNotesFrFrF, DEFAULT_TXT);
-		if (file.exists()) {
-			MTLog.log("Generated store listing file: %s.", file);
-			try {
-				String content = IOUtils.toString(Files.newInputStream(file.toPath()), GReader.UTF_8);
-				content = SCHEDULE_FR.matcher(content).replaceAll(
-						String.format(
-								isNext ? SCHEDULE_KEEP_FROM_TO_FR : SCHEDULE_FROM_TO_FR, //
-								SCHEDULE_DATE_FR.format(GFieldTypes.toDate(DATE_FORMAT, minDate)),
-								SCHEDULE_DATE_FR.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
-						)
-				);
-				IOUtils.write(content, Files.newOutputStream(file.toPath()), GReader.UTF_8);
-			} catch (Exception ioe) {
-				throw new MTLog.Fatal(ioe, "Error while writing store listing files!");
-			}
-		} else {
-			MTLog.log("Do not generate store listing file: %s.", file);
-		}
 	}
 
 	public static boolean checkDataFilesExists(@NotNull String fileBase) {

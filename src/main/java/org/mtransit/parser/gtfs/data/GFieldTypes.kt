@@ -1,6 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.commons.Constants.SPACE_
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -16,82 +17,48 @@ object GFieldTypes {
 
     const val DATE_FORMAT_PATTERN = "yyyyMMdd"
 
-    @Deprecated(message = "NOT thread-safe", replaceWith = ReplaceWith("GFieldTypes.makeTimeFormat()"))
-    @JvmField
-    val TIME_FORMAT = makeTimeFormat()
-
-    @Deprecated(message = "NOT thread-safe", replaceWith = ReplaceWith("GFieldTypes.makeDateFormat()"))
-    @JvmField
-    val DATE_FORMAT = makeDateFormat()
-
-    @Deprecated(message = "NOT thread-safe", replaceWith = ReplaceWith("GFieldTypes.makeDateAndTimeFormat()"))
-    @JvmField
-    val DATE_TIME_FORMAT = makeDateAndTimeFormat()
+    @JvmStatic
+    fun makeTimeFormat(): DateFormat =
+        SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.ENGLISH)
 
     @JvmStatic
-    fun makeTimeFormat(): SimpleDateFormat {
-        return SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.ENGLISH)
-    }
+    fun makeDateFormat(): DateFormat =
+        SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.ENGLISH)
 
     @JvmStatic
-    fun makeDateFormat(): SimpleDateFormat {
-        return SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.ENGLISH)
-    }
+    fun makeDateAndTimeFormat(): DateFormat =
+        SimpleDateFormat(DATE_FORMAT_PATTERN + SPACE_ + TIME_FORMAT_PATTERN, Locale.ENGLISH)
 
     @JvmStatic
-    fun makeDateAndTimeFormat(): SimpleDateFormat {
-        return SimpleDateFormat(DATE_FORMAT_PATTERN + SPACE_ + TIME_FORMAT_PATTERN, Locale.ENGLISH)
-    }
+    fun toDate(dateFormat: DateFormat, gDateInt: Int): Date = toDate(dateFormat, gDateInt.toString())
 
-    @Suppress("DEPRECATION")
-    @JvmOverloads
     @JvmStatic
-    fun toDate(dateFormat: SimpleDateFormat = DATE_FORMAT, gDateInt: Int): Date = toDate(dateFormat, gDateInt.toString())
+    fun toDate(dateFormat: DateFormat, gDateString: String): Date =
+        dateFormat.parse(gDateString)
 
-    @Suppress("DEPRECATION")
-    @JvmOverloads
     @JvmStatic
-    fun toDate(dateFormat: SimpleDateFormat = DATE_FORMAT, gDateString: String): Date {
-        return dateFormat.parse(gDateString)
-    }
+    fun fromDate(dateFormat: DateFormat, calendar: Calendar): String = fromDate(dateFormat, calendar.time)
 
-    @Suppress("DEPRECATION")
-    @JvmOverloads
     @JvmStatic
-    fun fromDate(dateFormat: SimpleDateFormat = DATE_FORMAT, calendar: Calendar): String = fromDate(dateFormat, calendar.time)
+    fun fromDate(dateFormat: DateFormat, gDateString: Date): String =
+        dateFormat.format(gDateString)
 
-    @Suppress("DEPRECATION")
-    @JvmOverloads
     @JvmStatic
-    fun fromDate(dateFormat: SimpleDateFormat = DATE_FORMAT, gDateString: Date): String {
-        return dateFormat.format(gDateString)
-    }
-
-    @Suppress("DEPRECATION")
-    @JvmOverloads
-    @JvmStatic
-    fun fromDateToInt(dateFormat: SimpleDateFormat = DATE_FORMAT, gDateString: Date) = fromDate(dateFormat, gDateString).toInt()
+    fun fromDateToInt(dateFormat: DateFormat, gDateString: Date) = fromDate(dateFormat, gDateString).toInt()
 
     fun cleanTime(gTimeString: String) = gTimeString.padStart(6, '0') // "%06d".format(Locale.ENGLISH, gTimeString) NOT working??
 
-    @Suppress("DEPRECATION")
-    @JvmOverloads
     @JvmStatic
-    fun toTimeStamp(dateTimeFormat: SimpleDateFormat = DATE_TIME_FORMAT, gDateInt: Int, gTimeInt: Int) =
+    fun toTimeStamp(dateTimeFormat: DateFormat, gDateInt: Int, gTimeInt: Int) =
         toDate(dateTimeFormat, gDateInt, gTimeInt).time
 
-    @Suppress("DEPRECATION")
-    @JvmOverloads
     @JvmStatic
-    fun toDate(dateTimeFormat: SimpleDateFormat = DATE_TIME_FORMAT, gDateInt: Int, gTimeInt: Int) =
+    fun toDate(dateTimeFormat: DateFormat, gDateInt: Int, gTimeInt: Int) =
         toDate(dateTimeFormat, gDateInt.toString(), gTimeInt.toString())
 
-    @Suppress("DEPRECATION")
-    @JvmOverloads
     @JvmStatic
-    fun toDate(dateTimeFormat: SimpleDateFormat = DATE_TIME_FORMAT, gDateString: String, gTimeString: String): Date {
-        return dateTimeFormat.parse(gDateString + SPACE_ + cleanTime(gTimeString))
-    }
+    fun toDate(dateTimeFormat: DateFormat, gDateString: String, gTimeString: String): Date =
+        dateTimeFormat.parse(gDateString + SPACE_ + cleanTime(gTimeString))
 
     fun Int.isBefore(date: Int?): Boolean {
         date ?: return false
