@@ -85,10 +85,10 @@ object MStoreListingGenerator {
         val dirListingLangF = File(dirListingF, lang)
         val dumpDirReleaseNotesLangF = File(dumpDirReleaseNotesF, lang)
         if (dirListingLangF.exists()) {
-            if (dirListingLangF.mkdirs()) {
-                MTLog.log("Created directory: '%s'.", dirListingLangF)
+            if (dumpDirReleaseNotesLangF.mkdirs()) {
+                MTLog.log("Created directory: '%s'.", dumpDirReleaseNotesLangF)
             }
-            val dumpFileReleaseNotesLang = File(dirListingLangF, DEFAULT_TXT)
+            val dumpFileReleaseNotesLang = File(dumpDirReleaseNotesLangF, DEFAULT_TXT)
             if (dumpFileReleaseNotesLang.exists()) {
                 MTLog.log("Generated store release notes file: %s.", dumpFileReleaseNotesLang)
                 try {
