@@ -2,7 +2,7 @@ package org.mtransit.parser.mt
 
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.MTLog.Fatal
-import org.mtransit.parser.gtfs.data.GFieldTypes.toDate
+import org.mtransit.parser.gtfs.data.GFieldTypes
 import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -94,8 +94,8 @@ object MStoreListingGenerator {
         if (dirReleaseNotesLangF.mkdirs()) MTLog.log("Created missing parent directory: '%s'.", dirReleaseNotesLangF)
         val dumpFileReleaseNotesLang = File(dirReleaseNotesLangF, DEFAULT_TXT)
         try {
-            val minDateS = dateFormat.format(toDate(MGenerator.DATE_FORMAT, minDate))
-            val maxDateS = dateFormat.format(toDate(MGenerator.DATE_FORMAT, maxDate))
+            val minDateS = dateFormat.format(GFieldTypes.toDate(MGenerator.DATE_FORMAT, minDate))
+            val maxDateS = dateFormat.format(GFieldTypes.toDate(MGenerator.DATE_FORMAT, maxDate))
             val content = if (dumpFileReleaseNotesLang.exists()) {
                 MTLog.log("Update store release notes file: $dumpFileReleaseNotesLang.")
                 dumpFileReleaseNotesLang.readText().replace(regex, (if (isNext) formatKeepFromTo else formatFromTo).format(minDateS, maxDateS))
