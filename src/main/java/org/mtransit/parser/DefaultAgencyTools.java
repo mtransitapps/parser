@@ -284,6 +284,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (color == null || color.trim().isEmpty()) {
 			return null;
 		}
+		if (Configs.getRouteConfig().isRouteColorIgnored(color)) {
+			return null;
+		}
 		return ColorUtils.darkenIfTooLight(color);
 	}
 

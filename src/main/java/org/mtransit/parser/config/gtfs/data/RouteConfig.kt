@@ -35,6 +35,8 @@ data class RouteConfig(
     // colors
     @SerialName("route_colors")
     val routeColors: List<RouteColor> = emptyList(),
+    @SerialName("route_colors_ignored")
+    val routeColorsIgnored: List<String> = emptyList(), // optional
     // TRIP
     @SerialName("trip_headsign_cleaners")
     val tripHeadsignCleaners: List<Cleaner> = emptyList(),
@@ -110,7 +112,6 @@ data class RouteConfig(
     fun convertRouteIdFromShortNameNotSupported(routeShortName: String) =
         this.routeShortNameToRouteIdConfigs
             .singleOrNull { it.routeShortName == routeShortName }?.routeId
-
     @JvmOverloads
     fun getRouteColor(gRoute: GRoute, override: Boolean = false): String? {
         this.routeColors.singleOrNull { gRoute.routeShortName == it.routeShortName }?.let { routeColorConf ->
@@ -120,6 +121,9 @@ data class RouteConfig(
         }
         return gRoute.routeColor
     }
+
+    fun isRouteColorIgnored(routeColor: String) =
+        this.routeColorsIgnored.any { it.equals(routeColor, ignoreCase = true) }
 
     fun cleanRouteShortName(routeShortName: String) =
         cleanString(routeShortName, this.routeShortNameCleaners)
