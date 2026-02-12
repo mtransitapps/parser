@@ -35,7 +35,7 @@ import org.mtransit.parser.mt.data.MSpec;
 import org.mtransit.parser.mt.data.MStop;
 import org.mtransit.parser.mt.data.MTrip;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -726,9 +726,9 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return splitDirectionStopTimesHeadSign;
 	}
 
-	private final SimpleDateFormat TIME_FORMAT = GFieldTypes.makeTimeFormat();
-	private final SimpleDateFormat DATE_TIME_FORMAT = GFieldTypes.makeDateAndTimeFormat();
-	private final SimpleDateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
+	private final DateFormat TIME_FORMAT = GFieldTypes.makeTimeFormat();
+	private final DateFormat DATE_TIME_FORMAT = GFieldTypes.makeDateAndTimeFormat();
+	private final DateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
 	private String parseGStopTimes(HashMap<String, MSchedule> mSchedules,
 								   long mDirectionId,

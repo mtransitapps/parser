@@ -1,6 +1,7 @@
 package org.mtransit.parser.gtfs.data
 
 import org.mtransit.commons.Constants.SPACE_
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -17,46 +18,46 @@ object GFieldTypes {
     const val DATE_FORMAT_PATTERN = "yyyyMMdd"
 
     @JvmStatic
-    fun makeTimeFormat(): SimpleDateFormat =
+    fun makeTimeFormat(): DateFormat =
         SimpleDateFormat(TIME_FORMAT_PATTERN, Locale.ENGLISH)
 
     @JvmStatic
-    fun makeDateFormat(): SimpleDateFormat =
+    fun makeDateFormat(): DateFormat =
         SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.ENGLISH)
 
     @JvmStatic
-    fun makeDateAndTimeFormat(): SimpleDateFormat =
+    fun makeDateAndTimeFormat(): DateFormat =
         SimpleDateFormat(DATE_FORMAT_PATTERN + SPACE_ + TIME_FORMAT_PATTERN, Locale.ENGLISH)
 
     @JvmStatic
-    fun toDate(dateFormat: SimpleDateFormat, gDateInt: Int): Date = toDate(dateFormat, gDateInt.toString())
+    fun toDate(dateFormat: DateFormat, gDateInt: Int): Date = toDate(dateFormat, gDateInt.toString())
 
     @JvmStatic
-    fun toDate(dateFormat: SimpleDateFormat, gDateString: String): Date =
+    fun toDate(dateFormat: DateFormat, gDateString: String): Date =
         dateFormat.parse(gDateString)
 
     @JvmStatic
-    fun fromDate(dateFormat: SimpleDateFormat, calendar: Calendar): String = fromDate(dateFormat, calendar.time)
+    fun fromDate(dateFormat: DateFormat, calendar: Calendar): String = fromDate(dateFormat, calendar.time)
 
     @JvmStatic
-    fun fromDate(dateFormat: SimpleDateFormat, gDateString: Date): String =
+    fun fromDate(dateFormat: DateFormat, gDateString: Date): String =
         dateFormat.format(gDateString)
 
     @JvmStatic
-    fun fromDateToInt(dateFormat: SimpleDateFormat, gDateString: Date) = fromDate(dateFormat, gDateString).toInt()
+    fun fromDateToInt(dateFormat: DateFormat, gDateString: Date) = fromDate(dateFormat, gDateString).toInt()
 
     fun cleanTime(gTimeString: String) = gTimeString.padStart(6, '0') // "%06d".format(Locale.ENGLISH, gTimeString) NOT working??
 
     @JvmStatic
-    fun toTimeStamp(dateTimeFormat: SimpleDateFormat, gDateInt: Int, gTimeInt: Int) =
+    fun toTimeStamp(dateTimeFormat: DateFormat, gDateInt: Int, gTimeInt: Int) =
         toDate(dateTimeFormat, gDateInt, gTimeInt).time
 
     @JvmStatic
-    fun toDate(dateTimeFormat: SimpleDateFormat, gDateInt: Int, gTimeInt: Int) =
+    fun toDate(dateTimeFormat: DateFormat, gDateInt: Int, gTimeInt: Int) =
         toDate(dateTimeFormat, gDateInt.toString(), gTimeInt.toString())
 
     @JvmStatic
-    fun toDate(dateTimeFormat: SimpleDateFormat, gDateString: String, gTimeString: String): Date =
+    fun toDate(dateTimeFormat: DateFormat, gDateString: String, gTimeString: String): Date =
         dateTimeFormat.parse(gDateString + SPACE_ + cleanTime(gTimeString))
 
     fun Int.isBefore(date: Int?): Boolean {

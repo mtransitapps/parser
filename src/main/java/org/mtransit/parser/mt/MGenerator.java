@@ -50,6 +50,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -974,7 +975,7 @@ public class MGenerator {
 
 	private static final String GTFS_RDS_VALUES_XML = "gtfs_rts_values.xml"; // do not change to avoid breaking compat w/ old modules
 
-	protected static final SimpleDateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
+	private static final DateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
 	private static final Pattern RDS_DB_VERSION_REGEX = Pattern.compile(
 			"((<integer name=\"gtfs_rts_db_version\">)(\\d+)(</integer>))", // do not change to avoid breaking compat w/ old modules
@@ -1218,7 +1219,7 @@ public class MGenerator {
 	@NotNull
 	private static String getCommentedDateTime(int timestampInSec, @NotNull MSpec mSpec) {
 		try {
-			final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH);
+			final DateFormat dateTimeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH);
 			try {
 				dateTimeFormat.setTimeZone(TimeZone.getTimeZone(mSpec.getFirstAgency().getTimezone()));
 			} catch (Exception e) {

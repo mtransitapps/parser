@@ -3,8 +3,6 @@ package org.mtransit.parser.mt.data
 import org.mtransit.commons.toIntTimestampSec
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.DBUtils
-import org.mtransit.parser.gtfs.data.GFieldTypes
-import java.text.SimpleDateFormat
 import java.util.TreeMap
 import java.util.concurrent.TimeUnit
 
@@ -82,10 +80,4 @@ data class MSpec(
 
     val lastTimestampInSeconds: Int
         get() = TimeUnit.MILLISECONDS.toSeconds(lastTimestamp).toIntTimestampSec()
-
-    companion object {
-        @JvmStatic
-        val newTimeFormatInstance: SimpleDateFormat
-            get() = GFieldTypes.makeTimeFormat()
-    }
 }

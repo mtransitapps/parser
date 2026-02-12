@@ -13,11 +13,11 @@ import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.data.MAgency;
+import org.mtransit.parser.mt.data.MDirection;
 import org.mtransit.parser.mt.data.MDirectionCardinalType;
 import org.mtransit.parser.mt.data.MRoute;
-import org.mtransit.parser.mt.data.MDirection;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -319,7 +319,7 @@ public interface GAgencyTools {
 	@NotNull
 	Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime,
 									@NotNull List<GStopTime> tripStopTimes,
-									@NotNull SimpleDateFormat timeFormat);
+									@NotNull DateFormat timeFormat);
 
 	// FREQUENCY
 	int getStartTime(@NotNull GFrequency gFrequency);

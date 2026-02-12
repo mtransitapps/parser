@@ -16,10 +16,13 @@ object MStoreListingGenerator {
     private const val RELEASE_NOTES = "release-notes"
     private const val DEFAULT_TXT = "default.txt"
 
+    private val DATE_FORMAT = GFieldTypes.makeDateFormat()
+
     // region en-US (default)
 
     private const val EN_US = "en-US"
 
+    @Suppress("SpellCheckingInspection")
     private val DATE_FORMAT_EN: DateFormat get() = SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH) // NOT thread-safe
 
     private val SCHEDULE_EN = Pattern.compile(
@@ -37,6 +40,7 @@ object MStoreListingGenerator {
 
     private const val FR_FR = "fr-FR"
 
+    @Suppress("SpellCheckingInspection")
     private val DATE_FORMAT_FR: DateFormat get() = SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH) // NOT thread-safe
 
     private val SCHEDULE_FR = Pattern.compile(
@@ -94,8 +98,8 @@ object MStoreListingGenerator {
         if (dirReleaseNotesLangF.mkdirs()) MTLog.log("Created missing parent directory: '%s'.", dirReleaseNotesLangF)
         val dumpFileReleaseNotesLang = File(dirReleaseNotesLangF, DEFAULT_TXT)
         try {
-            val minDateS = dateFormat.format(GFieldTypes.toDate(MGenerator.DATE_FORMAT, minDate))
-            val maxDateS = dateFormat.format(GFieldTypes.toDate(MGenerator.DATE_FORMAT, maxDate))
+            val minDateS = dateFormat.format(GFieldTypes.toDate(DATE_FORMAT, minDate))
+            val maxDateS = dateFormat.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
             val content = if (dumpFileReleaseNotesLang.exists()) {
                 MTLog.log("Update store release notes file: $dumpFileReleaseNotesLang.")
                 dumpFileReleaseNotesLang.readText().replace(regex, (if (isNext) formatKeepFromTo else formatFromTo).format(minDateS, maxDateS))
