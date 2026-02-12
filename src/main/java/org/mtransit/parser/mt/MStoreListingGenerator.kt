@@ -90,7 +90,7 @@ object MStoreListingGenerator {
             }
             val dumpFileReleaseNotesLang = File(dumpDirReleaseNotesLangF, DEFAULT_TXT)
             if (dumpFileReleaseNotesLang.exists()) {
-                MTLog.log("Generated store release notes file: %s.", dumpFileReleaseNotesLang)
+                MTLog.log("Update store release notes file: %s.", dumpFileReleaseNotesLang)
                 try {
                     val content = regex.matcher(
                         IOUtils.toString(Files.newInputStream(dumpFileReleaseNotesLang.toPath()), GReader.UTF_8)
@@ -106,7 +106,7 @@ object MStoreListingGenerator {
                     throw Fatal(ioe, "Error while writing store release notes files!")
                 }
             } else {
-                MTLog.log("Generate brand new store release notes file: %s.", dumpFileReleaseNotesLang)
+                MTLog.log("Generate new store release notes file: %s.", dumpFileReleaseNotesLang)
                 try {
                     val content = String.format(
                         formatFromTo,
