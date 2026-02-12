@@ -325,7 +325,7 @@ public class MGenerator {
 					mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds(), inputUrl,
 					false
 			);
-			dumpStoreListing(rawDirF, fileBase, minMaxDates.first, minMaxDates.second);
+			dumpStoreReleaseNotes(rawDirF, fileBase, minMaxDates.first, minMaxDates.second);
 			bumpDBVersion(rawDirF, gtfsDir);
 		}
 		MTLog.log("Writing files (%s)... DONE in %s.",
@@ -1256,6 +1256,7 @@ public class MGenerator {
 	}
 
 	private static final String PLAY = "play";
+	private static final String LISTINGS = "listings";
 	private static final String RELEASE_NOTES = "release-notes";
 	private static final String EN_US = "en-US";
 	private static final String FR_FR = "fr-FR";
@@ -1273,53 +1274,91 @@ public class MGenerator {
 	@SuppressWarnings("SpellCheckingInspection")
 	private static final String SCHEDULE_KEEP_FROM_TO_FR = "Horaires du $2 au %2$s.";
 
-	private static void dumpStoreListing(File dumpDirF, String fileBase, Integer minDate, Integer maxDate) {
-		SimpleDateFormat SCHEDULE_DATE = new SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH);
-		SimpleDateFormat SCHEDULE_DATE_FR = new SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH);
-		File file;
-		File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
-		File dumpDirPlayF = new File(dumpDirRootF, PLAY);
-		File dumpDirReleaseNotesF = new File(dumpDirPlayF, RELEASE_NOTES);
-		File dumpDirReleaseNotesEnUsF = new File(dumpDirReleaseNotesF, EN_US);
-		file = new File(dumpDirReleaseNotesEnUsF, DEFAULT_TXT);
-		boolean isNext = "next_".equalsIgnoreCase(fileBase);
-		if (file.exists()) {
-			MTLog.log("Generated store listing file: '%s'.", file);
-			try {
-				String content = IOUtils.toString(Files.newInputStream(file.toPath()), GReader.UTF_8);
-				content = SCHEDULE.matcher(content).replaceAll(
-						String.format(
-								isNext ? SCHEDULE_KEEP_FROM_TO : SCHEDULE_FROM_TO, //
-								SCHEDULE_DATE.format(GFieldTypes.toDate(DATE_FORMAT, minDate)),
-								SCHEDULE_DATE.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
-						)
-				);
-				IOUtils.write(content, Files.newOutputStream(file.toPath()), GReader.UTF_8);
-			} catch (Exception ioe) {
-				throw new MTLog.Fatal(ioe, "Error while writing store listing files!");
+	private static void dumpStoreReleaseNotes(File dumpDirF, String fileBase, Integer minDate, Integer maxDate) {
+		final SimpleDateFormat SCHEDULE_DATE = new SimpleDateFormat("MMMMM d, yyyy", Locale.ENGLISH);
+		final SimpleDateFormat SCHEDULE_DATE_FR = new SimpleDateFormat("d MMMMM yyyy", Locale.FRENCH);
+		final File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
+		final File dumpDirPlayF = new File(dumpDirRootF, PLAY);
+		final File dirListingF = new File(dumpDirPlayF, LISTINGS);
+		final File dirListingEnUsF = new File(dirListingF, EN_US);
+		final File dumpDirReleaseNotesF = new File(dumpDirPlayF, RELEASE_NOTES);
+		final File dumpDirReleaseNotesEnUsF = new File(dumpDirReleaseNotesF, EN_US);
+		final boolean isNext = "next_".equalsIgnoreCase(fileBase);
+		if (dirListingEnUsF.exists()) {
+			if (dumpDirReleaseNotesEnUsF.mkdirs()) {
+				MTLog.log("Created directory: '%s'.", dumpDirReleaseNotesEnUsF);
+			}
+			final File dumpFileReleaseNoteEnUs = new File(dumpDirReleaseNotesEnUsF, DEFAULT_TXT);
+			if (dumpFileReleaseNoteEnUs.exists()) {
+				MTLog.log("Generated store release notes file: '%s'.", dumpFileReleaseNoteEnUs);
+				try {
+					final String content = SCHEDULE.matcher(
+							IOUtils.toString(Files.newInputStream(dumpFileReleaseNoteEnUs.toPath()), GReader.UTF_8)
+					).replaceAll(
+							String.format(
+									isNext ? SCHEDULE_KEEP_FROM_TO : SCHEDULE_FROM_TO,
+									SCHEDULE_DATE.format(GFieldTypes.toDate(DATE_FORMAT, minDate)),
+									SCHEDULE_DATE.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
+							)
+					);
+					IOUtils.write(content, Files.newOutputStream(dumpFileReleaseNoteEnUs.toPath()), GReader.UTF_8);
+				} catch (Exception ioe) {
+					throw new MTLog.Fatal(ioe, "Error while writing store release notes files!");
+				}
+			} else {
+				MTLog.log("Generate brand new store release notes file: %s.", dumpFileReleaseNoteEnUs);
+				try {
+					final String content = String.format(
+							SCHEDULE_FROM_TO,
+							SCHEDULE_DATE.format(GFieldTypes.toDate(DATE_FORMAT, minDate)),
+							SCHEDULE_DATE.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
+					);
+					IOUtils.write(content, Files.newOutputStream(dumpFileReleaseNoteEnUs.toPath()), GReader.UTF_8);
+				} catch (Exception ioe) {
+					throw new MTLog.Fatal(ioe, "Error while new writing store release notes files!");
+				}
 			}
 		} else {
-			MTLog.log("Do not generate store listing file: %s.", file);
+			MTLog.log("Do not generate store release notes file in '%s' (listing '%s' does not exist).", dumpDirReleaseNotesEnUsF, dirListingEnUsF);
 		}
-		File dumpDirReleaseNotesFrFrF = new File(dumpDirReleaseNotesF, FR_FR);
-		file = new File(dumpDirReleaseNotesFrFrF, DEFAULT_TXT);
-		if (file.exists()) {
-			MTLog.log("Generated store listing file: %s.", file);
-			try {
-				String content = IOUtils.toString(Files.newInputStream(file.toPath()), GReader.UTF_8);
-				content = SCHEDULE_FR.matcher(content).replaceAll(
-						String.format(
-								isNext ? SCHEDULE_KEEP_FROM_TO_FR : SCHEDULE_FROM_TO_FR, //
-								SCHEDULE_DATE_FR.format(GFieldTypes.toDate(DATE_FORMAT, minDate)),
-								SCHEDULE_DATE_FR.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
-						)
-				);
-				IOUtils.write(content, Files.newOutputStream(file.toPath()), GReader.UTF_8);
-			} catch (Exception ioe) {
-				throw new MTLog.Fatal(ioe, "Error while writing store listing files!");
+		final File dirListingFrFrF = new File(dirListingF, FR_FR);
+		final File dumpDirReleaseNotesFrFrF = new File(dumpDirReleaseNotesF, FR_FR);
+		if (dirListingFrFrF.exists()) {
+			if (dirListingFrFrF.mkdirs()) {
+				MTLog.log("Created directory: '%s'.", dirListingFrFrF);
+			}
+			final File dumpFileReleaseNotesFrFr = new File(dirListingFrFrF, DEFAULT_TXT);
+			if (dumpFileReleaseNotesFrFr.exists()) {
+				MTLog.log("Generated store release notes file: %s.", dumpFileReleaseNotesFrFr);
+				try {
+					final String content = SCHEDULE_FR.matcher(
+							IOUtils.toString(Files.newInputStream(dumpFileReleaseNotesFrFr.toPath()), GReader.UTF_8)
+					).replaceAll(
+							String.format(
+									isNext ? SCHEDULE_KEEP_FROM_TO_FR : SCHEDULE_FROM_TO_FR,
+									SCHEDULE_DATE_FR.format(GFieldTypes.toDate(DATE_FORMAT, minDate)),
+									SCHEDULE_DATE_FR.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
+							)
+					);
+					IOUtils.write(content, Files.newOutputStream(dumpFileReleaseNotesFrFr.toPath()), GReader.UTF_8);
+				} catch (Exception ioe) {
+					throw new MTLog.Fatal(ioe, "Error while writing store release notes files!");
+				}
+			} else {
+				MTLog.log("Generate brand new store release notes file: %s.", dumpFileReleaseNotesFrFr);
+				try {
+					final String content = String.format(
+							SCHEDULE_FROM_TO_FR,
+							SCHEDULE_DATE_FR.format(GFieldTypes.toDate(DATE_FORMAT, minDate)),
+							SCHEDULE_DATE_FR.format(GFieldTypes.toDate(DATE_FORMAT, maxDate))
+					);
+					IOUtils.write(content, Files.newOutputStream(dumpFileReleaseNotesFrFr.toPath()), GReader.UTF_8);
+				} catch (Exception ioe) {
+					throw new MTLog.Fatal(ioe, "Error while writing new store release notes files!");
+				}
 			}
 		} else {
-			MTLog.log("Do not generate store listing file: %s.", file);
+			MTLog.log("Do not generate store release notes file in '%s' (listing '%s' does not exist).", dumpDirReleaseNotesFrFrF, dirListingFrFrF);
 		}
 	}
 
