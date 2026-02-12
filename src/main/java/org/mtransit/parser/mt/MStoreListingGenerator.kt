@@ -59,24 +59,23 @@ object MStoreListingGenerator {
         minDate: Int,
         maxDate: Int,
     ) {
-        val dumpDirRootF = dumpDirF.parentFile.parentFile
-        val dumpDirPlayF = File(dumpDirRootF, PLAY)
-        val dirListingF = File(dumpDirPlayF, LISTINGS)
-        val dumpDirReleaseNotesF = File(dumpDirPlayF, RELEASE_NOTES)
+        val (dirListingF, dirReleaseNotesF) = File(dumpDirF.parentFile.parentFile, PLAY).let { dirPlayF ->
+            File(dirPlayF, LISTINGS) to File(dirPlayF, RELEASE_NOTES)
+        }
         val isNext = "next_".equals(fileBase, ignoreCase = true)
         dumpStoreReleaseNote(
-            dirListingF, dumpDirReleaseNotesF, isNext, minDate, maxDate,
+            dirListingF, dirReleaseNotesF, isNext, minDate, maxDate,
             EN_US, DATE_FORMAT_EN, SCHEDULE_EN, SCHEDULE_EN_FROM_TO, SCHEDULE_EN_KEEP_FROM_TO
         )
         dumpStoreReleaseNote(
-            dirListingF, dumpDirReleaseNotesF, isNext, minDate, maxDate,
+            dirListingF, dirReleaseNotesF, isNext, minDate, maxDate,
             FR_FR, DATE_FORMAT_FR, SCHEDULE_FR, SCHEDULE_FROM_TO_FR, SCHEDULE_KEEP_FROM_TO_FR
         )
     }
 
     private fun dumpStoreReleaseNote(
         dirListingF: File,
-        dumpDirReleaseNotesF: File,
+        dirReleaseNotesF: File,
         isNext: Boolean,
         minDate: Int,
         maxDate: Int,
@@ -87,28 +86,26 @@ object MStoreListingGenerator {
         formatKeepFromTo: String,
     ) {
         val dirListingLangF = File(dirListingF, lang)
-        val dumpDirReleaseNotesLangF = File(dumpDirReleaseNotesF, lang)
-        if (dirListingLangF.exists()) {
-            if (dumpDirReleaseNotesLangF.mkdirs()) {
-                MTLog.log("Created directory: '%s'.", dumpDirReleaseNotesLangF)
+        if (!dirListingLangF.exists()) {
+            MTLog.log("Do not generate '$lang' store release notes file (listing '$dirListingLangF' does not exist).")
+            return
+        }
+        val dirReleaseNotesLangF = File(dirReleaseNotesF, lang)
+        if (dirReleaseNotesLangF.mkdirs()) MTLog.log("Created missing parent directory: '%s'.", dirReleaseNotesLangF)
+        val dumpFileReleaseNotesLang = File(dirReleaseNotesLangF, DEFAULT_TXT)
+        try {
+            val minDateS = dateFormat.format(toDate(MGenerator.DATE_FORMAT, minDate))
+            val maxDateS = dateFormat.format(toDate(MGenerator.DATE_FORMAT, maxDate))
+            val content = if (dumpFileReleaseNotesLang.exists()) {
+                MTLog.log("Update store release notes file: $dumpFileReleaseNotesLang.")
+                dumpFileReleaseNotesLang.readText().replace(regex, (if (isNext) formatKeepFromTo else formatFromTo).format(minDateS, maxDateS))
+            } else {
+                MTLog.log("Generate new store release notes file: $dumpFileReleaseNotesLang.")
+                formatFromTo.format(minDateS, maxDateS)
             }
-            val dumpFileReleaseNotesLang = File(dumpDirReleaseNotesLangF, DEFAULT_TXT)
-            try {
-                val minDateS = dateFormat.format(toDate(MGenerator.DATE_FORMAT, minDate))
-                val maxDateS = dateFormat.format(toDate(MGenerator.DATE_FORMAT, maxDate))
-                val content = if (dumpFileReleaseNotesLang.exists()) {
-                    MTLog.log("Update store release notes file: %s.", dumpFileReleaseNotesLang)
-                    dumpFileReleaseNotesLang.readText().replace(regex, (if (isNext) formatKeepFromTo else formatFromTo).format(minDateS, maxDateS))
-                } else {
-                    MTLog.log("Generate new store release notes file: %s.", dumpFileReleaseNotesLang)
-                    formatFromTo.format(minDateS, maxDateS)
-                }
-                dumpFileReleaseNotesLang.writeText(content)
-            } catch (ioe: Exception) {
-                throw Fatal(ioe, "Error while writing new store release notes files!")
-            }
-        } else {
-            MTLog.log("Do not generate store release notes file in '%s' (listing '%s' does not exist).", dumpDirReleaseNotesLangF, dirListingLangF)
+            dumpFileReleaseNotesLang.writeText(content)
+        } catch (ioe: Exception) {
+            throw Fatal(ioe, "Error while writing new store release notes files!")
         }
     }
 }
