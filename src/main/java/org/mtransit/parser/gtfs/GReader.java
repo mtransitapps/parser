@@ -29,8 +29,6 @@ import org.mtransit.parser.gtfs.data.GWheelchairBoardingType;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.util.Arrays;
@@ -43,8 +41,6 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("RedundantSuppression")
 public class GReader {
-
-	public static final Charset UTF_8 = StandardCharsets.UTF_8;
 
 	private static final boolean LOG_EXCLUDE = false;
 	// private static final boolean LOG_EXCLUDE = true; // DEBUG

@@ -365,7 +365,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					headsignTypeString = true;
 				}
 			}
-			directionKeptNonDescriptiveHeadsign = false; // 1 direction can keep the same non descriptive head sign
+			directionKeptNonDescriptiveHeadsign = false; // 1 direction can keep the same non-descriptive head sign
 			if (headsignTypeString && mDirectionHeadsignStrings.size() != mDirections.size()) {
 				MTLog.log("%s: Non descriptive direction headsigns (%s different headsign(s) for %s directions)", this.routeId, mDirectionHeadsignStrings.size(), mDirections.size());
 				for (MDirection mDirection : mDirections.values()) {
@@ -1112,6 +1112,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	private final HashMap<Integer, GStop> gStopsCache = new HashMap<>();
 
 	// https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/location/java/android/location/Location.java
+	@SuppressWarnings("SpellCheckingInspection")
 	private static void computeDistanceAndBearing(double lat1, double lon1, double lat2, double lon2, float[] results) {
 		// Based on https://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
 		// using the "Inverse Formula" (section 4)
