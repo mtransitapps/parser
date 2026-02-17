@@ -25,6 +25,8 @@ data class RouteConfig(
     // short-name
     @SerialName("use_route_long_name_for_missing_route_short_name")
     val useRouteLongNameForMissingRouteShortName: Boolean = false, // OPT-IN feature
+    @SerialName("route_id_to_route_short_name_configs")
+    val routeIdToRouteShortNameConfigs: List<RouteIdToRouteShortNameConfig> = emptyList(),
     @SerialName("route_short_name_cleaners")
     val routeShortNameCleaners: List<Cleaner> = emptyList(),
     // long-name
@@ -53,6 +55,8 @@ data class RouteConfig(
     val directionHeadsignCleaners: List<Cleaner> = emptyList(),
     @SerialName("direction_headsign_remove_route_long_name")
     val directionHeadsignRemoveRouteLongName: Boolean = false, // OPT-IN feature
+    @SerialName("direction_splitter_enabled")
+    val directionSplitterEnabled: Boolean = false, // OPT-IN feature
     @SerialName("direction_finder_enabled")
     val directionFinderEnabled: Boolean = false, // OPT-IN feature
     // STOP
@@ -70,6 +74,8 @@ data class RouteConfig(
     val stopHeadsignRemoveTripHeadsign: Boolean = false, // OPT-IN feature
     @SerialName("stop_headsign_remove_route_long_name")
     val stopHeadsignRemoveRouteLongName: Boolean = false, // OPT-IN feature
+    @SerialName("stop_headsign_cleanup_regex")
+    val stopHeadsignCleanupRegex: String? = null, // optional
 
 ) {
 
@@ -82,9 +88,19 @@ data class RouteConfig(
     )
 
     @Serializable
-    data class RouteColor(
+    data class RouteIdToRouteShortNameConfig(
+        @SerialName("route_id")
+        val routeId: String,
         @SerialName("route_short_name")
         val routeShortName: String,
+    )
+
+    @Serializable
+    data class RouteColor(
+        @SerialName("route_id")
+        val routeId: String?,
+        @SerialName("route_short_name")
+        val routeShortName: String?,
         @SerialName("color")
         val color: String,
         @SerialName("override")
@@ -103,6 +119,8 @@ data class RouteConfig(
     data class Cleaner(
         @SerialName("regex")
         val regex: String,
+        @SerialName("ignore_case")
+        val ignoreCase: Boolean = false,
         @SerialName("is_word")
         val isWord: Boolean = false,
         @SerialName("replacement")
@@ -112,13 +130,21 @@ data class RouteConfig(
     fun convertRouteIdFromShortNameNotSupported(routeShortName: String) =
         this.routeShortNameToRouteIdConfigs
             .singleOrNull { it.routeShortName == routeShortName }?.routeId
+
+    fun getRouteShortNameFromRouteId(routeId: String) =
+        this.routeIdToRouteShortNameConfigs
+            .singleOrNull { it.routeId == routeId }?.routeShortName
+
     @JvmOverloads
     fun getRouteColor(gRoute: GRoute, override: Boolean = false): String? {
-        this.routeColors.singleOrNull { gRoute.routeShortName == it.routeShortName }?.let { routeColorConf ->
-            if (routeColorConf.override || !override) {
-                return routeColorConf.color
+        //noinspection DiscouragedApi
+        (this.routeColors.singleOrNull { gRoute.routeId == it.routeId }
+            ?: this.routeColors.singleOrNull { gRoute.routeShortName == it.routeShortName })
+            ?.let { routeColorConf ->
+                if (routeColorConf.override || !override) {
+                    return routeColorConf.color
+                }
             }
-        }
         return gRoute.routeColor
     }
 
@@ -145,14 +171,14 @@ data class RouteConfig(
         if (cleaners.isEmpty()) return originalString
         var string = originalString
         cleaners.forEach {
-            when {
-                it.isWord -> {
-                    string = CleanUtils.cleanWord(it.regex).matcher(string).replaceAll(CleanUtils.cleanWordsReplacement(it.replacement))
-                }
-
-                else -> {
-                    string = it.regex.toRegex().replace(string, it.replacement)
-                }
+            if (it.regex.isEmpty()) return@forEach
+            val regexOptions = mutableSetOf<RegexOption>()
+            if (it.ignoreCase) {
+                regexOptions.add(RegexOption.IGNORE_CASE)
+            }
+            string = when {
+                it.isWord -> CleanUtils.cleanWord(it.regex).matcher(string).replaceAll(CleanUtils.cleanWordsReplacement(it.replacement))
+                else -> it.regex.toRegex(regexOptions).replace(string, it.replacement)
             }
         }
         return string

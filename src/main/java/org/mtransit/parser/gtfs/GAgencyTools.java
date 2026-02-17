@@ -183,6 +183,8 @@ public interface GAgencyTools {
 
 	void forgetOriginalTripId(@NotNull String gTripOriginalId);
 
+	boolean directionSplitterEnabled();
+
 	boolean directionSplitterEnabled(long routeId);
 
 	boolean directionOverrideId(long routeId);
@@ -287,6 +289,8 @@ public interface GAgencyTools {
 
 	@NotNull
 	String cleanStopHeadSign(@NotNull GRoute gRoute, @NotNull GTrip gTrip, @NotNull GStopTime gStopTime, @NotNull String stopHeadsign);
+
+	@Nullable String getStopHeadsignCleanupRegex();
 
 	@NotNull
 	String cleanStopHeadSign(@NotNull String stopHeadsign);

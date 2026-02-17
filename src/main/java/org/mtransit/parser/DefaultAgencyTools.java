@@ -275,6 +275,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean defaultAgencyColorEnabled() {
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getDefaultColorEnabled();
+		}
 		return false; // OPT-IN feature
 	}
 
@@ -373,7 +376,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanServiceId(@NotNull String gServiceId, boolean keep) {
-		String cleanServiceId = GTFSCommons.cleanOriginalId(gServiceId, getServiceIdCleanupPattern());
+		String cleanServiceId = GTFSCommons.cleanOriginalString(gServiceId, getServiceIdCleanupPattern());
 		if (cleanMergedServiceIds()) {
 			cleanServiceId = CleanUtils.cleanMergedID(cleanServiceId);
 		}
@@ -427,7 +430,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (cleanMergedRouteIds()) {
 			gRouteId = CleanUtils.cleanMergedID(gRouteId);
 		}
-		final String cleanRouteId = GTFSCommons.cleanOriginalId(gRouteId, getRouteIdCleanupPattern());
+		final String cleanRouteId = GTFSCommons.cleanOriginalString(gRouteId, getRouteIdCleanupPattern());
 		this.routeIdToCleanupRouteId.put(gRouteId, cleanRouteId);
 		return cleanRouteId;
 	}
@@ -544,6 +547,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String provideMissingRouteShortName(@NotNull GRoute gRoute) {
+		//noinspection DiscouragedApi
+		final String routeShortNameFromRouteId = Configs.getRouteConfig().getRouteShortNameFromRouteId(gRoute.getRouteId());
+		if (routeShortNameFromRouteId != null) {
+			return routeShortNameFromRouteId;
+		}
 		if (Configs.getRouteConfig().getUseRouteLongNameForMissingRouteShortName()) {
 			return gRoute.getRouteLongNameOrDefault();
 		}
@@ -746,7 +754,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public @NotNull String cleanTripOriginalId(@NotNull String gOriginalTripId) {
-		String cleanTripId = GTFSCommons.cleanOriginalId(gOriginalTripId, getTripIdCleanupPattern());
+		String cleanTripId = GTFSCommons.cleanOriginalString(gOriginalTripId, getTripIdCleanupPattern());
 		if (cleanMergedTripIds()) {
 			cleanTripId = CleanUtils.cleanMergedID(cleanTripId);
 		}
@@ -760,8 +768,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public boolean directionSplitterEnabled() {
+		return Configs.getRouteConfig().getDirectionSplitterEnabled();
+	}
+
+	@Override
 	public boolean directionSplitterEnabled(long routeId) {
-		return false; // OPT-IN feature
+		return directionSplitterEnabled();
 	}
 
 	@Override
@@ -1098,10 +1111,30 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return cleanStopHeadSign(stopHeadsign);
 	}
 
+	@Nullable
+	private Pattern stopHeadsignCleanupPattern = null;
+
+	private boolean stopHeadsignCleanupPatternSet = false;
+
+	@Nullable
+	private Pattern getStopHeadsignCleanupPattern() {
+		if (this.stopHeadsignCleanupPattern == null && !stopHeadsignCleanupPatternSet) {
+			this.stopHeadsignCleanupPattern = GTFSCommons.makeIdCleanupPattern(getStopHeadsignCleanupRegex());
+			this.stopHeadsignCleanupPatternSet = true;
+		}
+		return this.stopHeadsignCleanupPattern;
+	}
+
+	@Override
+	public @Nullable String getStopHeadsignCleanupRegex() {
+		return Configs.getRouteConfig().getStopHeadsignCleanupRegex();
+	}
+
 	@NotNull
 	@Override
 	public String cleanStopHeadSign(@NotNull String stopHeadsign) {
-		return cleanTripHeadsign(stopHeadsign);
+		String cleanStopHeadsign = GTFSCommons.cleanOriginalString(stopHeadsign, getStopHeadsignCleanupPattern());
+		return cleanTripHeadsign(cleanStopHeadsign);
 	}
 
 	@NotNull
@@ -1187,7 +1220,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopOriginalId(@NotNull String gStopOriginalId) {
-		String cleanStopId = GTFSCommons.cleanOriginalId(gStopOriginalId, getStopIdCleanupPattern());
+		String cleanStopId = GTFSCommons.cleanOriginalString(gStopOriginalId, getStopIdCleanupPattern());
 		if (cleanMergedStopIds()) {
 			cleanStopId = CleanUtils.cleanMergedID(cleanStopId);
 		}

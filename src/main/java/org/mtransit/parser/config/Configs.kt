@@ -32,10 +32,10 @@ object Configs {
     private fun loadGTFSAgencyConfig(gtfsDir: String) {
         try {
             val file = File("$gtfsDir/agency.json")
-            if (!file.exists()) return
-            this.agencyConfig = json.decodeFromString(file.readBytes().toString(Charsets.UTF_8))
+            if (!file.exists()) return // optional
+            this.agencyConfig = json.decodeFromString(file.readText())
         } catch (e: Exception) {
-            MTLog.logNonFatal(e, "Error loading GTFS agency config!")
+            throw MTLog.Fatal(e, "Error loading GTFS agency config!")
         }
     }
 
@@ -46,11 +46,10 @@ object Configs {
     private fun loadGTFSRouteConfig(gtfsDir: String) {
         try {
             val file = File("$gtfsDir/route.json")
-            if (!file.exists()) return
-            this.routeConfig = json.decodeFromString(file.readBytes().toString(Charsets.UTF_8))
+            if (!file.exists()) return // optional
+            this.routeConfig = json.decodeFromString(file.readText())
         } catch (e: Exception) {
-            MTLog.logNonFatal(e, "Error loading GTFS route config!")
+            throw MTLog.Fatal(e, "Error loading GTFS route config!")
         }
     }
-
 }
