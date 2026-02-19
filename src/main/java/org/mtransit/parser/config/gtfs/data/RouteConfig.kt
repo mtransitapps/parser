@@ -98,7 +98,7 @@ data class RouteConfig(
     @Serializable
     data class RouteColor(
         @SerialName("route_id")
-        val routeId: String?,
+        val routeId: String? = null,
         @SerialName("route_short_name")
         val routeShortName: String?,
         @SerialName("color")
