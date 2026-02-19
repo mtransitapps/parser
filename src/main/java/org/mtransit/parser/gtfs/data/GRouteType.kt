@@ -15,7 +15,7 @@ enum class GRouteType(
     // 6: Gondola or suspended cable car. Typically used for aerial cable cars where the car is suspended from the cable.
     // 7: Funicular. Used for any rail system that moves on steep inclines with a cable traction system.
 
-    // EXTENDED: // https://gtfs.org/reference/static/extended-route-types
+    // EXTENDED: // https://developers.google.com/transit/gtfs/reference/extended-route-types
     EX_URBAN_RAILWAY_SERVICE(400), // Urban Railway Service
     EX_BUS_SERVICE(700), // Bus Service
     EX_DEMAND_AND_RESPONSE_BUS_SERVICE(715), // Demand and Response Bus Service
