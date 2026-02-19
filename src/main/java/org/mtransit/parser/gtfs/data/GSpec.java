@@ -26,8 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-// https://developers.google.com/transit/gtfs/reference#FeedFiles
-// https://developers.google.com/transit/gtfs/reference/difference-gtfs-transit-implement
+// https://gtfs.org/schedule/reference
+// https://gtfs.org/schedule/best-practices
 @SuppressWarnings({"RedundantSuppression", "WeakerAccess"})
 public class GSpec {
 

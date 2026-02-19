@@ -13,7 +13,7 @@ data class AgencyConfig(
     /**
      * Route type filter (integer from GTFS Static `routes.txt` > `route_type` field)
      * (useful when multiple route type in same GTFS)
-     * @see [https://developers.google.com/transit/gtfs/reference#routestxt]
+     * @see [https://gtfs.org/reference/static/#routestxt]
      */
     @SerialName("target_route_type_id")
     val targetRouteTypeId: Int, // REQUIRED

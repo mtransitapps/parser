@@ -11,7 +11,6 @@ import org.mtransit.parser.gtfs.data.GFieldTypes.isDate
 import java.lang.Integer.max
 import java.lang.Integer.min
 
-// https://developers.google.com/transit/gtfs/reference#calendar_dates_fields
 // https://gtfs.org/reference/static/#calendar_datestxt
 data class GCalendarDate(
     val serviceIdInt: Int,

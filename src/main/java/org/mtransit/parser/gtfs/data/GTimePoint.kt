@@ -3,7 +3,6 @@ package org.mtransit.parser.gtfs.data
 import org.mtransit.parser.MTLog
 
 // https://gtfs.org/schedule/reference/#stop_timestxt
-// https://developers.google.com/transit/gtfs/reference#stop_timestxt
 enum class GTimePoint(val id: Int) {
 
     APPROXIMATE(0),

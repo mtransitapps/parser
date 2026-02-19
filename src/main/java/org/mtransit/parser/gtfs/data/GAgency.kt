@@ -6,7 +6,6 @@ import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.parser.MTLog
 
 // https://gtfs.org/schedule/reference/#agencytxt
-// https://developers.google.com/transit/gtfs/reference#agency_fields
 data class GAgency(
     val agencyIdInt: Int,
     val agencyName: String,

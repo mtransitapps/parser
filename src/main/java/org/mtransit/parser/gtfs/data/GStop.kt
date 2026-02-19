@@ -9,7 +9,6 @@ import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
 import kotlin.math.floor
 
-// https://developers.google.com/transit/gtfs/reference#stops_fields
 // https://gtfs.org/schedule/reference/#stopstxt
 data class GStop(
     val stopIdInt: Int,
