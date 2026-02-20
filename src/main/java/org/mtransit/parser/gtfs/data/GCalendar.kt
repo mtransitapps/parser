@@ -4,7 +4,6 @@ import androidx.annotation.Discouraged
 import org.mtransit.parser.MTLog
 import java.util.Calendar
 
-// https://developers.google.com/transit/gtfs/reference#calendar_fields
 // https://gtfs.org/reference/static/#calendartxt
 data class GCalendar(
     val serviceIdInt: Int,

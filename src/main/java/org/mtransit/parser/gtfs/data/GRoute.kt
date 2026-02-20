@@ -10,7 +10,6 @@ import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
 import kotlin.math.max
 
-// https://developers.google.com/transit/gtfs/reference#routestxt
 // https://gtfs.org/reference/static/#routestxt
 data class GRoute(
     val agencyIdInt: Int, // Optional (or empty)

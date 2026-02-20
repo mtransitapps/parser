@@ -7,7 +7,6 @@ import org.mtransit.parser.gtfs.GAgencyTools
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-// https://developers.google.com/transit/gtfs/reference#frequenciestxt
 // https://gtfs.org/reference/static/#frequenciestxt
 data class GFrequency(
     val tripIdInt: Int,

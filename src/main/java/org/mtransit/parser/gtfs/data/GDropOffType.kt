@@ -2,7 +2,7 @@ package org.mtransit.parser.gtfs.data
 
 import org.mtransit.parser.MTLog
 
-// https://developers.google.com/transit/gtfs/reference#stop_times_drop_off_type_field
+// https://gtfs.org/schedule/reference/#stop_timestxt
 enum class GDropOffType(val id: Int) {
 
     REGULAR(0),

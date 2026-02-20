@@ -1,6 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
-// https://developers.google.com/transit/gtfs/reference/#routestxt
+// https://gtfs.org/reference/static/#routestxt
 enum class GRouteType(
     val id: Int
 ) {

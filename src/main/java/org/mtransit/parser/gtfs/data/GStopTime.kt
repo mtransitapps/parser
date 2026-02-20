@@ -9,7 +9,6 @@ import org.mtransit.parser.gtfs.GAgencyTools
 import java.util.Date
 
 // https://gtfs.org/schedule/reference/#stop_timestxt
-// https://developers.google.com/transit/gtfs/reference#stop_times_fields
 data class GStopTime(
     val tripIdInt: Int,
     private val _arrivalTime: Int,

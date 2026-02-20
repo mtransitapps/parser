@@ -7,7 +7,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-// https://developers.google.com/transit/gtfs/reference#field_types
 // https://gtfs.org/schedule/reference/#field-types
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 object GFieldTypes {

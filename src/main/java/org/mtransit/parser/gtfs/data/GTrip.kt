@@ -6,7 +6,6 @@ import org.mtransit.commons.gtfs.data.Trip
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
 
-// https://developers.google.com/transit/gtfs/reference#tripstxt
 // https://gtfs.org/reference/static/#tripstxt
 data class GTrip(
     val tripIdInt: Int,
