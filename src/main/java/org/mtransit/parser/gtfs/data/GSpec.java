@@ -799,7 +799,7 @@ public class GSpec {
 		} else {
 			final Pair<Long, Long> arrivalAndDeparture = DefaultAgencyTools.extractTimeInMs(gStopTime, tripStopTimes);
 			if (arrivalAndDeparture == null) {
-				throw new MTLog.Fatal("setDepartureTimeCal() > cannot extract arrival & departure time from '%s'!", gStopTime);
+				throw new MTLog.Fatal("setDepartureTimeCal() > cannot extract arrival & departure time from '%s'!", gStopTime.toStringPlus(true));
 			}
 			final long departureTimeInMs = arrivalAndDeparture.second;
 			calendar.setTimeInMillis(departureTimeInMs);

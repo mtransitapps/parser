@@ -162,24 +162,22 @@ data class GStopTime(
                 "+(tripId:$_tripId)" +
                 "+(stopId:$_stopId)"
     } else { // shorter #CI
-        buildString {
-            append("{")
-            append("t:$_tripId,")
-            append("s:$_stopId,")
-            append("#:$stopSequence,")
+        buildList {
+            add("t:$_tripId")
+            add("s:$_stopId")
+            add("#:$stopSequence")
             if (hasDepartureTime()) {
-                append("d:${GTime.toString(_departureTime)},")
+                add("d:${GTime.toString(_departureTime)}")
             } else if (hasArrivalTime()) {
-                append("a:${GTime.toString(_arrivalTime)},")
+                add("a:${GTime.toString(_arrivalTime)}")
             }
             if (pickupType != GPickupType.REGULAR) {
-                append("$pickupType,")
+                add("$pickupType")
             }
             if (dropOffType != GDropOffType.REGULAR) {
-                append("$dropOffType,")
+                add("$dropOffType")
             }
-            append("}")
-        }
+        }.joinToString(separator = ",", prefix = "{", postfix = "}")
     }
 
     fun to() = StopTime(

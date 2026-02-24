@@ -220,11 +220,6 @@ data class RouteConfig(
         return string
     }
 
-    fun allowIgnoreInvalidStopTimes(todayDate: Int): Boolean {
-        if (allowInvalidStopTimes) return true // ALLOW
-        allowInvalidStopTimesUntil?.toIntOrNull()?.let { until ->
-            if (todayDate <= until) return true // ALLOW
-        }
-        return false // DO NOT allow
-    }
+    fun allowIgnoreInvalidStopTimes(todayDate: Int) =
+        allowInvalidStopTimes || (allowInvalidStopTimesUntil?.toIntOrNull()?.let { todayDate <= it } ?: false)
 }
