@@ -772,16 +772,20 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					// TODO later, when UI can display multiple times same stop/POI & schedules are affected to a specific sequence, keep both
 				}
 			}
+			final Pair<Integer, Integer> times = this.agencyTools.getTimes(gStopTime, gTripStopTimes, TIME_FORMAT);
+			if (times == null)  {
+				if (this.agencyTools.allowIgnoreInvalidStopTimes()) {
+					continue; // this is bad, some transit agency data can NOT be fixed :(
+				} else {
+					throw new MTLog.Fatal("Invalid stop time '%s'!", gStopTime.toStringPlus());
+				}
+			}
 			mSchedule = new MSchedule(
 					this.routeId,
 					serviceIdInt,
 					mDirectionId,
 					mStopId,
-					this.agencyTools.getTimes(
-							gStopTime,
-							gTripStopTimes,
-							TIME_FORMAT
-					),
+					times,
 					gStopTime.getTripIdInt(),
 					gTrip.getWheelchairAccessible().getId()
 			);

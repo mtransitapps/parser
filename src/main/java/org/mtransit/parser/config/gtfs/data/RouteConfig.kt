@@ -79,7 +79,11 @@ data class RouteConfig(
     val stopHeadsignRemoveRouteLongName: Boolean = false, // OPT-IN feature
     @SerialName("stop_headsign_cleanup_regex")
     val stopHeadsignCleanupRegex: String? = null, // optional
-
+    // STOP TIMES
+    @SerialName("allow_invalid_stop_times")
+    val allowInvalidStopTimes: Boolean = false, // OPT-IN feature
+    @SerialName("allow_invalid_stop_times_until")
+    val allowInvalidStopTimesUntil: String? = null, // OPT-IN feature
 ) {
 
     @Serializable
@@ -214,5 +218,13 @@ data class RouteConfig(
             }
         }
         return string
+    }
+
+    fun allowIgnoreInvalidStopTimes(todayDate: Int): Boolean {
+        if (allowInvalidStopTimes) return true // ALLOW
+        allowInvalidStopTimesUntil?.toIntOrNull()?.let { until ->
+            if (todayDate <= until) return true // ALLOW
+        }
+        return false // DO NOT allow
     }
 }

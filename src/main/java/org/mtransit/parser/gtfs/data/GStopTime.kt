@@ -157,13 +157,28 @@ data class GStopTime(
 
     @JvmOverloads
     @Suppress("unused")
-    fun toStringPlus(debug: Boolean = Constants.DEBUG): String {
-        return if (debug) { // longer
-            return toString() +
-                    "+(tripId:$_tripId)" +
-                    "+(stopId:$_stopId)"
-        } else { // shorter #CI
-            "{t:$_tripId,s:$_stopId,#:$stopSequence}"
+    fun toStringPlus(debug: Boolean = Constants.DEBUG) = if (debug) { // longer
+        toString() +
+                "+(tripId:$_tripId)" +
+                "+(stopId:$_stopId)"
+    } else { // shorter #CI
+        buildString {
+            append("{")
+            append("t:$_tripId,")
+            append("s:$_stopId,")
+            append("#:$stopSequence,")
+            if (hasDepartureTime()) {
+                append("d:${GTime.toString(_departureTime)},")
+            } else if (hasArrivalTime()) {
+                append("a:${GTime.toString(_arrivalTime)},")
+            }
+            if (pickupType != GPickupType.REGULAR) {
+                append("$pickupType,")
+            }
+            if (dropOffType != GDropOffType.REGULAR) {
+                append("$dropOffType,")
+            }
+            append("}")
         }
     }
 

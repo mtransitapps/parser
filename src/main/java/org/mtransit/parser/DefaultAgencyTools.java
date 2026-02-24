@@ -591,7 +591,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		routeLongName = Configs.getRouteConfig().cleanRouteLongName(routeLongName);
 		if (defaultStringsCleanerEnabled()) {
-			return StringsCleaner.cleanRouteLongName(routeLongName, getSupportedLanguages(), lowerUCStrings(), lowerUCWords(),  getIgnoreUCWords());
+			return StringsCleaner.cleanRouteLongName(routeLongName, getSupportedLanguages(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords());
 		}
 		return org.mtransit.commons.CleanUtils.cleanLabel(getFirstLanguageNN(), routeLongName);
 	}
@@ -611,7 +611,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		return false; // OPT-IN feature
 	}
-
 
 	@Override
 	public @NotNull String[] getIgnoreUCWords() {
@@ -1284,26 +1283,31 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return THREAD_POOL_SIZE;
 	}
 
-	@NotNull
+	@Nullable
 	@Override
 	public Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime,
 										   @NotNull List<GStopTime> tripStopTimes,
 										   @NotNull DateFormat timeFormat) {
-		if (!gStopTime.hasArrivalTime() || !gStopTime.hasDepartureTime()) {
-			return extractTimes(gStopTime, tripStopTimes, timeFormat);
-		} else {
+		if (gStopTime.hasArrivalTime() && gStopTime.hasDepartureTime()) {
 			return new Pair<>(
 					TimeUtils.cleanExtraSeconds(gStopTime.getArrivalTime()),
 					TimeUtils.cleanExtraSeconds(gStopTime.getDepartureTime()));
 		}
+		return extractTimes(gStopTime, tripStopTimes, timeFormat);
 	}
 
-	@NotNull
+	@Override
+	public boolean allowIgnoreInvalidStopTimes() {
+		return Configs.getRouteConfig().allowIgnoreInvalidStopTimes(getTodayDateInt()); // this is bad, some transit agency data can NOT be fixed :(
+	}
+
+	@Nullable
 	private static Pair<Integer, Integer> extractTimes(GStopTime gStopTime,
 													   @NotNull List<GStopTime> tripStopTimes,
 													   DateFormat timeFormat) {
 		try {
 			Pair<Long, Long> timesInMs = extractTimeInMs(gStopTime, tripStopTimes);
+			if (timesInMs == null) return null;
 			long arrivalTimeInMs = timesInMs.first;
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTimeInMillis(arrivalTimeInMs);
@@ -1326,7 +1330,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	@NotNull
+	@Nullable
 	public static Pair<Long, Long> extractTimeInMs(@NotNull GStopTime gStopTime,
 												   @NotNull List<GStopTime> tripGStopTimes) {
 		int previousArrivalTime = -1;
@@ -1393,7 +1397,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 				MTLog.log("- %s", aStopTime.toStringPlus(true));
 			}
 			//noinspection DiscouragedApi
-			throw new MTLog.Fatal("Invalid stop time trip ID '%s' > no previous stop for %s!", gStopTime.getTripId(), gStopTime.toStringPlus(true));
+			MTLog.log("Invalid stop time trip ID '%s' > no previous stop for %s!", gStopTime.getTripId(), gStopTime.toStringPlus(true));
+			return null;
 		}
 		long previousArrivalTimeInMs = GTime.toMs(previousArrivalTime);
 		long previousDepartureTimeInMs = GTime.toMs(previousDepartureTime);
@@ -1404,7 +1409,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 				MTLog.log("- %s", aStopTime.toStringPlus(true));
 			}
 			//noinspection DiscouragedApi
-			throw new MTLog.Fatal("Invalid stop time trip ID '%s' > no next stop for %s!", gStopTime.getTripId(), gStopTime.toStringPlus(true));
+			MTLog.log("Invalid stop time trip ID '%s' > no next stop for %s!", gStopTime.getTripId(), gStopTime.toStringPlus(true));
+			return null;
 		}
 		long nextArrivalTimeInMs = GTime.toMs(nextArrivalTime);
 		long nextDepartureTimeInMs = GTime.toMs(nextDepartureTime);
