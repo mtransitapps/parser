@@ -326,10 +326,12 @@ public interface GAgencyTools {
 	boolean excludeCalendarDate(@NotNull GCalendarDate gCalendarDate);
 
 	// SCHEDULE
-	@NotNull
+	@Nullable
 	Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime,
 									@NotNull List<GStopTime> tripStopTimes,
 									@NotNull DateFormat timeFormat);
+
+	boolean allowIgnoreInvalidStopTimes();
 
 	// FREQUENCY
 	int getStartTime(@NotNull GFrequency gFrequency);
