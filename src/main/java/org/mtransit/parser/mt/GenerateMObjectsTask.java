@@ -558,7 +558,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (cDirectionStopsList != null) {
 					if (!CollectionUtils.equalsList(mDirectionStopsList, cDirectionStopsList)) {
 						if (MDirectionStop.containsStopIds(cDirectionStopsList, mDirectionStopsList)) {
-							MTLog.logDebug("%s: Skip merge because current direction stops list contains other list.", this.routeId, MDirectionStop.printDirectionStops(cDirectionStopsList));
+							MTLog.logDebug("%s: Skip merge because current direction stops list contains new stops list.", this.routeId);
 						} else {
 							MTLog.log("%s: Need to merge direction ID '%s' stops lists (sizes: %d in %d).", this.routeId, mDirection.getId(), mDirectionStopsList.size(), cDirectionStopsList.size());
 							if (Constants.DEBUG) {

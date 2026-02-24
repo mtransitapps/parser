@@ -17,11 +17,19 @@ data class AgencyConfig(
      */
     @SerialName("target_route_type_id")
     val targetRouteTypeId: Int, // REQUIRED
+    // STRINGS
     /**
      * (Optional) Default string cleaner enabled/disabled (based on language/country/field)
      */
     @SerialName("default_strings_cleaner_enabled")
     val defaultStringsCleanerEnabled: Boolean = false, // OPT-IN feature
+    @SerialName("to_lower_upper_case_strings")
+    val toLowerUpperCaseStrings: Boolean = false, // OPT-IN feature
+    @SerialName("to_lower_upper_case_words")
+    val toLowerUpperCaseWords: Boolean = false, // OPT-IN feature
+    @SerialName("ignore_upper_case_words")
+    val ignoreUpperCaseWords: List<String> = emptyList(), // OPT-IN feature
+    // COLOR
     /**
      * (Optional) Default color enabled/disabled for agency (based on routes colors)
      */
@@ -32,6 +40,7 @@ data class AgencyConfig(
      */
     @SerialName("default_color")
     val defaultColor: String, // REQUIRED
+    // SERVICE
     @SerialName("service_id_cleanup_regex")
     val serviceIdCleanupRegex: String? = null, // optional
     @SerialName("service_id_clean_merged")

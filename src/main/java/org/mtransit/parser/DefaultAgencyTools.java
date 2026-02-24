@@ -591,9 +591,34 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		routeLongName = Configs.getRouteConfig().cleanRouteLongName(routeLongName);
 		if (defaultStringsCleanerEnabled()) {
-			return StringsCleaner.cleanRouteLongName(routeLongName, getSupportedLanguages());
+			return StringsCleaner.cleanRouteLongName(routeLongName, getSupportedLanguages(), lowerUCStrings(), lowerUCWords(),  getIgnoreUCWords());
 		}
 		return org.mtransit.commons.CleanUtils.cleanLabel(getFirstLanguageNN(), routeLongName);
+	}
+
+	@Override
+	public boolean lowerUCWords() {
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getToLowerUpperCaseWords();
+		}
+		return false; // OPT-IN feature
+	}
+
+	@Override
+	public boolean lowerUCStrings() {
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getToLowerUpperCaseStrings();
+		}
+		return false; // OPT-IN feature
+	}
+
+
+	@Override
+	public @NotNull String[] getIgnoreUCWords() {
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getIgnoreUpperCaseWords().toArray(new String[0]);
+		}
+		return new String[0];
 	}
 
 	@Deprecated
@@ -709,7 +734,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
 		tripHeadsign = Configs.getRouteConfig().cleanTripHeadsign(tripHeadsign);
 		if (defaultStringsCleanerEnabled()) {
-			return StringsCleaner.cleanTripHeadsign(tripHeadsign, getSupportedLanguages(), Configs.getRouteConfig().getTripHeadsignRemoveVia());
+			return StringsCleaner.cleanTripHeadsign(tripHeadsign, getSupportedLanguages(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords(), Configs.getRouteConfig().getTripHeadsignRemoveVia());
 		}
 		return tripHeadsign;
 	}
@@ -1058,6 +1083,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeTrip(@NotNull GTrip gTrip) {
+		if (Configs.getRouteConfig().excludeTrip(gTrip)) {
+			return EXCLUDE;
+		}
 		if (this.serviceIdInts != null) {
 			return excludeUselessTripInt(gTrip, this.serviceIdInts);
 		}
@@ -1084,7 +1112,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String cleanStopName(@NotNull String gStopName) {
 		if (defaultStringsCleanerEnabled()) {
-			return StringsCleaner.cleanStopName(gStopName, getSupportedLanguages());
+			return StringsCleaner.cleanStopName(gStopName, getSupportedLanguages(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords());
 		}
 		return org.mtransit.commons.CleanUtils.cleanLabel(getFirstLanguageNN(), gStopName);
 	}
@@ -1300,7 +1328,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@NotNull
 	public static Pair<Long, Long> extractTimeInMs(@NotNull GStopTime gStopTime,
-												   @NotNull List<GStopTime> tripStopTimes) {
+												   @NotNull List<GStopTime> tripGStopTimes) {
 		int previousArrivalTime = -1;
 		int previousArrivalTimeStopSequence = -1;
 		int previousDepartureTime = -1;
@@ -1309,51 +1337,51 @@ public class DefaultAgencyTools implements GAgencyTools {
 		int nextArrivalTimeStopSequence = -1;
 		int nextDepartureTime = -1;
 		int nextDepartureTimeStopSequence = -1;
-		for (GStopTime aStopTime : tripStopTimes) {
-			if (gStopTime.getTripIdInt() != aStopTime.getTripIdInt()) {
+		for (GStopTime tripGStopTime : tripGStopTimes) {
+			if (gStopTime.getTripIdInt() != tripGStopTime.getTripIdInt()) {
 				continue;
 			}
-			if (aStopTime.getStopSequence() == gStopTime.getStopSequence()
-					&& aStopTime.getStopIdInt() == gStopTime.getStopIdInt()
-					&& aStopTime.hasArrivalTime()
-					&& aStopTime.hasDepartureTime()) {
+			if (tripGStopTime.getStopSequence() == gStopTime.getStopSequence()
+					&& tripGStopTime.getStopIdInt() == gStopTime.getStopIdInt()
+					&& tripGStopTime.hasArrivalTime()
+					&& tripGStopTime.hasDepartureTime()) {
 				return new Pair<>( // re-use provided stop times from another trip #frequencies
-						aStopTime.getArrivalTimeMs(),
-						aStopTime.getDepartureTimeMs()
+						tripGStopTime.getArrivalTimeMs(),
+						tripGStopTime.getDepartureTimeMs()
 				);
 			}
-			if (aStopTime.getStopSequence() < gStopTime.getStopSequence()) {
-				if (aStopTime.hasDepartureTime()) {
+			if (tripGStopTime.getStopSequence() < gStopTime.getStopSequence()) {
+				if (tripGStopTime.hasDepartureTime()) {
 					if (previousDepartureTime < 0
 							|| previousDepartureTimeStopSequence < 0
-							|| previousDepartureTimeStopSequence < aStopTime.getStopSequence()) {
-						previousDepartureTime = aStopTime.getDepartureTime();
-						previousDepartureTimeStopSequence = aStopTime.getStopSequence();
+							|| previousDepartureTimeStopSequence < tripGStopTime.getStopSequence()) {
+						previousDepartureTime = tripGStopTime.getDepartureTime();
+						previousDepartureTimeStopSequence = tripGStopTime.getStopSequence();
 					}
 				}
-				if (aStopTime.hasArrivalTime()) {
+				if (tripGStopTime.hasArrivalTime()) {
 					if (previousArrivalTime < 0
 							|| previousArrivalTimeStopSequence < 0
-							|| previousArrivalTimeStopSequence < aStopTime.getStopSequence()) {
-						previousArrivalTime = aStopTime.getArrivalTime();
-						previousArrivalTimeStopSequence = aStopTime.getStopSequence();
+							|| previousArrivalTimeStopSequence < tripGStopTime.getStopSequence()) {
+						previousArrivalTime = tripGStopTime.getArrivalTime();
+						previousArrivalTimeStopSequence = tripGStopTime.getStopSequence();
 					}
 				}
-			} else if (aStopTime.getStopSequence() > gStopTime.getStopSequence()) {
-				if (aStopTime.hasDepartureTime()) {
+			} else if (tripGStopTime.getStopSequence() > gStopTime.getStopSequence()) {
+				if (tripGStopTime.hasDepartureTime()) {
 					if (nextDepartureTime < 0
 							|| nextDepartureTimeStopSequence < 0
-							|| nextDepartureTimeStopSequence > aStopTime.getStopSequence()) {
-						nextDepartureTime = aStopTime.getDepartureTime();
-						nextDepartureTimeStopSequence = aStopTime.getStopSequence();
+							|| nextDepartureTimeStopSequence > tripGStopTime.getStopSequence()) {
+						nextDepartureTime = tripGStopTime.getDepartureTime();
+						nextDepartureTimeStopSequence = tripGStopTime.getStopSequence();
 					}
 				}
-				if (aStopTime.hasArrivalTime()) {
+				if (tripGStopTime.hasArrivalTime()) {
 					if (nextArrivalTime < 0
 							|| nextArrivalTimeStopSequence < 0
-							|| nextArrivalTimeStopSequence > aStopTime.getStopSequence()) {
-						nextArrivalTime = aStopTime.getArrivalTime();
-						nextArrivalTimeStopSequence = aStopTime.getStopSequence();
+							|| nextArrivalTimeStopSequence > tripGStopTime.getStopSequence()) {
+						nextArrivalTime = tripGStopTime.getArrivalTime();
+						nextArrivalTimeStopSequence = tripGStopTime.getStopSequence();
 					}
 				}
 			}
@@ -1361,7 +1389,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (previousArrivalTime == -1 || previousDepartureTime == -1) {
 			//noinspection DiscouragedApi
 			MTLog.log("Trip ID '%s' stops: ", gStopTime.getTripId());
-			for (GStopTime aStopTime : tripStopTimes) {
+			for (GStopTime aStopTime : tripGStopTimes) {
 				MTLog.log("- %s", aStopTime.toStringPlus(true));
 			}
 			//noinspection DiscouragedApi
@@ -1372,7 +1400,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (nextArrivalTime == -1 || nextDepartureTime == -1) {
 			//noinspection DiscouragedApi
 			MTLog.log("Trip ID '%s' stops: ", gStopTime.getTripId());
-			for (GStopTime aStopTime : tripStopTimes) {
+			for (GStopTime aStopTime : tripGStopTimes) {
 				MTLog.log("- %s", aStopTime.toStringPlus(true));
 			}
 			//noinspection DiscouragedApi

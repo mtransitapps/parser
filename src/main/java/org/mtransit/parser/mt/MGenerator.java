@@ -1240,6 +1240,7 @@ public class MGenerator {
 	private static final String RESOURCE_INTEGER_AND_NAME_VALUE = RESOURCE_TAB + "<integer name=\"%s\">%s</integer>";
 	private static final String RESOURCE_BOOL_AND_NAME_VALUE = RESOURCE_TAB + "<bool name=\"%s\">%s</bool>";
 	private static final String RESOURCE_STRING_AND_NAME_VALUE = RESOURCE_TAB + "<string name=\"%s\">%s</string>";
+	private static final String RESOURCE_STRING_WITHOUT_VALUE = RESOURCE_TAB + "<string name=\"%s\" />";
 	private static final String RESOURCES_END = "</resources>";
 
 	private static String getRESOURCES_INTEGER(String resName, Integer resValue) {
@@ -1251,6 +1252,7 @@ public class MGenerator {
 	}
 
 	private static String getRESOURCES_STRING(@NotNull String resName, @Nullable Object resValue) {
+		if (resValue == null || resValue.toString().isEmpty()) return String.format(RESOURCE_STRING_WITHOUT_VALUE, resName);
 		return String.format(RESOURCE_STRING_AND_NAME_VALUE, resName, resValue);
 	}
 

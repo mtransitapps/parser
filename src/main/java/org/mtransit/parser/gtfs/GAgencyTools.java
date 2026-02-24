@@ -147,6 +147,12 @@ public interface GAgencyTools {
 	@NotNull
 	String cleanRouteLongName(@NotNull String routeLongName);
 
+	boolean lowerUCWords();
+
+	boolean lowerUCStrings();
+
+	@NotNull String[] getIgnoreUCWords();
+
 	@SuppressWarnings("DeprecatedIsStillUsed")
 	@Deprecated
 	boolean allowGTFSIdOverride();

@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.mtransit.commons.CleanUtils
 import org.mtransit.parser.gtfs.data.GRoute
+import org.mtransit.parser.gtfs.data.GTrip
 
 @Serializable
 data class RouteConfig(
@@ -40,6 +41,8 @@ data class RouteConfig(
     @SerialName("route_colors_ignored")
     val routeColorsIgnored: List<String> = emptyList(), // optional
     // TRIP
+    @SerialName("trip_excludes")
+    val tripExcludes: List<TripFilter> = emptyList(), // optional
     @SerialName("trip_headsign_cleaners")
     val tripHeadsignCleaners: List<Cleaner> = emptyList(),
     @SerialName("trip_headsign_remove_via")
@@ -127,6 +130,14 @@ data class RouteConfig(
         val replacement: String = "",
     )
 
+    @Serializable
+    data class TripFilter(
+        @SerialName("trip_headsign_regex")
+        val tripHeadsignRegex: String? = null,
+        @SerialName("ignore_case")
+        val ignoreCase: Boolean = false,
+    )
+
     fun convertRouteIdFromShortNameNotSupported(routeShortName: String) =
         this.routeShortNameToRouteIdConfigs
             .singleOrNull { it.routeShortName == routeShortName }?.routeId
@@ -159,6 +170,27 @@ data class RouteConfig(
 
     fun cleanTripHeadsign(tripHeadsign: String) =
         cleanString(tripHeadsign, this.tripHeadsignCleaners)
+
+    private val _tripExcludes: List<Regex> by lazy {
+        this.tripExcludes.mapNotNull {
+            if (it.tripHeadsignRegex.isNullOrEmpty()) return@mapNotNull null
+            val regexOptions = mutableSetOf<RegexOption>()
+            if (it.ignoreCase) {
+                regexOptions.add(RegexOption.IGNORE_CASE)
+            }
+            it.tripHeadsignRegex.toRegex(regexOptions)
+        }
+    }
+
+    fun excludeTrip(gTrip: GTrip): Boolean {
+        this._tripExcludes.forEach {
+            val gTripHeadsign = gTrip.tripHeadsign ?: return@forEach
+            if (it.matches(gTripHeadsign)) {
+                return true // EXCLUDE
+            }
+        }
+        return false // KEEP
+    }
 
     fun cleanDirectionHeadsign(directionHeadsign: String) =
         cleanString(directionHeadsign, this.directionHeadsignCleaners)
