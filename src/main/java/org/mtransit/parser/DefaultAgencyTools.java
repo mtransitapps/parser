@@ -811,18 +811,33 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return Configs.getRouteConfig().getDirectionHeadsignRemoveRouteLongName();
 	}
 
+	@Override
+	public boolean removeRouteShortNameFromDirectionHeadsign() {
+		return Configs.getRouteConfig().getDirectionHeadsignRemoveRouteShortName();
+	}
+
+	@Override
+	public boolean removeRouteDescFromDirectionHeadsign() {
+		return Configs.getRouteConfig().getDirectionHeadsignRemoveRouteDesc();
+	}
+
 	/**
 	 * @param directionId {@link org.mtransit.parser.gtfs.data.GDirectionId} (0 or 1 or missing/generated)
 	 */
 	@Override
 	public @NotNull String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
-		if (gRoute != null && removeRouteLongNameFromDirectionHeadsign()
-				&& directionHeadSign.equals(gRoute.getRouteLongNameOrDefault())) {
-			//noinspection deprecation
-			return cleanDirectionHeadsign(directionId, fromStopName, "");
+		if (gRoute != null) {
+			if (removeRouteLongNameFromDirectionHeadsign() && directionHeadSign.equals(gRoute.getRouteLongNameOrDefault())) {
+				directionHeadSign = "";
+			} else if (removeRouteShortNameFromDirectionHeadsign() && directionHeadSign.equals(gRoute.getRouteShortName())) {
+				directionHeadSign = "";
+			} else if (removeRouteDescFromDirectionHeadsign() && directionHeadSign.equals(gRoute.getRouteDescOrDefault())) {
+				directionHeadSign = "";
+			}
 		}
 		//noinspection deprecation
-		return cleanDirectionHeadsign(directionId, fromStopName, directionHeadSign);
+		directionHeadSign = cleanDirectionHeadsign(directionId, fromStopName, directionHeadSign);
+		return directionHeadSign;
 	}
 
 	@SuppressWarnings("DeprecatedIsStillUsed")
@@ -840,7 +855,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanDirectionHeadsign(boolean fromStopName, @NotNull String directionHeadSign) {
-		return cleanTripHeadsign(directionHeadSign);
+		directionHeadSign = cleanTripHeadsign(directionHeadSign);
+		return directionHeadSign;
 	}
 
 	@Override
@@ -914,6 +930,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public List<Integer> getDirectionTypes() {
+		if (!Configs.getRouteConfig().getDirectionTypes().isEmpty()) {
+			return Configs.getRouteConfig().getDirectionTypes();
+		}
 		//noinspection deprecation
 		final int deprecatedDirectionType = getDirectionType();
 		if (deprecatedDirectionType != -1
@@ -1164,9 +1183,18 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return cleanTripHeadsign(cleanStopHeadsign);
 	}
 
+	@Override
+	public @Nullable String getStopCodePrependIfMissing() {
+		return Configs.getRouteConfig().getStopCodePrependIfMissing();
+	}
+
 	@NotNull
 	@Override
 	public String getStopCode(@NotNull GStop gStop) {
+		final String prepend = getStopCodePrependIfMissing();
+		if (prepend != null && !gStop.getStopCode().startsWith(prepend)) {
+			return prepend + gStop.getStopCode();
+		}
 		return gStop.getStopCode();
 	}
 

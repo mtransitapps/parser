@@ -54,10 +54,16 @@ data class RouteConfig(
     @SerialName("trip_id_clean_merged")
     val tripIdCleanMerged: Boolean = false, // OPT-IN feature
     // DIRECTION
+    @SerialName("direction_types")
+    val directionTypes: List<Int> = emptyList(),
     @SerialName("direction_headsign_cleaners")
     val directionHeadsignCleaners: List<Cleaner> = emptyList(),
     @SerialName("direction_headsign_remove_route_long_name")
     val directionHeadsignRemoveRouteLongName: Boolean = false, // OPT-IN feature
+    @SerialName("direction_headsign_remove_route_short_name")
+    val directionHeadsignRemoveRouteShortName: Boolean = false, // OPT-IN feature
+    @SerialName("direction_headsign_remove_route_desc")
+    val directionHeadsignRemoveRouteDesc: Boolean = false, // OPT-IN feature
     @SerialName("direction_splitter_enabled")
     val directionSplitterEnabled: Boolean = false, // OPT-IN feature
     @SerialName("direction_finder_enabled")
@@ -73,6 +79,8 @@ data class RouteConfig(
     val useStopCodeForStopId: Boolean = false, // OPT-IN feature
     @SerialName("stop_code_to_stop_id_configs")
     val stopCodeToStopIdConfigs: List<StopCodeToStopIdConfig> = emptyList(),
+    @SerialName("stop_code_prepend_if_missing")
+    val stopCodePrependIfMissing: String? = null, // optional
     @SerialName("stop_headsign_remove_trip_headsign")
     val stopHeadsignRemoveTripHeadsign: Boolean = false, // OPT-IN feature
     @SerialName("stop_headsign_remove_route_long_name")
