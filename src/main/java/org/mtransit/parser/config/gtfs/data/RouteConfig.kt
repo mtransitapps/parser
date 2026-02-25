@@ -54,6 +54,8 @@ data class RouteConfig(
     @SerialName("trip_id_clean_merged")
     val tripIdCleanMerged: Boolean = false, // OPT-IN feature
     // DIRECTION
+    @SerialName("direction_types")
+    val directionTypes: List<Int> = emptyList(),
     @SerialName("direction_headsign_cleaners")
     val directionHeadsignCleaners: List<Cleaner> = emptyList(),
     @SerialName("direction_headsign_remove_route_long_name")

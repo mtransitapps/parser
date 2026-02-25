@@ -930,6 +930,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public List<Integer> getDirectionTypes() {
+		if (!Configs.getRouteConfig().getDirectionTypes().isEmpty()) {
+			return Configs.getRouteConfig().getDirectionTypes();
+		}
 		//noinspection deprecation
 		final int deprecatedDirectionType = getDirectionType();
 		if (deprecatedDirectionType != -1
