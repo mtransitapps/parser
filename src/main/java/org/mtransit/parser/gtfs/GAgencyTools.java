@@ -197,6 +197,10 @@ public interface GAgencyTools {
 
 	boolean removeRouteLongNameFromDirectionHeadsign();
 
+	boolean removeRouteShortNameFromDirectionHeadsign();
+
+	boolean removeRouteDescFromDirectionHeadsign();
+
 	@NotNull
 	String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, @NotNull String directionHeadSign);
 
@@ -300,6 +304,8 @@ public interface GAgencyTools {
 
 	@NotNull
 	String cleanStopHeadSign(@NotNull String stopHeadsign);
+
+	@Nullable String getStopCodePrependIfMissing();
 
 	@NotNull
 	String getStopCode(@NotNull GStop gStop);
