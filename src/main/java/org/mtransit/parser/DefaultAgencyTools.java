@@ -1188,8 +1188,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String getStopCode(@NotNull GStop gStop) {
-		if (getStopCodePrependIfMissing() != null && !gStop.getStopCode().startsWith(getStopCodePrependIfMissing())) {
-			return getStopCodePrependIfMissing() + gStop.getStopCode();
+		final String prepend = getStopCodePrependIfMissing();
+		if (prepend != null && !gStop.getStopCode().startsWith(prepend)) {
+			return prepend + gStop.getStopCode();
 		}
 		return gStop.getStopCode();
 	}
