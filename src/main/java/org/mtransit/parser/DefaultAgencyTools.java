@@ -466,7 +466,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public Long convertRouteIdNextChars(@NotNull String nextChars) {
-		return  Configs.getRouteConfig().convertRouteIdNextChars(nextChars);
+		return Configs.getRouteConfig().convertRouteIdNextChars(nextChars);
 	}
 
 	@Nullable
