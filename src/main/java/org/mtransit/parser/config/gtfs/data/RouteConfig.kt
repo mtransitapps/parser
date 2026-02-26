@@ -28,6 +28,8 @@ data class RouteConfig(
     @SerialName("route_id_previous_char_configs")
     val routeIdPreviousCharConfigs: List<RouteIdCharToRouteIdPartConfig> = emptyList(),
     // short-name
+    @SerialName("use_route_long_name_for_route_short_name")
+    val useRouteLongNameForRouteShortName: Boolean = false, // OPT-IN feature
     @SerialName("use_route_long_name_for_missing_route_short_name")
     val useRouteLongNameForMissingRouteShortName: Boolean = false, // OPT-IN feature
     @SerialName("route_id_to_route_short_name_configs")
