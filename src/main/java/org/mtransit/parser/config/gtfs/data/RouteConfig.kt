@@ -23,6 +23,10 @@ data class RouteConfig(
     val useRouteIdForRouteShortName: Boolean = false, // OPT-IN feature
     @SerialName("route_short_name_to_route_id_configs")
     val routeShortNameToRouteIdConfigs: List<RouteShortNameToRouteIdConfig> = emptyList(),
+    @SerialName("route_id_next_char_configs")
+    val routeIdNextCharConfigs: List<RouteIdCharToRouteIdPartConfig> = emptyList(),
+    @SerialName("route_id_previous_char_configs")
+    val routeIdPreviousCharConfigs: List<RouteIdCharToRouteIdPartConfig> = emptyList(),
     // short-name
     @SerialName("use_route_long_name_for_missing_route_short_name")
     val useRouteLongNameForMissingRouteShortName: Boolean = false, // OPT-IN feature
@@ -35,6 +39,8 @@ data class RouteConfig(
     val defaultRouteLongNameEnabled: Boolean = false, // OPT-IN feature
     @SerialName("route_long_name_cleaners")
     val routeLongNameCleaners: List<Cleaner> = emptyList(),
+    @SerialName("route_long_name_remove_route_id")
+    val routeLongNameRemoveRouteId: Boolean = false, // OPT-IN feature
     // colors
     @SerialName("route_colors")
     val routeColors: List<RouteColor> = emptyList(),
@@ -81,6 +87,8 @@ data class RouteConfig(
     val stopCodeToStopIdConfigs: List<StopCodeToStopIdConfig> = emptyList(),
     @SerialName("stop_code_prepend_if_missing")
     val stopCodePrependIfMissing: String? = null, // optional
+    @SerialName("use_stop_id_hash_code")
+    val useStopIdHashCode: Boolean = false, // OPT-IN feature
     @SerialName("stop_headsign_remove_trip_headsign")
     val stopHeadsignRemoveTripHeadsign: Boolean = false, // OPT-IN feature
     @SerialName("stop_headsign_remove_route_long_name")
@@ -100,6 +108,14 @@ data class RouteConfig(
         val routeShortName: String,
         @SerialName("route_id")
         val routeId: Long,
+    )
+
+    @Serializable
+    data class RouteIdCharToRouteIdPartConfig(
+        @SerialName("char")
+        val char: String,
+        @SerialName("route_id_part")
+        val routeIdPart: Long,
     )
 
     @Serializable
@@ -153,6 +169,14 @@ data class RouteConfig(
     fun convertRouteIdFromShortNameNotSupported(routeShortName: String) =
         this.routeShortNameToRouteIdConfigs
             .singleOrNull { it.routeShortName == routeShortName }?.routeId
+
+    fun convertRouteIdNextChars(nextChars: String) =
+        this.routeIdNextCharConfigs
+            .singleOrNull { it.char == nextChars }?.routeIdPart
+
+    fun convertRouteIdPreviousChars(previousChars: String) =
+        this.routeIdPreviousCharConfigs
+            .singleOrNull { it.char == previousChars }?.routeIdPart
 
     fun getRouteShortNameFromRouteId(routeId: String) =
         this.routeIdToRouteShortNameConfigs

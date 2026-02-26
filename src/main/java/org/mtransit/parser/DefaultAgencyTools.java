@@ -118,6 +118,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final Integer OVERRIDE_DATE;
 
 	static {
+		//noinspection SpellCheckingInspection
 		OVERRIDE_DATE = null; // yyyyMMdd
 	}
 
@@ -466,13 +467,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	@Override
 	public Long convertRouteIdNextChars(@NotNull String nextChars) {
-		return null;
+		return Configs.getRouteConfig().convertRouteIdNextChars(nextChars);
 	}
 
 	@Nullable
 	@Override
 	public Long convertRouteIdPreviousChars(@NotNull String previousChars) {
-		return null;
+		return Configs.getRouteConfig().convertRouteIdPreviousChars(previousChars);
 	}
 
 	@Override
@@ -568,10 +569,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return false; // OPT-IN feature
 	}
 
+	@Override
+	public boolean removeRouteIdFromRouteLongName() {
+		return Configs.getRouteConfig().getRouteLongNameRemoveRouteId();
+	}
+
 	@NotNull
 	@Override
 	public String getRouteLongName(@NotNull GRoute gRoute) {
 		String routeLongName = gRoute.getRouteLongNameOrDefault();
+		//noinspection DiscouragedApi
+		if (removeRouteIdFromRouteLongName() && routeLongName.equals(gRoute.getRouteId())) {
+			routeLongName = "";
+		}
 		if (tryRouteDescForMissingLongName()
 				&& org.mtransit.commons.StringUtils.isEmpty(routeLongName)) {
 			routeLongName = gRoute.getRouteDescOrDefault();
@@ -1206,12 +1216,21 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public boolean useStopIdHashCode() {
+		return Configs.getRouteConfig().getUseStopIdHashCode();
+	}
+
+	@Override
 	public int getStopId(@NotNull GStop gStop) {
 		try {
 			//noinspection DiscouragedApi
+			final String gStopId = gStop.getStopId();
+			if (useStopIdHashCode()) {
+				return Math.abs(gStopId.hashCode());
+			}
 			final String stopIdS =
 					useStopCodeForStopId() ? cleanStopOriginalId(getStopCode(gStop))
-							: gStop.getStopId();
+							: gStopId;
 			if (!CharUtils.isDigitsOnly(stopIdS)) {
 				final Integer stopIdSInt = convertStopIdFromCodeNotSupported(stopIdS);
 				if (stopIdSInt != null) {

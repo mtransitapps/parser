@@ -141,6 +141,8 @@ public interface GAgencyTools {
 
 	boolean tryRouteDescForMissingLongName();
 
+	boolean removeRouteIdFromRouteLongName();
+
 	@NotNull
 	String getRouteLongName(@NotNull GRoute gRoute);
 
@@ -276,6 +278,8 @@ public interface GAgencyTools {
 	boolean forceStopTimeFirstNoDropOffType();
 
 	boolean excludeStopTime(@NotNull GStopTime gStopTime);
+
+	boolean useStopIdHashCode();
 
 	// STOP
 	int getStopId(@NotNull GStop gStop);
