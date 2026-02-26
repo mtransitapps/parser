@@ -118,6 +118,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final Integer OVERRIDE_DATE;
 
 	static {
+		//noinspection SpellCheckingInspection
 		OVERRIDE_DATE = null; // yyyyMMdd
 	}
 
@@ -577,6 +578,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String getRouteLongName(@NotNull GRoute gRoute) {
 		String routeLongName = gRoute.getRouteLongNameOrDefault();
+		//noinspection DiscouragedApi
 		if (removeRouteIdFromRouteLongName() && routeLongName.equals(gRoute.getRouteId())) {
 			routeLongName = "";
 		}
