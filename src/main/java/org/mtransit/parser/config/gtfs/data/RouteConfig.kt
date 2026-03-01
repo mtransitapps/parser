@@ -91,6 +91,8 @@ data class RouteConfig(
     val stopCodePrependIfMissing: String? = null, // optional
     @SerialName("use_stop_id_hash_code")
     val useStopIdHashCode: Boolean = false, // OPT-IN feature
+    @SerialName("stop_name_cleaners")
+    val stopNameCleaners: List<Cleaner> = emptyList(),
     @SerialName("stop_headsign_remove_trip_headsign")
     val stopHeadsignRemoveTripHeadsign: Boolean = false, // OPT-IN feature
     @SerialName("stop_headsign_remove_route_long_name")
@@ -208,6 +210,9 @@ data class RouteConfig(
 
     fun cleanTripHeadsign(tripHeadsign: String) =
         cleanString(tripHeadsign, this.tripHeadsignCleaners)
+
+    fun cleanStopName(stopName: String) =
+        cleanString(stopName, this.stopNameCleaners)
 
     private val _tripExcludes: List<Regex> by lazy {
         this.tripExcludes.mapNotNull {
