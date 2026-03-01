@@ -8,6 +8,10 @@ import org.mtransit.parser.gtfs.data.GTrip
 
 @Serializable
 data class RouteConfig(
+    @SerialName("keep_routes")
+    val keepRoutes: List<RouteDef> = emptyList(), // force additional routes to be included (different types...)
+    @SerialName("exclude_routes")
+    val excludeRoutes: List<RouteDef> = emptyList(), // force additional routes to be excluded
     // ID
     @SerialName("default_route_id_enabled")
     val defaultRouteIdEnabled: Boolean = false, // OPT-IN feature
@@ -107,6 +111,14 @@ data class RouteConfig(
 ) {
 
     @Serializable
+    data class RouteDef(
+        @SerialName("route_id")
+        val routeId: String? = null,
+        @SerialName("route_short_name")
+        val routeShortName: String? = null,
+    )
+
+    @Serializable
     data class RouteShortNameToRouteIdConfig(
         @SerialName("route_short_name")
         val routeShortName: String,
@@ -169,6 +181,20 @@ data class RouteConfig(
         @SerialName("ignore_case")
         val ignoreCase: Boolean = false,
     )
+
+    fun keepRoutes(gRoute: GRoute) =
+        this.keepRoutes.any {
+            //noinspection DiscouragedApi
+            it.routeId != null && gRoute.routeId == it.routeId
+                    || it.routeShortName != null && gRoute.routeShortName == it.routeShortName
+        }
+
+    fun excludeRoutes(gRoute: GRoute) =
+        this.excludeRoutes.any {
+            //noinspection DiscouragedApi
+            it.routeId != null && gRoute.routeId == it.routeId
+                    || it.routeShortName != null && gRoute.routeShortName == it.routeShortName
+        }
 
     fun convertRouteIdFromShortNameNotSupported(routeShortName: String) =
         this.routeShortNameToRouteIdConfigs

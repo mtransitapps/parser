@@ -692,6 +692,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeRoute(@NotNull GRoute gRoute) {
+		if (Configs.getRouteConfig().keepRoutes(gRoute)) {
+			return KEEP;
+		}
+		if (Configs.getRouteConfig().excludeRoutes(gRoute)) {
+			return EXCLUDE;
+		}
 		//noinspection ConstantConditions
 		if (getOriginalAgencyRouteType() == null) {
 			throw new MTLog.Fatal("ERROR: unspecified agency route type '%s'!", getOriginalAgencyRouteType());
