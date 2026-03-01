@@ -604,7 +604,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		routeLongName = Configs.getRouteConfig().cleanRouteLongName(routeLongName);
 		if (defaultStringsCleanerEnabled()) {
-			return StringsCleaner.cleanRouteLongName(routeLongName, getSupportedLanguages(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords());
+			return StringsCleaner.cleanRouteLongName(routeLongName, getSupportedLanguages(), getAgencyRouteType(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords());
 		}
 		return org.mtransit.commons.CleanUtils.cleanLabel(getFirstLanguageNN(), routeLongName);
 	}
@@ -692,6 +692,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeRoute(@NotNull GRoute gRoute) {
+		if (Configs.getRouteConfig().keepRoutes(gRoute)) {
+			return KEEP;
+		}
+		if (Configs.getRouteConfig().excludeRoutes(gRoute)) {
+			return EXCLUDE;
+		}
 		//noinspection ConstantConditions
 		if (getOriginalAgencyRouteType() == null) {
 			throw new MTLog.Fatal("ERROR: unspecified agency route type '%s'!", getOriginalAgencyRouteType());
@@ -746,7 +752,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
 		tripHeadsign = Configs.getRouteConfig().cleanTripHeadsign(tripHeadsign);
 		if (defaultStringsCleanerEnabled()) {
-			return StringsCleaner.cleanTripHeadsign(tripHeadsign, getSupportedLanguages(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords(), Configs.getRouteConfig().getTripHeadsignRemoveVia());
+			return StringsCleaner.cleanTripHeadsign(tripHeadsign, getSupportedLanguages(), getAgencyRouteType(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords(), Configs.getRouteConfig().getTripHeadsignRemoveVia());
 		}
 		return tripHeadsign;
 	}
@@ -1142,8 +1148,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopName(@NotNull String gStopName) {
+		gStopName = Configs.getRouteConfig().cleanStopName(gStopName);
 		if (defaultStringsCleanerEnabled()) {
-			return StringsCleaner.cleanStopName(gStopName, getSupportedLanguages(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords());
+			return StringsCleaner.cleanStopName(gStopName, getSupportedLanguages(), getAgencyRouteType(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords());
 		}
 		return org.mtransit.commons.CleanUtils.cleanLabel(getFirstLanguageNN(), gStopName);
 	}

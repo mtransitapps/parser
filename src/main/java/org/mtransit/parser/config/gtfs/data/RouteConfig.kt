@@ -8,6 +8,10 @@ import org.mtransit.parser.gtfs.data.GTrip
 
 @Serializable
 data class RouteConfig(
+    @SerialName("keep_routes")
+    val keepRoutes: List<RouteDef> = emptyList(), // force additional routes to be included (different types...)
+    @SerialName("exclude_routes")
+    val excludeRoutes: List<RouteDef> = emptyList(), // force additional routes to be excluded
     // ID
     @SerialName("default_route_id_enabled")
     val defaultRouteIdEnabled: Boolean = false, // OPT-IN feature
@@ -91,6 +95,8 @@ data class RouteConfig(
     val stopCodePrependIfMissing: String? = null, // optional
     @SerialName("use_stop_id_hash_code")
     val useStopIdHashCode: Boolean = false, // OPT-IN feature
+    @SerialName("stop_name_cleaners")
+    val stopNameCleaners: List<Cleaner> = emptyList(),
     @SerialName("stop_headsign_remove_trip_headsign")
     val stopHeadsignRemoveTripHeadsign: Boolean = false, // OPT-IN feature
     @SerialName("stop_headsign_remove_route_long_name")
@@ -103,6 +109,14 @@ data class RouteConfig(
     @SerialName("allow_invalid_stop_times_until")
     val allowInvalidStopTimesUntil: String? = null, // OPT-IN feature
 ) {
+
+    @Serializable
+    data class RouteDef(
+        @SerialName("route_id")
+        val routeId: String? = null,
+        @SerialName("route_short_name")
+        val routeShortName: String? = null,
+    )
 
     @Serializable
     data class RouteShortNameToRouteIdConfig(
@@ -168,6 +182,20 @@ data class RouteConfig(
         val ignoreCase: Boolean = false,
     )
 
+    fun keepRoutes(gRoute: GRoute) =
+        this.keepRoutes.any {
+            //noinspection DiscouragedApi
+            it.routeId != null && gRoute.routeId == it.routeId
+                    || it.routeShortName != null && gRoute.routeShortName == it.routeShortName
+        }
+
+    fun excludeRoutes(gRoute: GRoute) =
+        this.excludeRoutes.any {
+            //noinspection DiscouragedApi
+            it.routeId != null && gRoute.routeId == it.routeId
+                    || it.routeShortName != null && gRoute.routeShortName == it.routeShortName
+        }
+
     fun convertRouteIdFromShortNameNotSupported(routeShortName: String) =
         this.routeShortNameToRouteIdConfigs
             .singleOrNull { it.routeShortName == routeShortName }?.routeId
@@ -208,6 +236,9 @@ data class RouteConfig(
 
     fun cleanTripHeadsign(tripHeadsign: String) =
         cleanString(tripHeadsign, this.tripHeadsignCleaners)
+
+    fun cleanStopName(stopName: String) =
+        cleanString(stopName, this.stopNameCleaners)
 
     private val _tripExcludes: List<Regex> by lazy {
         this.tripExcludes.mapNotNull {
