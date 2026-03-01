@@ -263,8 +263,8 @@ data class RouteConfig(
     }
 
     fun excludeTrip(gTrip: GTrip): Boolean {
+        val gTripHeadsign = gTrip.tripHeadsign ?: return false // EXCLUDE
         this._tripExcludes.forEach {
-            val gTripHeadsign = gTrip.tripHeadsign ?: return@forEach
             if (it.matches(gTripHeadsign)) {
                 return true // EXCLUDE
             }
@@ -284,8 +284,8 @@ data class RouteConfig(
     }
 
     fun excludeStopTime(gStopTime: GStopTime): Boolean {
+        val gStopTimeHeadsign = gStopTime.stopHeadsign ?: return false // KEEP
         this._stopTimeExcludes.forEach {
-            val gStopTimeHeadsign = gStopTime.stopHeadsign ?: return@forEach
             if (it.matches(gStopTimeHeadsign)) {
                 return true // EXCLUDE
             }
