@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.mtransit.commons.CleanUtils
 import org.mtransit.parser.gtfs.data.GRoute
+import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTrip
 
 @Serializable
@@ -104,6 +105,8 @@ data class RouteConfig(
     @SerialName("stop_headsign_cleanup_regex")
     val stopHeadsignCleanupRegex: String? = null, // optional
     // STOP TIMES
+    @SerialName("stop_time_excludes")
+    val stopTimeExcludes: List<StopTimeFilter> = emptyList(), // optional
     @SerialName("allow_invalid_stop_times")
     val allowInvalidStopTimes: Boolean = false, // OPT-IN feature
     @SerialName("allow_invalid_stop_times_until")
@@ -182,6 +185,14 @@ data class RouteConfig(
         val ignoreCase: Boolean = false,
     )
 
+    @Serializable
+    data class StopTimeFilter(
+        @SerialName("stop_time_headsign_regex")
+        val stopTimeHeadsignRegex: String? = null,
+        @SerialName("ignore_case")
+        val ignoreCase: Boolean = false,
+    )
+
     fun keepRoutes(gRoute: GRoute) =
         this.keepRoutes.any {
             //noinspection DiscouragedApi
@@ -255,6 +266,27 @@ data class RouteConfig(
         this._tripExcludes.forEach {
             val gTripHeadsign = gTrip.tripHeadsign ?: return@forEach
             if (it.matches(gTripHeadsign)) {
+                return true // EXCLUDE
+            }
+        }
+        return false // KEEP
+    }
+
+    private val _stopTimeExcludes: List<Regex> by lazy {
+        this.stopTimeExcludes.mapNotNull {
+            if (it.stopTimeHeadsignRegex.isNullOrEmpty()) return@mapNotNull null
+            val regexOptions = mutableSetOf<RegexOption>()
+            if (it.ignoreCase) {
+                regexOptions.add(RegexOption.IGNORE_CASE)
+            }
+            it.stopTimeHeadsignRegex.toRegex(regexOptions)
+        }
+    }
+
+    fun excludeStopTime(gStopTime: GStopTime): Boolean {
+        this._stopTimeExcludes.forEach {
+            val gStopTimeHeadsign = gStopTime.stopHeadsign ?: return@forEach
+            if (it.matches(gStopTimeHeadsign)) {
                 return true // EXCLUDE
             }
         }
