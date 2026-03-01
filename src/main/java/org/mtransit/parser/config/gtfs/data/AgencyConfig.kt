@@ -18,7 +18,7 @@ data class AgencyConfig(
     @SerialName("target_route_type_id")
     val targetRouteTypeId: Int, // REQUIRED
     @SerialName("extended_target_route_type_id")
-    val extendedTargetRouteTypeId: Int, // OPTIONAL
+    val extendedTargetRouteTypeId: Int? = null, // OPTIONAL
     // STRINGS
     /**
      * (Optional) Default string cleaner enabled/disabled (based on language/country/field)
