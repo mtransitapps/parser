@@ -297,10 +297,6 @@ public interface GAgencyTools {
 	@NotNull
 	String cleanStopName(@NotNull String gStopName);
 
-	boolean removeTripHeadsignFromStopHeadsign();
-
-	boolean removeRouteLongNameFromStopHeadsign();
-
 	@NotNull
 	String cleanStopHeadSign(@NotNull GRoute gRoute, @NotNull GTrip gTrip, @NotNull GStopTime gStopTime, @NotNull String stopHeadsign);
 

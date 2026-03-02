@@ -3,6 +3,7 @@ package org.mtransit.parser.config.gtfs.data
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.mtransit.commons.CleanUtils
+import org.mtransit.commons.StringUtils.EMPTY
 import org.mtransit.parser.gtfs.data.GRoute
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTrip
@@ -102,6 +103,8 @@ data class RouteConfig(
     val stopHeadsignRemoveTripHeadsign: Boolean = false, // OPT-IN feature
     @SerialName("stop_headsign_remove_route_long_name")
     val stopHeadsignRemoveRouteLongName: Boolean = false, // OPT-IN feature
+    @SerialName("stop_headsign_remove_route_long_name_cleaner")
+    val stopHeadsignRemoveRouteLongNameCleaner: Cleaner? = null, // optional
     @SerialName("stop_headsign_cleanup_regex")
     val stopHeadsignCleanupRegex: String? = null, // optional
     // STOP TIMES
@@ -250,6 +253,24 @@ data class RouteConfig(
 
     fun cleanStopName(stopName: String) =
         cleanString(stopName, this.stopNameCleaners)
+
+    fun cleanStopHeadsign(gRoute: GRoute, gTrip: GTrip, @Suppress("unused") gStopTime: GStopTime, stopHeadsign: String): String {
+        if (stopHeadsign.isEmpty()) return stopHeadsign
+        if (stopHeadsignRemoveTripHeadsign && stopHeadsign == gTrip.tripHeadsign) {
+            return EMPTY
+        }
+        if (stopHeadsignRemoveRouteLongName && stopHeadsign == gRoute.routeLongName) {
+            return EMPTY
+        }
+        stopHeadsignRemoveRouteLongNameCleaner?.takeIf { gRoute.routeLongNameOrDefault.isNotBlank() }?.let {
+            val regexOptions = mutableSetOf<RegexOption>()
+            if (it.ignoreCase) {
+                regexOptions.add(RegexOption.IGNORE_CASE)
+            }
+            return it.regex.format(gRoute.routeLongNameOrDefault).toRegex(regexOptions).replace(stopHeadsign, it.replacement)
+        }
+        return stopHeadsign
+    }
 
     private val _tripExcludes: List<Regex> by lazy {
         this.tripExcludes.mapNotNull {

@@ -1161,23 +1161,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return org.mtransit.commons.CleanUtils.cleanLabel(getFirstLanguageNN(), gStopName);
 	}
 
-	@Override
-	public boolean removeTripHeadsignFromStopHeadsign() {
-		return Configs.getRouteConfig().getStopHeadsignRemoveTripHeadsign();
-	}
-
-	@Override
-	public boolean removeRouteLongNameFromStopHeadsign() {
-		return Configs.getRouteConfig().getStopHeadsignRemoveRouteLongName();
-	}
-
 	@NotNull
 	@Override
 	public String cleanStopHeadSign(@NotNull GRoute gRoute, @NotNull GTrip gTrip, @NotNull GStopTime gStopTime, @NotNull String stopHeadsign) {
-		if (removeTripHeadsignFromStopHeadsign() && stopHeadsign.equals(gTrip.getTripHeadsignOrDefault())) {
-			return cleanStopHeadSign("");
-		}
-		if (removeRouteLongNameFromStopHeadsign() && stopHeadsign.equals(gRoute.getRouteLongNameOrDefault())) {
+		stopHeadsign = Configs.getRouteConfig().cleanStopHeadsign(gRoute, gTrip, gStopTime, stopHeadsign);
+		if (stopHeadsign.isEmpty()) {
 			return cleanStopHeadSign("");
 		}
 		return cleanStopHeadSign(stopHeadsign);
