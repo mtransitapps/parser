@@ -334,6 +334,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Nullable
 	public Integer getAgencyExtendedRouteType() {
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getExtendedTargetRouteTypeId();
+		}
 		return null; // optional
 	}
 
@@ -1105,6 +1108,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeStopTime(@NotNull GStopTime gStopTime) {
+		if (Configs.getRouteConfig().excludeStopTime(gStopTime)) {
+			return EXCLUDE;
+		}
 		// https://gtfs.org/schedule/best-practices/#stop_timestxt
 		return GPickupType.NO_PICKUP == gStopTime.getPickupType() //
 				&& GDropOffType.NO_DROP_OFF == gStopTime.getDropOffType();
