@@ -82,6 +82,10 @@ data class RouteConfig(
     val directionSplitterEnabled: Boolean = false, // OPT-IN feature
     @SerialName("direction_finder_enabled")
     val directionFinderEnabled: Boolean = false, // OPT-IN feature
+    @SerialName("allow_non_descriptive_head_signs")
+    val allowNonDescriptiveHeadSigns: Map<Long, Boolean> = emptyMap(), // OPT-IN feature
+    @SerialName("allow_non_descriptive_head_signs_until")
+    val allowNonDescriptiveHeadSignsUntil: Map<Long, String> = emptyMap(), // OPT-IN feature
     // STOP
     @SerialName("stop_id_cleanup_regex")
     val stopIdCleanupRegex: String? = null, // optional
@@ -340,4 +344,8 @@ data class RouteConfig(
 
     fun allowIgnoreInvalidStopTimes(todayDate: Int) =
         allowInvalidStopTimes || (allowInvalidStopTimesUntil?.toIntOrNull()?.let { todayDate <= it } ?: false)
+
+    fun allowNonDescriptiveHeadSigns(todayDate: Int, mRouteId: Long) =
+        allowNonDescriptiveHeadSigns[mRouteId] == true
+                || (allowNonDescriptiveHeadSignsUntil[mRouteId]?.toIntOrNull()?.let { todayDate <= it } ?: false)
 }
