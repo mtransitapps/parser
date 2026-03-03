@@ -343,9 +343,11 @@ data class RouteConfig(
     }
 
     fun allowIgnoreInvalidStopTimes(todayDate: Int) =
-        allowInvalidStopTimes || (allowInvalidStopTimesUntil?.toIntOrNull()?.let { todayDate <= it } ?: false)
+        allowInvalidStopTimes || isAllowedUntil(allowInvalidStopTimesUntil, todayDate)
 
     fun allowNonDescriptiveHeadSigns(todayDate: Int, mRouteId: Long) =
-        allowNonDescriptiveHeadSigns[mRouteId] == true
-                || (allowNonDescriptiveHeadSignsUntil[mRouteId]?.toIntOrNull()?.let { todayDate <= it } ?: false)
+        allowNonDescriptiveHeadSigns[mRouteId] == true || isAllowedUntil(allowNonDescriptiveHeadSignsUntil[mRouteId], todayDate)
+
+    private fun isAllowedUntil(dateStr: String?, todayDate: Int) =
+        dateStr?.toIntOrNull()?.let { todayDate <= it } ?: false
 }
