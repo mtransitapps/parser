@@ -893,7 +893,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean allowNonDescriptiveHeadSigns(long routeId) {
-		return false; // this is bad, some transit agency data can NOT be fixed :(
+		return Configs.getRouteConfig().allowNonDescriptiveHeadSigns(getTodayDateInt(), routeId); // this is bad, some transit agency data can NOT be fixed :(
 	}
 
 	@Override
