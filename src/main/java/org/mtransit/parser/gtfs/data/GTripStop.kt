@@ -23,7 +23,6 @@ data class GTripStop(
         stopSequence
     )
 
-    @Suppress("unused")
     constructor(
         routeAndTripUID: String,
         tripIdInt: Int,

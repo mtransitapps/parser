@@ -11,8 +11,8 @@ import java.util.Date
 // https://gtfs.org/schedule/reference/#stop_timestxt
 data class GStopTime(
     val tripIdInt: Int,
-    private val _arrivalTime: Int,
-    private val _departureTime: Int,
+    private val _arrivalTime: Int, // HHmmss
+    private val _departureTime: Int, // HHmmss
     val stopIdInt: Int,
     val stopSequence: Int,
     val stopHeadsign: String?,
