@@ -9,45 +9,33 @@ data class GTripStop(
     val routeIdInt: Int,
     val tripIdInt: Int,
     val stopIdInt: Int,
-    val stopSequence: Int
+    val stopSequence: Int,
+    val isLastTripStop: Boolean = false,
 ) {
 
-    @Suppress("unused")
-    constructor(
-        routeAndTripUID: String,
-        stopId: Int,
-        stopSequence: Int
-    ) : this(
-        GTrip.split(routeAndTripUID),
-        stopId,
-        stopSequence
-    )
-
-    @Suppress("unused")
     constructor(
         routeAndTripUID: String,
         tripIdInt: Int,
         stopId: Int,
-        stopSequence: Int
+        stopSequence: Int,
+        lastTripStop: Boolean,
     ) : this(
         GTrip.extractRouteIdInt(routeAndTripUID),
         tripIdInt,
         stopId,
-        stopSequence
-    )
-
-    constructor(
-        routeAndTripUID: Pair<Int, Int>,
-        stopId: Int,
-        stopSequence: Int
-    ) : this(
-        routeAndTripUID.first,
-        routeAndTripUID.second,
-        stopId,
-        stopSequence
+        stopSequence,
+        lastTripStop,
     )
 
     val uID by lazy { getNewUID(routeIdInt, tripIdInt, stopIdInt, stopSequence) }
+
+    @Suppress("unused")
+    @get:Discouraged(message = "Not memory efficient")
+    val routeId: String get() = _routeId
+
+    @Suppress("unused")
+    private val _routeId: String
+        get() = GIDs.getString(routeIdInt)
 
     @Suppress("unused")
     @get:Discouraged(message = "Not memory efficient")
@@ -68,7 +56,8 @@ data class GTripStop(
     fun toStringPlus(): String {
         return toString() +
                 "+(stopId:$_stopId)" +
-                "+(tripId:$_tripId)"
+                "+(tripId:$_tripId)" +
+                "+(routeId:$_routeId)"
     }
 
     companion object {
@@ -76,6 +65,7 @@ data class GTripStop(
         const val TRIP_ID = GTrip.TRIP_ID
         const val STOP_ID = GStop.STOP_ID
         const val STOP_SEQUENCE = GStopTime.STOP_SEQUENCE
+        const val LAST_TRIP_STOP = "last_trip_stop"
 
         private const val UID_SEPARATOR = "+" // int IDs can be negative
 

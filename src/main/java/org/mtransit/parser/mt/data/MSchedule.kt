@@ -9,7 +9,7 @@ import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GIDs
 
-data class MSchedule(
+data class MSchedule( // MStopTime
     val routeId: Long,
     val serviceIdInt: Int,
     val directionId: Long,
@@ -113,7 +113,7 @@ data class MSchedule(
             lastSchedule?.departure
         } ?: 0
         if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
-            add((departure - lastDeparture).div(100).toString()) // truncates the time to an minute that is closer to 0
+            add((departure - lastDeparture).div(100).toString()) // truncates the time to a minute that is closer to 0
         } else {
             add((departure - lastDeparture).toString())
         }
@@ -121,7 +121,7 @@ data class MSchedule(
             if (FeatureFlags.F_EXPORT_ARRIVAL_W_TRIP_ID) {
                 var arrivalDiff = (departure - arrival).takeIf { it > MIN_ARRIVAL_DIFF_IN_HH_MM_SS }
                 if (FeatureFlags.F_SCHEDULE_IN_MINUTES) {
-                    arrivalDiff = arrivalDiff?.div(100) // truncates the time to an minute that is closer to 0
+                    arrivalDiff = arrivalDiff?.div(100) // truncates the time to a minute that is closer to 0
                 }
                 add(arrivalDiff?.toString().orEmpty())
             }

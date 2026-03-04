@@ -1,45 +1,34 @@
 package org.mtransit.parser.mt.data
 
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.sql.SQLUtils
+import org.mtransit.commons.sql.toSQL
 
-data class MDirectionStop(
+data class MDirectionStop @JvmOverloads constructor(
     val directionId: Long,
     val stopId: Int,
     var stopSequence: Int,
-    var isNoPickup: Boolean = false
+    var isAlwaysLastTripStop: Boolean = false,
+    var isNoPickup: Boolean = false,
 ) : Comparable<MDirectionStop> {
-
-    // JAVA
-    constructor(
-        directionId: Long,
-        stopId: Int,
-        stopSequence: Int
-    ) : this(
-        directionId,
-        stopId,
-        stopSequence,
-        false
-    )
 
     val uID by lazy { getNewUID(directionId, stopId) }
 
-    fun equalsExceptStopSequence(ts: MDirectionStop): Boolean {
-        if (ts.directionId != 0L && ts.directionId != directionId) {
-            return false
-        }
-        @Suppress("RedundantIf")
-        if (ts.stopId != 0 && ts.stopId != stopId) {
-            return false
-        }
+    fun equalsDirectionAndStop(ts: MDirectionStop): Boolean {
+        if (ts.directionId != 0L && ts.directionId != directionId) return false
+        if (ts.stopId != 0 && ts.stopId != stopId) return false
         return true
     }
 
-    fun toFile() = listOf(
-        directionId.toString(), // DIRECTION ID
-        stopId.toString(), // STOP ID
-        stopSequence.toString(), // STOP SEQUENCE
-        (if (isNoPickup) 1 else 0).toString(), // DROP OFF ONLY
-    ).joinToString(SQLUtils.COLUMN_SEPARATOR)
+    fun toFile() = buildList {
+        add(directionId.toString())
+        add(stopId.toString())
+        add(stopSequence.toString())
+        add(isNoPickup.toSQL().toString())
+        if (FeatureFlags.F_EXPORT_DIRECTION_STOP_LAST) {
+            add(isAlwaysLastTripStop.toSQL().toString())
+        }
+    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     override fun compareTo(other: MDirectionStop): Int {
         // sort by direction_id => stop_sequence
@@ -49,23 +38,41 @@ data class MDirectionStop(
     }
 
     @Suppress("unused")
-    fun toStringSimple(): String {
-        return "DS{$directionId>$stopId[$stopSequence](${if (this.isNoPickup) 0 else 1})"
+    fun toStringSimple() = buildString {
+        append("DS{")
+        append(directionId)
+        append(">")
+        append(stopId)
+        append("[").append(stopSequence).append("]")
+        if (isNoPickup) {
+            append("(noPickup)")
+        }
+        if (isAlwaysLastTripStop) {
+            append("(last)")
+        }
+        append("}")
     }
 
     @Suppress("unused")
-    fun toStringSameDirection(): String {
-        return "${this.stopSequence}:${this.stopId}"
+    fun toStringSameDirection() = buildString {
+        append(stopSequence)
+        append(":")
+        append(stopId)
+        if (isNoPickup) {
+            append("(NP)")
+        }
+        if (isAlwaysLastTripStop) {
+            append("(last)")
+        }
     }
 
     companion object {
 
         private const val UID_SEPARATOR = "+" // int IDs can be negative
 
-        @Suppress("unused")
         @JvmStatic
-        fun containsStopIds(mainList: List<MDirectionStop>, otherList: List<MDirectionStop>): Boolean {
-            return toStopIds(mainList).contains(toStopIds(otherList))
+        fun List<MDirectionStop>.containsStopIds(otherList: List<MDirectionStop>): Boolean {
+            return toStopIds(this).contains(toStopIds(otherList))
         }
 
         @Suppress("unused")
@@ -78,6 +85,12 @@ data class MDirectionStop(
         @JvmStatic
         fun printDirectionStops(l: List<MDirectionStop>): String {
             return "[${l.size}] > ${l.joinToString { it.toStringSameDirection() }}"
+        }
+
+        @Suppress("unused")
+        @JvmStatic
+        fun toStringSimple(l: List<MDirectionStop>): String {
+            return "[${l.size}] > ${l.joinToString { it.toStringSimple() }}"
         }
 
         @JvmStatic

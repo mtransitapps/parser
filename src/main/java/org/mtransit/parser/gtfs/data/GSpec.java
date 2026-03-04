@@ -514,7 +514,7 @@ public class GSpec {
 	}
 
 	@NotNull
-	private Collection<Integer> getFrequencyTripIds() {
+	private Collection<Integer> getFrequencyTripIdInts() {
 		if (USE_DB_ONLY) {
 			return GIDs.getInts(GTFSDataBase.selectFrequencyTripIds());
 		}
@@ -623,8 +623,9 @@ public class GSpec {
 		String uid;
 		String tripUID;
 		GStopTime gStopTime;
+		GStopTime gStopTimeNext;
+		boolean lastTripStop;
 		List<GStopTime> tripStopTimes;
-		GTripStop gTripStop;
 		final int stopTimesCount = readStopTimesCount();
 		int tripStopsCount = 0;
 		int offset = 0;
@@ -639,6 +640,7 @@ public class GSpec {
 			offset += tripStopTimes.size();
 			for (int i = 0; i < tripStopTimes.size(); i++) {
 				gStopTime = tripStopTimes.get(i);
+				gStopTimeNext = i < tripStopTimes.size() - 1 ? tripStopTimes.get(i + 1) : null;
 				tripUID = this.tripIdIntsUIDs.get(gStopTime.getTripIdInt());
 				if (tripUID == null) {
 					continue;
@@ -648,8 +650,10 @@ public class GSpec {
 					MTLog.log("Generating GTFS trip stops from stop times... > (uid: %s) SKIP %s", uid, gStopTime);
 					continue;
 				}
-				gTripStop = new GTripStop(tripUID, gStopTime.getTripIdInt(), gStopTime.getStopIdInt(), gStopTime.getStopSequence());
-				addTripStops(gTripStop);
+				lastTripStop = gStopTimeNext == null || gStopTimeNext.getTripIdInt() != gStopTime.getTripIdInt();
+				addTripStops(
+						new GTripStop(tripUID, gStopTime.getTripIdInt(), gStopTime.getStopIdInt(), gStopTime.getStopSequence(), lastTripStop)
+				);
 			}
 			MTLog.log("Generating GTFS trip stops from stop times... (created %s trip stops)", (this.tripStopsUIDs.size() - tripStopsCount));
 			tripStopsCount = this.tripStopsUIDs.size();
@@ -673,7 +677,7 @@ public class GSpec {
 		int t = 0;
 		int ts = 0;
 		int st = 0;
-		for (Integer tripIdInt : getFrequencyTripIds()) {
+		for (Integer tripIdInt : getFrequencyTripIdInts()) {
 			if (!this.tripIdIntsUIDs.containsKey(tripIdInt)) {
 				continue; // excluded service ID
 			}
@@ -681,10 +685,10 @@ public class GSpec {
 			if (gOriginalTrip == null) {
 				throw new MTLog.Fatal("Cannot find original trip for ID '%s' (%d)!", GIDs.getString(tripIdInt), tripIdInt);
 			}
-			List<GStopTime> tripStopTimes = GStopTime.from(GTFSDataBase.selectStopTimes(Collections.singletonList(GIDs.getString(tripIdInt))));
-			ArrayList<GStopTime> newGStopTimes = new ArrayList<>();
-			Calendar stopTimeCal = Calendar.getInstance();
-			HashMap<Long, Integer> gStopTimeIncInSec = new HashMap<>();
+			final List<GStopTime> tripStopTimes = GStopTime.from(GTFSDataBase.selectStopTimes(Collections.singletonList(GIDs.getString(tripIdInt))));
+			final ArrayList<GStopTime> newGStopTimes = new ArrayList<>();
+			final Calendar stopTimeCal = Calendar.getInstance();
+			final HashMap<Long, Integer> gStopTimeIncInSec = new HashMap<>();
 			Integer previousStopTimeInSec = null;
 			long lastFirstStopTimeInMs = -1L;
 			for (GStopTime gStopTime : tripStopTimes) {
@@ -716,7 +720,7 @@ public class GSpec {
 					long firstStopTimeInMs = frequencyStartInMs;
 					int f = 0;
 					while (frequencyStartInMs <= firstStopTimeInMs && firstStopTimeInMs <= frequencyEndInMs) {
-						int newGeneratedTripIdInt = GIDs.getInt(GIDs.getString(tripIdInt) + "-" + f); // DB primary keys > [trip ID + sequence]
+						final int newGeneratedTripIdInt = GIDs.getInt(GIDs.getString(tripIdInt) + "-" + f); // DB primary keys > [trip ID + sequence]
 						addTrip(new GTrip(
 								newGeneratedTripIdInt,
 								gOriginalTrip.getRouteIdInt(),
@@ -732,14 +736,13 @@ public class GSpec {
 						));
 						t++;
 						stopTimeCal.setTimeInMillis(firstStopTimeInMs);
-						for (int i = 0; i < tripStopTimes.size(); i++) {
-							GStopTime gStopTime = tripStopTimes.get(i);
+						for (GStopTime gStopTime : tripStopTimes) {
 							stopTimeCal.add(Calendar.SECOND, gStopTimeIncInSec.get(gStopTime.getUID()));
-							int newDepartureTime = getNewDepartureTime(stopTimeCal);
-							GPickupType pickupType = gStopTime.getPickupType();
-							GDropOffType dropOffType = gStopTime.getDropOffType();
-							GTimePoint timePoint = gStopTime.getTimePoint();
-							GStopTime newGStopTime = new GStopTime(
+							final int newDepartureTime = getNewDepartureTime(stopTimeCal);
+							final GPickupType pickupType = gStopTime.getPickupType();
+							final GDropOffType dropOffType = gStopTime.getDropOffType();
+							final GTimePoint timePoint = gStopTime.getTimePoint();
+							final GStopTime newGStopTime = new GStopTime(
 									newGeneratedTripIdInt,
 									newDepartureTime,
 									newDepartureTime,
@@ -759,9 +762,14 @@ public class GSpec {
 					throw new MTLog.Fatal(e, "Error while generating stop times for frequency '%s'!", gFrequency);
 				}
 			}
+			GStopTime newGStopTime;
+			GStopTime gStopTimeNext;
+			boolean lastTripStop;
 			String tripUID;
 			String uid;
-			for (GStopTime newGStopTime : newGStopTimes) {
+			for (int i = 0; i < newGStopTimes.size(); i++) {
+				newGStopTime = newGStopTimes.get(i);
+				gStopTimeNext = i < newGStopTimes.size() - 1 ? newGStopTimes.get(i + 1) : null;
 				addStopTime(newGStopTime, true);
 				st++;
 				tripUID = this.tripIdIntsUIDs.get(newGStopTime.getTripIdInt());
@@ -777,8 +785,9 @@ public class GSpec {
 					MTLog.log("Generating GTFS trip stop from frequencies... > (uid: %s) SKIP %s", uid, newGStopTime);
 					continue;
 				}
+				lastTripStop = gStopTimeNext == null || gStopTimeNext.getTripIdInt() != newGStopTime.getTripIdInt();
 				addTripStops(
-						new GTripStop(tripUID, newGStopTime.getTripIdInt(), newGStopTime.getStopIdInt(), newGStopTime.getStopSequence())
+						new GTripStop(tripUID, newGStopTime.getTripIdInt(), newGStopTime.getStopIdInt(), newGStopTime.getStopSequence(), lastTripStop)
 				);
 				ts++;
 			}
