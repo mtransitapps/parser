@@ -5,50 +5,12 @@ import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 
-data class MDirection(
+data class MDirection @JvmOverloads constructor(
     val routeId: Long,
     var headsignId: Int = 0, // >= 0 (almost = direction ID)
     var headsignType: Int = HEADSIGN_TYPE_STRING, // 0=string, 1=direction, 2=inbound, 3=stopId, 4=descent-only
     var headsignValue: String = HEADSIGN_DEFAULT_VALUE,
 ) : Comparable<MDirection> {
-
-    constructor(
-        routeId: Long
-    ) : this(
-        routeId = routeId,
-        headsignId = 0,
-        headsignType = HEADSIGN_TYPE_STRING,
-        headsignValue = HEADSIGN_DEFAULT_VALUE,
-    )
-
-    constructor(
-        routeId: Long,
-        headsignString: String,
-        headsignId: Int
-    ) : this(routeId) {
-        setHeadsignString(headsignString, headsignId)
-    }
-
-    constructor(
-        routeId: Long,
-        direction: MDirectionCardinalType
-    ) : this(routeId) {
-        setHeadsignDirection(direction)
-    }
-
-    constructor(
-        routeId: Long,
-        inbound: MDirectionInboundType
-    ) : this(routeId) {
-        setHeadsignInbound(inbound)
-    }
-
-    constructor(
-        routeId: Long,
-        stop: MStop
-    ) : this(routeId) {
-        setHeadsignStop(stop)
-    }
 
     private var _id: Long = -1L
     val id: Long

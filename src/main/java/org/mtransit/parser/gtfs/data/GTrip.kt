@@ -184,18 +184,17 @@ data class GTrip(
 
         private const val UID_SEPARATOR = "+" // int IDs can be negative
 
-        @Suppress("unused")
         @JvmStatic
-        fun extractRouteIdInt(tripUID: String) = split(tripUID).second
+        fun extractRouteIdInt(tripUID: String) = split(tripUID).first
 
         @Suppress("unused")
         @JvmStatic
-        fun extractTripIdInt(tripUID: String) = split(tripUID).first
+        fun extractTripIdInt(tripUID: String) = split(tripUID).second
 
         @JvmStatic
         fun split(tripUID: String) = try {
             tripUID.split(UID_SEPARATOR).let { s ->
-                Pair(s[0].toInt(), s[1].toInt())
+                s[0].toInt() to s[1].toInt()
             }
         } catch (e: Exception) {
             throw MTLog.Fatal(e, "Error while trying to split $tripUID!")

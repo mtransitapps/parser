@@ -622,8 +622,10 @@ public class GSpec {
 		MTLog.log("Generating GTFS trip stops from stop times...");
 		String uid;
 		String tripUID;
+		GStopTime gStopTime;
+		GStopTime gStopTimeNext;
+		boolean lastTripStop;
 		List<GStopTime> tripStopTimes;
-		GTripStop gTripStop;
 		final int stopTimesCount = readStopTimesCount();
 		int tripStopsCount = 0;
 		int offset = 0;
@@ -636,7 +638,9 @@ public class GSpec {
 			MTLog.log("Generating GTFS trip stops from stop times...");
 			MTLog.log("Generating GTFS trip stops from stop times... (%d stop times found)", tripStopTimes.size());
 			offset += tripStopTimes.size();
-			for (GStopTime gStopTime : tripStopTimes) {
+			for (int i = 0; i < tripStopTimes.size(); i++) {
+				gStopTime = tripStopTimes.get(i);
+				gStopTimeNext = i < tripStopTimes.size() - 1 ? tripStopTimes.get(i + 1) : null;
 				tripUID = this.tripIdIntsUIDs.get(gStopTime.getTripIdInt());
 				if (tripUID == null) {
 					continue;
@@ -646,8 +650,10 @@ public class GSpec {
 					MTLog.log("Generating GTFS trip stops from stop times... > (uid: %s) SKIP %s", uid, gStopTime);
 					continue;
 				}
-				gTripStop = new GTripStop(tripUID, gStopTime.getTripIdInt(), gStopTime.getStopIdInt(), gStopTime.getStopSequence());
-				addTripStops(gTripStop);
+				lastTripStop = gStopTimeNext == null || gStopTimeNext.getTripIdInt() != gStopTime.getTripIdInt();
+				addTripStops(
+						new GTripStop(tripUID, gStopTime.getTripIdInt(), gStopTime.getStopIdInt(), gStopTime.getStopSequence(), lastTripStop)
+				);
 			}
 			MTLog.log("Generating GTFS trip stops from stop times... (created %s trip stops)", (this.tripStopsUIDs.size() - tripStopsCount));
 			tripStopsCount = this.tripStopsUIDs.size();
@@ -756,9 +762,14 @@ public class GSpec {
 					throw new MTLog.Fatal(e, "Error while generating stop times for frequency '%s'!", gFrequency);
 				}
 			}
+			GStopTime newGStopTime;
+			GStopTime gStopTimeNext;
+			boolean lastTripStop;
 			String tripUID;
 			String uid;
-			for (GStopTime newGStopTime : newGStopTimes) {
+			for (int i = 0; i < newGStopTimes.size(); i++) {
+				newGStopTime = newGStopTimes.get(i);
+				gStopTimeNext = i < newGStopTimes.size() - 1 ? newGStopTimes.get(i + 1) : null;
 				addStopTime(newGStopTime, true);
 				st++;
 				tripUID = this.tripIdIntsUIDs.get(newGStopTime.getTripIdInt());
@@ -774,8 +785,9 @@ public class GSpec {
 					MTLog.log("Generating GTFS trip stop from frequencies... > (uid: %s) SKIP %s", uid, newGStopTime);
 					continue;
 				}
+				lastTripStop = gStopTimeNext == null || gStopTimeNext.getTripIdInt() != newGStopTime.getTripIdInt();
 				addTripStops(
-						new GTripStop(tripUID, newGStopTime.getTripIdInt(), newGStopTime.getStopIdInt(), newGStopTime.getStopSequence())
+						new GTripStop(tripUID, newGStopTime.getTripIdInt(), newGStopTime.getStopIdInt(), newGStopTime.getStopSequence(), lastTripStop)
 				);
 				ts++;
 			}

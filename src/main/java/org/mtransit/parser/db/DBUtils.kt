@@ -1,7 +1,10 @@
 package org.mtransit.parser.db
 
+import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.sql.SQLCreateBuilder
+import org.mtransit.commons.sql.fromSQL
 import org.mtransit.commons.sql.getStringOrNull
+import org.mtransit.commons.sql.toSQL
 import org.mtransit.parser.DefaultAgencyTools
 import org.mtransit.parser.FileUtils
 import org.mtransit.parser.MTLog
@@ -84,6 +87,11 @@ object DBUtils {
                     .appendColumn(GTripStop.TRIP_ID, SQLUtilsCommons.INT)
                     .appendColumn(GTripStop.STOP_ID, SQLUtilsCommons.INT)
                     .appendColumn(GTripStop.STOP_SEQUENCE, SQLUtilsCommons.INT)
+                    .apply {
+                        if (FeatureFlags.F_EXPORT_DIRECTION_STOP_LAST) {
+                            appendColumn(GTripStop.LAST_TRIP_STOP, SQLUtilsCommons.INT) // as BOOLEAN
+                        }
+                    }
                     .build()
             )
             SQLUtils.executeUpdate(
@@ -332,12 +340,21 @@ object DBUtils {
         connection.createStatement().use { statement ->
             val rs = SQLUtils.executeUpdate(
                 statement,
-                SQLUtilsCommons.INSERT_INTO + TRIP_STOPS_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
-                        "${gTripStop.routeIdInt}," +
-                        "${gTripStop.tripIdInt}," +
-                        "${gTripStop.stopIdInt}," +
-                        "${gTripStop.stopSequence}" +
-                        SQLUtilsCommons.P2
+                buildString {
+                    append(SQLUtilsCommons.INSERT_INTO)
+                    append(TRIP_STOPS_TABLE_NAME)
+                    append(
+                        buildList {
+                            add(gTripStop.routeIdInt.toString())
+                            add(gTripStop.tripIdInt.toString())
+                            add(gTripStop.stopIdInt.toString())
+                            add(gTripStop.stopSequence.toString())
+                            if (FeatureFlags.F_EXPORT_DIRECTION_STOP_LAST) {
+                                add(gTripStop.isLastTripStop.toSQL().toString())
+                            }
+                        }.joinToString(separator = ",", prefix = SQLUtilsCommons.VALUES_P1, postfix = (SQLUtilsCommons.P2))
+                    )
+                }
             )
             insertRowCount++
             insertCount++
@@ -384,11 +401,7 @@ object DBUtils {
             query += " WHERE ${GTripStop.TRIP_ID} IN ${
                 tripIdInts
                     .distinct()
-                    .joinToString(
-                        separator = ",",
-                        prefix = "(",
-                        postfix = ")"
-                    ) { "$it" }
+                    .joinToString(separator = ",", prefix = "(", postfix = ")") { "$it" }
             }"
         }
         limitMaxNbRow?.let {
@@ -402,12 +415,22 @@ object DBUtils {
             val rs = SQLUtils.executeQuery(statement, query)
             while (rs.next()) {
                 result.add(
-                    GTripStop(
-                        rs.getInt(GTripStop.ROUTE_ID),
-                        rs.getInt(GTripStop.TRIP_ID),
-                        rs.getInt(GTripStop.STOP_ID),
-                        rs.getInt(GTripStop.STOP_SEQUENCE)
-                    )
+                    if (FeatureFlags.F_EXPORT_DIRECTION_STOP_LAST) {
+                        GTripStop(
+                            routeIdInt = rs.getInt(GTripStop.ROUTE_ID),
+                            tripIdInt = rs.getInt(GTripStop.TRIP_ID),
+                            stopIdInt = rs.getInt(GTripStop.STOP_ID),
+                            stopSequence = rs.getInt(GTripStop.STOP_SEQUENCE),
+                            isLastTripStop = rs.getInt(GTripStop.LAST_TRIP_STOP).fromSQL(),
+                        )
+                    } else {
+                        GTripStop(
+                            routeIdInt = rs.getInt(GTripStop.ROUTE_ID),
+                            tripIdInt = rs.getInt(GTripStop.TRIP_ID),
+                            stopIdInt = rs.getInt(GTripStop.STOP_ID),
+                            stopSequence = rs.getInt(GTripStop.STOP_SEQUENCE),
+                        )
+                    }
                 )
                 selectRowCount++
             }
