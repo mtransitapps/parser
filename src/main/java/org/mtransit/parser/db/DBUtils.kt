@@ -104,6 +104,7 @@ object DBUtils {
                     .appendColumn(MSchedule.ARRIVAL, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.DEPARTURE, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.TRIP_ID, SQLUtilsCommons.INT)
+                    .appendColumn(MSchedule.STOP_SEQUENCE, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.WHEELCHAIR_BOARDING, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.HEADSIGN_TYPE, SQLUtilsCommons.INT)
                     .appendColumn(MSchedule.HEADSIGN_VALUE, SQLUtilsCommons.TXT) // string ??
@@ -543,6 +544,7 @@ object DBUtils {
                         rs.getInt(MSchedule.ARRIVAL),
                         rs.getInt(MSchedule.DEPARTURE),
                         rs.getInt(MSchedule.TRIP_ID),
+                        rs.getInt(MSchedule.STOP_SEQUENCE),
                         rs.getInt(MSchedule.WHEELCHAIR_BOARDING),
                         rs.getInt(MSchedule.HEADSIGN_TYPE),
                         rs.getStringOrNull(MSchedule.HEADSIGN_VALUE)?.unquotes(),
