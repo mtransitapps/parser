@@ -777,6 +777,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					mStopId,
 					times,
 					gStopTime.getTripIdInt(),
+					gStopTime.getStopSequence(),
 					gTrip.getWheelchairAccessible().getId()
 			);
 			if (mSchedules.containsKey(mSchedule.getUID()) //
