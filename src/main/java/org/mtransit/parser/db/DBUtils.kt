@@ -376,6 +376,7 @@ object DBUtils {
                         "${mSchedule.arrival}," +
                         "${mSchedule.departure}," +
                         "${mSchedule.tripIdInt}," +
+                        "${mSchedule.stopSequence}," +
                         "${mSchedule.accessible}," +
                         "${mSchedule.headsignType}," +
                         "${mSchedule.headsignValue?.quotesEscape()}" +
