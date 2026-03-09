@@ -17,6 +17,7 @@ data class MSchedule( // MStopTime
     val arrival: Int, // HHmmss
     val departure: Int, // HHmmss
     val tripIdInt: Int,
+    val stopSequence: Int,
     val accessible: Int,
     var headsignType: Int = -1,
     var headsignValue: String? = null,
@@ -29,6 +30,7 @@ data class MSchedule( // MStopTime
         stopId: Int,
         times: Pair<Int?, Int?>,
         tripIdInt: Int,
+        stopSequence: Int,
         accessible: Int,
     ) : this(
         routeId = routeId,
@@ -38,6 +40,7 @@ data class MSchedule( // MStopTime
         arrival = (times.first ?: 0),
         departure = (times.second ?: 0),
         tripIdInt = tripIdInt,
+        stopSequence = stopSequence,
         accessible = accessible,
     )
 
@@ -127,6 +130,9 @@ data class MSchedule( // MStopTime
             }
             add(_tripId.convertTripId(quotesString = true))
         }
+        if (FeatureFlags.F_EXPORT_STOP_SEQUENCE) {
+            add(stopSequence.toString())
+        }
         if (headsignType == MDirection.HEADSIGN_TYPE_NO_PICKUP) {
             add(MDirection.HEADSIGN_TYPE_NO_PICKUP.toString())
             if (FeatureFlags.F_SCHEDULE_NO_QUOTES) {
@@ -193,6 +199,7 @@ data class MSchedule( // MStopTime
         const val ARRIVAL = "arrival"
         const val DEPARTURE = "departure"
         const val TRIP_ID = "trip_id"
+        const val STOP_SEQUENCE = "stop_sequence"
         const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
         const val HEADSIGN_TYPE = "headsign_type"
         const val HEADSIGN_VALUE = "headsign_value"
