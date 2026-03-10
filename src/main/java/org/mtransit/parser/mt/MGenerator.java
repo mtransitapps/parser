@@ -325,7 +325,7 @@ public class MGenerator {
 					false
 			);
 			MStoreListingGenerator.dumpStoreReleaseNotes(rawDirF, fileBase, minMaxDates.first, minMaxDates.second);
-			bumpDBVersion(rawDirF, gtfsDir);
+			bumpDBVersion(rawDirF, fileBase, gtfsDir);
 		}
 		MTLog.log("Writing files (%s)... DONE in %s.",
 				rawDirF.toURI(),
@@ -983,15 +983,15 @@ public class MGenerator {
 	);
 	private static final String RDS_DB_VERSION_REPLACEMENT = "$2%s$4";
 
-	private static void bumpDBVersion(File dumpDirF, String gtfsDir) {
+	private static void bumpDBVersion(File dumpDirF, final @NotNull String fileBase, String gtfsDir) {
 		MTLog.log("Bumping DB version...");
 		BufferedWriter ow = null;
-		String lastModifiedTimeDateS = getLastModified(gtfsDir);
-		if (StringUtils.isEmpty(lastModifiedTimeDateS)) {
+		final String lastModifiedDateS = getLastModified(gtfsDir);
+		if (StringUtils.isEmpty(lastModifiedDateS)) {
 			MTLog.log("Bumping DB version... SKIP (error while reading last modified time)");
 			return;
 		}
-		int lastModifiedTimeDateI = Integer.parseInt(lastModifiedTimeDateS);
+		int lastModifiedDateI = Integer.parseInt(lastModifiedDateS);
 		try {
 			File dumpDirRootF = dumpDirF.getParentFile().getParentFile();
 			File dumpDirResF = new File(dumpDirRootF, RES);
@@ -1003,22 +1003,27 @@ public class MGenerator {
 				MTLog.log("Bumping DB version... SKIP (error while reading current DB version)");
 				return;
 			}
-			String currentRdsDbVersion = matcher.group(3);
-			String currentLastModifiedTimeS = currentRdsDbVersion.substring(0, 8);
-			final int currentLastModifiedTimeI = Integer.parseInt(currentLastModifiedTimeS);
-			if (lastModifiedTimeDateI <= currentLastModifiedTimeI) {
-				MTLog.log("Bumping DB version... SKIP (current DB version '%s' NOT older than last modified date '%s')", currentRdsDbVersion,
-						lastModifiedTimeDateS);
+			String currentRdsDbVersionS = matcher.group(3);
+			String currentLastModifiedDateS = currentRdsDbVersionS.substring(0, 8);
+			final int currentLastModifiedDateI = Integer.parseInt(currentLastModifiedDateS);
+			if (DefaultAgencyTools.IS_CI && "current_".equalsIgnoreCase(fileBase)) {
+				if (lastModifiedDateI <= currentLastModifiedDateI) {
+					lastModifiedDateI = currentLastModifiedDateI + 1; // force new DB version always
+				}
+			}
+			if (lastModifiedDateI <= currentLastModifiedDateI) {
+				MTLog.log("Bumping DB version... SKIP (current DB version '%s' NOT older than last modified date '%s')", currentRdsDbVersionS,
+						lastModifiedDateI);
 				return;
 			}
-			if (currentRdsDbVersion.length() > lastModifiedTimeDateS.length()) {
-				lastModifiedTimeDateS = lastModifiedTimeDateS + "0";
+			if (currentRdsDbVersionS.length() > String.valueOf(lastModifiedDateI).length()) { // not "while", only 1 zero can be added
+				lastModifiedDateI *= 10;
 			}
-			String newContent = RDS_DB_VERSION_REGEX.matcher(content).replaceAll(String.format(RDS_DB_VERSION_REPLACEMENT, lastModifiedTimeDateS));
+			String newContent = RDS_DB_VERSION_REGEX.matcher(content).replaceAll(String.format(RDS_DB_VERSION_REPLACEMENT, lastModifiedDateI));
 			ow = new BufferedWriter(new FileWriter(gtfsRdsValuesXmlF));
 			MTLog.logPOINT(); // LOG
 			ow.write(newContent);
-			MTLog.log("Bumping DB version... DONE (new current DB version '%s')", lastModifiedTimeDateS);
+			MTLog.log("Bumping DB version... DONE (new current DB version '%s')", lastModifiedDateI);
 		} catch (IOException ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while bumping DB version!");
 		} finally {
