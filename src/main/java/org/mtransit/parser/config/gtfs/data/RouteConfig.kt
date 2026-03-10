@@ -7,6 +7,7 @@ import org.mtransit.commons.StringUtils.EMPTY
 import org.mtransit.parser.gtfs.data.GRoute
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTrip
+import java.util.Locale
 
 @Serializable
 data class RouteConfig(
@@ -95,6 +96,8 @@ data class RouteConfig(
     val stopIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
     @SerialName("use_stop_code_for_stop_id")
     val useStopCodeForStopId: Boolean = false, // OPT-IN feature
+    @SerialName("use_stop_id_for_stop_code")
+    val useStopIdForStopCode: Boolean = false, // OPT-IN feature
     @SerialName("stop_code_to_stop_id_configs")
     val stopCodeToStopIdConfigs: List<StopCodeToStopIdConfig> = emptyList(),
     @SerialName("stop_code_prepend_if_missing")
@@ -246,17 +249,17 @@ data class RouteConfig(
     fun isRouteColorIgnored(routeColor: String) =
         this.routeColorsIgnored.any { it.equals(routeColor, ignoreCase = true) }
 
-    fun cleanRouteShortName(routeShortName: String) =
-        cleanString(routeShortName, this.routeShortNameCleaners)
+    fun cleanRouteShortName(lang: Locale, routeShortName: String) =
+        cleanString(lang, routeShortName, this.routeShortNameCleaners)
 
-    fun cleanRouteLongName(routeLongName: String) =
-        cleanString(routeLongName, this.routeLongNameCleaners)
+    fun cleanRouteLongName(lang: Locale, routeLongName: String) =
+        cleanString(lang, routeLongName, this.routeLongNameCleaners)
 
-    fun cleanTripHeadsign(tripHeadsign: String) =
-        cleanString(tripHeadsign, this.tripHeadsignCleaners)
+    fun cleanTripHeadsign(lang: Locale, tripHeadsign: String) =
+        cleanString(lang, tripHeadsign, this.tripHeadsignCleaners)
 
-    fun cleanStopName(stopName: String) =
-        cleanString(stopName, this.stopNameCleaners)
+    fun cleanStopName(lang: Locale, stopName: String) =
+        cleanString(lang, stopName, this.stopNameCleaners)
 
     fun cleanStopHeadsign(gRoute: GRoute, gTrip: GTrip, @Suppress("unused") gStopTime: GStopTime, stopHeadsign: String): String {
         if (stopHeadsign.isEmpty()) return stopHeadsign
@@ -318,14 +321,14 @@ data class RouteConfig(
         return false // KEEP
     }
 
-    fun cleanDirectionHeadsign(directionHeadsign: String) =
-        cleanString(directionHeadsign, this.directionHeadsignCleaners)
+    fun cleanDirectionHeadsign(lang: Locale, directionHeadsign: String) =
+        cleanString(lang, directionHeadsign, this.directionHeadsignCleaners)
 
     fun convertStopIdFromCodeNotSupported(stopCode: String) =
         this.stopCodeToStopIdConfigs
             .singleOrNull { it.stopCode == stopCode }?.stopId
 
-    private fun cleanString(originalString: String, cleaners: List<Cleaner>): String {
+    private fun cleanString(lang: Locale, originalString: String, cleaners: List<Cleaner>): String {
         if (cleaners.isEmpty()) return originalString
         var string = originalString
         cleaners.forEach {
@@ -335,7 +338,13 @@ data class RouteConfig(
                 regexOptions.add(RegexOption.IGNORE_CASE)
             }
             string = when {
-                it.isWord -> CleanUtils.cleanWord(it.regex).matcher(string).replaceAll(CleanUtils.cleanWordsReplacement(it.replacement))
+                it.isWord -> {
+                    val pattern =
+                        if (lang.language == Locale.FRENCH.language) CleanUtils.cleanWordsFR(it.regex)
+                        else CleanUtils.cleanWords(it.regex)
+                    pattern.matcher(string).replaceAll(CleanUtils.cleanWordsReplacement(it.replacement))
+                }
+
                 else -> it.regex.toRegex(regexOptions).replace(string, it.replacement)
             }
         }
