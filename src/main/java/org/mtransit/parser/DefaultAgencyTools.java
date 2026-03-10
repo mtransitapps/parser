@@ -547,7 +547,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (org.mtransit.commons.StringUtils.isEmpty(routeShortName)) {
 			throw new MTLog.Fatal("No default route short name for '%s'!", routeShortName);
 		}
-		routeShortName = Configs.getRouteConfig().cleanRouteShortName(routeShortName);
+		routeShortName = Configs.getRouteConfig().cleanRouteShortName(getFirstLanguageNN(), routeShortName);
 		return routeShortName.trim();
 	}
 
@@ -605,7 +605,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (org.mtransit.commons.StringUtils.isEmpty(routeLongName)) {
 			throw new MTLog.Fatal("No default route long name for %s!", routeLongName);
 		}
-		routeLongName = Configs.getRouteConfig().cleanRouteLongName(routeLongName);
+		routeLongName = Configs.getRouteConfig().cleanRouteLongName(getFirstLanguageNN(), routeLongName);
 		if (defaultStringsCleanerEnabled()) {
 			return StringsCleaner.cleanRouteLongName(routeLongName, getSupportedLanguages(), getAgencyRouteType(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords());
 		}
@@ -753,7 +753,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
-		tripHeadsign = Configs.getRouteConfig().cleanTripHeadsign(tripHeadsign);
+		tripHeadsign = Configs.getRouteConfig().cleanTripHeadsign(getFirstLanguageNN(), tripHeadsign);
 		if (defaultStringsCleanerEnabled()) {
 			return StringsCleaner.cleanTripHeadsign(tripHeadsign, getSupportedLanguages(), getAgencyRouteType(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords(), Configs.getRouteConfig().getTripHeadsignRemoveVia());
 		}
@@ -867,7 +867,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanDirectionHeadsign(int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
-		directionHeadSign = Configs.getRouteConfig().cleanDirectionHeadsign(directionHeadSign);
+		directionHeadSign = Configs.getRouteConfig().cleanDirectionHeadsign(getFirstLanguageNN(), directionHeadSign);
 		//noinspection deprecation
 		return cleanDirectionHeadsign(fromStopName, directionHeadSign);
 	}
@@ -1154,7 +1154,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopName(@NotNull String gStopName) {
-		gStopName = Configs.getRouteConfig().cleanStopName(gStopName);
+		gStopName = Configs.getRouteConfig().cleanStopName(getFirstLanguageNN(), gStopName);
 		if (defaultStringsCleanerEnabled()) {
 			return StringsCleaner.cleanStopName(gStopName, getSupportedLanguages(), getAgencyRouteType(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords());
 		}
@@ -1206,10 +1206,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String getStopCode(@NotNull GStop gStop) {
 		final String prepend = getStopCodePrependIfMissing();
-		if (prepend != null && !gStop.getStopCode().startsWith(prepend)) {
-			return prepend + gStop.getStopCode();
+		//noinspection DiscouragedApi
+		final String stopCode =
+				Configs.getRouteConfig().getUseStopIdForStopCode() ? gStop.getStopId() :
+						gStop.getStopCode();
+		if (prepend != null && !stopCode.startsWith(prepend)) {
+			return prepend + stopCode;
 		}
-		return gStop.getStopCode();
+		return stopCode;
 	}
 
 	@Deprecated
