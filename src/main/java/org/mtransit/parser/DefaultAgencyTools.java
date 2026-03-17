@@ -755,7 +755,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
 		tripHeadsign = Configs.getRouteConfig().cleanTripHeadsign(getFirstLanguageNN(), tripHeadsign);
 		if (defaultStringsCleanerEnabled()) {
-			return StringsCleaner.cleanTripHeadsign(tripHeadsign, getSupportedLanguages(), getAgencyRouteType(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords(), Configs.getRouteConfig().getTripHeadsignRemoveVia());
+			return StringsCleaner.cleanTripHeadsign(
+					tripHeadsign,
+					getSupportedLanguages(),
+					getAgencyRouteType(),
+					lowerUCStrings(),
+					lowerUCWords(),
+					getIgnoreUCWords(),
+					Configs.getRouteConfig().getTripHeadsignRemoveVia()
+			);
 		}
 		return tripHeadsign;
 	}
@@ -1239,15 +1247,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 			final String stopIdS =
 					useStopCodeForStopId() ? cleanStopOriginalId(getStopCode(gStop))
 							: gStopId;
-			if (!CharUtils.isDigitsOnly(stopIdS)) {
-				final Integer stopIdSInt = convertStopIdFromCodeNotSupported(stopIdS);
-				if (stopIdSInt != null) {
-					return stopIdSInt;
-				}
+			if (stopIdS.isBlank() || !CharUtils.isDigitsOnly(stopIdS)) {
+				Integer stopIdSInt = convertStopIdFromCodeNotSupported(stopIdS);
+				if (stopIdSInt != null) return stopIdSInt;
+				stopIdSInt = Configs.getRouteConfig().convertStopIdFromOriginalNotSupported(gStopId);
+				if (stopIdSInt != null) return stopIdSInt;
 			}
 			return Integer.parseInt(stopIdS);
 		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while extracting stop ID from %s!", gStop.toStringPlus());
+			throw new MTLog.Fatal(e, "Error while extracting stop ID from %s!", gStop.toStringPlus(true));
 		}
 	}
 

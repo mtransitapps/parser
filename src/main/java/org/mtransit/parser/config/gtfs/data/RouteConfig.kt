@@ -100,6 +100,8 @@ data class RouteConfig(
     val useStopIdForStopCode: Boolean = false, // OPT-IN feature
     @SerialName("stop_code_to_stop_id_configs")
     val stopCodeToStopIdConfigs: List<StopCodeToStopIdConfig> = emptyList(),
+    @SerialName("stop_original_id_to_stop_id_configs")
+    val stopOriginalIdToStopIdConfigs: List<StopOriginalIdToStopIdConfig> = emptyList(),
     @SerialName("stop_code_prepend_if_missing")
     val stopCodePrependIfMissing: String? = null, // optional
     @SerialName("use_stop_id_hash_code")
@@ -171,6 +173,14 @@ data class RouteConfig(
     data class StopCodeToStopIdConfig(
         @SerialName("stop_code")
         val stopCode: String,
+        @SerialName("stop_id")
+        val stopId: Int,
+    )
+
+    @Serializable
+    data class StopOriginalIdToStopIdConfig(
+        @SerialName("original_stop_id")
+        val originalStopId: String,
         @SerialName("stop_id")
         val stopId: Int,
     )
@@ -323,6 +333,10 @@ data class RouteConfig(
 
     fun cleanDirectionHeadsign(lang: Locale, directionHeadsign: String) =
         cleanString(lang, directionHeadsign, this.directionHeadsignCleaners)
+
+    fun convertStopIdFromOriginalNotSupported(originalStopId: String) =
+        this.stopOriginalIdToStopIdConfigs
+            .singleOrNull { it.originalStopId == originalStopId }?.stopId
 
     fun convertStopIdFromCodeNotSupported(stopCode: String) =
         this.stopCodeToStopIdConfigs
