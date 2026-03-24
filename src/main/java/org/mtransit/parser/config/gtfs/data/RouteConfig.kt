@@ -370,11 +370,11 @@ data class RouteConfig(
     }
 
     @JvmOverloads
-    fun isDirectionSplitterEnabled(todayDate: Int,routeId: Long? = null) =
+    fun isDirectionSplitterEnabled(todayDate: Int, routeId: Long? = null) =
         directionSplitterEnabled && !isAllowedUntil(directionSplitterDisabledUntil[routeId], todayDate)
 
     @JvmOverloads
-    fun isDirectionFinderEnabled(todayDate: Int,routeId: Long? = null) =
+    fun isDirectionFinderEnabled(todayDate: Int, routeId: Long? = null) =
         directionFinderEnabled && !isAllowedUntil(directionFinderDisabledUntil[routeId], todayDate)
 
     fun allowIgnoreInvalidStopTimes(todayDate: Int) =
