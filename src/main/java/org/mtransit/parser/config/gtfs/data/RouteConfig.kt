@@ -81,8 +81,12 @@ data class RouteConfig(
     val directionHeadsignRemoveRouteDesc: Boolean = false, // OPT-IN feature
     @SerialName("direction_splitter_enabled")
     val directionSplitterEnabled: Boolean = false, // OPT-IN feature
+    @SerialName("direction_splitter_disabled_until")
+    val directionSplitterDisabledUntil: Map<Long, String> = emptyMap(), // OPT-IN feature
     @SerialName("direction_finder_enabled")
     val directionFinderEnabled: Boolean = false, // OPT-IN feature
+    @SerialName("direction_finder_disabled_until")
+    val directionFinderDisabledUntil: Map<Long, String> = emptyMap(), // OPT-IN feature
     @SerialName("allow_non_descriptive_head_signs")
     val allowNonDescriptiveHeadSigns: Map<Long, Boolean> = emptyMap(), // OPT-IN feature
     @SerialName("allow_non_descriptive_head_signs_until")
@@ -364,6 +368,14 @@ data class RouteConfig(
         }
         return string
     }
+
+    @JvmOverloads
+    fun isDirectionSplitterEnabled(todayDate: Int,routeId: Long? = null) =
+        directionSplitterEnabled && !isAllowedUntil(directionSplitterDisabledUntil[routeId], todayDate)
+
+    @JvmOverloads
+    fun isDirectionFinderEnabled(todayDate: Int,routeId: Long? = null) =
+        directionFinderEnabled && !isAllowedUntil(directionFinderDisabledUntil[routeId], todayDate)
 
     fun allowIgnoreInvalidStopTimes(todayDate: Int) =
         allowInvalidStopTimes || isAllowedUntil(allowInvalidStopTimesUntil, todayDate)
