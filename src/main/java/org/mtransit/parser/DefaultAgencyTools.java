@@ -823,12 +823,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean directionSplitterEnabled() {
-		return Configs.getRouteConfig().getDirectionSplitterEnabled();
+		return Configs.getRouteConfig().isDirectionSplitterEnabled(getTodayDateInt());
 	}
 
 	@Override
 	public boolean directionSplitterEnabled(long routeId) {
-		return directionSplitterEnabled();
+		return Configs.getRouteConfig().isDirectionSplitterEnabled(getTodayDateInt(), routeId);
 	}
 
 	@Override
@@ -891,12 +891,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean directionFinderEnabled() {
-		return Configs.getRouteConfig().getDirectionFinderEnabled();
+		return Configs.getRouteConfig().isDirectionFinderEnabled(getTodayDateInt());
 	}
 
 	@Override
 	public boolean directionFinderEnabled(long routeId, @NotNull GRoute gRoute) {
-		return directionFinderEnabled();
+		return Configs.getRouteConfig().isDirectionFinderEnabled(getTodayDateInt(), routeId);
 	}
 
 	@Override
