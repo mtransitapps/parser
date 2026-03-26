@@ -356,11 +356,24 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeAgency(@NotNull GAgency gAgency) {
-		//noinspection DiscouragedApi
-		if (getAgencyId() != null && gAgency.isDifferentAgency(getAgencyId())) {
-			return EXCLUDE;
+		final List<String> otherAgencyIds = Configs.getAgencyConfig() == null ? null : Configs.getAgencyConfig().getOtherAgencyIds();
+		if (otherAgencyIds != null) {
+			for (final String otherAgencyId : otherAgencyIds) {
+				//noinspection DiscouragedApi
+				if (!gAgency.isDifferentAgency(otherAgencyId)) {
+					return KEEP;
+				}
+			}
 		}
-		return KEEP;
+		final String agencyId = getAgencyId();
+		if (agencyId == null) {
+			return KEEP;
+		}
+		//noinspection DiscouragedApi
+		if (!gAgency.isDifferentAgency(agencyId)) {
+			return KEEP;
+		}
+		return EXCLUDE;
 	}
 
 	private final Map<String, String> serviceIdToCleanupServiceId = new HashMap<>();
