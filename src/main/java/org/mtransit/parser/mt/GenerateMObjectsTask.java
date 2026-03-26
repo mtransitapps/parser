@@ -767,7 +767,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 				if (this.agencyTools.allowIgnoreInvalidStopTimes()) {
 					continue; // this is bad, some transit agency data can NOT be fixed :(
 				} else {
-					throw new MTLog.Fatal("Invalid stop time '%s'!", gStopTime.toStringPlus());
+					throw new MTLog.Fatal("Invalid stop time '%s'!", gStopTime.toStringPlus(true));
 				}
 			}
 			mSchedule = new MSchedule(
