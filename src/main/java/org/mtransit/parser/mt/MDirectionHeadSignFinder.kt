@@ -44,10 +44,10 @@ object MDirectionHeadSignFinder {
                 routeId,
                 gRouteTrips,
                 routeGTFS,
-                gDirectionId.id,
+                directionId,
                 agencyTools
             )?.let { (headSign, stopIdInt, first, last, stopTimeHeadSigns, routeIdInts) ->
-                directionHeadSigns[directionId] = headSign
+                directionHeadSigns[directionId] = agencyTools.cleanTripHeadsign(headSign) // can be merged ("a / b") after clean trip last called
                 directionStopIdInts[directionId] = stopIdInt
                 directionAmPm[directionId] = first to last
                 directionStopTimeHeadSigns[directionId] = stopTimeHeadSigns
@@ -83,10 +83,8 @@ object MDirectionHeadSignFinder {
             for ((directionId, _) in directionHeadSigns) {
                 val gRoute = directionRouteIdInts[directionId].takeIf { it?.size == 1 }?.getOrNull(0)?.let { routeGTFS.getRoute(it) }
                     ?: continue
-                val rln = gRoute.routeLongNameOrDefault
-                if (rln.isBlank()) {
-                    continue
-                }
+                val rln = gRoute.routeLongNameOrDefault.takeIf { it.isNotBlank() }
+                    ?: continue
                 routeDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, agencyTools.cleanRouteLongName(rln))
             }
             if (routeDirectionHeadSigns.size == directionHeadSigns.size // all route long name or nothing
@@ -102,8 +100,6 @@ object MDirectionHeadSignFinder {
             val lastStopDirectionHeadSigns = mutableMapOf<Int, String>()
             for ((directionId, _) in directionHeadSigns) {
                 val stopIdInt = directionStopIdInts[directionId] ?: continue
-
-                @Suppress("DEPRECATION")
                 val stop = routeGTFS.getStop(stopIdInt) ?: continue
                 val gRoute = directionRouteIdInts[directionId].takeIf { it?.size == 1 }?.getOrNull(0)?.let { routeGTFS.getRoute(it) }
                 lastStopDirectionHeadSigns[directionId] =
@@ -160,7 +156,6 @@ object MDirectionHeadSignFinder {
             return directionHeadSigns
         }
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
-            @Suppress("DEPRECATION")
             throw MTLog.Fatal(
                 "$routeId: Could NOT fix non-descriptive direction head-signs!" +
                         directionHeadSigns.keys.joinToString { directionId ->
@@ -317,17 +312,9 @@ object MDirectionHeadSignFinder {
         distinctTripHeadSignAndStopTimes.forEach { (routeId, headSign, stopTimes) ->
             MTLog.log(
                 "$routeId: $directionId: '$headSign':" +
-                        if (Constants.DEBUG) {
-                            "\n"
-                        } else {
-                            ""
-                        } + " ${stopTimes.size} stops: ${
+                        (if (Constants.DEBUG) "\n" else "") + " ${stopTimes.size} stops: ${
                     stopTimes.map { gStopTime ->
-                        if (Constants.DEBUG) {
-                            "\n    - "
-                        } else {
-                            ""
-                        } + gStopTime.toStringPlus()
+                        (if (Constants.DEBUG) "\n    - " else "") + gStopTime.toStringPlus(false)
                     }
                 }"
             )
@@ -360,7 +347,6 @@ object MDirectionHeadSignFinder {
         } ?: throw MTLog.Fatal("$routeId: $directionId: no candidate after complex merge!")
     }
 
-    @Suppress("DEPRECATION")
     private fun mergeTrips(
         routeId: Long,
         directionId: Int,
@@ -871,7 +857,8 @@ object MDirectionHeadSignFinder {
                     && tripHeadSignCounts2 != 0 // not-merged
                     && abs(tripHeadSignCounts2 - tripHeadSignCounts1) <= minHeadSignCountsDiff
                 ) {
-                    val merged = MDirection.mergeHeadsignValue(stopTimesHeadSign1, stopTimesHeadSign2) ?: EMPTY
+                    val merged = MDirection.mergeHeadsignValue(stopTimesHeadSign1, stopTimesHeadSign2)
+                        ?: EMPTY
                     logMerge(!dataLossAuthorized, "$routeId: $directionId: merge #1 / #2 head-signs -> '$merged'")
                     return MergedTrip(
                         routeIdInts1, routeIdInts2, merged to pickAndMergeLongestTripStopTimes(
@@ -995,9 +982,9 @@ object MDirectionHeadSignFinder {
             throw MTLog.Fatal(
                 "$routeId: $directionId: Unresolved situation! \n" +
                         "- #1: $stopTimesHeadSign1. \n" +
-                        "  Stops: ${stopTimesList1.map { gStopTime -> "\n    - ${gStopTime.toStringPlus()}" }} \n" +
+                        "  Stops: ${stopTimesList1.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(true)}" }} \n" +
                         "- #2: $stopTimesHeadSign2. \n" +
-                        "  Stops: ${stopTimesList2.map { gStopTime -> "\n    - ${gStopTime.toStringPlus()}" }} \n" +
+                        "  Stops: ${stopTimesList2.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(true)}" }} \n" +
                         "!"
             )
         }
@@ -1118,7 +1105,6 @@ object MDirectionHeadSignFinder {
         return stopIdIntsAfterCommonCount
     }
 
-    @Suppress("DEPRECATION")
     private fun getStop(gSpec: GSpec, stopIdInts: Pair<Int?, Int?>?): GStop? {
         return stopIdInts?.first?.let { first -> gSpec.getStop(first) }
             ?: stopIdInts?.second?.let { second -> gSpec.getStop(second) }
