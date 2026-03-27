@@ -356,22 +356,28 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeAgency(@NotNull GAgency gAgency) {
-		final List<String> otherAgencyIds = Configs.getAgencyConfig() == null ? null : Configs.getAgencyConfig().getOtherAgencyIds();
-		if (otherAgencyIds != null) {
+		final org.mtransit.parser.config.gtfs.data.AgencyConfig agencyConfig = Configs.getAgencyConfig();
+		if (agencyConfig == null) {
+			return KEEP;
+		}
+		final String agencyId = agencyConfig.getAgencyId();
+		final List<String> otherAgencyIds = agencyConfig.getOtherAgencyIds();
+		final boolean hasAgencyId = agencyId != null;
+		final boolean hasOtherAgencyIds = !otherAgencyIds.isEmpty();
+		if (!hasAgencyId && !hasOtherAgencyIds) {
+			return KEEP; // no filters
+		}
+		//noinspection DiscouragedApi
+		if (hasAgencyId && !gAgency.isDifferentAgency(agencyId)) {
+			return KEEP;
+		}
+		if (hasOtherAgencyIds) {
 			for (final String otherAgencyId : otherAgencyIds) {
 				//noinspection DiscouragedApi
 				if (!gAgency.isDifferentAgency(otherAgencyId)) {
 					return KEEP;
 				}
 			}
-		}
-		final String agencyId = getAgencyId();
-		if (agencyId == null) {
-			return KEEP;
-		}
-		//noinspection DiscouragedApi
-		if (!gAgency.isDifferentAgency(agencyId)) {
-			return KEEP;
 		}
 		return EXCLUDE;
 	}
