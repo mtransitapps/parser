@@ -1272,8 +1272,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 				if (stopIdSInt != null) return stopIdSInt;
 				stopIdSInt = Configs.getRouteConfig().convertStopIdFromOriginalNotSupported(gStopId);
 				if (stopIdSInt != null) return stopIdSInt;
-			}
-			if (!CharUtils.isDigitsOnly(stopIdS)) {
 				return MStopIDConverter.convert(
 						stopIdS,
 						this::convertStopIdNotSupported,

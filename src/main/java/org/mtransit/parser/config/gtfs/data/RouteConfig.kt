@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.mtransit.commons.CleanUtils
 import org.mtransit.commons.StringUtils.EMPTY
+import org.mtransit.commons.toIntOrNull
 import org.mtransit.parser.gtfs.data.GRoute
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTrip
@@ -364,11 +365,11 @@ data class RouteConfig(
 
     fun convertStopIdNextChars(nextChars: String) =
         this.stopIdNextCharConfigs
-            .singleOrNull { it.char == nextChars }?.idPart?.toInt()
+            .singleOrNull { it.char == nextChars }?.idPart?.toIntOrNull()
 
     fun convertStopIdPreviousChars(previousChars: String) =
         this.stopIdPreviousCharConfigs
-            .singleOrNull { it.char == previousChars }?.idPart?.toInt()
+            .singleOrNull { it.char == previousChars }?.idPart?.toIntOrNull()
 
     private fun cleanString(lang: Locale, originalString: String, cleaners: List<Cleaner>): String {
         if (cleaners.isEmpty()) return originalString
