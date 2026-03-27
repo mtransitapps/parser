@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.mtransit.commons.CleanUtils
 import org.mtransit.commons.StringUtils.EMPTY
+import org.mtransit.commons.toIntOrNull
 import org.mtransit.parser.gtfs.data.GRoute
 import org.mtransit.parser.gtfs.data.GStopTime
 import org.mtransit.parser.gtfs.data.GTrip
@@ -31,9 +32,9 @@ data class RouteConfig(
     @SerialName("route_short_name_to_route_id_configs")
     val routeShortNameToRouteIdConfigs: List<RouteShortNameToRouteIdConfig> = emptyList(),
     @SerialName("route_id_next_char_configs")
-    val routeIdNextCharConfigs: List<RouteIdCharToRouteIdPartConfig> = emptyList(),
+    val routeIdNextCharConfigs: List<IdCharToIdPartConfig> = emptyList(),
     @SerialName("route_id_previous_char_configs")
-    val routeIdPreviousCharConfigs: List<RouteIdCharToRouteIdPartConfig> = emptyList(),
+    val routeIdPreviousCharConfigs: List<IdCharToIdPartConfig> = emptyList(),
     // short-name
     @SerialName("use_route_long_name_for_route_short_name")
     val useRouteLongNameForRouteShortName: Boolean = false, // OPT-IN feature
@@ -102,8 +103,15 @@ data class RouteConfig(
     val useStopCodeForStopId: Boolean = false, // OPT-IN feature
     @SerialName("use_stop_id_for_stop_code")
     val useStopIdForStopCode: Boolean = false, // OPT-IN feature
+    @Deprecated("use stopIdNotSupportedConfigs instead")
     @SerialName("stop_code_to_stop_id_configs")
-    val stopCodeToStopIdConfigs: List<StopCodeToStopIdConfig> = emptyList(),
+    val stopCodeToStopIdConfigs: List<StopIdConfig> = emptyList(),
+    @SerialName("stop_id_not_supported_configs")
+    val stopIdNotSupportedConfigs: List<StopIdConfig> = stopCodeToStopIdConfigs,
+    @SerialName("stop_id_next_char_configs")
+    val stopIdNextCharConfigs: List<IdCharToIdPartConfig> = emptyList(),
+    @SerialName("stop_id_previous_char_configs")
+    val stopIdPreviousCharConfigs: List<IdCharToIdPartConfig> = emptyList(),
     @SerialName("stop_original_id_to_stop_id_configs")
     val stopOriginalIdToStopIdConfigs: List<StopOriginalIdToStopIdConfig> = emptyList(),
     @SerialName("stop_code_prepend_if_missing")
@@ -146,11 +154,14 @@ data class RouteConfig(
     )
 
     @Serializable
-    data class RouteIdCharToRouteIdPartConfig(
+    data class IdCharToIdPartConfig(
         @SerialName("char")
         val char: String,
         @SerialName("route_id_part")
+        @Deprecated("use idPart instead")
         val routeIdPart: Long,
+        @SerialName("id_part")
+        val idPart: Long = routeIdPart
     )
 
     @Serializable
@@ -174,11 +185,17 @@ data class RouteConfig(
     )
 
     @Serializable
-    data class StopCodeToStopIdConfig(
+    data class StopIdConfig(
+        @Deprecated("use originalStopId instead")
         @SerialName("stop_code")
         val stopCode: String,
+        @SerialName("original_stop_id")
+        val originalStopId: String = stopCode,
+        @Deprecated("use stopIdInt instead")
         @SerialName("stop_id")
         val stopId: Int,
+        @SerialName("stop_id_int")
+        val stopIdInt: Int = stopId
     )
 
     @Serializable
@@ -237,11 +254,11 @@ data class RouteConfig(
 
     fun convertRouteIdNextChars(nextChars: String) =
         this.routeIdNextCharConfigs
-            .singleOrNull { it.char == nextChars }?.routeIdPart
+            .singleOrNull { it.char == nextChars }?.idPart
 
     fun convertRouteIdPreviousChars(previousChars: String) =
         this.routeIdPreviousCharConfigs
-            .singleOrNull { it.char == previousChars }?.routeIdPart
+            .singleOrNull { it.char == previousChars }?.idPart
 
     fun getRouteShortNameFromRouteId(routeId: String) =
         this.routeIdToRouteShortNameConfigs
@@ -342,9 +359,17 @@ data class RouteConfig(
         this.stopOriginalIdToStopIdConfigs
             .singleOrNull { it.originalStopId == originalStopId }?.stopId
 
-    fun convertStopIdFromCodeNotSupported(stopCode: String) =
-        this.stopCodeToStopIdConfigs
-            .singleOrNull { it.stopCode == stopCode }?.stopId
+    fun convertStopIdNotSupported(originalStopId: String) =
+        this.stopIdNotSupportedConfigs
+            .singleOrNull { it.originalStopId == originalStopId }?.stopIdInt
+
+    fun convertStopIdNextChars(nextChars: String) =
+        this.stopIdNextCharConfigs
+            .singleOrNull { it.char == nextChars }?.idPart?.toIntOrNull()
+
+    fun convertStopIdPreviousChars(previousChars: String) =
+        this.stopIdPreviousCharConfigs
+            .singleOrNull { it.char == previousChars }?.idPart?.toIntOrNull()
 
     private fun cleanString(lang: Locale, originalString: String, cleaners: List<Cleaner>): String {
         if (cleaners.isEmpty()) return originalString
