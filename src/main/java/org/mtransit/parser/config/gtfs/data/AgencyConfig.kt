@@ -11,6 +11,11 @@ data class AgencyConfig(
     @SerialName("agency_id")
     val agencyId: String? = null, // OPT-IN filter
     /**
+     * (Optional) Agency IDs filter (useful when multiple agencies in same GTFS)
+     */
+    @SerialName("other_agency_ids")
+    val otherAgencyIds: List<String> = emptyList(), // OPT-IN filter
+    /**
      * Route type filter (integer from GTFS Static `routes.txt` > `route_type` field)
      * (useful when multiple route type in same GTFS)
      * @see [https://gtfs.org/reference/static/#routestxt]

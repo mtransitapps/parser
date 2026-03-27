@@ -356,11 +356,30 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeAgency(@NotNull GAgency gAgency) {
-		//noinspection DiscouragedApi
-		if (getAgencyId() != null && gAgency.isDifferentAgency(getAgencyId())) {
-			return EXCLUDE;
+		final org.mtransit.parser.config.gtfs.data.AgencyConfig agencyConfig = Configs.getAgencyConfig();
+		if (agencyConfig == null) {
+			return KEEP;
 		}
-		return KEEP;
+		final String agencyId = agencyConfig.getAgencyId();
+		final List<String> otherAgencyIds = agencyConfig.getOtherAgencyIds();
+		final boolean hasAgencyId = agencyId != null;
+		final boolean hasOtherAgencyIds = !otherAgencyIds.isEmpty();
+		if (!hasAgencyId && !hasOtherAgencyIds) {
+			return KEEP; // no filters
+		}
+		//noinspection DiscouragedApi
+		if (hasAgencyId && !gAgency.isDifferentAgency(agencyId)) {
+			return KEEP;
+		}
+		if (hasOtherAgencyIds) {
+			for (final String otherAgencyId : otherAgencyIds) {
+				//noinspection DiscouragedApi
+				if (!gAgency.isDifferentAgency(otherAgencyId)) {
+					return KEEP;
+				}
+			}
+		}
+		return EXCLUDE;
 	}
 
 	private final Map<String, String> serviceIdToCleanupServiceId = new HashMap<>();
