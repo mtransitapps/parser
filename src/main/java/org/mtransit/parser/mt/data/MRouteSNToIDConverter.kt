@@ -110,8 +110,9 @@ object MRouteSNToIDConverter {
 
     // endregion
 
-    const val PREVIOUS: Long = 1_000_000L
-    const val NEXT: Long = 10_000L
+    const val PREVIOUS = 1_000_000L
+    const val NEXT = 10_000L
+    const val MAX_DIGIT = 1000L
 
     @JvmOverloads
     @JvmStatic
@@ -128,19 +129,19 @@ object MRouteSNToIDConverter {
         if (rsn.length == 1 && rsn[0].isLetter()) {
             endsWithLetter(rsn)?.let { return it }
         }
-        val matcher: Matcher = RSN.matcher(rsn)
+        val matcher = RSN.matcher(rsn)
         if (!matcher.find()) {
             return notSupportedToRouteId?.invoke(rsn)
                 ?: throw MTLog.Fatal("Unexpected route short name '$rsn' can not be parsed by regex!")
         }
-        val previousChars: String = matcher.group(2).uppercase()
-        val digits: Long = matcher.group(3).toLong()
-        val nextChars: String = matcher.group(4).uppercase()
-        if (digits !in 0..1000L) {
+        val previousChars = matcher.group(2).uppercase()
+        val digits = matcher.group(3).toLong()
+        val nextChars = matcher.group(4).uppercase()
+        if (digits !in 0..MAX_DIGIT) {
             return notSupportedToRouteId?.invoke(rsn)
                 ?: throw MTLog.Fatal("Unexpected route short name digits '$digits' in short name '$rsn' to convert to route ID!")
         }
-        var routeId: Long = digits
+        var routeId = digits
         routeId += endsWithLetter(nextChars) ?: run {
             nextCharsToLong?.invoke(nextChars)
                 ?: notSupportedToRouteId?.invoke(rsn)
@@ -155,7 +156,7 @@ object MRouteSNToIDConverter {
     }
 
     @JvmStatic
-    fun startsWithLetter(previousChars: String): Long? = when (previousChars) {
+    fun startsWithLetter(previousChars: String) = when (previousChars) {
         "" -> startsWith(Letters.NONE_)
         "A" -> startsWith(Letters.A)
         "B" -> startsWith(Letters.B)
@@ -219,17 +220,11 @@ object MRouteSNToIDConverter {
     }
 
     @JvmStatic
-    fun startsWith(digit: Long): Long {
-        return digit * PREVIOUS
-    }
+    fun startsWith(digit: Int) = digit * PREVIOUS
 
     @JvmStatic
-    fun endsWith(digit: Long): Long {
-        return digit * NEXT
-    }
+    fun endsWith(digit: Int) = digit * NEXT
 
     @JvmStatic
-    fun other(digit: Long): Long {
-        return Letters.OTHER_MIN_ + digit
-    }
+    fun other(digit: Int) = (Letters.OTHER_MIN_ + digit).toLong()
 }

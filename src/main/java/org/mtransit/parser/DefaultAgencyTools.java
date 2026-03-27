@@ -38,6 +38,7 @@ import org.mtransit.parser.mt.data.MServiceDate;
 import org.mtransit.parser.mt.data.MServiceId;
 import org.mtransit.parser.mt.data.MServiceIds;
 import org.mtransit.parser.mt.data.MSpec;
+import org.mtransit.parser.mt.data.MStopIDConverter;
 import org.mtransit.parser.mt.data.MString;
 import org.mtransit.parser.mt.data.MStrings;
 import org.mtransit.parser.mt.data.MTripId;
@@ -1267,10 +1268,18 @@ public class DefaultAgencyTools implements GAgencyTools {
 					useStopCodeForStopId() ? cleanStopOriginalId(getStopCode(gStop))
 							: gStopId;
 			if (stopIdS.isBlank() || !CharUtils.isDigitsOnly(stopIdS)) {
-				Integer stopIdSInt = convertStopIdFromCodeNotSupported(stopIdS);
+				Integer stopIdSInt = convertStopIdNotSupported(stopIdS);
 				if (stopIdSInt != null) return stopIdSInt;
 				stopIdSInt = Configs.getRouteConfig().convertStopIdFromOriginalNotSupported(gStopId);
 				if (stopIdSInt != null) return stopIdSInt;
+			}
+			if (!CharUtils.isDigitsOnly(stopIdS)) {
+				return MStopIDConverter.convert(
+						stopIdS,
+						this::convertStopIdNotSupported,
+						this::convertStopIdNextChars,
+						this::convertStopIdPreviousChars
+				);
 			}
 			return Integer.parseInt(stopIdS);
 		} catch (Exception e) {
@@ -1278,10 +1287,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 	}
 
-	@Nullable
 	@Override
-	public Integer convertStopIdFromCodeNotSupported(@NotNull String stopCode) {
-		return Configs.getRouteConfig().convertStopIdFromCodeNotSupported(stopCode);
+	public @Nullable Integer convertStopIdNotSupported(@NotNull String stopCode) {
+		return Configs.getRouteConfig().convertStopIdNotSupported(stopCode);
+	}
+
+	@Override
+	public @Nullable Integer convertStopIdNextChars(@NotNull String nextChars) {
+		return Configs.getRouteConfig().convertStopIdNextChars(nextChars);
+	}
+
+	@Override
+	public @Nullable Integer convertStopIdPreviousChars(@NotNull String previousChars) {
+		return Configs.getRouteConfig().convertStopIdPreviousChars(previousChars);
 	}
 
 	@Override

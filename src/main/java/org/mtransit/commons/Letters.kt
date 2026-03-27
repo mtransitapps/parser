@@ -1,34 +1,34 @@
 package org.mtransit.commons
 
 object Letters {
-    const val NONE_: Long = 0L
+    const val NONE_ = 0
 
-    const val A: Long = 1L
-    const val B: Long = 2L
-    const val C: Long = 3L
-    const val D: Long = 4L
-    const val E: Long = 5L
-    const val F: Long = 6L
-    const val G: Long = 7L
-    const val H: Long = 8L
-    const val I: Long = 9L
-    const val J: Long = 10L
-    const val K: Long = 11L
-    const val L: Long = 12L
-    const val M: Long = 13L
-    const val N: Long = 14L
-    const val O: Long = 15L
-    const val P: Long = 16L
-    const val Q: Long = 17L
-    const val R: Long = 18L
-    const val S: Long = 19L
-    const val T: Long = 20L
-    const val U: Long = 21L
-    const val V: Long = 22L
-    const val W: Long = 23L
-    const val X: Long = 24L
-    const val Y: Long = 25L
-    const val Z: Long = 26L
+    const val A = 1
+    const val B = 2
+    const val C = 3
+    const val D = 4
+    const val E = 5
+    const val F = 6
+    const val G = 7
+    const val H = 8
+    const val I = 9
+    const val J = 10
+    const val K = 11
+    const val L = 12
+    const val M = 13
+    const val N = 14
+    const val O = 15
+    const val P = 16
+    const val Q = 17
+    const val R = 18
+    const val S = 19
+    const val T = 20
+    const val U = 21
+    const val V = 22
+    const val W = 23
+    const val X = 24
+    const val Y = 25
+    const val Z = 26
 
-    const val OTHER_MIN_: Long = 27L
+    const val OTHER_MIN_ = 27
 }
