@@ -383,7 +383,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 							MTLog.log("%s: Direction headsign string '%s' non descriptive! (%s)", this.routeId, mDirection.getHeadsignValue(), mDirection);
 							MTLog.log("%s: direction headsigns: %s", this.routeId, mDirectionHeadsignStrings);
 							MTLog.log("%s: direction: %s", this.routeId, mDirections);
-							throw new MTLog.Fatal("");
+							throw new MTLog.Fatal("ERROR: Non descriptive direction headsigns!");
 						}
 						MTLog.log("%s: Keeping non-descriptive direction headsign '%s' (%s)", this.routeId, mDirection.getHeadsignValue(), mDirection);
 						directionKeptNonDescriptiveHeadsign = true; // last direction that can keep same head sign
@@ -396,7 +396,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					MTLog.log("%s: Direction headsign string '%s' non descriptive! (%s)", this.routeId, mDirection.getHeadsignValue(), mDirection);
 					MTLog.log("%s: %s", this.routeId, mDirectionHeadsignStrings);
 					MTLog.log("%s: %s", this.routeId, mDirections);
-					throw new MTLog.Fatal("");
+					throw new MTLog.Fatal("ERROR: Non descriptive direction headsigns!");
 				}
 			}
 		}

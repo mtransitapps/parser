@@ -916,7 +916,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean directionFinderEnabled(long routeId, @NotNull GRoute gRoute) {
-		return Configs.getRouteConfig().isDirectionFinderEnabled(getTodayDateInt(), routeId);
+		return directionFinderEnabled() || Configs.getRouteConfig().isDirectionFinderEnabled(getTodayDateInt(), routeId);
 	}
 
 	@Override
