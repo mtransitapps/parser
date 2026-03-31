@@ -7,7 +7,6 @@ import org.mtransit.commons.RegexUtils.END
 import org.mtransit.commons.RegexUtils.any
 import org.mtransit.commons.RegexUtils.atLeastOne
 import org.mtransit.commons.RegexUtils.group
-import org.mtransit.parser.MTLog
 import java.util.regex.Pattern
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
@@ -21,6 +20,7 @@ object MStopIDConverter {
     const val NEXT = 100_000
     const val MAX_DIGIT = 10_000
 
+    @Throws(RuntimeException::class)
     @JvmOverloads
     @JvmStatic
     fun convert(
@@ -31,7 +31,7 @@ object MStopIDConverter {
     ): Int {
         if (stopIdS.isBlank()) {
             return notSupported?.invoke(stopIdS)
-                ?: throw MTLog.Fatal("Unexpected stop ID '$stopIdS' to convert to stop ID integer!")
+                ?: throw RuntimeException("Unexpected stop ID '$stopIdS' to convert to stop ID integer!")
         }
         if (stopIdS.length == 1 && stopIdS[0].isLetter()) {
             endsWithLetter(stopIdS)?.let { return it }
@@ -39,25 +39,25 @@ object MStopIDConverter {
         val matcher = STOP_ID.matcher(stopIdS)
         if (!matcher.find()) {
             return notSupported?.invoke(stopIdS)
-                ?: throw MTLog.Fatal("Unexpected stop ID '$stopIdS' can not be parsed by regex!")
+                ?: throw RuntimeException("Unexpected stop ID '$stopIdS' can not be parsed by regex!")
         }
         val previousChars = matcher.group(2).uppercase()
         val digits = matcher.group(3).toInt()
         val nextChars = matcher.group(4).uppercase()
         if (digits !in 0..MAX_DIGIT) {
             return notSupported?.invoke(stopIdS)
-                ?: throw MTLog.Fatal("Unexpected stop ID digits '$digits' in stop ID '$stopIdS' to convert to stop ID integer!")
+                ?: throw RuntimeException("Unexpected stop ID digits '$digits' in stop ID '$stopIdS' to convert to stop ID integer!")
         }
         var stopId = digits
         stopId += endsWithLetter(nextChars) ?: run {
             nextCharsToInt?.invoke(nextChars)
                 ?: notSupported?.invoke(stopIdS)
-                ?: throw MTLog.Fatal("Unexpected next characters '$nextChars' in stop ID '$stopIdS'!")
+                ?: throw RuntimeException("Unexpected next characters '$nextChars' in stop ID '$stopIdS'!")
         }
         stopId += startsWithLetter(previousChars) ?: run {
             previousCharsToInt?.invoke(previousChars)
                 ?: notSupported?.invoke(stopIdS)
-                ?: throw MTLog.Fatal("Unexpected previous characters '$previousChars' in stop ID '$stopIdS'!")
+                ?: throw RuntimeException("Unexpected previous characters '$previousChars' in stop ID '$stopIdS'!")
         }
         return stopId
     }
