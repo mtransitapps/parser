@@ -157,11 +157,8 @@ data class RouteConfig(
     data class IdCharToIdPartConfig(
         @SerialName("char")
         val char: String,
-        @SerialName("route_id_part")
-        @Deprecated("use idPart instead")
-        val routeIdPart: Long,
         @SerialName("id_part")
-        val idPart: Long = routeIdPart
+        val idPart: Long,
     )
 
     @Serializable
@@ -186,16 +183,10 @@ data class RouteConfig(
 
     @Serializable
     data class StopIdConfig(
-        @Deprecated("use originalStopId instead")
-        @SerialName("stop_code")
-        val stopCode: String,
         @SerialName("original_stop_id")
-        val originalStopId: String = stopCode,
-        @Deprecated("use stopIdInt instead")
-        @SerialName("stop_id")
-        val stopId: Int,
+        val originalStopId: String,
         @SerialName("stop_id_int")
-        val stopIdInt: Int = stopId
+        val stopIdInt: Int,
     )
 
     @Serializable
