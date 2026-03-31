@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt.data
 
+import androidx.annotation.Discouraged
 import org.mtransit.commons.Letters
 import org.mtransit.commons.RegexUtils.BEGINNING
 import org.mtransit.commons.RegexUtils.DIGIT_CAR
@@ -8,7 +9,6 @@ import org.mtransit.commons.RegexUtils.any
 import org.mtransit.commons.RegexUtils.atLeastOne
 import org.mtransit.commons.RegexUtils.group
 import org.mtransit.parser.MTLog
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlin.math.absoluteValue
 
@@ -222,9 +222,21 @@ object MRouteSNToIDConverter {
     @JvmStatic
     fun startsWith(digit: Int) = digit * PREVIOUS
 
+    @Discouraged("use Int digit")
+    @JvmStatic
+    fun startsWith(digit: Long) = digit * PREVIOUS
+
     @JvmStatic
     fun endsWith(digit: Int) = digit * NEXT
 
+    @Discouraged("use Int digit")
+    @JvmStatic
+    fun endsWith(digit: Long) = digit * NEXT
+
     @JvmStatic
     fun other(digit: Int) = (Letters.OTHER_MIN_ + digit).toLong()
+
+    @Discouraged("use Int digit")
+    @JvmStatic
+    fun other(digit: Long) = Letters.OTHER_MIN_ + digit
 }
