@@ -451,7 +451,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			if (sb.length() == 0) {
 				throw new MTLog.Fatal("%s: Unsupported default route long name for route '%s'!", this.routeId, mRoute);
 			}
-			mRoute.setLongName(sb.toString());
+			mRoute.setLongName(agencyTools.cleanRouteLongName(sb.toString()));
 			mRoutes.put(mRoute.getId(), mRoute);
 		}
 	}
