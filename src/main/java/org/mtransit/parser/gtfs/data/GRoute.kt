@@ -272,6 +272,9 @@ data class GRoute(
             } else if (routeSortOrder1 == null) {
                 return routeSortOrder2
             }
+            if (routeSortOrder1 == routeSortOrder2) {
+                return routeSortOrder1
+            }
             return null // -1 // not merged < route sort order not used at the moment
         }
     }
