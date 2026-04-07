@@ -535,8 +535,9 @@ public class GReader {
 				if (previousGRoute != null && previousGRoute.equalsExceptMergeable(gRoute)) {
 					final String mergedRouteLongName = GRoute.mergeRouteLongNames(previousGRoute.getRouteLongName(), gRoute.getRouteLongName());
 					final String mergedRouteColor = GRoute.mergeRouteColors(previousGRoute.getRouteColor(), gRoute.getRouteColor());
+					final Integer mergedRouteSortOrder = GRoute.mergeRouteSortOrders(previousGRoute.getRouteSortOrder(), gRoute.getRouteSortOrder());
 					if (mergedRouteLongName != null) { // merge successful
-						gSpec.addRoute(previousGRoute.clone(mergedRouteLongName, mergedRouteColor), true);
+						gSpec.addRoute(previousGRoute.clone(mergedRouteLongName, mergedRouteColor, mergedRouteSortOrder), true);
 						return;
 					}
 				}

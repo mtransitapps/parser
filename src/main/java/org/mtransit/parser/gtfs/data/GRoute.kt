@@ -143,14 +143,18 @@ data class GRoute(
             routeDesc != o.routeDesc -> false // not equal
             routeType != o.routeType -> false // not equal
             routeTextColor != o.routeTextColor -> false // not equal
-            routeSortOrder != o.routeSortOrder -> false // not equal
             else -> true // mostly equal
         }
     }
 
-    fun clone(routeLongName: String?, routeColor: String?) = this.copy(
+    fun clone(
+        routeLongName: String?,
+        routeColor: String?,
+        routeSortOrder: Int?,
+    ) = this.copy(
         routeLongName = routeLongName,
         routeColor = routeColor,
+        routeSortOrder = routeSortOrder,
     )
 
     companion object {
@@ -259,6 +263,19 @@ data class GRoute(
             val mergedColorInt = ColorUtils.blendColors(routeColor1Int, routeColor2Int, 0.5f)
             val mergedColorHex = ColorUtils.convertToHEX(mergedColorInt)
             return mergedColorHex
+        }
+
+        @JvmStatic
+        fun mergeRouteSortOrders(routeSortOrder1: Int?, routeSortOrder2: Int?): Int? {
+            if (routeSortOrder2 == null) {
+                return routeSortOrder1
+            } else if (routeSortOrder1 == null) {
+                return routeSortOrder2
+            }
+            if (routeSortOrder1 == routeSortOrder2) {
+                return routeSortOrder1
+            }
+            return null // -1 // not merged < route sort order not used at the moment
         }
     }
 }
