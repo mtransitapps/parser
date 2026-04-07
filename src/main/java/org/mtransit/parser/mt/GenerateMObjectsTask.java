@@ -371,7 +371,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			if (headsignTypeString && mDirectionHeadsignStrings.size() != mDirections.size()) {
 				MTLog.log("%s: Non descriptive direction headsigns (%s different headsign(s) for %s directions)", this.routeId, mDirectionHeadsignStrings.size(), mDirections.size());
 				for (MDirection mDirection : mDirections.values()) {
-					MTLog.log("%s: mDirection: %s", this.routeId, mDirection);
+					MTLog.logDebug("%s: - %s", this.routeId, mDirection);
 					if (mDirectionStopTimesHeadsign.containsKey(mDirection.getId()) //
 							&& !mDirection.getHeadsignValue().equals(mDirectionStopTimesHeadsign.get(mDirection.getId()))) {
 						MTLog.log("%s: Replace direction headsign '%s' with stop times headsign '%s' (%s)", this.routeId, mDirection.getHeadsignValue(),
@@ -594,10 +594,19 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								MTLog.log("%s: Trip stop times head-sign different for same direction ID ('%s'!='%s')", this.routeId,
 										directionStopTimesHeadsign, mDirectionStopTimesHeadsign.get(mDirection.getId()));
 							}
-							mDirectionStopTimesHeadsign.put(mDirection.getId(),
-									MDirection.mergeHeadsignValue(
-											mDirectionStopTimesHeadsign.get(mDirection.getId()),
-											directionStopTimesHeadsign));
+							String mergedHeadsignValue = MDirection.mergeHeadsignValue(
+									mDirectionStopTimesHeadsign.get(mDirection.getId()),
+									directionStopTimesHeadsign
+							);
+							if (mergedHeadsignValue != null) {
+								mergedHeadsignValue = agencyTools.cleanDirectionHeadsign(
+										gRoute,
+										gTrip.getDirectionIdOrDefault(),
+										true,
+										mergedHeadsignValue
+								);
+							}
+							mDirectionStopTimesHeadsign.put(mDirection.getId(), mergedHeadsignValue);
 						}
 					} else {
 						mDirectionStopTimesHeadsign.put(mDirection.getId(), directionStopTimesHeadsign);
