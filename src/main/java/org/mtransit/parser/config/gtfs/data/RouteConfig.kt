@@ -167,7 +167,7 @@ data class RouteConfig(
     @Serializable
     data class RouteDefToShortNameConfig(
         @SerialName("route_id")
-        val routeId: String,
+        val routeId: String? = null,
         @SerialName("route_long_name")
         val routeLongName: String? = null,
         @SerialName("route_short_name")
@@ -261,7 +261,6 @@ data class RouteConfig(
     fun getRouteShortNameForRoute(gRoute: GRoute) =
         //noinspection DiscouragedApi
         (this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeId == it.routeId }
-            ?: this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeShortName == it.routeShortName }
             ?: this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName })
             ?.routeShortName
 
