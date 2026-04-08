@@ -256,16 +256,13 @@ data class RouteConfig(
             .singleOrNull { it.routeId == routeId }?.routeShortName
 
     @JvmOverloads
-    fun getRouteColor(gRoute: GRoute, override: Boolean = false): String? {
+    fun getRouteColor(gRoute: GRoute, defaultColor: String? = gRoute.routeColor, override: Boolean = false): String? {
         //noinspection DiscouragedApi
-        (this.routeColors.singleOrNull { gRoute.routeId == it.routeId }
+        return (this.routeColors.singleOrNull { gRoute.routeId == it.routeId }
             ?: this.routeColors.singleOrNull { gRoute.routeShortName == it.routeShortName })
-            ?.let { routeColorConf ->
-                if (routeColorConf.override || !override) {
-                    return routeColorConf.color
-                }
-            }
-        return gRoute.routeColor
+            ?.takeIf { it.override || !override }
+            ?.color
+            ?: defaultColor
     }
 
     fun isRouteColorIgnored(routeColor: String) =

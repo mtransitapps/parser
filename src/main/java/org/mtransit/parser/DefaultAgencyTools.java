@@ -667,6 +667,23 @@ public class DefaultAgencyTools implements GAgencyTools {
 		return mRoute.mergeLongName(mRouteToMerge);
 	}
 
+	@Nullable
+	@Override
+	public String getRouteColor(@NotNull GRoute gRoute, @NotNull MAgency agency) {
+		if (defaultAgencyColorEnabled()) {
+			final String routeColorFixed = fixColor(gRoute.getRouteColor());
+			if (routeColorFixed == null) {
+				return provideMissingRouteColor(gRoute);
+			} else if (agency.getColor().equalsIgnoreCase(routeColorFixed)) {
+				return fixColor(Configs.getRouteConfig().getRouteColor(gRoute, null));
+			} else {
+				return routeColorFixed;
+			}
+		}
+		//noinspection deprecation
+		return getRouteColor(gRoute);
+	}
+
 	@SuppressWarnings("DeprecatedIsStillUsed")
 	@Deprecated
 	@Nullable
@@ -674,29 +691,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public String getRouteColor(@NotNull GRoute gRoute) {
 		final String routeColorFixed = fixColor(gRoute.getRouteColor());
 		if (routeColorFixed == null) {
-			return provideMissingRouteColor(gRoute); // use agency color
-		}
-		if (getAgencyColor().equalsIgnoreCase(routeColorFixed)) {
-			return provideMissingRouteColor(gRoute); // use agency color
-		}
-		return routeColorFixed;
-	}
-
-	@Nullable
-	@Override
-	public String getRouteColor(@NotNull GRoute gRoute, @NotNull MAgency agency) {
-		if (defaultAgencyColorEnabled()) {
-			final String routeColorFixed = fixColor(gRoute.getRouteColor());
-			if (routeColorFixed == null) {
-				return provideMissingRouteColor(gRoute); // use agency color
-			}
-			if (agency.getColor().equalsIgnoreCase(routeColorFixed)) {
-				return provideMissingRouteColor(gRoute); // use agency color
-			}
+			return provideMissingRouteColor(gRoute);
+		} else if (getAgencyColor().equalsIgnoreCase(routeColorFixed)) {
+			return fixColor(Configs.getRouteConfig().getRouteColor(gRoute, null));
+		} else {
 			return routeColorFixed;
 		}
-		//noinspection deprecation
-		return getRouteColor(gRoute);
 	}
 
 	@Nullable
