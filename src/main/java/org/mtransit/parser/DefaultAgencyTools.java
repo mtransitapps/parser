@@ -578,9 +578,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String provideMissingRouteShortName(@NotNull GRoute gRoute) {
 		//noinspection DiscouragedApi
-		final String routeShortNameFromRout = Configs.getRouteConfig().getRouteShortNameForRoute(gRoute);
-		if (routeShortNameFromRout != null) {
-			return routeShortNameFromRout;
+		final String routeShortNameFromRoute = Configs.getRouteConfig().getRouteShortNameForRoute(gRoute);
+		if (routeShortNameFromRoute != null) {
+			return routeShortNameFromRoute;
 		}
 		if (Configs.getRouteConfig().getUseRouteLongNameForMissingRouteShortName()) {
 			return gRoute.getRouteLongNameOrDefault();

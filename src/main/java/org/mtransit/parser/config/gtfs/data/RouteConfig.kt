@@ -172,7 +172,13 @@ data class RouteConfig(
         val routeLongName: String? = null,
         @SerialName("route_short_name")
         val routeShortName: String,
-    )
+    ) {
+        init {
+            require(routeId != null || routeLongName != null) {
+                "Either 'route_id' or 'route_long_name' must be provided in RouteDefToShortNameConfig."
+            }
+        }
+    }
 
     @Serializable
     data class RouteColor(
