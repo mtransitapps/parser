@@ -344,6 +344,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public Integer getOriginalAgencyRouteType() {
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getOriginalRouteTypeId();
+		}
 		return getAgencyRouteType();
 	}
 
@@ -575,7 +578,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String provideMissingRouteShortName(@NotNull GRoute gRoute) {
 		//noinspection DiscouragedApi
-		final String routeShortNameFromRouteId = Configs.getRouteConfig().getRouteShortNameFromRouteId(gRoute.getRouteId());
+		final String routeShortNameFromRouteId = Configs.getRouteConfig().getRouteShortNameForRoute(gRoute);
 		if (routeShortNameFromRouteId != null) {
 			return routeShortNameFromRouteId;
 		}
