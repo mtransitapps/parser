@@ -40,8 +40,11 @@ data class RouteConfig(
     val useRouteLongNameForRouteShortName: Boolean = false, // OPT-IN feature
     @SerialName("use_route_long_name_for_missing_route_short_name")
     val useRouteLongNameForMissingRouteShortName: Boolean = false, // OPT-IN feature
+    @Deprecated("use routeToRouteShortNameConfigs instead")
     @SerialName("route_id_to_route_short_name_configs")
-    val routeIdToRouteShortNameConfigs: List<RouteIdToRouteShortNameConfig> = emptyList(),
+    val routeIdToRouteShortNameConfigs: List<RouteDefToShortNameConfig> = emptyList(),
+    @SerialName("route_to_short_name_configs")
+    val routeToRouteShortNameConfigs: List<RouteDefToShortNameConfig> = routeIdToRouteShortNameConfigs,
     @SerialName("route_short_name_cleaners")
     val routeShortNameCleaners: List<Cleaner> = emptyList(),
     // long-name
@@ -162,12 +165,20 @@ data class RouteConfig(
     )
 
     @Serializable
-    data class RouteIdToRouteShortNameConfig(
+    data class RouteDefToShortNameConfig(
         @SerialName("route_id")
-        val routeId: String,
+        val routeId: String? = null,
+        @SerialName("route_long_name")
+        val routeLongName: String? = null,
         @SerialName("route_short_name")
         val routeShortName: String,
-    )
+    ) {
+        init {
+            require(routeId != null || routeLongName != null) {
+                "Either 'route_id' or 'route_long_name' must be provided in RouteDefToShortNameConfig."
+            }
+        }
+    }
 
     @Serializable
     data class RouteColor(
@@ -175,6 +186,8 @@ data class RouteConfig(
         val routeId: String? = null,
         @SerialName("route_short_name")
         val routeShortName: String?,
+        @SerialName("route_long_name")
+        val routeLongName: String? = null,
         @SerialName("color")
         val color: String,
         @SerialName("override")
@@ -251,19 +264,21 @@ data class RouteConfig(
         this.routeIdPreviousCharConfigs
             .singleOrNull { it.char == previousChars }?.idPart
 
-    fun getRouteShortNameFromRouteId(routeId: String) =
-        this.routeIdToRouteShortNameConfigs
-            .singleOrNull { it.routeId == routeId }?.routeShortName
+    fun getRouteShortNameForRoute(gRoute: GRoute) =
+        //noinspection DiscouragedApi
+        (this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeId == it.routeId }
+            ?: this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName })
+            ?.routeShortName
 
     @JvmOverloads
-    fun getRouteColor(gRoute: GRoute, defaultColor: String? = gRoute.routeColor, override: Boolean = false): String? {
+    fun getRouteColor(gRoute: GRoute, defaultColor: String? = gRoute.routeColor, override: Boolean = false) =
         //noinspection DiscouragedApi
-        return (this.routeColors.singleOrNull { gRoute.routeId == it.routeId }
-            ?: this.routeColors.singleOrNull { gRoute.routeShortName == it.routeShortName })
+        (this.routeColors.singleOrNull { gRoute.routeId == it.routeId }
+            ?: this.routeColors.singleOrNull { gRoute.routeShortName == it.routeShortName }
+            ?: this.routeColors.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName })
             ?.takeIf { it.override || !override }
             ?.color
             ?: defaultColor
-    }
 
     fun isRouteColorIgnored(routeColor: String) =
         this.routeColorsIgnored.any { it.equals(routeColor, ignoreCase = true) }
