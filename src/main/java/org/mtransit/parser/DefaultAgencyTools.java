@@ -678,7 +678,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (routeColorFixed == null) {
 				return provideMissingRouteColor(gRoute);
 			} else if (agency.getColor().equalsIgnoreCase(routeColorFixed)) {
-				return fixColor(Configs.getRouteConfig().getRouteColor(gRoute, null));
+				return provideMissingRouteColor(gRoute);
 			} else {
 				return routeColorFixed;
 			}
@@ -696,7 +696,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		if (routeColorFixed == null) {
 			return provideMissingRouteColor(gRoute);
 		} else if (getAgencyColor().equalsIgnoreCase(routeColorFixed)) {
-			return fixColor(Configs.getRouteConfig().getRouteColor(gRoute, null));
+			return provideMissingRouteColor(gRoute);
 		} else {
 			return routeColorFixed;
 		}
