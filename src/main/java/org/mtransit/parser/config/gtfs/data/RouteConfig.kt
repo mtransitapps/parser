@@ -190,8 +190,6 @@ data class RouteConfig(
         val routeLongName: String? = null,
         @SerialName("color")
         val color: String,
-        @SerialName("override")
-        val override: Boolean = false,
     )
 
     @Serializable
@@ -270,15 +268,12 @@ data class RouteConfig(
             ?: this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName })
             ?.routeShortName
 
-    @JvmOverloads
-    fun getRouteColor(gRoute: GRoute, defaultColor: String? = gRoute.routeColor, override: Boolean = false) =
+    fun getRouteColor(gRoute: GRoute) =
         //noinspection DiscouragedApi
         (this.routeColors.singleOrNull { gRoute.routeId == it.routeId }
             ?: this.routeColors.singleOrNull { gRoute.routeShortName == it.routeShortName }
             ?: this.routeColors.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName })
-            ?.takeIf { it.override || !override }
             ?.color
-            ?: defaultColor
 
     fun isRouteColorIgnored(routeColor: String) =
         this.routeColorsIgnored.any { it.equals(routeColor, ignoreCase = true) }
