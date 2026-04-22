@@ -11,7 +11,7 @@ data class MAgency(
     val idInt: Int,
     val name: String,
     val url: String,
-    val timezone: String,
+    val timezoneId: String,
     val color: String,
     val type: Int,
 ) : Comparable<MAgency?> {
@@ -49,7 +49,7 @@ data class MAgency(
             this.idInt != other.idInt -> this._id.compareTo(other._id)
             this.name != other.name -> this.name.compareTo(other.name)
             this.url != other.url -> this.url.compareTo(other.url)
-            this.timezone != other.timezone -> this.timezone.compareTo(other.timezone)
+            this.timezoneId != other.timezoneId -> this.timezoneId.compareTo(other.timezoneId)
             this.color != other.color -> this.color.compareTo(other.color)
             this.type != other.type -> this.type.compareTo(other.type)
             else -> 0

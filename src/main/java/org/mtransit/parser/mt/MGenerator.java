@@ -1103,7 +1103,7 @@ public class MGenerator {
 				ow.write(getRESOURCES_INTEGER(GTFS_RDS_AGENCY_EXTENDED_TYPE, gAgencyTools.getAgencyExtendedRouteType()));
 				ow.write(Constants.NEW_LINE);
 			}
-			ow.write(getRESOURCES_STRING(GTFS_RDS_TIMEZONE, mSpec.getFirstAgency().getTimezone()));
+			ow.write(getRESOURCES_STRING(GTFS_RDS_TIMEZONE, mSpec.getFirstAgency().getTimezoneId()));
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_STRING(GTFS_RDS_COLOR, mSpec.getFirstAgency().getColor()));
 			ow.write(Constants.NEW_LINE);
@@ -1193,7 +1193,7 @@ public class MGenerator {
 			ow.write(getRESOURCES_BOOL(fileBase + GTFS_RDS_FREQUENCY_AVAILABLE, mSpec.hasRouteFrequencies()));
 			ow.write(Constants.NEW_LINE);
 			if (StringUtils.isEmpty(fileBase)) {
-				ow.write(getRESOURCES_STRING(GTFS_RDS_TIMEZONE, mSpec.getFirstAgency().getTimezone()));
+				ow.write(getRESOURCES_STRING(GTFS_RDS_TIMEZONE, mSpec.getFirstAgency().getTimezoneId()));
 				ow.write(Constants.NEW_LINE);
 			}
 			ow.write(getRESOURCES_STRING(fileBase + GTFS_RDS_AREA_MIN_LAT, minLat));
@@ -1226,9 +1226,9 @@ public class MGenerator {
 		try {
 			final DateFormat dateTimeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH);
 			try {
-				dateTimeFormat.setTimeZone(TimeZone.getTimeZone(mSpec.getFirstAgency().getTimezone()));
+				dateTimeFormat.setTimeZone(TimeZone.getTimeZone(mSpec.getFirstAgency().getTimezoneId()));
 			} catch (Exception e) {
-				MTLog.logNonFatal(e, "Error while setting time-zone for commented date time %s!", mSpec.getFirstAgency().getTimezone());
+				MTLog.logNonFatal(e, "Error while setting time-zone for commented date time %s!", mSpec.getFirstAgency().getTimezoneId());
 			}
 			final String formattedTime = dateTimeFormat.format(new Date(TimeUnit.SECONDS.toMillis(timestampInSec)));
 			return "<!-- " + formattedTime + " -->";

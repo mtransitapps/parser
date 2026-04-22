@@ -251,7 +251,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 					&& (lastDeparture < -1 || lastDeparture < lastFrequency.getEndTime())) {
 				lastDeparture = lastFrequency.getEndTime();
 			}
-			DATE_TIME_FORMAT.setTimeZone(TimeZone.getTimeZone(mAgenciesList.get(0).getTimezone()));
+			DATE_TIME_FORMAT.setTimeZone(TimeZone.getTimeZone(mAgenciesList.get(0).getTimezoneId()));
 			try {
 				firstTimestamp = GFieldTypes.toTimeStamp(DATE_TIME_FORMAT, firstCalendarDate, firstDeparture);
 			} catch (Exception e) {
