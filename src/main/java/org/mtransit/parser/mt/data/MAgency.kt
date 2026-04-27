@@ -1,6 +1,8 @@
 package org.mtransit.parser.mt.data
 
 import androidx.annotation.Discouraged
+import org.mtransit.parser.db.SQLUtils.escapeId
+import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GAgency
 import org.mtransit.parser.gtfs.data.GIDs
@@ -29,19 +31,11 @@ data class MAgency(
         agencyTools.agencyRouteType,
     )
 
-    @Suppress("unused")
-    @get:Discouraged(message = "Not memory efficient")
-    val id: String get() = _id
+    fun getCleanAgencyId(agencyTools: GAgencyTools): String = _id.convertAgencyId(agencyTools)
 
-    private val _id: String
-        get() {
-            return GIDs.getString(idInt)
-        }
+    private val _id: String get() = GIDs.getString(idInt)
 
-    fun toStringPlus(): String {
-        return toString() +
-                "+(_id:$_id)"
-    }
+    fun toStringPlus() = toString() + "+(_id:$_id)"
 
     override fun compareTo(other: MAgency?): Int {
         return when {
@@ -98,5 +92,14 @@ data class MAgency(
                 }
             return null
         }
+
+        internal fun convert(agencyTools: GAgencyTools, agencyId: String): String =
+            agencyTools.cleanAgencyId(agencyId).escapeId()
     }
 }
+
+fun String.convertAgencyId(agencyTools: GAgencyTools) =
+    MAgency.convert(
+        agencyTools = agencyTools,
+        agencyId = this,
+    )

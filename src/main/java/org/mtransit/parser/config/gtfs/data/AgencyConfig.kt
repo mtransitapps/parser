@@ -15,6 +15,8 @@ data class AgencyConfig(
      */
     @SerialName("other_agency_ids")
     val otherAgencyIds: List<String> = emptyList(), // OPT-IN filter
+    @SerialName("agency_id_cleanup_regex")
+    val agencyIdCleanupRegex: String? = null, // optional
     /**
      * Route type filter (integer from GTFS Static `routes.txt` > `route_type` field)
      * (useful when multiple route type in same GTFS)

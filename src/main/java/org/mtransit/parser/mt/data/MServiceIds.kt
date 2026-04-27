@@ -65,8 +65,7 @@ object MServiceIds {
     fun containsAllIdInts(idInts: Iterable<Int>)
         = idInts.all { idIntToId.containsKey(it) }
 
-    @JvmStatic
-    fun convert(agencyTools: GAgencyTools, serviceId: String, keep: Boolean = true, quotesString: Boolean = false): String =
+    internal fun convert(agencyTools: GAgencyTools, serviceId: String, keep: Boolean = true, quotesString: Boolean = false): String =
         if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {
             getInt(agencyTools.cleanServiceId(serviceId, keep)).toString()
         } else {
