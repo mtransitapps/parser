@@ -450,7 +450,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("foo foo / trip head-sign", result?.headSign)
+        assertEquals("foo foo/trip head-sign", result?.headSign)
     }
 
     @Test
@@ -622,7 +622,7 @@ class MDirectionHeadSignFinderTest {
         // Act
         val result = MDirectionHeadSignFinder.findDirectionHeadSign(RID, gRouteTrips, routeGTFS, directionId, agencyTools)
         // Assert
-        assertEquals("foo foo / trip head-sign", result?.headSign)
+        assertEquals("foo foo/trip head-sign", result?.headSign)
     }
 
     @Test

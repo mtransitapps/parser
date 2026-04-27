@@ -43,7 +43,7 @@ object MTripIds {
         synchronized(incrementLock) {
             val iterator = idToIdInt.asMutableMap().entries.iterator()
             while (iterator.hasNext()) {
-                val (tripId,tripIdInt) = iterator.next()
+                val (tripId, tripIdInt) = iterator.next()
                 if (tripId !in usedTripIds) {
                     idIntToId.remove(tripIdInt)
                     iterator.remove()
@@ -88,8 +88,7 @@ object MTripIds {
     @JvmStatic
     fun getAllSorted() = getAll().sorted()
 
-    @JvmStatic
-    fun convert(tripId: String, quotesString: Boolean = false) =
+    internal fun convert(tripId: String, quotesString: Boolean = false) =
         if (FeatureFlags.F_EXPORT_TRIP_ID_INTS) {
             getInt(tripId).toString()
         } else {

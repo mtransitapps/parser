@@ -315,10 +315,10 @@ public class MGenerator {
 		// STRINGS
 		dumpStrings(mSpec, fileBase, deleteAll, dataDirF, rawDirF, dbConnection); // AFTER ALL OTHER TABLE W/ STRINGS
 		if (deleteAll) {
-			dumpValues(rawDirF, fileBase, null, null, null, null, null, -1, -1, null, true);
+			dumpValues(gAgencyTools, rawDirF, fileBase, null, null, null, null, null, -1, -1, null, true);
 		} else {
 			dumpCommonValues(rawDirF, gAgencyTools, mSpec, inputUrl);
-			dumpValues(
+			dumpValues(gAgencyTools,
 					rawDirF, fileBase, mSpec,
 					minMaxLatLng.first.first, minMaxLatLng.second.first, minMaxLatLng.first.second, minMaxLatLng.second.second,
 					mSpec.getFirstTimestampInSeconds(), mSpec.getLastTimestampInSeconds(), inputUrl,
@@ -1057,6 +1057,7 @@ public class MGenerator {
 	private static final String GTFS_RDS_AGENCY_EXTENDED_TYPE = "gtfs_rts_agency_extended_type"; // do not change to avoid breaking compat w/ old modules
 	public static final String GTFS_RDS_TIMEZONE = "gtfs_rts_timezone"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_COLOR = "gtfs_rts_color"; // do not change to avoid breaking compat w/ old modules
+	private static final String GTFS_RDS_AGENCY_ID_CLEANUP_REGEX = "gtfs_rts_agency_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_SERVICE_ID_CLEANUP_REGEX = "gtfs_rts_service_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_ROUTE_ID_CLEANUP_REGEX = "gtfs_rts_route_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
 	private static final String GTFS_RDS_TRIP_ID_CLEANUP_REGEX = "gtfs_rts_trip_id_cleanup_regex"; // do not change to avoid breaking compat w/ old modules
@@ -1095,7 +1096,7 @@ public class MGenerator {
 				ow.write(Constants.NEW_LINE);
 			}
 			//noinspection DiscouragedApi
-			ow.write(getRESOURCES_STRING(GTFS_RDS_AGENCY_ID, mSpec.getFirstAgency().getId()));
+			ow.write(getRESOURCES_STRING(GTFS_RDS_AGENCY_ID, mSpec.getFirstAgency().getCleanAgencyId(gAgencyTools)));
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_INTEGER(GTFS_RDS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
 			ow.write(Constants.NEW_LINE);
@@ -1107,6 +1108,10 @@ public class MGenerator {
 			ow.write(Constants.NEW_LINE);
 			ow.write(getRESOURCES_STRING(GTFS_RDS_COLOR, mSpec.getFirstAgency().getColor()));
 			ow.write(Constants.NEW_LINE);
+			if (gAgencyTools.getAgencyIdCleanupRegex() != null) {
+				ow.write(getRESOURCES_STRING(GTFS_RDS_AGENCY_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getAgencyIdCleanupRegex())));
+				ow.write(Constants.NEW_LINE);
+			}
 			if (gAgencyTools.getServiceIdCleanupRegex() != null) {
 				ow.write(getRESOURCES_STRING(GTFS_RDS_SERVICE_ID_CLEANUP_REGEX, escapeResString(gAgencyTools.getServiceIdCleanupRegex())));
 				ow.write(Constants.NEW_LINE);
@@ -1151,7 +1156,7 @@ public class MGenerator {
 		return string;
 	}
 
-	private static void dumpValues(File dumpDirF, String fileBase, MSpec mSpec, Double minLat, Double maxLat, Double minLng, Double maxLng,
+	private static void dumpValues(GAgencyTools gAgencyTools, File dumpDirF, String fileBase, MSpec mSpec, Double minLat, Double maxLat, Double minLng, Double maxLng,
 								   int firstTimestampInSec, int lastTimestampInSec, @Nullable String inputUrl, boolean deleteAll) {
 		File file;
 		BufferedWriter ow = null;
@@ -1183,7 +1188,7 @@ public class MGenerator {
 					ow.write(Constants.NEW_LINE);
 				}
 				//noinspection DiscouragedApi
-				ow.write(getRESOURCES_STRING(GTFS_RDS_AGENCY_ID, mSpec.getFirstAgency().getId()));
+				ow.write(getRESOURCES_STRING(GTFS_RDS_AGENCY_ID, mSpec.getFirstAgency().getCleanAgencyId(gAgencyTools)));
 				ow.write(Constants.NEW_LINE);
 				ow.write(getRESOURCES_INTEGER(GTFS_RDS_AGENCY_TYPE, mSpec.getFirstAgency().getType()));
 				ow.write(Constants.NEW_LINE);

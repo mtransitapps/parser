@@ -320,6 +320,34 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Nullable
 	@Override
+	public String getAgencyIdCleanupRegex() {
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getAgencyIdCleanupRegex();
+		}
+		return null; // OPT-IN feature
+	}
+
+	@Nullable
+	private Pattern agencyIdCleanupPattern = null;
+
+	private boolean agencyIdCleanupPatternSet = false;
+
+	private @Nullable Pattern getAgencyIdCleanupPattern() {
+		if (this.agencyIdCleanupPattern == null && !agencyIdCleanupPatternSet) {
+			this.agencyIdCleanupPattern = GTFSCommons.makeIdCleanupPattern(getAgencyIdCleanupRegex());
+			this.agencyIdCleanupPatternSet = true;
+		}
+		return this.agencyIdCleanupPattern;
+	}
+
+	@NotNull
+	@Override
+	public String cleanAgencyId(@NotNull String gAgencyId) {
+		return GTFSCommons.cleanOriginalString(gAgencyId, getAgencyIdCleanupPattern());
+	}
+
+	@Nullable
+	@Override
 	public String getAgencyId() {
 		return Configs.getAgencyConfig() == null ? null : Configs.getAgencyConfig().getAgencyId(); // OPT-IN filter
 	}

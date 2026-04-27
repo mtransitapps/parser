@@ -73,6 +73,12 @@ public interface GAgencyTools {
 	@Nullable
 	String getAgencyId();
 
+	@Nullable
+	String getAgencyIdCleanupRegex();
+
+	@NotNull
+	String cleanAgencyId(@NotNull String gAgencyId);
+
 	@NotNull
 	Integer getAgencyRouteType();
 
