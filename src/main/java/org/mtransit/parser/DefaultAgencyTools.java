@@ -332,7 +332,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private boolean agencyIdCleanupPatternSet = false;
 
-	private @Nullable Pattern geAgencyIdCleanupPattern() {
+	private @Nullable Pattern getAgencyIdCleanupPattern() {
 		if (this.agencyIdCleanupPattern == null && !agencyIdCleanupPatternSet) {
 			this.agencyIdCleanupPattern = GTFSCommons.makeIdCleanupPattern(getAgencyIdCleanupRegex());
 			this.agencyIdCleanupPatternSet = true;
@@ -343,7 +343,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanAgencyId(@NotNull String gAgencyId) {
-		return GTFSCommons.cleanOriginalString(gAgencyId, geAgencyIdCleanupPattern());
+		return GTFSCommons.cleanOriginalString(gAgencyId, getAgencyIdCleanupPattern());
 	}
 
 	@Nullable
