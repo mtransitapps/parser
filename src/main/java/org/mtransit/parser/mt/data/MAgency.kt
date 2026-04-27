@@ -1,8 +1,6 @@
 package org.mtransit.parser.mt.data
 
-import androidx.annotation.Discouraged
 import org.mtransit.parser.db.SQLUtils.escapeId
-import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.gtfs.data.GAgency
 import org.mtransit.parser.gtfs.data.GIDs

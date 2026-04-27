@@ -190,7 +190,7 @@ data class MDirection @JvmOverloads constructor(
             }
         }
 
-        private const val SLASH = " / "
+        private const val SLASH = "/"
 
         @JvmStatic
         fun mergeHeadsignValue(
