@@ -215,6 +215,7 @@ data class GRoute(
         }
 
         private const val SLASH_ = " / "
+        private const val SLASH= "/"
 
         @JvmStatic
         fun mergeRouteLongNames(routeLongName1: String?, routeLongName2: String?): String? {
@@ -242,9 +243,10 @@ data class GRoute(
                         routeLongName2.dropLast(suffix.length) +
                         suffix
             }
-            val routeLongName1Split = routeLongName1.split(SLASH_)
-            val routeLongName2Split = routeLongName2.split(SLASH_)
-            val routeLongNamesSplit = (routeLongName1Split + routeLongName2Split).distinct().sorted()
+            val routeLongName1Split = routeLongName1.split(SLASH)
+            val routeLongName2Split = routeLongName2.split(SLASH)
+            val routeLongNamesSplit = (routeLongName1Split + routeLongName2Split)
+                .map { it.trim() }.filter { it.isNotBlank() }.distinct().sorted()
             return routeLongNamesSplit.joinToString(SLASH_)
         }
 
