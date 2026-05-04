@@ -695,17 +695,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean mergeRouteLongName(@NotNull MRoute mRoute, @NotNull MRoute mRouteToMerge) {
-		final String mergedRouteLongName = mergeRouteLongNamesOrNull(mRoute.getLongName(), mRouteToMerge.getLongName());
-		if (mergedRouteLongName != null) {
-			mRoute.setLongName(mergedRouteLongName);
-		}
-		return mergedRouteLongName != null;
-	}
-
-	@Nullable
-	@Override
-	public String mergeRouteLongNamesOrNull(@Nullable String routeLongName1, @Nullable String routeLongName2) {
-		return GRoute.mergeRouteLongNames(routeLongName1, routeLongName2);
+		return mRoute.mergeLongName(mRouteToMerge);
 	}
 
 	@Nullable

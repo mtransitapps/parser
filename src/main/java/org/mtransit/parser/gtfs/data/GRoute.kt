@@ -181,7 +181,7 @@ data class GRoute(
                 ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
             originalRouteId = line[ROUTE_ID] ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_ID from $line!"),
             routeShortName = line[ROUTE_SHORT_NAME]?.trim()
-                ?.let { rsn -> rsn.takeIf { it.isNotEmpty() }?.let { agencyTools?.cleanRouteShortName(it) } ?: rsn }
+                ?.let { it.takeIf { it.isNotEmpty() }?.let { agencyTools?.cleanRouteShortName(it) } ?: it }
                 ?.takeUnless { agencyTools?.useRouteIdForRouteShortName() == true }
                 ?: line[ROUTE_ID]?.trim()?.let { agencyTools?.cleanRouteOriginalId(it) ?: it }
                 ?: EMPTY,
@@ -214,7 +214,7 @@ data class GRoute(
             )
         }
 
-        private const val SLASH_ = " / "
+        private const val SLASH_: String = " / "
 
         @JvmStatic
         fun mergeRouteLongNames(routeLongName1: String?, routeLongName2: String?): String? {
@@ -242,10 +242,11 @@ data class GRoute(
                         routeLongName2.dropLast(suffix.length) +
                         suffix
             }
-            val routeLongName1Split = routeLongName1.split(SLASH_)
-            val routeLongName2Split = routeLongName2.split(SLASH_)
-            val routeLongNamesSplit = (routeLongName1Split + routeLongName2Split).distinct().sorted()
-            return routeLongNamesSplit.joinToString(SLASH_)
+            return if (routeLongName1 > routeLongName2) {
+                routeLongName2 + SLASH_ + routeLongName1
+            } else {
+                routeLongName1 + SLASH_ + routeLongName2
+            }
         }
 
         @JvmStatic

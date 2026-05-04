@@ -6,6 +6,7 @@ import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.quotes
 import org.mtransit.parser.db.SQLUtils.quotesEscape
 import org.mtransit.parser.gtfs.GAgencyTools
+import kotlin.math.max
 
 data class MRoute(
     val id: Long,
@@ -59,6 +60,45 @@ data class MRoute(
         }
     }
 
+    @Suppress("SameReturnValue")
+    fun mergeLongName(mRouteToMerge: MRoute?): Boolean {
+        if (mRouteToMerge == null || mRouteToMerge.longName.isEmpty()) {
+            return true
+        } else if (longName.isEmpty()) {
+            longName = mRouteToMerge.longName
+            return true
+        } else if (mRouteToMerge.longName.contains(longName)) {
+            longName = mRouteToMerge.longName
+            return true
+        } else if (longName.contains(mRouteToMerge.longName)) {
+            return true
+        }
+        val prefix = longName.commonPrefixWith(mRouteToMerge.longName)
+        val maxLength = max(longName.length, mRouteToMerge.longName.length)
+        if (prefix.length > maxLength / 2) {
+            longName = prefix +
+                    longName.substring(prefix.length) +
+                    SLASH +
+                    mRouteToMerge.longName.substring(prefix.length)
+            return true
+        }
+        val suffix = longName.commonSuffixWith(mRouteToMerge.longName)
+        if (suffix.length > maxLength / 2) {
+            longName = longName.substring(0, longName.length - suffix.length) +
+                    SLASH +
+                    mRouteToMerge.longName.substring(0, mRouteToMerge.longName.length - suffix.length) +
+                    suffix
+            return true
+        }
+        return if (longName > mRouteToMerge.longName) {
+            longName = mRouteToMerge.longName + SLASH + longName
+            true
+        } else {
+            longName = longName + SLASH + mRouteToMerge.longName
+            true
+        }
+    }
+
     @Suppress("unused")
     fun simpleMergeLongName(mRouteToMerge: MRoute?): Boolean {
         @Suppress("RedundantIf")
@@ -73,5 +113,9 @@ data class MRoute(
         } else {
             false // not simple
         }
+    }
+
+    companion object {
+        private const val SLASH = " / "
     }
 }
