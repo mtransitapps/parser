@@ -168,6 +168,9 @@ public interface GAgencyTools {
 	boolean mergeRouteLongName(@NotNull MRoute mRoute, @NotNull MRoute mRouteToMerge);
 
 	@Nullable
+	String mergeRouteLongNamesOrNull(@Nullable String routeLongName1, @Nullable String routeLongName2);
+
+	@Nullable
 	String getRouteColor(@NotNull GRoute gRoute);
 
 	@Nullable
