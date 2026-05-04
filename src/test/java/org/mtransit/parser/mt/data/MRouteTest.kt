@@ -39,4 +39,26 @@ class MRouteTest {
         assertNotNull(result)
         assertEquals("CN Tower / Downtown - Jasper Pl", result)
     }
+
+    @Test
+    fun testMergeLongName_Complex() {
+        val route1 = MRoute(1L, "RSN", "A4 - Deux-Montagnes / A1 - Brossard", "000000", "1", ROUTE_TYPE)
+        val route2 = MRoute(1L, "RSN", "A3 - Anse-à-l'Orme / A1 - Brossard", "000000", "1", ROUTE_TYPE)
+
+        val result = GRoute.mergeRouteLongNames(route1.longName, route2.longName)
+
+        assertNotNull(result)
+        assertEquals("A1 - Brossard / A3 - Anse-à-l'Orme / A4 - Deux-Montagnes", result)
+    }
+
+    @Test
+    fun testMergeLongName_Complex2() {
+        val route1 = MRoute(1L, "RSN", "A1 - Brossard / A3 - Anse-à-l'Orme / A4 - Deux-Montagnes", "000000", "1", ROUTE_TYPE)
+        val route2 = MRoute(1L, "RSN", "Bois-Franc / A1 - Brossard", "000000", "1", ROUTE_TYPE)
+
+        val result = GRoute.mergeRouteLongNames(route1.longName, route2.longName)
+
+        assertNotNull(result)
+        assertEquals("A1 - Brossard / A3 - Anse-à-l'Orme / A4 - Deux-Montagnes / Bois-Franc", result)
+    }
 }
