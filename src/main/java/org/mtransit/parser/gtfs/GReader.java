@@ -533,7 +533,7 @@ public class GReader {
 					return; // ignore if route already exists with same values
 				}
 				if (previousGRoute != null && previousGRoute.equalsExceptMergeable(gRoute)) {
-					final String mergedRouteLongName = GRoute.mergeRouteLongNames(previousGRoute.getRouteLongName(), gRoute.getRouteLongName());
+					final String mergedRouteLongName = agencyTools.mergeRouteLongNamesOrNull(previousGRoute.getRouteLongName(), gRoute.getRouteLongName());
 					final String mergedRouteColor = GRoute.mergeRouteColors(previousGRoute.getRouteColor(), gRoute.getRouteColor());
 					final Integer mergedRouteSortOrder = GRoute.mergeRouteSortOrders(previousGRoute.getRouteSortOrder(), gRoute.getRouteSortOrder());
 					if (mergedRouteLongName != null) { // merge successful
