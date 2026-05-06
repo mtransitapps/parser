@@ -62,8 +62,9 @@ data class AgencyConfig(
     @SerialName("service_id_not_unique_allowed")
     val serviceIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
 ) {
-    fun getAllLanguages(supportedLanguages: List<Locale>?): List<Locale>? {
-        supportedLanguages?.takeIf { it.isNotEmpty() } ?: return null
-        return supportedLanguages + additionalLanguages.map { Locale.forLanguageTag(it) }
+    fun getAllLanguages(supportedLanguages: List<Locale>): List<Locale>? {
+        if (supportedLanguages.isEmpty()) return null
+        if (additionalLanguages.isEmpty()) return supportedLanguages
+        return (supportedLanguages + additionalLanguages.map { Locale.forLanguageTag(it) }).distinct()
     }
 }
