@@ -2,6 +2,7 @@ package org.mtransit.parser.config.gtfs.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.util.Locale
 
 @Serializable
 data class AgencyConfig(
@@ -28,6 +29,8 @@ data class AgencyConfig(
     val originalRouteTypeId: Int = targetRouteTypeId, // REQUIRED (default to target route type ID)
     @SerialName("extended_target_route_type_id")
     val extendedTargetRouteTypeId: Int? = null, // OPTIONAL
+    @SerialName("additional_languages")
+    val additionalLanguages: List<String> = emptyList(), // OPT-IN feature
     // STRINGS
     /**
      * (Optional) Default string cleaner enabled/disabled (based on language/country/field)
@@ -58,4 +61,9 @@ data class AgencyConfig(
     val serviceIdCleanMerged: Boolean = false, // OPT-IN feature
     @SerialName("service_id_not_unique_allowed")
     val serviceIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
-)
+) {
+    fun getAllLanguages(supportedLanguages: List<Locale>?): List<Locale>? {
+        supportedLanguages?.takeIf { it.isNotEmpty() } ?: return null
+        return supportedLanguages + additionalLanguages.map { Locale.forLanguageTag(it) }
+    }
+}

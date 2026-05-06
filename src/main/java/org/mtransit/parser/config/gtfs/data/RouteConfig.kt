@@ -117,6 +117,8 @@ data class RouteConfig(
     val stopIdPreviousCharConfigs: List<IdCharToIdPartConfig> = emptyList(),
     @SerialName("stop_original_id_to_stop_id_configs")
     val stopOriginalIdToStopIdConfigs: List<StopOriginalIdToStopIdConfig> = emptyList(),
+    @SerialName("stop_code_cleaners")
+    val stopCodeCleaners: List<Cleaner> = emptyList(),
     @SerialName("stop_code_prepend_if_missing")
     val stopCodePrependIfMissing: String? = null, // optional
     @SerialName("use_stop_id_hash_code")
@@ -289,6 +291,9 @@ data class RouteConfig(
 
     fun cleanStopName(lang: Locale, stopName: String) =
         cleanString(lang, stopName, this.stopNameCleaners)
+
+    fun cleanStopCode(lang: Locale, stopCode: String) =
+        cleanString(lang, stopCode, this.stopCodeCleaners)
 
     fun cleanStopHeadsign(gRoute: GRoute, gTrip: GTrip, @Suppress("unused") gStopTime: GStopTime, stopHeadsign: String): String {
         if (stopHeadsign.isEmpty()) return stopHeadsign
