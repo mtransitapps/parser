@@ -199,6 +199,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		final Locale supportedLocale = Locale.forLanguageTag(supportedLanguage);
 		if (this.agencySupportedLanguages.contains(supportedLocale)) return;
 		this.agencySupportedLanguages.add(supportedLocale);
+		this.allLanguages = null; // invalidate cached supported languages
 	}
 
 	@Nullable
