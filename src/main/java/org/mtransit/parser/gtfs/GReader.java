@@ -74,7 +74,7 @@ public class GReader {
 		}
 		try {
 			final boolean skipDataCleanup = calendarsOnly || routeTripCalendarsOnly;
-			// AGENCY
+			// AGENCY // 1st (setup supported language)
 			if (!calendarsOnly) {
 				readFile(gtfsDir, GAgency.FILENAME, true, line ->
 						processAgency(agencyTools, gSpec, line)

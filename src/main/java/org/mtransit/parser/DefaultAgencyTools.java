@@ -188,27 +188,31 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@NotNull
-	private final List<Locale> supportedLanguages = new ArrayList<>();
+	private final List<Locale> agencySupportedLanguages = new ArrayList<>();
+
+	@Nullable
+	private List<Locale> allLanguages = null;
 
 	@Override
 	public void addSupportedLanguage(@Nullable String supportedLanguage) {
-		if (supportedLanguage == null) {
-			return;
-		}
+		if (supportedLanguage == null) return;
 		final Locale supportedLocale = Locale.forLanguageTag(supportedLanguage);
-		if (this.supportedLanguages.contains(supportedLocale)) {
-			return;
-		}
-		this.supportedLanguages.add(supportedLocale);
+		if (this.agencySupportedLanguages.contains(supportedLocale)) return;
+		this.agencySupportedLanguages.add(supportedLocale);
+		this.allLanguages = null; // invalidate cached supported languages
 	}
 
 	@Nullable
 	@Override
 	public List<Locale> getSupportedLanguages() {
-		if (!this.supportedLanguages.isEmpty()) {
-			return this.supportedLanguages;
+		if (this.allLanguages != null) return this.allLanguages; // cached
+		if (this.agencySupportedLanguages.isEmpty()) return null; // no-op
+		if (Configs.getAgencyConfig() != null) {
+			this.allLanguages = Configs.getAgencyConfig().getAllLanguages(this.agencySupportedLanguages);
+		} else {
+			this.allLanguages = this.agencySupportedLanguages;
 		}
-		return null; // no-op
+		return this.allLanguages;
 	}
 
 	@SuppressWarnings("WeakerAccess")
@@ -1277,12 +1281,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 		final String prepend = getStopCodePrependIfMissing();
 		//noinspection DiscouragedApi
 		final String stopCode =
-				Configs.getRouteConfig().getUseStopIdForStopCode() ? gStop.getStopId() :
-						gStop.getStopCode();
+				cleanStopCode(
+						Configs.getRouteConfig().getUseStopIdForStopCode() ? gStop.getStopId() :
+								gStop.getStopCode()
+				);
 		if (prepend != null && !stopCode.startsWith(prepend)) {
 			return prepend + stopCode;
 		}
 		return stopCode;
+	}
+
+	@NotNull
+	private String cleanStopCode(@NotNull String stopCode) {
+		return Configs.getRouteConfig().cleanStopCode(getFirstLanguageNN(), stopCode);
 	}
 
 	@Deprecated
