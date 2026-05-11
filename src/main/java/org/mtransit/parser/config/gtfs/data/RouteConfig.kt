@@ -405,8 +405,8 @@ data class RouteConfig(
     fun isDirectionSplitterEnabled(todayDate: Int, routeId: Long? = null) =
         directionSplitterEnabled && !isAllowedUntil(directionSplitterDisabledUntil[routeId], todayDate)
 
-    fun isDirectionOverrideId(todayDate: Int, mRouteId: Long) =
-        overrideDirectionId[mRouteId] == true || isAllowedUntil(overrideDirectionIdUntil[mRouteId], todayDate)
+    fun isDirectionIdOverrideEnabled(todayDate: Int, routeId: Long) =
+        directionIdOverrideEnabled[routeId] == true || isAllowedUntil(directionIdOverrideEnabledUntil[routeId], todayDate)
 
     @JvmOverloads
     fun isDirectionFinderEnabled(todayDate: Int, routeId: Long? = null) =
