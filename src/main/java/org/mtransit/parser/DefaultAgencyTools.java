@@ -898,7 +898,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean directionOverrideId(long routeId) {
-		return Configs.getRouteConfig().isDirectionOverrideId(getTodayDateInt(), routeId);
+		return Configs.getRouteConfig().isDirectionIdOverrideEnabled(getTodayDateInt(), routeId);
 	}
 
 	@Override
