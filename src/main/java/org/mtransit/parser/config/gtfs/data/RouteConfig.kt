@@ -75,6 +75,10 @@ data class RouteConfig(
     // DIRECTION
     @SerialName("direction_types")
     val directionTypes: List<Int> = emptyList(),
+    @SerialName("direction_id_override_enabled")
+    val overrideDirectionId: Map<Long, Boolean> = emptyMap(), // OPT-IN feature
+    @SerialName("direction_id_override_enabled_until")
+    val overrideDirectionIdUntil: Map<Long, String> = emptyMap(), // OPT-IN feature
     @SerialName("direction_headsign_cleaners")
     val directionHeadsignCleaners: List<Cleaner> = emptyList(),
     @SerialName("direction_headsign_remove_route_long_name")
@@ -400,6 +404,9 @@ data class RouteConfig(
     @JvmOverloads
     fun isDirectionSplitterEnabled(todayDate: Int, routeId: Long? = null) =
         directionSplitterEnabled && !isAllowedUntil(directionSplitterDisabledUntil[routeId], todayDate)
+
+    fun isDirectionOverrideId(todayDate: Int, mRouteId: Long) =
+        overrideDirectionId[mRouteId] == true || isAllowedUntil(overrideDirectionIdUntil[mRouteId], todayDate)
 
     @JvmOverloads
     fun isDirectionFinderEnabled(todayDate: Int, routeId: Long? = null) =
