@@ -2,6 +2,7 @@ package org.mtransit.parser.config
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import org.jetbrains.annotations.VisibleForTesting
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.config.gtfs.data.AgencyConfig
 import org.mtransit.parser.config.gtfs.data.RouteConfig
@@ -42,6 +43,11 @@ object Configs {
     @JvmStatic
     var routeConfig: RouteConfig = RouteConfig()
         private set
+
+    @VisibleForTesting
+    internal fun setRouteConfig(routeConfig: RouteConfig) {
+        this.routeConfig = routeConfig
+    }
 
     private fun loadGTFSRouteConfig(gtfsDir: String) {
         try {
