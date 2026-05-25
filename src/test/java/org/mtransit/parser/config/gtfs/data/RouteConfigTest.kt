@@ -26,6 +26,13 @@ class RouteConfigTest {
             }
         RouteConfig(
             directionFinderEnabled = true,
+        )
+            .isDirectionFinderEnabled(routeId = 1L, todayDate = TODAY_DATE)
+            .let { result ->
+                assertTrue { result }
+            }
+        RouteConfig(
+            directionFinderEnabled = true,
             directionFinderDisabledUntil = mapOf(1L to "${TODAY_DATE + 1}")
         )
             .isDirectionFinderEnabled(routeId = 1L, todayDate = TODAY_DATE)
