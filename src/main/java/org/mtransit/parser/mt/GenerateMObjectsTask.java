@@ -304,7 +304,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			MDirectionSplitter.splitDirection(this.routeId, gRoutes, routeGTFS, this.agencyTools);
 		}
 		if (this.agencyTools.directionFinderEnabled()) {
-			List<GTrip> routeGTrips = new ArrayList<>();
+			final List<GTrip> routeGTrips = new ArrayList<>();
 			for (GRoute gRoute : gRoutes) {
 				if (this.agencyTools.directionFinderEnabled(this.routeId, gRoute)) {
 					routeGTrips.addAll(routeGTFS.getRouteTrips(gRoute.getRouteIdInt()));
