@@ -1,5 +1,7 @@
 package org.mtransit.parser.config.gtfs.data
 
+import org.mtransit.parser.gtfs.data.GFieldTypes
+import java.util.Date
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -7,7 +9,7 @@ import kotlin.test.assertTrue
 class RouteConfigTest {
 
     companion object {
-        private const val TODAY_DATE = 20260525
+        private val TODAY_DATE = GFieldTypes.makeDateFormat().format(Date()).toInt()
     }
 
     @Test
