@@ -417,20 +417,14 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	}
 
 	private void fixRouteLongName(HashMap<Long, MRoute> mRoutes, HashMap<Long, MDirection> mDirections) {
-		if (!this.agencyTools.defaultRouteLongNameEnabled()) {
-			return;
-		}
+		if (!this.agencyTools.defaultRouteLongNameEnabled()) return;
 		for (MRoute mRoute : mRoutes.values()) {
-			if (!mRoute.getLongName().isEmpty()) {
-				continue;
-			}
-			StringBuilder sb = new StringBuilder();
+			if (!mRoute.getLongName().isEmpty()) continue;
+			final StringBuilder sb = new StringBuilder();
 			for (MDirection mDirection : mDirections.values()) {
 				if (mDirection.getRouteId() == mRoute.getId()) {
 					if (mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING) {
-						if (sb.length() > 0) {
-							sb.append(" <> ");
-						}
+						if (sb.length() > 0) sb.append(" <> ");
 						sb.append(mDirection.getHeadsignValue());
 					}
 				}

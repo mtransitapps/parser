@@ -1327,7 +1327,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public int getStopId(@NotNull GStop gStop) {
 		try {
 			//noinspection DiscouragedApi
-			final String gStopId = gStop.getStopId();
+			final String gStopId =
+					useParentStopIdForStopId() && gStop.getParentStationId() != null ? gStop.getParentStationId()
+							: gStop.getStopId();
 			if (useStopIdHashCode()) {
 				return Math.abs(gStopId.hashCode());
 			}
@@ -1353,8 +1355,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public @Nullable Integer convertStopIdNotSupported(@NotNull String stopCode) {
-		return Configs.getRouteConfig().convertStopIdNotSupported(stopCode);
+	public @Nullable Integer convertStopIdNotSupported(@NotNull String stopId) {
+		return Configs.getRouteConfig().convertStopIdNotSupported(stopId);
 	}
 
 	@Override
@@ -1370,6 +1372,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean useStopCodeForStopId() {
 		return Configs.getRouteConfig().getUseStopCodeForStopId();
+	}
+
+	@Override
+	public boolean useParentStopIdForStopId() {
+		return Configs.getRouteConfig().getUseParentStopIdForStopId();
 	}
 
 	@Override
