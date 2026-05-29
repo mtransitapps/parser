@@ -136,7 +136,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	private Integer todayDateInt = null;
 
-	public int getTodayDateInt() {
+	private int getTodayDateInt() {
 		if (todayDateInt == null) {
 			todayDateInt = Integer.parseInt(DATE_FORMAT.format(Calendar.getInstance().getTime()));
 		}
@@ -1327,8 +1327,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public int getStopId(@NotNull GStop gStop) {
 		try {
 			//noinspection DiscouragedApi
+			final String parentStationId = gStop.getParentStationId();
+			//noinspection DiscouragedApi
 			final String gStopId =
-					useParentStopIdForStopId() && gStop.getParentStationId() != null ? gStop.getParentStationId()
+					useParentStopIdForStopId() && parentStationId != null ? parentStationId
 							: gStop.getStopId();
 			if (useStopIdHashCode()) {
 				return Math.abs(gStopId.hashCode());

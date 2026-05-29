@@ -128,7 +128,7 @@ data class GStop(
             stopLong = line[STOP_LON]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),
             stopCode = line[STOP_CODE]?.trim() ?: EMPTY,
             locationType = line[LOCATION_TYPE]?.takeIf { it.isNotBlank() }?.toInt(),
-            parentStationId = line[PARENT_STATION]?.trim()
+            parentStationId = line[PARENT_STATION]?.takeIf { it.isNotBlank() }?.trim()
                 ?.let { agencyTools?.cleanStopOriginalId(it) ?: it },
             wheelchairBoarding = line[WHEELCHAIR_BOARDING]?.takeIf { it.isNotBlank() }?.toInt(),
         )
