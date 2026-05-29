@@ -78,7 +78,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final int MAX_LOOK_BACKWARD_IN_DAYS = 10 * 365; // used for CURRENT schedule from calendar_dates.txt all in the past
 	private static final int MAX_LOOK_FORWARD_IN_DAYS = 60;
 
-	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 5; // = 6 days
+	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 3; // = 4 days
 	private static final int MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS = 14;
 
 	// 2024-04-09: 10x -> 3x because merging 2 schedule can create very bad schedule info #GRTbus
