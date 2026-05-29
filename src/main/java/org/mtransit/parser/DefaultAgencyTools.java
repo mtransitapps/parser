@@ -136,6 +136,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	private Integer todayDateInt = null;
 
+	@SuppressWarnings("WeakerAccess")
 	public int getTodayDateInt() {
 		if (todayDateInt == null) {
 			todayDateInt = Integer.parseInt(DATE_FORMAT.format(Calendar.getInstance().getTime()));
@@ -1327,7 +1328,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public int getStopId(@NotNull GStop gStop) {
 		try {
 			//noinspection DiscouragedApi
-			final String gStopId = gStop.getStopId();
+			final String parentStationId = gStop.getParentStationId();
+			//noinspection DiscouragedApi
+			final String gStopId =
+					useParentStopIdForStopId() && parentStationId != null ? parentStationId
+							: gStop.getStopId();
 			if (useStopIdHashCode()) {
 				return Math.abs(gStopId.hashCode());
 			}
@@ -1353,8 +1358,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
-	public @Nullable Integer convertStopIdNotSupported(@NotNull String stopCode) {
-		return Configs.getRouteConfig().convertStopIdNotSupported(stopCode);
+	public @Nullable Integer convertStopIdNotSupported(@NotNull String stopId) {
+		return Configs.getRouteConfig().convertStopIdNotSupported(stopId);
 	}
 
 	@Override
@@ -1370,6 +1375,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean useStopCodeForStopId() {
 		return Configs.getRouteConfig().getUseStopCodeForStopId();
+	}
+
+	@Override
+	public boolean useParentStopIdForStopId() {
+		return Configs.getRouteConfig().getUseParentStopIdForStopId();
 	}
 
 	@Override

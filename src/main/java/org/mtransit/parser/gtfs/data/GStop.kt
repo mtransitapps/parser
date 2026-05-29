@@ -57,9 +57,9 @@ data class GStop(
 
     @JvmOverloads
     @Suppress("unused")
-    fun toStringPlus(debug: Boolean = Constants.DEBUG): String {
-        return if (debug) { // longer
-            return toString() +
+    fun toStringPlus(debug: Boolean = Constants.DEBUG) =
+        if (debug) { // longer
+            toString() +
                     "+(stopId:$_stopId)" +
                     "+(parent:$_parentStationId)"
         } else { // shorter #CI
@@ -71,7 +71,6 @@ data class GStop(
                 }
             }}"
         }
-    }
 
     fun equalsExceptMergeable(o: GStop): Boolean {
         return when {
@@ -129,7 +128,8 @@ data class GStop(
             stopLong = line[STOP_LON]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),
             stopCode = line[STOP_CODE]?.trim() ?: EMPTY,
             locationType = line[LOCATION_TYPE]?.takeIf { it.isNotBlank() }?.toInt(),
-            parentStationId = line[PARENT_STATION],
+            parentStationId = line[PARENT_STATION]?.takeIf { it.isNotBlank() }?.trim()
+                ?.let { agencyTools?.cleanStopOriginalId(it) ?: it },
             wheelchairBoarding = line[WHEELCHAIR_BOARDING]?.takeIf { it.isNotBlank() }?.toInt(),
         )
 
