@@ -136,7 +136,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Nullable
 	private Integer todayDateInt = null;
 
-	private int getTodayDateInt() {
+	@SuppressWarnings("WeakerAccess")
+	public int getTodayDateInt() {
 		if (todayDateInt == null) {
 			todayDateInt = Integer.parseInt(DATE_FORMAT.format(Calendar.getInstance().getTime()));
 		}
