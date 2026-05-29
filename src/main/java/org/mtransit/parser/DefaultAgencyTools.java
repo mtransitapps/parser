@@ -1,5 +1,7 @@
 package org.mtransit.parser;
 
+import androidx.annotation.VisibleForTesting;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.commons.CharUtils;
@@ -131,9 +133,19 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	private static final DateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
-	@SuppressWarnings({"unused", "WeakerAccess"})
+	@Nullable
+	private Integer todayDateInt = null;
+
 	public int getTodayDateInt() {
-		return Integer.parseInt(DATE_FORMAT.format(Calendar.getInstance().getTime()));
+		if (todayDateInt == null) {
+			todayDateInt = Integer.parseInt(DATE_FORMAT.format(Calendar.getInstance().getTime()));
+		}
+		return todayDateInt;
+	}
+
+	@VisibleForTesting
+	public void setTodayDateInt(@Nullable Integer todayDateInt) {
+		this.todayDateInt = todayDateInt;
 	}
 
 	public static void main(@NotNull String[] args) {
