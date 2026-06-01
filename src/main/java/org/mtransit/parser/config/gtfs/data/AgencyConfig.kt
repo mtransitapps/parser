@@ -26,7 +26,7 @@ data class AgencyConfig(
     @SerialName("target_route_type_id")
     val targetRouteTypeId: Int, // REQUIRED
     @SerialName("original_route_type_id")
-    val originalRouteTypeId: Int = targetRouteTypeId, // REQUIRED (default to target route type ID)
+    val originalRouteTypeId: Int = targetRouteTypeId, // OPTIONAL (default to target route type ID)
     @SerialName("extended_target_route_type_id")
     val extendedTargetRouteTypeId: Int? = null, // OPTIONAL
     @SerialName("additional_languages")
