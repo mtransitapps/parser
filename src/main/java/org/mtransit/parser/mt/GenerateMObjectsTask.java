@@ -431,7 +431,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			if (sb.length() == 0) {
 				final List<Locale> supportedLanguages = this.agencyTools.getSupportedLanguages();
-				if (supportedLanguages != null && supportedLanguages.size() == 1) {
+				if (supportedLanguages != null && supportedLanguages.size() >= 1) {
 					final Locale supportedLanguage = supportedLanguages.get(0);
 					if (Locale.ENGLISH.equals(supportedLanguage)) {
 						sb.append("Route ").append(mRoute.getShortNameOrDefault());
