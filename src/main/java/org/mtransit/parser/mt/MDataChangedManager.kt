@@ -40,14 +40,9 @@ object MDataChangedManager {
         if (gCalendarDateToAdd.date in lastStartDate..lastEndDate) {
             return false // same date range
         }
-        if (DefaultAgencyTools.diffInMs(
-                GFieldTypes.makeDateFormat(),
-                Calendar.getInstance(),
-                p.todayStringInt,
-                gCalendarDateToAdd.date,
-            ).absoluteValue > MIN_NOT_IGNORED_IN_DAYS.days.inWholeMilliseconds
-        ) {
-            return false // to soon to ignore
+        val diffInMs = DefaultAgencyTools.diffInMs(GFieldTypes.makeDateFormat(), Calendar.getInstance(), p.todayStringInt, gCalendarDateToAdd.date).absoluteValue
+        if (diffInMs < MIN_NOT_IGNORED_IN_DAYS.days.inWholeMilliseconds) {
+            return false // too soon to ignore
         }
         //noinspection DiscouragedApi
         val lastServiceIds = lastServiceDates.map { it.serviceId }.distinct()
@@ -246,7 +241,7 @@ object MDataChangedManager {
         // }
         addedGCalendarsDatesBefore.forEach { addedGCalendarDate ->
             val diffInMs = DefaultAgencyTools.diffInMs(dateFormat, c, todayStringInt, addedGCalendarDate.date).absoluteValue
-            if (diffInMs > MIN_NOT_IGNORED_IN_DAYS.days.inWholeMilliseconds) {
+            if (diffInMs < MIN_NOT_IGNORED_IN_DAYS.days.inWholeMilliseconds) {
                 MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")
                 return
             }
@@ -287,7 +282,7 @@ object MDataChangedManager {
         // }
         addedGCalendarsDatesAfter.forEach { addedGCalendarDate ->
             val diffInMs = DefaultAgencyTools.diffInMs(dateFormat, c, todayStringInt, addedGCalendarDate.date).absoluteValue
-            if (diffInMs > MIN_NOT_IGNORED_IN_DAYS.days.inWholeMilliseconds) {
+            if (diffInMs < MIN_NOT_IGNORED_IN_DAYS.days.inWholeMilliseconds) {
                 MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")
                 return
             }
@@ -327,7 +322,7 @@ object MDataChangedManager {
         // }
         addedGCalendarDatesDates.forEach { addedGCalendarDate ->
             val diffInMs = DefaultAgencyTools.diffInMs(dateFormat, c, todayStringInt, addedGCalendarDate.date).absoluteValue
-            if (diffInMs > MIN_NOT_IGNORED_IN_DAYS.days.inWholeMilliseconds) {
+            if (diffInMs < MIN_NOT_IGNORED_IN_DAYS.days.inWholeMilliseconds) {
                 MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")
                 return
             }
