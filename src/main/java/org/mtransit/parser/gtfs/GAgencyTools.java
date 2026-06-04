@@ -155,6 +155,8 @@ public interface GAgencyTools {
 	@NotNull
 	String cleanRouteLongName(@NotNull String routeLongName);
 
+	@Nullable Integer overrideRouteType(@Nullable String originalRouteId);
+
 	boolean lowerUCWords();
 
 	boolean lowerUCStrings();
