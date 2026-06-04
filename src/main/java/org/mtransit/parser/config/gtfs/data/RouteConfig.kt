@@ -1,5 +1,6 @@
 package org.mtransit.parser.config.gtfs.data
 
+import androidx.annotation.Discouraged
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.mtransit.commons.CleanUtils
@@ -108,6 +109,9 @@ data class RouteConfig(
     val stopIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
     @SerialName("use_stop_code_for_stop_id")
     val useStopCodeForStopId: Boolean = false, // OPT-IN feature
+    @SerialName("use_stop_code_for_stop_id_digits_only")
+    @get:Discouraged("only for backward compat w/ old Java config")
+    val useStopCodeForStopIdDigitsOnly: Boolean = false, // OPT-IN feature
     @SerialName("use_parent_stop_id_for_stop_id")
     val useParentStopIdForStopId: Boolean = false, // OPT-IN feature
     @SerialName("use_stop_id_for_stop_code")

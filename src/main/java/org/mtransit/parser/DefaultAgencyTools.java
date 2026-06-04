@@ -1,5 +1,6 @@
 package org.mtransit.parser;
 
+import androidx.annotation.Discouraged;
 import androidx.annotation.VisibleForTesting;
 
 import org.jetbrains.annotations.NotNull;
@@ -1336,9 +1337,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (useStopIdHashCode()) {
 				return Math.abs(gStopId.hashCode());
 			}
+			final String stopCode = cleanStopOriginalId(getStopCode(gStop));
+			@SuppressWarnings("DiscouragedApi")
 			final String stopIdS =
-					useStopCodeForStopId() ? cleanStopOriginalId(getStopCode(gStop))
-							: gStopId;
+					useStopCodeForStopId() ? stopCode
+							: useStopCodeForStopIdDigitsOnly() && CharUtils.isDigitsOnly(stopCode, true) ? stopCode
+							  : gStopId;
 			if (stopIdS.isBlank() || !CharUtils.isDigitsOnly(stopIdS)) {
 				Integer stopIdSInt = convertStopIdNotSupported(stopIdS);
 				if (stopIdSInt != null) return stopIdSInt;
@@ -1375,6 +1379,12 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public boolean useStopCodeForStopId() {
 		return Configs.getRouteConfig().getUseStopCodeForStopId();
+	}
+
+	@SuppressWarnings("DiscouragedApi")
+	@Discouraged(message = "only for backward compat w/ old Java config")
+	private boolean useStopCodeForStopIdDigitsOnly() {
+		return Configs.getRouteConfig().getUseStopCodeForStopIdDigitsOnly();
 	}
 
 	@Override
