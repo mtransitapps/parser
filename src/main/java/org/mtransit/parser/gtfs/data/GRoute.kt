@@ -187,7 +187,9 @@ data class GRoute(
                 ?: EMPTY,
             routeLongName = line[ROUTE_LONG_NAME],
             routeDesc = line[ROUTE_DESC],
-            routeType = line[ROUTE_TYPE]?.toInt() ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_TYPE from $line!"),
+            routeType = line[ROUTE_TYPE]?.toInt()
+                ?.let { routeType -> agencyTools?.overrideRouteType(line[ROUTE_ID]) ?: routeType }
+                ?: throw MTLog.Fatal("Invalid GRoute.$ROUTE_TYPE from $line!"),
             routeUrl = line[ROUTE_URL]?.takeIf { it.isNotBlank() }?.trim(),
             routeColor = line[ROUTE_COLOR]?.takeIf { it.isNotBlank() }?.trim(),
             routeTextColor = line[ROUTE_TEXT_COLOR]?.takeIf { it.isNotBlank() }?.trim(),
@@ -215,7 +217,7 @@ data class GRoute(
         }
 
         private const val SLASH_ = " / "
-        private const val SLASH= "/"
+        private const val SLASH = "/"
 
         @JvmStatic
         fun mergeRouteLongNames(routeLongName1: String?, routeLongName2: String?): String? {

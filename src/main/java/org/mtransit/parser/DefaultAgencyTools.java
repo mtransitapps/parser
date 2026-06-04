@@ -682,6 +682,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	}
 
 	@Override
+	public @Nullable Integer overrideRouteType(@Nullable String originalRouteId) {
+		return Configs.getRouteConfig().overrideRouteType(originalRouteId);
+	}
+
+	@Override
 	public boolean lowerUCWords() {
 		if (Configs.getAgencyConfig() != null) {
 			return Configs.getAgencyConfig().getToLowerUpperCaseWords();

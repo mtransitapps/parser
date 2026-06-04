@@ -36,6 +36,8 @@ data class RouteConfig(
     val routeIdNextCharConfigs: List<IdCharToIdPartConfig> = emptyList(),
     @SerialName("route_id_previous_char_configs")
     val routeIdPreviousCharConfigs: List<IdCharToIdPartConfig> = emptyList(),
+    @SerialName("route_type_override_configs")
+    val routeTypeOverrideConfigs: List<RouteTypeOverrideConfig> = emptyList(),
     // short-name
     @SerialName("use_route_long_name_for_route_short_name")
     val useRouteLongNameForRouteShortName: Boolean = false, // OPT-IN feature
@@ -161,6 +163,16 @@ data class RouteConfig(
     )
 
     @Serializable
+    data class RouteTypeOverrideConfig(
+        @SerialName("original_route_id")
+        val originalRouteId: String? = null,
+        @SerialName("original_route_id_regex")
+        val originalRouteIdRegex: String? = null,
+        @SerialName("route_type")
+        val routeType: Int,
+    )
+
+    @Serializable
     data class RouteShortNameToRouteIdConfig(
         @SerialName("route_short_name")
         val routeShortName: String,
@@ -261,6 +273,15 @@ data class RouteConfig(
             it.routeId != null && gRoute.routeId == it.routeId
                     || it.routeShortName != null && gRoute.routeShortName == it.routeShortName
         }
+
+    fun overrideRouteType(originalRouteId: String?): Int? {
+        return this.routeTypeOverrideConfigs
+            .singleOrNull { config ->
+                config.originalRouteId == originalRouteId
+                        || originalRouteId?.let { config.originalRouteIdRegex?.toRegex(RegexOption.IGNORE_CASE)?.matches(originalRouteId) } == true
+            }
+            ?.routeType
+    }
 
     fun convertRouteIdFromShortNameNotSupported(routeShortName: String) =
         this.routeShortNameToRouteIdConfigs
