@@ -209,9 +209,13 @@ data class RouteConfig(
         @SerialName("route_id")
         val routeId: String? = null,
         @SerialName("route_short_name")
-        val routeShortName: String?,
+        val routeShortName: String? = null,
+        @SerialName("route_short_name_regex")
+        val routeShortNameRegex: String? = null,
         @SerialName("route_long_name")
         val routeLongName: String? = null,
+        @SerialName("original_route_color")
+        val originalRouteColor: String? = null,
         @SerialName("color")
         val color: String,
     )
@@ -303,10 +307,13 @@ data class RouteConfig(
 
     fun getRouteColor(gRoute: GRoute) =
         //noinspection DiscouragedApi
-        (this.routeColors.singleOrNull { gRoute.routeId == it.routeId }
-            ?: this.routeColors.singleOrNull { gRoute.routeShortName == it.routeShortName }
-            ?: this.routeColors.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName })
-            ?.color
+        this.routeColors.firstOrNull { // order is important, 1st config match found wins
+            it.routeId == gRoute.routeId
+                    || it.routeShortName == gRoute.routeShortName
+                    || it.routeLongName == gRoute.routeLongNameOrDefault
+                    || it.originalRouteColor == gRoute.routeColor
+                    || it.routeShortNameRegex?.toRegex(RegexOption.IGNORE_CASE)?.containsMatchIn(gRoute.routeShortName) == true
+        }?.color
 
     fun isRouteColorIgnored(routeColor: String) =
         this.routeColorsIgnored.any { it.equals(routeColor, ignoreCase = true) }
