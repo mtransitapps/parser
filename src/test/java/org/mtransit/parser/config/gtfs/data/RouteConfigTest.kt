@@ -46,6 +46,9 @@ class RouteConfigTest {
             getRouteColor(makeGRoute(shortName = "350", color = "009EE0")).let { result ->
                 assertEquals("000000", result)
             }
+            getRouteColor(makeGRoute(shortName = "350", color = null)).let { result ->
+                assertEquals("000000", result)
+            }
             getRouteColor(makeGRoute(shortName = "427", color = "009EE0")).let { result ->
                 assertEquals("007339", result)
             }

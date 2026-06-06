@@ -311,7 +311,7 @@ data class RouteConfig(
             it.routeId == gRoute.routeId
                     || it.routeShortName == gRoute.routeShortName
                     || it.routeLongName == gRoute.routeLongNameOrDefault
-                    || it.originalRouteColor == gRoute.routeColor
+                    || it.originalRouteColor?.let { originalRouteColor -> originalRouteColor == gRoute.routeColor } == true
                     || it.routeShortNameRegex?.toRegex(RegexOption.IGNORE_CASE)?.containsMatchIn(gRoute.routeShortName) == true
         }?.color
 

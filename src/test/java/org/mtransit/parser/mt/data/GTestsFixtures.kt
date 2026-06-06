@@ -9,7 +9,7 @@ fun makeGRoute(
     shortName: String = "RSN$id",
     longName: String = "Long Name $id",
     routeType: Int = 0,
-    color: String = "000000",
+    color: String? = "000000",
 ) = GRoute(
     agencyIdInt = GIDs.getInt(agencyId),
     routeIdInt = GIDs.getInt(id),
