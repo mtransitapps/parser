@@ -218,7 +218,11 @@ data class RouteConfig(
         val originalRouteColor: String? = null,
         @SerialName("color")
         val color: String,
-    )
+    ) {
+        internal val parsedRouteShortNameRegex by lazy {
+            routeShortNameRegex?.toRegex(RegexOption.IGNORE_CASE)
+        }
+    }
 
     @Serializable
     data class StopIdConfig(
@@ -312,7 +316,7 @@ data class RouteConfig(
                     || it.routeShortName == gRoute.routeShortName
                     || it.routeLongName == gRoute.routeLongNameOrDefault
                     || it.originalRouteColor?.let { originalRouteColor -> originalRouteColor == gRoute.routeColor } == true
-                    || it.routeShortNameRegex?.toRegex(RegexOption.IGNORE_CASE)?.containsMatchIn(gRoute.routeShortName) == true
+                    || it.parsedRouteShortNameRegex?.containsMatchIn(gRoute.routeShortName) == true
         }?.color
 
     fun isRouteColorIgnored(routeColor: String) =
