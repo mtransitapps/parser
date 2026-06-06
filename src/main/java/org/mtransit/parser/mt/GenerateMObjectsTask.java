@@ -281,17 +281,19 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return mRouteSpec;
 	}
 
-	private void parseRDS(HashMap<String, MSchedule> mSchedules,
-						  HashMap<String, MFrequency> mFrequencies,
-						  HashMap<Integer, MAgency> mAgencies,
-						  HashMap<Long, MRoute> mRoutes,
-						  HashMap<Long, MDirection> mDirections,
-						  HashMap<Integer, MTrip> mTrips,
-						  HashMap<Integer, MStop> mStops,
-						  HashMap<String, MDirectionStop> allMDirectionStops,
-						  HashSet<Integer> directionStopIds,
-						  HashSet<Integer> serviceIdInts,
-						  GSpec routeGTFS) {
+	private void parseRDS(
+			HashMap<String, MSchedule> mSchedules,
+			HashMap<String, MFrequency> mFrequencies,
+			HashMap<Integer, MAgency> mAgencies,
+			HashMap<Long, MRoute> mRoutes,
+			HashMap<Long, MDirection> mDirections,
+			HashMap<Integer, MTrip> mTrips,
+			HashMap<Integer, MStop> mStops,
+			HashMap<String, MDirectionStop> allMDirectionStops,
+			HashSet<Integer> directionStopIds,
+			HashSet<Integer> serviceIdInts,
+			GSpec routeGTFS
+	) {
 		boolean mergeSuccessful;
 		HashMap<Long, String> mDirectionStopTimesHeadsign;
 		HashMap<Long, ArrayList<MDirectionStop>> directionIdToMDirectionStops = new HashMap<>();
@@ -431,7 +433,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			}
 			if (sb.length() == 0) {
 				final List<Locale> supportedLanguages = this.agencyTools.getSupportedLanguages();
-				if (supportedLanguages != null && supportedLanguages.size() >= 1) {
+				if (supportedLanguages != null && !supportedLanguages.isEmpty()) {
 					final Locale supportedLanguage = supportedLanguages.get(0);
 					if (Locale.ENGLISH.equals(supportedLanguage)) {
 						sb.append("Route ").append(mRoute.getShortNameOrDefault());
@@ -450,18 +452,20 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		}
 	}
 
-	private void parseGTrips(HashMap<String, MSchedule> mSchedules,
-							 HashMap<String, MFrequency> mFrequencies,
-							 HashMap<Long, MDirection> mDirections,
-							 HashMap<Integer, MTrip> mTrips,
-							 HashMap<Integer, MStop> mStops,
-							 HashSet<Integer> serviceIdInts,
-							 MRoute mRoute,
-							 HashMap<Long, String> mDirectionStopTimesHeadsign,
-							 HashMap<Long, ArrayList<MDirectionStop>> directionIdToMDirectionStops,
-							 GRoute gRoute,
-							 Map<Integer, String> gDirectionHeadSigns,
-							 GSpec routeGTFS) {
+	private void parseGTrips(
+			HashMap<String, MSchedule> mSchedules,
+			HashMap<String, MFrequency> mFrequencies,
+			HashMap<Long, MDirection> mDirections,
+			HashMap<Integer, MTrip> mTrips,
+			HashMap<Integer, MStop> mStops,
+			HashSet<Integer> serviceIdInts,
+			MRoute mRoute,
+			HashMap<Long, String> mDirectionStopTimesHeadsign,
+			HashMap<Long, ArrayList<MDirectionStop>> directionIdToMDirectionStops,
+			GRoute gRoute,
+			Map<Integer, String> gDirectionHeadSigns,
+			GSpec routeGTFS
+	) {
 		boolean mergeSuccessful;
 		HashMap<Long, HashSet<String>> mergedDirectionIdToMDirectionStops = new HashMap<>();
 		HashMap<Long, Pair<Integer, String>> originalDirectionHeadsign;
@@ -614,16 +618,18 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		MTLog.log("%s: parsing %d trips for route ID '%s'... DONE", this.routeId, routeGTrips.size(), gRouteId);
 	}
 
-	private HashMap<Long, String> parseGTripStops(HashMap<String, MSchedule> mSchedules,
-												  HashSet<Integer> serviceIdInts,
-												  HashMap<Integer, MStop> mStops,
-												  GRoute gRoute,
-												  GTrip gTrip,
-												  HashMap<Long, Pair<Integer, String>> originalDirectionHeadsign,
-												  ArrayList<MDirection> splitDirections,
-												  Integer serviceIdInt,
-												  HashMap<Long, HashMap<String, MDirectionStop>> splitDirectionStops,
-												  GSpec routeGTFS) {
+	private HashMap<Long, String> parseGTripStops(
+			HashMap<String, MSchedule> mSchedules,
+			HashSet<Integer> serviceIdInts,
+			HashMap<Integer, MStop> mStops,
+			GRoute gRoute,
+			GTrip gTrip,
+			HashMap<Long, Pair<Integer, String>> originalDirectionHeadsign,
+			ArrayList<MDirection> splitDirections,
+			Integer serviceIdInt,
+			HashMap<Long, HashMap<String, MDirectionStop>> splitDirectionStops,
+			GSpec routeGTFS
+	) {
 		HashMap<Long, String> splitDirectionStopTimesHeadSign = new HashMap<>();
 		int mStopId;
 		GStop gStop;
@@ -716,17 +722,19 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 	private final DateFormat DATE_TIME_FORMAT = GFieldTypes.makeDateAndTimeFormat();
 	private final DateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
-	private String parseGStopTimes(HashMap<String, MSchedule> mSchedules,
-								   long mDirectionId,
-								   Integer serviceIdInt,
-								   int originalDirectionHeadsignType,
-								   @Nullable String originalDirectionHeadsignValue,
-								   String directionStopTimesHeadsign,
-								   @NotNull GRoute gRoute,
-								   @NotNull GTrip gTrip,
-								   @NotNull GTripStop gTripStop,
-								   int mStopId,
-								   HashMap<String, Integer> addedMDirectionIdAndGStopIds) {
+	private String parseGStopTimes(
+			HashMap<String, MSchedule> mSchedules,
+			long mDirectionId,
+			Integer serviceIdInt,
+			int originalDirectionHeadsignType,
+			@Nullable String originalDirectionHeadsignValue,
+			String directionStopTimesHeadsign,
+			@NotNull GRoute gRoute,
+			@NotNull GTrip gTrip,
+			@NotNull GTripStop gTripStop,
+			int mStopId,
+			HashMap<String, Integer> addedMDirectionIdAndGStopIds
+	) {
 		MSchedule mSchedule;
 		String stopHeadsign;
 		boolean noPickup;
@@ -804,11 +812,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return directionStopTimesHeadsign;
 	}
 
-	private void parseFrequencies(HashMap<String, MFrequency> mFrequencies,
-								  GTrip gTrip,
-								  ArrayList<MDirection> splitDirections,
-								  Integer serviceIdInt,
-								  GSpec routeGTFS) {
+	private void parseFrequencies(
+			HashMap<String, MFrequency> mFrequencies,
+			GTrip gTrip,
+			ArrayList<MDirection> splitDirections,
+			Integer serviceIdInt,
+			GSpec routeGTFS
+	) {
 		MFrequency mFrequency;
 		for (GFrequency gFrequency : routeGTFS.getFrequencies(gTrip.getTripIdInt())) {
 			if (gFrequency.getTripIdInt() != gTrip.getTripIdInt()) {
@@ -842,8 +852,10 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		return directionStopTimesHeadsign;
 	}
 
-	private void setDirectionStopNoPickup(@NotNull ArrayList<MDirectionStop> mDirectionStopsList,
-										  @NotNull Collection<MSchedule> mSchedules) {
+	private void setDirectionStopNoPickup(
+			@NotNull ArrayList<MDirectionStop> mDirectionStopsList,
+			@NotNull Collection<MSchedule> mSchedules
+	) {
 		for (MDirectionStop directionStop : mDirectionStopsList) {
 			boolean noPickup = false;
 			for (MSchedule schedule : mSchedules) {
