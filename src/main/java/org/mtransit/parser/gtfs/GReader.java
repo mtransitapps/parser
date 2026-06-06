@@ -57,10 +57,12 @@ public class GReader {
 
 	@SuppressWarnings("ConstantValue")
 	@NotNull
-	public static GSpec readGtfsZipFile(@NotNull String gtfsDir,
-										@NotNull final GAgencyTools agencyTools,
-										boolean calendarsOnly,
-										boolean routeTripCalendarsOnly) {
+	public static GSpec readGtfsZipFile(
+			@NotNull String gtfsDir,
+			@NotNull final GAgencyTools agencyTools,
+			boolean calendarsOnly,
+			boolean routeTripCalendarsOnly
+	) {
 		MTLog.log("Reading GTFS file '%s'... (calendarsOnly:%s|routeTripCalendarsOnly:%s)", gtfsDir, calendarsOnly, routeTripCalendarsOnly);
 		long start = System.currentTimeMillis();
 		final GSpec gSpec = new GSpec();
@@ -212,15 +214,17 @@ public class GReader {
 	private static final Pattern QUOTE_ = Pattern.compile("\"");
 
 	@SuppressWarnings("unused")
-	private static void readCsv(String filename, BufferedReader reader,
-								LineProcessor lineProcessor) throws IOException {
+	private static void readCsv(String filename, BufferedReader reader, LineProcessor lineProcessor) throws IOException {
 		readCsv(filename, reader, lineProcessor, null);
 	}
 
 	@SuppressWarnings("resource")
-	private static void readCsv(String filename, BufferedReader reader,
-								LineProcessor lineProcessor,
-								@Nullable OnColumnNamesFound onColumnNamesFoundCallback) throws IOException {
+	private static void readCsv(
+			String filename,
+			BufferedReader reader,
+			LineProcessor lineProcessor,
+			@Nullable OnColumnNamesFound onColumnNamesFoundCallback
+	) throws IOException {
 		MTLog.log("Reading file '%s'...", filename);
 		String line;
 		String[] columnNames;
@@ -294,8 +298,13 @@ public class GReader {
 		MTLog.log("Reading file '%s' (lines: %s)... DONE", filename, l);
 	}
 
-	private static void processStopTime(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line,
-										@Nullable PreparedStatement insertStopTimePrepared, boolean skipDataCleanup) {
+	private static void processStopTime(
+			GAgencyTools agencyTools,
+			GSpec gSpec,
+			HashMap<String, String> line,
+			@Nullable PreparedStatement insertStopTimePrepared,
+			boolean skipDataCleanup
+	) {
 		try {
 			final GStopTime gStopTime = skipDataCleanup ? GStopTime.fromLine(line) : GStopTime.fromLine(line, agencyTools);
 			if (agencyTools.excludeTripNullable(gSpec.getTrip(gStopTime.getTripIdInt()))) {
@@ -357,9 +366,7 @@ public class GReader {
 		}
 	}
 
-	private static void processAgency(GAgencyTools agencyTools,
-									  GSpec gSpec,
-									  HashMap<String, String> line) {
+	private static void processAgency(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
 			final GAgency gAgency = GAgency.fromLine(line);
 			if (agencyTools.excludeAgency(gAgency)) {
@@ -424,8 +431,13 @@ public class GReader {
 		}
 	}
 
-	private static void processTrip(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line,
-									@Nullable PreparedStatement insertStopTimePrepared, boolean skipDataCleanup) {
+	private static void processTrip(
+			GAgencyTools agencyTools,
+			GSpec gSpec,
+			HashMap<String, String> line,
+			@Nullable PreparedStatement insertStopTimePrepared,
+			boolean skipDataCleanup
+	) {
 		try {
 			final GTrip gTrip = skipDataCleanup ? GTrip.fromLine(line) : GTrip.fromLine(line, agencyTools);
 			if (agencyTools.excludeTrip(gTrip)) {

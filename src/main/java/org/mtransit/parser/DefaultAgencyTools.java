@@ -1342,7 +1342,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (useStopIdHashCode()) {
 				return Math.abs(gStopId.hashCode());
 			}
-			final String stopCode = cleanStopOriginalId(getStopCode(gStop));
+			final String stopCode = cleanStopCode(gStop.getStopCode());
 			@SuppressWarnings("DiscouragedApi")
 			final String stopIdS =
 					useStopCodeForStopId() ? stopCode
