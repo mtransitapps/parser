@@ -113,7 +113,7 @@ data class GStop(
         private const val STOP_LAT = "stop_lat"
         private const val STOP_LON = "stop_lon"
         private const val STOP_CODE = "stop_code"
-        private const val LOCATION_TYPE = "location_type"
+        internal const val LOCATION_TYPE = "location_type"
         private const val PARENT_STATION = "parent_station"
         private const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
 

@@ -18,6 +18,7 @@ import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GDirection;
 import org.mtransit.parser.gtfs.data.GDropOffType;
 import org.mtransit.parser.gtfs.data.GFrequency;
+import org.mtransit.parser.gtfs.data.GLocationType;
 import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
@@ -475,6 +476,11 @@ public class GReader {
 
 	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line, boolean skipDataCleanup) {
 		try {
+			final GLocationType stopLocationType = GLocationType.parse(line.get(GStop.LOCATION_TYPE));
+			if (stopLocationType == GLocationType.GENERIC_NODE) {
+				MTLog.log("Generic node stop ignored (%s).", line); // not lat/lng?
+				return;
+			}
 			final GStop gStop = skipDataCleanup ? GStop.fromLine(line) : GStop.fromLine(line, agencyTools);
 			if (agencyTools.excludeStop(gStop)) {
 				//noinspection DiscouragedApi
