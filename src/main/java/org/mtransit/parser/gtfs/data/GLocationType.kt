@@ -25,7 +25,7 @@ enum class GLocationType(val id: Int) {
 
         @JvmStatic
         fun parse(id: String?): GLocationType {
-            return parse(id?.toInt())
+            return parse(id?.toIntOrNull())
         }
     }
 }
