@@ -118,6 +118,8 @@ data class RouteConfig(
     val useParentStopIdForStopId: Boolean = false, // OPT-IN feature
     @SerialName("use_stop_id_for_stop_code")
     val useStopIdForStopCode: Boolean = false, // OPT-IN feature
+    @SerialName("use_stop_name_for_stop_code")
+    val useStopNameForStopCode: Boolean = false, // OPT-IN feature
     @Deprecated("use stopIdNotSupportedConfigs instead")
     @SerialName("stop_code_to_stop_id_configs")
     val stopCodeToStopIdConfigs: List<StopIdConfig> = emptyList(),

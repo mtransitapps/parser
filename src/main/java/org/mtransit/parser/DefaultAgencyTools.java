@@ -1305,7 +1305,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		final String stopCode =
 				cleanStopCode(
 						Configs.getRouteConfig().getUseStopIdForStopCode() ? gStop.getStopId() :
-								gStop.getStopCode()
+								Configs.getRouteConfig().getUseStopNameForStopCode() ? gStop.getStopName() :
+										gStop.getStopCode()
 				);
 		if (prepend != null && !stopCode.startsWith(prepend)) {
 			return prepend + stopCode;
