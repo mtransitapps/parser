@@ -211,17 +211,19 @@ data class GCalendar(
         private const val DAY_TRUE = "1"
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>) = GCalendar(
-            line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
-            DAY_TRUE == line[MONDAY],
-            DAY_TRUE == line[TUESDAY],
-            DAY_TRUE == line[WEDNESDAY],
-            DAY_TRUE == line[THURSDAY],
-            DAY_TRUE == line[FRIDAY],
-            DAY_TRUE == line[SATURDAY],
-            DAY_TRUE == line[SUNDAY],
-            line[START_DATE]?.toInt() ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
-            line[END_DATE]?.toInt() ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
+        fun fromLine(line: Map<String, String>, maxDate: Int? = null) = GCalendar(
+            serviceId = line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
+            monday = DAY_TRUE == line[MONDAY],
+            tuesday = DAY_TRUE == line[TUESDAY],
+            wednesday = DAY_TRUE == line[WEDNESDAY],
+            thursday = DAY_TRUE == line[THURSDAY],
+            friday = DAY_TRUE == line[FRIDAY],
+            saturday = DAY_TRUE == line[SATURDAY],
+            sunday = DAY_TRUE == line[SUNDAY],
+            startDate = line[START_DATE]?.toInt() ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
+            endDate = line[END_DATE]?.toInt()
+                ?.let { if (maxDate != null && it > maxDate) maxDate else it }
+                ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
         )
 
         fun isRunningOnDay(calendar: GCalendar, dayString: String): Boolean =

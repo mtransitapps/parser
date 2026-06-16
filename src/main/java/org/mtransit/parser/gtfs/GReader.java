@@ -7,6 +7,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.DateUtils;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.FileUtils;
 import org.mtransit.parser.MTLog;
@@ -17,6 +18,7 @@ import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GDirection;
 import org.mtransit.parser.gtfs.data.GDropOffType;
+import org.mtransit.parser.gtfs.data.GFieldTypes;
 import org.mtransit.parser.gtfs.data.GFrequency;
 import org.mtransit.parser.gtfs.data.GLocationType;
 import org.mtransit.parser.gtfs.data.GPickupType;
@@ -33,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -381,11 +384,19 @@ public class GReader {
 		}
 	}
 
+	private static final int MAX_CALENDAR_DATE = Integer.parseInt(GFieldTypes.makeDateFormat().format(
+			DateUtils.getEndOfYear(DateUtils.addYears(new Date(), 3)) // 3 years // else local DB slow to deploy
+	));
+
 	private static void processCalendarDate(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
 			final GCalendarDate gCalendarDate = GCalendarDate.fromLine(line);
 			if (gCalendarDate == null) {
 				MTLog.log("Empty calendar dates ignored (%s).", line);
+				return;
+			}
+			if (gCalendarDate.isAfter(MAX_CALENDAR_DATE)) {
+				MTLog.log("Too much in the future calendar dates ignored (%s).", line);
 				return;
 			}
 			if (agencyTools.excludeCalendarDate(gCalendarDate)) {
@@ -400,7 +411,7 @@ public class GReader {
 
 	private static void processCalendar(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final GCalendar gCalendar = GCalendar.fromLine(line);
+			final GCalendar gCalendar = GCalendar.fromLine(line, MAX_CALENDAR_DATE);
 			if (agencyTools.excludeCalendar(gCalendar)) {
 				return;
 			}

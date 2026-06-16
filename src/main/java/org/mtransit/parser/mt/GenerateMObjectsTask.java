@@ -39,7 +39,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -194,10 +193,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 		long lastTimestamp = -1L;
 		if (!mServiceDatesList.isEmpty()) {
 			MServiceDate firstServiceDate = mServiceDatesList.get(0);
-			final int maxCalendarDate = GFieldTypes.fromDateToInt(DATE_FORMAT, new Date()) + 10 * 10_000; // max 10 years IN THE FUTURE
-			mServiceDatesList.removeIf(serviceDate ->
-					serviceDate.getCalendarDate() > maxCalendarDate
-			);
 			MServiceDate lastServiceDate = mServiceDatesList.get(mServiceDatesList.size() - 1);
 			int firstCalendarDate = firstServiceDate.getCalendarDate();
 			int lastCalendarDate = lastServiceDate.getCalendarDate();
@@ -720,7 +715,6 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 
 	private final DateFormat TIME_FORMAT = GFieldTypes.makeTimeFormat();
 	private final DateFormat DATE_TIME_FORMAT = GFieldTypes.makeDateAndTimeFormat();
-	private final DateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
 	private String parseGStopTimes(
 			HashMap<String, MSchedule> mSchedules,
