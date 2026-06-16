@@ -601,9 +601,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return gRoute.getRouteLongNameOrDefault();
 		}
 		//noinspection DiscouragedApi
-		final String routeShortName =
+		String routeShortName =
 				useRouteIdForRouteShortName() ? gRoute.getRouteId()
 						: gRoute.getRouteShortName();
+		if (org.mtransit.commons.StringUtils.isEmpty(routeShortName)
+				&& Configs.getRouteConfig().getUseRouteLongNameForMissingRouteShortName()) {
+			routeShortName = gRoute.getRouteLongNameOrDefault();
+		}
 		if (org.mtransit.commons.StringUtils.isEmpty(routeShortName)) {
 			return provideMissingRouteShortName(gRoute);
 		}
@@ -627,9 +631,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 		final String routeShortNameFromConfig = Configs.getRouteConfig().getRouteShortNameForRoute(gRoute);
 		if (routeShortNameFromConfig != null) {
 			return routeShortNameFromConfig;
-		}
-		if (Configs.getRouteConfig().getUseRouteLongNameForMissingRouteShortName()) {
-			return gRoute.getRouteLongNameOrDefault();
 		}
 		throw new MTLog.Fatal("No default route short name for %s!", gRoute.toStringPlus());
 	}

@@ -6,7 +6,7 @@ import java.util.Date
 object DateUtils {
 
     @JvmStatic
-    fun addYears(date: Date, years: Int) =
+    fun addYears(date: Date, years: Int): Date =
         Calendar.getInstance().apply {
             time = date
             add(Calendar.YEAR, years)
