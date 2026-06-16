@@ -603,12 +603,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 		//noinspection DiscouragedApi
 		String routeShortName =
 				useRouteIdForRouteShortName() ? gRoute.getRouteId()
-						// : useRouteLongNameForRouteShortName() ? gRoute.getRouteLongNameOrDefault()
 						: gRoute.getRouteShortName();
-		if (org.mtransit.commons.StringUtils.isEmpty(routeShortName)) {
-			if (Configs.getRouteConfig().getUseRouteLongNameForMissingRouteShortName()) {
-				routeShortName = gRoute.getRouteLongNameOrDefault();
-			}
+		if (org.mtransit.commons.StringUtils.isEmpty(routeShortName)
+				&& Configs.getRouteConfig().getUseRouteLongNameForMissingRouteShortName()) {
+			routeShortName = gRoute.getRouteLongNameOrDefault();
 		}
 		if (org.mtransit.commons.StringUtils.isEmpty(routeShortName)) {
 			return provideMissingRouteShortName(gRoute);
