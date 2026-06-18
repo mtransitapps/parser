@@ -211,7 +211,7 @@ data class GCalendar(
         private const val DAY_TRUE = "1"
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>, maxDate: Int? = null) = GCalendar(
+        fun fromLine(line: Map<String, String>, minDate: Int? = null, maxDate: Int? = null) = GCalendar(
             serviceId = line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
             monday = DAY_TRUE == line[MONDAY],
             tuesday = DAY_TRUE == line[TUESDAY],
@@ -220,9 +220,19 @@ data class GCalendar(
             friday = DAY_TRUE == line[FRIDAY],
             saturday = DAY_TRUE == line[SATURDAY],
             sunday = DAY_TRUE == line[SUNDAY],
-            startDate = line[START_DATE]?.toInt() ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
+            startDate = line[START_DATE]?.toInt()
+                ?.let { date ->
+                    if (minDate != null && date < minDate) return@let minDate
+                    if (maxDate != null && maxDate < date) return@let maxDate
+                    date
+                }
+                ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
             endDate = line[END_DATE]?.toInt()
-                ?.let { if (maxDate != null && it > maxDate) maxDate else it }
+                ?.let { date ->
+                    if (minDate != null && date < minDate) return@let minDate
+                    if (maxDate != null && maxDate < date) return@let maxDate
+                    date
+                }
                 ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
         )
 

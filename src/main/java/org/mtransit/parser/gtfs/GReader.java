@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.PreparedStatement;
+import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -384,7 +385,13 @@ public class GReader {
 		}
 	}
 
-	private static final int MAX_CALENDAR_DATE = Integer.parseInt(GFieldTypes.makeDateFormat().format(
+	private static final DateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
+
+	private static final int MIN_CALENDAR_DATE = Integer.parseInt(DATE_FORMAT.format(
+			DateUtils.getBeginningOfYear(DateUtils.removeYears(new Date(), 1)) // 1 year // else local DB slow to deploy
+	));
+
+	private static final int MAX_CALENDAR_DATE = Integer.parseInt(DATE_FORMAT.format(
 			DateUtils.getEndOfYear(DateUtils.addYears(new Date(), 3)) // 3 years // else local DB slow to deploy
 	));
 
@@ -395,8 +402,8 @@ public class GReader {
 				MTLog.log("Empty calendar dates ignored (%s).", line);
 				return;
 			}
-			if (gCalendarDate.isAfter(MAX_CALENDAR_DATE)) {
-				MTLog.log("Too much in the future calendar dates ignored (%s).", line);
+			if (gCalendarDate.isBefore(MIN_CALENDAR_DATE) || gCalendarDate.isAfter(MAX_CALENDAR_DATE)) {
+				MTLog.log("Too old/future calendar dates ignored (%s).", line);
 				return;
 			}
 			if (agencyTools.excludeCalendarDate(gCalendarDate)) {
@@ -411,7 +418,7 @@ public class GReader {
 
 	private static void processCalendar(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final GCalendar gCalendar = GCalendar.fromLine(line, MAX_CALENDAR_DATE);
+			final GCalendar gCalendar = GCalendar.fromLine(line, MIN_CALENDAR_DATE, MAX_CALENDAR_DATE);
 			if (agencyTools.excludeCalendar(gCalendar)) {
 				return;
 			}
