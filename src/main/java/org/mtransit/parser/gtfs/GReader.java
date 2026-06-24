@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import kotlin.ranges.IntRange;
+
 @SuppressWarnings("RedundantSuppression")
 public class GReader {
 
@@ -402,8 +404,11 @@ public class GReader {
 				MTLog.log("Empty calendar dates ignored (%s).", line);
 				return;
 			}
-			if (gCalendarDate.isBefore(MIN_CALENDAR_DATE) || gCalendarDate.isAfter(MAX_CALENDAR_DATE)) {
-				MTLog.log("Too old/future calendar dates ignored (%s).", line);
+			if (gCalendarDate.isBefore(MIN_CALENDAR_DATE)) {
+				MTLog.log("Too old calendar dates ignored (%s).", line);
+				return;
+			} else if (gCalendarDate.isAfter(MAX_CALENDAR_DATE)) {
+				MTLog.log("Too much in the future calendar dates ignored (%s).", line);
 				return;
 			}
 			if (agencyTools.excludeCalendarDate(gCalendarDate)) {
@@ -418,7 +423,7 @@ public class GReader {
 
 	private static void processCalendar(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final GCalendar gCalendar = GCalendar.fromLine(line, MIN_CALENDAR_DATE, MAX_CALENDAR_DATE);
+			final GCalendar gCalendar = GCalendar.fromLine(line, new IntRange(MIN_CALENDAR_DATE, MAX_CALENDAR_DATE));
 			if (agencyTools.excludeCalendar(gCalendar)) {
 				return;
 			}

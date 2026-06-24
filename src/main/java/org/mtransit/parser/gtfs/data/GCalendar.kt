@@ -3,6 +3,8 @@ package org.mtransit.parser.gtfs.data
 import androidx.annotation.Discouraged
 import org.mtransit.parser.MTLog
 import java.util.Calendar
+import kotlin.math.max
+import kotlin.math.min
 
 // https://gtfs.org/reference/static/#calendartxt
 data class GCalendar(
@@ -211,30 +213,30 @@ data class GCalendar(
         private const val DAY_TRUE = "1"
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>, minDate: Int? = null, maxDate: Int? = null) = GCalendar(
-            serviceId = line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
-            monday = DAY_TRUE == line[MONDAY],
-            tuesday = DAY_TRUE == line[TUESDAY],
-            wednesday = DAY_TRUE == line[WEDNESDAY],
-            thursday = DAY_TRUE == line[THURSDAY],
-            friday = DAY_TRUE == line[FRIDAY],
-            saturday = DAY_TRUE == line[SATURDAY],
-            sunday = DAY_TRUE == line[SUNDAY],
-            startDate = line[START_DATE]?.toInt()
-                ?.let { date ->
-                    if (minDate != null && date < minDate) return@let minDate
-                    if (maxDate != null && maxDate < date) return@let maxDate
-                    date
+        fun fromLine(line: Map<String, String>, dateRange: IntRange? = null): GCalendar {
+            var startDate = line[START_DATE]?.toInt() ?: throw MTLog.Fatal("Invalid GCalendar from $line!")
+            var endDate = line[END_DATE]?.toInt() ?: throw MTLog.Fatal("Invalid GCalendar from $line!")
+            dateRange?.let {
+                if (endDate < it.first) { // entirely before
+                    // do nothing (TODO max duration?)
+                } else {
+                    startDate = max(startDate, it.first)
+                    endDate = min(endDate, it.last)
                 }
-                ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
-            endDate = line[END_DATE]?.toInt()
-                ?.let { date ->
-                    if (minDate != null && date < minDate) return@let minDate
-                    if (maxDate != null && maxDate < date) return@let maxDate
-                    date
-                }
-                ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
-        )
+            }
+            return GCalendar(
+                serviceId = line[SERVICE_ID] ?: throw MTLog.Fatal("Invalid GCalendar from $line!"),
+                monday = DAY_TRUE == line[MONDAY],
+                tuesday = DAY_TRUE == line[TUESDAY],
+                wednesday = DAY_TRUE == line[WEDNESDAY],
+                thursday = DAY_TRUE == line[THURSDAY],
+                friday = DAY_TRUE == line[FRIDAY],
+                saturday = DAY_TRUE == line[SATURDAY],
+                sunday = DAY_TRUE == line[SUNDAY],
+                startDate = startDate,
+                endDate = endDate,
+            )
+        }
 
         fun isRunningOnDay(calendar: GCalendar, dayString: String): Boolean =
             calendar.isRunningOnCalendarDayOfWeek(
