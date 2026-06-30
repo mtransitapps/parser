@@ -67,6 +67,8 @@ data class RouteConfig(
     val tripExcludes: List<TripFilter> = emptyList(), // optional
     @SerialName("trip_headsign_cleaners")
     val tripHeadsignCleaners: List<Cleaner> = emptyList(),
+    @SerialName("trip_headsign_from_original_route_id_regex")
+    val tripHeadsignFromOriginalRouteIdRegex: String? = null, // optional
     @SerialName("trip_headsign_remove_via")
     val tripHeadsignRemoveVia: Boolean = false, // OPT-IN feature
     @SerialName("trip_id_cleanup_regex")
@@ -398,6 +400,11 @@ data class RouteConfig(
         }
         return false // KEEP
     }
+
+    fun provideMissingTripHeadSign(gTrip: GTrip, defaultHeadsign: String) =
+        //noinspection DiscouragedApi
+        this.tripHeadsignFromOriginalRouteIdRegex?.toRegex()?.replace(gTrip.originalRouteId, EMPTY)
+            ?: defaultHeadsign
 
     fun cleanDirectionHeadsign(lang: Locale, directionHeadsign: String) =
         cleanString(lang, directionHeadsign, this.directionHeadsignCleaners)

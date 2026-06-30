@@ -804,7 +804,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String provideMissingTripHeadSign(@NotNull GTrip gTrip) {
-		return gTrip.getTripHeadsignOrDefault();
+		return Configs.getRouteConfig().provideMissingTripHeadSign(gTrip, gTrip.getTripHeadsignOrDefault());
 	}
 
 	@Override
@@ -1289,7 +1289,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopHeadSign(@NotNull String stopHeadsign) {
-		String cleanStopHeadsign = GTFSCommons.cleanOriginalString(stopHeadsign, getStopHeadsignCleanupPattern());
+		final String cleanStopHeadsign = GTFSCommons.cleanOriginalString(stopHeadsign, getStopHeadsignCleanupPattern());
 		return cleanTripHeadsign(cleanStopHeadsign);
 	}
 
