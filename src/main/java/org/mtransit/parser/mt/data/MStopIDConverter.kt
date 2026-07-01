@@ -31,7 +31,7 @@ object MStopIDConverter {
     ): Int {
         if (stopIdS.isBlank()) {
             return notSupported?.invoke(stopIdS)
-                ?: throw RuntimeException("Unexpected stop ID '$stopIdS' to convert to stop ID integer!")
+                ?: throw RuntimeException("Unexpected stop ID '$stopIdS' to convert to integer!")
         }
         if (stopIdS.length == 1 && stopIdS[0].isLetter()) {
             endsWithLetter(stopIdS)?.let { return it }
@@ -46,7 +46,7 @@ object MStopIDConverter {
         val nextChars = matcher.group(4).uppercase()
         if (digits !in 0..MAX_DIGIT) {
             return notSupported?.invoke(stopIdS)
-                ?: throw RuntimeException("Unexpected stop ID digits '$digits' in stop ID '$stopIdS' to convert to stop ID integer!")
+                ?: throw RuntimeException("Unexpected digits '$digits' in stop ID '$stopIdS' to convert to integer!")
         }
         var stopId = digits
         stopId += endsWithLetter(nextChars) ?: run {

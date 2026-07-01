@@ -139,18 +139,18 @@ object MRouteSNToIDConverter {
         val nextChars = matcher.group(4).uppercase()
         if (digits !in 0..MAX_DIGIT) {
             return notSupportedToRouteId?.invoke(rsn)
-                ?: throw MTLog.Fatal("Unexpected route short name digits '$digits' in short name '$rsn' to convert to route ID!")
+                ?: throw MTLog.Fatal("Unexpected digits '$digits' in route short name '$rsn' to convert to route ID!")
         }
         var routeId = digits
         routeId += endsWithLetter(nextChars) ?: run {
             nextCharsToLong?.invoke(nextChars)
                 ?: notSupportedToRouteId?.invoke(rsn)
-                ?: throw MTLog.Fatal("Unexpected next characters '$nextChars' in short name '$rsn'!")
+                ?: throw MTLog.Fatal("Unexpected next characters '$nextChars' in route short name '$rsn'!")
         }
         routeId += startsWithLetter(previousChars) ?: run {
             previousCharsToLong?.invoke(previousChars)
                 ?: notSupportedToRouteId?.invoke(rsn)
-                ?: throw MTLog.Fatal("Unexpected previous characters '$previousChars' in short name '$rsn'!")
+                ?: throw MTLog.Fatal("Unexpected previous characters '$previousChars' in route short name '$rsn'!")
         }
         return routeId
     }
