@@ -215,6 +215,10 @@ public interface GAgencyTools {
 	boolean removeRouteDescFromDirectionHeadsign();
 
 	@NotNull
+	String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, boolean fromTripHeadSign, @NotNull String directionHeadSign);
+
+	@Deprecated
+	@NotNull
 	String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, @NotNull String directionHeadSign);
 
 	@Deprecated

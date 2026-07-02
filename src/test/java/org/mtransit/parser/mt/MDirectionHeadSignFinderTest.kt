@@ -42,9 +42,9 @@ class MDirectionHeadSignFinderTest {
     @Suppress("DEPRECATION")
     @Before
     fun setUp() {
-        whenever(agencyTools.cleanDirectionHeadsign(anyOrNull<GRoute>(), anyInt(), anyBoolean(), anyString()))
+        whenever(agencyTools.cleanDirectionHeadsign(anyOrNull<GRoute>(), anyInt(), anyBoolean(), anyBoolean(), anyString()))
             .then {
-                it.arguments[3]
+                it.arguments[4]
             }
         whenever(agencyTools.cleanStopHeadSign(any(), any(), any(), anyString()))
             .then {
