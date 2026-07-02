@@ -815,9 +815,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 			throw new MTLog.Fatal("Trying to set direction head-sign w/o valid GTFS route (ID: %s)", gTrip.getRouteId());
 		}
 		final boolean fromStopName = mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STOP_ID;
+		final boolean fromTripHeaSign = mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING;
 		if (directionFinderEnabled(mRoute.getId(), gRoute)) {
 			mDirection.setHeadsignString(
-					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, gTrip.getTripHeadsignOrDefault()),
+					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, fromTripHeaSign, gTrip.getTripHeadsignOrDefault()),
 					gTrip.getDirectionIdOrDefault()
 			);
 			return;
@@ -827,7 +828,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		try {
 			mDirection.setHeadsignString(
-					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, gTrip.getTripHeadsignOrDefault()),
+					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, fromTripHeaSign, gTrip.getTripHeadsignOrDefault()),
 					gTrip.getDirectionIdOrDefault()
 			);
 		} catch (NumberFormatException nfe) {
@@ -939,6 +940,18 @@ public class DefaultAgencyTools implements GAgencyTools {
 	/**
 	 * @param directionId {@link org.mtransit.parser.gtfs.data.GDirectionId} (0 or 1 or missing/generated)
 	 */
+	@Override
+	public @NotNull String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, boolean fromTripHeadSign, @NotNull String directionHeadSign) {
+		if (fromTripHeadSign) {
+			if (Configs.getRouteConfig().getDirectionHeadsignIgnoreTripHeadsign()) {
+				directionHeadSign = "";
+			}
+		}
+		return cleanDirectionHeadsign(gRoute, directionId, fromStopName, directionHeadSign);
+	}
+
+	@SuppressWarnings("DeprecatedIsStillUsed")
+	@Deprecated
 	@Override
 	public @NotNull String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
 		if (gRoute != null) {
@@ -1345,7 +1358,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 				return Math.abs(gStopId.hashCode());
 			}
 			final String stopCode = cleanStopCode(gStop.getStopCode());
-			@SuppressWarnings("DiscouragedApi")
+			//noinspection DiscouragedApi
 			final String stopIdS =
 					useStopCodeForStopId() ? stopCode
 							: useStopCodeForStopIdDigitsOnly() && CharUtils.isDigitsOnly(stopCode, true) ? stopCode

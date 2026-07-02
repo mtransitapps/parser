@@ -64,9 +64,9 @@ object MDirectionHeadSignFinder {
                 val firstAndLastTime = directionAmPm[directionId] ?: continue
                 val gRoute = directionRouteIdInts[directionId].takeIf { it?.size == 1 }?.getOrNull(0)?.let { routeGTFS.getRoute(it) }
                 if (GTime.areAM(firstAndLastTime)) {
-                    amPmDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, "AM")
+                    amPmDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, "AM")
                 } else if (GTime.arePM(firstAndLastTime)) {
-                    amPmDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, "PM")
+                    amPmDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, "PM")
                 }
             }
             if (amPmDirectionHeadSigns.size == 2  // all AM/PM or nothing
@@ -85,7 +85,7 @@ object MDirectionHeadSignFinder {
                     ?: continue
                 val rln = gRoute.routeLongNameOrDefault.takeIf { it.isNotBlank() }
                     ?: continue
-                routeDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, agencyTools.cleanRouteLongName(rln))
+                routeDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, agencyTools.cleanRouteLongName(rln))
             }
             if (routeDirectionHeadSigns.size == directionHeadSigns.size // all route long name or nothing
                 && agencyTools.directionHeadSignsDescriptive(routeDirectionHeadSigns)
@@ -103,7 +103,7 @@ object MDirectionHeadSignFinder {
                 val stop = routeGTFS.getStop(stopIdInt) ?: continue
                 val gRoute = directionRouteIdInts[directionId].takeIf { it?.size == 1 }?.getOrNull(0)?.let { routeGTFS.getRoute(it) }
                 lastStopDirectionHeadSigns[directionId] =
-                    agencyTools.cleanDirectionHeadsign(gRoute, directionId, true, agencyTools.cleanStopName(stop.stopName))
+                    agencyTools.cleanDirectionHeadsign(gRoute, directionId, true, false, agencyTools.cleanStopName(stop.stopName))
                 MTLog.logDebug("$routeId: $directionId Stop '${stop.toStringPlus(false)}' > '${lastStopDirectionHeadSigns[directionId]}'.")
             }
             val allDirectionHeadSignsEmpty: Boolean = directionHeadSigns
@@ -137,7 +137,7 @@ object MDirectionHeadSignFinder {
                 val gRoute = directionRouteIdInts[directionId].takeIf { it?.size == 1 }?.getOrNull(0)?.let { routeGTFS.getRoute(it) }
                 var cleanDirectionHeadsign: String? = null
                 for (stopTimeHeadSign in stopTimeHeadSigns) {
-                    cleanDirectionHeadsign = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, stopTimeHeadSign) // already cleaned
+                    cleanDirectionHeadsign = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, stopTimeHeadSign) // already cleaned
                     if (cleanDirectionHeadsign.isNotBlank()) {
                         break
                     }
@@ -188,7 +188,7 @@ object MDirectionHeadSignFinder {
                 val routeIdInt = gTrip.routeIdInt
                 val gRoute = routeGTFS.getRoute(routeIdInt)
                 val headSign = gTrip.tripHeadsign
-                    ?.let { agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, it) } ?: EMPTY
+                    ?.let { agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, true, it) } ?: EMPTY
                 val stopTimes = routeGTFS.getStopTimes(routeId, gTrip.tripIdInt, null, null)
                 Triple(routeIdInt, headSign, stopTimes)
             }.filterNot { (_, _, stopTimes) ->
@@ -309,7 +309,7 @@ object MDirectionHeadSignFinder {
         }
         // starting complex merge
         MTLog.log("$routeId: $directionId: COMPLEX merge required for: ")
-        distinctTripHeadSignAndStopTimes.forEach { (routeId, headSign, stopTimes) ->
+        distinctTripHeadSignAndStopTimes.forEach { (_, headSign, stopTimes) ->
             MTLog.log(
                 "$routeId: $directionId: '$headSign':" +
                         (if (Constants.DEBUG) "\n" else "") + " ${stopTimes.size} stops: ${
@@ -631,7 +631,7 @@ object MDirectionHeadSignFinder {
         if ((stopIdIntsAfterCommonCount2 == 0 && stopIdIntsAfterCommonCount1 == 0) // #1 & #2 have same last stop
             || (dataLossAuthorized && (stopIdIntsAfterCommonCount2 > 0 && stopIdIntsAfterCommonCount1 > 0)) // distinct last stops (branching)
         ) {
-            if (stopTimesHeadSign1.isBlank()) {
+            if (stopTimesHeadSign1.isBlank() && stopTimesHeadSign2.isNotBlank()) {
                 logMerge(!dataLossAuthorized, "$routeId: $directionId: #1 head-sign is blank, use #2 -> '$stopTimesHeadSign2'")
                 return MergedTrip(
                     routeIdInts1, routeIdInts2, stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
@@ -643,7 +643,7 @@ object MDirectionHeadSignFinder {
                     )
                 )
             }
-            if (stopTimesHeadSign2.isBlank()) {
+            if (stopTimesHeadSign2.isBlank() && stopTimesHeadSign1.isNotBlank()) {
                 logMerge(!dataLossAuthorized, "$routeId: $directionId: #2 head-sign is blank, use #1 -> '$stopTimesHeadSign1'")
                 return MergedTrip(
                     routeIdInts1, routeIdInts2, stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
@@ -982,9 +982,9 @@ object MDirectionHeadSignFinder {
             throw MTLog.Fatal(
                 "$routeId: $directionId: Unresolved situation! \n" +
                         "- #1: $stopTimesHeadSign1. \n" +
-                        "  Stops: ${stopTimesList1.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(true)}" }} \n" +
+                        "  Stops: ${stopTimesList1.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(false)}" }} \n" +
                         "- #2: $stopTimesHeadSign2. \n" +
-                        "  Stops: ${stopTimesList2.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(true)}" }} \n" +
+                        "  Stops: ${stopTimesList2.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(false)}" }} \n" +
                         "!"
             )
         }
