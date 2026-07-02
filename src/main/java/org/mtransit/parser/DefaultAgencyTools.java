@@ -815,10 +815,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 			throw new MTLog.Fatal("Trying to set direction head-sign w/o valid GTFS route (ID: %s)", gTrip.getRouteId());
 		}
 		final boolean fromStopName = mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STOP_ID;
-		final boolean fromTripHeaSign = mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING;
+		final boolean fromTripHeadSign = mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING;
 		if (directionFinderEnabled(mRoute.getId(), gRoute)) {
 			mDirection.setHeadsignString(
-					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, fromTripHeaSign, gTrip.getTripHeadsignOrDefault()),
+					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, fromTripHeadSign, gTrip.getTripHeadsignOrDefault()),
 					gTrip.getDirectionIdOrDefault()
 			);
 			return;
@@ -828,7 +828,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		try {
 			mDirection.setHeadsignString(
-					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, fromTripHeaSign, gTrip.getTripHeadsignOrDefault()),
+					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, fromTripHeadSign, gTrip.getTripHeadsignOrDefault()),
 					gTrip.getDirectionIdOrDefault()
 			);
 		} catch (NumberFormatException nfe) {

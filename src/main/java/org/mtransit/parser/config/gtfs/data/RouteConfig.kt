@@ -334,11 +334,13 @@ data class RouteConfig(
     fun cleanRouteLongName(lang: Locale, routeLongName: String) =
         cleanString(lang, routeLongName, this.routeLongNameCleaners)
 
-    fun cleanTripHeadsign(lang: Locale, tripHeadsign: String) =
-        cleanString(lang, tripHeadsign, this.tripHeadsignCleaners)
+    fun cleanTripHeadsign(lang: Locale, tripHeadsign: String): String {
+        return cleanString(lang, tripHeadsign, this.tripHeadsignCleaners)
+    }
 
-    fun cleanStopName(lang: Locale, stopName: String) =
-        cleanString(lang, stopName, this.stopNameCleaners)
+    fun cleanStopName(lang: Locale, stopName: String): String {
+        return cleanString(lang, stopName, this.stopNameCleaners)
+    }
 
     fun cleanStopCode(lang: Locale, stopCode: String) =
         cleanString(lang, stopCode, this.stopCodeCleaners)
@@ -408,8 +410,9 @@ data class RouteConfig(
         this.tripHeadsignFromOriginalRouteIdRegex?.toRegex()?.replace(gTrip.originalRouteId, EMPTY)
             ?: defaultHeadsign
 
-    fun cleanDirectionHeadsign(lang: Locale, directionHeadsign: String) =
-        cleanString(lang, directionHeadsign, this.directionHeadsignCleaners)
+    fun cleanDirectionHeadsign(lang: Locale, directionHeadsign: String): String {
+        return cleanString(lang, directionHeadsign, this.directionHeadsignCleaners)
+    }
 
     fun convertStopIdFromOriginalNotSupported(originalStopId: String) =
         this.stopOriginalIdToStopIdConfigs
