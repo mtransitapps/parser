@@ -677,7 +677,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		routeLongName = Configs.getRouteConfig().cleanRouteLongName(getFirstLanguageNN(), routeLongName);
 		if (defaultStringsCleanerEnabled()) {
-			return StringsCleaner.cleanRouteLongName(routeLongName, getSupportedLanguages(), getAgencyRouteType(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords());
+			return StringsCleaner.cleanRouteLongName(
+					routeLongName,
+					getSupportedLanguages(),
+					getAgencyRouteType(),
+					lowerUCStrings(),
+					lowerUCWords(),
+					lowerUCWordsMinPct(),
+					getIgnoreUCWords()
+			);
 		}
 		return org.mtransit.commons.CleanUtils.cleanLabel(getFirstLanguageNN(), routeLongName);
 	}
@@ -693,6 +701,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return Configs.getAgencyConfig().getToLowerUpperCaseWords();
 		}
 		return false; // OPT-IN feature
+	}
+
+	@Nullable
+	private Float lowerUCWordsMinPct() {
+		if (Configs.getAgencyConfig() != null) {
+			return Configs.getAgencyConfig().getToLowerUpperCaseWordsMinPct();
+		}
+		return null;
 	}
 
 	@Override
@@ -847,6 +863,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 					getAgencyRouteType(),
 					lowerUCStrings(),
 					lowerUCWords(),
+					lowerUCWordsMinPct(),
 					getIgnoreUCWords(),
 					Configs.getRouteConfig().getTripHeadsignRemoveVia()
 			);
@@ -1265,7 +1282,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public String cleanStopName(@NotNull String gStopName) {
 		gStopName = Configs.getRouteConfig().cleanStopName(getFirstLanguageNN(), gStopName);
 		if (defaultStringsCleanerEnabled()) {
-			return StringsCleaner.cleanStopName(gStopName, getSupportedLanguages(), getAgencyRouteType(), lowerUCStrings(), lowerUCWords(), getIgnoreUCWords());
+			return StringsCleaner.cleanStopName(
+					gStopName,
+					getSupportedLanguages(),
+					getAgencyRouteType(),
+					lowerUCStrings(),
+					lowerUCWords(),
+					lowerUCWordsMinPct(),
+					getIgnoreUCWords()
+			);
 		}
 		return org.mtransit.commons.CleanUtils.cleanLabel(getFirstLanguageNN(), gStopName);
 	}

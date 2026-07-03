@@ -41,6 +41,8 @@ data class AgencyConfig(
     val toLowerUpperCaseStrings: Boolean = false, // OPT-IN feature
     @SerialName("to_lower_upper_case_words")
     val toLowerUpperCaseWords: Boolean = false, // OPT-IN feature
+    @SerialName("to_lower_upper_case_words_min_pct")
+    val toLowerUpperCaseWordsMinPct: Float? = null, // OPT-IN feature
     @SerialName("ignore_upper_case_words")
     val ignoreUpperCaseWords: List<String> = emptyList(), // OPT-IN feature
     // COLOR
