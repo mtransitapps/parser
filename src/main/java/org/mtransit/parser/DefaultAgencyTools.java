@@ -11,6 +11,7 @@ import org.mtransit.commons.CommonsApp;
 import org.mtransit.commons.GTFSCommons;
 import org.mtransit.commons.StringsCleaner;
 import org.mtransit.parser.config.Configs;
+import org.mtransit.parser.config.gtfs.data.AgencyConfig;
 import org.mtransit.parser.gtfs.GAgencyTools;
 import org.mtransit.parser.gtfs.GReader;
 import org.mtransit.parser.gtfs.data.GAgency;
@@ -461,13 +462,25 @@ public class DefaultAgencyTools implements GAgencyTools {
 	 * When using only `calendar_dates.txt`, we might want to avoid adding 1 more service day if it adds a whole new "service ID period".
 	 * For example, we can have many service IDs starting with YYMMDD-abc-123 with 2 distinct groups like 26JN29-... and 26AU03-....
 	 */
-	private static boolean avoidServiceIdMerge(@NotNull Collection<Integer> currentServiceIdInts, @NotNull Collection<Integer> newServiceIdInts) {
-		final boolean avoidServiceIdMerge = Configs.getAgencyConfig() != null && Configs.getAgencyConfig().getServiceIdAvoidMerge();
-		if (!avoidServiceIdMerge) return true; // can merge
-		final boolean serviceIdCleanMerged = Configs.getAgencyConfig() != null && Configs.getAgencyConfig().getServiceIdCleanMerged();
-		final String serviceIdCleanupRegex = Configs.getAgencyConfig() == null ? null : Configs.getAgencyConfig().getServiceIdCleanupRegex();
+	private static boolean canMergeServiceIds(@NotNull Collection<Integer> currentServiceIdInts, @NotNull Collection<Integer> newServiceIdInts) {
+		final AgencyConfig agencyConfig = Configs.getAgencyConfig();
+		if (agencyConfig == null || !agencyConfig.getServiceIdAvoidMerge()) return true; // can merge
+		final boolean serviceIdCleanMerged = agencyConfig.getServiceIdCleanMerged();
+		final String serviceIdCleanupRegex = agencyConfig.getServiceIdCleanupRegex();
 		if (!serviceIdCleanMerged && (serviceIdCleanupRegex == null || serviceIdCleanupRegex.isBlank())) return true; // can merge
 		final Pattern serviceIdCleanupPattern = serviceIdCleanupRegex == null ? null : Pattern.compile(serviceIdCleanupRegex);
+		// make current set of cleaned service IDs
+		final Set<String> cleanCurrentServiceIds = new HashSet<>();
+		for (Integer currentServiceIdInt : currentServiceIdInts) {
+			String currentServiceId = GIDs.getString(currentServiceIdInt);
+			if (serviceIdCleanupPattern != null) {
+				currentServiceId = GTFSCommons.cleanOriginalString(currentServiceId, serviceIdCleanupPattern);
+			}
+			if (serviceIdCleanMerged) {
+				currentServiceId = CleanUtils.cleanMergedID(currentServiceId);
+			}
+			cleanCurrentServiceIds.add(currentServiceId);
+		}
 		for (Integer newServiceIdInt : newServiceIdInts) {
 			String newServiceId = GIDs.getString(newServiceIdInt);
 			if (serviceIdCleanupPattern != null) {
@@ -476,17 +489,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (serviceIdCleanMerged) {
 				newServiceId = CleanUtils.cleanMergedID(newServiceId);
 			}
-			for (Integer currentServiceIdInt : currentServiceIdInts) {
-				String currentServiceId = GIDs.getString(currentServiceIdInt);
-				if (serviceIdCleanupPattern != null) {
-					currentServiceId = GTFSCommons.cleanOriginalString(currentServiceId, serviceIdCleanupPattern);
-				}
-				if (serviceIdCleanMerged) {
-					currentServiceId = CleanUtils.cleanMergedID(currentServiceId);
-				}
-				if (newServiceId.equals(currentServiceId)) {
-					return false; // can not merge
-				}
+			if (cleanCurrentServiceIds.contains(newServiceId)) {
+				return false; // can not merge
 			}
 		}
 		return true; // can merge
@@ -1872,7 +1876,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 			refreshPeriodStartEndDatesFromCalendarDates(nextDayPeriod, nextDayServiceIdInts, gCalendarDates);
 			if (nextDayPeriod.getStartDate() != null && nextDayPeriod.getEndDate() != null
 					&& diffLowerOrEqual(DATE_FORMAT, c, nextDayPeriod.getStartDate(), nextDayPeriod.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS)
-					&& avoidServiceIdMerge(todayServiceIdInts, nextDayServiceIdInts)) {
+					&& canMergeServiceIds(todayServiceIdInts, nextDayServiceIdInts)) {
 				p.setEndDate(nextDayPeriod.getEndDate());
 				MTLog.log("> new end date '%s' because next %d day(s) has own service ID(s)", p.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS);
 				continue;
@@ -1888,7 +1892,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 					&& previousDayPeriod.getStartDate() != null && previousDayPeriod.getEndDate() != null
 					&& diffLowerOrEqual(DATE_FORMAT, c, previousDayPeriod.getStartDate(), previousDayPeriod.getEndDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS)
 					&& MServiceDate.containsAllServiceIdInts(lastServiceDates, previousDayPeriodServiceIdInts) // 2026-01-29: only look backward if min calendar date coverage is not reached or in previous schedule
-					&& avoidServiceIdMerge(todayServiceIdInts, previousDayPeriodServiceIdInts)
+					&& canMergeServiceIds(todayServiceIdInts, previousDayPeriodServiceIdInts)
 			) {
 				p.setStartDate(previousDayPeriod.getStartDate());
 				MTLog.log("> new start date '%s' because previous %d day(s) has own service ID(s)", p.getStartDate(), MIN_PREVIOUS_NEXT_ADDED_DAYS);
