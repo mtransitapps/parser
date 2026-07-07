@@ -353,9 +353,7 @@ public interface GAgencyTools {
 
 	// SCHEDULE
 	@Nullable
-	Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime,
-									@NotNull List<GStopTime> tripStopTimes,
-									@NotNull DateFormat timeFormat);
+	Pair<Integer, Integer> getTimes(@NotNull GStopTime gStopTime, @NotNull List<GStopTime> tripStopTimes, @NotNull DateFormat timeFormat);
 
 	boolean allowIgnoreInvalidStopTimes();
 

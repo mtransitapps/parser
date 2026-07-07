@@ -63,6 +63,8 @@ data class AgencyConfig(
     val serviceIdCleanMerged: Boolean = false, // OPT-IN feature
     @SerialName("service_id_not_unique_allowed")
     val serviceIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
+    @SerialName("service_id_avoid_merge")
+    val serviceIdAvoidMerge: Boolean = false, // OPT-IN feature
 ) {
     fun getAllLanguages(supportedLanguages: List<Locale>): List<Locale>? {
         if (supportedLanguages.isEmpty()) return null
