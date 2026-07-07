@@ -1,9 +1,16 @@
 package org.mtransit.parser
 
-data class Period(
-    var todayStringInt: Int?,
-    var startDate: Int?,
-    var endDate: Int?,
+data class Period @JvmOverloads constructor(
+    var todayStringInt: Int? = null,
+    var startDate: Int? = null,
+    var endDate: Int? = null,
 ) {
-    constructor() : this(null, null, null)
+    companion object {
+        @JvmStatic
+        fun from(today: Int) = Period(
+            todayStringInt = today,
+            startDate = null,
+            endDate = null
+        )
+    }
 }
