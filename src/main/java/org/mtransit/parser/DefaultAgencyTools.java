@@ -468,7 +468,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		final boolean serviceIdCleanMerged = agencyConfig.getServiceIdCleanMerged();
 		final String serviceIdCleanupRegex = agencyConfig.getServiceIdCleanupRegex();
 		if (!serviceIdCleanMerged && (serviceIdCleanupRegex == null || serviceIdCleanupRegex.isBlank())) return true; // can merge
-		final Pattern serviceIdCleanupPattern = serviceIdCleanupRegex == null ? null : Pattern.compile(serviceIdCleanupRegex);
+		final Pattern serviceIdCleanupPattern = serviceIdCleanupRegex == null || serviceIdCleanupRegex.isBlank() ? null : Pattern.compile(serviceIdCleanupRegex);
 		// make current set of cleaned service IDs
 		final Set<String> cleanCurrentServiceIds = new HashSet<>();
 		for (Integer currentServiceIdInt : currentServiceIdInts) {
