@@ -42,9 +42,9 @@ class MDirectionHeadSignFinderTest {
     @Suppress("DEPRECATION")
     @Before
     fun setUp() {
-        whenever(agencyTools.cleanDirectionHeadsign(anyOrNull<GRoute>(), anyInt(), anyBoolean(), anyBoolean(), anyString()))
+        whenever(agencyTools.cleanDirectionHeadsign(anyOrNull<GRoute>(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean(), anyString()))
             .then {
-                it.arguments[4]
+                it.arguments[5]
             }
         whenever(agencyTools.cleanStopHeadSign(any(), any(), any(), anyString()))
             .then {
@@ -821,6 +821,7 @@ class MDirectionHeadSignFinderTest {
         assertEquals(false, result?.firstAndLast?.let { GTime.arePM(it) } == true)
     }
 
+    @Suppress("SameParameterValue")
     private fun makeGTrip(
         routeId: String,
         serviceId: String,
@@ -843,6 +844,7 @@ class MDirectionHeadSignFinderTest {
         bikesAllowed = null,
     )
 
+    @Suppress("SameParameterValue")
     private fun makeGTrip(
         routeId: Int,
         serviceId: Int,

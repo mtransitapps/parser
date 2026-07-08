@@ -52,7 +52,7 @@ object MDirectionHeadSignFinder {
                 val routeDirection = routeGTFS.getRouteDirection(routeIdInt, directionId)
                     ?: return@let
                 routeDirection.destination
-                    ?.let { agencyTools.cleanDirectionHeadsign(routeGTFS.getRoute(routeIdInt), directionId, false, false, it) }
+                    ?.let { agencyTools.cleanDirectionHeadsign(routeGTFS.getRoute(routeIdInt), directionId, false, false, true, it) }
                     ?.takeIf { it.isNotBlank() }
                     ?.let {
                         MTLog.logDebug("$routeId: $directionId: direction > use '$it'.")
@@ -85,9 +85,9 @@ object MDirectionHeadSignFinder {
                 val firstAndLastTime = directionAmPm[directionId] ?: continue
                 val gRoute = directionRouteIdInts[directionId].takeIf { it?.size == 1 }?.getOrNull(0)?.let { routeGTFS.getRoute(it) }
                 if (GTime.areAM(firstAndLastTime)) {
-                    amPmDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, "AM")
+                    amPmDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, false, "AM")
                 } else if (GTime.arePM(firstAndLastTime)) {
-                    amPmDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, "PM")
+                    amPmDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, false, "PM")
                 }
             }
             if (amPmDirectionHeadSigns.size == 2  // all AM/PM or nothing
@@ -107,7 +107,7 @@ object MDirectionHeadSignFinder {
                 val rln = gRoute.routeLongNameOrDefault.takeIf { it.isNotBlank() }
                     ?: continue
                 routeDirectionHeadSigns[directionId] =
-                    agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, agencyTools.cleanRouteLongName(rln))
+                    agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, false, agencyTools.cleanRouteLongName(rln))
             }
             if (routeDirectionHeadSigns.size == directionHeadSigns.size // all route long name or nothing
                 && agencyTools.directionHeadSignsDescriptive(routeDirectionHeadSigns)
@@ -125,7 +125,7 @@ object MDirectionHeadSignFinder {
                 val stop = routeGTFS.getStop(stopIdInt) ?: continue
                 val gRoute = directionRouteIdInts[directionId].takeIf { it?.size == 1 }?.getOrNull(0)?.let { routeGTFS.getRoute(it) }
                 lastStopDirectionHeadSigns[directionId] =
-                    agencyTools.cleanDirectionHeadsign(gRoute, directionId, true, false, agencyTools.cleanStopName(stop.stopName))
+                    agencyTools.cleanDirectionHeadsign(gRoute, directionId, true, false, false, agencyTools.cleanStopName(stop.stopName))
                 MTLog.logDebug("$routeId: $directionId Stop '${stop.toStringPlus(false)}' > '${lastStopDirectionHeadSigns[directionId]}'.")
             }
             val allDirectionHeadSignsEmpty: Boolean = directionHeadSigns
@@ -159,7 +159,7 @@ object MDirectionHeadSignFinder {
                 val gRoute = directionRouteIdInts[directionId].takeIf { it?.size == 1 }?.getOrNull(0)?.let { routeGTFS.getRoute(it) }
                 var cleanDirectionHeadsign: String? = null
                 for (stopTimeHeadSign in stopTimeHeadSigns) {
-                    cleanDirectionHeadsign = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, stopTimeHeadSign) // already cleaned
+                    cleanDirectionHeadsign = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, false, stopTimeHeadSign) // already cleaned
                     if (cleanDirectionHeadsign.isNotBlank()) {
                         break
                     }
@@ -210,7 +210,7 @@ object MDirectionHeadSignFinder {
             }.map { gTrip ->
                 val routeIdInt = gTrip.routeIdInt
                 val headSign = gTrip.tripHeadsign
-                    ?.let { agencyTools.cleanDirectionHeadsign(routeGTFS.getRoute(routeIdInt), directionId, false, true, it) } ?: EMPTY
+                    ?.let { agencyTools.cleanDirectionHeadsign(routeGTFS.getRoute(routeIdInt), directionId, false, true, false, it) } ?: EMPTY
                 val stopTimes = routeGTFS.getStopTimes(routeId, gTrip.tripIdInt, null, null)
                 Triple(routeIdInt, headSign, stopTimes)
             }.filterNot { (_, _, stopTimes) ->

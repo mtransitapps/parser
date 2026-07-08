@@ -1,5 +1,7 @@
 package org.mtransit.parser;
 
+import static org.mtransit.parser.Constants.EMPTY;
+
 import androidx.annotation.Discouraged;
 import androidx.annotation.VisibleForTesting;
 
@@ -871,9 +873,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		final boolean fromStopName = mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STOP_ID;
 		final boolean fromTripHeadSign = mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING;
+		final boolean fromDirection = false; // using trip head-sign here
 		if (directionFinderEnabled(mRoute.getId(), gRoute)) {
 			mDirection.setHeadsignString(
-					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, fromTripHeadSign, gTrip.getTripHeadsignOrDefault()),
+					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, fromTripHeadSign, fromDirection, gTrip.getTripHeadsignOrDefault()),
 					gTrip.getDirectionIdOrDefault()
 			);
 			return;
@@ -883,7 +886,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		}
 		try {
 			mDirection.setHeadsignString(
-					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, fromTripHeadSign, gTrip.getTripHeadsignOrDefault()),
+					cleanDirectionHeadsign(gRoute, gTrip.getDirectionIdOrDefault(), fromStopName, fromTripHeadSign, fromDirection, gTrip.getTripHeadsignOrDefault()),
 					gTrip.getDirectionIdOrDefault()
 			);
 		} catch (NumberFormatException nfe) {
@@ -997,10 +1000,23 @@ public class DefaultAgencyTools implements GAgencyTools {
 	 * @param directionId {@link org.mtransit.parser.gtfs.data.GDirectionId} (0 or 1 or missing/generated)
 	 */
 	@Override
+	public @NotNull String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, boolean fromTripHeadSign, boolean fromDirection, @NotNull String directionHeadSign) {
+		if (fromDirection) {
+			if (Configs.getRouteConfig().getDirectionHeadsignIgnoreProvidedDirection()) {
+				return EMPTY;
+			}
+		}
+		//noinspection deprecation
+		return cleanDirectionHeadsign(gRoute, directionId, fromStopName, fromTripHeadSign, directionHeadSign);
+	}
+
+	@SuppressWarnings("DeprecatedIsStillUsed")
+	@Deprecated
+	@Override
 	public @NotNull String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, boolean fromTripHeadSign, @NotNull String directionHeadSign) {
 		if (fromTripHeadSign) {
 			if (Configs.getRouteConfig().getDirectionHeadsignIgnoreTripHeadsign()) {
-				directionHeadSign = "";
+				return EMPTY;
 			}
 		}
 		//noinspection deprecation
@@ -1013,16 +1029,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 	public @NotNull String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
 		if (gRoute != null) {
 			if (removeRouteLongNameFromDirectionHeadsign() && directionHeadSign.equals(gRoute.getRouteLongNameOrDefault())) {
-				directionHeadSign = "";
+				return EMPTY;
 			} else if (removeRouteShortNameFromDirectionHeadsign() && directionHeadSign.equals(gRoute.getRouteShortName())) {
-				directionHeadSign = "";
+				return EMPTY;
 			} else if (removeRouteDescFromDirectionHeadsign() && directionHeadSign.equals(gRoute.getRouteDescOrDefault())) {
-				directionHeadSign = "";
+				return EMPTY;
 			}
 		}
 		//noinspection deprecation
-		directionHeadSign = cleanDirectionHeadsign(directionId, fromStopName, directionHeadSign);
-		return directionHeadSign;
+		return cleanDirectionHeadsign(directionId, fromStopName, directionHeadSign);
 	}
 
 	@SuppressWarnings("DeprecatedIsStillUsed")
@@ -1030,9 +1045,10 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@NotNull
 	@Override
 	public String cleanDirectionHeadsign(int directionId, boolean fromStopName, @NotNull String directionHeadSign) {
-		directionHeadSign = Configs.getRouteConfig().cleanDirectionHeadsign(getFirstLanguageNN(), directionHeadSign);
 		//noinspection deprecation
-		return cleanDirectionHeadsign(fromStopName, directionHeadSign);
+		return cleanDirectionHeadsign(fromStopName,
+				Configs.getRouteConfig().cleanDirectionHeadsign(getFirstLanguageNN(), directionHeadSign)
+		);
 	}
 
 	@SuppressWarnings("DeprecatedIsStillUsed")

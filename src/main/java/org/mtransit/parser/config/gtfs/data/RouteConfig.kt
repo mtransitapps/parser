@@ -92,6 +92,8 @@ data class RouteConfig(
     val directionHeadsignRemoveRouteShortName: Boolean = false, // OPT-IN feature
     @SerialName("direction_headsign_remove_route_desc")
     val directionHeadsignRemoveRouteDesc: Boolean = false, // OPT-IN feature
+    @SerialName("direction_headsign_ignore_provided_direction")
+    val directionHeadsignIgnoreProvidedDirection: Boolean = false,
     @SerialName("direction_headsign_ignore_trip_headsign")
     val directionHeadsignIgnoreTripHeadsign: Boolean = false, // OPT-IN feature
     @SerialName("direction_splitter_enabled")
