@@ -58,8 +58,10 @@ data class GDirection(
 
         private const val ROUTE_ID = GRoute.ROUTE_ID
         private const val DIRECTION_ID = "direction_id"
-        private const val DIRECTION = "direction"
 
+        private const val DIRECTION = "direction" // can be parsed to enum or regular string (TODO enum useless?)
+
+        private const val DIRECTION_DESTINATION = "direction_destination"
         private const val DESTINATION = "destination"
         private const val DIRECTION_NAME = "direction_name"
         private const val ROUTE_DIRECTION_NAME = "route_direction_name"
@@ -77,7 +79,9 @@ data class GDirection(
             destination = line[DESTINATION]?.trim()
                 ?: line[DIRECTION_NAME]?.trim()
                 ?: line[ROUTE_DIRECTION_NAME]?.trim()
-                ?: line[DIRECTION_LEGACY]?.trim(),
+                ?: line[DIRECTION_DESTINATION]?.trim()
+                ?: line[DIRECTION_LEGACY]?.trim()
+                ?: line[DIRECTION]?.trim(),
         )
 
         @JvmStatic
