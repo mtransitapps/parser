@@ -1,5 +1,6 @@
 package org.mtransit.parser.mt
 
+import org.jetbrains.annotations.VisibleForTesting
 import org.mtransit.commons.StringUtils.EMPTY
 import org.mtransit.commons.containsExactList
 import org.mtransit.commons.indexOf
@@ -40,6 +41,16 @@ object MDirectionHeadSignFinder {
         val directionRouteIdInts = mutableMapOf<Int, List<Int>>()
         GDirectionId.entries.forEach { gDirectionId ->
             val directionId = gDirectionId.id
+            gRouteTrips.map { it.routeIdInt }.distinct().singleOrNull()?.let { routeIdInt ->
+                val routeDirection = routeGTFS.getRouteDirection(routeIdInt, directionId)
+                routeDirection?.destination
+                    ?.let { agencyTools.cleanDirectionHeadsign(routeGTFS.getRoute(routeIdInt), directionId, false, true, it) }
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let {
+                        directionHeadSigns[directionId] = it
+                        return@forEach
+                    }
+            }
             findDirectionHeadSign(
                 routeId,
                 gRouteTrips,
@@ -85,7 +96,8 @@ object MDirectionHeadSignFinder {
                     ?: continue
                 val rln = gRoute.routeLongNameOrDefault.takeIf { it.isNotBlank() }
                     ?: continue
-                routeDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, agencyTools.cleanRouteLongName(rln))
+                routeDirectionHeadSigns[directionId] =
+                    agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, agencyTools.cleanRouteLongName(rln))
             }
             if (routeDirectionHeadSigns.size == directionHeadSigns.size // all route long name or nothing
                 && agencyTools.directionHeadSignsDescriptive(routeDirectionHeadSigns)
@@ -174,7 +186,8 @@ object MDirectionHeadSignFinder {
         return directionHeadSigns
     }
 
-    fun findDirectionHeadSign(
+    @VisibleForTesting
+    internal fun findDirectionHeadSign(
         routeId: Long,
         gRouteTrips: List<GTrip>,
         routeGTFS: GSpec,
@@ -186,9 +199,8 @@ object MDirectionHeadSignFinder {
                 gTrip.directionIdOrDefault == directionId
             }.map { gTrip ->
                 val routeIdInt = gTrip.routeIdInt
-                val gRoute = routeGTFS.getRoute(routeIdInt)
                 val headSign = gTrip.tripHeadsign
-                    ?.let { agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, true, it) } ?: EMPTY
+                    ?.let { agencyTools.cleanDirectionHeadsign(routeGTFS.getRoute(routeIdInt), directionId, false, true, it) } ?: EMPTY
                 val stopTimes = routeGTFS.getStopTimes(routeId, gTrip.tripIdInt, null, null)
                 Triple(routeIdInt, headSign, stopTimes)
             }.filterNot { (_, _, stopTimes) ->

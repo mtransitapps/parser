@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.text.DateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -125,7 +126,7 @@ public class GReader {
 			}
 			// DIRECTIONS (ext) (after route)
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
-				readFile(gtfsDir, GDirection.FILENAME, false, line ->
+				readFiles(gtfsDir, GDirection.getFILENAMES(), false, line ->
 						processDirection(agencyTools, gSpec, line, skipDataCleanup)
 				);
 			}
@@ -183,9 +184,24 @@ public class GReader {
 			boolean fileRequired,
 			@NotNull LineProcessor lineProcessor
 	) {
-		return readFile(gtfsDir, fileName, fileRequired, lineProcessor, null);
+		return readFiles(
+				gtfsDir,
+				Collections.singletonList(fileName),
+				fileRequired,
+				lineProcessor
+		);
 	}
 
+	private static boolean readFiles(
+			@NotNull String gtfsDir,
+			@NotNull List<String> fileNames,
+			boolean fileRequired,
+			@NotNull LineProcessor lineProcessor
+	) {
+		return readFiles(gtfsDir, fileNames, fileRequired, lineProcessor, null);
+	}
+
+	@SuppressWarnings({"UnusedReturnValue", "SameParameterValue"})
 	private static boolean readFile(
 			@NotNull String gtfsDir,
 			@NotNull String fileName,
@@ -193,12 +209,28 @@ public class GReader {
 			@NotNull LineProcessor lineProcessor,
 			@Nullable OnColumnNamesFound onColumnNamesFoundCallback
 	) {
-		final File gtfsFile = FileUtils.findFileCaseInsensitive(gtfsDir, fileName);
+		return readFiles(
+				gtfsDir,
+				Collections.singletonList(fileName),
+				fileRequired,
+				lineProcessor,
+				onColumnNamesFoundCallback
+		);
+	}
+
+	private static boolean readFiles(
+			@NotNull String gtfsDir,
+			@NotNull List<String> fileNames,
+			boolean fileRequired,
+			@NotNull LineProcessor lineProcessor,
+			@Nullable OnColumnNamesFound onColumnNamesFoundCallback
+	) {
+		final File gtfsFile = FileUtils.findFileCaseInsensitive(gtfsDir, fileNames);
 		if (gtfsFile == null || !gtfsFile.exists()) {
 			if (fileRequired) {
 				throw new MTLog.Fatal("'%s' file does not exist!", gtfsFile);
 			} else {
-				MTLog.log("Reading file '%s'... SKIP (non-existing).", fileName);
+				MTLog.log("Reading file(s) '%s'... SKIP (non-existing).", fileNames);
 				return false;
 			}
 		}
@@ -443,7 +475,7 @@ public class GReader {
 				logExclude("Exclude direction (!route): %s | %s.", gRoute == null ? null : gRoute.getRouteId(), gDirection.getDirectionId());
 				return;
 			}
-			final GDirection existingDirection = gSpec.getDirection(gDirection.getRouteIdInt(), gDirection.getDirectionId());
+			final GDirection existingDirection = gSpec.getRouteDirection(gDirection.getRouteIdInt(), gDirection.getDirectionId().getId());
 			if (existingDirection != null) {
 				//noinspection DiscouragedApi
 				MTLog.logDebug("Duplicate direction ID for route ID! (new:%s|old:%s)", gDirection.getDirectionId(), existingDirection.getDirectionId());
