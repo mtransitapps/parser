@@ -69,7 +69,7 @@ import java.util.regex.Pattern;
 public class DefaultAgencyTools implements GAgencyTools {
 
 	static {
-		CommonsApp.setup(false);
+		CommonsApp.setup(false); // isAndroidPlatform
 	}
 
 	@SuppressWarnings("WeakerAccess")
