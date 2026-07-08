@@ -31,6 +31,10 @@ data class GDirection(
     private val _routeId: String
         get() = GIDs.getString(routeIdInt)
 
+    val destinationOrDirection: String? =
+        destination
+            ?: directionType.takeIf { it != GDirectionType.UNKNOWN }?.value
+
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
@@ -73,8 +77,7 @@ data class GDirection(
             destination = line[DESTINATION]?.trim()
                 ?: line[DIRECTION_NAME]?.trim()
                 ?: line[ROUTE_DIRECTION_NAME]?.trim()
-                ?: line[DIRECTION_LEGACY]?.trim()
-            ,
+                ?: line[DIRECTION_LEGACY]?.trim(),
         )
 
         @JvmStatic

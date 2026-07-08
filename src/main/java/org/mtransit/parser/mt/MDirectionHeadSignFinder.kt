@@ -54,7 +54,7 @@ object MDirectionHeadSignFinder {
             directionRouteIdInt?.let { routeIdInt ->
                 val routeDirection = routeGTFS.getRouteDirection(routeIdInt, directionId)
                     ?: return@let
-                routeDirection.destination
+                routeDirection.destinationOrDirection
                     ?.let { agencyTools.cleanDirectionHeadsign(routeGTFS.getRoute(routeIdInt), directionId, false, false, true, it) }
                     ?.takeIf { it.isNotBlank() }
                     ?.let {

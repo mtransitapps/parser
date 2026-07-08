@@ -268,9 +268,7 @@ public class GReader {
 		String line;
 		String[] columnNames;
 		line = reader.readLine();
-		if (line == null || line.isEmpty()) {
-			return;
-		}
+		if (line == null || line.isEmpty()) return;
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
 			MTLog.log("Reading file '%s'... > remove 1st empty car", filename);
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
@@ -283,9 +281,7 @@ public class GReader {
 		if (onColumnNamesFoundCallback != null) {
 			onColumnNamesFoundCallback.processColumnNames(Arrays.asList(columnNames));
 		}
-		if (columnNames.length == 0) {
-			return;
-		}
+		if (columnNames.length == 0) return;
 		List<CSVRecord> records;
 		HashMap<String, String> map = new HashMap<>();
 		String[] lineColumns = new String[columnNames.length];
@@ -306,10 +302,10 @@ public class GReader {
 				}
 				recordColumns = records.get(0);
 				recordColumnsSize = recordColumns.size();
-				if (columnNames.length != recordColumnsSize
-						&& columnNames.length != (recordColumnsSize + 1)) {
-					MTLog.log("File '%s' line invalid: %s columns instead of %s: %s", filename, recordColumnsSize, columnNames.length, line);
-					continue;
+				if (recordColumnsSize > columnNames.length) {
+					MTLog.log("File '%s' line contains MORE columns (%s:%s) than expected (%s:%s)!", filename, recordColumnsSize, line, columnNames.length, Arrays.asList(columnNames));
+				} else if (recordColumnsSize < columnNames.length) {
+					MTLog.log("File '%s' line contains LESS columns (%s:%s) than expected (%s:%s)!", filename, recordColumnsSize, line, columnNames.length, Arrays.asList(columnNames));
 				}
 				for (int i = 0; i < lineColumns.length; i++) {
 					final String lineColumn = i >= recordColumns.size() ? EMPTY : recordColumns.get(i);
@@ -318,7 +314,8 @@ public class GReader {
 							QUOTE_.matcher(lineColumn).replaceAll(EMPTY);
 				}
 				map.clear();
-				for (int ci = 0; ci < recordColumnsSize; ++ci) {
+				final int usedColumnsCounts = Math.min(recordColumnsSize, columnNames.length);
+				for (int ci = 0; ci < usedColumnsCounts; ++ci) {
 					map.put(columnNames[ci], lineColumns[ci]);
 				}
 				if (lineProcessor != null) {
