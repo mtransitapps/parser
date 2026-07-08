@@ -57,8 +57,9 @@ data class GDirection(
         private const val DIRECTION = "direction"
 
         private const val DESTINATION = "destination"
-        private const val DESTINATION_DIRECTION_NAME = "direction_name"
-        private const val DESTINATION_ROUTE_DIRECTION_NAME = "route_direction_name"
+        private const val DIRECTION_NAME = "direction_name"
+        private const val ROUTE_DIRECTION_NAME = "route_direction_name"
+        private const val DIRECTION_LEGACY = "direction_legacy" // #STM
         // TODO other alternatives
 
         @JvmOverloads
@@ -70,8 +71,9 @@ data class GDirection(
             directionIdInt = line[DIRECTION_ID]?.toIntOrNull() ?: throw MTLog.Fatal("Invalid GDirection from $line!"),
             directionTypeValue = line[DIRECTION]?.trim(),
             destination = line[DESTINATION]?.trim()
-                ?: line[DESTINATION_DIRECTION_NAME]?.trim()
-                ?: line[DESTINATION_ROUTE_DIRECTION_NAME]?.trim()
+                ?: line[DIRECTION_NAME]?.trim()
+                ?: line[ROUTE_DIRECTION_NAME]?.trim()
+                ?: line[DIRECTION_LEGACY]?.trim()
             ,
         )
 

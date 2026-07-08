@@ -41,15 +41,25 @@ object MDirectionHeadSignFinder {
         val directionRouteIdInts = mutableMapOf<Int, List<Int>>()
         GDirectionId.entries.forEach { gDirectionId ->
             val directionId = gDirectionId.id
-            gRouteTrips.map { it.routeIdInt }.distinct().singleOrNull()?.let { routeIdInt ->
+            val directionTrips = gRouteTrips.filter { it.directionId == directionId }
+            if (directionTrips.isEmpty()) {
+                MTLog.logDebug("$routeId: $directionId: no trips -> no head-sign.")
+                return@forEach
+            }
+            val directionRoutesIdInts = directionTrips.map { it.routeIdInt }.distinct()
+            MTLog.logDebug("$routeId: $directionId: direction original route ID(s): ${GIDs.toStringPlus(directionRoutesIdInts)} (trips: ${directionTrips.size})")
+            directionRoutesIdInts.singleOrNull()?.let { routeIdInt ->
                 val routeDirection = routeGTFS.getRouteDirection(routeIdInt, directionId)
-                routeDirection?.destination
-                    ?.let { agencyTools.cleanDirectionHeadsign(routeGTFS.getRoute(routeIdInt), directionId, false, true, it) }
+                    ?: return@let
+                routeDirection.destination
+                    ?.let { agencyTools.cleanDirectionHeadsign(routeGTFS.getRoute(routeIdInt), directionId, false, false, it) }
                     ?.takeIf { it.isNotBlank() }
                     ?.let {
+                        MTLog.logDebug("$routeId: $directionId: direction > use '$it'.")
                         directionHeadSigns[directionId] = it
                         return@forEach
                     }
+                MTLog.logDebug("$routeId: $directionId: ignore direction ${routeDirection.toStringPlus()}'.")
             }
             findDirectionHeadSign(
                 routeId,
