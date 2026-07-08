@@ -93,7 +93,9 @@ data class RouteConfig(
     @SerialName("direction_headsign_remove_route_desc")
     val directionHeadsignRemoveRouteDesc: Boolean = false, // OPT-IN feature
     @SerialName("direction_headsign_ignore_provided_direction")
-    val directionHeadsignIgnoreProvidedDirection: Boolean = false,
+    val directionHeadsignIgnoreProvidedDirection: Boolean = false, // OPT-IN feature
+    @SerialName("direction_headsign_ignore_provided_direction_until")
+    val directionHeadsignIgnoreProvidedDirectionUntil: Map<String, String> = emptyMap(), // OPT-IN feature
     @SerialName("direction_headsign_ignore_trip_headsign")
     val directionHeadsignIgnoreTripHeadsign: Boolean = false, // OPT-IN feature
     @SerialName("direction_splitter_enabled")
@@ -456,6 +458,10 @@ data class RouteConfig(
     }
 
     @JvmOverloads
+    fun isDirectionHeadsignIgnoreProvidedDirection(todayDate: Int, gOriginalRouteId: String? = null) =
+        directionHeadsignIgnoreProvidedDirection || isAllowedUntil(directionHeadsignIgnoreProvidedDirectionUntil[gOriginalRouteId], todayDate)
+
+    @JvmOverloads
     fun isDirectionSplitterEnabled(todayDate: Int, routeId: Long? = null) =
         directionSplitterEnabled && !isAllowedUntil(directionSplitterDisabledUntil[routeId], todayDate)
 
@@ -472,6 +478,6 @@ data class RouteConfig(
     fun allowNonDescriptiveHeadSigns(todayDate: Int, mRouteId: Long) =
         allowNonDescriptiveHeadSigns[mRouteId] == true || isAllowedUntil(allowNonDescriptiveHeadSignsUntil[mRouteId], todayDate)
 
-    private fun isAllowedUntil(dateStr: String?, todayDate: Int) =
+    fun isAllowedUntil(dateStr: String?, todayDate: Int) =
         dateStr?.toIntOrNull()?.let { todayDate <= it } ?: false
 }

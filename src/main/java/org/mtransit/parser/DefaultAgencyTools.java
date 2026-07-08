@@ -1002,7 +1002,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public @NotNull String cleanDirectionHeadsign(@Nullable GRoute gRoute, int directionId, boolean fromStopName, boolean fromTripHeadSign, boolean fromDirection, @NotNull String directionHeadSign) {
 		if (fromDirection) {
-			if (Configs.getRouteConfig().getDirectionHeadsignIgnoreProvidedDirection()) {
+			//noinspection DiscouragedApi
+			if (gRoute != null && Configs.getRouteConfig().isDirectionHeadsignIgnoreProvidedDirection(getTodayDateInt(), gRoute.getOriginalRouteId())) {
 				return EMPTY;
 			}
 		}
