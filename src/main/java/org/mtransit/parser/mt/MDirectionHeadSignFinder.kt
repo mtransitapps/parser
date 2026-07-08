@@ -46,9 +46,12 @@ object MDirectionHeadSignFinder {
                 MTLog.logDebug("$routeId: $directionId: no trips -> no head-sign.")
                 return@forEach
             }
-            val directionRoutesIdInts = directionTrips.map { it.routeIdInt }.distinct()
-            MTLog.logDebug("$routeId: $directionId: direction original route ID(s): ${GIDs.toStringPlus(directionRoutesIdInts)} (trips: ${directionTrips.size})")
-            directionRoutesIdInts.singleOrNull()?.let { routeIdInt ->
+            val directionRouteIdInt = gRouteTrips.firstOrNull()?.routeIdInt
+                ?.takeIf { firstTripRouteIdInt ->
+                    gRouteTrips.all { it.routeIdInt == firstTripRouteIdInt }
+                }
+            MTLog.logDebug("$routeId: $directionId: direction original route ID(s): ${GIDs.toStringPlus(directionRouteIdInt)} (trips: ${directionTrips.size})")
+            directionRouteIdInt?.let { routeIdInt ->
                 val routeDirection = routeGTFS.getRouteDirection(routeIdInt, directionId)
                     ?: return@let
                 routeDirection.destination

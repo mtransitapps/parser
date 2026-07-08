@@ -65,12 +65,10 @@ public final class FileUtils {
 		}
 		final File[] files = directory.listFiles(); // Get all files and subdirectories
 		if (files != null) {
-			for (File file : files) {
-				if (file.isFile()) { // Check if it's a file (not a directory)
-					for (String fileNameToFind : fileNamesToFind) {
-						if (file.getName().equalsIgnoreCase(fileNameToFind)) {
-							return file; // Found the file (case-insensitive)
-						}
+			for (String fileNameToFind : fileNamesToFind) {
+				for (File file : files) {
+					if (file.isFile() && file.getName().equalsIgnoreCase(fileNameToFind)) {
+						return file; // Found the file (case-insensitive)
 					}
 				}
 			}

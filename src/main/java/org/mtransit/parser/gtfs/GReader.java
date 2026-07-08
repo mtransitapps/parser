@@ -228,7 +228,7 @@ public class GReader {
 		final File gtfsFile = FileUtils.findFileCaseInsensitive(gtfsDir, fileNames);
 		if (gtfsFile == null || !gtfsFile.exists()) {
 			if (fileRequired) {
-				throw new MTLog.Fatal("'%s' file does not exist!", gtfsFile);
+				throw new MTLog.Fatal("'%s' file does not exist!", fileNames);
 			} else {
 				MTLog.log("Reading file(s) '%s'... SKIP (non-existing).", fileNames);
 				return false;
