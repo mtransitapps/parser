@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.text.DateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -125,7 +126,7 @@ public class GReader {
 			}
 			// DIRECTIONS (ext) (after route)
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
-				readFile(gtfsDir, GDirection.FILENAME, false, line ->
+				readFiles(gtfsDir, GDirection.getFILENAMES(), false, line ->
 						processDirection(agencyTools, gSpec, line, skipDataCleanup)
 				);
 			}
@@ -183,9 +184,24 @@ public class GReader {
 			boolean fileRequired,
 			@NotNull LineProcessor lineProcessor
 	) {
-		return readFile(gtfsDir, fileName, fileRequired, lineProcessor, null);
+		return readFiles(
+				gtfsDir,
+				Collections.singletonList(fileName),
+				fileRequired,
+				lineProcessor
+		);
 	}
 
+	private static boolean readFiles(
+			@NotNull String gtfsDir,
+			@NotNull List<String> fileNames,
+			boolean fileRequired,
+			@NotNull LineProcessor lineProcessor
+	) {
+		return readFiles(gtfsDir, fileNames, fileRequired, lineProcessor, null);
+	}
+
+	@SuppressWarnings({"UnusedReturnValue", "SameParameterValue"})
 	private static boolean readFile(
 			@NotNull String gtfsDir,
 			@NotNull String fileName,
@@ -193,12 +209,28 @@ public class GReader {
 			@NotNull LineProcessor lineProcessor,
 			@Nullable OnColumnNamesFound onColumnNamesFoundCallback
 	) {
-		final File gtfsFile = FileUtils.findFileCaseInsensitive(gtfsDir, fileName);
+		return readFiles(
+				gtfsDir,
+				Collections.singletonList(fileName),
+				fileRequired,
+				lineProcessor,
+				onColumnNamesFoundCallback
+		);
+	}
+
+	private static boolean readFiles(
+			@NotNull String gtfsDir,
+			@NotNull List<String> fileNames,
+			boolean fileRequired,
+			@NotNull LineProcessor lineProcessor,
+			@Nullable OnColumnNamesFound onColumnNamesFoundCallback
+	) {
+		final File gtfsFile = FileUtils.findFileCaseInsensitive(gtfsDir, fileNames);
 		if (gtfsFile == null || !gtfsFile.exists()) {
 			if (fileRequired) {
-				throw new MTLog.Fatal("'%s' file does not exist!", gtfsFile);
+				throw new MTLog.Fatal("'%s' file does not exist!", fileNames);
 			} else {
-				MTLog.log("Reading file '%s'... SKIP (non-existing).", fileName);
+				MTLog.log("Reading file(s) '%s'... SKIP (non-existing).", fileNames);
 				return false;
 			}
 		}
@@ -236,58 +268,55 @@ public class GReader {
 		String line;
 		String[] columnNames;
 		line = reader.readLine();
-		if (line == null || line.isEmpty()) {
-			return;
-		}
+		if (line == null || line.isEmpty()) return;
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
 			MTLog.log("Reading file '%s'... > remove 1st empty car", filename);
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
-		CSVRecord recordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
-		columnNames = new String[recordColumns.size()];
-		for (int i = 0; i < recordColumns.size(); i++) {
-			columnNames[i] = recordColumns.get(i);
+		CSVRecord lineRecordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
+		columnNames = new String[lineRecordColumns.size()];
+		for (int i = 0; i < lineRecordColumns.size(); i++) {
+			columnNames[i] = lineRecordColumns.get(i);
 		}
 		if (onColumnNamesFoundCallback != null) {
 			onColumnNamesFoundCallback.processColumnNames(Arrays.asList(columnNames));
 		}
-		if (columnNames.length == 0) {
-			return;
-		}
-		List<CSVRecord> records;
-		HashMap<String, String> map = new HashMap<>();
-		String[] lineColumns = new String[columnNames.length];
-		int recordColumnsSize;
+		if (columnNames.length == 0) return;
+		List<CSVRecord> lineRecords;
+		final HashMap<String, String> map = new HashMap<>();
 		int l = 0;
 		boolean withQuotes;
+		int warningCount = 0;
 		while ((line = reader.readLine()) != null) {
 			try {
 				try {
-					records = CSVParser.parse(line, CSV_FORMAT).getRecords();
+					lineRecords = CSVParser.parse(line, CSV_FORMAT).getRecords();
 					withQuotes = true;
 				} catch (Exception e) {
-					records = CSVParser.parse(line, CSV_FORMAT_NO_QUOTE).getRecords();
+					lineRecords = CSVParser.parse(line, CSV_FORMAT_NO_QUOTE).getRecords();
 					withQuotes = false;
 				}
-				if (records.isEmpty()) {
-					continue; // empty line
-				}
-				recordColumns = records.get(0);
-				recordColumnsSize = recordColumns.size();
-				if (columnNames.length != recordColumnsSize
-						&& columnNames.length != (recordColumnsSize + 1)) {
-					MTLog.log("File '%s' line invalid: %s columns instead of %s: %s", filename, recordColumnsSize, columnNames.length, line);
-					continue;
-				}
-				for (int i = 0; i < lineColumns.length; i++) {
-					final String lineColumn = i >= recordColumns.size() ? EMPTY : recordColumns.get(i);
-					lineColumns[i] = withQuotes ?
-							lineColumn :
-							QUOTE_.matcher(lineColumn).replaceAll(EMPTY);
+				if (lineRecords.isEmpty()) continue; // empty line
+				lineRecordColumns = lineRecords.get(0);
+				// recordColumnsSize = lineRecordColumns.size();
+				if (lineRecordColumns.size() > columnNames.length) {
+					if (warningCount < 10) {
+						MTLog.log("File '%s' line contains MORE columns (%s:%s) than expected (%s:%s)!", filename, lineRecordColumns.size(), line, columnNames.length, Arrays.asList(columnNames));
+						warningCount++;
+					}
+				} else if (lineRecordColumns.size() < columnNames.length) {
+					if (warningCount < 10) {
+						MTLog.log("File '%s' line contains LESS columns (%s:%s) than expected (%s:%s)!", filename, lineRecordColumns.size(), line, columnNames.length, Arrays.asList(columnNames));
+						warningCount++;
+					}
 				}
 				map.clear();
-				for (int ci = 0; ci < recordColumnsSize; ++ci) {
-					map.put(columnNames[ci], lineColumns[ci]);
+				for (int i = 0; i < columnNames.length; i++) {
+					String lineColumn = i < lineRecordColumns.size() ? lineRecordColumns.get(i) : EMPTY;
+					lineColumn = withQuotes ?
+							lineColumn :
+							QUOTE_.matcher(lineColumn).replaceAll(EMPTY);
+					map.put(columnNames[i], lineColumn);
 				}
 				if (lineProcessor != null) {
 					lineProcessor.processLine(map);
@@ -443,7 +472,7 @@ public class GReader {
 				logExclude("Exclude direction (!route): %s | %s.", gRoute == null ? null : gRoute.getRouteId(), gDirection.getDirectionId());
 				return;
 			}
-			final GDirection existingDirection = gSpec.getDirection(gDirection.getRouteIdInt(), gDirection.getDirectionId());
+			final GDirection existingDirection = gSpec.getRouteDirection(gDirection.getRouteIdInt(), gDirection.getDirectionId().getId());
 			if (existingDirection != null) {
 				//noinspection DiscouragedApi
 				MTLog.logDebug("Duplicate direction ID for route ID! (new:%s|old:%s)", gDirection.getDirectionId(), existingDirection.getDirectionId());

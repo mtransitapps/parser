@@ -100,7 +100,7 @@ public class GSpec {
 	}
 
 	@Nullable
-	public GAgency getAgency(@NotNull Integer agencyIdInt) {
+	public GAgency getAgency(int agencyIdInt) {
 		if (USE_DB_ONLY) {
 			return GAgency.from(GTFSDataBase.selectAgency(GIDs.getString(agencyIdInt)));
 		}
@@ -259,7 +259,7 @@ public class GSpec {
 	}
 
 	@Nullable
-	public GRoute getRoute(@NotNull Integer routeIdInt) {
+	public GRoute getRoute(int routeIdInt) {
 		if (USE_DB_ONLY) {
 			return GRoute.from(GTFSDataBase.selectRoute(GIDs.getString(routeIdInt)));
 		}
@@ -311,7 +311,7 @@ public class GSpec {
 	}
 
 	@Nullable
-	public GStop getStop(@NotNull Integer gStopIdInt) {
+	public GStop getStop(int gStopIdInt) {
 		if (USE_DB_ONLY) {
 			return GStop.from(GTFSDataBase.selectStop(GIDs.getString(gStopIdInt)));
 		}
@@ -389,7 +389,7 @@ public class GSpec {
 	}
 
 	@Nullable
-	public GTrip getTrip(@NotNull Integer tripIdInt) {
+	public GTrip getTrip(int tripIdInt) {
 		if (USE_DB_ONLY) {
 			return GTrip.from(GTFSDataBase.selectTrip(GIDs.getString(tripIdInt)));
 		}
@@ -410,7 +410,7 @@ public class GSpec {
 		return this.tripIdIntRouteIdInt.get(tripIdInt);
 	}
 
-	public boolean hasTripsOriginalRouteId(@NotNull Integer routeIdInt) {
+	public boolean hasTripsOriginalRouteId(int routeIdInt) {
 		return this.tripOriginalRouteIdInt.contains(routeIdInt);
 	}
 
@@ -424,7 +424,7 @@ public class GSpec {
 	}
 
 	@NotNull
-	public List<GTrip> getRouteTrips(@NotNull Integer routeIdInt) {
+	public List<GTrip> getRouteTrips(int routeIdInt) {
 		if (USE_DB_ONLY) {
 			return GTrip.from(GTFSDataBase.selectTrips(null, Collections.singleton(GIDs.getString(routeIdInt))));
 		}
@@ -437,7 +437,7 @@ public class GSpec {
 	}
 
 	@Nullable
-	public List<GDirection> getDirection(@NotNull Integer routeIdInt) {
+	public List<GDirection> getRouteDirections(int routeIdInt) {
 		if (USE_DB_ONLY) {
 			return GDirection.from(GTFSDataBase.selectDirections(GIDs.getString(routeIdInt)));
 		}
@@ -445,11 +445,11 @@ public class GSpec {
 	}
 
 	@Nullable
-	public GDirection getDirection(@NotNull Integer routeIdInt, @NotNull GDirectionId directionId) {
-		List<GDirection> directions = getDirection(routeIdInt);
+	public GDirection getRouteDirection(int routeIdInt, int directionId) {
+		final List<GDirection> directions = getRouteDirections(routeIdInt);
 		if (directions != null) {
 			for (GDirection direction : directions) {
-				if (direction.getDirectionId() == directionId) {
+				if (direction.getDirectionId().getId() == directionId) {
 					return direction;
 				}
 			}
@@ -466,14 +466,13 @@ public class GSpec {
 	}
 
 	@NotNull
-	public List<GStopTime> getStopTimes(@NotNull Long mRouteId,
-										@NotNull Integer gTripIdInt) {
+	public List<GStopTime> getStopTimes(long mRouteId, int gTripIdInt) {
 		return getStopTimes(mRouteId, gTripIdInt, null, null);
 	}
 
 	@NotNull
-	public List<GStopTime> getStopTimes(@NotNull Long mRouteId,
-										@NotNull Integer gTripIdInt,
+	public List<GStopTime> getStopTimes(long mRouteId,
+										int gTripIdInt,
 										@SuppressWarnings("unused") @Nullable String optGStopId,
 										@SuppressWarnings("unused") @Nullable Integer optGStopSequence) {
 		GenerateMObjectsTask routeGenerator = this.routeGenerators.get(mRouteId);
@@ -491,7 +490,7 @@ public class GSpec {
 		GTFSDataBase.insertStopTime(gStopTime.to(), insertStopTimePrepared);
 	}
 
-	private int removeTripStopTimes(@NotNull Integer gTripId) {
+	private int removeTripStopTimes(int gTripId) {
 		int r = 0;
 		r += GTFSDataBase.deleteStopTimes(GIDs.getString(gTripId));
 		return r;
@@ -739,9 +738,6 @@ public class GSpec {
 						for (GStopTime gStopTime : tripStopTimes) {
 							stopTimeCal.add(Calendar.SECOND, gStopTimeIncInSec.get(gStopTime.getUID()));
 							final int newDepartureTime = getNewDepartureTime(stopTimeCal);
-							final GPickupType pickupType = gStopTime.getPickupType();
-							final GDropOffType dropOffType = gStopTime.getDropOffType();
-							final GTimePoint timePoint = gStopTime.getTimePoint();
 							final GStopTime newGStopTime = new GStopTime(
 									newGeneratedTripIdInt,
 									newDepartureTime,
@@ -749,9 +745,9 @@ public class GSpec {
 									gStopTime.getStopIdInt(),
 									gStopTime.getStopSequence(),
 									gStopTime.getStopHeadsign(),
-									pickupType,
-									dropOffType,
-									timePoint
+									gStopTime.getPickupType(),
+									gStopTime.getDropOffType(),
+									gStopTime.getTimePoint()
 							);
 							newGStopTimes.add(newGStopTime);
 						}
@@ -832,7 +828,7 @@ public class GSpec {
 	}
 
 	@NotNull
-	public GSpec getRouteGTFS(@SuppressWarnings("unused") @NotNull Long mRouteId) {
+	public GSpec getRouteGTFS(@SuppressWarnings("unused") long mRouteId) {
 		return this;
 	}
 
@@ -972,7 +968,7 @@ public class GSpec {
 	}
 
 	@SuppressWarnings("unused")
-	public void cleanupRouteGTFS(@NotNull Long mRouteId) {
+	public void cleanupRouteGTFS(long mRouteId) {
 		MTLog.log("%d: Removing route data...", mRouteId);
 		int r = 0;
 		try {
@@ -989,7 +985,7 @@ public class GSpec {
 		MTLog.log("%d: Removing route data...DONE (%d removed objects)", mRouteId, r);
 	}
 
-	public boolean hasRouteTrips(@NotNull Long mRouteId) {
+	public boolean hasRouteTrips(long mRouteId) {
 		return this.mRouteWithTripIds.contains(mRouteId);
 	}
 

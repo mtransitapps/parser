@@ -420,9 +420,13 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 			final StringBuilder sb = new StringBuilder();
 			for (MDirection mDirection : mDirections.values()) {
 				if (mDirection.getRouteId() == mRoute.getId()) {
-					if (mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING) {
-						if (sb.length() > 0) sb.append(" <> ");
-						sb.append(mDirection.getHeadsignValue());
+					if (mDirection.getHeadsignType() == MDirection.HEADSIGN_TYPE_STRING
+							&& !mDirection.getHeadsignValue().isBlank()) {
+						final String cleanDirectionHeadsign = agencyTools.cleanRouteLongName(mDirection.getHeadsignValue());
+						if (!cleanDirectionHeadsign.isBlank()) {
+							if (sb.length() > 0) sb.append(" <> ");
+							sb.append(cleanDirectionHeadsign);
+						}
 					}
 				}
 			}

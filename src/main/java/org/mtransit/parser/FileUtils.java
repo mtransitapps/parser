@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public final class FileUtils {
@@ -55,7 +56,7 @@ public final class FileUtils {
 	}
 
 	@Nullable
-	public static File findFileCaseInsensitive(@NotNull String directoryPath, @NotNull String fileNameToFind) {
+	public static File findFileCaseInsensitive(@NotNull String directoryPath, @NotNull List<String> fileNamesToFind) {
 		final File directory = new File(directoryPath);
 		// Check if the provided path is a directory and exists
 		if (!directory.isDirectory()) {
@@ -64,9 +65,9 @@ public final class FileUtils {
 		}
 		final File[] files = directory.listFiles(); // Get all files and subdirectories
 		if (files != null) {
-			for (File file : files) {
-				if (file.isFile()) { // Check if it's a file (not a directory)
-					if (file.getName().equalsIgnoreCase(fileNameToFind)) {
+			for (String fileNameToFind : fileNamesToFind) {
+				for (File file : files) {
+					if (file.isFile() && file.getName().equalsIgnoreCase(fileNameToFind)) {
 						return file; // Found the file (case-insensitive)
 					}
 				}
