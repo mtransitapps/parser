@@ -76,12 +76,12 @@ data class GDirection(
                 ?: throw MTLog.Fatal("Invalid GDirection from $line!"),
             directionIdInt = line[DIRECTION_ID]?.toIntOrNull() ?: throw MTLog.Fatal("Invalid GDirection from $line!"),
             directionTypeValue = line[DIRECTION]?.trim(),
-            destination = line[DESTINATION]?.trim()
-                ?: line[DIRECTION_NAME]?.trim()
-                ?: line[ROUTE_DIRECTION_NAME]?.trim()
-                ?: line[DIRECTION_DESTINATION]?.trim()
-                ?: line[DIRECTION_LEGACY]?.trim()
-                ?: line[DIRECTION]?.trim(),
+            destination = line[DESTINATION]?.trim()?.takeIf { it.isNotBlank() }
+                ?: line[DIRECTION_NAME]?.trim()?.takeIf { it.isNotBlank() }
+                ?: line[ROUTE_DIRECTION_NAME]?.trim()?.takeIf { it.isNotBlank() }
+                ?: line[DIRECTION_DESTINATION]?.trim()?.takeIf { it.isNotBlank() }
+                ?: line[DIRECTION_LEGACY]?.trim()?.takeIf { it.isNotBlank() }
+                ?: line[DIRECTION]?.trim()?.takeIf { it.isNotBlank() },
         )
 
         @JvmStatic
