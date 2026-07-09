@@ -273,50 +273,50 @@ public class GReader {
 			MTLog.log("Reading file '%s'... > remove 1st empty car", filename);
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
-		CSVRecord recordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
-		columnNames = new String[recordColumns.size()];
-		for (int i = 0; i < recordColumns.size(); i++) {
-			columnNames[i] = recordColumns.get(i);
+		CSVRecord lineRecordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
+		columnNames = new String[lineRecordColumns.size()];
+		for (int i = 0; i < lineRecordColumns.size(); i++) {
+			columnNames[i] = lineRecordColumns.get(i);
 		}
 		if (onColumnNamesFoundCallback != null) {
 			onColumnNamesFoundCallback.processColumnNames(Arrays.asList(columnNames));
 		}
 		if (columnNames.length == 0) return;
-		List<CSVRecord> records;
-		HashMap<String, String> map = new HashMap<>();
-		String[] lineColumns = new String[columnNames.length];
-		int recordColumnsSize;
+		List<CSVRecord> lineRecords;
+		final HashMap<String, String> map = new HashMap<>();
 		int l = 0;
 		boolean withQuotes;
+		int warningCount = 0;
 		while ((line = reader.readLine()) != null) {
 			try {
 				try {
-					records = CSVParser.parse(line, CSV_FORMAT).getRecords();
+					lineRecords = CSVParser.parse(line, CSV_FORMAT).getRecords();
 					withQuotes = true;
 				} catch (Exception e) {
-					records = CSVParser.parse(line, CSV_FORMAT_NO_QUOTE).getRecords();
+					lineRecords = CSVParser.parse(line, CSV_FORMAT_NO_QUOTE).getRecords();
 					withQuotes = false;
 				}
-				if (records.isEmpty()) {
-					continue; // empty line
-				}
-				recordColumns = records.get(0);
-				recordColumnsSize = recordColumns.size();
-				if (recordColumnsSize > columnNames.length) {
-					MTLog.log("File '%s' line contains MORE columns (%s:%s) than expected (%s:%s)!", filename, recordColumnsSize, line, columnNames.length, Arrays.asList(columnNames));
-				} else if (recordColumnsSize < columnNames.length) {
-					MTLog.log("File '%s' line contains LESS columns (%s:%s) than expected (%s:%s)!", filename, recordColumnsSize, line, columnNames.length, Arrays.asList(columnNames));
-				}
-				for (int i = 0; i < lineColumns.length; i++) {
-					final String lineColumn = i >= recordColumns.size() ? EMPTY : recordColumns.get(i);
-					lineColumns[i] = withQuotes ?
-							lineColumn :
-							QUOTE_.matcher(lineColumn).replaceAll(EMPTY);
+				if (lineRecords.isEmpty()) continue; // empty line
+				lineRecordColumns = lineRecords.get(0);
+				// recordColumnsSize = lineRecordColumns.size();
+				if (lineRecordColumns.size() > columnNames.length) {
+					if (warningCount < 10) {
+						MTLog.log("File '%s' line contains MORE columns (%s:%s) than expected (%s:%s)!", filename, lineRecordColumns.size(), line, columnNames.length, Arrays.asList(columnNames));
+						warningCount++;
+					}
+				} else if (lineRecordColumns.size() < columnNames.length) {
+					if (warningCount < 10) {
+						MTLog.log("File '%s' line contains LESS columns (%s:%s) than expected (%s:%s)!", filename, lineRecordColumns.size(), line, columnNames.length, Arrays.asList(columnNames));
+						warningCount++;
+					}
 				}
 				map.clear();
-				final int usedColumnsCounts = Math.min(recordColumnsSize, columnNames.length);
-				for (int ci = 0; ci < usedColumnsCounts; ++ci) {
-					map.put(columnNames[ci], lineColumns[ci]);
+				for (int i = 0; i < columnNames.length; i++) {
+					String lineColumn = i < lineRecordColumns.size() ? lineRecordColumns.get(i) : EMPTY;
+					lineColumn = withQuotes ?
+							lineColumn :
+							QUOTE_.matcher(lineColumn).replaceAll(EMPTY);
+					map.put(columnNames[i], lineColumn);
 				}
 				if (lineProcessor != null) {
 					lineProcessor.processLine(map);

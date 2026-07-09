@@ -41,7 +41,7 @@ object MDirectionHeadSignFinder {
         val directionRouteIdInts = mutableMapOf<Int, List<Int>>()
         GDirectionId.entries.forEach { gDirectionId ->
             val directionId = gDirectionId.id
-            val directionTrips = gRouteTrips.filter { it.directionId == directionId }
+            val directionTrips = gRouteTrips.filter { gTrip -> gTrip.directionIdOrDefault == directionId }
             if (directionTrips.isEmpty()) {
                 MTLog.logDebug("$routeId: $directionId: no trips -> no head-sign.")
                 return@forEach
