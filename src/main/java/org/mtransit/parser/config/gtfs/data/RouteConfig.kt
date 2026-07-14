@@ -174,7 +174,7 @@ data class RouteConfig(
         val routeShortNameRegex: String? = null,
     ) {
         internal val parsedRouteShortNameRegex by lazy {
-            routeShortNameRegex?.toRegex(RegexOption.IGNORE_CASE)
+            routeShortNameRegex?.takeIf { it.isNotBlank() }?.toRegex(RegexOption.IGNORE_CASE)
         }
     }
 
@@ -186,7 +186,11 @@ data class RouteConfig(
         val originalRouteIdRegex: String? = null,
         @SerialName("route_type")
         val routeType: Int,
-    )
+    ) {
+        internal val parsedOriginalRouteIdRegex by lazy {
+            originalRouteIdRegex?.takeIf { it.isNotBlank() }?.toRegex(RegexOption.IGNORE_CASE)
+        }
+    }
 
     @Serializable
     data class RouteShortNameToRouteIdConfig(
@@ -236,7 +240,7 @@ data class RouteConfig(
         val color: String,
     ) {
         internal val parsedRouteShortNameRegex by lazy {
-            routeShortNameRegex?.toRegex(RegexOption.IGNORE_CASE)
+            routeShortNameRegex?.takeIf { it.isNotBlank() }?.toRegex(RegexOption.IGNORE_CASE)
         }
     }
 
@@ -304,7 +308,7 @@ data class RouteConfig(
         return this.routeTypeOverrideConfigs
             .singleOrNull { config ->
                 config.originalRouteId == originalRouteId
-                        || originalRouteId?.let { config.originalRouteIdRegex?.toRegex(RegexOption.IGNORE_CASE)?.matches(originalRouteId) } == true
+                        || originalRouteId?.let { config.parsedOriginalRouteIdRegex?.matches(originalRouteId) } == true
             }
             ?.routeType
     }
