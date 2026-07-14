@@ -170,7 +170,13 @@ data class RouteConfig(
         val routeId: String? = null,
         @SerialName("route_short_name")
         val routeShortName: String? = null,
-    )
+        @SerialName("route_short_name_regex")
+        val routeShortNameRegex: String? = null,
+    ) {
+        internal val parsedRouteShortNameRegex by lazy {
+            routeShortNameRegex?.toRegex(RegexOption.IGNORE_CASE)
+        }
+    }
 
     @Serializable
     data class RouteTypeOverrideConfig(
@@ -281,15 +287,17 @@ data class RouteConfig(
     fun keepRoutes(gRoute: GRoute) =
         this.keepRoutes.any {
             //noinspection DiscouragedApi
-            it.routeId != null && gRoute.routeId == it.routeId
-                    || it.routeShortName != null && gRoute.routeShortName == it.routeShortName
+            (it.routeId != null && gRoute.routeId == it.routeId)
+                    || (it.routeShortName != null && gRoute.routeShortName == it.routeShortName)
+                    || (it.parsedRouteShortNameRegex?.matches(gRoute.routeShortName) == true)
         }
 
     fun excludeRoutes(gRoute: GRoute) =
         this.excludeRoutes.any {
             //noinspection DiscouragedApi
-            it.routeId != null && gRoute.routeId == it.routeId
-                    || it.routeShortName != null && gRoute.routeShortName == it.routeShortName
+            (it.routeId != null && gRoute.routeId == it.routeId)
+                    || (it.routeShortName != null && gRoute.routeShortName == it.routeShortName)
+                    || (it.parsedRouteShortNameRegex?.matches(gRoute.routeShortName) == true)
         }
 
     fun overrideRouteType(originalRouteId: String?): Int? {
