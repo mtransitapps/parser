@@ -391,7 +391,7 @@ data class RouteConfig(
     }
 
     fun excludeTrip(gTrip: GTrip): Boolean {
-        val gTripHeadsign = gTrip.tripHeadsign ?: return false // EXCLUDE
+        val gTripHeadsign = gTrip.tripHeadsign ?: return false // KEEP
         this._tripExcludes.forEach {
             if (it.matches(gTripHeadsign)) {
                 return true // EXCLUDE
