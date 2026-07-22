@@ -223,8 +223,8 @@ data class GTrip(
         }
 
         fun updateList(gTrips: MutableList<GTrip>, condition: (GTrip) -> Boolean, updateTrip: (GTrip) -> GTrip): List<GTrip> {
-            for (i in 0 until gTrips.size) {
-                val gTrip = gTrips[i]
+            for ((i, element) in gTrips.withIndex()) {
+                val gTrip = element
                 if (condition(gTrip)) {
                     gTrips[i] = updateTrip(gTrip)
                 }

@@ -77,6 +77,8 @@ data class RouteConfig(
     val tripIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
     @SerialName("trip_id_clean_merged")
     val tripIdCleanMerged: Boolean = false, // OPT-IN feature
+    @SerialName("direction_id_use_other_trips_with_same_headsign")
+    val directionIdUseOtherTripsWithSameHeadsign: Boolean = false, // OPT-IN feature
     // DIRECTION
     @SerialName("direction_types")
     val directionTypes: List<Int> = emptyList(),

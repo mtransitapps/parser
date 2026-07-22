@@ -1,6 +1,7 @@
 package org.mtransit.parser;
 
 import static org.mtransit.parser.Constants.EMPTY;
+import static org.mtransit.parser.gtfs.data.GSpecExtKt.fixMissingTripDirectionIds;
 
 import androidx.annotation.Discouraged;
 import androidx.annotation.VisibleForTesting;
@@ -186,6 +187,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		final long start = System.currentTimeMillis();
 		final GSpec gtfs = GReader.readGtfsZipFile(args[0], this, false, false);
 		MDataChangedManager.avoidCalendarDatesDataChanged(lastServiceDates, gtfs, this);
+		fixMissingTripDirectionIds(gtfs);
 		gtfs.cleanupStops();
 		gtfs.cleanupExcludedData();
 		gtfs.cleanupStopTimesPickupDropOffTypes(this);
