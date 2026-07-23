@@ -99,7 +99,7 @@ data class RouteConfig(
     @SerialName("direction_headsign_ignore_trip_headsign")
     val directionHeadsignIgnoreTripHeadsign: Boolean = false, // OPT-IN feature
     @SerialName("direction_splitter_enabled")
-    val directionSplitterEnabled: Boolean = false, // OPT-IN feature
+    val directionSplitterEnabled: Boolean? = null, // OPT-IN feature
     @SerialName("direction_splitter_disabled_until")
     val directionSplitterDisabledUntil: Map<Long, String> = emptyMap(), // OPT-IN feature
     @SerialName("direction_finder_enabled")
@@ -475,7 +475,7 @@ data class RouteConfig(
 
     @JvmOverloads
     fun isDirectionSplitterEnabled(todayDate: Int, routeId: Long? = null) =
-        directionSplitterEnabled && !isAllowedUntil(directionSplitterDisabledUntil[routeId], todayDate)
+        directionSplitterEnabled == true && !isAllowedUntil(directionSplitterDisabledUntil[routeId], todayDate)
 
     fun isDirectionIdOverrideEnabled(todayDate: Int, routeId: Long) =
         directionIdOverrideEnabled[routeId] == true || isAllowedUntil(directionIdOverrideEnabledUntil[routeId], todayDate)

@@ -975,7 +975,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean directionSplitterEnabled(long routeId) {
-		if (Configs.getRouteConfig().getDirectionSplitterDisabledUntil().isEmpty()) {
+		if (Configs.getRouteConfig().getDirectionSplitterEnabled() == null // not set
+				&& !Configs.getRouteConfig().getDirectionSplitterDisabledUntil().containsKey(routeId) // not disabled for this route
+		) {
 			if (this.directionSplitterUseful) {
 				return true;
 			}
