@@ -966,13 +966,20 @@ public class DefaultAgencyTools implements GAgencyTools {
 		this.tripIdToCleanupTripId.remove(gOriginalTripId);
 	}
 
+	private boolean directionSplitterUseful = false; // opt-in feature
+
 	@Override
-	public boolean directionSplitterEnabled() {
-		return Configs.getRouteConfig().isDirectionSplitterEnabled(getTodayDateInt());
+	public void setDirectionSplitterUseful(boolean enabled) {
+		this.directionSplitterUseful = enabled;
 	}
 
 	@Override
 	public boolean directionSplitterEnabled(long routeId) {
+		if (Configs.getRouteConfig().getDirectionSplitterDisabledUntil().isEmpty()) {
+			if (this.directionSplitterUseful) {
+				return true;
+			}
+		}
 		return Configs.getRouteConfig().isDirectionSplitterEnabled(getTodayDateInt(), routeId);
 	}
 
