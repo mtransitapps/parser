@@ -46,6 +46,7 @@ data class GTrip(
         bikesAllowed = bikesAllowed,
     )
 
+    @set:Discouraged(message = "Should not be changed")
     var directionId: Int?
         get() {
             return directionIdE.originalId() // optional
@@ -61,12 +62,6 @@ data class GTrip(
     @Suppress("unused")
     val directionIdOrOriginal: Int?
         get() = directionIdE.originalId()
-
-    @Suppress("unused")
-    @Discouraged(message = "Should not be changed")
-    fun setDirectionId(newDirectionId: Int?) {
-        this.directionId = newDirectionId
-    }
 
     fun hasTripHeadsign() = !this.tripHeadsign.isNullOrBlank()
 
