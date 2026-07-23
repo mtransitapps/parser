@@ -129,7 +129,7 @@ object MDirectionHeadSignFinder {
                 val gRoute = directionRouteIdInts[directionId].takeIf { it?.size == 1 }?.getOrNull(0)?.let { routeGTFS.getRoute(it) }
                 lastStopDirectionHeadSigns[directionId] =
                     agencyTools.cleanDirectionHeadsign(gRoute, directionId, true, false, false, agencyTools.cleanStopName(stop.stopName))
-                MTLog.logDebug("$routeId: $directionId Stop '${stop.toStringPlus(false)}' > '${lastStopDirectionHeadSigns[directionId]}'.")
+                MTLog.logDebug("$routeId: $directionId: - last stop '${stop.toStringPlus(false)}' > '${lastStopDirectionHeadSigns[directionId]}'.")
             }
             val allDirectionHeadSignsEmpty: Boolean = directionHeadSigns
                 .map { (_, headSign) -> headSign }
@@ -743,7 +743,7 @@ object MDirectionHeadSignFinder {
                     MTLog.log(
                         !dataLossAuthorized,
                         "$routeId: $directionId: #2 goes for WAY more stops ($stopIdIntsAfterCommonCount2) than " +
-                                "#1 ($stopIdIntsAfterCommonCount1:$stopTimesHeadSign1) " +
+                                "#1 ($stopIdIntsAfterCommonCount1:'$stopTimesHeadSign1') " +
                                 "-> '$stopTimesHeadSign2'"
                     )
                     return MergedTrip(
@@ -762,7 +762,7 @@ object MDirectionHeadSignFinder {
                     MTLog.log(
                         !dataLossAuthorized,
                         "$routeId: $directionId: #1 goes for WAY more stops ($stopIdIntsAfterCommonCount1) than " +
-                                "#2 ($stopIdIntsAfterCommonCount2:$stopTimesHeadSign2) " +
+                                "#2 ($stopIdIntsAfterCommonCount2:'$stopTimesHeadSign2') " +
                                 "-> '$stopTimesHeadSign1'"
                     )
                     return MergedTrip(
@@ -970,7 +970,7 @@ object MDirectionHeadSignFinder {
                             !dataLossAuthorized,
                             "$routeId: $directionId: distance from last common to " +
                                     "#1 last ($distanceToStop1) > " +
-                                    "#2 last ($distanceToStop2) ($stopTimesHeadSign2) " +
+                                    "#2 last ($distanceToStop2) ('$stopTimesHeadSign2') " +
                                     "-> '$stopTimesHeadSign1'"
                         )
                         return MergedTrip(
@@ -987,7 +987,7 @@ object MDirectionHeadSignFinder {
                             !dataLossAuthorized,
                             "$routeId: $directionId: distance from last common to " +
                                     "#2 last ($distanceToStop2) > " +
-                                    "#1 last ($distanceToStop1) ($stopTimesHeadSign1) " +
+                                    "#1 last ($distanceToStop1) ('$stopTimesHeadSign1') " +
                                     "-> '$stopTimesHeadSign2'"
                         )
                         return MergedTrip(
@@ -1006,18 +1006,18 @@ object MDirectionHeadSignFinder {
         if (dataLossAuthorized) {
             throw MTLog.Fatal(
                 "$routeId: $directionId: Unresolved situation! \n" +
-                        "- #1: $stopTimesHeadSign1. \n" +
+                        "- #1: '$stopTimesHeadSign1'. \n" +
                         "  Stops: ${stopTimesList1.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(false)}" }} \n" +
-                        "- #2: $stopTimesHeadSign2. \n" +
+                        "- #2: '$stopTimesHeadSign2'. \n" +
                         "  Stops: ${stopTimesList2.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(false)}" }} \n" +
                         "!"
             )
         }
         logMerge(
             !dataLossAuthorized, "$routeId: $directionId: unresolved situation > no head-sign (" +
-                    "$stopTimesHeadSign1:${GIDs.toStringPlus(stopTimesList1.firstOrNull()?.tripIdInt)}" +
+                    "'$stopTimesHeadSign1':${GIDs.toStringPlus(stopTimesList1.firstOrNull()?.tripIdInt)}" +
                     "|" +
-                    "$stopTimesHeadSign2:${GIDs.toStringPlus(stopTimesList2.firstOrNull()?.tripIdInt)}" +
+                    "'$stopTimesHeadSign2':${GIDs.toStringPlus(stopTimesList2.firstOrNull()?.tripIdInt)}" +
                     ")."
         )
         return null
