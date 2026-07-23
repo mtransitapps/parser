@@ -46,8 +46,13 @@ data class GTrip(
         bikesAllowed = bikesAllowed,
     )
 
-    val directionId: Int?
-        get() = directionIdE.originalId() // optional
+    var directionId: Int?
+        get() {
+            return directionIdE.originalId() // optional
+        }
+        private set(value) {
+            this.directionIdE = GDirectionId.parse(value)
+        }
 
     @Suppress("unused")
     val directionIdOrDefault: Int
@@ -60,7 +65,7 @@ data class GTrip(
     @Suppress("unused")
     @Discouraged(message = "Should not be changed")
     fun setDirectionId(newDirectionId: Int?) {
-        this.directionIdE = GDirectionId.parse(newDirectionId)
+        this.directionId = newDirectionId
     }
 
     fun hasTripHeadsign() = !this.tripHeadsign.isNullOrBlank()
@@ -214,23 +219,10 @@ data class GTrip(
         }
 
         @JvmStatic
-        fun updateDirectionIdForTrips(gTrips: MutableList<GTrip>, tripIdInts: Collection<Int>, directionId: Int): List<GTrip> {
-            return updateList(
-                gTrips = gTrips,
-                condition = { tripIdInts.contains(it.tripIdInt) },
-                updateTrip = { it.copy(directionIdE = GDirectionId.parse(directionId)) }
-            )
-        }
-
-        fun updateList(gTrips: MutableList<GTrip>, condition: (GTrip) -> Boolean, updateTrip: (GTrip) -> GTrip): List<GTrip> {
-            for ((i, element) in gTrips.withIndex()) {
-                val gTrip = element
-                if (condition(gTrip)) {
-                    gTrips[i] = updateTrip(gTrip)
-                }
+        fun MutableList<GTrip>.updateDirectionId(tripIdInts: Collection<Int>, directionId: Int) =
+            replaceAll { gTrip ->
+                if (!tripIdInts.contains(gTrip.tripIdInt)) return@replaceAll gTrip
+                gTrip.copy(directionIdE = GDirectionId.parse(directionId))
             }
-
-            return gTrips
-        }
     }
 }

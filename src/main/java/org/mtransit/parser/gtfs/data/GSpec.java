@@ -34,8 +34,8 @@ public class GSpec {
 	private static final boolean LOG_REMOVED = false;
 	// private static final boolean LOG_REMOVED = true; // DEBUG
 
-	private static final boolean USE_DB_ONLY = false;
-	// private static final boolean USE_DB_ONLY = true; // WIP
+	protected static final boolean USE_DB_ONLY = false;
+	// protected static final boolean USE_DB_ONLY = true; // WIP
 
 	@NotNull
 	private final Map<Integer, GAgency> agenciesCache = new HashMap<>();
@@ -355,7 +355,7 @@ public class GSpec {
 	}
 
 	@NotNull
-	public Collection<Integer> getAllTripRouteIdInts() {
+	protected Collection<Integer> getAllTripRouteIdInts() {
 		if (USE_DB_ONLY) {
 			return GIDs.getInts(GTFSDataBase.selectTripRouteIds());
 		}
@@ -367,23 +367,6 @@ public class GSpec {
 			return GTFSDataBase.countTrips();
 		}
 		return CollectionUtils.totalMapSize(this.routeIdIntTripsCache);
-	}
-
-	public void updateTripDirectionId(@NotNull GDirectionId gDirectionId, @Nullable Collection<Integer> tripIdInts) {
-		updateTripDirectionId(gDirectionId.getId(), tripIdInts);
-	}
-
-	@SuppressWarnings("WeakerAccess")
-	public void updateTripDirectionId(int directionId, @Nullable Collection<Integer> tripIdInts) {
-		if (tripIdInts == null) return;
-		List<Integer> routeIdInts = new ArrayList<>();
-		for (Integer tripIdInt : tripIdInts) {
-			routeIdInts.add(getTripRouteId(tripIdInt));
-		}
-		for (Integer routeIdInt : routeIdInts) {
-			GTrip.updateDirectionIdForTrips(getRouteTrips(routeIdInt), tripIdInts, directionId);
-			GTFSDataBase.updateTrip(GIDs.getStrings(tripIdInts), directionId);
-		}
 	}
 
 	@Nullable
@@ -404,7 +387,7 @@ public class GSpec {
 	}
 
 	@Nullable
-	private Integer getTripRouteId(Integer tripIdInt) {
+	protected Integer getTripRouteId(int tripIdInt) {
 		return this.tripIdIntRouteIdInt.get(tripIdInt);
 	}
 
