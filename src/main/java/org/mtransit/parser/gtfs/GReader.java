@@ -106,8 +106,13 @@ public class GReader {
 			if (!calendarsOnly) {
 				GTFSDataBase.setAutoCommit(false);
 				final PreparedStatement insertTripsPrepared = USE_PREPARED_STATEMENT ? GTFSDataBase.prepareInsertTrip(agencyTools.allowDuplicateKeyError()) : null;
-				readFile(gtfsDir, GTrip.FILENAME, true, line ->
-						processTrip(agencyTools, gSpec, line, insertTripsPrepared, skipDataCleanup)
+				readFile(gtfsDir, GTrip.FILENAME, true,
+						line -> processTrip(agencyTools, gSpec, line, insertTripsPrepared, skipDataCleanup),
+						columnNames -> {
+							if (!columnNames.contains(GTrip.DIRECTION_ID)) {
+								agencyTools.setDirectionSplitterUseful(true); // direction IDs not provided
+							}
+						}
 				);
 				if (insertTripsPrepared != null) {
 					GTFSDataBase.executePreparedStatement(insertTripsPrepared);
