@@ -9,15 +9,16 @@ import org.mtransit.parser.gtfs.data.GTrip.Companion.updateDirectionId
 fun GSpec.getRoute(gTrip: GTrip) = this.getRoute(gTrip.routeIdInt)
 
 fun GSpec.updateTripDirectionId(directionId: Int, tripIdInts: Collection<Int>?) {
-    tripIdInts
-        ?.mapNotNull { getTripRouteId(it) }
-        ?.distinct()
-        ?.forEach { routeIdInt ->
-            if (!USE_DB_ONLY) {
+    tripIdInts ?: return
+    if (!USE_DB_ONLY) {
+        tripIdInts
+            .mapNotNull { getTripRouteId(it) }
+            .distinct()
+            .forEach { routeIdInt ->
                 getRouteTrips(routeIdInt).updateDirectionId(tripIdInts, directionId)
             }
-            GTFSDataBase.updateTrip(tripIds = GIDs.getStrings(tripIdInts), directionId)
-        }
+    }
+    GTFSDataBase.updateTrip(tripIds = GIDs.getStrings(tripIdInts), directionId)
 }
 
 fun GSpec.fixMissingTripDirectionIds() {
