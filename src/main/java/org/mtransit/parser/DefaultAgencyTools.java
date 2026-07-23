@@ -554,7 +554,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		try {
 			//noinspection DiscouragedApi
 			final String routeIdS =
-					useRouteShortNameForRouteId() ? cleanRouteShortName(getRouteShortName(gRoute))
+					useRouteShortNameForRouteId() ? getRouteShortName(gRoute)
 							: gRoute.getRouteId();
 			if (defaultRouteIdEnabled()
 					&& !CharUtils.isDigitsOnly(routeIdS)) {
@@ -639,7 +639,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public String getRouteShortName(@NotNull GRoute gRoute) {
 		if (Configs.getRouteConfig().getUseRouteLongNameForRouteShortName()) {
-			return gRoute.getRouteLongNameOrDefault();
+			return cleanRouteShortName(gRoute.getRouteLongNameOrDefault());
 		}
 		//noinspection DiscouragedApi
 		String routeShortName =
