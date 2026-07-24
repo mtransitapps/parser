@@ -136,7 +136,7 @@ data class GTrip(
         internal const val SERVICE_ID = "service_id"
         private const val TRIP_HEADSIGN = "trip_headsign"
         private const val TRIP_SHORT_NAME = "trip_short_name"
-        private const val DIRECTION_ID = "direction_id"
+        internal const val DIRECTION_ID = "direction_id"
         private const val BLOCK_ID = "block_id"
         private const val SHAPE_ID = "shape_id"
         private const val WHEELCHAIR_ACCESSIBLE = "wheelchair_accessible"

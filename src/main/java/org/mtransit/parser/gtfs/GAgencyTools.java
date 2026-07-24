@@ -202,7 +202,7 @@ public interface GAgencyTools {
 
 	void forgetOriginalTripId(@NotNull String gTripOriginalId);
 
-	boolean directionSplitterEnabled();
+	void setDirectionSplitterUseful(boolean enabled);
 
 	boolean directionSplitterEnabled(long routeId);
 
