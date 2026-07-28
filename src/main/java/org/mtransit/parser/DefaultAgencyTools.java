@@ -129,12 +129,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 		OVERRIDE_DATE = null; // yyyyMMdd
 	}
 
-	private static final boolean TOMORROW;
-
-	static {
-		TOMORROW = false;
-	}
-
 	private static final DateFormat DATE_FORMAT = GFieldTypes.makeDateFormat();
 
 	@Nullable
@@ -143,6 +137,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@SuppressWarnings("WeakerAccess")
 	public int getTodayDateInt() {
 		if (todayDateInt == null) {
+			//noinspection ConstantValue
+			if (OVERRIDE_DATE != null) {
+				todayDateInt = OVERRIDE_DATE;
+				return todayDateInt;
+			}
 			todayDateInt = Integer.parseInt(DATE_FORMAT.format(Calendar.getInstance().getTime()));
 		}
 		return todayDateInt;
@@ -1742,11 +1741,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 		boolean isCurrent = "current_".equalsIgnoreCase(args[2]);
 		boolean isNext = "next_".equalsIgnoreCase(args[2]);
 		boolean isCurrentOrNext = isCurrent || isNext;
-		Calendar c = Calendar.getInstance();
-		if (!isCurrentOrNext && TOMORROW) {
-			c.add(Calendar.DAY_OF_MONTH, 1); // TOMORROW (too late to publish today's schedule)
-		}
-		usefulPeriod.setTodayStringInt(Integer.valueOf(DATE_FORMAT.format(c.getTime())));
+		final Calendar c = Calendar.getInstance();
+		usefulPeriod.setTodayStringInt(agencyTools.getTodayDateInt());
 		if (!isCurrentOrNext && OVERRIDE_DATE != null) {
 			usefulPeriod.setTodayStringInt(OVERRIDE_DATE);
 		}
