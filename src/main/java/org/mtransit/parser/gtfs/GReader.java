@@ -1,7 +1,7 @@
 package org.mtransit.parser.gtfs;
 
 import static org.mtransit.commons.Constants.EMPTY;
-import static org.mtransit.parser.gtfs.data.GSpecExtKt.getCalendarsMaxStartDate;
+import static org.mtransit.parser.gtfs.data.GSpecExtKt.getCalendarsMaxEndDate;
 import static org.mtransit.parser.gtfs.data.GSpecExtKt.getCalendarsMinStartDate;
 import static org.mtransit.parser.gtfs.data.GSpecExtKt.isInsideGCalendars;
 
@@ -98,10 +98,10 @@ public class GReader {
 					processCalendar(agencyTools, gSpec, line)
 			);
 			final @Nullable Integer calendarsMinStartDate = getCalendarsMinStartDate(gSpec);
-			final @Nullable Integer calendarsMaxStartDate = getCalendarsMaxStartDate(gSpec);
+			final @Nullable Integer calendarsMaxEndDate = getCalendarsMaxEndDate(gSpec);
 			// CALENDAR DATES (-> non-excluded service IDs) (after calendar)
 			boolean hasCalendarDates = readFile(gtfsDir, GCalendarDate.FILENAME, false, line ->
-					processCalendarDate(agencyTools, gSpec, line, calendarsMinStartDate, calendarsMaxStartDate)
+					processCalendarDate(agencyTools, gSpec, line, calendarsMinStartDate, calendarsMaxEndDate)
 			);
 			boolean hasCalendar = hasCalendarDates || hasCalendars;
 			if (!hasCalendar) {
@@ -441,7 +441,7 @@ public class GReader {
 			GSpec gSpec,
 			HashMap<String, String> line,
 			@Nullable Integer calendarsMinStartDate,
-			@Nullable Integer calendarsMaxStartDate
+			@Nullable Integer calendarsMaxEndDate
 	) {
 		try {
 			final GCalendarDate gCalendarDate = GCalendarDate.fromLine(line);
@@ -449,7 +449,7 @@ public class GReader {
 				MTLog.log("Empty calendar date ignored (%s).", line);
 				return;
 			}
-			if (Boolean.FALSE.equals(isInsideGCalendars(gSpec, gCalendarDate, () -> calendarsMinStartDate, () -> calendarsMaxStartDate))) {
+			if (Boolean.FALSE.equals(isInsideGCalendars(gSpec, gCalendarDate, () -> calendarsMinStartDate, () -> calendarsMaxEndDate))) {
 				MTLog.logDebug("Out of calendar coverage calendar date ignored (%s).", line);
 				return;
 			}
