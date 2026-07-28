@@ -99,7 +99,7 @@ public class GReader {
 			);
 			final @Nullable Integer calendarsMinStartDate = getCalendarsMinStartDate(gSpec);
 			final @Nullable Integer calendarsMaxEndDate = getCalendarsMaxEndDate(gSpec);
-			// CALENDAR DATES (-> non-excluded service IDs) (after calendar)
+			// CALENDAR DATES (-> non-excluded service IDs) (after calendars)
 			boolean hasCalendarDates = readFile(gtfsDir, GCalendarDate.FILENAME, false, line ->
 					processCalendarDate(agencyTools, gSpec, line, calendarsMinStartDate, calendarsMaxEndDate)
 			);

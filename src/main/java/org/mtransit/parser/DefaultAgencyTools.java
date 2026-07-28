@@ -1743,9 +1743,6 @@ public class DefaultAgencyTools implements GAgencyTools {
 		boolean isCurrentOrNext = isCurrent || isNext;
 		final Calendar c = Calendar.getInstance();
 		usefulPeriod.setTodayStringInt(agencyTools.getTodayDateInt());
-		if (!isCurrentOrNext && OVERRIDE_DATE != null) {
-			usefulPeriod.setTodayStringInt(OVERRIDE_DATE);
-		}
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, !agencyFilter, agencyFilter);
 		MDataChangedManager.avoidCalendarDatesDataChanged(lastServiceDates, gtfs, agencyTools);
 		if (agencyFilter) {
