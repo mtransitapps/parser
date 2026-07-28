@@ -1,6 +1,9 @@
 package org.mtransit.parser.gtfs;
 
 import static org.mtransit.commons.Constants.EMPTY;
+import static org.mtransit.parser.gtfs.data.GSpecExtKt.getCalendarsMaxEndDate;
+import static org.mtransit.parser.gtfs.data.GSpecExtKt.getCalendarsMinStartDate;
+import static org.mtransit.parser.gtfs.data.GSpecExtKt.isInsideGCalendars;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -90,13 +93,15 @@ public class GReader {
 						processAgency(agencyTools, gSpec, line)
 				);
 			}
-			// CALENDAR DATES (-> non-excluded service IDs)
-			boolean hasCalendarDates = readFile(gtfsDir, GCalendarDate.FILENAME, false, line ->
-					processCalendarDate(agencyTools, gSpec, line)
-			);
-			// CALENDAR (-> non-excluded service IDs)
+			// CALENDAR (-> non-excluded service IDs) (before calendar dates)
 			boolean hasCalendars = readFile(gtfsDir, GCalendar.FILENAME, false, line ->
 					processCalendar(agencyTools, gSpec, line)
+			);
+			final @Nullable Integer calendarsMinStartDate = getCalendarsMinStartDate(gSpec);
+			final @Nullable Integer calendarsMaxEndDate = getCalendarsMaxEndDate(gSpec);
+			// CALENDAR DATES (-> non-excluded service IDs) (after calendars)
+			boolean hasCalendarDates = readFile(gtfsDir, GCalendarDate.FILENAME, false, line ->
+					processCalendarDate(agencyTools, gSpec, line, calendarsMinStartDate, calendarsMaxEndDate)
 			);
 			boolean hasCalendar = hasCalendarDates || hasCalendars;
 			if (!hasCalendar) {
@@ -431,18 +436,28 @@ public class GReader {
 			DateUtils.getEndOfYear(DateUtils.addYears(new Date(), 3)) // 3 years // else local DB slow to deploy
 	));
 
-	private static void processCalendarDate(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
+	private static void processCalendarDate(
+			GAgencyTools agencyTools,
+			GSpec gSpec,
+			HashMap<String, String> line,
+			@Nullable Integer calendarsMinStartDate,
+			@Nullable Integer calendarsMaxEndDate
+	) {
 		try {
 			final GCalendarDate gCalendarDate = GCalendarDate.fromLine(line);
 			if (gCalendarDate == null) {
-				MTLog.log("Empty calendar dates ignored (%s).", line);
+				MTLog.log("Empty calendar date ignored (%s).", line);
+				return;
+			}
+			if (Boolean.FALSE.equals(isInsideGCalendars(gSpec, gCalendarDate, () -> calendarsMinStartDate, () -> calendarsMaxEndDate))) {
+				MTLog.logDebug("Out of calendar coverage calendar date ignored (%s).", line);
 				return;
 			}
 			if (gCalendarDate.isBefore(MIN_CALENDAR_DATE)) {
-				MTLog.log("Too old calendar dates ignored (%s).", line);
+				MTLog.log("Too old calendar date ignored (%s).", line);
 				return;
 			} else if (gCalendarDate.isAfter(MAX_CALENDAR_DATE)) {
-				MTLog.log("Too much in the future calendar dates ignored (%s).", line);
+				MTLog.log("Too much in the future calendar date ignored (%s).", line);
 				return;
 			}
 			if (agencyTools.excludeCalendarDate(gCalendarDate)) {
