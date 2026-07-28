@@ -11,6 +11,6 @@ fun GSpec.isInsideGCalendars(
     calendarsMaxEndDate: () -> Int? = this::calendarsMaxEndDate
 ): Boolean? {
     val calendarsMinStartDate = calendarsMinStartDate() ?: return null // no calendars (only calendar dates inside GTFS)
-    val calendarsMaxStartDate = calendarsMaxEndDate() ?: return null // no calendars (only calendar dates inside GTFS)
-    return gCalendarDate.isBetween(calendarsMinStartDate, calendarsMaxStartDate)
+    val calendarsMaxEndDate = calendarsMaxEndDate() ?: return null // no calendars (only calendar dates inside GTFS)
+    return gCalendarDate.isBetween(calendarsMinStartDate, calendarsMaxEndDate)
 }
