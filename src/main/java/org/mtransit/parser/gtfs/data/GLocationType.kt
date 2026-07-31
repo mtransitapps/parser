@@ -12,7 +12,7 @@ enum class GLocationType(val id: Int) {
 
     /**
      * Station.
-     * A physical structure or area that contains one or more platform.
+     * A physical structure or area that contains one or more platforms.
      */
     STATION(1),
 
