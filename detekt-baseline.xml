@@ -92,7 +92,6 @@
     <ID>MagicNumber:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$3</ID>
     <ID>MagicNumber:MSchedule.kt:MSchedule$100</ID>
     <ID>MagicNumber:MServiceDate.kt:MServiceDate.Companion$3</ID>
-    <ID>MaxLineLength:MDataChangedManager.kt:MDataChangedManager$MTLog.log("&gt; Cannot remove added dates because of wrong number of added dates (${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})")</ID>
     <ID>NewLineAtEndOfFile:CharUtils.kt:org.mtransit.parser.CharUtils.kt</ID>
     <ID>NewLineAtEndOfFile:CloseableUtils.kt:org.mtransit.commons.CloseableUtils.kt</ID>
     <ID>NewLineAtEndOfFile:CollectionsExt.kt:org.mtransit.commons.CollectionsExt.kt</ID>

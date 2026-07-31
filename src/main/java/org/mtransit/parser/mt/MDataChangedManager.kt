@@ -268,7 +268,10 @@ object MDataChangedManager {
             }
             val updatedCalendar = originalCalendar.copy(startDate = dayAfterRemovedDate)
             if (originalCalendar.dates.size - updatedCalendar.dates.size != 1) {
-                MTLog.log("> Cannot remove added dates because of wrong number of added dates (${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})")
+                MTLog.log(
+                    "> Cannot remove added dates because of wrong number of added dates " +
+                            "(${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})"
+                )
                 return
             }
             newGCalendars.remove(originalCalendar)
