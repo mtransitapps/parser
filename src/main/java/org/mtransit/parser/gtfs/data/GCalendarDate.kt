@@ -143,7 +143,7 @@ data class GCalendarDate(
             val startDateToCheck = max(startDate, gCalendar.startDate)
             val endDateToCheck = min(endDate, gCalendar.endDate)
             val gCalendarDateServiceId = gCalendarDates?.filter { it.isServiceIdInt(gCalendar.serviceIdInt) } ?: return false  // NOT entirely removed
-            (startDateToCheck..endDateToCheck).forEach { date ->
+            for (date in startDateToCheck..endDateToCheck) {
                 if (gCalendarDateServiceId.none { it.isDate(date) && it.exceptionType == GCalendarDatesExceptionType.SERVICE_REMOVED }) {
                     return false // NOT entirely removed
                 }

@@ -31,7 +31,6 @@
     <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@JvmStatic fun endsWithLetter</ID>
     <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@JvmStatic fun startsWithLetter</ID>
     <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@Throws(RuntimeException::class) @JvmOverloads @JvmStatic fun convert: Int</ID>
-    <ID>ForEachOnRange:GCalendarDate.kt:GCalendarDate.Companion$startDateToCheck..endDateToCheck</ID>
     <ID>LargeClass:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder</ID>
     <ID>LargeClass:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest</ID>
     <ID>LongMethod:CollectionsExt.kt:fun &lt;T&gt; Iterable&lt;T&gt;.overlap: Boolean</ID>
