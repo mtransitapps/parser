@@ -32,6 +32,7 @@ object MDirectionHeadSignFinder {
 
     private const val MIN_HEAD_SIGN_COUNT_PERCENT = .67f
 
+    @Suppress("DestructuringDeclarationWithTooManyEntries")
     @JvmStatic
     fun findDirectionHeadSigns(routeId: Long, gRouteTrips: List<GTrip>, routeGTFS: GSpec, agencyTools: GAgencyTools): Map<Int, String> {
         val directionHeadSigns = mutableMapOf<Int, String>()
