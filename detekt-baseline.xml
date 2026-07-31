@@ -2,5 +2,213 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>ComplexCondition:GRouteType.kt:GRouteType.Companion$routeType == EX_BUS_SERVICE.id || routeType == EX_DEMAND_AND_RESPONSE_BUS_SERVICE.id || routeType == EX_SHARE_TAXI_SERVICE.id || routeType == EX_COMMUNAL_TAXI_SERVICE.id</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$(stopIdIntsAfterCommonCount2 == 0 &amp;&amp; stopIdIntsAfterCommonCount1 == 0) // #1 &amp; #2 have same last stop || (dataLossAuthorized &amp;&amp; (stopIdIntsAfterCommonCount2 &gt; 0 &amp;&amp; stopIdIntsAfterCommonCount1 &gt; 0))</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$(stopNameList1First == stopNameList2First || (prefix1First2First.length &gt;= minFixLength1First2First &amp;&amp; prefix1First2First.length &gt; suffix1First2First.length) || (suffix1First2First.length &gt;= minFixLength1First2First &amp;&amp; suffix1First2First.length &gt; prefix1First2First.length))</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$(stopNameList1First == stopNameList2First || (prefix1First2First.length &gt;= minFixLength1First2First &amp;&amp; prefix1First2First.length &gt; suffix1First2First.length) || (suffix1First2First.length &gt;= minFixLength1First2First &amp;&amp; suffix1First2First.length &gt; prefix1First2First.length)) &amp;&amp; (stopNameList1Last == stopNameList2Last || (prefix1Last2Last.length &gt;= minFixLength1Last2Last &amp;&amp; prefix1Last2Last.length &gt; suffix1First2Last.length) || (suffix1Last2Last.length &gt;= minFixLength1Last2Last &amp;&amp; suffix1Last2Last.length &gt; prefix1First2Last.length))</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$(stopNameList1Last == stopNameList2Last || (prefix1Last2Last.length &gt;= minFixLength1Last2Last &amp;&amp; prefix1Last2Last.length &gt; suffix1First2Last.length) || (suffix1Last2Last.length &gt;= minFixLength1Last2Last &amp;&amp; suffix1Last2Last.length &gt; prefix1First2Last.length))</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$directionHeadSigns.size == 2 // AM/PM only if 2 directions &amp;&amp; (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns) || directionHeadSigns.filterValues { it == "AM" || it == "PM" }.isNotEmpty())</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$distance1First2Last &lt; distance2First1Last &amp;&amp; (distance1First2Last &lt; MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS || (dataLossAuthorized &amp;&amp; distance1First2Last &lt; MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS * 2f))</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$distance2First1Last &lt; distance1First2Last &amp;&amp; (distance2First1Last &lt; MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS || (dataLossAuthorized &amp;&amp; distance2First1Last &lt; MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS * 2f))</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$firstCommonStopIdInt != null // has a common stop &amp;&amp; (forceMerge // force merge || (stopIdIntsBeforeCommon.isEmpty() // has stops before common &amp;&amp; stopIdIntsBeforeCommonPrepend.isNotEmpty()))</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$stopNameList1First == stopNameList2Last || (prefix1First2Last.length &gt;= minFixLength1First2Last &amp;&amp; prefix1First2Last.length &gt; suffix1First2Last.length) || (suffix1First2Last.length &gt;= minFixLength1First2Last &amp;&amp; suffix1First2Last.length &gt; prefix1First2Last.length)</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$stopNameList1Last == stopNameList2First || (prefix2First1Last.length &gt;= minFixLength2First1Last &amp;&amp; prefix2First1Last.length &gt; suffix2First1Last.length) || (suffix2First1Last.length &gt;= minFixLength2First1Last &amp;&amp; suffix2First1Last.length &gt; prefix2First1Last.length)</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$stopTimesList1FirstStop != null &amp;&amp; stopTimesList1LastStop != null &amp;&amp; stopTimesList2FirstStop != null &amp;&amp; stopTimesList2LastStop != null</ID>
+    <ID>CyclomaticComplexMethod:CollectionsExt.kt:fun &lt;T&gt; Iterable&lt;T&gt;.overlap: Boolean</ID>
+    <ID>CyclomaticComplexMethod:DBUtils.kt:DBUtils$@Suppress("AssignedValueIsNeverRead") @JvmStatic fun selectSchedules: List&lt;MSchedule&gt;</ID>
+    <ID>CyclomaticComplexMethod:GCalendar.kt:GCalendar.Companion$private fun initAllDates</ID>
+    <ID>CyclomaticComplexMethod:GRoute.kt:GRoute.Companion$@JvmOverloads @JvmStatic fun fromLine</ID>
+    <ID>CyclomaticComplexMethod:MDataChangedManager.kt:MDataChangedManager$@Suppress("DiscouragedApi") @JvmStatic fun avoidCalendarDatesDataChanged</ID>
+    <ID>CyclomaticComplexMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@Suppress("DestructuringDeclarationWithTooManyEntries") @JvmStatic fun findDirectionHeadSigns: Map&lt;Int, String&gt;</ID>
+    <ID>CyclomaticComplexMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@VisibleForTesting internal fun findDirectionHeadSign: DirectionResult?</ID>
+    <ID>CyclomaticComplexMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$private fun mergeTrips: MergedTrip?</ID>
+    <ID>CyclomaticComplexMethod:MDirectionSplitter.kt:MDirectionSplitter$@JvmStatic fun splitDirection</ID>
+    <ID>CyclomaticComplexMethod:MDirectionSplitter.kt:MDirectionSplitter$fun splitDirections: MutableList&lt;DirectionTripsStops&gt;</ID>
+    <ID>CyclomaticComplexMethod:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmOverloads @JvmStatic fun convert: Long</ID>
+    <ID>CyclomaticComplexMethod:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmStatic fun endsWithLetter</ID>
+    <ID>CyclomaticComplexMethod:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmStatic fun startsWithLetter</ID>
+    <ID>CyclomaticComplexMethod:MSchedule.kt:MSchedule$fun toFile</ID>
+    <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@JvmStatic fun endsWithLetter</ID>
+    <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@JvmStatic fun startsWithLetter</ID>
+    <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@Throws(RuntimeException::class) @JvmOverloads @JvmStatic fun convert: Int</ID>
+    <ID>ForEachOnRange:GCalendarDate.kt:GCalendarDate.Companion$startDateToCheck..endDateToCheck</ID>
+    <ID>LargeClass:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder</ID>
+    <ID>LargeClass:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest</ID>
+    <ID>LongMethod:CollectionsExt.kt:fun &lt;T&gt; Iterable&lt;T&gt;.overlap: Boolean</ID>
+    <ID>LongMethod:DBUtils.kt:DBUtils$@Suppress("AssignedValueIsNeverRead") @JvmStatic fun selectSchedules: List&lt;MSchedule&gt;</ID>
+    <ID>LongMethod:LocationUtils.kt:LocationUtils$private fun computeDistanceAndBearing</ID>
+    <ID>LongMethod:MDataChangedManager.kt:MDataChangedManager$@Suppress("DiscouragedApi") @JvmStatic fun avoidCalendarDatesDataChanged</ID>
+    <ID>LongMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@Suppress("DestructuringDeclarationWithTooManyEntries") @JvmStatic fun findDirectionHeadSigns: Map&lt;Int, String&gt;</ID>
+    <ID>LongMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@VisibleForTesting internal fun findDirectionHeadSign: DirectionResult?</ID>
+    <ID>LongMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$private fun mergeTrips: MergedTrip?</ID>
+    <ID>LongMethod:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest$@Test fun testFindDirectionHeadSign_DistinctLastStopNoClearWinnerMerge</ID>
+    <ID>LongMethod:MDirectionSplitter.kt:MDirectionSplitter$@JvmStatic fun splitDirection</ID>
+    <ID>LongMethod:MDirectionSplitter.kt:MDirectionSplitter$fun splitDirections: MutableList&lt;DirectionTripsStops&gt;</ID>
+    <ID>LoopWithTooManyJumpStatements:CollectionsExt.kt:while</ID>
+    <ID>LoopWithTooManyJumpStatements:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$for</ID>
+    <ID>LoopWithTooManyJumpStatements:MDirectionSplitter.kt:MDirectionSplitter$for</ID>
+    <ID>MagicNumber:DateUtils.kt:DateUtils$23</ID>
+    <ID>MagicNumber:DateUtils.kt:DateUtils$59</ID>
+    <ID>MagicNumber:DateUtils.kt:DateUtils$999</ID>
+    <ID>MagicNumber:GDirectionId.kt:GDirectionId.NEW_1$19</ID>
+    <ID>MagicNumber:GDirectionId.kt:GDirectionId.NEW_2$29</ID>
+    <ID>MagicNumber:GDirectionId.kt:GDirectionId.NONE$9</ID>
+    <ID>MagicNumber:GDropOffType.kt:GDropOffType.MUST_COORDINATE_WITH_DRIVER$3</ID>
+    <ID>MagicNumber:GFieldTypes.kt:GFieldTypes$6</ID>
+    <ID>MagicNumber:GLocationType.kt:GLocationType.BOARDING_AREA$4</ID>
+    <ID>MagicNumber:GLocationType.kt:GLocationType.GENERIC_NODE$3</ID>
+    <ID>MagicNumber:GPickupType.kt:GPickupType.MUST_COORDINATE_WITH_DRIVER$3</ID>
+    <ID>MagicNumber:GRouteType.kt:GRouteType.BUS$3</ID>
+    <ID>MagicNumber:GRouteType.kt:GRouteType.EX_BUS_SERVICE$700</ID>
+    <ID>MagicNumber:GRouteType.kt:GRouteType.EX_COMMUNAL_TAXI_SERVICE$1501</ID>
+    <ID>MagicNumber:GRouteType.kt:GRouteType.EX_DEMAND_AND_RESPONSE_BUS_SERVICE$715</ID>
+    <ID>MagicNumber:GRouteType.kt:GRouteType.EX_SHARE_TAXI_SERVICE$717</ID>
+    <ID>MagicNumber:GRouteType.kt:GRouteType.EX_TRAM_SERVICE$900</ID>
+    <ID>MagicNumber:GRouteType.kt:GRouteType.EX_URBAN_RAILWAY_SERVICE$400</ID>
+    <ID>MagicNumber:GRouteType.kt:GRouteType.FERRY$4</ID>
+    <ID>MagicNumber:GTime.kt:GTime$12_00_00</ID>
+    <ID>MagicNumber:GTime.kt:GTime$12_99_99</ID>
+    <ID>MagicNumber:GTime.kt:GTime$24_00_00</ID>
+    <ID>MagicNumber:GTime.kt:GTime$6</ID>
+    <ID>MagicNumber:LocationUtils.kt:LocationUtils$1.0e-12</ID>
+    <ID>MagicNumber:LocationUtils.kt:LocationUtils$16384.0</ID>
+    <ID>MagicNumber:LocationUtils.kt:LocationUtils$175.0</ID>
+    <ID>MagicNumber:LocationUtils.kt:LocationUtils$180.0</ID>
+    <ID>MagicNumber:LocationUtils.kt:LocationUtils$3.0</ID>
+    <ID>MagicNumber:LocationUtils.kt:LocationUtils$320.0</ID>
+    <ID>MagicNumber:LocationUtils.kt:LocationUtils$4.0</ID>
+    <ID>MagicNumber:LocationUtils.kt:LocationUtils$4096.0</ID>
+    <ID>MagicNumber:LocationUtils.kt:LocationUtils$6.0</ID>
+    <ID>MagicNumber:LocationUtils.kt:LocationUtils$768</ID>
+    <ID>MagicNumber:MDataChangedManager.kt:MDataChangedManager$7</ID>
+    <ID>MagicNumber:MDirectionCardinalType.kt:MDirectionCardinalType$3</ID>
+    <ID>MagicNumber:MDirectionCardinalType.kt:MDirectionCardinalType$4</ID>
+    <ID>MagicNumber:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$0.5f</ID>
+    <ID>MagicNumber:MDirectionSplitter.kt:MDirectionSplitter$.33f</ID>
+    <ID>MagicNumber:MDirectionSplitter.kt:MDirectionSplitter$0.50f</ID>
+    <ID>MagicNumber:MDirectionSplitter.kt:MDirectionSplitter$100f</ID>
+    <ID>MagicNumber:MDropOffType.kt:MDropOffType.MUST_COORDINATE_WITH_DRIVER$3</ID>
+    <ID>MagicNumber:MPickupType.kt:MPickupType.MUST_COORDINATE_WITH_DRIVER$3</ID>
+    <ID>MagicNumber:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$3</ID>
+    <ID>MagicNumber:MSchedule.kt:MSchedule$100</ID>
+    <ID>MagicNumber:MServiceDate.kt:MServiceDate.Companion$3</ID>
+    <ID>MaxLineLength:MDataChangedManager.kt:MDataChangedManager$MTLog.log("&gt; Cannot remove added dates because of wrong number of added dates (${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})")</ID>
+    <ID>NewLineAtEndOfFile:CharUtils.kt:org.mtransit.parser.CharUtils.kt</ID>
+    <ID>NewLineAtEndOfFile:CloseableUtils.kt:org.mtransit.commons.CloseableUtils.kt</ID>
+    <ID>NewLineAtEndOfFile:CollectionsExt.kt:org.mtransit.commons.CollectionsExt.kt</ID>
+    <ID>NewLineAtEndOfFile:CollectionsExtTest.kt:org.mtransit.commons.CollectionsExtTest.kt</ID>
+    <ID>NewLineAtEndOfFile:DBUtils.kt:org.mtransit.parser.db.DBUtils.kt</ID>
+    <ID>NewLineAtEndOfFile:DirectionResult.kt:org.mtransit.parser.mt.DirectionResult.kt</ID>
+    <ID>NewLineAtEndOfFile:DirectionTripsStops.kt:org.mtransit.parser.mt.DirectionTripsStops.kt</ID>
+    <ID>NewLineAtEndOfFile:DumpDbUtils.kt:org.mtransit.parser.db.DumpDbUtils.kt</ID>
+    <ID>NewLineAtEndOfFile:GAgency.kt:org.mtransit.parser.gtfs.data.GAgency.kt</ID>
+    <ID>NewLineAtEndOfFile:GCalendar.kt:org.mtransit.parser.gtfs.data.GCalendar.kt</ID>
+    <ID>NewLineAtEndOfFile:GCalendarDate.kt:org.mtransit.parser.gtfs.data.GCalendarDate.kt</ID>
+    <ID>NewLineAtEndOfFile:GCalendarDatesExceptionType.kt:org.mtransit.parser.gtfs.data.GCalendarDatesExceptionType.kt</ID>
+    <ID>NewLineAtEndOfFile:GDirection.kt:org.mtransit.parser.gtfs.data.GDirection.kt</ID>
+    <ID>NewLineAtEndOfFile:GDirectionId.kt:org.mtransit.parser.gtfs.data.GDirectionId.kt</ID>
+    <ID>NewLineAtEndOfFile:GDirectionType.kt:org.mtransit.parser.gtfs.data.GDirectionType.kt</ID>
+    <ID>NewLineAtEndOfFile:GDropOffType.kt:org.mtransit.parser.gtfs.data.GDropOffType.kt</ID>
+    <ID>NewLineAtEndOfFile:GFieldTypes.kt:org.mtransit.parser.gtfs.data.GFieldTypes.kt</ID>
+    <ID>NewLineAtEndOfFile:GFrequency.kt:org.mtransit.parser.gtfs.data.GFrequency.kt</ID>
+    <ID>NewLineAtEndOfFile:GIDs.kt:org.mtransit.parser.gtfs.data.GIDs.kt</ID>
+    <ID>NewLineAtEndOfFile:GPickupType.kt:org.mtransit.parser.gtfs.data.GPickupType.kt</ID>
+    <ID>NewLineAtEndOfFile:GRouteType.kt:org.mtransit.parser.gtfs.data.GRouteType.kt</ID>
+    <ID>NewLineAtEndOfFile:GStop.kt:org.mtransit.parser.gtfs.data.GStop.kt</ID>
+    <ID>NewLineAtEndOfFile:GStopTime.kt:org.mtransit.parser.gtfs.data.GStopTime.kt</ID>
+    <ID>NewLineAtEndOfFile:GTFSDataBase.kt:org.mtransit.parser.db.GTFSDataBase.kt</ID>
+    <ID>NewLineAtEndOfFile:GTime.kt:org.mtransit.parser.gtfs.data.GTime.kt</ID>
+    <ID>NewLineAtEndOfFile:GTimePoint.kt:org.mtransit.parser.gtfs.data.GTimePoint.kt</ID>
+    <ID>NewLineAtEndOfFile:GTrip.kt:org.mtransit.parser.gtfs.data.GTrip.kt</ID>
+    <ID>NewLineAtEndOfFile:GTripStop.kt:org.mtransit.parser.gtfs.data.GTripStop.kt</ID>
+    <ID>NewLineAtEndOfFile:GWheelchairBoardingType.kt:org.mtransit.parser.gtfs.data.GWheelchairBoardingType.kt</ID>
+    <ID>NewLineAtEndOfFile:HtmlSymbols.kt:org.mtransit.commons.HtmlSymbols.kt</ID>
+    <ID>NewLineAtEndOfFile:IntExt.kt:org.mtransit.commons.IntExt.kt</ID>
+    <ID>NewLineAtEndOfFile:Letters.kt:org.mtransit.commons.Letters.kt</ID>
+    <ID>NewLineAtEndOfFile:LocationUtils.kt:org.mtransit.parser.LocationUtils.kt</ID>
+    <ID>NewLineAtEndOfFile:MAgency.kt:org.mtransit.parser.mt.data.MAgency.kt</ID>
+    <ID>NewLineAtEndOfFile:MAgencyTests.kt:org.mtransit.parser.mt.data.MAgencyTests.kt</ID>
+    <ID>NewLineAtEndOfFile:MDataChangedManager.kt:org.mtransit.parser.mt.MDataChangedManager.kt</ID>
+    <ID>NewLineAtEndOfFile:MDirection.kt:org.mtransit.parser.mt.data.MDirection.kt</ID>
+    <ID>NewLineAtEndOfFile:MDirectionCardinalType.kt:org.mtransit.parser.mt.data.MDirectionCardinalType.kt</ID>
+    <ID>NewLineAtEndOfFile:MDirectionHeadSignFinder.kt:org.mtransit.parser.mt.MDirectionHeadSignFinder.kt</ID>
+    <ID>NewLineAtEndOfFile:MDirectionHeadSignFinderTest.kt:org.mtransit.parser.mt.MDirectionHeadSignFinderTest.kt</ID>
+    <ID>NewLineAtEndOfFile:MDirectionInboundType.kt:org.mtransit.parser.mt.data.MDirectionInboundType.kt</ID>
+    <ID>NewLineAtEndOfFile:MDirectionSplitter.kt:org.mtransit.parser.mt.MDirectionSplitter.kt</ID>
+    <ID>NewLineAtEndOfFile:MDirectionSplitterTest.kt:org.mtransit.parser.mt.MDirectionSplitterTest.kt</ID>
+    <ID>NewLineAtEndOfFile:MDirectionStop.kt:org.mtransit.parser.mt.data.MDirectionStop.kt</ID>
+    <ID>NewLineAtEndOfFile:MDirectionType.kt:org.mtransit.parser.mt.data.MDirectionType.kt</ID>
+    <ID>NewLineAtEndOfFile:MDropOffType.kt:org.mtransit.parser.mt.data.MDropOffType.kt</ID>
+    <ID>NewLineAtEndOfFile:MFrequency.kt:org.mtransit.parser.mt.data.MFrequency.kt</ID>
+    <ID>NewLineAtEndOfFile:MGeneratorTest.kt:org.mtransit.parser.mt.MGeneratorTest.kt</ID>
+    <ID>NewLineAtEndOfFile:MPickupType.kt:org.mtransit.parser.mt.data.MPickupType.kt</ID>
+    <ID>NewLineAtEndOfFile:MReader.kt:org.mtransit.parser.mt.MReader.kt</ID>
+    <ID>NewLineAtEndOfFile:MRouteSNToIDConverterTest.kt:org.mtransit.parser.mt.data.MRouteSNToIDConverterTest.kt</ID>
+    <ID>NewLineAtEndOfFile:MServiceDate.kt:org.mtransit.parser.mt.data.MServiceDate.kt</ID>
+    <ID>NewLineAtEndOfFile:MServiceDateTest.kt:org.mtransit.parser.mt.data.MServiceDateTest.kt</ID>
+    <ID>NewLineAtEndOfFile:MSpec.kt:org.mtransit.parser.mt.data.MSpec.kt</ID>
+    <ID>NewLineAtEndOfFile:MStop.kt:org.mtransit.parser.mt.data.MStop.kt</ID>
+    <ID>NewLineAtEndOfFile:MStrings.kt:org.mtransit.parser.mt.data.MStrings.kt</ID>
+    <ID>NewLineAtEndOfFile:MergedTrip.kt:org.mtransit.parser.mt.MergedTrip.kt</ID>
+    <ID>NewLineAtEndOfFile:ParserMain.kt:org.mtransit.parser.scratch.ParserMain.kt</ID>
+    <ID>NewLineAtEndOfFile:SQLUtils.kt:org.mtransit.parser.db.SQLUtils.kt</ID>
+    <ID>NewLineAtEndOfFile:StringUtils.kt:org.mtransit.parser.StringUtils.kt</ID>
+    <ID>NewLineAtEndOfFile:TimeUtilsTest.kt:org.mtransit.parser.TimeUtilsTest.kt</ID>
+    <ID>NewLineAtEndOfFile:TorontoTTCCommons.kt:org.mtransit.commons.TorontoTTCCommons.kt</ID>
+    <ID>ReturnCount:AgencyConfig.kt:AgencyConfig$fun getAllLanguages: List&lt;Locale&gt;?</ID>
+    <ID>ReturnCount:CollectionsExt.kt:fun &lt;T&gt; Iterable&lt;T&gt;.intersectWithOrder: Set&lt;T&gt;</ID>
+    <ID>ReturnCount:CollectionsExt.kt:fun &lt;T&gt; Iterable&lt;T&gt;.overlap: Boolean</ID>
+    <ID>ReturnCount:GCalendar.kt:GCalendar$@Suppress("unused") fun isInside: Boolean</ID>
+    <ID>ReturnCount:GCalendar.kt:GCalendar$@Suppress("unused") fun isOverlapping: Boolean</ID>
+    <ID>ReturnCount:GCalendarDate.kt:GCalendarDate.Companion$@JvmStatic fun isServiceEntirelyRemoved: Boolean</ID>
+    <ID>ReturnCount:GDropOffType.kt:GDropOffType.Companion$fun parse: GDropOffType</ID>
+    <ID>ReturnCount:GFieldTypes.kt:GFieldTypes$fun Int.isBetween: Boolean</ID>
+    <ID>ReturnCount:GPickupType.kt:GPickupType.Companion$fun parse: GPickupType</ID>
+    <ID>ReturnCount:GRoute.kt:GRoute.Companion$@JvmStatic fun mergeRouteColors: String?</ID>
+    <ID>ReturnCount:GRoute.kt:GRoute.Companion$@JvmStatic fun mergeRouteLongNames: String?</ID>
+    <ID>ReturnCount:GRoute.kt:GRoute.Companion$@JvmStatic fun mergeRouteSortOrders: Int?</ID>
+    <ID>ReturnCount:GRouteType.kt:GRouteType.Companion$@JvmStatic fun isSameType: Boolean</ID>
+    <ID>ReturnCount:GSpecExt.kt:fun GSpec.isInsideGCalendars: Boolean?</ID>
+    <ID>ReturnCount:GStopTime.kt:GStopTime$fun isRegular: Boolean</ID>
+    <ID>ReturnCount:GStopTime.kt:GStopTime$override fun compareTo: Int</ID>
+    <ID>ReturnCount:MAgency.kt:MAgency.Companion$@JvmStatic fun pickColorFromRoutes: String?</ID>
+    <ID>ReturnCount:MDataChangedManager.kt:MDataChangedManager$@Suppress("DiscouragedApi") @JvmStatic fun avoidCalendarDatesDataChanged</ID>
+    <ID>ReturnCount:MDataChangedManager.kt:MDataChangedManager$@Suppress("unused") // TODO remove @JvmStatic fun addMissingDateToAvoidDataChanged</ID>
+    <ID>ReturnCount:MDataChangedManager.kt:MDataChangedManager$@Suppress("unused") // TODO remove @JvmStatic fun ignoreCalendarDateToAvoidDataChanged: Boolean</ID>
+    <ID>ReturnCount:MDirection.kt:MDirection.Companion$@JvmStatic fun mergeHeadsignValue: String?</ID>
+    <ID>ReturnCount:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@VisibleForTesting internal fun findDirectionHeadSign: DirectionResult?</ID>
+    <ID>ReturnCount:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$private fun mergeTrips: MergedTrip?</ID>
+    <ID>ReturnCount:MDirectionStop.kt:MDirectionStop$fun equalsDirectionAndStop: Boolean</ID>
+    <ID>ReturnCount:MReader.kt:MReader$@Suppress("unused") // TODO removed @JvmStatic fun readFirstLastDepartures: Pair&lt;Int?, Int?&gt;?</ID>
+    <ID>ReturnCount:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmOverloads @JvmStatic fun convert: Long</ID>
+    <ID>ReturnCount:MSchedule.kt:MSchedule$@Suppress("unused") fun hasHeadsign: Boolean</ID>
+    <ID>ReturnCount:MSchedule.kt:MSchedule$fun isSameServiceRDSDeparture: Boolean</ID>
+    <ID>ReturnCount:MStopIDConverter.kt:MStopIDConverter$@Throws(RuntimeException::class) @JvmOverloads @JvmStatic fun convert: Int</ID>
+    <ID>ReturnCount:MStrings.kt:MStrings$@JvmStatic fun convert: String</ID>
+    <ID>ReturnCount:RouteConfig.kt:RouteConfig$fun cleanStopHeadsign: String</ID>
+    <ID>ReturnCount:RouteConfig.kt:RouteConfig$fun excludeStopTime: Boolean</ID>
+    <ID>ReturnCount:RouteConfig.kt:RouteConfig$fun excludeTrip: Boolean</ID>
+    <ID>ThrowsCount:DBUtils.kt:DBUtils$@Suppress("unused") @Deprecated("Use GTFSDataBase instead.") @JvmStatic fun insertStopTime</ID>
+    <ID>ThrowsCount:GCalendar.kt:GCalendar.Companion$@JvmStatic fun fromLine: GCalendar</ID>
+    <ID>ThrowsCount:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmOverloads @JvmStatic fun convert: Long</ID>
+    <ID>ThrowsCount:MStopIDConverter.kt:MStopIDConverter$@Throws(RuntimeException::class) @JvmOverloads @JvmStatic fun convert: Int</ID>
+    <ID>TooGenericExceptionCaught:Configs.kt:Configs$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DBUtils.kt:DBUtils$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GCalendar.kt:GCalendar.Companion$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GTrip.kt:GTrip.Companion$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MReader.kt:MReader$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MStoreListingGenerator.kt:MStoreListingGenerator$ioe: Exception</ID>
+    <ID>TooGenericExceptionThrown:MStopIDConverter.kt:MStopIDConverter$throw RuntimeException("Unexpected digits '$digits' in stop ID '$stopIdS' to convert to integer!")</ID>
+    <ID>TooGenericExceptionThrown:MStopIDConverter.kt:MStopIDConverter$throw RuntimeException("Unexpected next characters '$nextChars' in stop ID '$stopIdS'!")</ID>
+    <ID>TooGenericExceptionThrown:MStopIDConverter.kt:MStopIDConverter$throw RuntimeException("Unexpected previous characters '$previousChars' in stop ID '$stopIdS'!")</ID>
+    <ID>TooGenericExceptionThrown:MStopIDConverter.kt:MStopIDConverter$throw RuntimeException("Unexpected stop ID '$stopIdS' can not be parsed by regex!")</ID>
+    <ID>TooGenericExceptionThrown:MStopIDConverter.kt:MStopIDConverter$throw RuntimeException("Unexpected stop ID '$stopIdS' to convert to integer!")</ID>
+    <ID>TooManyFunctions:DBUtils.kt:DBUtils</ID>
+    <ID>TooManyFunctions:GCalendar.kt:GCalendar</ID>
+    <ID>TooManyFunctions:GFieldTypes.kt:GFieldTypes</ID>
+    <ID>TooManyFunctions:GTFSDataBase.kt:GTFSDataBase</ID>
+    <ID>TooManyFunctions:GTime.kt:GTime</ID>
+    <ID>TooManyFunctions:RouteConfig.kt:RouteConfig</ID>
+    <ID>TooManyFunctions:SQLUtils.kt:SQLUtils</ID>
   </CurrentIssues>
 </SmellBaseline>
