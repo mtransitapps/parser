@@ -46,3 +46,16 @@ fun GSpec.fixMissingTripDirectionIds() {
     }
     MTLog.log("Try fixing GTFS trips w/o direction IDs... DONE (%d fixed trips with direction ID)", tripIdDirectionFixed)
 }
+
+val GSpec.calendarsMinStartDate: Int? get() = this.allCalendars.takeIf { it.isNotEmpty() }?.minByOrNull { it.startDate }?.startDate
+val GSpec.calendarsMaxEndDate: Int? get() = this.allCalendars.takeIf { it.isNotEmpty() }?.maxByOrNull { it.endDate }?.endDate
+
+fun GSpec.isInsideGCalendars(
+    gCalendarDate: GCalendarDate,
+    calendarsMinStartDate: () -> Int? = this::calendarsMinStartDate,
+    calendarsMaxEndDate: () -> Int? = this::calendarsMaxEndDate
+): Boolean? {
+    val calendarsMinStartDate = calendarsMinStartDate() ?: return null // no calendars (only calendar dates inside GTFS)
+    val calendarsMaxEndDate = calendarsMaxEndDate() ?: return null // no calendars (only calendar dates inside GTFS)
+    return gCalendarDate.isBetween(calendarsMinStartDate, calendarsMaxEndDate)
+}
