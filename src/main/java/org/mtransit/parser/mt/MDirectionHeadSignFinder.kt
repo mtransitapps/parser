@@ -1035,11 +1035,11 @@ object MDirectionHeadSignFinder {
         // cheating, just changing first arrival time / last departure time for AM/PM
         val firstIdx = 0
         if (mergedStopTimes[firstIdx].departureTime < otherStopTimesList.first().departureTime) {
-            mergedStopTimes[firstIdx] = mergedStopTimes[firstIdx].copy(_departureTime = otherStopTimesList.first().departureTime)
+            mergedStopTimes[firstIdx] = mergedStopTimes[firstIdx].copy(departureTime = otherStopTimesList.first().departureTime)
         }
         val lastIdx = mergedStopTimes.size - 1
         if (mergedStopTimes[lastIdx].arrivalTime > otherStopTimesList.last().arrivalTime) {
-            mergedStopTimes[lastIdx] = mergedStopTimes[lastIdx].copy(_arrivalTime = otherStopTimesList.last().arrivalTime)
+            mergedStopTimes[lastIdx] = mergedStopTimes[lastIdx].copy(arrivalTime = otherStopTimesList.last().arrivalTime)
         }
         return mergedStopTimes
     }
