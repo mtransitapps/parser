@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit
 // https://gtfs.org/reference/static/#frequenciestxt
 data class GFrequency(
     val tripIdInt: Int,
-    private val _startTime: Int,
-    private val _endTime: Int,
+    val startTime: Int,
+    val endTime: Int,
     val headwaySecs: Int,
     val exactTimes: Int?,
 ) {
@@ -38,23 +38,19 @@ data class GFrequency(
     private val _tripId: String
         get() = GIDs.getString(tripIdInt)
 
-    val startTime: Int = _startTime
-
     @Suppress("unused")
     val startTimeDate: Date
-        get() = GTime.toDate(_startTime)
+        get() = GTime.toDate(startTime)
 
     val startTimeMs: Long
-        get() = GTime.toMs(_startTime)
-
-    val endTime: Int = _endTime
+        get() = GTime.toMs(startTime)
 
     @Suppress("unused")
     val endTimeDate: Date
-        get() = GTime.toDate(_endTime)
+        get() = GTime.toDate(endTime)
 
     val endTimeMs: Long
-        get() = GTime.toMs(_endTime)
+        get() = GTime.toMs(endTime)
 
     val headwayMs: Long
         get() = TimeUnit.SECONDS.toMillis(headwaySecs.toLong())
@@ -67,8 +63,8 @@ data class GFrequency(
 
     fun to() = Frequency(
         tripId = _tripId,
-        startTime = GTime.toString(_startTime),
-        endTime = GTime.toString(_endTime),
+        startTime = GTime.toString(startTime),
+        endTime = GTime.toString(endTime),
         headwaySecs = headwaySecs,
         exactTimes = exactTimes
     )

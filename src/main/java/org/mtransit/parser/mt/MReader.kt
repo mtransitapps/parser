@@ -47,14 +47,17 @@ object MReader {
 
     // region first/last departures
 
-    private fun makeFirstDepartureRegex(fileBase: String) =
-        Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase${MGenerator.GTFS_RDS_FIRST_DEPARTURE_IN_SEC}\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
+    private fun makeFirstDepartureRegex(fileBase: String) = Regex(
+        any(WHITESPACE_CAR) + "<integer name=\"$fileBase${MGenerator.GTFS_RDS_FIRST_DEPARTURE_IN_SEC}\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY)
+    )
 
-    private fun makeLastDepartureRegex(fileBase: String) =
-        Regex(any(WHITESPACE_CAR) + "<integer name=\"$fileBase${MGenerator.GTFS_RDS_LAST_DEPARTURE_IN_SEC}\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY))
+    private fun makeLastDepartureRegex(fileBase: String) = Regex(
+        any(WHITESPACE_CAR) + "<integer name=\"$fileBase${MGenerator.GTFS_RDS_LAST_DEPARTURE_IN_SEC}\">${group(oneOrMore(DIGIT_CAR))}</integer>" + any(ANY)
+    )
 
-    private fun makeTimeZoneRegex() =
-        Regex(any(WHITESPACE_CAR) + "<string name=\"${MGenerator.GTFS_RDS_TIMEZONE}\">${group(oneOrMore(ALPHA_NUM_CAR) + "/" + oneOrMore(ALPHA_NUM_CAR))}</string>")
+    private fun makeTimeZoneRegex() = Regex(
+        any(WHITESPACE_CAR) + "<string name=\"${MGenerator.GTFS_RDS_TIMEZONE}\">${group(oneOrMore(ALPHA_NUM_CAR) + "/" + oneOrMore(ALPHA_NUM_CAR))}</string>"
+    )
 
     @Suppress("unused") // TODO removed
     @JvmStatic
