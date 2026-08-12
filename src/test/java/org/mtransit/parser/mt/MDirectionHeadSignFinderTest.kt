@@ -453,8 +453,11 @@ class MDirectionHeadSignFinderTest {
         assertEquals("foo foo/trip head-sign", result?.headSign)
     }
 
+    /**
+     * should be same head-sign for same last stop, probably wrong data, use most popular / last stops
+     */
     @Test
-    fun testFindDirectionHeadSign_TripsWithMoreStopsMultipleHeadSignInclShorterTrips() { // should be same head-sign for same last stop, probably wrong data, use most popular / last stops
+    fun testFindDirectionHeadSign_TripsWithMoreStopsMultipleHeadSignInclShorterTrips() {
         // Arrange
         val directionId = GDirectionId.NONE.id
         val tripId1 = "trip_id_1"

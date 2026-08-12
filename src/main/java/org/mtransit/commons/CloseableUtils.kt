@@ -15,7 +15,7 @@ object CloseableUtils {
     fun closeQuietly(closeable: Closeable?) {
         try {
             closeable?.close()
-        } catch (ioe: IOException) {
+        } catch (_: IOException) {
             // ignore
         }
     }

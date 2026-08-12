@@ -11,8 +11,8 @@ import java.util.Date
 // https://gtfs.org/schedule/reference/#stop_timestxt
 data class GStopTime(
     val tripIdInt: Int,
-    private val _arrivalTime: Int, // HHmmss
-    private val _departureTime: Int, // HHmmss
+    val arrivalTime: Int, // HHmmss
+    val departureTime: Int, // HHmmss
     val stopIdInt: Int,
     val stopSequence: Int,
     val stopHeadsign: String?,
@@ -33,8 +33,8 @@ data class GStopTime(
         timePointInt: Int,
     ) : this(
         tripIdInt = tripIdInt,
-        _arrivalTime = arrivalTime,
-        _departureTime = departureTime,
+        arrivalTime = arrivalTime,
+        departureTime = departureTime,
         stopIdInt = stopIdInt,
         stopSequence = stopSequence,
         stopHeadsign = stopHeadsign,
@@ -55,8 +55,8 @@ data class GStopTime(
         timePoint: GTimePoint,
     ) : this(
         tripIdInt = GIDs.getInt(tripId),
-        _arrivalTime = arrivalTime,
-        _departureTime = departureTime,
+        arrivalTime = arrivalTime,
+        departureTime = departureTime,
         stopIdInt = stopIdInt,
         stopSequence = stopSequence,
         stopHeadsign = stopHeadsign,
@@ -77,8 +77,8 @@ data class GStopTime(
         timePoint: GTimePoint,
     ) : this(
         tripIdInt = GIDs.getInt(tripId),
-        _arrivalTime = GTime.fromString(arrivalTime),
-        _departureTime = GTime.fromString(departureTime),
+        arrivalTime = GTime.fromString(arrivalTime),
+        departureTime = GTime.fromString(departureTime),
         stopIdInt = GIDs.getInt(stopId),
         stopSequence = stopSequence,
         stopHeadsign = stopHeadsign,
@@ -101,28 +101,24 @@ data class GStopTime(
     private val _stopId: String
         get() = GIDs.getString(stopIdInt)
 
-    val arrivalTime: Int = _arrivalTime
-
-    fun hasArrivalTime() = _arrivalTime >= 0
+    fun hasArrivalTime() = arrivalTime >= 0
 
     @Suppress("unused")
     val arrivalTimeMs: Long
-        get() = GTime.toMs(_arrivalTime)
+        get() = GTime.toMs(arrivalTime)
 
     @Suppress("unused")
     val arrivalTimeDate: Date
-        get() = GTime.toDate(_arrivalTime)
+        get() = GTime.toDate(arrivalTime)
 
-    val departureTime: Int = _departureTime
-
-    fun hasDepartureTime() = _departureTime >= 0
+    fun hasDepartureTime() = departureTime >= 0
 
     val departureTimeMs: Long
-        get() = GTime.toMs(_departureTime)
+        get() = GTime.toMs(departureTime)
 
     @Suppress("unused")
     val departureTimeDate: Date
-        get() = GTime.toDate(_departureTime)
+        get() = GTime.toDate(departureTime)
 
     val uID by lazy { getNewUID(tripIdInt, stopIdInt, stopSequence) }
 
@@ -149,8 +145,8 @@ data class GStopTime(
         if (this.stopSequence != other.stopSequence) {
             return this.stopSequence.compareTo(other.stopSequence)
         }
-        if (this._departureTime != other._departureTime) {
-            return this._departureTime.compareTo(other._departureTime)
+        if (this.departureTime != other.departureTime) {
+            return this.departureTime.compareTo(other.departureTime)
         }
         throw MTLog.Fatal("Unexpected stop times to compare: '$this' & '$other'!")
     }
@@ -167,9 +163,9 @@ data class GStopTime(
             add("s:$_stopId")
             add("#:$stopSequence")
             if (hasDepartureTime()) {
-                add("d:${GTime.toString(_departureTime)}")
+                add("d:${GTime.toString(departureTime)}")
             } else if (hasArrivalTime()) {
-                add("a:${GTime.toString(_arrivalTime)}")
+                add("a:${GTime.toString(arrivalTime)}")
             }
             if (pickupType != GPickupType.REGULAR) {
                 add("$pickupType")
@@ -184,8 +180,8 @@ data class GStopTime(
         tripId = _tripId,
         stopId = _stopId,
         stopSequence = stopSequence,
-        arrivalTime = GTime.toString(_arrivalTime),
-        departureTime = GTime.toString(_departureTime),
+        arrivalTime = GTime.toString(arrivalTime),
+        departureTime = GTime.toString(departureTime),
         stopHeadsign = stopHeadsign,
         pickupType = pickupType.id,
         dropOffType = dropOffType.id,
