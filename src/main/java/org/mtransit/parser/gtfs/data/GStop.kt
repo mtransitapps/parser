@@ -102,10 +102,12 @@ data class GStop(
     fun clone(
         stopLat: Double,
         stopLong: Double,
+        stopTimezone: String?,
         wheelchairBoarding: GWheelchairBoardingType,
     ) = this.copy(
         stopLat = stopLat,
         stopLong = stopLong,
+        stopTimezone = stopTimezone,
         wheelchairBoarding = wheelchairBoarding,
     )
 
@@ -167,6 +169,12 @@ data class GStop(
         @JvmStatic
         fun mergeLocation(loc1: Double, loc2: Double): Double {
             return floor((loc1 + loc2) / 2.00)
+        }
+
+        @JvmStatic
+        fun mergeTimezone(tz1: String?, tz2: String?): String? {
+            if (tz1 == tz2) return tz1 // only kept if same
+            return null // will use agency TZ
         }
     }
 }

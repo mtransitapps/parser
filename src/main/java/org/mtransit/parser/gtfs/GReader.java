@@ -582,8 +582,9 @@ public class GReader {
 				if (previousStop != null && previousStop.equalsExceptMergeable(gStop)) {
 					final double mergedLat = GStop.mergeLocation(previousStop.getStopLat(), gStop.getStopLat());
 					final double mergedLng = GStop.mergeLocation(previousStop.getStopLong(), gStop.getStopLong());
+					final String mergedTimeZoneId = GStop.mergeTimezone(previousStop.getStopTimezone(), gStop.getStopTimezone());
 					final GWheelchairBoardingType mergedWheelchairBoarding = GWheelchairBoardingType.merge(previousStop.getWheelchairBoarding(), gStop.getWheelchairBoarding());
-					gSpec.addStop(previousStop.clone(mergedLat, mergedLng, mergedWheelchairBoarding), true);
+					gSpec.addStop(previousStop.clone(mergedLat, mergedLng, mergedTimeZoneId, mergedWheelchairBoarding), true);
 					return;
 				}
 				if (previousStop != null) {
