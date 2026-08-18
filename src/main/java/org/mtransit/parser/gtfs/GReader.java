@@ -175,8 +175,11 @@ public class GReader {
 			}
 			// STOPS (after stop times)
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
+				final GAgency singleAgency = gSpec.getSingleAgency();
+				//noinspection DiscouragedApi
+				final String agencyTimezone = singleAgency == null ? null : singleAgency.getAgencyTimezone();
 				readFile(gtfsDir, GStop.FILENAME, true, line ->
-						processStop(agencyTools, gSpec, line, skipDataCleanup)
+						processStop(agencyTools, gSpec, line, skipDataCleanup, agencyTimezone)
 				);
 			}
 			// TODO OTHER FILES TYPE
@@ -546,14 +549,14 @@ public class GReader {
 		}
 	}
 
-	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line, boolean skipDataCleanup) {
+	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line, boolean skipDataCleanup, @Nullable String agencyTimezone) {
 		try {
 			final GLocationType stopLocationType = GLocationType.parse(line.get(GStop.LOCATION_TYPE));
 			if (stopLocationType == GLocationType.GENERIC_NODE) {
 				MTLog.log("Generic node stop ignored (%s).", line); // not lat/lng?
 				return;
 			}
-			final GStop gStop = skipDataCleanup ? GStop.fromLine(line) : GStop.fromLine(line, agencyTools);
+			final GStop gStop = skipDataCleanup ? GStop.fromLine(line, agencyTimezone) : GStop.fromLine(line, agencyTimezone, agencyTools);
 			if (agencyTools.excludeStop(gStop)) {
 				//noinspection DiscouragedApi
 				logExclude("Exclude stop: %s.", line.get(GStop.STOP_ID));
