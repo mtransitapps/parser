@@ -7,7 +7,6 @@ import org.mtransit.commons.gtfs.data.StopId
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
-import java.time.ZoneId
 import kotlin.math.floor
 
 // https://gtfs.org/schedule/reference/#stopstxt
@@ -125,7 +124,7 @@ data class GStop(
 
         @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, agencyTimezone: String?, agencyTools: GAgencyTools? = null) = GStop(
+        fun fromLine(line: Map<String, String>, agencyTimezone: String?, availableZoneIds: Set<String>, agencyTools: GAgencyTools? = null) = GStop(
             stopId = line[STOP_ID]?.trim()
                 ?.let { agencyTools?.cleanStopOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GStop from $line!"),
@@ -136,10 +135,10 @@ data class GStop(
             locationType = line[LOCATION_TYPE]?.takeIf { it.isNotBlank() }?.toInt(),
             parentStationId = line[PARENT_STATION]?.takeIf { it.isNotBlank() }?.trim()
                 ?.let { agencyTools?.cleanStopOriginalId(it) ?: it },
-            stopTimezone = line[STOP_TIMEZONE]
+            stopTimezone = line[STOP_TIMEZONE]?.trim()
                 ?.takeIf { it.isNotBlank() }
                 ?.also { gStopTimezone ->
-                    if (!ZoneId.getAvailableZoneIds().contains(gStopTimezone)) {
+                    if (!availableZoneIds.contains(gStopTimezone)) {
                         throw MTLog.Fatal("Invalid stop timezone in $line!")
                     }
                 }

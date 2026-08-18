@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.text.DateFormat;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -415,9 +416,11 @@ public class GReader {
 		}
 	}
 
+	private static final Set<String> AVAILABLE_TIME_ZONE_IDS = ZoneId.getAvailableZoneIds(); // cache because it returns new set copy every time
+
 	private static void processAgency(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final GAgency gAgency = GAgency.fromLine(line);
+			final GAgency gAgency = GAgency.fromLine(line, AVAILABLE_TIME_ZONE_IDS);
 			if (agencyTools.excludeAgency(gAgency)) {
 				MTLog.logDebug("processAgency() > SKIP (exclude agency)");
 				return;
@@ -556,7 +559,8 @@ public class GReader {
 				MTLog.log("Generic node stop ignored (%s).", line); // not lat/lng?
 				return;
 			}
-			final GStop gStop = skipDataCleanup ? GStop.fromLine(line, agencyTimezone) : GStop.fromLine(line, agencyTimezone, agencyTools);
+			final GStop gStop = skipDataCleanup ? GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS)
+					: GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS, agencyTools);
 			if (agencyTools.excludeStop(gStop)) {
 				//noinspection DiscouragedApi
 				logExclude("Exclude stop: %s.", line.get(GStop.STOP_ID));
