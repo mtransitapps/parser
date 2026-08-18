@@ -52,7 +52,7 @@ data class MStop(
         add(accessible.toString())
         add(originalIdHash.toString()) // original ID hash
         if (FeatureFlags.F_EXPORT_STOP_TIMEZONE_ID) {
-            add(timeZoneId?.quotesEscape().orEmpty()) // time zone ID
+            add(timeZoneId.orEmpty().quotesEscape()) // time zone ID
         }
     }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
