@@ -137,12 +137,13 @@ data class GStop(
             parentStationId = line[PARENT_STATION]?.takeIf { it.isNotBlank() }?.trim()
                 ?.let { agencyTools?.cleanStopOriginalId(it) ?: it },
             stopTimezone = line[STOP_TIMEZONE]
+                ?.takeIf { it.isNotBlank() }
                 ?.also { gStopTimezone ->
                     if (!ZoneId.getAvailableZoneIds().contains(gStopTimezone)) {
-                        throw MTLog.Fatal("Invalid stop time zone in $line!")
+                        throw MTLog.Fatal("Invalid stop timezone in $line!")
                     }
                 }
-                ?.takeIf { it.isNotBlank() && it != agencyTimezone },
+                ?.takeIf { it != agencyTimezone },
             wheelchairBoarding = line[WHEELCHAIR_BOARDING]?.takeIf { it.isNotBlank() }?.toInt(),
         )
 
