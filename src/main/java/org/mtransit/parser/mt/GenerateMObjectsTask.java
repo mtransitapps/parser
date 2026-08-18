@@ -710,6 +710,7 @@ public class GenerateMObjectsTask implements Callable<MSpec> {
 								gStop.getStopLong(),
 								gStop.getWheelchairBoarding().getId(),
 								gStop.getStopId(),
+								gStop.getStopTimezone(),
 								this.agencyTools
 						));
 			}
