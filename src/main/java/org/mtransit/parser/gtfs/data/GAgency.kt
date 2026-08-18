@@ -4,6 +4,7 @@ import androidx.annotation.Discouraged
 import org.mtransit.commons.gtfs.data.Agency
 import org.mtransit.commons.gtfs.data.AgencyId
 import org.mtransit.parser.MTLog
+import java.time.ZoneId
 
 // https://gtfs.org/schedule/reference/#agencytxt
 data class GAgency(
@@ -86,7 +87,9 @@ data class GAgency(
             agencyId = line[AGENCY_ID].orEmpty(),
             agencyName = line[AGENCY_NAME] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
             agencyUrl = line[AGENCY_URL] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
-            agencyTimezone = line[AGENCY_TIMEZONE] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
+            agencyTimezone = line[AGENCY_TIMEZONE]
+                ?.takeIf { ZoneId.getAvailableZoneIds().contains(it) }
+                ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
             agencyLang = line[AGENCY_LANG],
             agencyPhone = line[AGENCY_PHONE],
             agencyFareUrl = line[AGENCY_FARE_URL],

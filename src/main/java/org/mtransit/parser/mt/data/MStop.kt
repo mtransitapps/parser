@@ -4,6 +4,7 @@ import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.quotesEscape
+import org.mtransit.parser.db.SQLUtils.quotesEscapeId
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.mt.MDataChangedManager
 
@@ -52,7 +53,7 @@ data class MStop(
         add(accessible.toString())
         add(originalIdHash.toString()) // original ID hash
         if (FeatureFlags.F_EXPORT_STOP_TIMEZONE_ID) {
-            add(timeZoneId.orEmpty().quotesEscape()) // time zone ID
+            add(timeZoneId.orEmpty().quotesEscapeId()) // time zone ID (can contain "_")
         }
     }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
