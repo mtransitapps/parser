@@ -18,6 +18,7 @@ data class GStop(
     val stopCode: String,
     val locationType: GLocationType,
     val parentStationIdInt: Int?,
+    val stopTimezone: String?,
     var wheelchairBoarding: GWheelchairBoardingType,
 ) {
 
@@ -29,6 +30,7 @@ data class GStop(
         stopCode: String,
         locationType: Int?,
         parentStationId: StopId?,
+        stopTimezone: String?,
         wheelchairBoarding: Int?,
     ) : this(
         GIDs.getInt(stopId),
@@ -38,6 +40,7 @@ data class GStop(
         stopCode,
         GLocationType.parse(locationType),
         parentStationId?.let { GIDs.getInt(it) },
+        stopTimezone,
         GWheelchairBoardingType.parse(wheelchairBoarding),
     )
 
@@ -92,16 +95,19 @@ data class GStop(
         stopUrl = null, // TODO
         locationType = locationType.id,
         parentStationId = _parentStationId,
+        stopTimezone = stopTimezone,
         wheelchairBoarding = wheelchairBoarding.id,
     )
 
     fun clone(
         stopLat: Double,
         stopLong: Double,
+        stopTimezone: String?,
         wheelchairBoarding: GWheelchairBoardingType,
     ) = this.copy(
         stopLat = stopLat,
         stopLong = stopLong,
+        stopTimezone = stopTimezone,
         wheelchairBoarding = wheelchairBoarding,
     )
 
@@ -115,11 +121,12 @@ data class GStop(
         private const val STOP_CODE = "stop_code"
         internal const val LOCATION_TYPE = "location_type"
         private const val PARENT_STATION = "parent_station"
+        private const val STOP_TIMEZONE = "stop_timezone"
         private const val WHEELCHAIR_BOARDING = "wheelchair_boarding"
 
         @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, agencyTools: GAgencyTools? = null) = GStop(
+        fun fromLine(line: Map<String, String>, agencyTimezone: String?, availableZoneIds: Set<String>, agencyTools: GAgencyTools? = null) = GStop(
             stopId = line[STOP_ID]?.trim()
                 ?.let { agencyTools?.cleanStopOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GStop from $line!"),
@@ -130,6 +137,14 @@ data class GStop(
             locationType = line[LOCATION_TYPE]?.takeIf { it.isNotBlank() }?.toInt(),
             parentStationId = line[PARENT_STATION]?.takeIf { it.isNotBlank() }?.trim()
                 ?.let { agencyTools?.cleanStopOriginalId(it) ?: it },
+            stopTimezone = line[STOP_TIMEZONE]?.trim()
+                ?.takeIf { it.isNotBlank() }
+                ?.also { gStopTimezone ->
+                    if (!availableZoneIds.contains(gStopTimezone)) {
+                        throw MTLog.Fatal("Invalid stop timezone in $line!")
+                    }
+                }
+                ?.takeIf { it != agencyTimezone },
             wheelchairBoarding = line[WHEELCHAIR_BOARDING]?.takeIf { it.isNotBlank() }?.toInt(),
         )
 
@@ -146,6 +161,7 @@ data class GStop(
                 stopCode = it.stopCode ?: EMPTY,
                 locationType = it.locationType,
                 parentStationId = it.parentStationId,
+                stopTimezone = it.stopTimezone,
                 wheelchairBoarding = it.wheelchairBoarding,
             )
         }
@@ -153,6 +169,12 @@ data class GStop(
         @JvmStatic
         fun mergeLocation(loc1: Double, loc2: Double): Double {
             return floor((loc1 + loc2) / 2.00)
+        }
+
+        @JvmStatic
+        fun mergeTimezone(tz1: String?, tz2: String?): String? {
+            if (tz1 == tz2) return tz1 // only kept if same
+            return null // will use agency TZ
         }
     }
 }

@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.text.DateFormat;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -175,8 +176,11 @@ public class GReader {
 			}
 			// STOPS (after stop times)
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
+				final GAgency singleAgency = gSpec.getSingleAgency();
+				//noinspection DiscouragedApi
+				final String agencyTimezone = singleAgency == null ? null : singleAgency.getAgencyTimezone();
 				readFile(gtfsDir, GStop.FILENAME, true, line ->
-						processStop(agencyTools, gSpec, line, skipDataCleanup)
+						processStop(agencyTools, gSpec, line, skipDataCleanup, agencyTimezone)
 				);
 			}
 			// TODO OTHER FILES TYPE
@@ -412,9 +416,11 @@ public class GReader {
 		}
 	}
 
+	private static final Set<String> AVAILABLE_TIME_ZONE_IDS = ZoneId.getAvailableZoneIds(); // cache because it returns new set copy every time
+
 	private static void processAgency(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final GAgency gAgency = GAgency.fromLine(line);
+			final GAgency gAgency = GAgency.fromLine(line, AVAILABLE_TIME_ZONE_IDS);
 			if (agencyTools.excludeAgency(gAgency)) {
 				MTLog.logDebug("processAgency() > SKIP (exclude agency)");
 				return;
@@ -546,14 +552,15 @@ public class GReader {
 		}
 	}
 
-	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line, boolean skipDataCleanup) {
+	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line, boolean skipDataCleanup, @Nullable String agencyTimezone) {
 		try {
 			final GLocationType stopLocationType = GLocationType.parse(line.get(GStop.LOCATION_TYPE));
 			if (stopLocationType == GLocationType.GENERIC_NODE) {
 				MTLog.log("Generic node stop ignored (%s).", line); // not lat/lng?
 				return;
 			}
-			final GStop gStop = skipDataCleanup ? GStop.fromLine(line) : GStop.fromLine(line, agencyTools);
+			final GStop gStop = skipDataCleanup ? GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS)
+					: GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS, agencyTools);
 			if (agencyTools.excludeStop(gStop)) {
 				//noinspection DiscouragedApi
 				logExclude("Exclude stop: %s.", line.get(GStop.STOP_ID));
@@ -575,8 +582,9 @@ public class GReader {
 				if (previousStop != null && previousStop.equalsExceptMergeable(gStop)) {
 					final double mergedLat = GStop.mergeLocation(previousStop.getStopLat(), gStop.getStopLat());
 					final double mergedLng = GStop.mergeLocation(previousStop.getStopLong(), gStop.getStopLong());
+					final String mergedTimeZoneId = GStop.mergeTimezone(previousStop.getStopTimezone(), gStop.getStopTimezone());
 					final GWheelchairBoardingType mergedWheelchairBoarding = GWheelchairBoardingType.merge(previousStop.getWheelchairBoarding(), gStop.getWheelchairBoarding());
-					gSpec.addStop(previousStop.clone(mergedLat, mergedLng, mergedWheelchairBoarding), true);
+					gSpec.addStop(previousStop.clone(mergedLat, mergedLng, mergedTimeZoneId, mergedWheelchairBoarding), true);
 					return;
 				}
 				if (previousStop != null) {
