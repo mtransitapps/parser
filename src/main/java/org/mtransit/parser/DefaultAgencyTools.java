@@ -1452,8 +1452,9 @@ public class DefaultAgencyTools implements GAgencyTools {
 			//noinspection DiscouragedApi
 			final String stopIdS =
 					useStopCodeForStopId() ? stopCode
-							: useStopCodeForStopIdDigitsOnly() && CharUtils.isDigitsOnly(stopCode, true) ? stopCode
-							  : gStopId;
+							: Configs.getRouteConfig().getUseStopCodeForStopIdIfAvailable() && !stopCode.isBlank() ? stopCode
+							  : useStopCodeForStopIdDigitsOnly() && CharUtils.isDigitsOnly(stopCode, true) ? stopCode
+								: gStopId;
 			if (stopIdS.isBlank() || !CharUtils.isDigitsOnly(stopIdS)) {
 				Integer stopIdSInt = convertStopIdNotSupported(stopIdS);
 				if (stopIdSInt != null) return stopIdSInt;
@@ -1466,7 +1467,15 @@ public class DefaultAgencyTools implements GAgencyTools {
 						this::convertStopIdPreviousChars
 				);
 			}
-			return Integer.parseInt(stopIdS);
+			try {
+				return Integer.parseInt(stopIdS);
+			} catch (NumberFormatException nfe) {
+				Integer stopIdSInt = convertStopIdNotSupported(stopIdS);
+				if (stopIdSInt != null) return stopIdSInt;
+				stopIdSInt = Configs.getRouteConfig().convertStopIdFromOriginalNotSupported(gStopId);
+				if (stopIdSInt != null) return stopIdSInt;
+				throw nfe;
+			}
 		} catch (Exception e) {
 			throw new MTLog.Fatal(e, "Error while extracting stop ID from %s!", gStop.toStringPlus(true));
 		}

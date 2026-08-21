@@ -119,6 +119,8 @@ data class RouteConfig(
     val stopIdNotUniqueAllowed: Boolean = false, // OPT-IN feature
     @SerialName("use_stop_code_for_stop_id")
     val useStopCodeForStopId: Boolean = false, // OPT-IN feature
+    @SerialName("use_stop_code_for_stop_id_if_available")
+    val useStopCodeForStopIdIfAvailable: Boolean = false, // OPT-IN feature
     @SerialName("use_stop_code_for_stop_id_digits_only")
     @get:Discouraged("only for backward compat w/ old Java config")
     val useStopCodeForStopIdDigitsOnly: Boolean = false, // OPT-IN feature
