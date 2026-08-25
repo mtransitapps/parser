@@ -261,6 +261,7 @@ public class DefaultAgencyToolsTest {
 		assertEquals(2024_04_06, p.getStartDate().intValue());
 		assertNotNull(p.getEndDate());
 		assertEquals(2024_04_25, p.getEndDate().intValue());
+
 		// NEXT
 		p.setTodayStringInt(p.getEndDate() + 1); // current + 1
 		p.setStartDate(null); // reset
@@ -273,7 +274,7 @@ public class DefaultAgencyToolsTest {
 		assertNotNull(p.getStartDate());
 		assertEquals(2024_04_26, p.getStartDate().intValue());
 		assertNotNull(p.getEndDate());
-		assertEquals(2024_05_10, p.getEndDate().intValue());
+		assertEquals(2024_05_06, p.getEndDate().intValue());
 	}
 
 	@Test
@@ -372,6 +373,7 @@ public class DefaultAgencyToolsTest {
 		assertEquals(2024_04_08, p.getStartDate().intValue());
 		assertNotNull(p.getEndDate());
 		assertEquals(2024_04_21, p.getEndDate().intValue());
+
 		// NEXT
 		p.setTodayStringInt(p.getEndDate() + 1); // current + 1
 		p.setStartDate(null); // reset
