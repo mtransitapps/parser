@@ -83,7 +83,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 	private static final int MAX_LOOK_FORWARD_IN_DAYS = 60;
 
 	private static final int MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS = 3; // = 4 days
-	private static final int MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS = 14;
+	private static final int MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS = 10; // = 11 days (not too big to avoid merging 2 different schedule)
 
 	// 2024-04-09: 10x -> 3x because merging 2 schedule can create very bad schedule info #GRTbus
 	private static final long MAX_CALENDAR_DATE_COVERAGE_RATIO = 3;
@@ -1950,13 +1950,13 @@ public class DefaultAgencyTools implements GAgencyTools {
 						&& (nextPeriodCoverageInMs <= 0L || previousPeriodCoverageInMs < nextPeriodCoverageInMs)
 						&& previousToCurrent < MAX_CALENDAR_DATE_COVERAGE_RATIO) {
 					p.setStartDate(incDateDays(DATE_FORMAT, c, p.getStartDate(), -1)); // start--
-					MTLog.log("new start date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.getStartDate());
+					MTLog.log("new start date because coverage lower than %s days: %s  (ratio: %s x)", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.getStartDate(), previousToCurrent);
 				} else if (TimeUnit.MILLISECONDS.toDays(currentPeriodCoverageInMs) < MIN_CALENDAR_COVERAGE_TOTAL_IN_DAYS
 						|| nextToCurrent < MAX_CALENDAR_DATE_COVERAGE_RATIO) {
 					p.setEndDate(incDateDays(DATE_FORMAT, c, p.getEndDate(), 1)); // end++
-					MTLog.log("new end date because coverage lower than %s days: %s", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.getEndDate());
+					MTLog.log("new end date because coverage lower than %s days: %s (ratio: %s x)", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, p.getEndDate(), nextToCurrent);
 				} else {
-					MTLog.log("coverage lower than %s days but would add too many days (p: %sx, n: %sx)", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, nextToCurrent, previousToCurrent);
+					MTLog.log("coverage lower than %s days but would add too many days (p: %s x, n: %s x)", MIN_CALENDAR_DATE_COVERAGE_TOTAL_IN_DAYS, nextToCurrent, previousToCurrent);
 					break;
 				}
 				continue;
