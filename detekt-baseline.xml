@@ -112,7 +112,6 @@
     <ID>NewLineAtEndOfFile:GIDs.kt:org.mtransit.parser.gtfs.data.GIDs.kt</ID>
     <ID>NewLineAtEndOfFile:GPickupType.kt:org.mtransit.parser.gtfs.data.GPickupType.kt</ID>
     <ID>NewLineAtEndOfFile:GRouteType.kt:org.mtransit.parser.gtfs.data.GRouteType.kt</ID>
-    <ID>NewLineAtEndOfFile:GStop.kt:org.mtransit.parser.gtfs.data.GStop.kt</ID>
     <ID>NewLineAtEndOfFile:GStopTime.kt:org.mtransit.parser.gtfs.data.GStopTime.kt</ID>
     <ID>NewLineAtEndOfFile:GTFSDataBase.kt:org.mtransit.parser.db.GTFSDataBase.kt</ID>
     <ID>NewLineAtEndOfFile:GTime.kt:org.mtransit.parser.gtfs.data.GTime.kt</ID>
@@ -153,39 +152,25 @@
     <ID>NewLineAtEndOfFile:StringUtils.kt:org.mtransit.parser.StringUtils.kt</ID>
     <ID>NewLineAtEndOfFile:TimeUtilsTest.kt:org.mtransit.parser.TimeUtilsTest.kt</ID>
     <ID>NewLineAtEndOfFile:TorontoTTCCommons.kt:org.mtransit.commons.TorontoTTCCommons.kt</ID>
-    <ID>ReturnCount:AgencyConfig.kt:AgencyConfig$fun getAllLanguages: List&lt;Locale&gt;?</ID>
-    <ID>ReturnCount:CollectionsExt.kt:fun &lt;T&gt; Iterable&lt;T&gt;.intersectWithOrder: Set&lt;T&gt;</ID>
     <ID>ReturnCount:CollectionsExt.kt:fun &lt;T&gt; Iterable&lt;T&gt;.overlap: Boolean</ID>
-    <ID>ReturnCount:GCalendar.kt:GCalendar$@Suppress("unused") fun isInside: Boolean</ID>
-    <ID>ReturnCount:GCalendar.kt:GCalendar$@Suppress("unused") fun isOverlapping: Boolean</ID>
     <ID>ReturnCount:GCalendarDate.kt:GCalendarDate.Companion$@JvmStatic fun isServiceEntirelyRemoved: Boolean</ID>
     <ID>ReturnCount:GDropOffType.kt:GDropOffType.Companion$fun parse: GDropOffType</ID>
-    <ID>ReturnCount:GFieldTypes.kt:GFieldTypes$fun Int.isBetween: Boolean</ID>
     <ID>ReturnCount:GPickupType.kt:GPickupType.Companion$fun parse: GPickupType</ID>
     <ID>ReturnCount:GRoute.kt:GRoute.Companion$@JvmStatic fun mergeRouteColors: String?</ID>
     <ID>ReturnCount:GRoute.kt:GRoute.Companion$@JvmStatic fun mergeRouteLongNames: String?</ID>
     <ID>ReturnCount:GRoute.kt:GRoute.Companion$@JvmStatic fun mergeRouteSortOrders: Int?</ID>
     <ID>ReturnCount:GRouteType.kt:GRouteType.Companion$@JvmStatic fun isSameType: Boolean</ID>
-    <ID>ReturnCount:GSpecExt.kt:fun GSpec.isInsideGCalendars: Boolean?</ID>
-    <ID>ReturnCount:GStopTime.kt:GStopTime$fun isRegular: Boolean</ID>
-    <ID>ReturnCount:GStopTime.kt:GStopTime$override fun compareTo: Int</ID>
-    <ID>ReturnCount:MAgency.kt:MAgency.Companion$@JvmStatic fun pickColorFromRoutes: String?</ID>
     <ID>ReturnCount:MDataChangedManager.kt:MDataChangedManager$@Suppress("DiscouragedApi") @JvmStatic fun avoidCalendarDatesDataChanged</ID>
     <ID>ReturnCount:MDataChangedManager.kt:MDataChangedManager$@Suppress("unused") // TODO remove @JvmStatic fun addMissingDateToAvoidDataChanged</ID>
     <ID>ReturnCount:MDataChangedManager.kt:MDataChangedManager$@Suppress("unused") // TODO remove @JvmStatic fun ignoreCalendarDateToAvoidDataChanged: Boolean</ID>
     <ID>ReturnCount:MDirection.kt:MDirection.Companion$@JvmStatic fun mergeHeadsignValue: String?</ID>
     <ID>ReturnCount:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@VisibleForTesting internal fun findDirectionHeadSign: DirectionResult?</ID>
     <ID>ReturnCount:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$private fun mergeTrips: MergedTrip?</ID>
-    <ID>ReturnCount:MDirectionStop.kt:MDirectionStop$fun equalsDirectionAndStop: Boolean</ID>
     <ID>ReturnCount:MReader.kt:MReader$@Suppress("unused") // TODO removed @JvmStatic fun readFirstLastDepartures: Pair&lt;Int?, Int?&gt;?</ID>
     <ID>ReturnCount:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmOverloads @JvmStatic fun convert: Long</ID>
-    <ID>ReturnCount:MSchedule.kt:MSchedule$@Suppress("unused") fun hasHeadsign: Boolean</ID>
     <ID>ReturnCount:MSchedule.kt:MSchedule$fun isSameServiceRDSDeparture: Boolean</ID>
     <ID>ReturnCount:MStopIDConverter.kt:MStopIDConverter$@Throws(RuntimeException::class) @JvmOverloads @JvmStatic fun convert: Int</ID>
-    <ID>ReturnCount:MStrings.kt:MStrings$@JvmStatic fun convert: String</ID>
     <ID>ReturnCount:RouteConfig.kt:RouteConfig$fun cleanStopHeadsign: String</ID>
-    <ID>ReturnCount:RouteConfig.kt:RouteConfig$fun excludeStopTime: Boolean</ID>
-    <ID>ReturnCount:RouteConfig.kt:RouteConfig$fun excludeTrip: Boolean</ID>
     <ID>ThrowsCount:DBUtils.kt:DBUtils$@Suppress("unused") @Deprecated("Use GTFSDataBase instead.") @JvmStatic fun insertStopTime</ID>
     <ID>ThrowsCount:GCalendar.kt:GCalendar.Companion$@JvmStatic fun fromLine: GCalendar</ID>
     <ID>ThrowsCount:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmOverloads @JvmStatic fun convert: Long</ID>
