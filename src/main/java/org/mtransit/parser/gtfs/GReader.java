@@ -242,14 +242,17 @@ public class GReader {
 		final File gtfsFile = FileUtils.findFileCaseInsensitive(gtfsDir, fileNames);
 		if (gtfsFile == null || !gtfsFile.exists()) {
 			if (fileRequired) {
-				throw new MTLog.Fatal("'%s' file does not exist!", fileNames);
+				throw new MTLog.Fatal("'%s' required file does not exist!", fileNames);
 			} else {
 				MTLog.log("Reading file(s) '%s'... SKIP (non-existing).", fileNames);
 				return false;
 			}
 		}
 		try (BufferedReader br = Files.newBufferedReader(gtfsFile.toPath())) {
-			readCsv(gtfsFile.getName(), br, lineProcessor, onColumnNamesFoundCallback);
+			final int linesProcessedCount = readCsv(gtfsFile.getName(), br, lineProcessor, onColumnNamesFoundCallback);
+			if (fileRequired && linesProcessedCount <= 0) {
+				throw new MTLog.Fatal("'%s' required file is empty!", gtfsFile);
+			}
 		} catch (IOException ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while reading GTFS file %s!", gtfsFile);
 		}
@@ -266,13 +269,8 @@ public class GReader {
 
 	private static final Pattern QUOTE_ = Pattern.compile("\"");
 
-	@SuppressWarnings("unused")
-	private static void readCsv(String filename, BufferedReader reader, LineProcessor lineProcessor) throws IOException {
-		readCsv(filename, reader, lineProcessor, null);
-	}
-
 	@SuppressWarnings("resource")
-	private static void readCsv(
+	private static int readCsv(
 			String filename,
 			BufferedReader reader,
 			LineProcessor lineProcessor,
@@ -282,9 +280,9 @@ public class GReader {
 		String line;
 		String[] columnNames;
 		line = reader.readLine();
-		if (line == null || line.isEmpty()) return;
+		if (line == null || line.isEmpty()) return 0;
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
-			MTLog.log("Reading file '%s'... > remove 1st empty car", filename);
+			MTLog.log("Reading file '%s'... > remove 1st empty char", filename);
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
 		CSVRecord lineRecordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
@@ -295,7 +293,7 @@ public class GReader {
 		if (onColumnNamesFoundCallback != null) {
 			onColumnNamesFoundCallback.processColumnNames(Arrays.asList(columnNames));
 		}
-		if (columnNames.length == 0) return;
+		if (columnNames.length == 0) return 0;
 		List<CSVRecord> lineRecords;
 		final HashMap<String, String> map = new HashMap<>();
 		int l = 0;
@@ -346,6 +344,7 @@ public class GReader {
 			} // LOG
 		}
 		MTLog.log("Reading file '%s' (lines: %s)... DONE", filename, l);
+		return l;
 	}
 
 	private static void processStopTime(
