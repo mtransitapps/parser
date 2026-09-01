@@ -282,7 +282,7 @@ public class GReader {
 		line = reader.readLine();
 		if (line == null || line.isEmpty()) return 0;
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
-			MTLog.log("Reading file '%s'... > remove 1st empty car", filename);
+			MTLog.log("Reading file '%s'... > remove 1st empty char", filename);
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
 		CSVRecord lineRecordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
