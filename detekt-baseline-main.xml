@@ -31,8 +31,10 @@
     <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@JvmStatic fun endsWithLetter</ID>
     <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@JvmStatic fun startsWithLetter</ID>
     <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@Throws(RuntimeException::class) @JvmOverloads @JvmStatic fun convert: Int</ID>
+    <ID>ImplicitDefaultLocale:MStoreListingGenerator.kt:MStoreListingGenerator$(if (isNext) formatKeepFromTo else formatFromTo).format(minDateS, maxDateS)</ID>
+    <ID>ImplicitDefaultLocale:MStoreListingGenerator.kt:MStoreListingGenerator$formatFromTo.format(minDateS, maxDateS)</ID>
+    <ID>ImplicitDefaultLocale:RouteConfig.kt:RouteConfig$it.regex.format(gRoute.routeLongNameOrDefault)</ID>
     <ID>LargeClass:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder</ID>
-    <ID>LargeClass:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest</ID>
     <ID>LongMethod:CollectionsExt.kt:fun &lt;T&gt; Iterable&lt;T&gt;.overlap: Boolean</ID>
     <ID>LongMethod:DBUtils.kt:DBUtils$@Suppress("AssignedValueIsNeverRead") @JvmStatic fun selectSchedules: List&lt;MSchedule&gt;</ID>
     <ID>LongMethod:LocationUtils.kt:LocationUtils$private fun computeDistanceAndBearing</ID>
@@ -40,9 +42,14 @@
     <ID>LongMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@Suppress("DestructuringDeclarationWithTooManyEntries") @JvmStatic fun findDirectionHeadSigns: Map&lt;Int, String&gt;</ID>
     <ID>LongMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@VisibleForTesting internal fun findDirectionHeadSign: DirectionResult?</ID>
     <ID>LongMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$private fun mergeTrips: MergedTrip?</ID>
-    <ID>LongMethod:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest$@Test fun testFindDirectionHeadSign_DistinctLastStopNoClearWinnerMerge</ID>
     <ID>LongMethod:MDirectionSplitter.kt:MDirectionSplitter$@JvmStatic fun splitDirection</ID>
     <ID>LongMethod:MDirectionSplitter.kt:MDirectionSplitter$fun splitDirections: MutableList&lt;DirectionTripsStops&gt;</ID>
+    <ID>LongParameterList:DBUtils.kt:DBUtils$@Suppress("AssignedValueIsNeverRead") @JvmStatic fun selectSchedules: List&lt;MSchedule&gt;</ID>
+    <ID>LongParameterList:GCalendar.kt:GCalendar.Companion$private fun initAllDates</ID>
+    <ID>LongParameterList:GTFSDataBase.kt:GTFSDataBase$@JvmStatic fun updateStopTime: Boolean</ID>
+    <ID>LongParameterList:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$private fun mergeBeforeFirstCommonStop: List&lt;GStopTime&gt;</ID>
+    <ID>LongParameterList:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$private fun mergeTrips: MergedTrip?</ID>
+    <ID>LongParameterList:MStoreListingGenerator.kt:MStoreListingGenerator$private fun dumpStoreReleaseNote</ID>
     <ID>LoopWithTooManyJumpStatements:CollectionsExt.kt:while</ID>
     <ID>LoopWithTooManyJumpStatements:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$for</ID>
     <ID>LoopWithTooManyJumpStatements:MDirectionSplitter.kt:MDirectionSplitter$for</ID>
@@ -94,7 +101,6 @@
     <ID>NewLineAtEndOfFile:CharUtils.kt:org.mtransit.parser.CharUtils.kt</ID>
     <ID>NewLineAtEndOfFile:CloseableUtils.kt:org.mtransit.commons.CloseableUtils.kt</ID>
     <ID>NewLineAtEndOfFile:CollectionsExt.kt:org.mtransit.commons.CollectionsExt.kt</ID>
-    <ID>NewLineAtEndOfFile:CollectionsExtTest.kt:org.mtransit.commons.CollectionsExtTest.kt</ID>
     <ID>NewLineAtEndOfFile:DBUtils.kt:org.mtransit.parser.db.DBUtils.kt</ID>
     <ID>NewLineAtEndOfFile:DirectionResult.kt:org.mtransit.parser.mt.DirectionResult.kt</ID>
     <ID>NewLineAtEndOfFile:DirectionTripsStops.kt:org.mtransit.parser.mt.DirectionTripsStops.kt</ID>
@@ -124,25 +130,19 @@
     <ID>NewLineAtEndOfFile:Letters.kt:org.mtransit.commons.Letters.kt</ID>
     <ID>NewLineAtEndOfFile:LocationUtils.kt:org.mtransit.parser.LocationUtils.kt</ID>
     <ID>NewLineAtEndOfFile:MAgency.kt:org.mtransit.parser.mt.data.MAgency.kt</ID>
-    <ID>NewLineAtEndOfFile:MAgencyTests.kt:org.mtransit.parser.mt.data.MAgencyTests.kt</ID>
     <ID>NewLineAtEndOfFile:MDataChangedManager.kt:org.mtransit.parser.mt.MDataChangedManager.kt</ID>
     <ID>NewLineAtEndOfFile:MDirection.kt:org.mtransit.parser.mt.data.MDirection.kt</ID>
     <ID>NewLineAtEndOfFile:MDirectionCardinalType.kt:org.mtransit.parser.mt.data.MDirectionCardinalType.kt</ID>
     <ID>NewLineAtEndOfFile:MDirectionHeadSignFinder.kt:org.mtransit.parser.mt.MDirectionHeadSignFinder.kt</ID>
-    <ID>NewLineAtEndOfFile:MDirectionHeadSignFinderTest.kt:org.mtransit.parser.mt.MDirectionHeadSignFinderTest.kt</ID>
     <ID>NewLineAtEndOfFile:MDirectionInboundType.kt:org.mtransit.parser.mt.data.MDirectionInboundType.kt</ID>
     <ID>NewLineAtEndOfFile:MDirectionSplitter.kt:org.mtransit.parser.mt.MDirectionSplitter.kt</ID>
-    <ID>NewLineAtEndOfFile:MDirectionSplitterTest.kt:org.mtransit.parser.mt.MDirectionSplitterTest.kt</ID>
     <ID>NewLineAtEndOfFile:MDirectionStop.kt:org.mtransit.parser.mt.data.MDirectionStop.kt</ID>
     <ID>NewLineAtEndOfFile:MDirectionType.kt:org.mtransit.parser.mt.data.MDirectionType.kt</ID>
     <ID>NewLineAtEndOfFile:MDropOffType.kt:org.mtransit.parser.mt.data.MDropOffType.kt</ID>
     <ID>NewLineAtEndOfFile:MFrequency.kt:org.mtransit.parser.mt.data.MFrequency.kt</ID>
-    <ID>NewLineAtEndOfFile:MGeneratorTest.kt:org.mtransit.parser.mt.MGeneratorTest.kt</ID>
     <ID>NewLineAtEndOfFile:MPickupType.kt:org.mtransit.parser.mt.data.MPickupType.kt</ID>
     <ID>NewLineAtEndOfFile:MReader.kt:org.mtransit.parser.mt.MReader.kt</ID>
-    <ID>NewLineAtEndOfFile:MRouteSNToIDConverterTest.kt:org.mtransit.parser.mt.data.MRouteSNToIDConverterTest.kt</ID>
     <ID>NewLineAtEndOfFile:MServiceDate.kt:org.mtransit.parser.mt.data.MServiceDate.kt</ID>
-    <ID>NewLineAtEndOfFile:MServiceDateTest.kt:org.mtransit.parser.mt.data.MServiceDateTest.kt</ID>
     <ID>NewLineAtEndOfFile:MSpec.kt:org.mtransit.parser.mt.data.MSpec.kt</ID>
     <ID>NewLineAtEndOfFile:MStop.kt:org.mtransit.parser.mt.data.MStop.kt</ID>
     <ID>NewLineAtEndOfFile:MStrings.kt:org.mtransit.parser.mt.data.MStrings.kt</ID>
@@ -150,8 +150,11 @@
     <ID>NewLineAtEndOfFile:ParserMain.kt:org.mtransit.parser.scratch.ParserMain.kt</ID>
     <ID>NewLineAtEndOfFile:SQLUtils.kt:org.mtransit.parser.db.SQLUtils.kt</ID>
     <ID>NewLineAtEndOfFile:StringUtils.kt:org.mtransit.parser.StringUtils.kt</ID>
-    <ID>NewLineAtEndOfFile:TimeUtilsTest.kt:org.mtransit.parser.TimeUtilsTest.kt</ID>
     <ID>NewLineAtEndOfFile:TorontoTTCCommons.kt:org.mtransit.commons.TorontoTTCCommons.kt</ID>
+    <ID>NoNameShadowing:DBUtils.kt:DBUtils${ "$it" }</ID>
+    <ID>NoNameShadowing:GSpecExt.kt:calendarsMaxEndDate</ID>
+    <ID>NoNameShadowing:GSpecExt.kt:calendarsMinStartDate</ID>
+    <ID>NoNameShadowing:GTFSDataBase.kt:GTFSDataBase${ SQLUtils.execute(statement, it) }</ID>
     <ID>ReturnCount:CollectionsExt.kt:fun &lt;T&gt; Iterable&lt;T&gt;.overlap: Boolean</ID>
     <ID>ReturnCount:GCalendarDate.kt:GCalendarDate.Companion$@JvmStatic fun isServiceEntirelyRemoved: Boolean</ID>
     <ID>ReturnCount:GDropOffType.kt:GDropOffType.Companion$fun parse: GDropOffType</ID>
@@ -193,5 +196,13 @@
     <ID>TooManyFunctions:GTime.kt:GTime</ID>
     <ID>TooManyFunctions:RouteConfig.kt:RouteConfig</ID>
     <ID>TooManyFunctions:SQLUtils.kt:SQLUtils</ID>
+    <ID>UnusedPrivateProperty:MRoute.kt:MRoute$agencyTools: GAgencyTools? = null</ID>
+    <ID>UnusedPrivateProperty:MStop.kt:MStop$agencyTools: GAgencyTools? = null</ID>
+    <ID>UnusedVariable:LocationUtils.kt:LocationUtils$iter</ID>
+    <ID>UseIsNullOrEmpty:GTimePoint.kt:GTimePoint.Companion$id == null || id.isEmpty()</ID>
+    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$firstCommonStopIdInt ?.let { stopIdInts1.subList(0, stopIdInts1.indexOf(firstCommonStopIdInt)) } ?: emptyList()</ID>
+    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$firstCommonStopIdInt ?.let { stopIdInts2.subList(0, stopIdInts2.indexOf(firstCommonStopIdInt)) } ?: emptyList()</ID>
+    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$lastCommonStopIdInt ?.let { stopIdInts1.subList(stopIdInts1.lastIndexOf(lastCommonStopIdInt) + 1, stopIdInts1.size) } ?: emptyList()</ID>
+    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$lastCommonStopIdInt ?.let { stopIdInts2.subList(stopIdInts2.lastIndexOf(lastCommonStopIdInt) + 1, stopIdInts2.size) } ?: emptyList()</ID>
   </CurrentIssues>
 </SmellBaseline>
