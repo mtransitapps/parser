@@ -13,6 +13,7 @@ import org.mtransit.parser.gtfs.data.GIDs
 import org.mtransit.parser.gtfs.data.GRoute
 import org.mtransit.parser.gtfs.data.GSpec
 import org.mtransit.parser.gtfs.data.GTrip
+import org.mtransit.parser.gtfs.data.updateTripDirectionId
 import kotlin.math.min
 
 object MDirectionSplitter {
@@ -60,8 +61,8 @@ object MDirectionSplitter {
             }
             if ((min(trips0Size, trips1Size).toFloat() / gRouteTrips.size) > .33f) {
                 // TODO check if directions candidates group match existing split to keep original direction IDs
-                routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, headSignToGTripIdInts[sortedHeadSigns[0]])
-                routeGTFS.updateTripDirectionId(GDirectionId.NEW_2, headSignToGTripIdInts[sortedHeadSigns[1]])
+                routeGTFS.updateTripDirectionId(GDirectionId.NEW_1.id, headSignToGTripIdInts[sortedHeadSigns[0]])
+                routeGTFS.updateTripDirectionId(GDirectionId.NEW_2.id, headSignToGTripIdInts[sortedHeadSigns[1]])
                 MTLog.log("$routeId: Splitting directions... DONE (with trip head-signs)")
                 return
             }
@@ -84,7 +85,7 @@ object MDirectionSplitter {
                 ) {
                     MTLog.log("$routeId: Keep original direction ID")
                 } else {
-                    routeGTFS.updateTripDirectionId(GDirectionId.NEW_1, directionsCandidates[0].tripIdInts)
+                    routeGTFS.updateTripDirectionId(GDirectionId.NEW_1.id, directionsCandidates[0].tripIdInts)
                 }
             }
 
@@ -95,8 +96,8 @@ object MDirectionSplitter {
                 } else {
                     GDirectionId.NEW_1 to GDirectionId.NEW_2
                 }
-                routeGTFS.updateTripDirectionId(direction0, directionsCandidates[0].tripIdInts)
-                routeGTFS.updateTripDirectionId(direction1, directionsCandidates[1].tripIdInts)
+                routeGTFS.updateTripDirectionId(direction0.id, directionsCandidates[0].tripIdInts)
+                routeGTFS.updateTripDirectionId(direction1.id, directionsCandidates[1].tripIdInts)
             }
 
             else -> {
