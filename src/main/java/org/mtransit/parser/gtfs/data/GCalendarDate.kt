@@ -73,7 +73,7 @@ data class GCalendarDate(
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(serviceId:$_serviceId)"
+            "+(serviceId:$_serviceId)"
     }
 
     fun to() = CalendarDate(
@@ -123,7 +123,7 @@ data class GCalendarDate(
         fun getNewUID(
             date: Int,
             serviceIdInt: Int,
-        ) = "${date}$UID_SEPARATOR${serviceIdInt}".toLong()
+        ) = "${date}$UID_SEPARATOR$serviceIdInt".toLong()
 
         @JvmStatic
         fun isServiceEntirelyRemoved(
@@ -142,7 +142,7 @@ data class GCalendarDate(
             endDate ?: return false
             val startDateToCheck = max(startDate, gCalendar.startDate)
             val endDateToCheck = min(endDate, gCalendar.endDate)
-            val gCalendarDateServiceId = gCalendarDates?.filter { it.isServiceIdInt(gCalendar.serviceIdInt) } ?: return false  // NOT entirely removed
+            val gCalendarDateServiceId = gCalendarDates?.filter { it.isServiceIdInt(gCalendar.serviceIdInt) } ?: return false // NOT entirely removed
             for (date in startDateToCheck..endDateToCheck) {
                 if (gCalendarDateServiceId.none { it.isDate(date) && it.exceptionType == GCalendarDatesExceptionType.SERVICE_REMOVED }) {
                     return false // NOT entirely removed

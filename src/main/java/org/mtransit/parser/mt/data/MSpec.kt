@@ -23,8 +23,10 @@ data class MSpec(
     var schedules: Collection<MSchedule>? = null
 
     val isValid: Boolean
-        get() = (hasAgencies() && hasServiceDates() && hasRoutes() && hasDirections() && hasDirectionStops() && hasStops() //
-                && (hasStopSchedules() || hasRouteFrequencies()))
+        get() = (
+            hasAgencies() && hasServiceDates() && hasRoutes() && hasDirections() && hasDirectionStops() && hasStops() //
+                && (hasStopSchedules() || hasRouteFrequencies())
+            )
 
     fun hasAgencies(): Boolean {
         return agencies.isNotEmpty()

@@ -58,7 +58,7 @@ data class GFrequency(
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(tripId:$_tripId)"
+            "+(tripId:$_tripId)"
     }
 
     fun to() = Frequency(

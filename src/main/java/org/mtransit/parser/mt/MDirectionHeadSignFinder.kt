@@ -80,8 +80,10 @@ object MDirectionHeadSignFinder {
             }
         }
         if (directionHeadSigns.size == 2 // AM/PM only if 2 directions
-            && (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)
-                    || directionHeadSigns.filterValues { it == "AM" || it == "PM" }.isNotEmpty())
+            && (
+                !agencyTools.directionHeadSignsDescriptive(directionHeadSigns)
+                    || directionHeadSigns.filterValues { it == "AM" || it == "PM" }.isNotEmpty()
+                )
         ) {
             MTLog.log("$routeId: Direction head-signs '$directionHeadSigns' not descriptive, using AM/PM...")
             val amPmDirectionHeadSigns = mutableMapOf<Int, String>()
@@ -94,7 +96,7 @@ object MDirectionHeadSignFinder {
                     amPmDirectionHeadSigns[directionId] = agencyTools.cleanDirectionHeadsign(gRoute, directionId, false, false, false, "PM")
                 }
             }
-            if (amPmDirectionHeadSigns.size == 2  // all AM/PM or nothing
+            if (amPmDirectionHeadSigns.size == 2 // all AM/PM or nothing
                 && agencyTools.directionHeadSignsDescriptive(amPmDirectionHeadSigns)
             ) {
                 for (amPmDirectionHeadSign in amPmDirectionHeadSigns) {
@@ -184,17 +186,17 @@ object MDirectionHeadSignFinder {
         if (!agencyTools.directionHeadSignsDescriptive(directionHeadSigns)) {
             throw MTLog.Fatal(
                 "$routeId: Could NOT fix non-descriptive direction head-signs!" +
-                        directionHeadSigns.keys.joinToString { directionId ->
-                            "\n$routeId: $directionId: '${directionHeadSigns[directionId]}' [" +
-                                    "AM/PM: ${directionAmPm[directionId]} | " +
-                                    "last stop: ${
-                                        directionStopIdInts[directionId]?.let {
-                                            routeGTFS.getStop(
-                                                it
-                                            )?.toStringPlus(true) ?: it.toString()
-                                        }
-                                    }]"
-                        }
+                    directionHeadSigns.keys.joinToString { directionId ->
+                        "\n$routeId: $directionId: '${directionHeadSigns[directionId]}' [" +
+                            "AM/PM: ${directionAmPm[directionId]} | " +
+                            "last stop: ${
+                                directionStopIdInts[directionId]?.let {
+                                    routeGTFS.getStop(
+                                        it
+                                    )?.toStringPlus(true) ?: it.toString()
+                                }
+                            }]"
+                    }
             )
         }
         return directionHeadSigns
@@ -219,7 +221,8 @@ object MDirectionHeadSignFinder {
                 Triple(routeIdInt, headSign, stopTimes)
             }.filterNot { (_, _, stopTimes) ->
                 stopTimes.isEmpty() // exclude trips w/o stop times
-            }.sortedByDescending { (_, _, stopTimes) -> // longest first to avoid no intersect between trips
+            }.sortedByDescending { (_, _, stopTimes) ->
+                // longest first to avoid no intersect between trips
                 stopTimes.size
             }
         // 0 - check if merge necessary at all
@@ -338,11 +341,11 @@ object MDirectionHeadSignFinder {
         distinctTripHeadSignAndStopTimes.forEach { (_, headSign, stopTimes) ->
             MTLog.log(
                 "$routeId: $directionId: '$headSign':" +
-                        (if (Constants.DEBUG) "\n" else "") + " ${stopTimes.size} stops: ${
-                    stopTimes.map { gStopTime ->
-                        (if (Constants.DEBUG) "\n    - " else "") + gStopTime.toStringPlus(false)
-                    }
-                }"
+                    (if (Constants.DEBUG) "\n" else "") + " ${stopTimes.size} stops: ${
+                        stopTimes.map { gStopTime ->
+                            (if (Constants.DEBUG) "\n    - " else "") + gStopTime.toStringPlus(false)
+                        }
+                    }"
             )
         }
         distinctTripHeadSignAndStopTimes.sortByDescending { it.gStopTimes.size }
@@ -410,7 +413,6 @@ object MDirectionHeadSignFinder {
                 && stopTimesList2FirstStop != null
                 && stopTimesList2LastStop != null
             ) {
-
                 val stopNameList1First = stopTimesList1FirstStop.stopName
                 val stopNameList1Last = stopTimesList1LastStop.stopName
                 val stopNameList2First = stopTimesList2FirstStop.stopName
@@ -427,10 +429,10 @@ object MDirectionHeadSignFinder {
                 logMerge(
                     !dataLossAuthorized,
                     "$routeId: $directionId: #1 First & #2 First > " +
-                            "p:'$prefix1First2First'(${prefix1First2First.length}), " +
-                            "s:'$suffix1First2First'(${suffix1First2First.length})" +
-                            "(m:$minFixLength1First2First), " +
-                            "d:'$distance1First2First'."
+                        "p:'$prefix1First2First'(${prefix1First2First.length}), " +
+                        "s:'$suffix1First2First'(${suffix1First2First.length})" +
+                        "(m:$minFixLength1First2First), " +
+                        "d:'$distance1First2First'."
                 )
 
                 // compare #1 last w/ #2 last
@@ -444,10 +446,10 @@ object MDirectionHeadSignFinder {
                 logMerge(
                     !dataLossAuthorized,
                     "$routeId: $directionId: #1 Last & #2 Last > " +
-                            "p:'$prefix1Last2Last'(${prefix1Last2Last.length}), " +
-                            "s:'$suffix1Last2Last'(${suffix1Last2Last.length})" +
-                            "(m:$minFixLength1Last2Last), " +
-                            "d:'$distance1Last2Last'."
+                        "p:'$prefix1Last2Last'(${prefix1Last2Last.length}), " +
+                        "s:'$suffix1Last2Last'(${suffix1Last2Last.length})" +
+                        "(m:$minFixLength1Last2Last), " +
+                        "d:'$distance1Last2Last'."
                 )
 
                 // compare #1 first w/ #2 last
@@ -461,10 +463,10 @@ object MDirectionHeadSignFinder {
                 logMerge(
                     !dataLossAuthorized,
                     "$routeId: $directionId: #1 First & #2 Last > " +
-                            "p:'$prefix1First2Last'(${prefix1First2Last.length}), " +
-                            "s:'$suffix1First2Last'(${suffix1First2Last.length})" +
-                            "(m:$minFixLength1First2Last), " +
-                            "d:'$distance1First2Last'."
+                        "p:'$prefix1First2Last'(${prefix1First2Last.length}), " +
+                        "s:'$suffix1First2Last'(${suffix1First2Last.length})" +
+                        "(m:$minFixLength1First2Last), " +
+                        "d:'$distance1First2Last'."
                 )
 
                 // compare #1 last w/ #2 first
@@ -478,19 +480,23 @@ object MDirectionHeadSignFinder {
                 logMerge(
                     !dataLossAuthorized,
                     "$routeId: $directionId: #1 Last & #2 First > " +
-                            "p:'$prefix2First1Last'(${prefix2First1Last.length}), " +
-                            "s:'$suffix2First1Last'(${suffix2First1Last.length})" +
-                            "(m:$minFixLength2First1Last), " +
-                            "d:'$distance2First1Last'."
+                        "p:'$prefix2First1Last'(${prefix2First1Last.length}), " +
+                        "s:'$suffix2First1Last'(${suffix2First1Last.length})" +
+                        "(m:$minFixLength2First1Last), " +
+                        "d:'$distance2First1Last'."
                 )
 
-                if ((stopNameList1First == stopNameList2First
+                if ((
+                        stopNameList1First == stopNameList2First
                             || (prefix1First2First.length >= minFixLength1First2First && prefix1First2First.length > suffix1First2First.length)
-                            || (suffix1First2First.length >= minFixLength1First2First && suffix1First2First.length > prefix1First2First.length))
+                            || (suffix1First2First.length >= minFixLength1First2First && suffix1First2First.length > prefix1First2First.length)
+                        )
                     &&
-                    (stopNameList1Last == stopNameList2Last
+                    (
+                        stopNameList1Last == stopNameList2Last
                             || (prefix1Last2Last.length >= minFixLength1Last2Last && prefix1Last2Last.length > suffix1First2Last.length)
-                            || (suffix1Last2Last.length >= minFixLength1Last2Last && suffix1Last2Last.length > prefix1First2Last.length))
+                            || (suffix1Last2Last.length >= minFixLength1Last2Last && suffix1Last2Last.length > prefix1First2Last.length)
+                        )
                 ) {
                     // almost same 1st & last stops (prefix/suffix)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2FirstStop.stopIdInt
@@ -501,22 +507,25 @@ object MDirectionHeadSignFinder {
                     // almost same 1st & last stops (distance)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2FirstStop.stopIdInt
                     lastCommonStopIdInt = stopTimesList1LastStop.stopIdInt to stopTimesList2LastStop.stopIdInt
-                } else if ((stopNameList1First == stopNameList2First
-                            || (prefix1First2First.length >= minFixLength1First2First && prefix1First2First.length > suffix1First2First.length)
-                            || (suffix1First2First.length >= minFixLength1First2First && suffix1First2First.length > prefix1First2First.length))
+                } else if ((
+                    stopNameList1First == stopNameList2First
+                        || (prefix1First2First.length >= minFixLength1First2First && prefix1First2First.length > suffix1First2First.length)
+                        || (suffix1First2First.length >= minFixLength1First2First && suffix1First2First.length > prefix1First2First.length)
+                    )
                 ) {
                     // almost 1 common stop is #1 first & #2 first (prefix/suffix)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2FirstStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
                 } else if (
-                    (stopNameList1Last == stopNameList2Last
-                            || (prefix1Last2Last.length >= minFixLength1Last2Last && prefix1Last2Last.length > suffix1First2Last.length)
-                            || (suffix1Last2Last.length >= minFixLength1Last2Last && suffix1Last2Last.length > prefix1First2Last.length))
+                    (
+                    stopNameList1Last == stopNameList2Last
+                        || (prefix1Last2Last.length >= minFixLength1Last2Last && prefix1Last2Last.length > suffix1First2Last.length)
+                        || (suffix1Last2Last.length >= minFixLength1Last2Last && suffix1Last2Last.length > prefix1First2Last.length)
+                    )
                 ) {
                     // almost 1 common stop is #1 last & #2 last (prefix/suffix)
                     lastCommonStopIdInt = stopTimesList1LastStop.stopIdInt to stopTimesList2LastStop.stopIdInt
                     firstCommonStopIdInt = lastCommonStopIdInt
-
                 } else if (distance1First2First < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS) {
                     // almost 1 common stop is #1 first & #2 first (distance)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2FirstStop.stopIdInt
@@ -540,15 +549,19 @@ object MDirectionHeadSignFinder {
                     firstCommonStopIdInt = stopTimesList2FirstStop.stopIdInt to stopTimesList1LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
                 } else if (distance1First2Last < distance2First1Last
-                    && (distance1First2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS
-                            || (dataLossAuthorized && distance1First2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS * 2f))
+                    && (
+                        distance1First2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS
+                            || (dataLossAuthorized && distance1First2Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS * 2f)
+                        )
                 ) {
                     // almost 1 common stop is #1 first & #2 last (distance)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2LastStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
                 } else if (distance2First1Last < distance1First2Last
-                    && (distance2First1Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS
-                            || (dataLossAuthorized && distance2First1Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS * 2f))
+                    && (
+                        distance2First1Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS
+                            || (dataLossAuthorized && distance2First1Last < MAX_DISTANCE_TO_BE_SAME_TRANSIT_HUB_IN_METERS * 2f)
+                        )
                 ) {
                     // almost 1 common stop is #1 last & #2 first (distance)
                     firstCommonStopIdInt = stopTimesList2FirstStop.stopIdInt to stopTimesList1LastStop.stopIdInt
@@ -587,7 +600,8 @@ object MDirectionHeadSignFinder {
             if (it == stopTimesHeadSign1) {
                 logMerge(!dataLossAuthorized, "$routeId: $directionId: merge w/ head-sign only (agency) -> '$stopTimesHeadSign1'")
                 return MergedTrip(
-                    routeIdInts1, routeIdInts2, stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
+                    routeIdInts1, routeIdInts2,
+                    stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
                         firstCommonStopIdInt,
                         stopTimesList1,
                         stopIdIntsBeforeCommon1,
@@ -598,7 +612,8 @@ object MDirectionHeadSignFinder {
             } else if (it == stopTimesHeadSign2) {
                 logMerge(!dataLossAuthorized, "$routeId: $directionId: merge w/ head-sign only (agency) -> '$stopTimesHeadSign2'")
                 return MergedTrip(
-                    routeIdInts1, routeIdInts2, stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
+                    routeIdInts1, routeIdInts2,
+                    stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
                         firstCommonStopIdInt,
                         stopTimesList2,
                         stopIdIntsBeforeCommon2,
@@ -631,7 +646,8 @@ object MDirectionHeadSignFinder {
         ) {
             logMerge(!dataLossAuthorized, "$routeId: $directionId: #1 ('$stopTimesHeadSign1') stops but #2 goes further -> '$stopTimesHeadSign2'")
             return MergedTrip(
-                routeIdInts1, routeIdInts2, mergeHeadSigns(stopTimesHeadSign2, stopTimesHeadSign1) to mergeBeforeFirstCommonStop(
+                routeIdInts1, routeIdInts2,
+                mergeHeadSigns(stopTimesHeadSign2, stopTimesHeadSign1) to mergeBeforeFirstCommonStop(
                     firstCommonStopIdInt,
                     stopTimesList2,
                     stopIdIntsBeforeCommon2,
@@ -645,7 +661,8 @@ object MDirectionHeadSignFinder {
         ) {
             logMerge(!dataLossAuthorized, "$routeId: $directionId: #2 ('$stopTimesHeadSign2') stops but #1 goes further -> '$stopTimesHeadSign1'")
             return MergedTrip(
-                routeIdInts1, routeIdInts2, mergeHeadSigns(stopTimesHeadSign1, stopTimesHeadSign2) to mergeBeforeFirstCommonStop(
+                routeIdInts1, routeIdInts2,
+                mergeHeadSigns(stopTimesHeadSign1, stopTimesHeadSign2) to mergeBeforeFirstCommonStop(
                     firstCommonStopIdInt,
                     stopTimesList1,
                     stopIdIntsBeforeCommon1,
@@ -660,7 +677,8 @@ object MDirectionHeadSignFinder {
             if (stopTimesHeadSign1.isBlank() && stopTimesHeadSign2.isNotBlank()) {
                 logMerge(!dataLossAuthorized, "$routeId: $directionId: #1 head-sign is blank, use #2 -> '$stopTimesHeadSign2'")
                 return MergedTrip(
-                    routeIdInts1, routeIdInts2, stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
+                    routeIdInts1, routeIdInts2,
+                    stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
                         firstCommonStopIdInt,
                         stopTimesList2,
                         stopIdIntsBeforeCommon2,
@@ -672,7 +690,8 @@ object MDirectionHeadSignFinder {
             if (stopTimesHeadSign2.isBlank() && stopTimesHeadSign1.isNotBlank()) {
                 logMerge(!dataLossAuthorized, "$routeId: $directionId: #2 head-sign is blank, use #1 -> '$stopTimesHeadSign1'")
                 return MergedTrip(
-                    routeIdInts1, routeIdInts2, stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
+                    routeIdInts1, routeIdInts2,
+                    stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
                         firstCommonStopIdInt,
                         stopTimesList1,
                         stopIdIntsBeforeCommon1,
@@ -684,7 +703,8 @@ object MDirectionHeadSignFinder {
             if (stopTimesHeadSign1 == stopTimesHeadSign2) {
                 logMerge(!dataLossAuthorized, "$routeId: $directionId: #1 & #2 have same head-sign -> '$stopTimesHeadSign1'")
                 return MergedTrip(
-                    routeIdInts1, routeIdInts2, stopTimesHeadSign1 to pickAndMergeLongestTripStopTimes(
+                    routeIdInts1, routeIdInts2,
+                    stopTimesHeadSign1 to pickAndMergeLongestTripStopTimes(
                         stopTimesList1,
                         stopTimesList2,
                         firstCommonStopIdInt,
@@ -698,7 +718,8 @@ object MDirectionHeadSignFinder {
                 agencyTools.mergeComplexDirectionHeadSign(stopTimesHeadSign1, stopTimesHeadSign2)?.let { merged ->
                     logMerge(!dataLossAuthorized, "$routeId: $directionId: merge #1 / #2 head-signs (agency) -> '$merged'")
                     return MergedTrip(
-                        routeIdInts1, routeIdInts2, merged to pickAndMergeLongestTripStopTimes(
+                        routeIdInts1, routeIdInts2,
+                        merged to pickAndMergeLongestTripStopTimes(
                             stopTimesList1,
                             stopTimesList2,
                             firstCommonStopIdInt,
@@ -715,7 +736,8 @@ object MDirectionHeadSignFinder {
                 ) {
                     logMerge(!dataLossAuthorized, "$routeId: $directionId: use prefix -> '$prefix'")
                     return MergedTrip(
-                        routeIdInts1, routeIdInts2, prefix.trim() to pickAndMergeLongestTripStopTimes(
+                        routeIdInts1, routeIdInts2,
+                        prefix.trim() to pickAndMergeLongestTripStopTimes(
                             stopTimesList1,
                             stopTimesList2,
                             firstCommonStopIdInt,
@@ -729,7 +751,8 @@ object MDirectionHeadSignFinder {
                 ) {
                     logMerge(!dataLossAuthorized, "$routeId: $directionId: use suffix -> '$suffix'")
                     return MergedTrip(
-                        routeIdInts1, routeIdInts2, suffix.trim() to pickAndMergeLongestTripStopTimes(
+                        routeIdInts1, routeIdInts2,
+                        suffix.trim() to pickAndMergeLongestTripStopTimes(
                             stopTimesList1,
                             stopTimesList2,
                             firstCommonStopIdInt,
@@ -744,11 +767,12 @@ object MDirectionHeadSignFinder {
                     MTLog.log(
                         !dataLossAuthorized,
                         "$routeId: $directionId: #2 goes for WAY more stops ($stopIdIntsAfterCommonCount2) than " +
-                                "#1 ($stopIdIntsAfterCommonCount1:$stopTimesHeadSign1) " +
-                                "-> '$stopTimesHeadSign2'"
+                            "#1 ($stopIdIntsAfterCommonCount1:$stopTimesHeadSign1) " +
+                            "-> '$stopTimesHeadSign2'"
                     )
                     return MergedTrip(
-                        routeIdInts1, routeIdInts2, stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
+                        routeIdInts1, routeIdInts2,
+                        stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
                             firstCommonStopIdInt,
                             stopTimesList2,
                             stopIdIntsBeforeCommon2,
@@ -763,11 +787,12 @@ object MDirectionHeadSignFinder {
                     MTLog.log(
                         !dataLossAuthorized,
                         "$routeId: $directionId: #1 goes for WAY more stops ($stopIdIntsAfterCommonCount1) than " +
-                                "#2 ($stopIdIntsAfterCommonCount2:$stopTimesHeadSign2) " +
-                                "-> '$stopTimesHeadSign1'"
+                            "#2 ($stopIdIntsAfterCommonCount2:$stopTimesHeadSign2) " +
+                            "-> '$stopTimesHeadSign1'"
                     )
                     return MergedTrip(
-                        routeIdInts1, routeIdInts2, stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
+                        routeIdInts1, routeIdInts2,
+                        stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
                             firstCommonStopIdInt,
                             stopTimesList1,
                             stopIdIntsBeforeCommon1,
@@ -793,11 +818,12 @@ object MDirectionHeadSignFinder {
                 logMerge(
                     !dataLossAuthorized,
                     "$routeId: $directionId: #2 head-sign used ($tripHeadSignCounts2) more than " +
-                            "#1 ($tripHeadSignCounts1:'$stopTimesHeadSign1') " +
-                            "-> '$stopTimesHeadSign2'"
+                        "#1 ($tripHeadSignCounts1:'$stopTimesHeadSign1') " +
+                        "-> '$stopTimesHeadSign2'"
                 )
                 return MergedTrip(
-                    routeIdInts1, routeIdInts2, stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
+                    routeIdInts1, routeIdInts2,
+                    stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
                         firstCommonStopIdInt,
                         stopTimesList2,
                         stopIdIntsBeforeCommon2,
@@ -812,11 +838,12 @@ object MDirectionHeadSignFinder {
                 logMerge(
                     !dataLossAuthorized,
                     "$routeId: $directionId: #1 head-sign used ($tripHeadSignCounts1) more than " +
-                            "#2 ($tripHeadSignCounts2:'$stopTimesHeadSign2') " +
-                            "-> '$stopTimesHeadSign1'"
+                        "#2 ($tripHeadSignCounts2:'$stopTimesHeadSign2') " +
+                        "-> '$stopTimesHeadSign1'"
                 )
                 return MergedTrip(
-                    routeIdInts1, routeIdInts2, stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
+                    routeIdInts1, routeIdInts2,
+                    stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
                         firstCommonStopIdInt,
                         stopTimesList1,
                         stopIdIntsBeforeCommon1,
@@ -831,14 +858,14 @@ object MDirectionHeadSignFinder {
                     val otherStopsUsingSameHeadSignCounts1 = tripHeadSignAndLastStopCounts.filter { lastStopIdIntTripHeadSignAndCount ->
                         val lastStopIdIntTripHeadSign = lastStopIdIntTripHeadSignAndCount.key
                         lastStopIdIntTripHeadSign.first == stopTimesHeadSign1 // same head-sign
-                                && lastStopIdIntTripHeadSign.second != lastStopIdInt1 // other stops
+                            && lastStopIdIntTripHeadSign.second != lastStopIdInt1 // other stops
                     }.map { lastStopIdIntTripHeadSignAndCount ->
                         lastStopIdIntTripHeadSignAndCount.value
                     }.sum()
                     val otherStopsUsingSameHeadSignCounts2 = tripHeadSignAndLastStopCounts.filter { lastStopIdIntTripHeadSignAndCount ->
                         val lastStopIdIntTripHeadSign = lastStopIdIntTripHeadSignAndCount.key
                         lastStopIdIntTripHeadSign.first == stopTimesHeadSign2 // same head-sign
-                                && lastStopIdIntTripHeadSign.second != lastStopIdInt2 // other stops
+                            && lastStopIdIntTripHeadSign.second != lastStopIdInt2 // other stops
                     }.map { lastStopIdIntTripHeadSignAndCount ->
                         lastStopIdIntTripHeadSignAndCount.value
                     }.sum()
@@ -848,10 +875,11 @@ object MDirectionHeadSignFinder {
                         logMerge(
                             !dataLossAuthorized,
                             "$routeId: $directionId: #1 unique to this trip while #2 used for $otherStopsUsingSameHeadSignCounts2 others " +
-                                    "-> '$stopTimesHeadSign1'"
+                                "-> '$stopTimesHeadSign1'"
                         )
                         return MergedTrip(
-                            routeIdInts1, routeIdInts2, stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
+                            routeIdInts1, routeIdInts2,
+                            stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
                                 firstCommonStopIdInt,
                                 stopTimesList1,
                                 stopIdIntsBeforeCommon1,
@@ -866,10 +894,11 @@ object MDirectionHeadSignFinder {
                         logMerge(
                             !dataLossAuthorized,
                             "$routeId: $directionId: #2 unique to this trip while #1 used for $otherStopsUsingSameHeadSignCounts1 others " +
-                                    "-> '$stopTimesHeadSign1'"
+                                "-> '$stopTimesHeadSign1'"
                         )
                         return MergedTrip(
-                            routeIdInts1, routeIdInts2, stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
+                            routeIdInts1, routeIdInts2,
+                            stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
                                 firstCommonStopIdInt,
                                 stopTimesList2,
                                 stopIdIntsBeforeCommon2,
@@ -887,7 +916,8 @@ object MDirectionHeadSignFinder {
                         ?: EMPTY
                     logMerge(!dataLossAuthorized, "$routeId: $directionId: merge #1 / #2 head-signs -> '$merged'")
                     return MergedTrip(
-                        routeIdInts1, routeIdInts2, merged to pickAndMergeLongestTripStopTimes(
+                        routeIdInts1, routeIdInts2,
+                        merged to pickAndMergeLongestTripStopTimes(
                             stopTimesList1,
                             stopTimesList2,
                             firstCommonStopIdInt,
@@ -902,7 +932,8 @@ object MDirectionHeadSignFinder {
                 ) {
                     logMerge(!dataLossAuthorized, "$routeId: $directionId: #2 head-sign included in #1 -> '$stopTimesHeadSign2'")
                     return MergedTrip(
-                        routeIdInts1, routeIdInts2, stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
+                        routeIdInts1, routeIdInts2,
+                        stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
                             firstCommonStopIdInt,
                             stopTimesList2,
                             stopIdIntsBeforeCommon2,
@@ -911,12 +942,13 @@ object MDirectionHeadSignFinder {
                         )
                     )
                 }
-                if (tripHeadSignCounts2 != 0  // not-merged
+                if (tripHeadSignCounts2 != 0 // not-merged
                     && stopTimesHeadSign2.contains(stopTimesHeadSign1)
                 ) {
                     logMerge(!dataLossAuthorized, "$routeId: $directionId: #1 head-sign included in #2 -> '$stopTimesHeadSign1'")
                     return MergedTrip(
-                        routeIdInts1, routeIdInts2, stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
+                        routeIdInts1, routeIdInts2,
+                        stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
                             firstCommonStopIdInt,
                             stopTimesList1,
                             stopIdIntsBeforeCommon1,
@@ -930,7 +962,8 @@ object MDirectionHeadSignFinder {
                 ) {
                     logMerge(!dataLossAuthorized, "$routeId: $directionId: #2 head-sign included in #1 (merged) -> '$stopTimesHeadSign1'")
                     return MergedTrip(
-                        routeIdInts1, routeIdInts2, stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
+                        routeIdInts1, routeIdInts2,
+                        stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
                             firstCommonStopIdInt,
                             stopTimesList1,
                             stopIdIntsBeforeCommon1,
@@ -939,12 +972,13 @@ object MDirectionHeadSignFinder {
                         )
                     )
                 }
-                if (tripHeadSignCounts2 == 0  // was merged
+                if (tripHeadSignCounts2 == 0 // was merged
                     && stopTimesHeadSign2.contains(stopTimesHeadSign1)
                 ) {
                     logMerge(!dataLossAuthorized, "$routeId: $directionId: #1 head-sign included in #2 (merged) -> '$stopTimesHeadSign2'")
                     return MergedTrip(
-                        routeIdInts1, routeIdInts2, stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
+                        routeIdInts1, routeIdInts2,
+                        stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
                             firstCommonStopIdInt,
                             stopTimesList2,
                             stopIdIntsBeforeCommon2,
@@ -970,12 +1004,13 @@ object MDirectionHeadSignFinder {
                         logMerge(
                             !dataLossAuthorized,
                             "$routeId: $directionId: distance from last common to " +
-                                    "#1 last ($distanceToStop1) > " +
-                                    "#2 last ($distanceToStop2) ($stopTimesHeadSign2) " +
-                                    "-> '$stopTimesHeadSign1'"
+                                "#1 last ($distanceToStop1) > " +
+                                "#2 last ($distanceToStop2) ($stopTimesHeadSign2) " +
+                                "-> '$stopTimesHeadSign1'"
                         )
                         return MergedTrip(
-                            routeIdInts1, routeIdInts2, stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
+                            routeIdInts1, routeIdInts2,
+                            stopTimesHeadSign1 to mergeBeforeFirstCommonStop(
                                 firstCommonStopIdInt,
                                 stopTimesList1,
                                 stopIdIntsBeforeCommon1,
@@ -987,12 +1022,13 @@ object MDirectionHeadSignFinder {
                         logMerge(
                             !dataLossAuthorized,
                             "$routeId: $directionId: distance from last common to " +
-                                    "#2 last ($distanceToStop2) > " +
-                                    "#1 last ($distanceToStop1) ($stopTimesHeadSign1) " +
-                                    "-> '$stopTimesHeadSign2'"
+                                "#2 last ($distanceToStop2) > " +
+                                "#1 last ($distanceToStop1) ($stopTimesHeadSign1) " +
+                                "-> '$stopTimesHeadSign2'"
                         )
                         return MergedTrip(
-                            routeIdInts1, routeIdInts2, stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
+                            routeIdInts1, routeIdInts2,
+                            stopTimesHeadSign2 to mergeBeforeFirstCommonStop(
                                 firstCommonStopIdInt,
                                 stopTimesList2,
                                 stopIdIntsBeforeCommon2,
@@ -1007,19 +1043,20 @@ object MDirectionHeadSignFinder {
         if (dataLossAuthorized) {
             throw MTLog.Fatal(
                 "$routeId: $directionId: Unresolved situation! \n" +
-                        "- #1: $stopTimesHeadSign1. \n" +
-                        "  Stops: ${stopTimesList1.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(false)}" }} \n" +
-                        "- #2: $stopTimesHeadSign2. \n" +
-                        "  Stops: ${stopTimesList2.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(false)}" }} \n" +
-                        "!"
+                    "- #1: $stopTimesHeadSign1. \n" +
+                    "  Stops: ${stopTimesList1.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(false)}" }} \n" +
+                    "- #2: $stopTimesHeadSign2. \n" +
+                    "  Stops: ${stopTimesList2.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(false)}" }} \n" +
+                    "!"
             )
         }
         logMerge(
-            !dataLossAuthorized, "$routeId: $directionId: unresolved situation > no head-sign (" +
-                    "$stopTimesHeadSign1:${GIDs.toStringPlus(stopTimesList1.firstOrNull()?.tripIdInt)}" +
-                    "|" +
-                    "$stopTimesHeadSign2:${GIDs.toStringPlus(stopTimesList2.firstOrNull()?.tripIdInt)}" +
-                    ")."
+            !dataLossAuthorized,
+            "$routeId: $directionId: unresolved situation > no head-sign (" +
+                "$stopTimesHeadSign1:${GIDs.toStringPlus(stopTimesList1.firstOrNull()?.tripIdInt)}" +
+                "|" +
+                "$stopTimesHeadSign2:${GIDs.toStringPlus(stopTimesList2.firstOrNull()?.tripIdInt)}" +
+                ")."
         )
         return null
     }
@@ -1092,9 +1129,13 @@ object MDirectionHeadSignFinder {
         forceMerge: Boolean = true
     ): List<GStopTime> {
         return if (firstCommonStopIdInt != null // has a common stop
-            && (forceMerge // force merge
-                    || (stopIdIntsBeforeCommon.isEmpty() // has stops before common
-                    && stopIdIntsBeforeCommonPrepend.isNotEmpty())) // prepend do NOT have stops before common
+            && (
+                forceMerge // force merge
+                    || (
+                        stopIdIntsBeforeCommon.isEmpty() // has stops before common
+                            && stopIdIntsBeforeCommonPrepend.isNotEmpty()
+                        )
+                ) // prepend do NOT have stops before common
         ) {
             stopTimesList
                 .toMutableList()
@@ -1116,14 +1157,13 @@ object MDirectionHeadSignFinder {
         val minStopSequence = stopTimesList.minStopSequence()
         val maxStopSequence = stopTimesList.maxStopSequence()
         var stopIdIntsAfterCommonCount = stopIdIntsAfterCommon.size
-        var s = stopTimesList.size - 1  // reverse order (from last)
+        var s = stopTimesList.size - 1 // reverse order (from last)
         val sMinIndex: Int = (stopIdInts.lastIndexOf(lastCommonStopIdInt) + 1).coerceAtLeast(0)
         while (stopIdIntsAfterCommonCount > 0
             && s >= sMinIndex
         ) {
             val gStopTime = stopTimesList[s]
-            if (!gStopTime.isRegular(minStopSequence, maxStopSequence)
-            ) {
+            if (!gStopTime.isRegular(minStopSequence, maxStopSequence)) {
                 stopIdIntsAfterCommonCount--
             }
             s--

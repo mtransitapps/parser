@@ -186,11 +186,11 @@ fun <T> Iterable<T>.matchList(
     val thisSuffix = thisString.commonSuffixWith(otherString)
     val thisSuffixLength = thisSuffix.length
     val otherLength = otherIt.toComparableString(stringLength).length
-    return (when {
+    return when {
         combineMatch -> thisSuffixLength + thisPrefixLength
         thisPrefixLength > thisSuffixLength -> thisPrefixLength
         else -> thisSuffixLength
-    }).toFloat().div(otherLength) + ignoredMatchPt
+    }.toFloat().div(otherLength) + ignoredMatchPt
 }
 
 fun <T> Iterable<T>.hasItemsGoingIntoSameOrder(otherIt: Iterable<T>): Boolean {
@@ -207,9 +207,11 @@ fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>, firstItem
         val otherMatchIndex = otherList.indexOf(thisList[thisIndex], otherStartIndex)
         if (otherMatchIndex != -1) {
             var len = 1
-            while (thisIndex + len < thisList.size &&
+            while (
+                thisIndex + len < thisList.size &&
                 otherMatchIndex + len < otherList.size &&
-                thisList[thisIndex + len] == otherList[otherMatchIndex + len]) {
+                thisList[thisIndex + len] == otherList[otherMatchIndex + len]
+            ) {
                 len++
             }
             if (len > 1) {

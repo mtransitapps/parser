@@ -43,8 +43,8 @@ data class MFrequency(
 
     fun toStringPlus(): String {
         return toString() +
-                "+(serviceId:$_serviceId)" +
-                "+(uID:$uID)"
+            "+(serviceId:$_serviceId)" +
+            "+(uID:$uID)"
     }
 
     companion object {
@@ -57,6 +57,6 @@ data class MFrequency(
             directionId: Long,
             startTime: Int,
             endTime: Int
-        ) = "${serviceIdInt}$UID_SEPARATOR${directionId}$UID_SEPARATOR${startTime}$UID_SEPARATOR${endTime}"
+        ) = "${serviceIdInt}$UID_SEPARATOR${directionId}$UID_SEPARATOR${startTime}$UID_SEPARATOR$endTime"
     }
 }

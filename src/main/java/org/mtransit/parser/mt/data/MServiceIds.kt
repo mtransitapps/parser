@@ -62,8 +62,8 @@ object MServiceIds {
 
     @Suppress("unused")
     @JvmStatic
-    fun containsAllIdInts(idInts: Iterable<Int>)
-        = idInts.all { idIntToId.containsKey(it) }
+    fun containsAllIdInts(idInts: Iterable<Int>) =
+        idInts.all { idIntToId.containsKey(it) }
 
     internal fun convert(agencyTools: GAgencyTools, serviceId: String, keep: Boolean = true, quotesString: Boolean = false): String =
         if (FeatureFlags.F_EXPORT_SERVICE_ID_INTS) {

@@ -294,23 +294,23 @@ data class RouteConfig(
         this.keepRoutes.any {
             //noinspection DiscouragedApi
             (it.routeId != null && gRoute.routeId == it.routeId)
-                    || (it.routeShortName != null && gRoute.routeShortName == it.routeShortName)
-                    || (it.parsedRouteShortNameRegex?.matches(gRoute.routeShortName) == true)
+                || (it.routeShortName != null && gRoute.routeShortName == it.routeShortName)
+                || (it.parsedRouteShortNameRegex?.matches(gRoute.routeShortName) == true)
         }
 
     fun excludeRoutes(gRoute: GRoute) =
         this.excludeRoutes.any {
             //noinspection DiscouragedApi
             (it.routeId != null && gRoute.routeId == it.routeId)
-                    || (it.routeShortName != null && gRoute.routeShortName == it.routeShortName)
-                    || (it.parsedRouteShortNameRegex?.matches(gRoute.routeShortName) == true)
+                || (it.routeShortName != null && gRoute.routeShortName == it.routeShortName)
+                || (it.parsedRouteShortNameRegex?.matches(gRoute.routeShortName) == true)
         }
 
     fun overrideRouteType(originalRouteId: String?): Int? {
         return this.routeTypeOverrideConfigs
             .singleOrNull { config ->
                 config.originalRouteId == originalRouteId
-                        || originalRouteId?.let { config.parsedOriginalRouteIdRegex?.matches(originalRouteId) } == true
+                    || originalRouteId?.let { config.parsedOriginalRouteIdRegex?.matches(originalRouteId) } == true
             }
             ?.routeType
     }
@@ -329,18 +329,21 @@ data class RouteConfig(
 
     fun getRouteShortNameForRoute(gRoute: GRoute) =
         //noinspection DiscouragedApi
-        (this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeId == it.routeId }
-            ?: this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName })
+        (
+            this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeId == it.routeId }
+                ?: this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName }
+            )
             ?.routeShortName
 
     fun getRouteColor(gRoute: GRoute) =
         //noinspection DiscouragedApi
-        this.routeColors.firstOrNull { // order is important, 1st config match found wins
+        this.routeColors.firstOrNull {
+            // order is important, 1st config match found wins
             it.routeId == gRoute.routeId
-                    || it.routeShortName == gRoute.routeShortName
-                    || it.routeLongName == gRoute.routeLongNameOrDefault
-                    || it.originalRouteColor?.let { originalRouteColor -> originalRouteColor == gRoute.routeColor } == true
-                    || it.parsedRouteShortNameRegex?.containsMatchIn(gRoute.routeShortName) == true
+                || it.routeShortName == gRoute.routeShortName
+                || it.routeLongName == gRoute.routeLongNameOrDefault
+                || it.originalRouteColor?.let { originalRouteColor -> originalRouteColor == gRoute.routeColor } == true
+                || it.parsedRouteShortNameRegex?.containsMatchIn(gRoute.routeShortName) == true
         }?.color
 
     fun isRouteColorIgnored(routeColor: String) =
@@ -460,8 +463,11 @@ data class RouteConfig(
             string = when {
                 it.isWord -> {
                     val pattern =
-                        if (lang.language == Locale.FRENCH.language) CleanUtils.cleanWordsFR(it.regex)
-                        else CleanUtils.cleanWords(it.regex)
+                        if (lang.language == Locale.FRENCH.language) {
+                            CleanUtils.cleanWordsFR(it.regex)
+                        } else {
+                            CleanUtils.cleanWords(it.regex)
+                        }
                     pattern.matcher(string).replaceAll(CleanUtils.cleanWordsReplacement(it.replacement))
                 }
 

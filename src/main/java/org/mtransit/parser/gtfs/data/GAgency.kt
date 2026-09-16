@@ -54,7 +54,7 @@ data class GAgency(
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(agencyId:$_agencyId)"
+            "+(agencyId:$_agencyId)"
     }
 
     fun to() = Agency(

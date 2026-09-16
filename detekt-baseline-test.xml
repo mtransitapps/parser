@@ -2,9 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>LargeClass:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest</ID>
     <ID>LongMethod:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest$@Test fun testFindDirectionHeadSign_DistinctLastStopNoClearWinnerMerge</ID>
-    <ID>LongParameterList:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest$@Suppress("SameParameterValue") private fun makeGTrip</ID>
     <ID>UseOrEmpty:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest$it.arguments[0] as? String ?: ""</ID>
   </CurrentIssues>
 </SmellBaseline>

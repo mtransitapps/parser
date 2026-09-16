@@ -71,7 +71,8 @@ object MDirectionSplitter {
             gTrip.tripIdInt to stopTimes.map { it.stopIdInt }
         }.filterNot { (_, stopTimes) ->
             stopTimes.isEmpty() // exclude trips w/o stop times
-        }.sortedByDescending { (_, stopTimes) -> // longest first to avoid no intersect between trips
+        }.sortedByDescending { (_, stopTimes) ->
+            // longest first to avoid no intersect between trips
             stopTimes.size
         }
         val directionsCandidates = splitDirections(routeId, gTripIdIntStopIdInts)
@@ -125,7 +126,8 @@ object MDirectionSplitter {
                     MTLog.logDebug("$routeId: Exact match for: '${GIDs.toStringPlus(gTripIdInt)}': \n - ${GIDs.toStringPlus(gStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)
                     true
-                } == true) {
+                } == true
+            ) {
                 continue
             }
             // LOOK FOR SAME STOPS DIRECTION
@@ -135,7 +137,8 @@ object MDirectionSplitter {
                     MTLog.logDebug("$routeId: Same stops direction for: '${GIDs.toStringPlus(gTripIdInt)}': \n - ${GIDs.toStringPlus(gStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)
                     true
-                } == true) {
+                } == true
+            ) {
                 continue
             }
             // LOOK FOR ALMOST A MATCH
@@ -149,7 +152,8 @@ object MDirectionSplitter {
                     MTLog.logDebug("$routeId: ${ALMOST_A_MATCH * 100f}%% match for: '${GIDs.toStringPlus(gTripIdInt)}': \n${GIDs.toStringPlus(gStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)
                     true
-                } == true) {
+                } == true
+            ) {
                 continue
             }
             // LOOK FOR SIGNIFICANTLY BIGGER MATCH
@@ -240,7 +244,8 @@ object MDirectionSplitter {
                     MTLog.logDebug("$routeId: overlap with trips ${GIDs.toStringPlus(rTripIdInts)}\nwith stops:${GIDs.toStringPlus(rStopIdInts)}")
                     rTripIdInts.add(gTripIdInt)
                     true
-                } == true) {
+                } == true
+            ) {
                 continue
             }
 
@@ -251,17 +256,17 @@ object MDirectionSplitter {
             }
             throw MTLog.Fatal(
                 "$routeId: Unresolved situation! \n" +
-                        "- ?: Trips: '${GIDs.toStringPlus(gTripIdInt)}': \n" +
-                        "   -> Stops: ${GIDs.toStringPlus(gStopIdInts, limit = -1)} \n" +
-                        " - ${directionsCandidates.size} candidates: \n" +
-                        "---------- \n" +
-                        "- 0: Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.tripIdInts, limit = -1)}: \n" +
-                        "   -> Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.stopIdInts, limit = -1)} \n" +
-                        "---------- \n" +
-                        "- 1: Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.tripIdInts, limit = -1)}: \n" +
-                        "   -> Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.stopIdInts, limit = -1)} \n" +
-                        "---------- \n" +
-                        "!"
+                    "- ?: Trips: '${GIDs.toStringPlus(gTripIdInt)}': \n" +
+                    "   -> Stops: ${GIDs.toStringPlus(gStopIdInts, limit = -1)} \n" +
+                    " - ${directionsCandidates.size} candidates: \n" +
+                    "---------- \n" +
+                    "- 0: Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.tripIdInts, limit = -1)}: \n" +
+                    "   -> Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(0)?.stopIdInts, limit = -1)} \n" +
+                    "---------- \n" +
+                    "- 1: Trips: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.tripIdInts, limit = -1)}: \n" +
+                    "   -> Stops: ${GIDs.toStringPlus(directionsCandidates.getOrNull(1)?.stopIdInts, limit = -1)} \n" +
+                    "---------- \n" +
+                    "!"
             )
         }
         return directionsCandidates
