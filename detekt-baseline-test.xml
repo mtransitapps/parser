@@ -4,17 +4,7 @@
   <CurrentIssues>
     <ID>LargeClass:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest</ID>
     <ID>LongMethod:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest$@Test fun testFindDirectionHeadSign_DistinctLastStopNoClearWinnerMerge</ID>
-    <ID>LongParameterList:GTestsFixtures.kt:fun makeGRoute</ID>
     <ID>LongParameterList:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest$@Suppress("SameParameterValue") private fun makeGTrip</ID>
-    <ID>LongParameterList:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest$private fun makeGStopTime</ID>
-    <ID>NewLineAtEndOfFile:CollectionsExtTest.kt:org.mtransit.commons.CollectionsExtTest.kt</ID>
-    <ID>NewLineAtEndOfFile:MAgencyTests.kt:org.mtransit.parser.mt.data.MAgencyTests.kt</ID>
-    <ID>NewLineAtEndOfFile:MDirectionHeadSignFinderTest.kt:org.mtransit.parser.mt.MDirectionHeadSignFinderTest.kt</ID>
-    <ID>NewLineAtEndOfFile:MDirectionSplitterTest.kt:org.mtransit.parser.mt.MDirectionSplitterTest.kt</ID>
-    <ID>NewLineAtEndOfFile:MGeneratorTest.kt:org.mtransit.parser.mt.MGeneratorTest.kt</ID>
-    <ID>NewLineAtEndOfFile:MRouteSNToIDConverterTest.kt:org.mtransit.parser.mt.data.MRouteSNToIDConverterTest.kt</ID>
-    <ID>NewLineAtEndOfFile:MServiceDateTest.kt:org.mtransit.parser.mt.data.MServiceDateTest.kt</ID>
-    <ID>NewLineAtEndOfFile:TimeUtilsTest.kt:org.mtransit.parser.TimeUtilsTest.kt</ID>
     <ID>UseOrEmpty:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest$it.arguments[0] as? String ?: ""</ID>
   </CurrentIssues>
 </SmellBaseline>

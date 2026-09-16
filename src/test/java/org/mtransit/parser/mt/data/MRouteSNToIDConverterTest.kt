@@ -62,7 +62,9 @@ class MRouteSNToIDConverterTest {
         val previousCharsToLong: (String) -> Long? = { previous ->
             if ("CUSTOM" == previous) {
                 77L * MRouteSNToIDConverter.PREVIOUS
-            } else null
+            } else {
+                null
+            }
         }
         // Act
         val result = MRouteSNToIDConverter.convert(rsn, previousCharsToLong = previousCharsToLong)
@@ -77,7 +79,9 @@ class MRouteSNToIDConverterTest {
         val nextCharsToLong: (String) -> Long? = { next ->
             if ("CUSTOM" == next) {
                 77L * MRouteSNToIDConverter.NEXT
-            } else null
+            } else {
+                null
+            }
         }
         // Act
         val result = MRouteSNToIDConverter.convert(rsn, nextCharsToLong = nextCharsToLong)
@@ -92,12 +96,16 @@ class MRouteSNToIDConverterTest {
         val previousCharsToLong: (String) -> Long? = { previous ->
             if ("AA" == previous) {
                 11L * MRouteSNToIDConverter.PREVIOUS
-            } else null
+            } else {
+                null
+            }
         }
         val nextCharsToLong: (String) -> Long? = { next ->
             if ("ZZ" == next) {
                 99L * MRouteSNToIDConverter.NEXT
-            } else null
+            } else {
+                null
+            }
         }
         // Act
         val result = MRouteSNToIDConverter.convert(rsn, previousCharsToLong = previousCharsToLong, nextCharsToLong = nextCharsToLong)
@@ -112,7 +120,9 @@ class MRouteSNToIDConverterTest {
         val notSupportedToRouteId: (String) -> Long? = { previous ->
             if (rsn == previous) {
                 123456789L
-            } else null
+            } else {
+                null
+            }
         }
         // Act
         val result = MRouteSNToIDConverter.convert(rsn, notSupportedToRouteId = notSupportedToRouteId)
@@ -127,7 +137,9 @@ class MRouteSNToIDConverterTest {
         val notSupportedToRouteId: (String) -> Long? = { previous ->
             if (rsn == previous) {
                 -1L
-            } else null
+            } else {
+                null
+            }
         }
         // Act
         val result = MRouteSNToIDConverter.convert(rsn, notSupportedToRouteId = notSupportedToRouteId)
