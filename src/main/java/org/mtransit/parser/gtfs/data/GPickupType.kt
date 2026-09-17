@@ -36,10 +36,7 @@ enum class GPickupType(val id: Int) {
                 try {
                     parse(id.toInt())
                 } catch (nfe: NumberFormatException) {
-                    throw MTLog.Fatal(
-                        nfe,
-                        "Error while parsing '\$id' as pickup type!"
-                    )
+                    throw MTLog.Fatal(nfe, "Error while parsing '$id' as pickup type!")
                 }
             }
         }

@@ -24,7 +24,7 @@ data class MSpec(
 
     val isValid: Boolean
         get() = (
-            hasAgencies() && hasServiceDates() && hasRoutes() && hasDirections() && hasDirectionStops() && hasStops() //
+            hasAgencies() && hasServiceDates() && hasRoutes() && hasDirections() && hasDirectionStops() && hasStops()
                 && (hasStopSchedules() || hasRouteFrequencies())
             )
 

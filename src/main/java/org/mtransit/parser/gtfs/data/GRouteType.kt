@@ -27,7 +27,7 @@ enum class GRouteType(
     companion object {
 
         @JvmStatic
-        fun isUnknown(routeType: Int): Boolean = entries.toTypedArray().none { it.id == routeType }
+        fun isUnknown(routeType: Int) = entries.toTypedArray().none { it.id == routeType }
 
         @JvmStatic
         fun isSameType(agencyRouteType: Int, routeType: Int): Boolean {

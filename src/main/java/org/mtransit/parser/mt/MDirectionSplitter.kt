@@ -71,8 +71,7 @@ object MDirectionSplitter {
             gTrip.tripIdInt to stopTimes.map { it.stopIdInt }
         }.filterNot { (_, stopTimes) ->
             stopTimes.isEmpty() // exclude trips w/o stop times
-        }.sortedByDescending { (_, stopTimes) ->
-            // longest first to avoid no intersect between trips
+        }.sortedByDescending { (_, stopTimes) -> // longest first to avoid no intersect between trips
             stopTimes.size
         }
         val directionsCandidates = splitDirections(routeId, gTripIdIntStopIdInts)

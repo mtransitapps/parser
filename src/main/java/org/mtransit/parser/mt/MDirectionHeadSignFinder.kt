@@ -221,8 +221,7 @@ object MDirectionHeadSignFinder {
                 Triple(routeIdInt, headSign, stopTimes)
             }.filterNot { (_, _, stopTimes) ->
                 stopTimes.isEmpty() // exclude trips w/o stop times
-            }.sortedByDescending { (_, _, stopTimes) ->
-                // longest first to avoid no intersect between trips
+            }.sortedByDescending { (_, _, stopTimes) -> // longest first to avoid no intersect between trips
                 stopTimes.size
             }
         // 0 - check if merge necessary at all
@@ -342,10 +341,10 @@ object MDirectionHeadSignFinder {
             MTLog.log(
                 "$routeId: $directionId: '$headSign':" +
                     (if (Constants.DEBUG) "\n" else "") + " ${stopTimes.size} stops: ${
-                        stopTimes.map { gStopTime ->
-                            (if (Constants.DEBUG) "\n    - " else "") + gStopTime.toStringPlus(false)
-                        }
-                    }"
+                    stopTimes.map { gStopTime ->
+                        (if (Constants.DEBUG) "\n    - " else "") + gStopTime.toStringPlus(false)
+                    }
+                }"
             )
         }
         distinctTripHeadSignAndStopTimes.sortByDescending { it.gStopTimes.size }
@@ -508,20 +507,20 @@ object MDirectionHeadSignFinder {
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2FirstStop.stopIdInt
                     lastCommonStopIdInt = stopTimesList1LastStop.stopIdInt to stopTimesList2LastStop.stopIdInt
                 } else if ((
-                    stopNameList1First == stopNameList2First
-                        || (prefix1First2First.length >= minFixLength1First2First && prefix1First2First.length > suffix1First2First.length)
-                        || (suffix1First2First.length >= minFixLength1First2First && suffix1First2First.length > prefix1First2First.length)
-                    )
+                        stopNameList1First == stopNameList2First
+                            || (prefix1First2First.length >= minFixLength1First2First && prefix1First2First.length > suffix1First2First.length)
+                            || (suffix1First2First.length >= minFixLength1First2First && suffix1First2First.length > prefix1First2First.length)
+                        )
                 ) {
                     // almost 1 common stop is #1 first & #2 first (prefix/suffix)
                     firstCommonStopIdInt = stopTimesList1FirstStop.stopIdInt to stopTimesList2FirstStop.stopIdInt
                     lastCommonStopIdInt = firstCommonStopIdInt
                 } else if (
                     (
-                    stopNameList1Last == stopNameList2Last
-                        || (prefix1Last2Last.length >= minFixLength1Last2Last && prefix1Last2Last.length > suffix1First2Last.length)
-                        || (suffix1Last2Last.length >= minFixLength1Last2Last && suffix1Last2Last.length > prefix1First2Last.length)
-                    )
+                        stopNameList1Last == stopNameList2Last
+                            || (prefix1Last2Last.length >= minFixLength1Last2Last && prefix1Last2Last.length > suffix1First2Last.length)
+                            || (suffix1Last2Last.length >= minFixLength1Last2Last && suffix1Last2Last.length > prefix1First2Last.length)
+                        )
                 ) {
                     // almost 1 common stop is #1 last & #2 last (prefix/suffix)
                     lastCommonStopIdInt = stopTimesList1LastStop.stopIdInt to stopTimesList2LastStop.stopIdInt
@@ -1132,10 +1131,10 @@ object MDirectionHeadSignFinder {
             && (
                 forceMerge // force merge
                     || (
-                        stopIdIntsBeforeCommon.isEmpty() // has stops before common
-                            && stopIdIntsBeforeCommonPrepend.isNotEmpty()
-                        )
-                ) // prepend do NOT have stops before common
+                    stopIdIntsBeforeCommon.isEmpty() // has stops before common
+                        && stopIdIntsBeforeCommonPrepend.isNotEmpty() // prepend do NOT have stops before common
+                    )
+                )
         ) {
             stopTimesList
                 .toMutableList()

@@ -459,13 +459,11 @@ object DBUtils {
         // SERVICE ID
         serviceIdInt?.let {
             @Suppress("KotlinConstantConditions")
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.SERVICE_ID} = $serviceIdInt"
         }
         serviceIdInts?.let {
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.SERVICE_ID} IN ${
                 serviceIdInts
                     .distinct()
@@ -478,13 +476,11 @@ object DBUtils {
         }
         // DIRECTION ID
         directionId?.let {
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.DIRECTION_ID} = $directionId"
         }
         directionIds?.let {
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.DIRECTION_ID} IN ${
                 directionIds
                     .distinct()
@@ -497,13 +493,11 @@ object DBUtils {
         }
         // STOP ID
         stopIdInt?.let {
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.STOP_ID} = $stopIdInt"
         }
         stopIdInts?.let {
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.STOP_ID} IN ${
                 stopIdInts
                     .distinct()
@@ -516,13 +510,11 @@ object DBUtils {
         }
         // ARRIVAL & DEPARTURE
         arrival?.let {
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.ARRIVAL} = $arrival"
         }
         departure?.let {
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.DEPARTURE} = $departure"
         }
         query += " ORDER BY " +
@@ -576,30 +568,25 @@ object DBUtils {
         var whereAdded = false
         serviceIdInt?.let {
             @Suppress("KotlinConstantConditions")
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.SERVICE_ID} = $serviceIdInt"
         }
         directionId?.let {
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.DIRECTION_ID} = $directionId"
         }
         // STOP ID
         stopIdInt?.let {
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.STOP_ID} = $stopIdInt"
         }
         // ARRIVAL & DEPARTURE
         arrival?.let {
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.ARRIVAL} = $arrival"
         }
         departure?.let {
-            query += if (whereAdded) " AND" else " WHERE"
-            whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
             query += " ${MSchedule.DEPARTURE} = $departure"
         }
         deleteCount++
