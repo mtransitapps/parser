@@ -329,8 +329,8 @@ data class RouteConfig(
 
     fun getRouteShortNameForRoute(gRoute: GRoute): String? {
         //noinspection DiscouragedApi
-        val config = (this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeId == it.routeId }
-            ?: this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName })
+        val config = this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeId == it.routeId }
+            ?: this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName }
         return config?.routeShortName
     }
 
