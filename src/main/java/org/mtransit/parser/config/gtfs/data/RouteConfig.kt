@@ -294,23 +294,23 @@ data class RouteConfig(
         this.keepRoutes.any {
             //noinspection DiscouragedApi
             (it.routeId != null && gRoute.routeId == it.routeId)
-                    || (it.routeShortName != null && gRoute.routeShortName == it.routeShortName)
-                    || (it.parsedRouteShortNameRegex?.matches(gRoute.routeShortName) == true)
+                || (it.routeShortName != null && gRoute.routeShortName == it.routeShortName)
+                || (it.parsedRouteShortNameRegex?.matches(gRoute.routeShortName) == true)
         }
 
     fun excludeRoutes(gRoute: GRoute) =
         this.excludeRoutes.any {
             //noinspection DiscouragedApi
             (it.routeId != null && gRoute.routeId == it.routeId)
-                    || (it.routeShortName != null && gRoute.routeShortName == it.routeShortName)
-                    || (it.parsedRouteShortNameRegex?.matches(gRoute.routeShortName) == true)
+                || (it.routeShortName != null && gRoute.routeShortName == it.routeShortName)
+                || (it.parsedRouteShortNameRegex?.matches(gRoute.routeShortName) == true)
         }
 
     fun overrideRouteType(originalRouteId: String?): Int? {
         return this.routeTypeOverrideConfigs
             .singleOrNull { config ->
                 config.originalRouteId == originalRouteId
-                        || originalRouteId?.let { config.parsedOriginalRouteIdRegex?.matches(originalRouteId) } == true
+                    || originalRouteId?.let { config.parsedOriginalRouteIdRegex?.matches(originalRouteId) } == true
             }
             ?.routeType
     }
@@ -327,20 +327,21 @@ data class RouteConfig(
         this.routeIdPreviousCharConfigs
             .singleOrNull { it.char == previousChars }?.idPart
 
-    fun getRouteShortNameForRoute(gRoute: GRoute) =
+    fun getRouteShortNameForRoute(gRoute: GRoute): String? {
         //noinspection DiscouragedApi
-        (this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeId == it.routeId }
-            ?: this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName })
-            ?.routeShortName
+        val config = this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeId == it.routeId }
+            ?: this.routeToRouteShortNameConfigs.singleOrNull { gRoute.routeLongNameOrDefault == it.routeLongName }
+        return config?.routeShortName
+    }
 
     fun getRouteColor(gRoute: GRoute) =
         //noinspection DiscouragedApi
         this.routeColors.firstOrNull { // order is important, 1st config match found wins
             it.routeId == gRoute.routeId
-                    || it.routeShortName == gRoute.routeShortName
-                    || it.routeLongName == gRoute.routeLongNameOrDefault
-                    || it.originalRouteColor?.let { originalRouteColor -> originalRouteColor == gRoute.routeColor } == true
-                    || it.parsedRouteShortNameRegex?.containsMatchIn(gRoute.routeShortName) == true
+                || it.routeShortName == gRoute.routeShortName
+                || it.routeLongName == gRoute.routeLongNameOrDefault
+                || it.originalRouteColor?.let { originalRouteColor -> originalRouteColor == gRoute.routeColor } == true
+                || it.parsedRouteShortNameRegex?.containsMatchIn(gRoute.routeShortName) == true
         }?.color
 
     fun isRouteColorIgnored(routeColor: String) =
@@ -451,21 +452,21 @@ data class RouteConfig(
     private fun cleanString(lang: Locale, originalString: String, cleaners: List<Cleaner>): String {
         if (cleaners.isEmpty()) return originalString
         var string = originalString
-        cleaners.forEach {
-            if (it.regex.isEmpty()) return@forEach
+        cleaners.forEach { cleaner ->
+            if (cleaner.regex.isEmpty()) return@forEach
             val regexOptions = mutableSetOf<RegexOption>()
-            if (it.ignoreCase) {
+            if (cleaner.ignoreCase) {
                 regexOptions.add(RegexOption.IGNORE_CASE)
             }
             string = when {
-                it.isWord -> {
-                    val pattern =
-                        if (lang.language == Locale.FRENCH.language) CleanUtils.cleanWordsFR(it.regex)
-                        else CleanUtils.cleanWords(it.regex)
-                    pattern.matcher(string).replaceAll(CleanUtils.cleanWordsReplacement(it.replacement))
+                cleaner.isWord -> {
+                    cleaner.regex.let {
+                        if (lang.language == Locale.FRENCH.language) return@let CleanUtils.cleanWordsFR(it)
+                        return@let CleanUtils.cleanWords(it)
+                    }.matcher(string).replaceAll(CleanUtils.cleanWordsReplacement(cleaner.replacement))
                 }
 
-                else -> it.regex.toRegex(regexOptions).replace(string, it.replacement)
+                else -> cleaner.regex.toRegex(regexOptions).replace(string, cleaner.replacement)
             }
         }
         return string

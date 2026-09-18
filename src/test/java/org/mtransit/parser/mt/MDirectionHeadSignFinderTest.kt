@@ -484,11 +484,11 @@ class MDirectionHeadSignFinderTest {
             )
         whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId3), null, null))
             .thenReturn(
-                makeGStopTimeList(tripId3, 1, 7)  // WRONG data: should be 5 stops OR other "trip head-sign",
+                makeGStopTimeList(tripId3, 1, 7) // WRONG data: should be 5 stops OR other "trip head-sign",
             )
         whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId4), null, null))
             .thenReturn(
-                makeGStopTimeList(tripId4, 1, 7)  // WRONG data: should be 5 stops OR other "trip head-sign",
+                makeGStopTimeList(tripId4, 1, 7) // WRONG data: should be 5 stops OR other "trip head-sign",
             )
         whenever(routeGTFS.getStopTimes(RID, GIDs.getInt(tripId5), null, null))
             .thenReturn(
@@ -824,7 +824,7 @@ class MDirectionHeadSignFinderTest {
         assertEquals(false, result?.firstAndLast?.let { GTime.arePM(it) } == true)
     }
 
-    @Suppress("SameParameterValue")
+    @Suppress("SameParameterValue", "LongParameterList")
     private fun makeGTrip(
         routeId: String,
         serviceId: String,

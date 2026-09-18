@@ -63,8 +63,8 @@ data class GStop(
     fun toStringPlus(debug: Boolean = Constants.DEBUG) =
         if (debug) { // longer
             toString() +
-                    "+(stopId:$_stopId)" +
-                    "+(parent:$_parentStationId)"
+                "+(stopId:$_stopId)" +
+                "+(parent:$_parentStationId)"
         } else { // shorter #CI
             "{s:$_stopId${
                 if (stopCode.isNotBlank() && stopCode != _stopId) {

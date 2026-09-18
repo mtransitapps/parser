@@ -36,11 +36,11 @@ object MReader {
 
     private fun getResDirName(fileBase: String? = null): String {
         return "$MAIN_SRC_DIR/" +
-                when {
-                    CURRENT_.equals(fileBase, ignoreCase = true) -> "$RES-current"
-                    NEXT_.equals(fileBase, ignoreCase = true) -> "$RES-next"
-                    else -> RES
-                }
+            when {
+                CURRENT_.equals(fileBase, ignoreCase = true) -> "$RES-current"
+                NEXT_.equals(fileBase, ignoreCase = true) -> "$RES-next"
+                else -> RES
+            }
     }
 
     // endregion
@@ -123,9 +123,11 @@ object MReader {
         readFileMerge("service dates", fileBase, MGenerator.GTFS_SCHEDULE_SERVICE_DATES) { MServiceDate.fromFileLine(it) }
 
     private fun <T> readFile(type: String, fileBase: String, fileName: String, transform: (String) -> T?): List<T>? = try {
-        (File("${getResDirName(fileBase)}/$RAW/${fileBase}$fileName").takeIf { it.exists() }
-            ?: CURRENT_.takeIf { NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() }
-            ?: "".takeIf { CURRENT_ == fileBase || NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() })
+        (
+            File("${getResDirName(fileBase)}/$RAW/${fileBase}$fileName").takeIf { it.exists() }
+                ?: CURRENT_.takeIf { NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() }
+                ?: "".takeIf { CURRENT_ == fileBase || NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() }
+            )
             ?.readLines()
             ?.mapNotNull { transform(it) }
             ?: run {
@@ -139,9 +141,11 @@ object MReader {
 
     @Suppress("SameParameterValue")
     private fun <T> readFileMerge(type: String, fileBase: String, fileName: String, transform: (String) -> List<T>?): List<T>? = try {
-        (File("${getResDirName(fileBase)}/$RAW/${fileBase}$fileName").takeIf { it.exists() }
-            ?: CURRENT_.takeIf { NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() }
-            ?: "".takeIf { CURRENT_ == fileBase || NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() })
+        (
+            File("${getResDirName(fileBase)}/$RAW/${fileBase}$fileName").takeIf { it.exists() }
+                ?: CURRENT_.takeIf { NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() }
+                ?: "".takeIf { CURRENT_ == fileBase || NEXT_ == fileBase }?.let { File("${getResDirName(it)}/$RAW/${it}$fileName") }?.takeIf { it.exists() }
+            )
             ?.readLines()
             ?.mapNotNull { transform(it) }
             ?.flatten()
