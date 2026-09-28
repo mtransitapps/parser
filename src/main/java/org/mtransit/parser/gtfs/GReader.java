@@ -282,7 +282,7 @@ public class GReader {
 		line = reader.readLine();
 		if (line == null || line.isEmpty()) return 0;
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
-			MTLog.log("Reading file '%s'... > remove 1st empty char", filename);
+			MTLog.log("Reading file '%s'... > remove 1st empty char", filename);
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
 		CSVRecord lineRecordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
@@ -419,7 +419,7 @@ public class GReader {
 
 	private static void processAgency(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final GAgency gAgency = GAgency.fromLine(line, AVAILABLE_TIME_ZONE_IDS);
+			final GAgency gAgency = GAgency.fromLine(line, AVAILABLE_TIME_ZONE_IDS, agencyTools.getAgencyDefaultLanguage());
 			if (agencyTools.excludeAgency(gAgency)) {
 				MTLog.logDebug("processAgency() > SKIP (exclude agency)");
 				return;

@@ -46,6 +46,9 @@ public interface GAgencyTools {
 
 	void addSupportedLanguage(@Nullable String supportedLanguage);
 
+	@Nullable
+	String getAgencyDefaultLanguage();
+
 	/**
 	 * @return sorted supported languages (1st = primary language)
 	 */
