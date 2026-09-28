@@ -222,7 +222,14 @@ public class DefaultAgencyTools implements GAgencyTools {
 	@Override
 	public List<Locale> getSupportedLanguages() {
 		if (this.allLanguages != null) return this.allLanguages; // cached
-		if (this.agencySupportedLanguages.isEmpty()) return null; // no-op
+		if (this.agencySupportedLanguages.isEmpty()) {
+			final String defaultLanguage = Configs.getAgencyConfig() == null ? null : Configs.getAgencyConfig().getAgencyDefaultLanguage();
+			if (defaultLanguage != null) {
+				addSupportedLanguage(defaultLanguage);
+			} else {
+				return null; // no-op
+			}
+		}
 		if (Configs.getAgencyConfig() != null) {
 			this.allLanguages = Configs.getAgencyConfig().getAllLanguages(this.agencySupportedLanguages);
 		} else {
