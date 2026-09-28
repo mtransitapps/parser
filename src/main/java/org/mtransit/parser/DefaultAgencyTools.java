@@ -218,6 +218,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 		this.allLanguages = null; // invalidate cached supported languages
 	}
 
+	@Override
+	public @Nullable String getAgencyDefaultLanguage() {
+		return Configs.getAgencyConfig() == null ? null : Configs.getAgencyConfig().getAgencyDefaultLanguage();
+	}
+
 	@Nullable
 	@Override
 	public List<Locale> getSupportedLanguages() {
