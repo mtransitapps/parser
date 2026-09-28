@@ -89,7 +89,7 @@ data class GAgency(
             agencyTimezone = line[AGENCY_TIMEZONE]?.trim()
                 ?.takeIf { availableZoneIds.contains(it) }
                 ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
-            agencyLang = line[AGENCY_LANG]?.takeIf { it.isNotBlank() } ?: defaultLanguage,
+            agencyLang = line[AGENCY_LANG]?.takeIf { it.isNotBlank() } ?: defaultLanguage?.takeIf { it.isNotBlank() },
             agencyPhone = line[AGENCY_PHONE],
             agencyFareUrl = line[AGENCY_FARE_URL],
             agencyEmail = line[AGENCY_EMAIL],
