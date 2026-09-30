@@ -235,6 +235,8 @@ data class RouteConfig(
         val routeShortNameRegex: String? = null,
         @SerialName("route_long_name")
         val routeLongName: String? = null,
+        @SerialName("route_long_name_regex")
+        val routeLongNameRegex: String? = null,
         @SerialName("original_route_color")
         val originalRouteColor: String? = null,
         @SerialName("color")
@@ -242,6 +244,9 @@ data class RouteConfig(
     ) {
         internal val parsedRouteShortNameRegex by lazy {
             routeShortNameRegex?.takeIf { it.isNotBlank() }?.toRegex(RegexOption.IGNORE_CASE)
+        }
+        internal val parsedRouteLongNameRegex by lazy {
+            routeLongNameRegex?.takeIf { it.isNotBlank() }?.toRegex(RegexOption.IGNORE_CASE)
         }
     }
 
@@ -341,6 +346,7 @@ data class RouteConfig(
                 || it.routeLongName == gRoute.routeLongNameOrDefault
                 || it.originalRouteColor?.let { originalRouteColor -> originalRouteColor == gRoute.routeColor } == true
                 || it.parsedRouteShortNameRegex?.containsMatchIn(gRoute.routeShortName) == true
+                || it.parsedRouteLongNameRegex?.containsMatchIn(gRoute.routeLongNameOrDefault) == true
         }?.color
 
     fun isRouteColorIgnored(routeColor: String) =

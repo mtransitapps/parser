@@ -29,6 +29,8 @@ data class AgencyConfig(
     val originalRouteTypeId: Int = targetRouteTypeId, // OPTIONAL (default to target route type ID)
     @SerialName("extended_target_route_type_id")
     val extendedTargetRouteTypeId: Int? = null, // OPTIONAL
+    @SerialName("agency_default_language")
+    val agencyDefaultLanguage: String? = null, // optional (if not provided in agency.txt)
     @SerialName("additional_languages")
     val additionalLanguages: List<String> = emptyList(), // OPT-IN feature
     // STRINGS
