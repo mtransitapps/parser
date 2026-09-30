@@ -4,7 +4,6 @@ import androidx.annotation.Discouraged
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.mtransit.commons.CleanUtils
-import org.mtransit.commons.StringUtils.EMPTY
 import org.mtransit.commons.toIntOrNull
 import org.mtransit.parser.gtfs.data.GRoute
 import org.mtransit.parser.gtfs.data.GStopTime
@@ -367,10 +366,10 @@ data class RouteConfig(
     fun cleanStopHeadsign(gRoute: GRoute, gTrip: GTrip, @Suppress("unused") gStopTime: GStopTime, stopHeadsign: String): String {
         if (stopHeadsign.isEmpty()) return stopHeadsign
         if (stopHeadsignRemoveTripHeadsign && stopHeadsign == gTrip.tripHeadsign) {
-            return EMPTY
+            return ""
         }
         if (stopHeadsignRemoveRouteLongName && stopHeadsign == gRoute.routeLongName) {
-            return EMPTY
+            return ""
         }
         stopHeadsignRemoveRouteLongNameCleaner?.takeIf { gRoute.routeLongNameOrDefault.isNotBlank() }?.let {
             val regexOptions = mutableSetOf<RegexOption>()
@@ -426,7 +425,7 @@ data class RouteConfig(
 
     fun provideMissingTripHeadSign(gTrip: GTrip, defaultHeadsign: String) =
         //noinspection DiscouragedApi
-        this.tripHeadsignFromOriginalRouteIdRegex?.toRegex()?.replace(gTrip.originalRouteId, EMPTY)
+        this.tripHeadsignFromOriginalRouteIdRegex?.toRegex()?.replace(gTrip.originalRouteId, "")
             ?: defaultHeadsign
 
     fun cleanDirectionHeadsign(lang: Locale, directionHeadsign: String): String {

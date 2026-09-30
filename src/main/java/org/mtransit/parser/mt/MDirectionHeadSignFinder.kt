@@ -1,7 +1,6 @@
 package org.mtransit.parser.mt
 
 import org.jetbrains.annotations.VisibleForTesting
-import org.mtransit.commons.StringUtils.EMPTY
 import org.mtransit.commons.containsExactList
 import org.mtransit.commons.indexOf
 import org.mtransit.commons.lastIndexOf
@@ -170,7 +169,7 @@ object MDirectionHeadSignFinder {
                         break
                     }
                 }
-                stopTimesDirectionHeadSigns[directionId] = cleanDirectionHeadsign ?: EMPTY
+                stopTimesDirectionHeadSigns[directionId] = cleanDirectionHeadsign.orEmpty()
             }
             if (stopTimesDirectionHeadSigns.size == directionHeadSigns.size
                 && agencyTools.directionHeadSignsDescriptive(stopTimesDirectionHeadSigns)
@@ -216,7 +215,7 @@ object MDirectionHeadSignFinder {
             }.map { gTrip ->
                 val routeIdInt = gTrip.routeIdInt
                 val headSign = gTrip.tripHeadsign
-                    ?.let { agencyTools.cleanDirectionHeadsign(routeGTFS.getRoute(routeIdInt), directionId, false, true, false, it) } ?: EMPTY
+                    ?.let { agencyTools.cleanDirectionHeadsign(routeGTFS.getRoute(routeIdInt), directionId, false, true, false, it) }.orEmpty()
                 val stopTimes = routeGTFS.getStopTimes(routeId, gTrip.tripIdInt, null, null)
                 Triple(routeIdInt, headSign, stopTimes)
             }.filterNot { (_, _, stopTimes) ->
@@ -907,8 +906,7 @@ object MDirectionHeadSignFinder {
                     && tripHeadSignCounts2 != 0 // not-merged
                     && abs(tripHeadSignCounts2 - tripHeadSignCounts1) <= minHeadSignCountsDiff
                 ) {
-                    val merged = MDirection.mergeHeadsignValue(stopTimesHeadSign1, stopTimesHeadSign2)
-                        ?: EMPTY
+                    val merged = MDirection.mergeHeadsignValue(stopTimesHeadSign1, stopTimesHeadSign2).orEmpty()
                     logMerge(!dataLossAuthorized, "$routeId: $directionId: merge #1 / #2 head-signs -> '$merged'")
                     return MergedTrip(
                         routeIdInts1, routeIdInts2,

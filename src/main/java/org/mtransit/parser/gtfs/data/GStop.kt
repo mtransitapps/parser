@@ -1,7 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
-import org.mtransit.commons.StringUtils.EMPTY
 import org.mtransit.commons.gtfs.data.Stop
 import org.mtransit.commons.gtfs.data.StopId
 import org.mtransit.parser.Constants
@@ -133,7 +132,7 @@ data class GStop(
             stopName = line[STOP_NAME] ?: throw MTLog.Fatal("Invalid GStop from $line!"),
             stopLat = line[STOP_LAT]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),
             stopLong = line[STOP_LON]?.toDouble() ?: throw MTLog.Fatal("Invalid GStop from $line!"),
-            stopCode = line[STOP_CODE]?.trim() ?: EMPTY,
+            stopCode = line[STOP_CODE]?.trim().orEmpty(),
             locationType = line[LOCATION_TYPE]?.takeIf { it.isNotBlank() }?.toInt(),
             parentStationId = line[PARENT_STATION]?.takeIf { it.isNotBlank() }?.trim()
                 ?.let { agencyTools?.cleanStopOriginalId(it) ?: it },
@@ -158,7 +157,7 @@ data class GStop(
                 stopName = it.stopName,
                 stopLat = it.stopLat,
                 stopLong = it.stopLon,
-                stopCode = it.stopCode ?: EMPTY,
+                stopCode = it.stopCode.orEmpty(),
                 locationType = it.locationType,
                 parentStationId = it.parentStationId,
                 stopTimezone = it.stopTimezone,
