@@ -131,7 +131,7 @@ object MDirectionHeadSignFinder {
                 val gRoute = directionRouteIdInts[directionId].takeIf { it?.size == 1 }?.getOrNull(0)?.let { routeGTFS.getRoute(it) }
                 lastStopDirectionHeadSigns[directionId] =
                     agencyTools.cleanDirectionHeadsign(gRoute, directionId, true, false, false, agencyTools.cleanStopName(stop.stopName))
-                MTLog.logDebug("$routeId: $directionId Stop '${stop.toStringPlus(false)}' > '${lastStopDirectionHeadSigns[directionId]}'.")
+                MTLog.logDebug("$routeId: $directionId: last stop '${stop.toStringPlus(false)}' > '${lastStopDirectionHeadSigns[directionId]}'.")
             }
             val allDirectionHeadSignsEmpty: Boolean = directionHeadSigns
                 .map { (_, headSign) -> headSign }
