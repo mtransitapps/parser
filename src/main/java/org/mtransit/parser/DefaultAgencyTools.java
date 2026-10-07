@@ -1453,10 +1453,11 @@ public class DefaultAgencyTools implements GAgencyTools {
 			if (useStopIdHashCode()) {
 				return Math.abs(gStopId.hashCode());
 			}
-			final String stopCode = cleanStopCode(gStop.getStopCode());
+			final String originalStopCode = gStop.getStopCode();
+			final String stopCode = cleanStopCode(originalStopCode);
 			//noinspection DiscouragedApi
 			final String stopIdS =
-					useStopCodeForStopId() ? stopCode
+					useStopCodeForStopId() ? (stopCode.isEmpty() ? originalStopCode : stopCode)
 							: Configs.getRouteConfig().getUseStopCodeForStopIdIfAvailable() && !stopCode.isBlank() ? stopCode
 							  : useStopCodeForStopIdDigitsOnly() && CharUtils.isDigitsOnly(stopCode, true) ? stopCode
 								: gStopId;
