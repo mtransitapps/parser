@@ -413,7 +413,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 
 	@Override
 	public boolean excludeAgency(@NotNull GAgency gAgency) {
-		final org.mtransit.parser.config.gtfs.data.AgencyConfig agencyConfig = Configs.getAgencyConfig();
+		final AgencyConfig agencyConfig = Configs.getAgencyConfig();
 		if (agencyConfig == null) {
 			return KEEP;
 		}
