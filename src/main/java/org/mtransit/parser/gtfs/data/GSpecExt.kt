@@ -9,7 +9,7 @@ import org.mtransit.parser.gtfs.data.GTrip.Companion.updateDirectionId
 fun GSpec.getRoute(gTrip: GTrip) = this.getRoute(gTrip.routeIdInt)
 
 fun GSpec.updateTripDirectionId(directionId: Int, tripIdInts: Collection<Int>?) {
-    tripIdInts ?: return
+    tripIdInts?.takeIf { it.isNotEmpty() } ?: return
     if (!USE_DB_ONLY) {
         tripIdInts
             .mapNotNull { getTripRouteId(it) }
@@ -44,7 +44,7 @@ fun GSpec.fixMissingTripDirectionIds() {
                 }
             }
     }
-    MTLog.log("Try fixing GTFS trips w/o direction IDs... DONE (%d fixed trips with direction ID)", tripIdDirectionFixed)
+    MTLog.log("Try fixing GTFS trips w/o direction IDs... DONE (fixed %d trips w/o direction ID)", tripIdDirectionFixed)
 }
 
 val GSpec.calendarsMinStartDate: Int? get() = this.allCalendars.takeIf { it.isNotEmpty() }?.minByOrNull { it.startDate }?.startDate
