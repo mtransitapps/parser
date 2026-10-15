@@ -1,7 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
-import org.mtransit.commons.StringUtils
 import org.mtransit.commons.gtfs.data.Trip
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -46,8 +45,14 @@ data class GTrip(
         bikesAllowed = bikesAllowed,
     )
 
-    val directionId: Int?
-        get() = directionIdE.originalId() // optional
+    @set:Discouraged(message = "Should not be changed")
+    var directionId: Int?
+        get() {
+            return directionIdE.originalId() // optional
+        }
+        private set(value) {
+            this.directionIdE = GDirectionId.parse(value)
+        }
 
     @Suppress("unused")
     val directionIdOrDefault: Int
@@ -57,19 +62,13 @@ data class GTrip(
     val directionIdOrOriginal: Int?
         get() = directionIdE.originalId()
 
-    @Suppress("unused")
-    @Discouraged(message = "Should not be changed")
-    fun setDirectionId(newDirectionId: Int?) {
-        this.directionIdE = GDirectionId.parse(newDirectionId)
-    }
-
     fun hasTripHeadsign() = !this.tripHeadsign.isNullOrBlank()
 
     @Suppress("unused")
-    val tripHeadsignOrDefault: String = tripHeadsign ?: StringUtils.EMPTY
+    val tripHeadsignOrDefault: String = tripHeadsign.orEmpty()
 
     @Suppress("unused")
-    val tripShortNameOrDefault: String = tripShortName ?: StringUtils.EMPTY
+    val tripShortNameOrDefault: String = tripShortName.orEmpty()
 
     val uID by lazy { getNewUID(routeIdInt, tripIdInt) }
 
@@ -214,23 +213,12 @@ data class GTrip(
         }
 
         @JvmStatic
-        fun updateDirectionIdForTrips(gTrips: MutableList<GTrip>, tripIdInts: Collection<Int>, directionId: Int): List<GTrip> {
-            return updateList(
-                gTrips = gTrips,
-                condition = { tripIdInts.contains(it.tripIdInt) },
-                updateTrip = { it.copy(directionIdE = GDirectionId.parse(directionId)) }
-            )
-        }
-
-        fun updateList(gTrips: MutableList<GTrip>, condition: (GTrip) -> Boolean, updateTrip: (GTrip) -> GTrip): List<GTrip> {
-            for (i in 0 until gTrips.size) {
-                val gTrip = gTrips[i]
-                if (condition(gTrip)) {
-                    gTrips[i] = updateTrip(gTrip)
-                }
+        fun MutableList<GTrip>.updateDirectionId(tripIdInts: Set<Int>, directionId: Int) {
+            val directionIdE = GDirectionId.parse(directionId)
+            replaceAll { gTrip ->
+                if (gTrip.tripIdInt !in tripIdInts) return@replaceAll gTrip
+                gTrip.copy(directionIdE = directionIdE)
             }
-
-            return gTrips
         }
     }
 }
