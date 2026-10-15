@@ -22,10 +22,12 @@ enum class GTimePoint(val id: Int) {
         fun parse(id: String?): GTimePoint {
             return if (id == null || id.isEmpty()) { // that's OK
                 EXACT // default
-            } else try {
-                parse(id.toInt())
-            } catch (nfe: NumberFormatException) {
-                throw MTLog.Fatal(nfe, "Error while parsing '$id' as time point!")
+            } else {
+                try {
+                    parse(id.toInt())
+                } catch (nfe: NumberFormatException) {
+                    throw MTLog.Fatal(nfe, "Error while parsing '$id' as time point!")
+                }
             }
         }
     }

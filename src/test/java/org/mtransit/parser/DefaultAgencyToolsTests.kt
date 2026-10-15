@@ -2,7 +2,6 @@ package org.mtransit.parser
 
 import org.mtransit.parser.config.Configs
 import org.mtransit.parser.config.gtfs.data.RouteConfig
-import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.mt.data.makeGRoute
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -15,12 +14,11 @@ class DefaultAgencyToolsTests {
         private const val TODAY_DATE = 20260528
     }
 
-    private val _subject = DefaultAgencyTools()
-    private val subject: GAgencyTools = _subject
+    private val subject = DefaultAgencyTools()
 
     @BeforeTest
     fun setUp() {
-        _subject.setTodayDateInt(TODAY_DATE)
+        subject.setTodayDateInt(TODAY_DATE)
     }
 
     @Test

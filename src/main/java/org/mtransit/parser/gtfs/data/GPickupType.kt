@@ -23,20 +23,21 @@ enum class GPickupType(val id: Int) {
             }
             return if (MUST_COORDINATE_WITH_DRIVER.id == id) {
                 MUST_COORDINATE_WITH_DRIVER
-            } else REGULAR // default
+            } else {
+                REGULAR // default
+            }
         }
 
         @JvmStatic
         fun parse(id: String?): GPickupType {
             return if (id.isNullOrEmpty()) { // no pickup info, that's OK
                 REGULAR // default
-            } else try {
-                parse(id.toInt())
-            } catch (nfe: NumberFormatException) {
-                throw MTLog.Fatal(
-                    nfe,
-                    "Error while parsing '\$id' as pickup type!"
-                )
+            } else {
+                try {
+                    parse(id.toInt())
+                } catch (nfe: NumberFormatException) {
+                    throw MTLog.Fatal(nfe, "Error while parsing '$id' as pickup type!")
+                }
             }
         }
     }

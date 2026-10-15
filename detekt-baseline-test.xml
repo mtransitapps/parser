@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest$@Test fun testFindDirectionHeadSign_DistinctLastStopNoClearWinnerMerge</ID>
+    <ID>UseOrEmpty:MDirectionHeadSignFinderTest.kt:MDirectionHeadSignFinderTest$it.arguments[0] as? String ?: ""</ID>
+  </CurrentIssues>
+</SmellBaseline>

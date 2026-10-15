@@ -34,7 +34,9 @@ data class MDirectionStop @JvmOverloads constructor(
         // sort by direction_id => stop_sequence
         return if (directionId != other.directionId) {
             directionId.compareTo(other.directionId)
-        } else stopSequence - other.stopSequence
+        } else {
+            stopSequence - other.stopSequence
+        }
     }
 
     @Suppress("unused")
@@ -97,6 +99,6 @@ data class MDirectionStop @JvmOverloads constructor(
         fun getNewUID(
             directionId: Long,
             stopId: Int
-        ) = "${directionId}$UID_SEPARATOR${stopId}"
+        ) = "${directionId}$UID_SEPARATOR$stopId"
     }
 }

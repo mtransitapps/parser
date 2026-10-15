@@ -47,7 +47,7 @@ fun <T> Iterable<T>.filter(removeRepeat: Boolean = false, removeFirstAndLast: Bo
 fun <T> Iterable<T>.intersectWithOrder(otherIt: Iterable<T>, ignoreRepeat: Boolean = false, ignoreFirstAndLast: Boolean = false): Set<T> {
     val thisToCompare = this.filter(ignoreRepeat, ignoreFirstAndLast)
     val otherToCompare = otherIt.filter(ignoreRepeat, ignoreFirstAndLast)
-    val intersect = thisToCompare.intersect(otherToCompare)
+    val intersect = thisToCompare.intersect(otherToCompare.toSet())
     val firstCommonT = intersect.firstOrNull()
     val lastCommonT = intersect.lastOrNull()
     if (firstCommonT == null || lastCommonT == null) {
@@ -75,7 +75,7 @@ fun <T> Iterable<T>.overlap(otherIt: Iterable<T>): Boolean {
     if (this.count() == 0 || otherIt.count() == 0) {
         return false
     }
-    val intersect = this.intersect(otherIt)
+    val intersect = this.intersect(otherIt.toSet())
     if (intersect.isEmpty()) {
         return false
     }
@@ -128,6 +128,7 @@ fun <T> Iterable<T>.overlap(otherIt: Iterable<T>): Boolean {
             break // finish traversing other, incomplete loop overlap
         }
     }
+    @Suppress("RedundantIf")
     if (otherSize != otherCheckCount) {
         return false
     }
@@ -170,7 +171,7 @@ fun <T> Iterable<T>.matchList(
         }
     }
     val ignoredMatchPt: Float = ignoredMatch.toFloat().div(otherIt.count())
-    val intersect = thisToCompare.intersect(otherToCompare)
+    val intersect = thisToCompare.intersect(otherToCompare.toSet())
     val firstCommonItem = intersect.firstOrNull()
     val lastCommonItem = intersect.lastOrNull()
     if (firstCommonItem == null || lastCommonItem == null) {
@@ -186,11 +187,11 @@ fun <T> Iterable<T>.matchList(
     val thisSuffix = thisString.commonSuffixWith(otherString)
     val thisSuffixLength = thisSuffix.length
     val otherLength = otherIt.toComparableString(stringLength).length
-    return (when {
+    return when {
         combineMatch -> thisSuffixLength + thisPrefixLength
         thisPrefixLength > thisSuffixLength -> thisPrefixLength
         else -> thisSuffixLength
-    }).toFloat().div(otherLength) + ignoredMatchPt
+    }.toFloat().div(otherLength) + ignoredMatchPt
 }
 
 fun <T> Iterable<T>.hasItemsGoingIntoSameOrder(otherIt: Iterable<T>): Boolean {
@@ -207,9 +208,11 @@ fun <T> Iterable<T>.countItemsGoingIntoSameOrder(otherIt: Iterable<T>, firstItem
         val otherMatchIndex = otherList.indexOf(thisList[thisIndex], otherStartIndex)
         if (otherMatchIndex != -1) {
             var len = 1
-            while (thisIndex + len < thisList.size &&
+            while (
+                thisIndex + len < thisList.size &&
                 otherMatchIndex + len < otherList.size &&
-                thisList[thisIndex + len] == otherList[otherMatchIndex + len]) {
+                thisList[thisIndex + len] == otherList[otherMatchIndex + len]
+            ) {
                 len++
             }
             if (len > 1) {

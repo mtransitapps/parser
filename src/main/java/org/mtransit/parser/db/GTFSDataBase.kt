@@ -47,7 +47,7 @@ object GTFSDataBase {
     private const val FILE_PATH = "input/gtfs_db_file"
 
     private val IS_USING_FILE_INSTEAD_OF_MEMORY = DefaultAgencyTools.IS_CI
-            || Constants.DEBUG
+        || Constants.DEBUG
     // private val IS_USING_FILE_INSTEAD_OF_MEMORY = false // (GHA.standard.linux > RAM = 16 GB)
     // || true // DEBUG
 
@@ -78,9 +78,7 @@ object GTFSDataBase {
     }
 
     @JvmStatic
-    fun getDBSize() = if (IS_USING_FILE_INSTEAD_OF_MEMORY) {
-        FileUtils.size(File(FILE_PATH))
-    } else null
+    fun getDBSize() = if (IS_USING_FILE_INSTEAD_OF_MEMORY) FileUtils.size(File(FILE_PATH)) else null
 
     @JvmStatic
     fun reset() {
@@ -395,7 +393,8 @@ object GTFSDataBase {
     @JvmStatic
     fun updateStopTime(
         stopTime: StopTime,
-        pickupType: Int? = null, dropOffType: Int? = null,
+        pickupType: Int? = null,
+        dropOffType: Int? = null,
         orderByDesc: Boolean? = null, // true = ASC, false = DESC
         limit: Int? = null,
     ) = updateStopTime(
@@ -408,8 +407,11 @@ object GTFSDataBase {
 
     @JvmStatic
     fun updateStopTime(
-        tripId: TripId, stopId: StopId? = null, stopSequence: Int? = null,
-        pickupType: Int? = null, dropOffType: Int? = null,
+        tripId: TripId,
+        stopId: StopId? = null,
+        stopSequence: Int? = null,
+        pickupType: Int? = null,
+        dropOffType: Int? = null,
         orderByDesc: Boolean? = null, // true = ASC, false = DESC
         limit: Int? = null,
     ): Boolean {

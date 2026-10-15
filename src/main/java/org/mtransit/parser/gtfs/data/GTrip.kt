@@ -109,9 +109,9 @@ data class GTrip(
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(routeId:$_routeId)" +
-                "+(serviceId:$_serviceId)" +
-                "+(tripId:$_tripId)"
+            "+(routeId:$_routeId)" +
+            "+(serviceId:$_serviceId)" +
+            "+(tripId:$_tripId)"
     }
 
     fun to() = Trip(
@@ -204,7 +204,7 @@ data class GTrip(
         fun getNewUID(
             routeIdInt: Int,
             tripIdInt: Int,
-        ) = "${routeIdInt}$UID_SEPARATOR${tripIdInt}"
+        ) = "${routeIdInt}$UID_SEPARATOR$tripIdInt"
 
         @JvmStatic
         fun longestFirst(tripList: List<GTrip>, tripStopListGetter: (Int) -> List<GTripStop>?): List<GTrip> {

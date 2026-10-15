@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.text.DateFormat;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -175,8 +176,11 @@ public class GReader {
 			}
 			// STOPS (after stop times)
 			if (!calendarsOnly && !routeTripCalendarsOnly) {
+				final GAgency singleAgency = gSpec.getSingleAgency();
+				//noinspection DiscouragedApi
+				final String agencyTimezone = singleAgency == null ? null : singleAgency.getAgencyTimezone();
 				readFile(gtfsDir, GStop.FILENAME, true, line ->
-						processStop(agencyTools, gSpec, line, skipDataCleanup)
+						processStop(agencyTools, gSpec, line, skipDataCleanup, agencyTimezone)
 				);
 			}
 			// TODO OTHER FILES TYPE
@@ -238,14 +242,17 @@ public class GReader {
 		final File gtfsFile = FileUtils.findFileCaseInsensitive(gtfsDir, fileNames);
 		if (gtfsFile == null || !gtfsFile.exists()) {
 			if (fileRequired) {
-				throw new MTLog.Fatal("'%s' file does not exist!", fileNames);
+				throw new MTLog.Fatal("'%s' required file does not exist!", fileNames);
 			} else {
 				MTLog.log("Reading file(s) '%s'... SKIP (non-existing).", fileNames);
 				return false;
 			}
 		}
 		try (BufferedReader br = Files.newBufferedReader(gtfsFile.toPath())) {
-			readCsv(gtfsFile.getName(), br, lineProcessor, onColumnNamesFoundCallback);
+			final int linesProcessedCount = readCsv(gtfsFile.getName(), br, lineProcessor, onColumnNamesFoundCallback);
+			if (fileRequired && linesProcessedCount <= 0) {
+				throw new MTLog.Fatal("'%s' required file is empty!", gtfsFile);
+			}
 		} catch (IOException ioe) {
 			throw new MTLog.Fatal(ioe, "I/O Error while reading GTFS file %s!", gtfsFile);
 		}
@@ -262,13 +269,8 @@ public class GReader {
 
 	private static final Pattern QUOTE_ = Pattern.compile("\"");
 
-	@SuppressWarnings("unused")
-	private static void readCsv(String filename, BufferedReader reader, LineProcessor lineProcessor) throws IOException {
-		readCsv(filename, reader, lineProcessor, null);
-	}
-
 	@SuppressWarnings("resource")
-	private static void readCsv(
+	private static int readCsv(
 			String filename,
 			BufferedReader reader,
 			LineProcessor lineProcessor,
@@ -278,9 +280,9 @@ public class GReader {
 		String line;
 		String[] columnNames;
 		line = reader.readLine();
-		if (line == null || line.isEmpty()) return;
+		if (line == null || line.isEmpty()) return 0;
 		if (line.charAt(0) == '\uFEFF') { // remove 1st empty char
-			MTLog.log("Reading file '%s'... > remove 1st empty car", filename);
+			MTLog.log("Reading file '%s'... > remove 1st empty char", filename);
 			line = String.copyValueOf(line.toCharArray(), 1, line.length() - 1);
 		}
 		CSVRecord lineRecordColumns = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
@@ -291,7 +293,7 @@ public class GReader {
 		if (onColumnNamesFoundCallback != null) {
 			onColumnNamesFoundCallback.processColumnNames(Arrays.asList(columnNames));
 		}
-		if (columnNames.length == 0) return;
+		if (columnNames.length == 0) return 0;
 		List<CSVRecord> lineRecords;
 		final HashMap<String, String> map = new HashMap<>();
 		int l = 0;
@@ -342,6 +344,7 @@ public class GReader {
 			} // LOG
 		}
 		MTLog.log("Reading file '%s' (lines: %s)... DONE", filename, l);
+		return l;
 	}
 
 	private static void processStopTime(
@@ -412,9 +415,11 @@ public class GReader {
 		}
 	}
 
+	private static final Set<String> AVAILABLE_TIME_ZONE_IDS = ZoneId.getAvailableZoneIds(); // cache because it returns new set copy every time
+
 	private static void processAgency(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final GAgency gAgency = GAgency.fromLine(line);
+			final GAgency gAgency = GAgency.fromLine(line, AVAILABLE_TIME_ZONE_IDS, agencyTools.getAgencyDefaultLanguage());
 			if (agencyTools.excludeAgency(gAgency)) {
 				MTLog.logDebug("processAgency() > SKIP (exclude agency)");
 				return;
@@ -546,14 +551,15 @@ public class GReader {
 		}
 	}
 
-	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line, boolean skipDataCleanup) {
+	private static void processStop(GAgencyTools agencyTools, GSpec gSpec, Map<String, String> line, boolean skipDataCleanup, @Nullable String agencyTimezone) {
 		try {
 			final GLocationType stopLocationType = GLocationType.parse(line.get(GStop.LOCATION_TYPE));
 			if (stopLocationType == GLocationType.GENERIC_NODE) {
 				MTLog.log("Generic node stop ignored (%s).", line); // not lat/lng?
 				return;
 			}
-			final GStop gStop = skipDataCleanup ? GStop.fromLine(line) : GStop.fromLine(line, agencyTools);
+			final GStop gStop = skipDataCleanup ? GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS)
+					: GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS, agencyTools);
 			if (agencyTools.excludeStop(gStop)) {
 				//noinspection DiscouragedApi
 				logExclude("Exclude stop: %s.", line.get(GStop.STOP_ID));
@@ -575,8 +581,9 @@ public class GReader {
 				if (previousStop != null && previousStop.equalsExceptMergeable(gStop)) {
 					final double mergedLat = GStop.mergeLocation(previousStop.getStopLat(), gStop.getStopLat());
 					final double mergedLng = GStop.mergeLocation(previousStop.getStopLong(), gStop.getStopLong());
+					final String mergedTimeZoneId = GStop.mergeTimezone(previousStop.getStopTimezone(), gStop.getStopTimezone());
 					final GWheelchairBoardingType mergedWheelchairBoarding = GWheelchairBoardingType.merge(previousStop.getWheelchairBoarding(), gStop.getWheelchairBoarding());
-					gSpec.addStop(previousStop.clone(mergedLat, mergedLng, mergedWheelchairBoarding), true);
+					gSpec.addStop(previousStop.clone(mergedLat, mergedLng, mergedTimeZoneId, mergedWheelchairBoarding), true);
 					return;
 				}
 				if (previousStop != null) {

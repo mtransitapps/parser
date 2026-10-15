@@ -38,7 +38,7 @@ data class GDirection(
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(routeId:$_routeId)"
+            "+(routeId:$_routeId)"
     }
 
     fun to() = Direction(

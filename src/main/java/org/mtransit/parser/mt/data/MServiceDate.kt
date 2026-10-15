@@ -50,8 +50,8 @@ data class MServiceDate(
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(service:$_serviceId)" +
-                "+(exception:$exceptionType)"
+            "+(service:$_serviceId)" +
+            "+(exception:$exceptionType)"
     }
 
     fun toCalendarDate(overrideServiceIdInt: Int? = null) =
@@ -76,12 +76,15 @@ data class MServiceDate(
         )
 
         @JvmStatic
-        val COMPARATOR_FOR_FILE = if (FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES)
+        val COMPARATOR_FOR_FILE = if (FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES) {
             compareBy(
                 MServiceDate::_serviceId,
                 MServiceDate::calendarDate,
                 MServiceDate::exceptionType,
-            ) else COMPARATOR_BY_CALENDAR_DATE
+            )
+        } else {
+            COMPARATOR_BY_CALENDAR_DATE
+        }
 
         @Suppress("unused")
         @JvmStatic
@@ -102,7 +105,7 @@ data class MServiceDate(
             )
 
         fun fromFileLine(line: String): List<MServiceDate>? =
-            if (FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES)
+            if (FeatureFlags.F_EXPORT_FLATTEN_SERVICE_DATES) {
                 line.split(SQLUtils.COLUMN_SEPARATOR)
                     .takeIf { it.size >= 3 }
                     ?.toMutableList()
@@ -116,17 +119,19 @@ data class MServiceDate(
                             )
                         }
                     }
-            else line.split(SQLUtils.COLUMN_SEPARATOR)
-                .takeIf { it.size == 3 }
-                ?.let { columns ->
-                    listOf(
-                        MServiceDate(
-                            serviceIdInt = GIDs.getInt(columns[0].unquotes()),
-                            calendarDate = columns[1].toInt(),
-                            exceptionType = columns[2].toInt()
+            } else {
+                line.split(SQLUtils.COLUMN_SEPARATOR)
+                    .takeIf { it.size == 3 }
+                    ?.let { columns ->
+                        listOf(
+                            MServiceDate(
+                                serviceIdInt = GIDs.getInt(columns[0].unquotes()),
+                                calendarDate = columns[1].toInt(),
+                                exceptionType = columns[2].toInt()
+                            )
                         )
-                    )
-                }
+                    }
+            }
 
         @Suppress("unused")
         @JvmStatic

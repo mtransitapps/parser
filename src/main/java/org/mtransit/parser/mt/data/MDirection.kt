@@ -165,7 +165,7 @@ data class MDirection @JvmOverloads constructor(
 
         @JvmStatic
         fun getNewId(routeId: Long, headsignId: Int) =
-            "${routeId}0${headsignId}".toLong()
+            "${routeId}0$headsignId".toLong()
 
         @Suppress("unused")
         @JvmStatic

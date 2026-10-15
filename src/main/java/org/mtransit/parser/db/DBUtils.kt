@@ -114,9 +114,7 @@ object DBUtils {
     }
 
     @JvmStatic
-    fun getDBSize() = if (IS_USING_FILE_INSTEAD_OF_MEMORY) {
-        FileUtils.size(File(FILE_PATH))
-    } else null
+    fun getDBSize() = if (IS_USING_FILE_INSTEAD_OF_MEMORY) FileUtils.size(File(FILE_PATH)) else null
 
     @Suppress("unused")
     @JvmStatic
@@ -140,18 +138,18 @@ object DBUtils {
     @JvmStatic
     fun prepareInsertStopTime(allowUpdate: Boolean = false): PreparedStatement {
         return connection.prepareStatement(
-            (if (allowUpdate) SQLUtilsCommons.INSERT_OR_REPLACE_INTO else SQLUtilsCommons.INSERT_INTO)
-                    + STOP_TIMES_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
-                    "?," + // trip ID
-                    "?," + // stop ID
-                    "?," + // stop sequence
-                    "?," + // arrival time
-                    "?," + // departure time
-                    "?," + // stop head-sign
-                    "?," + // pickup type
-                    "?," + // drop off type
-                    "?" + // time point
-                    SQLUtilsCommons.P2
+            (if (allowUpdate) SQLUtilsCommons.INSERT_OR_REPLACE_INTO else SQLUtilsCommons.INSERT_INTO) + STOP_TIMES_TABLE_NAME +
+                SQLUtilsCommons.VALUES_P1 +
+                "?," + // trip ID
+                "?," + // stop ID
+                "?," + // stop sequence
+                "?," + // arrival time
+                "?," + // departure time
+                "?," + // stop head-sign
+                "?," + // pickup type
+                "?," + // drop off type
+                "?" + // time point
+                SQLUtilsCommons.P2
         )
     }
 
@@ -200,18 +198,18 @@ object DBUtils {
         connection.createStatement().use { statement ->
             val rs = SQLUtils.executeUpdate(
                 statement,
-                (if (allowUpdate) SQLUtilsCommons.INSERT_OR_REPLACE_INTO else SQLUtilsCommons.INSERT_INTO)
-                        + STOP_TIMES_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
-                        "${gStopTime.tripIdInt}," +
-                        "${gStopTime.stopIdInt}," +
-                        "${gStopTime.stopSequence}," +
-                        "${gStopTime.arrivalTime}," +
-                        "${gStopTime.departureTime}," +
-                        "${gStopTime.stopHeadsign?.quotesEscape()}," +
-                        "${gStopTime.pickupType.id}," +
-                        "${gStopTime.dropOffType.id}," +
-                        "${gStopTime.timePoint.id}" +
-                        SQLUtilsCommons.P2
+                (if (allowUpdate) SQLUtilsCommons.INSERT_OR_REPLACE_INTO else SQLUtilsCommons.INSERT_INTO) + STOP_TIMES_TABLE_NAME +
+                    SQLUtilsCommons.VALUES_P1 +
+                    "${gStopTime.tripIdInt}," +
+                    "${gStopTime.stopIdInt}," +
+                    "${gStopTime.stopSequence}," +
+                    "${gStopTime.arrivalTime}," +
+                    "${gStopTime.departureTime}," +
+                    "${gStopTime.stopHeadsign?.quotesEscape()}," +
+                    "${gStopTime.pickupType.id}," +
+                    "${gStopTime.dropOffType.id}," +
+                    "${gStopTime.timePoint.id}" +
+                    SQLUtilsCommons.P2,
             )
             insertRowCount++
             insertCount++
@@ -244,9 +242,9 @@ object DBUtils {
             }"
         }
         query += " ORDER BY " +
-                "${GStopTime.TRIP_ID} ASC, " +
-                "${GStopTime.STOP_SEQUENCE} ASC, " +
-                "${GStopTime.DEPARTURE_TIME} ASC"
+            "${GStopTime.TRIP_ID} ASC, " +
+            "${GStopTime.STOP_SEQUENCE} ASC, " +
+            "${GStopTime.DEPARTURE_TIME} ASC"
         limitMaxNbRow?.let {
             query += " LIMIT $limitMaxNbRow"
             limitOffset?.let {
@@ -301,11 +299,11 @@ object DBUtils {
     fun deleteStopTime(gStopTime: GStopTime): Boolean {
         var query = "DELETE FROM $STOP_TIMES_TABLE_NAME"
         query += " WHERE " +
-                "${GStopTime.TRIP_ID} = ${gStopTime.tripIdInt}" +
-                " AND " +
-                "${GStopTime.STOP_ID} = ${gStopTime.stopIdInt}" +
-                " AND " +
-                "${GStopTime.STOP_SEQUENCE} = ${gStopTime.stopSequence}"
+            "${GStopTime.TRIP_ID} = ${gStopTime.tripIdInt}" +
+            " AND " +
+            "${GStopTime.STOP_ID} = ${gStopTime.stopIdInt}" +
+            " AND " +
+            "${GStopTime.STOP_SEQUENCE} = ${gStopTime.stopSequence}"
         connection.createStatement().use { statement ->
             val rs = SQLUtils.executeUpdate(statement, query)
             deletedRowCount += rs
@@ -324,7 +322,7 @@ object DBUtils {
         var query = "DELETE FROM $STOP_TIMES_TABLE_NAME"
         tripId?.let {
             query += " WHERE " +
-                    "${GStopTime.TRIP_ID} = $tripId"
+                "${GStopTime.TRIP_ID} = $tripId"
         }
         deleteCount++
         connection.createStatement().use { statement ->
@@ -368,19 +366,20 @@ object DBUtils {
         connection.createStatement().use { statement ->
             val rs = SQLUtils.executeUpdate(
                 statement,
-                SQLUtilsCommons.INSERT_INTO + SCHEDULES_TABLE_NAME + SQLUtilsCommons.VALUES_P1 +
-                        "${mSchedule.routeId}," +
-                        "${mSchedule.serviceIdInt}," +
-                        "${mSchedule.directionId}," +
-                        "${mSchedule.stopId}," +
-                        "${mSchedule.arrival}," +
-                        "${mSchedule.departure}," +
-                        "${mSchedule.tripIdInt}," +
-                        "${mSchedule.stopSequence}," +
-                        "${mSchedule.accessible}," +
-                        "${mSchedule.headsignType}," +
-                        "${mSchedule.headsignValue?.quotesEscape()}" +
-                        SQLUtilsCommons.P2
+                SQLUtilsCommons.INSERT_INTO + SCHEDULES_TABLE_NAME +
+                    SQLUtilsCommons.VALUES_P1 +
+                    "${mSchedule.routeId}," +
+                    "${mSchedule.serviceIdInt}," +
+                    "${mSchedule.directionId}," +
+                    "${mSchedule.stopId}," +
+                    "${mSchedule.arrival}," +
+                    "${mSchedule.departure}," +
+                    "${mSchedule.tripIdInt}," +
+                    "${mSchedule.stopSequence}," +
+                    "${mSchedule.accessible}," +
+                    "${mSchedule.headsignType}," +
+                    "${mSchedule.headsignValue?.quotesEscape()}" +
+                    SQLUtilsCommons.P2
             )
             insertRowCount++
             insertCount++
@@ -460,11 +459,13 @@ object DBUtils {
         // SERVICE ID
         serviceIdInt?.let {
             @Suppress("KotlinConstantConditions")
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.SERVICE_ID} = $serviceIdInt"
         }
         serviceIdInts?.let {
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.SERVICE_ID} IN ${
                 serviceIdInts
                     .distinct()
@@ -477,12 +478,13 @@ object DBUtils {
         }
         // DIRECTION ID
         directionId?.let {
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.DIRECTION_ID} = $directionId"
-
         }
         directionIds?.let {
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.DIRECTION_ID} IN ${
                 directionIds
                     .distinct()
@@ -495,12 +497,13 @@ object DBUtils {
         }
         // STOP ID
         stopIdInt?.let {
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.STOP_ID} = $stopIdInt"
-
         }
         stopIdInts?.let {
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.STOP_ID} IN ${
                 stopIdInts
                     .distinct()
@@ -513,18 +516,20 @@ object DBUtils {
         }
         // ARRIVAL & DEPARTURE
         arrival?.let {
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.ARRIVAL} = $arrival"
         }
         departure?.let {
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.DEPARTURE} = $departure"
         }
         query += " ORDER BY " +
-                "${MSchedule.SERVICE_ID} ASC, " +
-                "${MSchedule.DIRECTION_ID} ASC, " +
-                "${MSchedule.STOP_ID} ASC, " +
-                "${MSchedule.DEPARTURE} ASC"
+            "${MSchedule.SERVICE_ID} ASC, " +
+            "${MSchedule.DIRECTION_ID} ASC, " +
+            "${MSchedule.STOP_ID} ASC, " +
+            "${MSchedule.DEPARTURE} ASC"
         // LIMIT
         limitMaxNbRow?.let {
             query += " LIMIT $limitMaxNbRow"
@@ -571,27 +576,30 @@ object DBUtils {
         var whereAdded = false
         serviceIdInt?.let {
             @Suppress("KotlinConstantConditions")
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.SERVICE_ID} = $serviceIdInt"
         }
         directionId?.let {
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.DIRECTION_ID} = $directionId"
-
         }
         // STOP ID
         stopIdInt?.let {
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.STOP_ID} = $stopIdInt"
-
         }
         // ARRIVAL & DEPARTURE
         arrival?.let {
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.ARRIVAL} = $arrival"
         }
         departure?.let {
-            query += if (whereAdded) " AND" else " WHERE"; whereAdded = true
+            query += if (whereAdded) " AND" else " WHERE"
+            whereAdded = true
             query += " ${MSchedule.DEPARTURE} = $departure"
         }
         deleteCount++

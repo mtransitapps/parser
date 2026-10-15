@@ -54,7 +54,7 @@ data class GAgency(
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(agencyId:$_agencyId)"
+            "+(agencyId:$_agencyId)"
     }
 
     fun to() = Agency(
@@ -82,12 +82,14 @@ data class GAgency(
         private const val AGENCY_EMAIL = "agency_email" // Optional
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>) = GAgency(
+        fun fromLine(line: Map<String, String>, availableZoneIds: Set<String>, defaultLanguage: String?) = GAgency(
             agencyId = line[AGENCY_ID].orEmpty(),
             agencyName = line[AGENCY_NAME] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
             agencyUrl = line[AGENCY_URL] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
-            agencyTimezone = line[AGENCY_TIMEZONE] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
-            agencyLang = line[AGENCY_LANG],
+            agencyTimezone = line[AGENCY_TIMEZONE]?.trim()
+                ?.takeIf { availableZoneIds.contains(it) }
+                ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
+            agencyLang = line[AGENCY_LANG]?.takeIf { it.isNotBlank() } ?: defaultLanguage?.takeIf { it.isNotBlank() },
             agencyPhone = line[AGENCY_PHONE],
             agencyFareUrl = line[AGENCY_FARE_URL],
             agencyEmail = line[AGENCY_EMAIL],

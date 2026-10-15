@@ -110,8 +110,11 @@ object MDataChangedManager {
         val c = Calendar.getInstance()
         val todayStringInt = GFieldTypes.fromDateToInt(dateFormat, c.time)
         val (lastCalendarsServiceDates, lastCalendarDatesServiceDates) =
-            if (ALL_CALENDARS_IN_CALENDAR_DATES) emptyList<MServiceDate>() to lastServiceDates // calendar dates only
-            else lastServiceDates.partition { it.exceptionType == MCalendarExceptionType.DEFAULT.id }
+            if (ALL_CALENDARS_IN_CALENDAR_DATES) {
+                emptyList<MServiceDate>() to lastServiceDates // calendar dates only
+            } else {
+                lastServiceDates.partition { it.exceptionType == MCalendarExceptionType.DEFAULT.id }
+            }
         val allCalendarsWithDays = if (ALL_CALENDARS_IN_CALENDAR_DATES) emptyList() else gtfs.allCalendars.filter { it.hasDays() }
         MTLog.log("> Service IDS from '${GCalendar.FILENAME}':")
         MTLog.log("> - Last: ${lastCalendarsServiceDates.map { it.serviceId }.distinct().sorted().joinToString(limit = 50)}")
@@ -207,7 +210,7 @@ object MDataChangedManager {
             if (updatedCalendar.dates.size - originalCalendar.dates.size != 1) {
                 MTLog.log(
                     "> Cannot re-add removed dates because of wrong number of added dates " +
-                            "(${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})"
+                        "(${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})"
                 )
                 return
             }
@@ -247,7 +250,7 @@ object MDataChangedManager {
         addedGCalendarsDatesBefore.forEach { addedGCalendarDate ->
             val diffInMs = DefaultAgencyTools.diffInMs(dateFormat, c, todayStringInt, addedGCalendarDate.date).absoluteValue
             if (diffInMs < MIN_NOT_IGNORED_IN_DAYS.days.inWholeMilliseconds) {
-                MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")
+                MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:$todayStringInt)")
                 return
             }
             if (!lastCalendarsServiceIdInts.contains(addedGCalendarDate.serviceId.convertServiceIdTemp(agencyTools).toGIDInt())) {
@@ -270,7 +273,7 @@ object MDataChangedManager {
             if (originalCalendar.dates.size - updatedCalendar.dates.size != 1) {
                 MTLog.log(
                     "> Cannot remove added dates because of wrong number of added dates " +
-                            "(${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})"
+                        "(${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})"
                 )
                 return
             }
@@ -291,7 +294,7 @@ object MDataChangedManager {
         addedGCalendarsDatesAfter.forEach { addedGCalendarDate ->
             val diffInMs = DefaultAgencyTools.diffInMs(dateFormat, c, todayStringInt, addedGCalendarDate.date).absoluteValue
             if (diffInMs < MIN_NOT_IGNORED_IN_DAYS.days.inWholeMilliseconds) {
-                MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")
+                MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:$todayStringInt)")
                 return
             }
             if (!lastCalendarsServiceIdInts.contains(addedGCalendarDate.serviceId.convertServiceIdTemp(agencyTools).toGIDInt())) {
@@ -314,7 +317,7 @@ object MDataChangedManager {
             if (originalCalendar.dates.size - updatedCalendar.dates.size != 1) {
                 MTLog.log(
                     "> Cannot remove added dates because of wrong number of added dates " +
-                            "(${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})"
+                        "(${updatedCalendar.dates.size} vs ${originalCalendar.dates.size})"
                 )
                 return
             }
@@ -334,7 +337,7 @@ object MDataChangedManager {
         addedGCalendarDatesDates.forEach { addedGCalendarDate ->
             val diffInMs = DefaultAgencyTools.diffInMs(dateFormat, c, todayStringInt, addedGCalendarDate.date).absoluteValue
             if (diffInMs < MIN_NOT_IGNORED_IN_DAYS.days.inWholeMilliseconds) {
-                MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:${todayStringInt})")
+                MTLog.log("> Cannot optimise data changed because of new date is too soon '${addedGCalendarDate.date}' (today:$todayStringInt)")
                 return
             }
             if (!lastCalendarDatesServiceIdInts.contains(addedGCalendarDate.serviceId.convertServiceIdTemp(agencyTools).toGIDInt())) {
@@ -346,14 +349,16 @@ object MDataChangedManager {
             dataChanged = true
         }
         if (dataChanged) {
-            MTLog.log(buildString {
-                append("> Optimised data changed: ")
-                if (!ALL_CALENDARS_IN_CALENDAR_DATES) {
-                    append("`${GCalendar.FILENAME}`: ${gtfs.allCalendars.flatMap { it.dates }.size} -> ${newGCalendars.flatMap { it.dates }.size} | ")
-                    append("& ")
+            MTLog.log(
+                buildString {
+                    append("> Optimised data changed: ")
+                    if (!ALL_CALENDARS_IN_CALENDAR_DATES) {
+                        append("`${GCalendar.FILENAME}`: ${gtfs.allCalendars.flatMap { it.dates }.size} -> ${newGCalendars.flatMap { it.dates }.size} | ")
+                        append("& ")
+                    }
+                    append("'${GCalendarDate.FILENAME}': ${gtfs.allCalendarDates.size} -> ${newGCalendarDates.size}.")
                 }
-                append("'${GCalendarDate.FILENAME}': ${gtfs.allCalendarDates.size} -> ${newGCalendarDates.size}.")
-            })
+            )
             gtfs.replaceCalendarsSameServiceIds(newGCalendars, newGCalendarDates)
         } else {
             MTLog.log("> No optimization for date changed required for calendars & calendar dates.")

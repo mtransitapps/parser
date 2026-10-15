@@ -158,7 +158,7 @@ data class GCalendar(
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(serviceIdInt:$_serviceId)"
+            "+(serviceIdInt:$_serviceId)"
     }
 
     @Suppress("unused")
@@ -242,7 +242,8 @@ data class GCalendar(
             calendar.isRunningOnCalendarDayOfWeek(
                 Calendar.getInstance()
                     .apply { time = GFieldTypes.makeDateFormat().parse(dayString) }
-                    .get(Calendar.DAY_OF_WEEK))
+                    .get(Calendar.DAY_OF_WEEK)
+            )
 
         @JvmStatic
         @JvmOverloads

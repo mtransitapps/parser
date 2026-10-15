@@ -25,7 +25,9 @@ enum class GCalendarDatesExceptionType(val id: Int) {
         fun parse(id: String?): GCalendarDatesExceptionType {
             return if (id.isNullOrEmpty()) { // that's OK
                 SERVICE_ADDED // default in GTFS spec
-            } else parse(id.toInt())
+            } else {
+                parse(id.toInt())
+            }
         }
     }
 }

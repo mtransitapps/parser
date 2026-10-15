@@ -55,9 +55,9 @@ data class GTripStop(
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(stopId:$_stopId)" +
-                "+(tripId:$_tripId)" +
-                "+(routeId:$_routeId)"
+            "+(stopId:$_stopId)" +
+            "+(tripId:$_tripId)" +
+            "+(routeId:$_routeId)"
     }
 
     companion object {
@@ -74,7 +74,7 @@ data class GTripStop(
             tripUID: String,
             stopIdInt: Int,
             stopSequence: Int
-        ) = "${tripUID}$UID_SEPARATOR${stopIdInt}$UID_SEPARATOR${stopSequence}"
+        ) = "${tripUID}$UID_SEPARATOR${stopIdInt}$UID_SEPARATOR$stopSequence"
 
         @JvmStatic
         fun getNewUID(
@@ -82,7 +82,7 @@ data class GTripStop(
             tripIdInt: Int,
             stopIdInt: Int,
             stopSequence: Int
-        ) = "${routeIdInt}$UID_SEPARATOR${tripIdInt}$UID_SEPARATOR${stopIdInt}$UID_SEPARATOR${stopSequence}"
+        ) = "${routeIdInt}$UID_SEPARATOR${tripIdInt}$UID_SEPARATOR${stopIdInt}$UID_SEPARATOR$stopSequence"
 
         @Suppress("unused")
         @JvmStatic

@@ -1,0 +1,118 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BackingPropertyNaming:MAgency.kt:MAgency$private val _id: String get() = GIDs.getString(idInt)</ID>
+    <ID>BackingPropertyNaming:RouteConfig.kt:RouteConfig$private val _stopTimeExcludes: List&lt;Regex&gt; by lazy { this.stopTimeExcludes.mapNotNull { if (it.stopTimeHeadsignRegex.isNullOrEmpty()) return@mapNotNull null val regexOptions = mutableSetOf&lt;RegexOption&gt;() if (it.ignoreCase) { regexOptions.add(RegexOption.IGNORE_CASE) } it.stopTimeHeadsignRegex.toRegex(regexOptions) } }</ID>
+    <ID>BackingPropertyNaming:RouteConfig.kt:RouteConfig$private val _tripExcludes: List&lt;Regex&gt; by lazy { this.tripExcludes.mapNotNull { if (it.tripHeadsignRegex.isNullOrEmpty()) return@mapNotNull null val regexOptions = mutableSetOf&lt;RegexOption&gt;() if (it.ignoreCase) { regexOptions.add(RegexOption.IGNORE_CASE) } it.tripHeadsignRegex.toRegex(regexOptions) } }</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$( stopNameList1First == stopNameList2First || (prefix1First2First.length &gt;= minFixLength1First2First &amp;&amp; prefix1First2First.length &gt; suffix1First2First.length) || (suffix1First2First.length &gt;= minFixLength1First2First &amp;&amp; suffix1First2First.length &gt; prefix1First2First.length) ) &amp;&amp; ( stopNameList1Last == stopNameList2Last || (prefix1Last2Last.length &gt;= minFixLength1Last2Last &amp;&amp; prefix1Last2Last.length &gt; suffix1First2Last.length) || (suffix1Last2Last.length &gt;= minFixLength1Last2Last &amp;&amp; suffix1Last2Last.length &gt; prefix1First2Last.length) )</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$(stopIdIntsAfterCommonCount2 == 0 &amp;&amp; stopIdIntsAfterCommonCount1 == 0) // #1 &amp; #2 have same last stop || (dataLossAuthorized &amp;&amp; (stopIdIntsAfterCommonCount2 &gt; 0 &amp;&amp; stopIdIntsAfterCommonCount1 &gt; 0))</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$stopNameList1First == stopNameList2First || (prefix1First2First.length &gt;= minFixLength1First2First &amp;&amp; prefix1First2First.length &gt; suffix1First2First.length) || (suffix1First2First.length &gt;= minFixLength1First2First &amp;&amp; suffix1First2First.length &gt; prefix1First2First.length)</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$stopNameList1First == stopNameList2Last || (prefix1First2Last.length &gt;= minFixLength1First2Last &amp;&amp; prefix1First2Last.length &gt; suffix1First2Last.length) || (suffix1First2Last.length &gt;= minFixLength1First2Last &amp;&amp; suffix1First2Last.length &gt; prefix1First2Last.length)</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$stopNameList1Last == stopNameList2First || (prefix2First1Last.length &gt;= minFixLength2First1Last &amp;&amp; prefix2First1Last.length &gt; suffix2First1Last.length) || (suffix2First1Last.length &gt;= minFixLength2First1Last &amp;&amp; suffix2First1Last.length &gt; prefix2First1Last.length)</ID>
+    <ID>ComplexCondition:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$stopNameList1Last == stopNameList2Last || (prefix1Last2Last.length &gt;= minFixLength1Last2Last &amp;&amp; prefix1Last2Last.length &gt; suffix1First2Last.length) || (suffix1Last2Last.length &gt;= minFixLength1Last2Last &amp;&amp; suffix1Last2Last.length &gt; prefix1First2Last.length)</ID>
+    <ID>CyclomaticComplexMethod:CollectionsExt.kt:fun &lt;T&gt; Iterable&lt;T&gt;.overlap: Boolean</ID>
+    <ID>CyclomaticComplexMethod:DBUtils.kt:DBUtils$@Suppress("AssignedValueIsNeverRead") @JvmStatic fun selectSchedules: List&lt;MSchedule&gt;</ID>
+    <ID>CyclomaticComplexMethod:GCalendar.kt:GCalendar.Companion$private fun initAllDates</ID>
+    <ID>CyclomaticComplexMethod:GRoute.kt:GRoute.Companion$@JvmOverloads @JvmStatic fun fromLine</ID>
+    <ID>CyclomaticComplexMethod:MDataChangedManager.kt:MDataChangedManager$@Suppress("DiscouragedApi") @JvmStatic fun avoidCalendarDatesDataChanged</ID>
+    <ID>CyclomaticComplexMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@Suppress("DestructuringDeclarationWithTooManyEntries") @JvmStatic fun findDirectionHeadSigns: Map&lt;Int, String&gt;</ID>
+    <ID>CyclomaticComplexMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@VisibleForTesting internal fun findDirectionHeadSign: DirectionResult?</ID>
+    <ID>CyclomaticComplexMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$private fun mergeTrips: MergedTrip?</ID>
+    <ID>CyclomaticComplexMethod:MDirectionSplitter.kt:MDirectionSplitter$@JvmStatic fun splitDirection</ID>
+    <ID>CyclomaticComplexMethod:MDirectionSplitter.kt:MDirectionSplitter$fun splitDirections: MutableList&lt;DirectionTripsStops&gt;</ID>
+    <ID>CyclomaticComplexMethod:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmOverloads @JvmStatic fun convert: Long</ID>
+    <ID>CyclomaticComplexMethod:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmStatic fun endsWithLetter</ID>
+    <ID>CyclomaticComplexMethod:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmStatic fun startsWithLetter</ID>
+    <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@JvmStatic fun endsWithLetter</ID>
+    <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@JvmStatic fun startsWithLetter</ID>
+    <ID>CyclomaticComplexMethod:MStopIDConverter.kt:MStopIDConverter$@Throws(RuntimeException::class) @JvmOverloads @JvmStatic fun convert: Int</ID>
+    <ID>ImplicitDefaultLocale:MStoreListingGenerator.kt:MStoreListingGenerator$(if (isNext) formatKeepFromTo else formatFromTo).format(minDateS, maxDateS)</ID>
+    <ID>ImplicitDefaultLocale:MStoreListingGenerator.kt:MStoreListingGenerator$formatFromTo.format(minDateS, maxDateS)</ID>
+    <ID>ImplicitDefaultLocale:RouteConfig.kt:RouteConfig$it.regex.format(gRoute.routeLongNameOrDefault)</ID>
+    <ID>LargeClass:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder</ID>
+    <ID>LongMethod:DBUtils.kt:DBUtils$@Suppress("AssignedValueIsNeverRead") @JvmStatic fun selectSchedules: List&lt;MSchedule&gt;</ID>
+    <ID>LongMethod:LocationUtils.kt:LocationUtils$@Suppress("MagicNumber", "PropertyName") // https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/location/Location.java private fun computeDistanceAndBearing</ID>
+    <ID>LongMethod:MDataChangedManager.kt:MDataChangedManager$@Suppress("DiscouragedApi") @JvmStatic fun avoidCalendarDatesDataChanged</ID>
+    <ID>LongMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@Suppress("DestructuringDeclarationWithTooManyEntries") @JvmStatic fun findDirectionHeadSigns: Map&lt;Int, String&gt;</ID>
+    <ID>LongMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@VisibleForTesting internal fun findDirectionHeadSign: DirectionResult?</ID>
+    <ID>LongMethod:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$private fun mergeTrips: MergedTrip?</ID>
+    <ID>LongMethod:MDirectionSplitter.kt:MDirectionSplitter$fun splitDirections: MutableList&lt;DirectionTripsStops&gt;</ID>
+    <ID>LongParameterList:GCalendar.kt:GCalendar.Companion$private fun initAllDates</ID>
+    <ID>LongParameterList:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$private fun mergeTrips: MergedTrip?</ID>
+    <ID>LongParameterList:MStoreListingGenerator.kt:MStoreListingGenerator$private fun dumpStoreReleaseNote</ID>
+    <ID>LoopWithTooManyJumpStatements:CollectionsExt.kt:while</ID>
+    <ID>LoopWithTooManyJumpStatements:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$for</ID>
+    <ID>LoopWithTooManyJumpStatements:MDirectionSplitter.kt:MDirectionSplitter$for</ID>
+    <ID>MagicNumber:DateUtils.kt:DateUtils$23</ID>
+    <ID>MagicNumber:DateUtils.kt:DateUtils$59</ID>
+    <ID>MagicNumber:DateUtils.kt:DateUtils$999</ID>
+    <ID>MagicNumber:GFieldTypes.kt:GFieldTypes$6</ID>
+    <ID>MagicNumber:GTime.kt:GTime$12_00_00</ID>
+    <ID>MagicNumber:GTime.kt:GTime$12_99_99</ID>
+    <ID>MagicNumber:GTime.kt:GTime$24_00_00</ID>
+    <ID>MagicNumber:GTime.kt:GTime$6</ID>
+    <ID>MagicNumber:MDataChangedManager.kt:MDataChangedManager$7</ID>
+    <ID>MagicNumber:MDirectionCardinalType.kt:MDirectionCardinalType$3</ID>
+    <ID>MagicNumber:MDirectionCardinalType.kt:MDirectionCardinalType$4</ID>
+    <ID>MagicNumber:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$0.5f</ID>
+    <ID>MagicNumber:MDirectionSplitter.kt:MDirectionSplitter$.33f</ID>
+    <ID>MagicNumber:MDirectionSplitter.kt:MDirectionSplitter$0.50f</ID>
+    <ID>MagicNumber:MDirectionSplitter.kt:MDirectionSplitter$100f</ID>
+    <ID>MagicNumber:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$3</ID>
+    <ID>MagicNumber:MSchedule.kt:MSchedule$100</ID>
+    <ID>MagicNumber:MServiceDate.kt:MServiceDate.Companion$3</ID>
+    <ID>NoNameShadowing:DBUtils.kt:DBUtils${ "$it" }</ID>
+    <ID>NoNameShadowing:GSpecExt.kt:calendarsMaxEndDate</ID>
+    <ID>NoNameShadowing:GSpecExt.kt:calendarsMinStartDate</ID>
+    <ID>NoNameShadowing:GTFSDataBase.kt:GTFSDataBase${ SQLUtils.execute(statement, it) }</ID>
+    <ID>PropertyName:MDataChangedManager.kt:MDataChangedManager$@Suppress("LocalVariableName") val DATE_FORMAT = GFieldTypes.makeDateFormat()</ID>
+    <ID>ReturnCount:CollectionsExt.kt:fun &lt;T&gt; Iterable&lt;T&gt;.overlap: Boolean</ID>
+    <ID>ReturnCount:GCalendarDate.kt:GCalendarDate.Companion$@JvmStatic fun isServiceEntirelyRemoved: Boolean</ID>
+    <ID>ReturnCount:GDropOffType.kt:GDropOffType.Companion$fun parse: GDropOffType</ID>
+    <ID>ReturnCount:GPickupType.kt:GPickupType.Companion$fun parse: GPickupType</ID>
+    <ID>ReturnCount:GRoute.kt:GRoute.Companion$@JvmStatic fun mergeRouteColors: String?</ID>
+    <ID>ReturnCount:GRoute.kt:GRoute.Companion$@JvmStatic fun mergeRouteLongNames: String?</ID>
+    <ID>ReturnCount:GRoute.kt:GRoute.Companion$@JvmStatic fun mergeRouteSortOrders: Int?</ID>
+    <ID>ReturnCount:GRouteType.kt:GRouteType.Companion$@JvmStatic fun isSameType: Boolean</ID>
+    <ID>ReturnCount:MDataChangedManager.kt:MDataChangedManager$@Suppress("DiscouragedApi") @JvmStatic fun avoidCalendarDatesDataChanged</ID>
+    <ID>ReturnCount:MDataChangedManager.kt:MDataChangedManager$@Suppress("unused") // TODO remove @JvmStatic fun addMissingDateToAvoidDataChanged</ID>
+    <ID>ReturnCount:MDataChangedManager.kt:MDataChangedManager$@Suppress("unused") // TODO remove @JvmStatic fun ignoreCalendarDateToAvoidDataChanged: Boolean</ID>
+    <ID>ReturnCount:MDirection.kt:MDirection.Companion$@JvmStatic fun mergeHeadsignValue: String?</ID>
+    <ID>ReturnCount:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$@VisibleForTesting internal fun findDirectionHeadSign: DirectionResult?</ID>
+    <ID>ReturnCount:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$private fun mergeTrips: MergedTrip?</ID>
+    <ID>ReturnCount:MReader.kt:MReader$@Suppress("unused") // TODO removed @JvmStatic fun readFirstLastDepartures: Pair&lt;Int?, Int?&gt;?</ID>
+    <ID>ReturnCount:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmOverloads @JvmStatic fun convert: Long</ID>
+    <ID>ReturnCount:MSchedule.kt:MSchedule$fun isSameServiceRDSDeparture: Boolean</ID>
+    <ID>ReturnCount:MStopIDConverter.kt:MStopIDConverter$@Throws(RuntimeException::class) @JvmOverloads @JvmStatic fun convert: Int</ID>
+    <ID>ReturnCount:RouteConfig.kt:RouteConfig$fun cleanStopHeadsign: String</ID>
+    <ID>ThrowsCount:MRouteSNToIDConverter.kt:MRouteSNToIDConverter$@JvmOverloads @JvmStatic fun convert: Long</ID>
+    <ID>ThrowsCount:MStopIDConverter.kt:MStopIDConverter$@Throws(RuntimeException::class) @JvmOverloads @JvmStatic fun convert: Int</ID>
+    <ID>TooGenericExceptionCaught:Configs.kt:Configs$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DBUtils.kt:DBUtils$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GCalendar.kt:GCalendar.Companion$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GTrip.kt:GTrip.Companion$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MReader.kt:MReader$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MStoreListingGenerator.kt:MStoreListingGenerator$ioe: Exception</ID>
+    <ID>TooGenericExceptionThrown:MStopIDConverter.kt:MStopIDConverter$throw RuntimeException("Unexpected digits '$digits' in stop ID '$stopIdS' to convert to integer!")</ID>
+    <ID>TooGenericExceptionThrown:MStopIDConverter.kt:MStopIDConverter$throw RuntimeException("Unexpected next characters '$nextChars' in stop ID '$stopIdS'!")</ID>
+    <ID>TooGenericExceptionThrown:MStopIDConverter.kt:MStopIDConverter$throw RuntimeException("Unexpected previous characters '$previousChars' in stop ID '$stopIdS'!")</ID>
+    <ID>TooGenericExceptionThrown:MStopIDConverter.kt:MStopIDConverter$throw RuntimeException("Unexpected stop ID '$stopIdS' can not be parsed by regex!")</ID>
+    <ID>TooGenericExceptionThrown:MStopIDConverter.kt:MStopIDConverter$throw RuntimeException("Unexpected stop ID '$stopIdS' to convert to integer!")</ID>
+    <ID>TooManyFunctions:DBUtils.kt:DBUtils</ID>
+    <ID>TooManyFunctions:GCalendar.kt:GCalendar</ID>
+    <ID>TooManyFunctions:GFieldTypes.kt:GFieldTypes</ID>
+    <ID>TooManyFunctions:GTFSDataBase.kt:GTFSDataBase</ID>
+    <ID>TooManyFunctions:GTime.kt:GTime</ID>
+    <ID>TooManyFunctions:RouteConfig.kt:RouteConfig</ID>
+    <ID>TooManyFunctions:SQLUtils.kt:SQLUtils</ID>
+    <ID>UnusedPrivateProperty:MRoute.kt:MRoute$agencyTools: GAgencyTools? = null</ID>
+    <ID>UnusedPrivateProperty:MStop.kt:MStop$agencyTools: GAgencyTools? = null</ID>
+    <ID>UnusedVariable:LocationUtils.kt:LocationUtils$iter</ID>
+    <ID>UseIsNullOrEmpty:GTimePoint.kt:GTimePoint.Companion$id == null || id.isEmpty()</ID>
+    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$firstCommonStopIdInt ?.let { stopIdInts1.subList(0, stopIdInts1.indexOf(firstCommonStopIdInt)) } ?: emptyList()</ID>
+    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$firstCommonStopIdInt ?.let { stopIdInts2.subList(0, stopIdInts2.indexOf(firstCommonStopIdInt)) } ?: emptyList()</ID>
+    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$lastCommonStopIdInt ?.let { stopIdInts1.subList(stopIdInts1.lastIndexOf(lastCommonStopIdInt) + 1, stopIdInts1.size) } ?: emptyList()</ID>
+    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$lastCommonStopIdInt ?.let { stopIdInts2.subList(stopIdInts2.lastIndexOf(lastCommonStopIdInt) + 1, stopIdInts2.size) } ?: emptyList()</ID>
+  </CurrentIssues>
+</SmellBaseline>

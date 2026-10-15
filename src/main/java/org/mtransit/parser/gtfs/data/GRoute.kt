@@ -104,8 +104,8 @@ data class GRoute(
     @Suppress("unused")
     fun toStringPlus(): String {
         return toString() +
-                "+(routeId:$_routeId)" +
-                "+(agencyId:$_agencyId)"
+            "+(routeId:$_routeId)" +
+            "+(agencyId:$_agencyId)"
     }
 
     fun toStringShort() = buildString {
@@ -234,16 +234,16 @@ data class GRoute(
             val maxLength = max(routeLongName1.length, routeLongName2.length)
             if (prefix.length > maxLength / 2) {
                 return prefix +
-                        routeLongName1.substring(prefix.length) +
-                        SLASH_ +
-                        routeLongName2.substring(prefix.length)
+                    routeLongName1.substring(prefix.length) +
+                    SLASH_ +
+                    routeLongName2.substring(prefix.length)
             }
             val suffix = routeLongName1.commonSuffixWith(routeLongName2)
             if (suffix.length > maxLength / 2) {
                 return routeLongName1.dropLast(suffix.length) +
-                        SLASH_ +
-                        routeLongName2.dropLast(suffix.length) +
-                        suffix
+                    SLASH_ +
+                    routeLongName2.dropLast(suffix.length) +
+                    suffix
             }
             val routeLongName1Split = routeLongName1.split(SLASH)
             val routeLongName2Split = routeLongName2.split(SLASH)

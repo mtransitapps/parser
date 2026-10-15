@@ -24,17 +24,21 @@ enum class GDropOffType(val id: Int) {
             }
             return if (MUST_COORDINATE_WITH_DRIVER.id == id) {
                 MUST_COORDINATE_WITH_DRIVER
-            } else REGULAR  // default
+            } else {
+                REGULAR // default
+            }
         }
 
         @JvmStatic
         fun parse(id: String?): GDropOffType {
             return if (id.isNullOrEmpty()) { // that's OK
                 REGULAR // default
-            } else try {
-                parse(id.toInt())
-            } catch (nfe: NumberFormatException) {
-                throw MTLog.Fatal(nfe, "Error while parsing '$id' as drop off type!")
+            } else {
+                try {
+                    parse(id.toInt())
+                } catch (nfe: NumberFormatException) {
+                    throw MTLog.Fatal(nfe, "Error while parsing '$id' as drop off type!")
+                }
             }
         }
     }

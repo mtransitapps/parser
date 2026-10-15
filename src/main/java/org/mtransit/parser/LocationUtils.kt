@@ -17,6 +17,7 @@ object LocationUtils {
         return results[0]
     }
 
+    @Suppress("MagicNumber", "PropertyName")
     // https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/location/Location.java
     private fun computeDistanceAndBearing(oLat1: Double, oLon1: Double, oLat2: Double, oLon2: Double, results: FloatArray) {
         // Based on https://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
@@ -68,17 +69,21 @@ object LocationUtils {
             cosSqAlpha = 1.0 - sinAlpha * sinAlpha
             cos2SM = if (cosSqAlpha == 0.0) 0.0 else cosSigma - 2.0 * sinU1sinU2 / cosSqAlpha // (18)
             val uSquared = cosSqAlpha * aSqMinusBSqOverBSq // defn
-            A = 1 + uSquared / 16384.0 *  // (3)
-                    (4096.0 + uSquared * (-768 + uSquared * (320.0 - 175.0 * uSquared)))
-            val B = uSquared / 1024.0 *  // (4)
-                    (256.0 + uSquared * (-128.0 + uSquared * (74.0 - 47.0 * uSquared)))
+            A = 1 + uSquared / 16384.0 * // (3)
+                (4096.0 + uSquared * (-768 + uSquared * (320.0 - 175.0 * uSquared)))
+            val B = uSquared / 1024.0 * // (4)
+                (256.0 + uSquared * (-128.0 + uSquared * (74.0 - 47.0 * uSquared)))
             val C = f / 16.0 * cosSqAlpha * (4.0 + f * (4.0 - 3.0 * cosSqAlpha)) // (10)
             val cos2SMSq = cos2SM * cos2SM
-            deltaSigma = (B
+            deltaSigma = (
+                B
                     * sinSigma
-                    *  // (6)
-                    (cos2SM + B / 4.0
-                            * (cosSigma * (-1.0 + 2.0 * cos2SMSq) - B / 6.0 * cos2SM * (-3.0 + 4.0 * sinSigma * sinSigma) * (-3.0 + 4.0 * cos2SMSq))))
+                    * // (6)
+                    (
+                        cos2SM + B / 4.0
+                            * (cosSigma * (-1.0 + 2.0 * cos2SMSq) - B / 6.0 * cos2SM * (-3.0 + 4.0 * sinSigma * sinSigma) * (-3.0 + 4.0 * cos2SMSq))
+                        )
+                )
             lambda = L + (1.0 - C) * f * sinAlpha * (sigma + C * sinSigma * (cos2SM + C * cosSigma * (-1.0 + 2.0 * cos2SM * cos2SM))) // (11)
             val delta = (lambda - lambdaOrig) / lambda
             if (abs(delta) < 1.0e-12) {

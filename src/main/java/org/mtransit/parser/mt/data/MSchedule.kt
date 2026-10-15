@@ -93,8 +93,8 @@ data class MSchedule( // MStopTime
 
     fun toStringPlus(): String {
         return toString() +
-                "+(serviceId:$_serviceId)" +
-                "+(uID:$uID)"
+            "+(serviceId:$_serviceId)" +
+            "+(uID:$uID)"
     }
 
     fun toFile(agencyTools: GAgencyTools, lastSchedule: MSchedule?) = buildList {
@@ -155,7 +155,7 @@ data class MSchedule( // MStopTime
 
     fun isSameServiceAndDirection(lastSchedule: MSchedule?) =
         lastSchedule?.serviceIdInt == serviceIdInt
-                && lastSchedule.directionId == directionId
+            && lastSchedule.directionId == directionId
 
     fun isSameServiceRDSDeparture(ts: MSchedule): Boolean {
         if (ts.serviceIdInt != serviceIdInt) {
@@ -176,20 +176,23 @@ data class MSchedule( // MStopTime
     }
 
     override fun compareTo(other: MSchedule) =
-        if (FeatureFlags.F_EXPORT_SCHEDULE_SORTED_BY_ROUTE_DIRECTION) compareBy(
-            MSchedule::routeId,
-            MSchedule::directionId,
-            MSchedule::stopId,
-            MSchedule::_serviceId,
-            MSchedule::departure
-        ).compare(this, other)
-        else compareBy(
-            MSchedule::routeId,
-            MSchedule::_serviceId,
-            MSchedule::directionId,
-            MSchedule::stopId,
-            MSchedule::departure
-        ).compare(this, other)
+        if (FeatureFlags.F_EXPORT_SCHEDULE_SORTED_BY_ROUTE_DIRECTION) {
+            compareBy(
+                MSchedule::routeId,
+                MSchedule::directionId,
+                MSchedule::stopId,
+                MSchedule::_serviceId,
+                MSchedule::departure
+            ).compare(this, other)
+        } else {
+            compareBy(
+                MSchedule::routeId,
+                MSchedule::_serviceId,
+                MSchedule::directionId,
+                MSchedule::stopId,
+                MSchedule::departure
+            ).compare(this, other)
+        }
 
     companion object {
         const val ROUTE_ID = "route_id"
@@ -212,7 +215,7 @@ data class MSchedule( // MStopTime
             directionId: Long,
             stopId: Int,
             departure: Int
-        ) = "${serviceIdInt}$UID_SEPARATOR${directionId}$UID_SEPARATOR${stopId}$UID_SEPARATOR${departure}"
+        ) = "${serviceIdInt}$UID_SEPARATOR${directionId}$UID_SEPARATOR${stopId}$UID_SEPARATOR$departure"
 
         const val MIN_ARRIVAL_DIFF_IN_HH_MM_SS = 100 // 1 minute
     }

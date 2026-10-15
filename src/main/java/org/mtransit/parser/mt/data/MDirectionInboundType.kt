@@ -24,10 +24,10 @@ enum class MDirectionInboundType(val id: String) {
     companion object {
         @JvmStatic
         fun parse(id: String?): MDirectionInboundType {
-            return when(id) {
+            return when (id) {
                 INBOUND.id -> INBOUND
                 OUTBOUND.id -> OUTBOUND
-                else -> NONE   // default
+                else -> NONE // default
             }
         }
     }

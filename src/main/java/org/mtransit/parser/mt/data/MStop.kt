@@ -4,6 +4,7 @@ import org.mtransit.commons.FeatureFlags
 import org.mtransit.commons.GTFSCommons
 import org.mtransit.commons.sql.SQLUtils
 import org.mtransit.parser.db.SQLUtils.quotesEscape
+import org.mtransit.parser.db.SQLUtils.quotesEscapeId
 import org.mtransit.parser.gtfs.GAgencyTools
 import org.mtransit.parser.mt.MDataChangedManager
 
@@ -15,6 +16,7 @@ data class MStop(
     val lng: Double,
     val accessible: Int,
     private val originalIdHash: Int,
+    val timeZoneId: String?,
 ) : Comparable<MStop> {
 
     constructor(
@@ -25,6 +27,7 @@ data class MStop(
         lng: Double,
         accessible: Int,
         originalId: String,
+        timeZoneId: String?,
         agencyTools: GAgencyTools? = null,
     ) : this(
         id,
@@ -34,21 +37,25 @@ data class MStop(
         lng,
         accessible,
         GTFSCommons.stringIdToHash(originalId),
+        timeZoneId
     )
 
     fun hasLat() = lat != 0.0
 
     fun hasLng() = lng != 0.0
 
-    fun toFile() = listOf(
-        id.toString(), // ID
-        code.quotesEscape(), // code
-        name.toStringIds(FeatureFlags.F_EXPORT_STRINGS).quotesEscape(), // name
-        MDataChangedManager.avoidLatLngChanged(lat), // latitude
-        MDataChangedManager.avoidLatLngChanged(lng), // longitude
-        accessible.toString(),
-        originalIdHash.toString(), // original ID hash
-    ).joinToString(SQLUtils.COLUMN_SEPARATOR)
+    fun toFile() = buildList {
+        add(id.toString()) // ID
+        add(code.quotesEscape()) // code
+        add(name.toStringIds(FeatureFlags.F_EXPORT_STRINGS).quotesEscape()) // name
+        add(MDataChangedManager.avoidLatLngChanged(lat)) // latitude
+        add(MDataChangedManager.avoidLatLngChanged(lng)) // longitude
+        add(accessible.toString())
+        add(originalIdHash.toString()) // original ID hash
+        if (FeatureFlags.F_EXPORT_STOP_TIMEZONE_ID) {
+            add(timeZoneId.orEmpty().quotesEscapeId()) // time zone ID (can contain "_")
+        }
+    }.joinToString(SQLUtils.COLUMN_SEPARATOR)
 
     override fun compareTo(other: MStop): Int {
         return id - other.id

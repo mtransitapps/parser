@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mtransit.parser.gtfs.data.GIDs
 
-
 class MDirectionSplitterTest {
 
     companion object {
@@ -20,7 +19,6 @@ class MDirectionSplitterTest {
     private val t7 = GIDs.getInt("trip_7")
     private val t8 = GIDs.getInt("trip_8")
     private val t9 = GIDs.getInt("trip_9")
-
 
     private val s0 = GIDs.getInt("stop_00")
     private val s1 = GIDs.getInt("stop_01")
@@ -88,6 +86,7 @@ class MDirectionSplitterTest {
         assertEquals(2, result.size)
     }
 
+    @Suppress("CommentWrapping")
     @Test
     fun testSplitDirections_OtherTripWith2StopsRightOrder() {
         // Arrange
@@ -101,6 +100,7 @@ class MDirectionSplitterTest {
         assertEquals(1, result.size)
     }
 
+    @Suppress("CommentWrapping")
     @Test
     fun testSplitDirections_OtherTripWith3StopsRightOrder() {
         // Arrange
@@ -140,6 +140,7 @@ class MDirectionSplitterTest {
         assertEquals(2, result.size)
     }
 
+    @Suppress("CommentWrapping")
     @Test
     fun testSplitDirections_Complex2Directions() {
         // Arrange

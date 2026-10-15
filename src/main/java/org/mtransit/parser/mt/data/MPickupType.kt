@@ -22,17 +22,19 @@ enum class MPickupType(val id: Int) {
                 NO_PICKUP.id == id -> NO_PICKUP
                 MUST_PHONE_AGENCY.id == id -> MUST_PHONE_AGENCY
                 MUST_COORDINATE_WITH_DRIVER.id == id -> MUST_COORDINATE_WITH_DRIVER
-                else -> REGULAR  // default
+                else -> REGULAR // default
             }
         }
 
         fun parse(id: String?): MPickupType {
             return if (id == null) { // no pickup info, that's OK
                 REGULAR // default
-            } else try {
-                parse(id.toInt())
-            } catch (nfe: NumberFormatException) {
-                throw MTLog.Fatal(nfe, "Error while parsing '$id' as pickup type!")
+            } else {
+                try {
+                    parse(id.toInt())
+                } catch (nfe: NumberFormatException) {
+                    throw MTLog.Fatal(nfe, "Error while parsing '$id' as pickup type!")
+                }
             }
         }
     }

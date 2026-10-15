@@ -135,7 +135,7 @@ data class GStopTime(
             return dropOffType == GDropOffType.REGULAR // last stop = NO PICKUP = regular
         }
         return pickupType == GPickupType.REGULAR
-                && dropOffType == GDropOffType.REGULAR
+            && dropOffType == GDropOffType.REGULAR
     }
 
     override fun compareTo(other: GStopTime): Int {
@@ -155,8 +155,8 @@ data class GStopTime(
     @Suppress("unused")
     fun toStringPlus(debug: Boolean = Constants.DEBUG) = if (debug) { // longer
         toString() +
-                "+(tripId:$_tripId)" +
-                "+(stopId:$_stopId)"
+            "+(tripId:$_tripId)" +
+            "+(stopId:$_stopId)"
     } else { // shorter #CI
         buildList {
             add("t:$_tripId")
@@ -244,7 +244,7 @@ data class GStopTime(
             tripIdInt: Int,
             stopIdInt: Int,
             stopSequence: Int,
-        ) = "${tripIdInt}$UID_SEPARATOR${stopIdInt}$UID_SEPARATOR${stopSequence}".toLong()
+        ) = "${tripIdInt}$UID_SEPARATOR${stopIdInt}$UID_SEPARATOR$stopSequence".toLong()
 
         fun Iterable<GStopTime>.minStopSequence(): Int {
             return this.minOfOrNull { it.stopSequence } ?: 0
