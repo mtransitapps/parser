@@ -15,7 +15,7 @@ fun GSpec.updateTripDirectionId(directionId: Int, tripIdInts: Collection<Int>?) 
             .mapNotNull { getTripRouteId(it) }
             .distinct()
             .forEach { routeIdInt ->
-                getRouteTrips(routeIdInt).updateDirectionId(tripIdInts, directionId)
+                getRouteTrips(routeIdInt).updateDirectionId(tripIdInts.toSet(), directionId)
             }
     }
     GTFSDataBase.updateTrip(tripIds = GIDs.getStrings(tripIdInts), directionId)

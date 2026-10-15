@@ -214,10 +214,10 @@ data class GTrip(
         }
 
         @JvmStatic
-        fun MutableList<GTrip>.updateDirectionId(tripIdInts: Collection<Int>, directionId: Int) {
+        fun MutableList<GTrip>.updateDirectionId(tripIdInts: Set<Int>, directionId: Int) {
             val directionIdE = GDirectionId.parse(directionId)
             replaceAll { gTrip ->
-                if (!tripIdInts.contains(gTrip.tripIdInt)) return@replaceAll gTrip
+                if (gTrip.tripIdInt !in tripIdInts) return@replaceAll gTrip
                 gTrip.copy(directionIdE = directionIdE)
             }
         }
