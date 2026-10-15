@@ -31,7 +31,7 @@ fun GSpec.fixMissingTripDirectionIds() {
             .filter { it.directionIdOrOriginal == null }
             .groupBy { it.tripHeadsign }
             .forEach { (tripHeadsign, gTripsNoDirectionId) ->
-                if (tripHeadsign == null) return@forEach
+                if (tripHeadsign.isNullOrBlank()) return@forEach
                 val distinctOriginalDirectionIds = gRouteTrips
                     .asSequence()
                     .filter { it.tripHeadsign == tripHeadsign }

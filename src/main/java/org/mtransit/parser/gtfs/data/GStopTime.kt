@@ -1,7 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
-import org.mtransit.commons.StringUtils
 import org.mtransit.commons.gtfs.data.StopTime
 import org.mtransit.parser.Constants
 import org.mtransit.parser.MTLog
@@ -125,7 +124,7 @@ data class GStopTime(
     fun hasStopHeadsign() = !this.stopHeadsign.isNullOrBlank()
 
     @Suppress("unused")
-    val stopHeadsignOrDefault: String = stopHeadsign ?: StringUtils.EMPTY
+    val stopHeadsignOrDefault: String = stopHeadsign.orEmpty()
 
     fun isRegular(minSequence: Int = 0, maxSequence: Int = Int.MAX_VALUE): Boolean {
         if (this.stopSequence == minSequence && dropOffType == GDropOffType.NO_DROP_OFF) {

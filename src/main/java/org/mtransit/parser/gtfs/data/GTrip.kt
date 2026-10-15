@@ -1,7 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
 import androidx.annotation.Discouraged
-import org.mtransit.commons.StringUtils
 import org.mtransit.commons.gtfs.data.Trip
 import org.mtransit.parser.MTLog
 import org.mtransit.parser.gtfs.GAgencyTools
@@ -66,10 +65,10 @@ data class GTrip(
     fun hasTripHeadsign() = !this.tripHeadsign.isNullOrBlank()
 
     @Suppress("unused")
-    val tripHeadsignOrDefault: String = tripHeadsign ?: StringUtils.EMPTY
+    val tripHeadsignOrDefault: String = tripHeadsign.orEmpty()
 
     @Suppress("unused")
-    val tripShortNameOrDefault: String = tripShortName ?: StringUtils.EMPTY
+    val tripShortNameOrDefault: String = tripShortName.orEmpty()
 
     val uID by lazy { getNewUID(routeIdInt, tripIdInt) }
 
