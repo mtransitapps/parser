@@ -125,7 +125,13 @@ data class GStop(
 
         @JvmOverloads
         @JvmStatic
-        fun fromLine(line: Map<String, String>, agencyTimezone: String?, availableZoneIds: Set<String>, agencyTools: GAgencyTools? = null) = GStop(
+        fun fromLine(
+            line: Map<String, String>,
+            agencyTimezone: String?,
+            availableZoneIds: Set<String>,
+            timeZonesOverrides: Map<String, String>,
+            agencyTools: GAgencyTools? = null,
+        ) = GStop(
             stopId = line[STOP_ID]?.trim()
                 ?.let { agencyTools?.cleanStopOriginalId(it) ?: it }
                 ?: throw MTLog.Fatal("Invalid GStop from $line!"),
@@ -138,6 +144,7 @@ data class GStop(
                 ?.let { agencyTools?.cleanStopOriginalId(it) ?: it },
             stopTimezone = line[STOP_TIMEZONE]?.trim()
                 ?.takeIf { it.isNotBlank() }
+                ?.let { timeZonesOverrides[it] ?: it }
                 ?.also { gStopTimezone ->
                     if (!availableZoneIds.contains(gStopTimezone)) {
                         throw MTLog.Fatal("Invalid stop timezone in $line!")

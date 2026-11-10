@@ -82,11 +82,17 @@ data class GAgency(
         private const val AGENCY_EMAIL = "agency_email" // Optional
 
         @JvmStatic
-        fun fromLine(line: Map<String, String>, availableZoneIds: Set<String>, timeZonesOverrides: Map<String, String>, defaultLanguage: String?) = GAgency(
+        fun fromLine(
+            line: Map<String, String>,
+            availableZoneIds: Set<String>,
+            timeZonesOverrides: Map<String, String>,
+            defaultLanguage: String?,
+        ) = GAgency(
             agencyId = line[AGENCY_ID].orEmpty(),
             agencyName = line[AGENCY_NAME] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
             agencyUrl = line[AGENCY_URL] ?: throw MTLog.Fatal("Invalid GAgency from $line!"),
             agencyTimezone = line[AGENCY_TIMEZONE]?.trim()
+                ?.takeIf { it.isNotBlank() }
                 ?.let { timeZonesOverrides[it] ?: it }
                 ?.takeIf { availableZoneIds.contains(it) }
                 ?: throw MTLog.Fatal("Invalid GAgency from $line!"),

@@ -570,8 +570,8 @@ public class GReader {
 				MTLog.log("Generic node stop ignored (%s).", line); // not lat/lng?
 				return;
 			}
-			final GStop gStop = skipDataCleanup ? GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS)
-					: GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS, agencyTools);
+			final GStop gStop = skipDataCleanup ? GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS, TIME_ZONES_OVERRIDES)
+					: GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS, TIME_ZONES_OVERRIDES, agencyTools);
 			if (agencyTools.excludeStop(gStop)) {
 				//noinspection DiscouragedApi
 				logExclude("Exclude stop: %s.", line.get(GStop.STOP_ID));
