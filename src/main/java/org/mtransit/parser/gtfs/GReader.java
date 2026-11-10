@@ -421,26 +421,22 @@ public class GReader {
 	private static final String TIME_ZONE_UTC_6_FOREVER = "America/Regina";
 	private static final String TIME_ZONE_UTC_5_FOREVER = "America/Cancun";
 
-	private static final Map<String, String> TIME_ZONES_OVERRIDES;
-
-	static {
-		HashMap<String, String> timeZonesOverrides = new HashMap<>(); // #oldAndroidDeviceEmulator
-		// Canada - BC
-		timeZonesOverrides.put("America/Vancouver", TIME_ZONE_UTC_7_FOREVER);
-		timeZonesOverrides.put("Canada/Pacific", TIME_ZONE_UTC_7_FOREVER); // Legacy Alias (Pointer)
-		// Canada - AB
-		timeZonesOverrides.put("America/Edmonton", TIME_ZONE_UTC_6_FOREVER);
-		timeZonesOverrides.put("Canada/Mountain", TIME_ZONE_UTC_6_FOREVER); // Legacy Alias (Pointer)
-		// Canada - NT
-		timeZonesOverrides.put("America/Yellowknife", TIME_ZONE_UTC_6_FOREVER);
-		timeZonesOverrides.put("America/Inuvik", TIME_ZONE_UTC_6_FOREVER);
-		// Canada - AB
-		timeZonesOverrides.put("America/Winnipeg", TIME_ZONE_UTC_5_FOREVER);
-		timeZonesOverrides.put("Canada/Central", TIME_ZONE_UTC_5_FOREVER); // Legacy Alias (Pointer)
-		// Canada - ON
-		timeZonesOverrides.put("America/Rainy_River", TIME_ZONE_UTC_5_FOREVER); // (different from the rest of ON)
-		TIME_ZONES_OVERRIDES = timeZonesOverrides;
-	}
+	private static final Map<String, String> TIME_ZONES_OVERRIDES = Map.of(
+			// Canada - BC
+			"America/Vancouver", TIME_ZONE_UTC_7_FOREVER,
+			"Canada/Pacific", TIME_ZONE_UTC_7_FOREVER, // Legacy Alias (Pointer)
+			// Canada - AB
+			"America/Edmonton", TIME_ZONE_UTC_6_FOREVER,
+			"Canada/Mountain", TIME_ZONE_UTC_6_FOREVER, // Legacy Alias (Pointer)
+			// Canada - NT
+			"America/Yellowknife", TIME_ZONE_UTC_6_FOREVER,
+			"America/Inuvik", TIME_ZONE_UTC_6_FOREVER,
+			// Canada - MB
+			"America/Winnipeg", TIME_ZONE_UTC_5_FOREVER,
+			"Canada/Central", TIME_ZONE_UTC_5_FOREVER, // Legacy Alias (Pointer)
+			// Canada - ON
+			"America/Rainy_River", TIME_ZONE_UTC_5_FOREVER // (different from the rest of ON)
+	);
 
 	private static void processAgency(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
