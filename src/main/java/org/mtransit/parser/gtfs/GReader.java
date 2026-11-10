@@ -417,9 +417,21 @@ public class GReader {
 
 	private static final Set<String> AVAILABLE_TIME_ZONE_IDS = ZoneId.getAvailableZoneIds(); // cache because it returns new set copy every time
 
+	private static final Map<String, String> TIME_ZONES_OVERRIDES;
+
+	static {
+		HashMap<String, String> timeZonesOverrides = new HashMap<>(); // #oldAndroidDevice
+		timeZonesOverrides.put("America/Vancouver", "America/Phoenix"); // time zone rule changed to UTC-7 all year round
+		timeZonesOverrides.put("America/Edmonton", "America/Regina"); // time zone rule changed to UTC-6 all year round
+		timeZonesOverrides.put("America/Winnipeg", "America/Cancun"); // time zone rule changed to UTC-5 all year round
+		timeZonesOverrides.put("America/Yellowknife", "America/Regina"); // time zone rule changed to UTC-6 all year round
+		timeZonesOverrides.put("America/Inuvik", "America/Regina"); // time zone rule changed to UTC-6 all year round
+		TIME_ZONES_OVERRIDES = timeZonesOverrides;
+	}
+
 	private static void processAgency(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final GAgency gAgency = GAgency.fromLine(line, AVAILABLE_TIME_ZONE_IDS, agencyTools.getAgencyDefaultLanguage());
+			final GAgency gAgency = GAgency.fromLine(line, AVAILABLE_TIME_ZONE_IDS, TIME_ZONES_OVERRIDES, agencyTools.getAgencyDefaultLanguage());
 			if (agencyTools.excludeAgency(gAgency)) {
 				MTLog.logDebug("processAgency() > SKIP (exclude agency)");
 				return;
