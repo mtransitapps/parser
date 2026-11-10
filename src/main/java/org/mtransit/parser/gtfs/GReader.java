@@ -417,9 +417,30 @@ public class GReader {
 
 	private static final Set<String> AVAILABLE_TIME_ZONE_IDS = ZoneId.getAvailableZoneIds(); // cache because it returns new set copy every time
 
+	private static final String TIME_ZONE_UTC_7_FOREVER = "America/Phoenix";
+	private static final String TIME_ZONE_UTC_6_FOREVER = "America/Regina";
+	private static final String TIME_ZONE_UTC_5_FOREVER = "America/Cancun";
+
+	private static final Map<String, String> TIME_ZONES_OVERRIDES = Map.of(
+			// Canada - BC
+			"America/Vancouver", TIME_ZONE_UTC_7_FOREVER,
+			"Canada/Pacific", TIME_ZONE_UTC_7_FOREVER, // Legacy Alias (Pointer)
+			// Canada - AB
+			"America/Edmonton", TIME_ZONE_UTC_6_FOREVER,
+			"Canada/Mountain", TIME_ZONE_UTC_6_FOREVER, // Legacy Alias (Pointer)
+			// Canada - NT
+			"America/Yellowknife", TIME_ZONE_UTC_6_FOREVER,
+			"America/Inuvik", TIME_ZONE_UTC_6_FOREVER,
+			// Canada - MB
+			"America/Winnipeg", TIME_ZONE_UTC_5_FOREVER,
+			"Canada/Central", TIME_ZONE_UTC_5_FOREVER, // Legacy Alias (Pointer)
+			// Canada - ON
+			"America/Rainy_River", TIME_ZONE_UTC_5_FOREVER // (different from the rest of ON)
+	);
+
 	private static void processAgency(GAgencyTools agencyTools, GSpec gSpec, HashMap<String, String> line) {
 		try {
-			final GAgency gAgency = GAgency.fromLine(line, AVAILABLE_TIME_ZONE_IDS, agencyTools.getAgencyDefaultLanguage());
+			final GAgency gAgency = GAgency.fromLine(line, AVAILABLE_TIME_ZONE_IDS, TIME_ZONES_OVERRIDES, agencyTools.getAgencyDefaultLanguage());
 			if (agencyTools.excludeAgency(gAgency)) {
 				MTLog.logDebug("processAgency() > SKIP (exclude agency)");
 				return;
@@ -558,8 +579,8 @@ public class GReader {
 				MTLog.log("Generic node stop ignored (%s).", line); // not lat/lng?
 				return;
 			}
-			final GStop gStop = skipDataCleanup ? GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS)
-					: GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS, agencyTools);
+			final GStop gStop = skipDataCleanup ? GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS, TIME_ZONES_OVERRIDES)
+					: GStop.fromLine(line, agencyTimezone, AVAILABLE_TIME_ZONE_IDS, TIME_ZONES_OVERRIDES, agencyTools);
 			if (agencyTools.excludeStop(gStop)) {
 				//noinspection DiscouragedApi
 				logExclude("Exclude stop: %s.", line.get(GStop.STOP_ID));
