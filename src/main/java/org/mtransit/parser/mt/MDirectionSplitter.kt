@@ -255,7 +255,7 @@ object MDirectionSplitter {
                 continue
             }
             throw MTLog.Fatal(
-                "$routeId: Unresolved situation! \n" +
+                "$routeId: Unresolved direction splitter situation! \n" +
                     "- ?: Trips: '${GIDs.toStringPlus(gTripIdInt)}': \n" +
                     "   -> Stops: ${GIDs.toStringPlus(gStopIdInts, limit = -1)} \n" +
                     " - ${directionsCandidates.size} candidates: \n" +

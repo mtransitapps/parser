@@ -1035,7 +1035,7 @@ object MDirectionHeadSignFinder {
         }
         if (dataLossAuthorized) {
             throw MTLog.Fatal(
-                "$routeId: $directionId: Unresolved situation! \n" +
+                "$routeId: $directionId: Unresolved direction head-sign finder situation! \n" +
                     "- #1: '$stopTimesHeadSign1'. \n" +
                     "  Stops: ${stopTimesList1.map { gStopTime -> "\n    - ${gStopTime.toStringPlus(false)}" }} \n" +
                     "- #2: '$stopTimesHeadSign2'. \n" +
