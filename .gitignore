@@ -21,4 +21,4 @@ build/
 *.iml
 
 # Shared files
-/dependencies/*
+/data-parser/dependencies/*
