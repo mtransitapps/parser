@@ -568,19 +568,19 @@ object MDirectionHeadSignFinder {
         val stopIdIntsBeforeCommon1 =
             firstCommonStopIdInt
                 ?.let { stopIdInts1.subList(0, stopIdInts1.indexOf(firstCommonStopIdInt)) }
-                ?: emptyList()
+                .orEmpty()
         val stopIdIntsBeforeCommon2 = firstCommonStopIdInt
             ?.let { stopIdInts2.subList(0, stopIdInts2.indexOf(firstCommonStopIdInt)) }
-            ?: emptyList()
+            .orEmpty()
         val stopIdIntsAfterCommon1 = lastCommonStopIdInt
             ?.let { stopIdInts1.subList(stopIdInts1.lastIndexOf(lastCommonStopIdInt) + 1, stopIdInts1.size) }
-            ?: emptyList()
+            .orEmpty()
         // IGNORE NON-REGULAR STOPS AFTER COMMON
         val stopIdIntsAfterCommonCount1 =
             removeNonRegularStopsAfterCommon(lastCommonStopIdInt, stopTimesList1, stopIdInts1, stopIdIntsAfterCommon1)
         val stopIdIntsAfterCommon2 = lastCommonStopIdInt
             ?.let { stopIdInts2.subList(stopIdInts2.lastIndexOf(lastCommonStopIdInt) + 1, stopIdInts2.size) }
-            ?: emptyList()
+            .orEmpty()
         val stopIdIntsAfterCommonCount2 =
             removeNonRegularStopsAfterCommon(lastCommonStopIdInt, stopTimesList2, stopIdInts2, stopIdIntsAfterCommon2)
         if (lastCommonStopIdInt == null

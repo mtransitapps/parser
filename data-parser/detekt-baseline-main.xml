@@ -109,10 +109,5 @@
     <ID>UnusedPrivateProperty:MRoute.kt:MRoute$agencyTools: GAgencyTools? = null</ID>
     <ID>UnusedPrivateProperty:MStop.kt:MStop$agencyTools: GAgencyTools? = null</ID>
     <ID>UnusedVariable:LocationUtils.kt:LocationUtils$iter</ID>
-    <ID>UseIsNullOrEmpty:GTimePoint.kt:GTimePoint.Companion$id == null || id.isEmpty()</ID>
-    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$firstCommonStopIdInt ?.let { stopIdInts1.subList(0, stopIdInts1.indexOf(firstCommonStopIdInt)) } ?: emptyList()</ID>
-    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$firstCommonStopIdInt ?.let { stopIdInts2.subList(0, stopIdInts2.indexOf(firstCommonStopIdInt)) } ?: emptyList()</ID>
-    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$lastCommonStopIdInt ?.let { stopIdInts1.subList(stopIdInts1.lastIndexOf(lastCommonStopIdInt) + 1, stopIdInts1.size) } ?: emptyList()</ID>
-    <ID>UseOrEmpty:MDirectionHeadSignFinder.kt:MDirectionHeadSignFinder$lastCommonStopIdInt ?.let { stopIdInts2.subList(stopIdInts2.lastIndexOf(lastCommonStopIdInt) + 1, stopIdInts2.size) } ?: emptyList()</ID>
   </CurrentIssues>
 </SmellBaseline>

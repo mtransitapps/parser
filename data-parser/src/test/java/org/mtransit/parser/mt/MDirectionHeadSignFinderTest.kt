@@ -57,7 +57,7 @@ class MDirectionHeadSignFinderTest {
             }
         whenever(routeGTFS.getRoute(anyInt()))
             .then {
-                val routeId = it.arguments[0] as? String ?: ""
+                val routeId = (it.arguments[0] as? String).orEmpty()
                 GRoute(
                     agencyId = "0",
                     routeId = routeId,

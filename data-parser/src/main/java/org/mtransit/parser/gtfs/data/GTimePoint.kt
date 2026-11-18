@@ -20,7 +20,7 @@ enum class GTimePoint(val id: Int) {
 
         @JvmStatic
         fun parse(id: String?): GTimePoint {
-            return if (id == null || id.isEmpty()) { // that's OK
+            return if (id.isNullOrEmpty()) { // that's OK
                 EXACT // default
             } else {
                 try {
