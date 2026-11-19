@@ -68,7 +68,7 @@ fun GSpec.cleanupExcludedServiceIds() {
     MTLog.log("Removing more excluded service IDs...")
     var r = 0
     try {
-        val allTripRouteIdInts = getAllTripRouteIdInts()
+        val allTripRouteIdInts = getAllTripRouteIdInts().toSet()
         val notExcludedServiceIdInts = mutableSetOf<Int>()
         for (gRouteIdInt in getAllRouteIdInts()) {
             if (allTripRouteIdInts.contains(gRouteIdInt)) {
@@ -78,7 +78,7 @@ fun GSpec.cleanupExcludedServiceIds() {
             }
         }
 
-        val dbCalendarDatesToDelete = mutableListOf<CalendarDate>()
+        val dbCalendarDatesToDelete = mutableSetOf<CalendarDate>()
         val itGCalendar = getAllCalendars().iterator()
         while (itGCalendar.hasNext()) {
             val gCalendar = itGCalendar.next()
