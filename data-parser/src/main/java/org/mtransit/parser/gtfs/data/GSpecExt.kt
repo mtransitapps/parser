@@ -69,10 +69,15 @@ fun GSpec.cleanupExcludedServiceIds() {
     var r = 0
     try {
         val allTripRouteIdInts = getAllTripRouteIdInts()
-        val notExcludedServiceIdInts = getAllRouteIdInts().flatMapTo(mutableSetOf()) { gRouteIdInt ->
-            if (!allTripRouteIdInts.contains(gRouteIdInt)) return@flatMapTo emptySet()
-            getRouteTrips(gRouteIdInt).mapNotNull { it.serviceIdInt }
+        val notExcludedServiceIdInts = mutableSetOf<Int>()
+        for (gRouteIdInt in getAllRouteIdInts()) {
+            if (allTripRouteIdInts.contains(gRouteIdInt)) {
+                for (gTrip in getRouteTrips(gRouteIdInt)) {
+                    gTrip.serviceIdInt?.let { notExcludedServiceIdInts.add(it) }
+                }
+            }
         }
+
         val dbCalendarDatesToDelete = mutableListOf<CalendarDate>()
         val itGCalendar = getAllCalendars().iterator()
         while (itGCalendar.hasNext()) {
@@ -80,7 +85,7 @@ fun GSpec.cleanupExcludedServiceIds() {
             if (!notExcludedServiceIdInts.contains(gCalendar.serviceIdInt)) {
                 itGCalendar.remove()
                 if (GSpec.ALL_CALENDARS_STORED_IN_CALENDAR_DATES) {
-                    dbCalendarDatesToDelete.addAll(gCalendar.flattenToCalendarDates().map { it.to() })
+                    gCalendar.flattenToCalendarDates().mapTo(dbCalendarDatesToDelete) { it.to() }
                 } else {
                     throw Fatal("cleanupExcludedServiceIds() > delete calendar in DB not supported yet!")
                 }
