@@ -281,7 +281,7 @@ public class GSpec {
 	}
 
 	@NotNull
-	private Collection<Integer> getAllRouteIdInts() {
+	protected Collection<Integer> getAllRouteIdInts() {
 		if (USE_DB_ONLY) {
 			return GIDs.getInts(GTFSDataBase.selectRouteIds());
 		}
@@ -897,58 +897,6 @@ public class GSpec {
 		MTLog.log("Cleanup stop times pickup & drop-off types...DONE (%d updated objects)", stu);
 	}
 
-	public void cleanupExcludedServiceIds() {
-		MTLog.log("Removing more excluded service IDs...");
-		int r = 0;
-		try {
-			final Collection<Integer> allRouteIdsInt = getAllRouteIdInts();
-			final Collection<Integer> allTripRouteIdInts = getAllTripRouteIdInts();
-			final HashSet<Integer> notExcludedRouteTripServiceIdInts = new HashSet<>();
-			for (Integer gRouteIdInt : allRouteIdsInt) {
-				if (allTripRouteIdInts.contains(gRouteIdInt)) {
-					for (GTrip gTrip : getRouteTrips(gRouteIdInt)) {
-						notExcludedRouteTripServiceIdInts.add(gTrip.getServiceIdInt());
-					}
-				}
-			}
-			final Iterator<GCalendar> itGCalendar = getAllCalendars().iterator();
-			while (itGCalendar.hasNext()) {
-				final GCalendar gCalendar = itGCalendar.next();
-				if (!notExcludedRouteTripServiceIdInts.contains(gCalendar.getServiceIdInt())) {
-					itGCalendar.remove();
-					if (ALL_CALENDARS_STORED_IN_CALENDAR_DATES) {
-						for (GCalendarDate gCalendarDate : gCalendar.flattenToCalendarDates()) {
-							GTFSDataBase.deleteCalendarDate(gCalendarDate.to());
-						}
-					} else {
-						throw new MTLog.Fatal("cleanupExcludedServiceIds() > delete calendar in DB not supported yet!");
-					}
-					logRemoved("Removed calendar: %s.", gCalendar.toStringPlus());
-					r++;
-					if (r % 100 == 0) {
-						MTLog.logPOINT();
-					}
-				}
-			}
-			Iterator<GCalendarDate> itGCalendarDate = getAllCalendarDates().iterator();
-			while (itGCalendarDate.hasNext()) {
-				GCalendarDate gCalendarDate = itGCalendarDate.next();
-				if (!notExcludedRouteTripServiceIdInts.contains(gCalendarDate.getServiceIdInt())) {
-					itGCalendarDate.remove();
-					GTFSDataBase.deleteCalendarDate(gCalendarDate.to());
-					logRemoved("Removed calendar date (or calendar): %s.", gCalendarDate.toStringPlus());
-					r++;
-					if (r % 100 == 0) {
-						MTLog.logPOINT();
-					}
-				}
-			}
-		} catch (Exception e) {
-			throw new MTLog.Fatal(e, "Error while removing more excluded service IDs!");
-		}
-		MTLog.log("Removing more excluded service IDs... DONE (%d removed objects)", r);
-	}
-
 	public void clearRawData() {
 	}
 
@@ -1008,10 +956,8 @@ public class GSpec {
 		MTLog.log("Splitting GTFS by route ID... DONE");
 	}
 
-	private void logRemoved(@NotNull String format, @NotNull Object... args) {
-		if (!LOG_REMOVED) {
-			return;
-		}
+	protected void logRemoved(@NotNull String format, @NotNull Object... args) {
+		if (!LOG_REMOVED) return;
 		MTLog.log(format, args);
 	}
 }

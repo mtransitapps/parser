@@ -261,9 +261,9 @@ object GTFSDataBase {
 
     @JvmOverloads
     @JvmStatic
-    fun deleteCalendarDate(calendarDate: CalendarDate? = null) {
+    fun deleteCalendarDate(calendarDates: Collection<CalendarDate>? = null) {
         connection.createStatement().use { statement ->
-            CalendarDateSQL.delete(statement, calendarDate)
+            CalendarDateSQL.delete(statement, calendarDates)
         }
     }
 
