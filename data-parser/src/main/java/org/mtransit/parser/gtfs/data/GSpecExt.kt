@@ -73,7 +73,7 @@ fun GSpec.cleanupExcludedServiceIds() {
         for (gRouteIdInt in getAllRouteIdInts()) {
             if (allTripRouteIdInts.contains(gRouteIdInt)) {
                 for (gTrip in getRouteTrips(gRouteIdInt)) {
-                    gTrip.serviceIdInt?.let { notExcludedServiceIdInts.add(it) }
+                    notExcludedServiceIdInts.add(gTrip.serviceIdInt)
                 }
             }
         }
