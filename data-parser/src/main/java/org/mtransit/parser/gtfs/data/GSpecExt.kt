@@ -62,6 +62,8 @@ fun GSpec.isInsideGCalendars(
     return gCalendarDate.isBetween(calendarsMinStartDate, calendarsMaxEndDate)
 }
 
+private const val LOG_MOD = 100
+
 fun GSpec.cleanupExcludedServiceIds() {
     MTLog.log("Removing more excluded service IDs...")
     var r = 0
@@ -72,7 +74,6 @@ fun GSpec.cleanupExcludedServiceIds() {
             getRouteTrips(gRouteIdInt).mapNotNull { it.serviceIdInt }
         }
         val dbCalendarDatesToDelete = mutableListOf<CalendarDate>()
-        MTLog.log("Removing more excluded service IDs... (calendars)")
         val itGCalendar = getAllCalendars().iterator()
         while (itGCalendar.hasNext()) {
             val gCalendar = itGCalendar.next()
@@ -85,12 +86,11 @@ fun GSpec.cleanupExcludedServiceIds() {
                 }
                 logRemoved("Removed calendar: %s.", gCalendar.toStringPlus())
                 r++
-                if (r % 100 == 0) {
+                if (r % LOG_MOD == 0) {
                     MTLog.logPOINT()
                 }
             }
         }
-        MTLog.log("Removing more excluded service IDs... (calendars date)")
         val itGCalendarDate = getAllCalendarDates().iterator()
         while (itGCalendarDate.hasNext()) {
             val gCalendarDate = itGCalendarDate.next()
@@ -99,7 +99,7 @@ fun GSpec.cleanupExcludedServiceIds() {
                 dbCalendarDatesToDelete.add(gCalendarDate.to())
                 logRemoved("Removed calendar date (or calendar): %s.", gCalendarDate.toStringPlus())
                 r++
-                if (r % 100 == 0) {
+                if (r % LOG_MOD == 0) {
                     MTLog.logPOINT()
                 }
             }
