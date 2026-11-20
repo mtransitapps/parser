@@ -29,6 +29,7 @@ import org.mtransit.parser.gtfs.data.GPickupType;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GRouteType;
 import org.mtransit.parser.gtfs.data.GSpec;
+import org.mtransit.parser.gtfs.data.GSpecExtKt;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
 import org.mtransit.parser.gtfs.data.GTime;
@@ -278,6 +279,8 @@ public class DefaultAgencyTools implements GAgencyTools {
 			return "bus";
 		} else if (GRouteType.isSameType(type, MAgency.ROUTE_TYPE_FERRY)) {
 			return "ferry";
+		} else if (GRouteType.isSameType(type, MAgency.ROUTE_TYPE_GONDOLA)) {
+			return "gondola";
 		}
 		MTLog.log("getAgencyType() > Unexpected agency route type '%s'!", type);
 		return "type";
@@ -1763,7 +1766,7 @@ public class DefaultAgencyTools implements GAgencyTools {
 		GSpec gtfs = GReader.readGtfsZipFile(args[0], agencyTools, !agencyFilter, agencyFilter);
 		MDataChangedManager.avoidCalendarDatesDataChanged(lastServiceDates, gtfs, agencyTools);
 		if (agencyFilter) {
-			gtfs.cleanupExcludedServiceIds();
+			GSpecExtKt.cleanupExcludedServiceIds(gtfs);
 		}
 		final List<GCalendar> gCalendars = gtfs.getAllCalendars();
 		final List<GCalendarDate> gCalendarDates = gtfs.getAllCalendarDates();

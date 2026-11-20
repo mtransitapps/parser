@@ -69,6 +69,10 @@ data class MAgency(
         @JvmField
         val ROUTE_TYPE_FERRY = GRouteType.FERRY.id
 
+        @Suppress("unused")
+        @JvmField
+        val ROUTE_TYPE_GONDOLA = GRouteType.GONDOLA.id
+
         private const val ROUTE_COLOR_IS_AGENCY_COLOR_MIN_PCT = 0.66f
 
         @JvmStatic

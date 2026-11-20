@@ -1,6 +1,6 @@
 package org.mtransit.parser.gtfs.data
 
-// https://gtfs.org/reference/static/#routestxt
+// https://gtfs.org/documentation/schedule/reference/#routestxt
 enum class GRouteType(
     val id: Int
 ) {
@@ -12,7 +12,7 @@ enum class GRouteType(
     FERRY(4), // Ferry. Used for short- and long-distance boat service
 
     // 5: Cable car. Used for street-level cable cars where the cable runs beneath the car.
-    // 6: Gondola or suspended cable car. Typically used for aerial cable cars where the car is suspended from the cable.
+    GONDOLA(6), // Gondola or suspended cable car. Typically used for aerial cable cars where the car is suspended from the cable.
     // 7: Funicular. Used for any rail system that moves on steep inclines with a cable traction system.
 
     // EXTENDED: // https://developers.google.com/transit/gtfs/reference/extended-route-types

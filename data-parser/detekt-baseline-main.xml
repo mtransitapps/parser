@@ -91,6 +91,7 @@
     <ID>TooGenericExceptionCaught:Configs.kt:Configs$e: Exception</ID>
     <ID>TooGenericExceptionCaught:DBUtils.kt:DBUtils$e: Exception</ID>
     <ID>TooGenericExceptionCaught:GCalendar.kt:GCalendar.Companion$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GSpecExt.kt:e: Exception</ID>
     <ID>TooGenericExceptionCaught:GTrip.kt:GTrip.Companion$e: Exception</ID>
     <ID>TooGenericExceptionCaught:MReader.kt:MReader$e: Exception</ID>
     <ID>TooGenericExceptionCaught:MStoreListingGenerator.kt:MStoreListingGenerator$ioe: Exception</ID>
