@@ -1,6 +1,5 @@
 package org.mtransit.parser.config
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.jetbrains.annotations.VisibleForTesting
 import org.mtransit.parser.MTLog
@@ -10,7 +9,6 @@ import java.io.File
 
 object Configs {
 
-    @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
         allowTrailingComma = true
         ignoreUnknownKeys = true
