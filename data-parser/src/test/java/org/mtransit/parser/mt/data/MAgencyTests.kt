@@ -32,9 +32,9 @@ class MAgencyTests {
         val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         whenever(routeGTFS.allRoutes).then {
             listOf(
-                makeRoute(id = "1", color = "000000"),
-                makeRoute(id = "2", color = "000000"),
-                makeRoute(id = "3", color = "FFFFFF"),
+                mkRoute(id = "1", color = "000000"),
+                mkRoute(id = "2", color = "000000"),
+                mkRoute(id = "3", color = "FFFFFF"),
             )
         }
         whenever(routeGTFS.getOtherRoutes(AGENCY_ID_INT)).then { emptyList<GRoute>() }
@@ -50,9 +50,9 @@ class MAgencyTests {
         val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         whenever(routeGTFS.allRoutes).then {
             listOf(
-                makeRoute(id = "1", color = null),
-                makeRoute(id = "2", color = null),
-                makeRoute(id = "3", color = null),
+                mkRoute(id = "1", color = null),
+                mkRoute(id = "2", color = null),
+                mkRoute(id = "3", color = null),
             )
         }
         whenever(routeGTFS.getOtherRoutes(AGENCY_ID_INT)).then { emptyList<GRoute>() }
@@ -68,9 +68,9 @@ class MAgencyTests {
         val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         whenever(routeGTFS.allRoutes).then {
             listOf(
-                makeRoute(id = "1", color = "FFFFFF"),
-                makeRoute(id = "2", color = "ffffff"),
-                makeRoute(id = "3", color = "000000"),
+                mkRoute(id = "1", color = "FFFFFF"),
+                mkRoute(id = "2", color = "ffffff"),
+                mkRoute(id = "3", color = "000000"),
             )
         }
         whenever(routeGTFS.getOtherRoutes(AGENCY_ID_INT)).then { emptyList<GRoute>() }
@@ -86,8 +86,8 @@ class MAgencyTests {
         val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         whenever(routeGTFS.allRoutes).then {
             listOf(
-                makeRoute(id = "1", color = "000000"),
-                makeRoute(id = "2", color = "FFFFFF"),
+                mkRoute(id = "1", color = "000000"),
+                mkRoute(id = "2", color = "FFFFFF"),
             )
         }
         whenever(routeGTFS.getOtherRoutes(AGENCY_ID_INT)).then { emptyList<GRoute>() }
@@ -103,9 +103,9 @@ class MAgencyTests {
         val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         whenever(routeGTFS.allRoutes).then {
             listOf(
-                makeRoute(id = "1", color = "000000"),
-                makeRoute(id = "2", color = "FFFFFF"),
-                makeRoute(agencyIdInt = GIDs.getInt("another_agency"), id = "3", color = "FFFFFF"),
+                mkRoute(id = "1", color = "000000"),
+                mkRoute(id = "2", color = "FFFFFF"),
+                mkRoute(agencyIdInt = GIDs.getInt("another_agency"), id = "3", color = "FFFFFF"),
             )
         }
         whenever(routeGTFS.getOtherRoutes(AGENCY_ID_INT)).then { emptyList<GRoute>() }
@@ -121,9 +121,9 @@ class MAgencyTests {
         val gAgency = GAgency(AGENCY_ID_INT, AGENCY_NAME, AGENCY_URL, AGENCY_TZ, AGENCY_TAG, AGENCY_PHONE, AGENCY_FARE_URL, AGENCY_EMAIL)
         whenever(routeGTFS.allRoutes).then {
             listOf(
-                makeRoute(id = "1", color = "000000"),
-                makeRoute(id = "2", color = "FFFFFF"),
-                makeRoute(id = "3", color = null),
+                mkRoute(id = "1", color = "000000"),
+                mkRoute(id = "2", color = "FFFFFF"),
+                mkRoute(id = "3", color = null),
             )
         }
         whenever(routeGTFS.getOtherRoutes(AGENCY_ID_INT)).then { emptyList<GRoute>() }
@@ -133,7 +133,7 @@ class MAgencyTests {
         Assert.assertEquals(null, result)
     }
 
-    private fun makeRoute(agencyIdInt: Int = AGENCY_ID_INT, id: String, routeType: Int = ROUTE_TYPE, color: String?) =
+    private fun mkRoute(agencyIdInt: Int = AGENCY_ID_INT, id: String, routeType: Int = ROUTE_TYPE, color: String?) =
         GRoute(
             agencyIdInt = agencyIdInt,
             routeIdInt = GIDs.getInt(id),
